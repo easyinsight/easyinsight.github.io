@@ -292,7 +292,7 @@ public class ExportService {
                     analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                 analysisDefinition.updateMetadata();
                 ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
-                toListPDFInDatabase(analysisDefinition, listDataResults, conn);
+                toListPDFInDatabase(analysisDefinition, listDataResults, conn, insightRequestMetadata);
             } else {
                 toImagePDFDatabase(analysisDefinition, bytes, width, height, conn);
             }
@@ -304,11 +304,11 @@ public class ExportService {
         }
     }
 
-    public void toListPDFInDatabase(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn) throws SQLException, DocumentException {
-        toDatabase(analysisDefinition.getName(), toListPDF(analysisDefinition, listDataResults, conn), conn);
+    public void toListPDFInDatabase(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
+        toDatabase(analysisDefinition.getName(), toListPDF(analysisDefinition, listDataResults, conn, insightRequestMetadata), conn);
     }
 
-    public byte[] toListPDF(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn) throws SQLException, DocumentException {
+    public byte[] toListPDF(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
@@ -316,6 +316,18 @@ public class ExportService {
         ResultSet rs = dateFormatStmt.executeQuery();
         rs.next();
         int dateFormat = rs.getInt(1);
+        int time = insightRequestMetadata.getUtcOffset() / 60;
+        String string;
+        if (time > 0) {
+            string = "GMT-"+Math.abs(time);
+        } else if (time < 0) {
+            string = "GMT+"+Math.abs(time);
+        } else {
+            string = "GMT";
+        }
+        TimeZone timeZone = TimeZone.getTimeZone(string);
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(timeZone);
         Document document = new Document(PageSize.A4.rotate());
         PdfWriter.getInstance(document, baos);
         document.open();
@@ -362,7 +374,7 @@ public class ExportService {
                         AnalysisItem headerItem = listDataResults.getHeaders()[i];
                         if (headerItem == analysisItem) {
                             Value value = listRow.getValues()[i];
-                            String valueString = createValue(dateFormat, headerItem, value);
+                            String valueString = createValue(dateFormat, headerItem, value, cal);
                             PdfPCell valueCell = new PdfPCell(new Phrase(valueString));
                             valueCell.setFixedHeight(20f);
                             table.addCell(valueCell);
@@ -400,7 +412,7 @@ public class ExportService {
         return baos.toByteArray();
     }
 
-    public static String createValue(int dateFormat, AnalysisItem headerItem, Value value) {
+    public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal) {
         String valueString;
         if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
             double doubleValue = value.toDouble();
@@ -461,6 +473,7 @@ public class ExportService {
                 throw new RuntimeException("No date format found.");
             }
             DateValue dateValue = (DateValue) value;
+            sdf.setCalendar(cal);
             valueString = sdf.format(dateValue.getDate());
         } else {
             valueString = value.toString();
@@ -812,7 +825,7 @@ public class ExportService {
         }
     }
 
-    public static String toTable(WSAnalysisDefinition report, ListDataResults listDataResults, EIConnection conn) throws SQLException {
+    public static String toTable(WSAnalysisDefinition report, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         if (listDataResults.getReportFault() != null) {
             return listDataResults.getReportFault().toString();
         }
@@ -821,6 +834,18 @@ public class ExportService {
         ResultSet rs = dateFormatStmt.executeQuery();
         rs.next();
         int dateFormat = rs.getInt(1);
+        int time = insightRequestMetadata.getUtcOffset() / 60;
+        String string;
+        if (time > 0) {
+            string = "GMT-"+Math.abs(time);
+        } else if (time < 0) {
+            string = "GMT+"+Math.abs(time);
+        } else {
+            string = "GMT";
+        }
+        TimeZone timeZone = TimeZone.getTimeZone(string);
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(timeZone);
         StringBuilder sb = new StringBuilder();
         java.util.List<AnalysisItem> items = new java.util.ArrayList<AnalysisItem>(report.getAllAnalysisItems());
         items.remove(null);
@@ -851,7 +876,7 @@ public class ExportService {
                     if (headerItem == analysisItem) {
                         com.easyinsight.core.Value value = listRow.getValues()[i];
                         sb.append("<td style=\"border-style:solid;border-width:1px\">");
-                        sb.append(com.easyinsight.export.ExportService.createValue(dateFormat, headerItem, value));
+                        sb.append(com.easyinsight.export.ExportService.createValue(dateFormat, headerItem, value, cal));
                         sb.append("</td>");
                     }
                 }
@@ -865,6 +890,18 @@ public class ExportService {
     public static String exportScorecard(long scorecardID, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws Exception {
         SecurityUtil.authorizeScorecard(scorecardID);
         insightRequestMetadata.setSuppressShifts(true);
+        int time = insightRequestMetadata.getUtcOffset() / 60;
+        String string;
+        if (time > 0) {
+            string = "GMT-"+Math.abs(time);
+        } else if (time < 0) {
+            string = "GMT+"+Math.abs(time);
+        } else {
+            string = "GMT";
+        }
+        TimeZone timeZone = TimeZone.getTimeZone(string);
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(timeZone);
         Scorecard scorecard = new ScorecardStorage().getScorecard(scorecardID, conn);
         List<KPIOutcome> outcomes = new ScorecardService().getValues(scorecard.getKpis(), conn, insightRequestMetadata);
         for (KPI kpi : scorecard.getKpis()) {
@@ -903,7 +940,7 @@ public class ExportService {
             sb.append(kpi.getName());
             sb.append("</td>");
             sb.append("<td style=\""+tdStyle+"\">");
-            sb.append(createValue(0, kpi.getAnalysisMeasure(), new NumericValue(kpi.getKpiOutcome().getOutcomeValue())));
+            sb.append(createValue(0, kpi.getAnalysisMeasure(), new NumericValue(kpi.getKpiOutcome().getOutcomeValue()), cal));
             sb.append("</td>");
             sb.append("<td style=\""+tdStyle+"\">");
             sb.append(kpi.getDayWindow());

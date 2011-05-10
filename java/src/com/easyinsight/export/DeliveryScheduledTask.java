@@ -176,7 +176,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         DataResults dataResults = DataService.list(analysisDefinition, insightRequestMetadata, conn);
                         if (dataResults instanceof ListDataResults) {
                             ListDataResults listDataResults = (ListDataResults) dataResults;
-                            String table = ExportService.toTable(analysisDefinition, listDataResults, conn);
+                            String table = ExportService.toTable(analysisDefinition, listDataResults, conn, insightRequestMetadata);
                             sendNoAttachEmails(conn, table, activityID, subject, body, htmlEmail, ScheduledActivity.REPORT_DELIVERY);
                         }
                     } else if (deliveryFormat == ReportDelivery.PNG) {
@@ -190,7 +190,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             DataResults dataResults = DataService.list(analysisDefinition, insightRequestMetadata, conn);
                             if (dataResults instanceof ListDataResults) {
                                 ListDataResults listDataResults = (ListDataResults) dataResults;
-                                byte[] bytes = new ExportService().toListPDF(analysisDefinition, listDataResults, conn);
+                                byte[] bytes = new ExportService().toListPDF(analysisDefinition, listDataResults, conn, insightRequestMetadata);
                                 String reportName = analysisDefinition.getName();
                                 sendEmails(conn, bytes, reportName + ".pdf", accountID, "application/pdf", activityID);
                             }
