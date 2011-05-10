@@ -18,7 +18,12 @@ public class SubstringFunction extends Function {
         }*/
         int startIndex = (int) ((Value) params.get(1)).toDouble().doubleValue();
         int endIndex = (int) ((Value) params.get(2)).toDouble().doubleValue();
-        String string = substringValue.substring(startIndex, endIndex);
+        String string;
+        try {
+            string = substringValue.substring(startIndex, endIndex);
+        } catch (StringIndexOutOfBoundsException e) {
+            string = "";
+        }
         return new StringValue(string);
     }
 
