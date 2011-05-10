@@ -164,7 +164,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         DataResults dataResults = DataService.list(analysisDefinition, insightRequestMetadata, conn);
                         if (dataResults instanceof ListDataResults) {
                             ListDataResults listDataResults = (ListDataResults) dataResults;
-                            byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, listDataResults, conn);
+                            byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, listDataResults, conn, insightRequestMetadata);
                             String reportName = analysisDefinition.getName();
                             sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
                         }

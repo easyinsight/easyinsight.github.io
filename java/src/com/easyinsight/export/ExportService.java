@@ -475,7 +475,7 @@ public class ExportService {
             insightRequestMetadata.setSuppressShifts(true);
             analysisDefinition.updateMetadata();
             ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
-            return toExcel(analysisDefinition, listDataResults);
+            return toExcel(analysisDefinition, listDataResults, insightRequestMetadata);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -507,7 +507,7 @@ public class ExportService {
         FlexContext.getHttpRequest().getSession().setAttribute("imageID", id);
     }
 
-    public byte[] toExcel(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults) throws IOException, SQLException {
+    public byte[] toExcel(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, InsightRequestMetadata insightRequestMetadata) throws IOException, SQLException {
         EIConnection conn = Database.instance().getConnection();
         int dateFormat;
         try {
@@ -517,13 +517,25 @@ public class ExportService {
                     listDataResults.summarize();
                 }
             }
+            int time = insightRequestMetadata.getUtcOffset() / 60;
+            String string;
+            if (time > 0) {
+                string = "GMT-"+Math.abs(time);
+            } else if (time < 0) {
+                string = "GMT+"+Math.abs(time);
+            } else {
+                string = "GMT";
+            }
+            TimeZone timeZone = TimeZone.getTimeZone(string);
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeZone(timeZone);
             PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
             dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
             ResultSet rs = dateFormatStmt.executeQuery();
             rs.next();
             dateFormat = rs.getInt(1);
 
-            HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, listDataResults, dateFormat);
+            HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, listDataResults, dateFormat, cal);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             workbook.write(baos);
             byte[] bytes = baos.toByteArray();
@@ -545,7 +557,7 @@ public class ExportService {
         }
     }
 
-    public byte[] toExcelEmail(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn) throws IOException, SQLException {
+    public byte[] toExcelEmail(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws IOException, SQLException {
 
         int dateFormat;
         if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST) {
@@ -554,13 +566,25 @@ public class ExportService {
                 listDataResults.summarize();
             }
         }
+        int time = insightRequestMetadata.getUtcOffset() / 60;
+        String string;
+        if (time > 0) {
+            string = "GMT-"+Math.abs(time);
+        } else if (time < 0) {
+            string = "GMT+"+Math.abs(time);
+        } else {
+            string = "GMT";
+        }
+        TimeZone timeZone = TimeZone.getTimeZone(string);
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(timeZone);
         PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
         dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
         ResultSet rs = dateFormatStmt.executeQuery();
         rs.next();
         dateFormat = rs.getInt(1);
 
-        HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, listDataResults, dateFormat);
+        HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, listDataResults, dateFormat, cal);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         workbook.write(baos);
         byte[] bytes = baos.toByteArray();
@@ -568,7 +592,7 @@ public class ExportService {
         return bytes;
     }
 
-    private HSSFWorkbook createWorkbookFromList(WSAnalysisDefinition listDefinition, ListDataResults listDataResults, int dateFormat) {
+    private HSSFWorkbook createWorkbookFromList(WSAnalysisDefinition listDefinition, ListDataResults listDataResults, int dateFormat, Calendar cal) {
         HSSFWorkbook workbook = new HSSFWorkbook();
         Map<String, HSSFCellStyle> styleMap = new HashMap<String, HSSFCellStyle>();
         HSSFCellStyle currencyStyle = workbook.createCellStyle();
@@ -631,7 +655,7 @@ public class ExportService {
                 AnalysisItem analysisItem = listDataResults.getHeaders()[cellIndex];
                 short translatedIndex = positionMap.get(analysisItem);
                 HSSFCellStyle style = getStyle(styleMap, analysisItem, workbook, dateFormat, value);
-                populateCell(row, translatedIndex, value, style, analysisItem);
+                populateCell(row, translatedIndex, value, style, analysisItem, cal);
                 cellIndex++;
             }
             i++;
@@ -740,7 +764,7 @@ public class ExportService {
         return style;
     }
 
-    private void populateCell(HSSFRow row, int cellIndex, Value value, HSSFCellStyle style, AnalysisItem analysisItem) {
+    private void populateCell(HSSFRow row, int cellIndex, Value value, HSSFCellStyle style, AnalysisItem analysisItem, Calendar cal) {
         HSSFCell cell = row.createCell(cellIndex);
         cell.setCellStyle(style);
         if (value.type() == Value.STRING) {
@@ -783,7 +807,8 @@ public class ExportService {
             }
         } else if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
-            cell.setCellValue(dateValue.getDate());
+            cal.setTime(dateValue.getDate());
+            cell.setCellValue(cal.getTime());
         }
     }
 
