@@ -20,13 +20,7 @@ public class DateValue extends Value implements Serializable {
     private int hour;
     private int minute;
     private boolean dateTime;
-    /*
-    public var year:int;
-        public var month:int;
-        public var day:int;
-        public var hour:int;
-        public var minute:int;
-     */
+
     private String format;
     private static final long serialVersionUID = 8170674055682369820L;
 
@@ -43,7 +37,6 @@ public class DateValue extends Value implements Serializable {
 
     public void calculate(Calendar cal) {
         if (date != null) {
-            System.out.println("at this point, time = " + date);
             cal.setTime(date);
             year = cal.get(Calendar.YEAR);
             month = cal.get(Calendar.MONTH);

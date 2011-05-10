@@ -268,7 +268,6 @@ public class ExportService {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
             InsightRequestMetadata insightRequestMetadata =new InsightRequestMetadata();
-            insightRequestMetadata.setSuppressShifts(true);
             ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
             return toCSV(analysisDefinition, listDataResults);
         } catch (Exception e) {
@@ -287,7 +286,6 @@ public class ExportService {
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         try {
-            insightRequestMetadata.setSuppressShifts(true);
             if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                 analysisDefinition.updateMetadata();
@@ -485,7 +483,6 @@ public class ExportService {
         if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         try {
-            insightRequestMetadata.setSuppressShifts(true);
             analysisDefinition.updateMetadata();
             ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
             return toExcel(analysisDefinition, listDataResults, insightRequestMetadata);
@@ -889,7 +886,6 @@ public class ExportService {
 
     public static String exportScorecard(long scorecardID, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws Exception {
         SecurityUtil.authorizeScorecard(scorecardID);
-        insightRequestMetadata.setSuppressShifts(true);
         int time = insightRequestMetadata.getUtcOffset() / 60;
         String string;
         if (time > 0) {
