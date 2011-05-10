@@ -225,6 +225,10 @@ public class DataService {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         try {
+            if (insightRequestMetadata == null) {
+                insightRequestMetadata = new InsightRequestMetadata();
+            }
+            insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID(), conn);
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
             if (analysisDefinition.getAddedItems() != null) {
@@ -265,6 +269,10 @@ public class DataService {
     public DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
 
+        if (insightRequestMetadata == null) {
+            insightRequestMetadata = new InsightRequestMetadata();
+        }
+        insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
         Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID(), conn);
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
         if (analysisDefinition.getAddedItems() != null) {
@@ -302,6 +310,7 @@ public class DataService {
             if (insightRequestMetadata == null) {
                 insightRequestMetadata = new InsightRequestMetadata();
             }
+            insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
             DataResults results;
 
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
@@ -379,7 +388,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             long startTime = System.currentTimeMillis();
-            Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID(), conn);
+            Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
             if (insightRequestMetadata == null) {
                 insightRequestMetadata = new InsightRequestMetadata();
             }
