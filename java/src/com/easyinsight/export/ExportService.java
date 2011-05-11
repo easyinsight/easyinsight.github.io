@@ -471,7 +471,9 @@ public class ExportService {
                 throw new RuntimeException("No date format found.");
             }
             DateValue dateValue = (DateValue) value;
-            sdf.setCalendar(cal);
+            if (dateDim.isTimeshift()) {
+                sdf.setCalendar(cal);
+            }
             valueString = sdf.format(dateValue.getDate());
         } else {
             valueString = value.toString();
@@ -817,8 +819,17 @@ public class ExportService {
             }
         } else if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
-            cal.setTime(dateValue.getDate());
-            cell.setCellValue(cal);
+            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
+                if (dateDim.isTimeshift()) {
+                    cal.setTime(dateValue.getDate());
+                    cell.setCellValue(cal);
+                } else {
+                    cell.setCellValue(dateValue.getDate());
+                }
+            } else {
+                cell.setCellValue(dateValue.getDate());
+            }
         }
     }
 
