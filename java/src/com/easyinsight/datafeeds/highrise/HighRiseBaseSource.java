@@ -88,7 +88,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                 if (logRequest) {
                     System.out.println(restMethod.getResponseBodyAsString());
                 }
-                doc = builder.build(restMethod.getResponseBodyAsStream());                
+                doc = builder.build(restMethod.getResponseBodyAsStream());
                 String rootValue = doc.getRootElement().getValue();
                 if ("The API is not available to this account".equals(rootValue)) {
                     throw new ReportException(new DataSourceConnectivityReportFault("You need to enable API access to your Highrise account--you can do this under Account (Upgrade/Invoice), Highrise API in the Highrise user interface.", parentDefinition));

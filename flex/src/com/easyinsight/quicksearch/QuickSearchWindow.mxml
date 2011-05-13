@@ -1,11 +1,13 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:yahoo="http://www.yahoo.com/astra/2006/mxml"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:util="com.easyinsight.util.*" creationComplete="setupListeners()"
          borderThickness="1" borderColor="0x000000" borderStyle="solid" dropShadowEnabled="true"
          backgroundColor="0xECE9D8" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.controls.List;
+        import mx.core.UIComponent;
         import mx.managers.PopUpManager;
 
         private var _descriptors:ArrayCollection;
@@ -56,6 +58,7 @@
             factory.properties = { iconField: "icon" };
             focusManager.setFocus(searchInput);
             stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, false, 0, true);
+            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
             searchInput.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
             if (descriptors == null) {
                 feedService.getDescriptors.send();
@@ -78,10 +81,29 @@
             }
         }
 
+        private function onMouseDown(event:MouseEvent):void {
+            var result:Boolean = hitTestPoint(event.localX, event.localY);
+            if (!result) {
+                if (autoCompleteManager.hasDropdown(searchInput)) {
+                    var uiComp:UIComponent = autoCompleteManager.getDropdownForTarget(searchInput);
+                    var point:Point = new Point(event.stageX, event.stageY);
+                    var translatedPoint:Point = uiComp.contentToLocal(point);
+                    result = uiComp.hitTestPoint(translatedPoint.x, translatedPoint.y);
+                }
+                if (!result) {
+                    stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+                    stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+                    dispatchEvent(new QuickSearchEvent(QuickSearchEvent.QUICK_SEARCH_CANCEL));
+                    PopUpManager.removePopUp(this);
+                }
+            }
+        }
+
         private function onKeyDown(event:KeyboardEvent):void {
             if (!keyRun && event.keyCode == Keyboard.ESCAPE) {
                 keyRun = true;
                 stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+                stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
                 dispatchEvent(new QuickSearchEvent(QuickSearchEvent.QUICK_SEARCH_CANCEL));
                 PopUpManager.removePopUp(this);
             } else if (event.keyCode == Keyboard.ENTER) {
@@ -93,6 +115,8 @@
                 } else {
                     if (!keyRun) {
                         keyRun = true;
+                        stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+                        stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
                         dispatchEvent(new QuickSearchEvent(QuickSearchEvent.QUICK_SEARCH, descriptor));
                         PopUpManager.removePopUp(this);
                     }
@@ -106,6 +130,7 @@
             if (descriptor != null && !keyRun) {
                 keyRun = true;
                 stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+                stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
                 dispatchEvent(new QuickSearchEvent(QuickSearchEvent.QUICK_SEARCH, descriptor));
                 PopUpManager.removePopUp(this);
             }

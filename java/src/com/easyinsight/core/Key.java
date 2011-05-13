@@ -11,15 +11,15 @@ import java.io.Serializable;
 @Entity
 @Table(name="item_key")
 @Inheritance(strategy= InheritanceType.JOINED)
-public abstract class Key implements Comparable<Key>, Serializable, Cloneable {
+public class Key implements Comparable<Key>, Serializable, Cloneable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="item_key_id")
     private long keyID;
 
-    public abstract String toSQL();
+    public String toSQL() { throw new UnsupportedOperationException(); }
 
-    public abstract Key toBaseKey();
+    public Key toBaseKey() { throw new UnsupportedOperationException(); }
 
     public boolean hasDataSource(long dataSourceID) {
         return false;
@@ -33,13 +33,13 @@ public abstract class Key implements Comparable<Key>, Serializable, Cloneable {
         this.keyID = keyID;
     }
 
-    public abstract String toDisplayName();
+    public String toDisplayName() { throw new UnsupportedOperationException(); }
 
-    public abstract boolean indexed();
+    public boolean indexed() { throw new UnsupportedOperationException(); }
 
-    public abstract String toKeyString();
+    public String toKeyString() { throw new UnsupportedOperationException(); }
 
-    public abstract String internalString();
+    public String internalString() { throw new UnsupportedOperationException(); }
 
     public int compareTo(Key o) {
         return toDisplayName().compareTo(o.toDisplayName());

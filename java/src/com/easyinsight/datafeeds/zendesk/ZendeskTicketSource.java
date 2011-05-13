@@ -1,11 +1,7 @@
 package com.easyinsight.datafeeds.zendesk;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.DateValue;
-import com.easyinsight.core.EmptyValue;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.Value;
-import com.easyinsight.core.StringValue;
+import com.easyinsight.core.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -77,7 +73,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 SOLVED_AT, STATUS, STATUS_UPDATED_AT, SUBMITTER, SUBJECT, TICKET_TYPE, UPDATED_AT, SCORE, VIA, COUNT, TICKET_ID));
         try {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
-            Document fields = runRestRequest(zendeskCompositeSource, getHttpClient(zendeskCompositeSource.getZdUserName(),
+            /*Document fields = runRestRequest(zendeskCompositeSource, getHttpClient(zendeskCompositeSource.getZdUserName(),
                     zendeskCompositeSource.getZdPassword()), "/ticket_fields.xml", new Builder());
             Nodes recordNodes = fields.query("/records/record");
             for (int i = 0; i < recordNodes.size(); i++) {
@@ -86,7 +82,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 if (!baseKeys.contains(title)) {
                     baseKeys.add("zd" + queryField(recordNode, "id/text()"));
                 }
-            }
+            }*/
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -129,16 +125,14 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 Node recordNode = recordNodes.get(i);
                 String title = queryField(recordNode, "title/text()");
                 String id = queryField(recordNode, "id/text()");
-                Key customKey = keys.get("zd" + id);
-                if (customKey != null) {
-                    String type = queryField(recordNode, "type/text()");
-                    if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type)) {
-                        items.add(new AnalysisDimension(customKey, title));
-                    } else if ("MultiLineField".equals(type)) {
-                        items.add(new AnalysisText(customKey, title));
-                    } else if ("NumericField".equals(type) || "DecimalField".equals(type)) {
-                        items.add(new AnalysisMeasure(customKey, title, AggregationTypes.SUM));
-                    }
+                Key customKey = new NamedKey("zd" + id);
+                String type = queryField(recordNode, "type/text()");
+                if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type)) {
+                    items.add(new AnalysisDimension(customKey, title));
+                } else if ("MultiLineField".equals(type)) {
+                    items.add(new AnalysisText(customKey, title));
+                } else if ("NumericField".equals(type) || "DecimalField".equals(type)) {
+                    items.add(new AnalysisMeasure(customKey, title, AggregationTypes.SUM));
                 }
             }
         } catch (Exception e) {

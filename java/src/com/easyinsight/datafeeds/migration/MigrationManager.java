@@ -77,7 +77,7 @@ public class MigrationManager {
                                         migration.migrate(keyMap, conn);
                                     }
                                 }
-                                new DataSourceInternalService().updateFeedDefinition(migrateSource, conn, true);
+                                new DataSourceInternalService().updateFeedDefinition(migrateSource, conn, true, true);
                                 conn.commit();
                             } catch (Throwable e) {
                                 LogClass.error(e);

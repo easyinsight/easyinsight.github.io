@@ -82,8 +82,24 @@ public class HighriseCompanyCache extends HighRiseBaseSource {
                         tagString = tagBuilder.substring(0, tagBuilder.length() - 1);
 
                     }
+                    Map<String, String> customFields = new HashMap<String, String>();
+                    contactDataNodes = companyNode.query("contact-data");
+                    if (contactDataNodes.size() > 0) {
+                        Node contactDataNode = contactDataNodes.get(0);
+                        for (int j = 0; j < contactDataNode.getChildCount(); j++) {
+                            Node testNode = contactDataNode.getChild(j);
+                            String subjectFieldID = queryField(testNode, "subject-field-id/text()");
+                            if (subjectFieldID != null) {
+                                String value = queryField(testNode, "value/text()");
+                                customFields.put(subjectFieldID, value);
+
+                            }
+                        }
+                    }
+
+
                     companyList.add(new HighriseCompany(name, id, tagString, responsiblePartyName, createdAt, updatedAt, zip, background,
-                            country, state, city));
+                            country, state, city, customFields));
                     companyIDs.add(id);
                     companyCount++;
                 }

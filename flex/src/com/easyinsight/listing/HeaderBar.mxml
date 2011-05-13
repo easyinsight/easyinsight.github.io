@@ -210,7 +210,7 @@
         <mx:Label text="Help" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <mx:Spacer width="100%"/>
-    <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl .)"/>
+    <listing:SearchButton/>
     <mx:Spacer width="10"/>
     <easyinsight:LoggedOnStatus/>
 </mx:HBox>

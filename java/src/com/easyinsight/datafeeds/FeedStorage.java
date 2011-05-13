@@ -490,7 +490,14 @@ public class FeedStorage {
                             AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
                             analysisHierarchyItem.setHierarchyLevels(new ArrayList<HierarchyLevel>(analysisHierarchyItem.getHierarchyLevels()));
                         }*/
-                        analysisItems.add((AnalysisItem) Database.deproxy(analysisItem));
+                        AnalysisItem item = (AnalysisItem) Database.deproxy(analysisItem);
+                        if (item.getKey().getClass().getName().equals("com.easyinsight.core.Key")) {
+                            PreparedStatement fixStmt = conn.prepareStatement("DELETE FROM FEED_TO_ANALYSIS_ITEM WHERE ANALYSIS_ITEM_ID = ?");
+                            fixStmt.setLong(1, analysisItemID);
+                            fixStmt.executeUpdate();
+                        } else {
+                            analysisItems.add(item);
+                        }
                     }
                 } catch (HibernateException e) {
                     PreparedStatement fixStmt = conn.prepareStatement("DELETE FROM FEED_TO_ANALYSIS_ITEM WHERE ANALYSIS_ITEM_ID = ?");

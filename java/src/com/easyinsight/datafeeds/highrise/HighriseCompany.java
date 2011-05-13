@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.highrise;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -20,9 +21,10 @@ public class HighriseCompany {
     private String state;
     private String country;
     private String city;
+    private Map<String, String> customFields;
 
     public HighriseCompany(String companyName, String companyID, String tags, String owner, Date createdAt, Date updatedAt, String zipCode, String background,
-                           String country, String state, String city) {
+                           String country, String state, String city, Map<String, String> customFields) {
         this.companyName = companyName;
         this.companyID = companyID;
         this.tags = tags;
@@ -34,6 +36,11 @@ public class HighriseCompany {
         this.country = country;
         this.state = state;
         this.city = city;
+        this.customFields = customFields;
+    }
+
+    public Map<String, String> getCustomFields() {
+        return customFields;
     }
 
     public String getState() {

@@ -200,6 +200,9 @@ public class CompositeFeedDefinition extends FeedDefinition {
     public void populateFields(Connection conn) {
         // get fields from the composite feed nodes...
         try {
+            /*GatherItemVisitor gatherItemVisitor = new GatherItemVisitor(conn);
+            gatherItemVisitor.visit(this);*/
+
             AnalysisItemVisitor analysisItemVisitor = new AnalysisItemVisitor(conn);
             analysisItemVisitor.visit(this);
 
@@ -221,14 +224,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
 
             // Clear any existing fields from child data sources, since those may have changed
 
-            Iterator<AnalysisItem> iter = fields.iterator();
-            while (iter.hasNext()) {
-                AnalysisItem analysisItem = iter.next();
-                Key key = analysisItem.getKey();
-                if (analysisItem.isConcrete()) {
-                    iter.remove();
-                }
-            }
+
             
             // define folder for each child
             
@@ -255,6 +251,18 @@ public class CompositeFeedDefinition extends FeedDefinition {
                     DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
                     String name = getCompositeFeedName(derivedKey.getFeedID(), conn);
                     analysisItem.setDisplayName(name + " - " + entry.getKey());
+                }
+            }
+
+            Iterator<AnalysisItem> iter = fields.iterator();
+            Set<String> fieldSet = new HashSet<String>();
+            for (AnalysisItem gatherItem : analysisItemVisitor.fields) {
+                fieldSet.add(gatherItem.toDisplay());
+            }
+            while (iter.hasNext()) {
+                AnalysisItem analysisItem = iter.next();
+                if (fieldSet.contains(analysisItem.toDisplay())) {
+                    iter.remove();
                 }
             }
 
@@ -324,7 +332,22 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
     }
 
-    
+    private class GatherItemVisitor extends CompositeFeedNodeShallowVisitor {
+        private List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
+        private Connection conn;
+
+        private GatherItemVisitor(Connection conn) {
+            this.conn = conn;
+        }
+
+        @Override
+        protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException, CloneNotSupportedException {
+            List<AnalysisItem> analysisItemList = retrieveFields(compositeFeedNode.getDataFeedID(), conn);
+            for (AnalysisItem analysisItem : analysisItemList) {
+                fields.add(analysisItem);
+            }
+        }
+    }
 
     private class AnalysisItemVisitor extends CompositeFeedNodeShallowVisitor {
 

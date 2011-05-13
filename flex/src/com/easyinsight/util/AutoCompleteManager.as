@@ -745,7 +745,7 @@ public class AutoCompleteManager extends EventDispatcher
      * @param t A TextInput instance
      * @return Boolean
      */
-    protected function hasDropdown(t:TextInput):Boolean
+    public function hasDropdown(t:TextInput):Boolean
     {
         for each (var o:ListBase in _dropdowns)
         {

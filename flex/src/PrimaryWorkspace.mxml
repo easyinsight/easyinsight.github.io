@@ -23,14 +23,7 @@
         import com.easyinsight.framework.TORegistry;
         import com.easyinsight.listing.HeaderBar;
         import com.easyinsight.listing.IModulePerspective;
-        import com.easyinsight.listing.LaunchQuickSearchEvent;
-        import com.easyinsight.quicksearch.EIDescriptor;
-        import com.easyinsight.quicksearch.QuickSearchEvent;
-        import com.easyinsight.quicksearch.QuickSearchWindow;
-        import com.easyinsight.report.ReportPerspectiveInfo;
         import com.easyinsight.skin.ApplicationSkin;
-        import com.easyinsight.solutions.DataSourceDescriptor;
-        import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.util.ErrorReportView;
         import com.easyinsight.util.PopUpUtil;
@@ -95,6 +88,7 @@
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
+            User.getEventNotifier().addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
             //GAHelper.initialize(tracker);
             userService.getBuildPath.send();
         }
@@ -105,7 +99,6 @@
         }
 
         private function applicationListeners():void {
-            stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
             addUncaughtErrorListener(stage.loaderInfo);
             addUncaughtErrorListener(this.loaderInfo);
 
@@ -138,43 +131,6 @@
                 // a non-Error, non-ErrorEvent type was thrown and uncaught
             }
 
-        }
-
-        private function onKeyDown(event:KeyboardEvent):void {
-            if (event.ctrlKey && event.keyCode == 190 && User.getInstance() != null) {
-                launchQuickSearchWindow(null);
-            }
-            /*else if (event.keyCode == 192) {
-             DisplayListAnalysis.traverse(this);
-             }*/
-        }
-
-        private function launchQuickSearchWindow(event:LaunchQuickSearchEvent):void {
-            var window:QuickSearchWindow = new QuickSearchWindow();
-            window.addEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch, false, 0, true);
-            window.addEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch, false, 0, true);
-            PopUpManager.addPopUp(window, this, false);
-            PopUpUtil.centerPopUp(window);
-        }
-
-
-        private function onQuickSearch(event:QuickSearchEvent):void {
-            event.currentTarget.removeEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch);
-            event.currentTarget.removeEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch);
-            if (event.type == QuickSearchEvent.QUICK_SEARCH) {
-                if (event.eiDescriptor.getType() == EIDescriptor.DATA_SOURCE) {
-                    var eiDescriptor:DataSourceDescriptor = event.eiDescriptor as DataSourceDescriptor;
-                    internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.REPORT_EDITOR, {dataSourceID: eiDescriptor.id})));
-                } else if (event.eiDescriptor.getType() == EIDescriptor.REPORT) {
-                    internalAnalyze(new AnalyzeEvent(new ReportPerspectiveInfo(event.eiDescriptor as InsightDescriptor)));
-                } else if (event.eiDescriptor.getType() == EIDescriptor.GOAL_TREE) {
-                    internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.KPI_TREE_VIEW, {goalTreeID: event.eiDescriptor.id})));
-                } else if (event.eiDescriptor.getType() == EIDescriptor.DASHBOARD) {
-                    internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id})));
-                } else if (event.eiDescriptor.getType() == EIDescriptor.SCORECARD) {
-                    internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID: event.eiDescriptor.id})));
-                }
-            }
         }
 
         private function onFault(event:FaultEvent):void {
@@ -529,12 +485,11 @@
             headerBar.setStyle("paddingLeft", 10);
             headerBar.setStyle("paddingRight", 10);
             headerBar.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
-            headerBar.addEventListener(LaunchQuickSearchEvent.LAUNCH_QUICK_SEARCH, launchQuickSearchWindow);
             masterCanvas.addChild(headerBar);
             var box:Box = new Box();
             box.percentWidth = 100;
             box.height = 5;
-            box.y = 68;            
+            box.y = 68;
             masterCanvas.addChild(box);
             var hbox:HBox = new HBox();
             hbox.y = 73;

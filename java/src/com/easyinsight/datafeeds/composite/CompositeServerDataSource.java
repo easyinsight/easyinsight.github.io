@@ -204,34 +204,16 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return sessionId;
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID, Date lastRefreshTime) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, EIConnection conn) {
         try {
             refreshData(accountID, now, conn, null, callDataID, lastRefreshTime);
-            return new CredentialsResponse(true, getDataFeedID());
-        } catch (ReportException re) {
-            return new CredentialsResponse(false, re.getReportFault());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            refreshData(accountID, now, conn, null, callDataID, lastRefreshTime);
-            conn.commit();
             ReportCache.instance().flushResults(getDataFeedID());
             return new CredentialsResponse(true, getDataFeedID());
         } catch (ReportException re) {
             return new CredentialsResponse(false, re.getReportFault());
         } catch (Exception e) {
             LogClass.error(e);
-            conn.rollback();
             return new CredentialsResponse(false, e.getMessage(), getDataFeedID());
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
         }
     }
 
@@ -246,17 +228,12 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             insertStmt.setString(4, InetAddress.getLocalHost().getHostAddress());
             insertStmt.execute();
             long auditID = Database.instance().getAutoGenKey(insertStmt);
-            boolean changed = false;
-            // possibilities...
-            // a new data soucrce was added as a child as part of an upgrade
-            // a new custom field was added, etc
 
-            List<AnalysisItem> allItems = new ArrayList<AnalysisItem>();
             List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn);
             for (IServerDataSourceDefinition source : sources) {
                 source.refreshData(accountID, now, conn, this, callDataID, lastRefreshTime);
-                allItems.addAll(source.getFields());
             }
+
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE data_source_refresh_audit set end_time = ? where data_source_refresh_audit_id = ?");
             updateStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
             updateStmt.setLong(2, auditID);

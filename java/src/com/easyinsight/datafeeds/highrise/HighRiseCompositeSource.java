@@ -140,6 +140,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private transient HighriseCache highriseCache;
     private transient HighriseRecordingsCache highriseRecordingsCache;
     private transient HighriseCompanyCache highriseCompanyCache;
+    private transient HighriseCustomFieldsCache customFieldsCache;
 
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
@@ -167,6 +168,14 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             highriseCompanyCache.populateCaches(httpClient, getUrl(), this, date, getOrCreateCache(httpClient));
         }
         return highriseCompanyCache;
+    }
+
+    public HighriseCustomFieldsCache getOrCreateCustomFieldCache(HttpClient httpClient, Date date) throws HighRiseLoginException, ParsingException, ParseException {
+        if (customFieldsCache == null) {
+            customFieldsCache = new HighriseCustomFieldsCache();
+            customFieldsCache.blah(httpClient, getUrl(), this, date, getOrCreateCache(httpClient));
+        }
+        return customFieldsCache;
     }
 
     @Override

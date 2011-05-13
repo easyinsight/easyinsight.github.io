@@ -145,7 +145,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         chartDefinition.setFilterDefinitions(filters);
         AnalysisDimension myDimension = new AnalysisDimension(TestUtil.createKey("Customer", dataFeedID), true);
         AnalysisMeasure measure = new AnalysisMeasure(TestUtil.createKey("Revenue", dataFeedID), AggregationTypes.SUM);
-        chartDefinition.setMeasure(measure);
+        //chartDefinition.setMeasure(measure);
         chartDefinition.setXaxis(myDimension);
         AnalysisService analysisService = new AnalysisService();
         long analysisID = analysisService.saveAnalysisDefinition(chartDefinition).getAnalysisID();

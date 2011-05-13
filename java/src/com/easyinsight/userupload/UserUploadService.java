@@ -571,27 +571,26 @@ public class UserUploadService {
 
                         public void run() {
                             SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
+                            EIConnection conn = Database.instance().getConnection();
                             try {
+                                conn.setAutoCommit(false);
                                 Date now = new Date();
-                                CredentialsResponse credentialsResponse = dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null, callID, ((FeedDefinition) dataSource).getLastRefreshStart());
-                                if (credentialsResponse.isSuccessful() && !feedDefinition.isVisible()) {
-                                    feedDefinition.setVisible(true);
-                                }
+                                dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, ((FeedDefinition) dataSource).getLastRefreshStart());
+                                feedDefinition.setVisible(true);
                                 feedDefinition.setLastRefreshStart(now);
-                                feedStorage.updateDataFeedConfiguration(feedDefinition);
-                                if (credentialsResponse.isSuccessful()) {
-                                    ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE);
-                                } else {
-                                    if (credentialsResponse.getReportFault() == null) {
-                                        ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, credentialsResponse.getFailureMessage());
-                                    } else {
-                                        ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, credentialsResponse.getReportFault());
-                                    }
-                                }
+                                new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn, true, true);
+                                ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE);
+                                conn.commit();
+                            } catch (ReportException re) {
+                                conn.rollback();
+                                ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault());
                             } catch (Exception e) {
                                 LogClass.error(e);
+                                conn.rollback();
                                 ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage());
                             } finally {
+                                conn.setAutoCommit(true);
+                                Database.closeConnection(conn);
                                 DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
                                 SecurityUtil.clearThreadLocal();
                             }
@@ -785,27 +784,26 @@ public class UserUploadService {
 
                     public void run() {
                         SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
+                        EIConnection conn = Database.instance().getConnection();
                         try {
+                            conn.setAutoCommit(false);
                             Date now = new Date();
-                            CredentialsResponse credentialsResponse = serverDataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), null, callID, dataSource.getLastRefreshStart());
-                            if (credentialsResponse.isSuccessful() && !dataSource.isVisible()) {
-                                dataSource.setVisible(true);
-                            }
+                            serverDataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, dataSource.getLastRefreshStart());
+                            dataSource.setVisible(true);
                             dataSource.setLastRefreshStart(now);
-                            feedStorage.updateDataFeedConfiguration(dataSource);
-                            if (credentialsResponse.isSuccessful()) {
-                                ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE);
-                            } else {
-                                if (credentialsResponse.getReportFault() == null) {
-                                    ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, credentialsResponse.getFailureMessage());
-                                } else {
-                                    ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, credentialsResponse.getReportFault());
-                                }
-                            }
+                            feedStorage.updateDataFeedConfiguration(dataSource, conn);
+                            conn.commit();
+                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE);
+                        } catch (ReportException re) {
+                            conn.rollback();
+                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault());
                         } catch (Exception e) {
                             LogClass.error(e);
+                            conn.rollback();
                             ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage());
                         } finally {
+                            conn.setAutoCommit(true);
+                            Database.closeConnection(conn);
                             DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
                             SecurityUtil.clearThreadLocal();
                         }

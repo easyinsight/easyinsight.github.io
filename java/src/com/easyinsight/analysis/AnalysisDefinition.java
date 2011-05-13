@@ -396,6 +396,11 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setAnalysisID(null);
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
 
+        allFields = new ArrayList<AnalysisItem>(allFields);
+        if (analysisDefinition.getAddedItems() != null) {
+            allFields.addAll(analysisDefinition.getAddedItems());
+        }
+
         List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
 
         Collection<AnalysisItem> reportItems = getReportStructure().values();

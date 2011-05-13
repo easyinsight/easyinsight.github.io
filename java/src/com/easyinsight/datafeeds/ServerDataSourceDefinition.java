@@ -157,34 +157,41 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID, Date lastRefreshTime) {
-        try {
-            refreshData(accountID, now, conn, parentDefinition, callDataID, lastRefreshTime);
-            return new CredentialsResponse(true, getDataFeedID());
-        } catch (ReportException re) {
-            return new CredentialsResponse(false, re.getReportFault());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception {
         DataStorage dataStorage = null;
         try {
             Map<String, Key> keys = newDataSourceFields(parentDefinition);
+            List<AnalysisItem> fields = createAnalysisItems(keys, conn, parentDefinition);
+            List<AnalysisItem> newFields = new ArrayList<AnalysisItem>();
+            for (AnalysisItem field : fields) {
+                if (field == null) {
+                    continue;
+                }
+                if (field.getKey() == null) {
+                    continue;
+                }
+                AnalysisItem existingField = findAnalysisItemByKey(field.getKey().toKeyString());
+                if (existingField == null) {
+                    newFields.add(field);
+                }
+            }
+            if (newFields.size() > 0) {
+                System.out.println("Discovered new fields = " + newFields);
+                for (AnalysisItem newField : newFields) {
+                    getFields().add(newField);
+                    keys.put(newField.getKey().toKeyString(), newField.getKey());
+                }
+                new DataSourceInternalService().updateFeedDefinition(this, conn, true, false);
+            }
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
             System.out.println("Refreshing " + getDataFeedID() + " for account " + accountID + " at " + new Date());
             if (clearsData() || lastRefreshTime == null || lastRefreshTime.getTime() < 100) {
                 dataStorage.truncate(); 
             }
-            DataSet dataSet = getDataSet(newDataSourceFields(parentDefinition), now, parentDefinition, dataStorage, conn, callDataID, lastRefreshTime);
-            //List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials, conn);
-            //int version = dataStorage.getVersion();
-            //int newVersion = dataStorage.migrate(getFields(), items);
+            DataSet dataSet = getDataSet(keys, now, parentDefinition, dataStorage, conn, callDataID, lastRefreshTime);
             addData(dataStorage, dataSet);
             dataStorage.commit();
             System.out.println("Completed refresh of " + getDataFeedID() + " for account " + accountID + " at " + new Date());
-            //notifyOfDataUpdate();
             return true;
         } catch (Exception e) {
             if (dataStorage != null) {

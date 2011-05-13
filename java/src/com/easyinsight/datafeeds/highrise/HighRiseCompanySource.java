@@ -1,14 +1,17 @@
 package com.easyinsight.datafeeds.highrise;
 
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
+import nu.xom.ParsingException;
 import org.jetbrains.annotations.NotNull;
 import org.apache.commons.httpclient.HttpClient;
 
+import java.text.ParseException;
 import java.util.*;
 import java.sql.Connection;
 
@@ -65,6 +68,17 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
+        try {
+            HighRiseCompositeSource compositeSource = (HighRiseCompositeSource) parentDefinition;
+            Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, (EIConnection) conn);
+            HttpClient client = getHttpClient(token.getTokenValue(), "");
+            HighriseCustomFieldsCache cache = compositeSource.getOrCreateCustomFieldCache(client, null);
+            for (Map.Entry<String, String> entry : cache.getCustomFields().entrySet()) {
+                analysisItems.add(new AnalysisDimension(new NamedKey(entry.getKey()), "Company " + entry.getValue()));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return analysisItems;
     }
 
@@ -75,6 +89,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
+
 
         DataSet ds = new DataSet();
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
@@ -95,6 +110,9 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                 row.addValue(TAGS, highriseCompany.getTags());
                 row.addValue(OWNER, highriseCompany.getOwner());
                 row.addValue(COUNT, 1);
+                for (Map.Entry<String, String> entry : highriseCompany.getCustomFields().entrySet()) {
+                    row.addValue(keys.get(entry.getKey()), entry.getValue());
+                }
             }
         } catch (ReportException re) {
             throw re;

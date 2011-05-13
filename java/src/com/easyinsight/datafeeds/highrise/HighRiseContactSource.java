@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.highrise;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
@@ -83,6 +84,17 @@ public class HighRiseContactSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(OWNER), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
+        try {
+            HighRiseCompositeSource compositeSource = (HighRiseCompositeSource) parentDefinition;
+            Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, (EIConnection) conn);
+            HttpClient client = getHttpClient(token.getTokenValue(), "");
+            HighriseCustomFieldsCache cache = compositeSource.getOrCreateCustomFieldCache(client, null);
+            for (Map.Entry<String, String> entry : cache.getCustomFields().entrySet()) {
+                analysisItems.add(new AnalysisDimension(new NamedKey(entry.getKey()), "Contact " + entry.getValue()));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return analysisItems;
     }
 
@@ -197,6 +209,22 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                         }
                         String tagString = tagBuilder.substring(0, tagBuilder.length() - 1);
                         row.addValue(TAGS, tagString);
+                    }
+                    contactDataNodes = companyNode.query("contact-data");
+                    if (contactDataNodes.size() > 0) {
+                        Node contactDataNode = contactDataNodes.get(0);
+                        for (int j = 0; j < contactDataNode.getChildCount(); j++) {
+                            Node testNode = contactDataNode.getChild(j);
+                            String subjectFieldID = queryField(testNode, "subject-field-id/text()");
+                            if (subjectFieldID != null) {
+                                String value = queryField(testNode, "value/text()");
+                                Key key = keys.get(subjectFieldID);
+                                if (key != null) {
+                                    row.addValue(key, value);
+                                }
+
+                            }
+                        }
                     }
                     contactCount++;
                 }

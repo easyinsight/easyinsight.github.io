@@ -9,7 +9,6 @@ import com.easyinsight.storage.DataStorage;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -37,10 +36,10 @@ public class DataSourceInternalService {
     }
 
     public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn) throws Exception {
-        updateFeedDefinition(feedDefinition, conn, false);
+        updateFeedDefinition(feedDefinition, conn, false, true);
     }
 
-    public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn, boolean systemUpdate) throws Exception {
+    public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn, boolean systemUpdate, boolean updateComposite) throws Exception {
         DataStorage metadata = null;
         try {
             feedDefinition.beforeSave(conn);
@@ -60,7 +59,9 @@ public class DataSourceInternalService {
                 feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
             }
 
-            updateComposites(feedDefinition, conn);
+            if (updateComposite) {
+                updateComposites(feedDefinition, conn);
+            }
 
         } catch (Exception e) {
             if (metadata != null) {

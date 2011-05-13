@@ -11,6 +11,7 @@ import com.easyinsight.analysis.*;
 import java.util.*;
 
 import com.easyinsight.pipeline.AltCompositeReportPipeline;
+import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.pipeline.CompositeReportPipeline;
 import com.easyinsight.pipeline.Pipeline;
 import org.jgrapht.UndirectedGraph;
@@ -182,13 +183,7 @@ public class CompositeFeed extends Feed {
         itemSet.removeAll(alwaysSet);
 
         if (itemSet.size() > 0) {
-            /*StringBuilder builder = new StringBuilder();
-            for (AnalysisItem analysisItem : itemSet) {
-                builder.append(analysisItem.toDisplay()).append(",");
-            }
-            builder.deleteCharAt(builder.length() - 1);*/
             throw new InvalidFieldsException(itemSet);
-            /*throw new RuntimeException("Could not find a data source to handle fields " + builder.toString() + ".");*/
         }
 
         for (CompositeFeedConnection connection : connections) {
@@ -197,20 +192,6 @@ public class CompositeFeed extends Feed {
             Edge edge = new Edge(connection);
             graph.addEdge(source, target, edge);
         }
-
-        // determine the path through the graph, create a new graph
-
-
-        /*Iterator<QueryStateNode> graphIterator = new BreadthFirstIterator<QueryStateNode, Edge>(graph);
-        while (graphIterator.hasNext()) {
-            QueryStateNode queryStateNode = graphIterator.next();
-            for (AnalysisItem analysisItem : analysisItems) {
-                if (queryStateNode.handles(analysisItem.getKey())) {
-                    neededNodes.put(queryStateNode.feedID, queryStateNode);
-                    queryStateNode.addItem(analysisItem);
-                }
-            }
-        }*/
 
         if (neededNodes.size() == 1) {
             QueryStateNode queryStateNode = neededNodes.values().iterator().next();
@@ -338,41 +319,12 @@ public class CompositeFeed extends Feed {
                         sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID);
                 dataSet = mergeAudit.getDataSet();
                 auditStrings.addAll(mergeAudit.getMergeStrings());
-                //dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
                 sourceNode.queryData.dataSet = dataSet;
                 sourceNode.queryData.neededItems.addAll(targetNode.queryData.neededItems);
                 targetNode.queryData = sourceNode.queryData;
             }
 
         }
-
-        /*Set<Edge> edgeSet = new HashSet<Edge>();
-
-        for (QueryStateNode queryStateNode : neededNodes.values()) {
-            queryStateNode.produceDataSet(insightRequestMetadata);
-            Set<Edge> allEdges = graph.edgesOf(queryStateNode);
-            for (Edge edge : allEdges) {
-                if (neededNodes.get(graph.getEdgeSource(edge).feedID) != null &&
-                        neededNodes.get(graph.getEdgeTarget(edge).feedID) != null) {
-                    edgeSet.add(edge);
-                }
-            }
-        }
-
-
-        for (Edge edge : edgeSet) {
-            QueryStateNode sourceNode = neededNodes.get(edge.connection.getSourceFeedID());
-            QueryStateNode targetNode = neededNodes.get(edge.connection.getTargetFeedID());
-            //Key sourceJoin = new DerivedKey(edge.connection.getSourceJoin(), edge.connection.getSourceFeedID());
-            //Key targetJoin = new DerivedKey(edge.connection.getTargetJoin(), edge.connection.getTargetFeedID());
-            MergeAudit mergeAudit = edge.connection.merge(sourceNode.myDataSet, targetNode.myDataSet, sourceNode.neededItems, targetNode.neededItems,
-                    sourceNode.dataSourceName, targetNode.dataSourceName);
-            dataSet = mergeAudit.getDataSet();
-            auditStrings.addAll(mergeAudit.getMergeStrings());
-            //dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
-            sourceNode.myDataSet = dataSet;
-            targetNode.myDataSet = dataSet;
-        }*/
         dataSet.setAudits(auditStrings);
 
         return dataSet;
@@ -390,13 +342,11 @@ public class CompositeFeed extends Feed {
     private class QueryStateNode {
         private long feedID;
         private QueryData queryData = new QueryData();
-        //private Set<Key> neededKeys = new HashSet<Key>();
-        //private Set<AnalysisItem> neededItems = new HashSet<AnalysisItem>();
+        private Set<AnalysisItem> neededItems = new HashSet<AnalysisItem>();
         private List<AnalysisItem> allAnalysisItems = new ArrayList<AnalysisItem>();
         private Collection<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         private Collection<AnalysisItem> allFeedItems;
         private Collection<AnalysisItem> joinItems = new HashSet<AnalysisItem>();
-        //private DataSet myDataSet;
         private String dataSourceName;
         private EIConnection conn;
 
@@ -419,14 +369,18 @@ public class CompositeFeed extends Feed {
                     break;
                 }
             }
-            addItem(analysisItem);
-            joinItems.add(analysisItem);
-            //neededKeys.add(analysisItem.getKey());
+            List<AnalysisItem> items = analysisItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(analysisItem), false, true, false, CleanupComponent.AGGREGATE_CALCULATIONS);
+            for (AnalysisItem item : items) {
+                addItem(item);
+                joinItems.add(item);
+            }
         }
 
         public void addItem(AnalysisItem analysisItem) {
+            if (!analysisItem.isDerived()) {
+                neededItems.add(analysisItem);
+            }
             queryData.neededItems.add(analysisItem);
-            //neededKeys.add(analysisItem.getKey());
         }
 
         public void addKey(Key key) {
@@ -449,7 +403,7 @@ public class CompositeFeed extends Feed {
 
             Feed feed = FeedRegistry.instance().getFeed(feedID, conn);
 
-            DataSet dataSet = feed.getAggregateDataSet(queryData.neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
+            DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
 
             Pipeline pipeline;
             if (getDataSource().getFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {

@@ -6,7 +6,6 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.userupload.UploadPolicy;
 
 import javax.servlet.http.HttpServletRequest;
@@ -84,13 +83,9 @@ public interface IServerDataSourceDefinition {
 
     Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition);
 
-    CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime);
-
     boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception;
 
     Key getField(String sourceKey);
 
     List<AnalysisItem> getFields();
-
-    CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID, Date lastRefreshTime);
 }

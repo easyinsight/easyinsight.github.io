@@ -91,7 +91,7 @@ public class SolutionTest extends TestCase {
         WSColumnChartDefinition chartDefinition = new WSColumnChartDefinition();
         chartDefinition.setName("ColumnChart");
         chartDefinition.setDataFeedID(dataSourceID);
-        chartDefinition.setMeasure(getItem("amount", feedDefinition));
+        //chartDefinition.setMeasure(getItem("amount", feedDefinition));
         chartDefinition.setXaxis(getItem("customer", feedDefinition));
         long chartID = new AnalysisService().saveAnalysisDefinition(chartDefinition).getAnalysisID();
         Solution solution = new Solution();
