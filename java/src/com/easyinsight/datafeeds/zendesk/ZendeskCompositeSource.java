@@ -55,6 +55,10 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
             client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
             HttpMethod restMethod = new GetMethod(getUrl() + "/organizations.xml");
             client.executeMethod(restMethod);
+            String response = restMethod.getResponseBodyAsString();
+            if (response.contains("Couldn't authenticate you")) {
+                return "Zendesk rejected the specified credentials.";
+            }
             return null;
         } catch (Exception e) {
             return e.getMessage();
