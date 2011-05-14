@@ -119,7 +119,8 @@ public class DataService {
                 dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, fields, false, conn);
                 valid = true;
             } catch (InvalidFieldsException ife) {
-                validQueryItems.removeAll(ife.getAnalysisItems());
+                throw ife;
+                //validQueryItems.removeAll(ife.getAnalysisItems());
             }
         }
         return dataSet;
@@ -208,6 +209,8 @@ public class DataService {
             results.setAttribution(feed.getAttribution());
             //}
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
+            /*new AdminService().logAction(new ActionReportLog(SecurityUtil.getUserID(), ActionLog.VIEW, analysisDefinition.getAnalysisID()), conn);*/
+            conn.commit();
             return results;
         } catch (ReportException re) {
             EmbeddedDataResults results = new EmbeddedDataResults();
@@ -215,8 +218,10 @@ public class DataService {
             return results;
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }
@@ -225,6 +230,7 @@ public class DataService {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         try {
+            conn.setAutoCommit(false);
             if (insightRequestMetadata == null) {
                 insightRequestMetadata = new InsightRequestMetadata();
             }
@@ -255,13 +261,17 @@ public class DataService {
             DataSet dataSet = getDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
-            return pipeline.toDataSet(dataSet);
+            dataSet = pipeline.toDataSet(dataSet);
+            conn.commit();
+            return dataSet;
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }
@@ -434,6 +444,9 @@ public class DataService {
             results.setAuditMessages(auditMessages);
             // }
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
+            /*if (insightRequestMetadata.isReportEditor()) {
+                new AdminService().logAction(new ActionReportLog(SecurityUtil.getUserID(), ActionLog.EDIT, analysisDefinition.getAnalysisID()), conn);
+            }*/
             return results;
         } catch (ReportException dae) {
             ListDataResults embeddedDataResults = new ListDataResults();
