@@ -218,6 +218,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     }
 
     public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception {
+        boolean changed = false;
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO data_source_refresh_audit (account_id, data_source_id, " +
@@ -231,7 +232,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
             List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn);
             for (IServerDataSourceDefinition source : sources) {
-                source.refreshData(accountID, now, conn, this, callDataID, lastRefreshTime);
+                changed = source.refreshData(accountID, now, conn, this, callDataID, lastRefreshTime) || changed;
             }
 
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE data_source_refresh_audit set end_time = ? where data_source_refresh_audit_id = ?");
@@ -244,7 +245,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         }
         
         //notifyOfDataUpdate();
-        return false;
+        return changed;
     }
 
     protected void refreshDone() {

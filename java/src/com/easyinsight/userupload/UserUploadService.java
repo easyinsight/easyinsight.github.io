@@ -575,10 +575,14 @@ public class UserUploadService {
                             try {
                                 conn.setAutoCommit(false);
                                 Date now = new Date();
-                                dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, ((FeedDefinition) dataSource).getLastRefreshStart());
+                                boolean changed = dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, ((FeedDefinition) dataSource).getLastRefreshStart());
                                 feedDefinition.setVisible(true);
                                 feedDefinition.setLastRefreshStart(now);
-                                new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn, true, true);
+                                if (changed) {
+                                    new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn, true, true);
+                                } else {
+                                    feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
+                                }
                                 ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE);
                                 conn.commit();
                             } catch (ReportException re) {
@@ -788,10 +792,14 @@ public class UserUploadService {
                         try {
                             conn.setAutoCommit(false);
                             Date now = new Date();
-                            serverDataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, dataSource.getLastRefreshStart());
+                            boolean changed = serverDataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, dataSource.getLastRefreshStart());
                             dataSource.setVisible(true);
                             dataSource.setLastRefreshStart(now);
-                            feedStorage.updateDataFeedConfiguration(dataSource, conn);
+                            if (changed) {
+                                new DataSourceInternalService().updateFeedDefinition(dataSource, conn, true, true);
+                            } else {
+                                feedStorage.updateDataFeedConfiguration(dataSource, conn);
+                            }
                             conn.commit();
                             ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE);
                         } catch (ReportException re) {

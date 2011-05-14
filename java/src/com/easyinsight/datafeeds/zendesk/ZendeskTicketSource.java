@@ -125,7 +125,10 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 Node recordNode = recordNodes.get(i);
                 String title = queryField(recordNode, "title/text()");
                 String id = queryField(recordNode, "id/text()");
-                Key customKey = new NamedKey("zd" + id);
+                Key customKey = keys.get("zd" + id);
+                if (customKey == null) {
+                    customKey = new NamedKey("zd" + id);
+                }
                 String type = queryField(recordNode, "type/text()");
                 if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type)) {
                     items.add(new AnalysisDimension(customKey, title));

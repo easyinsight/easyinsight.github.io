@@ -74,7 +74,11 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
             HttpClient client = getHttpClient(token.getTokenValue(), "");
             HighriseCustomFieldsCache cache = compositeSource.getOrCreateCustomFieldCache(client, null);
             for (Map.Entry<String, String> entry : cache.getCustomFields().entrySet()) {
-                analysisItems.add(new AnalysisDimension(new NamedKey(entry.getKey()), "Company " + entry.getValue()));
+                Key key = keys.get(entry.getKey());
+                if (key == null) {
+                    key = new NamedKey(entry.getKey());
+                }
+                analysisItems.add(new AnalysisDimension(key, "Company " + entry.getValue()));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

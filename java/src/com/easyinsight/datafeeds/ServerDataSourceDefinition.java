@@ -158,6 +158,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     }
 
     public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception {
+        boolean changed = false;
         DataStorage dataStorage = null;
         try {
             Map<String, Key> keys = newDataSourceFields(parentDefinition);
@@ -176,6 +177,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
                 }
             }
             if (newFields.size() > 0) {
+                changed = true;
                 System.out.println("Discovered new fields = " + newFields);
                 for (AnalysisItem newField : newFields) {
                     getFields().add(newField);
@@ -192,7 +194,6 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             addData(dataStorage, dataSet);
             dataStorage.commit();
             System.out.println("Completed refresh of " + getDataFeedID() + " for account " + accountID + " at " + new Date());
-            return true;
         } catch (Exception e) {
             if (dataStorage != null) {
                 dataStorage.rollback();
@@ -203,6 +204,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
                 dataStorage.closeConnection();
             }
         }
+        return changed;
     }
 
     protected boolean clearsData() {
