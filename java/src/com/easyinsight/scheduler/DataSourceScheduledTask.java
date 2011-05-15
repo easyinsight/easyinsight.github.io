@@ -70,15 +70,21 @@ public class DataSourceScheduledTask extends ScheduledTask {
                     int firstDayOfWeek = rs.getInt(7);
                     SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser, firstDayOfWeek);
                     try {
+
                         if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
                             try {
-                                dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null, null, ((FeedDefinition) dataSource).getLastRefreshStart());
+                                boolean result = dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null, null, ((FeedDefinition) dataSource).getLastRefreshStart());
+                                ((FeedDefinition)dataSource).setLastRefreshStart(now);
+                                if (result) {
+                                    new DataSourceInternalService().updateFeedDefinition((FeedDefinition) dataSource, conn, true, true);
+                                } else {
+                                    feedStorage.updateDataFeedConfiguration((FeedDefinition) dataSource, conn);
+                                }
                             } finally {
                                 DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
                             }
                         }
-                        ((FeedDefinition)dataSource).setLastRefreshStart(now);
-                        feedStorage.updateDataFeedConfiguration((FeedDefinition) dataSource, conn);
+
                     } finally {
                         SecurityUtil.clearThreadLocal();
                     }
