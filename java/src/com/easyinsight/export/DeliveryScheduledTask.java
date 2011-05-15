@@ -96,19 +96,20 @@ public class DeliveryScheduledTask extends ScheduledTask {
             queryStmt.setInt(2, Account.TRIAL);
             queryStmt.setLong(3, ownerID);
             ResultSet queryRS = queryStmt.executeQuery();
-            queryRS.next();
-            String userName = queryRS.getString(1);
-            int accountType = queryRS.getInt(2);
-            boolean accountAdmin = queryRS.getBoolean(3);
-            int firstDayOfWeek = queryRS.getInt(4);
-            String firstName = queryRS.getString(5);
-            String lastName = queryRS.getString(6);
-            SecurityUtil.populateThreadLocal(userName, ownerID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
-            try {
-                String scorecardHTML = ExportService.exportScorecard(scorecardID, insightRequestMetadata, conn);
-                sendNoAttachEmails(conn, scorecardHTML, activityID, subject, body, htmlEmail, ScheduledActivity.SCORECARD_DELIVERY);
-            } finally {
-                SecurityUtil.clearThreadLocal();
+            if (queryRS.next()) {
+                String userName = queryRS.getString(1);
+                int accountType = queryRS.getInt(2);
+                boolean accountAdmin = queryRS.getBoolean(3);
+                int firstDayOfWeek = queryRS.getInt(4);
+                String firstName = queryRS.getString(5);
+                String lastName = queryRS.getString(6);
+                SecurityUtil.populateThreadLocal(userName, ownerID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
+                try {
+                    String scorecardHTML = ExportService.exportScorecard(scorecardID, insightRequestMetadata, conn);
+                    sendNoAttachEmails(conn, scorecardHTML, activityID, subject, body, htmlEmail, ScheduledActivity.SCORECARD_DELIVERY);
+                } finally {
+                    SecurityUtil.clearThreadLocal();
+                }
             }
         }
     }
