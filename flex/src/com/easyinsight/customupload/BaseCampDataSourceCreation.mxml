@@ -61,7 +61,7 @@
         <mx:Label text="Basecamp API Authentication Token:" width="250" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
         <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" width="350"/>
     </mx:HBox>
-    <mx:Label text="You can find the token on your Highrise page under My Info - API Token." fontSize="12"/>
+    <mx:Label text="You can find the token on your Basecamp page under My Info - API Token." fontSize="12"/>
     <mx:Form>
         <mx:FormItem label="Include On Hold/Inactive Projects:" direction="horizontal">
             <mx:CheckBox id="inactiveCheckbox" selected="{inactiveIncluded}"/>
