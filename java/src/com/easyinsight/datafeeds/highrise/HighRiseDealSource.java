@@ -88,13 +88,12 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     }
 
 
-
     private String retrieveCategoryInfo(HttpClient client, Builder builder, Map<String, String> categoryCache, String categoryID, String url, FeedDefinition parentDefinition) throws HighRiseLoginException, ParsingException {
         try {
             String contactName = null;
-            if(categoryID != null) {
+            if (categoryID != null) {
                 contactName = categoryCache.get(categoryID);
-                if(contactName == null) {
+                if (contactName == null) {
                     Document contactInfo = runRestRequest("/deal_categories/" + categoryID + ".xml", client, builder, url, false, false, parentDefinition);
                     Nodes dealNodes = contactInfo.query("/deal-category");
                     if (dealNodes.size() > 0) {
@@ -133,18 +132,27 @@ public class HighRiseDealSource extends HighRiseBaseSource {
             HighriseCache highriseCache = highRiseCompositeSource.getOrCreateCache(client);
             //do {
             Document userDoc = runRestRequest("/deal_categories.xml", client, builder, url, true, false, parentDefinition);
-            Nodes dealCategoryDoc = userDoc.query("/deal-catgories/deal-category");
+            Nodes dealCategoryDoc = userDoc.query("/deal-categories/deal-category");
             for (int i = 0; i < dealCategoryDoc.size(); i++) {
                 Node categoryNode = dealCategoryDoc.get(i);
                 String categoryName = queryField(categoryNode, "name/text()");
                 String categoryID = queryField(categoryNode, "id/text()");
                 categoryCache.put(categoryID, categoryName);
             }
-            Document deals = runRestRequest("/deals.xml", client, builder, url, true, false, parentDefinition);
+            int offset = 0;
+            int dealCount;
             loadingProgress(0, 1, "Synchronizing with deals...", callDataID);
-            Nodes dealNodes = deals.query("/deals/deal");
-            for(int i = 0;i < dealNodes.size();i++) {
-                try {
+            do {
+                dealCount = 0;
+                Document deals;
+                if (offset == 0) {
+                    deals = runRestRequest("/deals.xml?n=0", client, builder, url, true, false, parentDefinition);
+                } else {
+                    deals = runRestRequest("/deals.xml?n=" + offset, client, builder, url, true, false, parentDefinition);
+                }
+                Nodes dealNodes = deals.query("/deals/deal");
+                for (int i = 0; i < dealNodes.size(); i++) {
+
                     IRow row = ds.createRow();
                     Node currDeal = dealNodes.get(i);
                     String dealName = queryField(currDeal, "name/text()");
@@ -201,18 +209,19 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                     if (statusChangedOn != null) {
                         row.addValue(STATUS_CHANGED_ON, new DateValue(deadlineFormat.parse(statusChangedOn)));
                     }
-                } catch (Exception e) {
-                    LogClass.error(e);
+                    dealCount++;
                 }
-            }
-            //} while(info.currentPage++ < info.MaxPages);
+                offset += 500;
+                dataStorage.insertData(ds);
+                ds = new DataSet();
+            } while (dealCount == 500);
 
         } catch (ReportException re) {
             throw re;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        return ds;
+        return null;
     }
 
     @Override
