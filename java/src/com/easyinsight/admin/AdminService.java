@@ -1,6 +1,12 @@
 package com.easyinsight.admin;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.audit.ActionDashboardLog;
+import com.easyinsight.audit.ActionDataSourceLog;
+import com.easyinsight.audit.ActionLog;
+import com.easyinsight.audit.ActionReportLog;
+import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.email.SendGridEmail;
@@ -8,7 +14,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.outboundnotifications.BroadcastInfo;
 import com.easyinsight.eventing.MessageUtils;
 
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.lang.management.ThreadInfo;
@@ -16,7 +21,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.*;
 
+import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.User;
@@ -30,6 +37,97 @@ import org.hibernate.Session;
 public class AdminService {
 
     private static final String LOC_XML = "<url>\r\n\t<loc>{0}</loc>\r\n</url>\r\n";
+
+    public void logAction(ActionLog actionLog) {
+        Session session = Database.instance().createSession();
+        try {
+            actionLog.setUserID(SecurityUtil.getUserID());
+            actionLog.setActionDate(new Date());
+            session.getTransaction().begin();
+            session.save(actionLog);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+        } finally {
+            session.close();
+        }
+    }
+
+    public Collection<ActionLog> getRecentActions() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            Collection<ActionLog> actions = new LinkedHashSet<ActionLog>();
+            PreparedStatement queryDSStmt = conn.prepareStatement("SELECT action_data_source_log.data_source_id, action_log.action_type, data_feed.feed_name, action_log.action_date from " +
+                    "data_feed, action_data_source_log, action_log where action_log.action_log_id = action_data_source_log.action_log_id and " +
+                    "action_data_source_log.data_source_id = data_feed.data_feed_id and action_log.user_id = ? order by action_log.action_date desc");
+            queryDSStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet dsRS = queryDSStmt.executeQuery();
+            while (dsRS.next()) {
+                long dataSourceID = dsRS.getLong(1);
+                int actionType = dsRS.getInt(2);
+                String dataSourceName = dsRS.getString(3);
+                Date actionDate = new Date(dsRS.getTimestamp(4).getTime());
+                actions.add(new ActionDataSourceLog(dataSourceID, dataSourceName, actionType, actionDate));
+            }
+            PreparedStatement queryReportStmt = conn.prepareStatement("SELECT action_report_log.report_id, action_log.action_type, analysis.data_feed_id," +
+                    "analysis.report_type, analysis.title, analysis.url_key, action_log.action_date from analysis, action_log, action_report_log where action_log.action_log_id = action_report_log.action_log_id and " +
+                    "action_report_log.report_id = analysis.analysis_id and action_log.user_id = ? order by action_log.action_date desc");
+            queryReportStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet reportRS = queryReportStmt.executeQuery();
+            while (reportRS.next()) {
+                long reportID = reportRS.getLong(1);
+                int actionType = reportRS.getInt(2);
+                long dataSourceID = reportRS.getLong(3);
+                int reportType = reportRS.getInt(4);
+                String reportName = reportRS.getString(5);
+                String urlKey = reportRS.getString(6);
+                Date actionDate = new Date(reportRS.getTimestamp(7).getTime());
+                actions.add(new ActionReportLog(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey, Roles.OWNER), actionType, actionDate));
+            }
+            PreparedStatement queryDashboardStmt = conn.prepareStatement("SELECT action_dashboard_log.dashboard_id, action_log.action_type, dashboard.data_source_id," +
+                    "dashboard.dashboard_name, dashboard.url_key, action_log.action_date from dashboard, action_log, action_dashboard_log where action_log.action_log_id = action_dashboard_log.action_log_id and " +
+                    "action_dashboard_log.dashboard_id = dashboard.dashboard_id and action_log.user_id = ? order by action_log.action_date desc");
+            queryDashboardStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet dashboardRS = queryDashboardStmt.executeQuery();
+            while (dashboardRS.next()) {
+                long dashboardID = dashboardRS.getLong(1);
+                int actionType = dashboardRS.getInt(2);
+                long dataSourceID = dashboardRS.getLong(3);
+                String dashboardName = dashboardRS.getString(4);
+                String urlKey = dashboardRS.getString(5);
+                Date actionDate = new Date(dashboardRS.getTimestamp(6).getTime());
+                actions.add(new ActionDashboardLog(new DashboardDescriptor(dashboardName, dashboardID, urlKey, dataSourceID, Roles.OWNER, null), actionType, actionDate));
+            }
+            List<ActionLog> actionList = new ArrayList<ActionLog>(actions);
+            Collections.sort(actionList, new Comparator<ActionLog>() {
+
+                public int compare(ActionLog actionLog, ActionLog actionLog1) {
+                    return actionLog1.getActionDate().compareTo(actionLog.getActionDate());
+                }
+            });
+            if (actionList.size() > 5) {
+                actionList = actionList.subList(0, 5);
+            }
+            return actionList;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void logAction(ActionLog actionLog, EIConnection conn) {
+        Session session = Database.instance().createSession(conn);
+        try {
+            session.save(actionLog);
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            session.close();
+        }
+    }
 
     public String describeReport(String urlKey) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
