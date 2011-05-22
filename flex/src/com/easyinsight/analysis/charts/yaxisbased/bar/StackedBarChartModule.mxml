@@ -2,6 +2,11 @@
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
            implements="com.easyinsight.analysis.IReportRenderer"
            width="100%" height="100%">
+    <mx:states>
+        <mx:State name="hideLegend">
+            <mx:RemoveChild target="{legend}"/>
+        </mx:State>
+    </mx:states>
     <mx:Style>
         .axisTitles {
             fontSize: 14;
@@ -170,7 +175,7 @@
                 // create the data series
 
                 canvas.addChild(barChart);
-                var legend:Legend = new Legend();
+                legend = new Legend();
                 legend.percentHeight = 100;
                 legend.dataProvider = barChart;
                 canvas.addChild(legend);
@@ -178,6 +183,9 @@
                 barChart.visible = true;
             }
         }
+
+        [Bindable]
+        private var legend:Legend;
 
         private function myDataFunction(series:Series, item:Object, fieldName:String):Object {
             if (fieldName == 'xValue')
@@ -216,6 +224,7 @@
             barChartDef = analysisDefinition as StackedBarChartDefinition;
 
             if (dataSet.length > 0) {
+
                 canvas.setStyle("backgroundAlpha", barChartDef.backgroundAlpha);
                 stackIndex = 0;
                 if (barChartDef.columnSort != ChartDefinition.SORT_UNSORTED) {
@@ -235,6 +244,12 @@
 
                 yField = barChartDef.yaxis.qualifiedName();
                 createChart();
+
+                if (barChartDef.showLegend) {
+                    currentState = "";
+                } else {
+                    currentState = "hideLegend";
+                }
 
                 var mySeries:Array = new Array();
 

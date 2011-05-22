@@ -87,6 +87,8 @@ public class ApplicationSkin {
 
     public void populateProperties(List<ReportProperty> properties) {
         coreAppBackgroundImage = findImage(properties, "coreAppBackgroundImage", null);
+        headerBarLogo = findImage(properties, "headerBarLogo", null);
+        headerBarLogoEnabled = propertyEnabled(properties, "headerBarLogo");
         coreAppBackgroundImageEnabled = propertyEnabled(properties, "coreAppBackgroundImage");
         coreAppBackgroundColor = (int) findNumberProperty(properties, "coreAppBackgroundColor", 0);
         coreAppBackgroundColorEnabled = propertyEnabled(properties, "coreAppBackgroundColor");
@@ -105,15 +107,15 @@ public class ApplicationSkin {
         reportBackgroundSize = findStringProperty(properties, "reportBackgroundSize", "100%");
         reportBackgroundSizeEnabled = propertyEnabled(properties, "reportBackgroundSize");
         myDataName = findBooleanProperty(properties, "myDataName", true);
-        myDataSize = findBooleanProperty(properties, "myDataSize", true);
+        myDataSize = findBooleanProperty(properties, "myDataSize", false);
         myDataOwner = findBooleanProperty(properties, "myDataOwner", false);
         myDataCreationDate = findBooleanProperty(properties, "myDataCreationDate", false);
-        myDataLastTime = findBooleanProperty(properties, "myDataLastTime", true);
-        myDataCombine = findBooleanProperty(properties, "myDataCombine", true);
+        myDataLastTime = findBooleanProperty(properties, "myDataLastTime", false);
+        myDataCombine = findBooleanProperty(properties, "myDataCombine", false);
         myDataNewScorecard = findBooleanProperty(properties, "myDataScorecard", true);
-        myDataNewKPITree = findBooleanProperty(properties, "myDataKPITree", true);
+        myDataNewKPITree = findBooleanProperty(properties, "myDataKPITree", false);
         myDataNewDashboard = findBooleanProperty(properties, "myDataDashboard", true);
-        myDataLookupTable = findBooleanProperty(properties, "myDataLookupTable", true);
+        myDataLookupTable = findBooleanProperty(properties, "myDataLookupTable", false);
     }
 
     public ImageDescriptor getCoreAppBackgroundImage() {

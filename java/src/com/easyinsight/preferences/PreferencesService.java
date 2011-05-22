@@ -55,14 +55,13 @@ public class PreferencesService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE, USER WHERE (USER_IMAGE_ID = ? AND USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID) OR " +
-                    "USER_IMAGE.PUBLIC_VISIBILITY = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES, USER_IMAGE.image_name FROM USER_IMAGE, USER WHERE (USER_IMAGE_ID = ? AND USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID)");
             queryStmt.setLong(1, imageID);
             queryStmt.setLong(2, accountID);
-            queryStmt.setBoolean(3, true);
             ResultSet rs = queryStmt.executeQuery();
             rs.next();
             bytes = rs.getBytes(1);
+            System.out.println(rs.getString(2));
             conn.commit();
             return bytes;
         } catch (Exception e) {
@@ -105,13 +104,14 @@ public class PreferencesService {
     }
 
     public ApplicationSkin getGlobalSkin() {
+        ApplicationSkin applicationSkin = null;
         Session session = Database.instance().createSession();
         try {
             session.getTransaction().begin();
             List results = session.createQuery("from ApplicationSkinSettings where globalSkin = ?").setBoolean(0, true).list();
             if (results.size() > 0) {
                 ApplicationSkinSettings settings = (ApplicationSkinSettings) results.get(0);
-                return settings.toSkin();
+                applicationSkin = settings.toSkin();
             }
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -121,17 +121,18 @@ public class PreferencesService {
         } finally {
             session.close();
         }
-        return null;
+        return applicationSkin;
     }
 
     public ApplicationSkin getUserSkin() {
+        ApplicationSkin applicationSkin = null;
         Session session = Database.instance().createSession();
         try {
             session.getTransaction().begin();
             List results = session.createQuery("from ApplicationSkinSettings where userID = ?").setLong(0, SecurityUtil.getUserID()).list();
             if (results.size() > 0) {
                 ApplicationSkinSettings settings = (ApplicationSkinSettings) results.get(0);
-                return settings.toSkin();
+                applicationSkin = settings.toSkin();
             }
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -141,7 +142,7 @@ public class PreferencesService {
         } finally {
             session.close();
         }
-        return null;
+        return applicationSkin;
     }
 
     public ApplicationSkin getAccountSkin() {

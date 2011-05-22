@@ -11,6 +11,8 @@
 
         import com.easyinsight.skin.ApplicationSkin;
 
+        import mx.controls.Alert;
+
         import mx.events.ItemClickEvent;
         import mx.utils.URLUtil;
 
@@ -102,6 +104,13 @@
             stackIndex = 1;
         }
 
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            var availableColumns:int = (vbox.width - 40) / (240);
+            //Alert.show("unscaled width = " + (vbox.width - 40) + " available columns = " + availableColumns);
+            solutionGrid.width = availableColumns * 240 + 20;
+        }
+
         private function filterFunction(item:Object):Boolean {
             var okay:Boolean = false;
             var solution:Solution = item as Solution;
@@ -135,13 +144,12 @@
 
         [Bindable]
         private var stackIndex:int;
-                        
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="solutionService" id="solutionService">
         <mx:method name="getSolutions" result="gotAllSolutions()"/>
     </mx:RemoteObject>
-    <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10" id="vbox" horizontalAlign="center">
     <mx:HBox width="100%" horizontalAlign="center">
         <mx:VBox width="100%" height="100%" horizontalAlign="center">
             <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
@@ -150,14 +158,7 @@
             <mx:Label text="Click on any of the options below to quickly connect and get started." fontSize="18"/>
         </mx:VBox>
     </mx:HBox>
-    <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all">
-        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-            <mx:ProgressBar indeterminate="{stackIndex == 0}" label="Loading available connections..."/>
-        </mx:Box>
-        <mx:Canvas width="100%" height="100%">
-            <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView" dataProvider="{availableSolutions}" id="solutionGrid"
-                columnWidth="240" rowHeight="160"/>
-        </mx:Canvas>
-    </mx:ViewStack>
+        <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView" dataProvider="{availableSolutions}" id="solutionGrid"
+            columnWidth="240" rowHeight="160"/>
     </mx:VBox>
 </skin:BackgroundImage>

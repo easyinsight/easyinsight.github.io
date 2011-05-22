@@ -47,5 +47,9 @@ public class UserAudit {
     public function audit(message:String):void {
         adminService.userAudit.send(message);
     }
+
+    public function log(actionLog:ActionLog):void {
+        adminService.logAction.send(actionLog);
+    }
 }
 }

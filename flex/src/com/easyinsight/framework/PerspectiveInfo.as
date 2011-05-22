@@ -17,7 +17,6 @@ public class PerspectiveInfo {
     public static const ACCOUNT_CREATION:int = 14;
     public static const HOME_PAGE:int = 15;
     /*public static const SCORECARDS:int = 16;*/
-    public static const MY_DATA:int = 17;
     public static const CONNECTIONS:int = 18;
     public static const API:int = 19;
     public static const ACCOUNT:int = 20;

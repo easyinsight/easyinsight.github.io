@@ -70,6 +70,7 @@
             items.addItem(new ComboBoxReportFormItem("Core Application Background Styling", "coreAppBackgroundSize", skin.coreAppBackgroundSize, skin, ["100%", "Auto"], "coreAppBackgroundSizeEnabled"));
             items.addItem(new ColorReportFormItem("Header Bar Background Color", "headerBarBackgroundColor", skin.headerBarBackgroundColor, skin, "headerBarBackgroundColorEnabled"));
             items.addItem(new ColorReportFormItem("Header Bar Divider Color", "headerBarDividerColor", skin.headerBarDividerColor, skin, "headerBarDividerColorEnabled"));
+            items.addItem(new ImageReportFormItem("Logo File", "headerBarLogo", skin.headerBarLogo, skin, "headerBarLogoEnabled"));
             items.addItem(new ColorReportFormItem("Center Canvas Background Color", "centerCanvasBackgroundColor", skin.centerCanvasBackgroundColor, skin, "centerCanvasBackgroundColorEnabled"));
             items.addItem(new NumericReportFormItem("Center Canvas Background Alpha", "centerCanvasBackgroundAlpha", skin.centerCanvasBackgroundAlpha, skin, 0, 1, "centerCanvasBackgroundAlphaEnabled"));
 

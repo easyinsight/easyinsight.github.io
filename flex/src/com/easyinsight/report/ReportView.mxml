@@ -27,6 +27,7 @@
 
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.ActionReportLog;
         import com.easyinsight.util.EIErrorEvent;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.UserAudit;
@@ -439,6 +440,7 @@
 
                 // if filters were passed in
                 overlayIndex = 1;
+                UserAudit.instance().log(new ActionReportLog(ActionReportLog.VIEW, _reportID));
                 viewFactory.retrieveData(false);
             } catch(e:Error) {
                 Alert.show(e.message);
@@ -615,7 +617,7 @@
             </mx:VBox>
         </mx:ViewStack>
         <report:ReportCanvas id="reportCanvas" stackTrace="{stackTrace}" overlayIndex="{overlayIndex}"
-                             loading="{loading}"/>
+                             loading="false"/>
     </mx:VBox>
     </mx:VBox>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">

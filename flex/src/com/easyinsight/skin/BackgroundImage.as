@@ -46,7 +46,7 @@ public class BackgroundImage extends Canvas {
         }
         if (_applyCenterScreenLogic) {
             centerScreen = getChildAt(0) as Container;
-            if (centerScreen.width == 0) centerScreen.width = 1000;
+            /*if (centerScreen.width == 0) centerScreen.width = 100;*/
             centerScreen.percentHeight = 100;
         }
         addChildAt(backgroundImage, 0);
@@ -100,8 +100,16 @@ public class BackgroundImage extends Canvas {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         if (_applyCenterScreenLogic) {
             if (getChildren().length == 2) {
+                var margin:int = 200;
+                var centerWidth:int = unscaledWidth - margin;
+                if (centerWidth < 1000) {
+                    // if we're now down to 900, reduce margin by 100
+                    margin -= (1000 - centerWidth);
+                    centerWidth = 1000;
+                }
                 var content:DisplayObject = getChildren()[1];
-                content.x = unscaledWidth / 2 - (content.width / 2);
+                content.width = centerWidth;
+                content.x = unscaledWidth / 2 - (centerWidth / 2);
             }
         }
     }

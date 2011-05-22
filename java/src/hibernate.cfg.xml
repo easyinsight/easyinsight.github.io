@@ -136,6 +136,10 @@
         <mapping class="com.easyinsight.notifications.GroupCommentNotification" />
         <mapping class="com.easyinsight.notifications.UserToDataSourceNotification" />
         <mapping class="com.easyinsight.notifications.UserToReportNotification" />
+        <mapping class="com.easyinsight.audit.ActionLog" />
+        <mapping class="com.easyinsight.audit.ActionReportLog" />
+        <mapping class="com.easyinsight.audit.ActionDashboardLog" />
+        <mapping class="com.easyinsight.audit.ActionDataSourceLog" />
     </session-factory>
 
 </hibernate-configuration>

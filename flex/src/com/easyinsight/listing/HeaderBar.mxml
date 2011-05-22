@@ -27,6 +27,9 @@
             if (User.getInstance().uiConfiguration != null) {
                 createState(User.getInstance().uiConfiguration);
             }
+            if (ApplicationSkin.instance().headerBarLogo != null) {
+                logoImage.source = ApplicationSkin.instance().headerBarLogo;
+            }
         }
 
         private function loginEvent(event:LoginEvent):void {
@@ -148,7 +151,6 @@
             var ops:Array = [];
             //evaluate(apiListingOption, UIConfiguration.SHOW_APIS, config, ops);
             evaluate(accountsOption, UIConfiguration.SHOW_ACCOUNT, config, ops);
-            evaluate(myDataOption, UIConfiguration.SHOW_MY_DATA, config, ops);
             evaluate(connectionsOption, UIConfiguration.SHOW_CONNECTIONS, config, ops);
             evaluate(exchangeOption, UIConfiguration.SHOW_EXCHANGE, config, ops);
             if (ops.length > 0) {
@@ -176,10 +178,6 @@
     <listing:ListingOption perspectiveClass="{PerspectiveInfo.HOME_PAGE}" displayName="Home" listingChange="onListingChange(event)" width="85">
         <mx:Image source="{homeIcon}" id="homeImage"/>
         <mx:Label text="Home" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-    </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{PerspectiveInfo.MY_DATA}" displayName="My Data" listingChange="onListingChange(event)" id="myDataOption" width="85">
-        <mx:Image source="{myDataIcon}" id="myDataImage"/>
-        <mx:Label text="My Data" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspectiveClass="{PerspectiveInfo.CONNECTIONS}" displayName="Connections" listingChange="onListingChange(event)"
             id="connectionsOption" width="85">

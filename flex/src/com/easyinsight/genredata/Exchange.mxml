@@ -185,8 +185,8 @@
                                           solution="{solution}" updateURL="updateURL()"/>
 
     <mx:VBox>
-        <mx:HBox width="980" verticalAlign="middle" paddingTop="20" paddingBottom="20" paddingLeft="20"
-                 paddingRight="20">
+        <mx:HBox verticalAlign="middle" paddingTop="20" paddingBottom="20" paddingLeft="20"
+                 paddingRight="20" width="100%">
             <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name"
                          selectedItem="{solution}"
                          rowCount="{solutionRows}"/>
@@ -199,7 +199,7 @@
             <mx:Button icon="@Embed(source='../../../../assets/refresh.png')" toolTip="Refresh Listing" click="refreshExchange()" labelPlacement="right"
                     label="Refresh Listing"/>
         </mx:HBox>
-        <mx:HBox width="980" height="100%" id="listsBox" paddingTop="5" paddingBottom="5" paddingLeft="20"
+        <mx:HBox width="100%" height="100%" id="listsBox" paddingTop="5" paddingBottom="5" paddingLeft="20"
                  paddingRight="20">
             
         </mx:HBox>

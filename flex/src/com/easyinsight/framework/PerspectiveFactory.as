@@ -11,7 +11,6 @@ import com.easyinsight.feedassembly.NewCompositeFeedWorkspace;
 import com.easyinsight.feedassembly.NewFederatedWindow;
 import com.easyinsight.genredata.Exchange;
 import com.easyinsight.listing.MyData;
-import com.easyinsight.listing.SimpleIntro;
 import com.easyinsight.report.ReportView;
 import com.easyinsight.schedule.ScheduleManagement;
 import com.easyinsight.scorecard.ScorecardEditor;
@@ -57,14 +56,11 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 perspective = new DirectUIComponent(new LookupTableEditor());
                 break;
             case PerspectiveInfo.HOME_PAGE:
-                perspective = new DirectUIComponent(new SimpleIntro());
+                perspective = new DirectUIComponent(new MyData());
                 break;
             /*case PerspectiveInfo.SCORECARDS:
                 perspective = new DirectUIComponent(new ScorecardHome());
                 break;*/
-            case PerspectiveInfo.MY_DATA:
-                perspective = new DirectUIComponent(new MyData());
-                break;
             /*case PerspectiveInfo.API:
                 perspective = new DirectUIComponent(new APIPage());
                 break;*/

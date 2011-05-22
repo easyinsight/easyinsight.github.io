@@ -37,11 +37,12 @@
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
-        import com.easyinsight.listing.LaunchQuickSearchEvent;
         import com.easyinsight.listing.ReportEditorAnalyzeSource;
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.ActionDataSourceLog;
+        import com.easyinsight.util.ActionReportLog;
         import com.easyinsight.util.ErrorReportView;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.UserAudit;
@@ -315,12 +316,14 @@
                     var fragmentString:String = URLUtil.objectToString(fragmentObject);
                     BrowserManager.getInstance().setTitle("Easy Insight - " + dataSourceName);
                     BrowserManager.getInstance().setFragment(fragmentString);
+                    UserAudit.instance().log(new ActionDataSourceLog(ActionDataSourceLog.NEW_REPORT, dataSourceID));
                 } else {
                     var feedFragmentObject:Object = new Object();
                     feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
                     var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                     BrowserManager.getInstance().setTitle("Easy Insight - " + analysisDefinition.name);
                     BrowserManager.getInstance().setFragment(feedFragmentString);
+                    UserAudit.instance().log(new ActionReportLog(ActionReportLog.EDIT, analysisDefinition.analysisID));
                 }
 
                 if (analysisDefinition == null) {
@@ -376,7 +379,6 @@
                         }
                         sortFields();
                     }
-                    UserAudit.instance().audit(UserAudit.OPEN_REPORT_EDITOR);
                 }
                 dataView.availableFields = wrappers;
                 if (openState != null) {
@@ -529,14 +531,10 @@
                     } else {
                         tabNavigator.removeChild(exportTab);
                     }
-                    guestMode = User.getInstance().guestUser;
                 }
             } catch(e:Error) {
             }
         }
-
-        [Bindable]
-        private var guestMode:Boolean;
 
         private function addFieldToReport(event:ReportEditorFieldEvent):void {
             dataView.addItem(event.item.analysisItem);
@@ -738,19 +736,14 @@
         private function onDragComplete(event:DragEvent):void {
             event.preventDefault();
             dataView.revertDropAreas();
-            transformContainer.closeDropMessage();
         }
 
         private function onDragStart():void {
             dataView.highlightDropAreas();
-            if (tabNavigator.selectedIndex == 2) {
-                transformContainer.showDropMessage();
-            }
         }
 
         private function onDragEnd():void {
             dataView.revertDropAreas();
-            transformContainer.closeDropMessage();
         }
 
         private function iconFunction(item:Object):Class {
@@ -840,10 +833,10 @@
                        toolTip="Close" labelPlacement="right" label="Close Editor" x="10" y="10"/>
             <mx:VRule strokeColor="#DDDDDD" height="16" x="126" y="13"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
-                       toolTip="Save" enabled="{!_previewMode &amp;&amp; !guestMode &amp;&amp; !loadingReport}" label="Save"
+                       toolTip="Save" enabled="{!_previewMode &amp;&amp; !loadingReport}" label="Save"
                     labelPlacement="right" x="136" y="10"/>
             <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
-                       toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !guestMode &amp;&amp; !loadingReport}" label="Save As"
+                       toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !loadingReport}" label="Save As"
                     labelPlacement="right" x="212" y="10"/>
             <mx:VRule strokeColor="#DDDDDD" height="16" x="305" y="13"/>
             <mx:Button id="refreshButton" toolTip="Refresh Data"

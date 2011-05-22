@@ -199,8 +199,28 @@ public class UserUploadService {
                 }
             });
 
+            int dataSourceCount = 0;
+            int reportCount = 0;
+            int dashboardCount = 0;
+            for (EIDescriptor descriptor : results) {
+                if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
+                    dataSourceCount++;
+                    DataSourceDescriptor dataSourceDescriptor = (DataSourceDescriptor) descriptor;
+                    for (EIDescriptor child : dataSourceDescriptor.getChildren()) {
+                        if (child.getType() == EIDescriptor.REPORT) {
+                            reportCount++;
+                        } else if (child.getType() == EIDescriptor.DASHBOARD) {
+                            dashboardCount++;
+                        }
+                    }
+                }
+            }
+            MyDataTree myDataTree = new MyDataTree(results, onlyMyData);
+            myDataTree.setDashboardCount(dashboardCount);
+            myDataTree.setDataSourceCount(dataSourceCount);
+            myDataTree.setReportCount(reportCount);
             conn.commit();
-            return new MyDataTree(results, onlyMyData);
+            return myDataTree;
         } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();

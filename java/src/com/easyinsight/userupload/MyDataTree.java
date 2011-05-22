@@ -12,6 +12,9 @@ import java.util.List;
 public class MyDataTree {
     private List<EIDescriptor> objects;
     private boolean includeGroup;
+    private int reportCount;
+    private int dashboardCount;
+    private int dataSourceCount;
 
     public MyDataTree() {
     }
@@ -19,6 +22,30 @@ public class MyDataTree {
     public MyDataTree(List<EIDescriptor> objects, boolean includeGroup) {
         this.objects = objects;
         this.includeGroup = includeGroup;
+    }
+
+    public int getReportCount() {
+        return reportCount;
+    }
+
+    public void setReportCount(int reportCount) {
+        this.reportCount = reportCount;
+    }
+
+    public int getDashboardCount() {
+        return dashboardCount;
+    }
+
+    public void setDashboardCount(int dashboardCount) {
+        this.dashboardCount = dashboardCount;
+    }
+
+    public int getDataSourceCount() {
+        return dataSourceCount;
+    }
+
+    public void setDataSourceCount(int dataSourceCount) {
+        this.dataSourceCount = dataSourceCount;
     }
 
     public List<EIDescriptor> getObjects() {

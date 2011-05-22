@@ -2,6 +2,8 @@ package com.easyinsight.skin {
 import flash.events.Event;
 import flash.events.EventDispatcher;
 
+import mx.controls.Alert;
+
 public class ApplicationSkin extends EventDispatcher {
 
     private var _coreAppBackgroundImage:Object;
@@ -17,16 +19,16 @@ public class ApplicationSkin extends EventDispatcher {
     private var _reportBackground:Object = defaultReportBackground;
     private var _reportBackgroundSize:String = "100%";
 
-    private var _myDataName:Boolean;
-    private var _myDataSize:Boolean;
-    private var _myDataOwner:Boolean;
-    private var _myDataCreationDate:Boolean;
-    private var _myDataLastTime:Boolean;
-    private var _myDataCombine:Boolean;
-    private var _myDataNewScorecard:Boolean;
-    private var _myDataNewKPITree:Boolean;
-    private var _myDataNewDashboard:Boolean;
-    private var _myDataLookupTable:Boolean;
+    private var _myDataName:Boolean = true;
+    private var _myDataSize:Boolean = false;
+    private var _myDataOwner:Boolean = false;
+    private var _myDataCreationDate:Boolean = false;
+    private var _myDataLastTime:Boolean = false;
+    private var _myDataCombine:Boolean = false;
+    private var _myDataNewScorecard:Boolean = true;
+    private var _myDataNewKPITree:Boolean = false;
+    private var _myDataNewDashboard:Boolean = true;
+    private var _myDataLookupTable:Boolean = false;
 
     public function ApplicationSkin() {
         super();
