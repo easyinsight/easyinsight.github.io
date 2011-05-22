@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" height="100%" paddingLeft="10" paddingRight="10" paddingTop="10"
-                         paddingBottom="10" horizontalAlign="center" creationComplete="adminService.getRecentActions.send()">
+                         paddingBottom="10" horizontalAlign="center">
     <mx:Metadata>
         [Event(name="createReport", type="flash.events.Event")]
         [Event(name="uiChange", type="flash.events.Event")]
@@ -47,6 +47,10 @@
         private var tablesAddIcon:Class;
 
         private var _uploadGrid:AdvancedDataGrid;
+
+        public function refreshActions():void {
+            adminService.getRecentActions.send()
+        }
 
         public function set uploadGrid(value:AdvancedDataGrid):void {
             _uploadGrid = value;

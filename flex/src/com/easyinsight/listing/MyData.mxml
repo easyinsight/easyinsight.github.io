@@ -305,6 +305,7 @@
             loadingIndex = 1;
             showLoading = true;
             uploadService.getFeedAnalysisTree.send(includeGroups);
+            buttonBox.refreshActions();
         }
 
         private function updateUI(event:Event = null):void {
