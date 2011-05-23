@@ -158,7 +158,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
     public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         Token tokenObj = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.PIVOTAL_TRACKER_TOKEN, getDataFeedID(), false, conn);
         try {
-            if (tokenObj == null && ptUserName != null && ptPassword != null) {
+            if (ptUserName != null && ptPassword != null) {
                 String tokenValue = getToken(ptUserName, ptPassword);
                 tokenObj = new Token();
                 tokenObj.setTokenValue(tokenValue);
@@ -200,8 +200,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
             }
             return dataSet;
         } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
+            throw new ReportException(new DataSourceConnectivityReportFault("Please re-enter your authentication information for Pivotal Tracker.", this));
         }
     }
 
