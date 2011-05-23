@@ -440,7 +440,9 @@
 
                 // if filters were passed in
                 overlayIndex = 1;
-                UserAudit.instance().log(new ActionReportLog(ActionReportLog.VIEW, _reportID));
+                if (_reportID != 0) {
+                    UserAudit.instance().log(new ActionReportLog(ActionReportLog.VIEW, _reportID));
+                }
                 viewFactory.retrieveData(false);
             } catch(e:Error) {
                 Alert.show(e.message);
