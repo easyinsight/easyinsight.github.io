@@ -37,6 +37,7 @@ public class ActionReportLog extends ActionLog {
 
     public ActionReportLog(InsightDescriptor insightDescriptor, int actionType, Date date) {
         this.insightDescriptor = insightDescriptor;
+        reportID = insightDescriptor.getId();
         setActionType(actionType);
         setActionDate(date);
     }
@@ -55,6 +56,26 @@ public class ActionReportLog extends ActionLog {
 
     public void setReportID(long reportID) {
         this.reportID = reportID;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        ActionReportLog that = (ActionReportLog) o;
+
+        if (reportID != that.reportID) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (int) (reportID ^ (reportID >>> 32));
+        return result;
     }
 }
 
