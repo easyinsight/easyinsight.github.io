@@ -519,12 +519,12 @@ public class AnalysisDefinition implements Cloneable {
                         }
                     }
                 }
-            }
-            if (key != null) {
-                analysisItem.setKey(key);
-            } else {
-                Key clonedKey = analysisItem.getKey().clone();
-                analysisItem.setKey(clonedKey);
+                if (key != null) {
+                    analysisItem.setKey(key);
+                } else {
+                    Key clonedKey = analysisItem.getKey().clone();
+                    analysisItem.setKey(clonedKey);
+                }
             }
             analysisItem.updateIDs(replacementMap);
         }
