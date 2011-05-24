@@ -147,7 +147,7 @@ public class DataService {
                 dataSourceAccessible = false;
             }
             if (customFilters != null) {
-                analysisDefinition.getFilterDefinitions().addAll(customFilters);
+                analysisDefinition.setFilterDefinitions(customFilters);
             }
             if (drillThroughFilters != null) {
                 analysisDefinition.applyFilters(drillThroughFilters);
