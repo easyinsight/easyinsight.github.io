@@ -393,7 +393,12 @@ public class DataStorage {
                     InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                     insightRequestMetadata.setNow(new Date());
                     insightRequestMetadata.setAggregateQuery(false);
-                    existing = retrieveData(previousKeys, null, 0, keyMetadatas, previousVersion, insightRequestMetadata);
+                    try {
+                        existing = retrieveData(previousKeys, null, 0, keyMetadatas, previousVersion, insightRequestMetadata);
+                    } catch (SQLException e) {
+                        LogClass.error(e);
+                        existing = new DataSet();
+                    }
                     //existing = new DataSet();
                 }
             }
@@ -1033,27 +1038,22 @@ public class DataStorage {
     private static void addOrUpdateMetadata(long dataFeedID, FeedPersistenceMetadata metadata, Connection conn) {
         try {
             if (metadata.getMetadataID() > 0) {
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE FEED_PERSISTENCE_METADATA SET SIZE = ?, VERSION = ?, DATABASE_NAME = ?," +
-                        "LAST_DATA_TIME = ? WHERE " +
-                        "FEED_PERSISTENCE_METADATA_ID = ?");
-                updateStmt.setLong(1, metadata.getSize());
-                updateStmt.setLong(2, metadata.getVersion());
-                updateStmt.setString(3, metadata.getDatabase());
-                updateStmt.setTimestamp(4, new Timestamp(metadata.getLastData().getTime()));
-                updateStmt.setLong(5, metadata.getMetadataID());
-                updateStmt.executeUpdate();
-                updateStmt.close();
-            } else {
-                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO FEED_PERSISTENCE_METADATA (FEED_ID, " +
-                        "VERSION, SIZE, DATABASE_NAME, LAST_DATA_TIME) VALUES (?, ?, ?, ?, ?)");
-                insertStmt.setLong(1, dataFeedID);
-                insertStmt.setInt(2, metadata.getVersion());
-                insertStmt.setLong(3, metadata.getSize());
-                insertStmt.setString(4, metadata.getDatabase());
-                insertStmt.setTimestamp(5, new Timestamp(metadata.getLastData().getTime()));
-                insertStmt.execute();
-                insertStmt.close();
+                PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_PERSISTENCE_METADATA_ID = ?");
+                deleteStmt.setLong(1, metadata.getMetadataID());
+                deleteStmt.executeUpdate();
+                deleteStmt.close();
             }
+
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO FEED_PERSISTENCE_METADATA (FEED_ID, " +
+                    "VERSION, SIZE, DATABASE_NAME, LAST_DATA_TIME) VALUES (?, ?, ?, ?, ?)");
+            insertStmt.setLong(1, dataFeedID);
+            insertStmt.setInt(2, metadata.getVersion());
+            insertStmt.setLong(3, metadata.getSize());
+            insertStmt.setString(4, metadata.getDatabase());
+            insertStmt.setTimestamp(5, new Timestamp(metadata.getLastData().getTime()));
+            insertStmt.execute();
+            insertStmt.close();
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
