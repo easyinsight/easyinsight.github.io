@@ -42,7 +42,8 @@
                         if (report.getReportType() == WSAnalysisDefinition.LIST || report.getReportType() == WSAnalysisDefinition.TREE ||
                                 report.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                             ListDataResults dataResults = (ListDataResults) new DataService().list(report, new InsightRequestMetadata());
-                            out.println(ExportService.toTable(report, dataResults, conn));
+                            InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                            out.println(ExportService.toTable(report, dataResults, conn, insightRequestMetadata));
                         } else {
                             session.setAttribute("report", report);
                             %>
