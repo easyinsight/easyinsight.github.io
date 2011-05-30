@@ -439,9 +439,13 @@ public class DataStorage {
                 insertData(mirror);
             }
 
-            String dropSQL = "DROP TABLE " + "df" + feedID + "v" + previousVersion;
-            PreparedStatement dropTableStmt = storageConn.prepareStatement(dropSQL);
-            dropTableStmt.execute();
+            try {
+                String dropSQL = "DROP TABLE " + "df" + feedID + "v" + previousVersion;
+                PreparedStatement dropTableStmt = storageConn.prepareStatement(dropSQL);
+                dropTableStmt.execute();
+            } catch (SQLException e) {
+                LogClass.error(e);
+            }
         }
         return this.version;
     }
