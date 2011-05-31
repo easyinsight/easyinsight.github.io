@@ -39,32 +39,37 @@ public class FreshbooksEstimateFeed extends FreshbooksFeed {
             int currentPage;
             do {
                 Document invoicesDoc = query("estimate.list", "<page>" + requestPage + "</page>", conn);
-                Node invoicesSummaryNode = invoicesDoc.query("/response/estimates").get(0);
-                String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
-                String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
-                pages = Integer.parseInt(pageString);
-                currentPage = Integer.parseInt(currentPageString);
-                Nodes invoices = invoicesDoc.query("/response/estimates/estimate");
+                Nodes nodes = invoicesDoc.query("/response/estimates");
+                if (nodes.size() > 0) {
+                    Node invoicesSummaryNode = nodes.get(0);
+                    String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                    String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                    pages = Integer.parseInt(pageString);
+                    currentPage = Integer.parseInt(currentPageString);
+                    Nodes invoices = invoicesDoc.query("/response/estimates/estimate");
 
-                for (int i = 0; i < invoices.size(); i++) {
-                    Node invoice = invoices.get(i);
-                    String invoiceID = queryField(invoice, "estimate_id/text()");
-                    String invoiceNumber = queryField(invoice, "number/text()");
-                    String clientID = queryField(invoice, "client_id/text()");
-                    String notes = queryField(invoice, "notes/text()");
-                    String terms = queryField(invoice, "terms/text()");
+                    for (int i = 0; i < invoices.size(); i++) {
+                        Node invoice = invoices.get(i);
+                        String invoiceID = queryField(invoice, "estimate_id/text()");
+                        String invoiceNumber = queryField(invoice, "number/text()");
+                        String clientID = queryField(invoice, "client_id/text()");
+                        String notes = queryField(invoice, "notes/text()");
+                        String terms = queryField(invoice, "terms/text()");
 
-                    String amountString = queryField(invoice, "amount/text()");
-                    IRow row = dataSet.createRow();
-                    addValue(row, FreshbooksEstimateSource.ESTIMATE_ID, invoiceID, keys);
-                    addValue(row, FreshbooksEstimateSource.NUMBER, invoiceNumber, keys);
-                    addValue(row, FreshbooksEstimateSource.NOTES, notes, keys);
-                    addValue(row, FreshbooksEstimateSource.TERMS, terms, keys);
-                    addValue(row, FreshbooksEstimateSource.CLIENT_ID, clientID, keys);
-                    if (amountString != null) {
-                        addValue(row, FreshbooksEstimateSource.AMOUNT, Double.parseDouble(amountString), keys);
+                        String amountString = queryField(invoice, "amount/text()");
+                        IRow row = dataSet.createRow();
+                        addValue(row, FreshbooksEstimateSource.ESTIMATE_ID, invoiceID, keys);
+                        addValue(row, FreshbooksEstimateSource.NUMBER, invoiceNumber, keys);
+                        addValue(row, FreshbooksEstimateSource.NOTES, notes, keys);
+                        addValue(row, FreshbooksEstimateSource.TERMS, terms, keys);
+                        addValue(row, FreshbooksEstimateSource.CLIENT_ID, clientID, keys);
+                        if (amountString != null) {
+                            addValue(row, FreshbooksEstimateSource.AMOUNT, Double.parseDouble(amountString), keys);
+                        }
+                        addValue(row, FreshbooksEstimateSource.COUNT, 1, keys);
                     }
-                    addValue(row, FreshbooksEstimateSource.COUNT, 1, keys);
+                } else {
+                    break;
                 }
                 requestPage++;
             } while (currentPage < pages);

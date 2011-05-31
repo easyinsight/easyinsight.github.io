@@ -38,38 +38,44 @@ public class FreshbooksInvoiceItemFeed extends FreshbooksFeed {
             int pages;
             int currentPage;
             do {
-                Document invoicesDoc = query("invoice.list", "<page>" + requestPage + "</page>", conn);
-                Node invoicesSummaryNode = invoicesDoc.query("/response/invoices").get(0);
-                String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
-                String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
-                pages = Integer.parseInt(pageString);
-                currentPage = Integer.parseInt(currentPageString);
-                Nodes invoices = invoicesDoc.query("/response/invoices/invoice");
+                String string = "<page>" + requestPage + "</page>";
+                Document invoicesDoc = query("invoice.list", string, conn);
+                Nodes invoiceList = invoicesDoc.query("/response/invoices");
+                if (invoiceList.size() > 0) {
+                    Node invoicesSummaryNode = invoicesDoc.query("/response/invoices").get(0);
+                    String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                    String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                    pages = Integer.parseInt(pageString);
+                    currentPage = Integer.parseInt(currentPageString);
+                    Nodes invoices = invoicesDoc.query("/response/invoices/invoice");
 
-                for (int i = 0; i < invoices.size(); i++) {
-                    Node invoice = invoices.get(i);
-                    String invoiceID = queryField(invoice, "invoice_id/text()");
-                    Nodes lineItems = invoice.query("lines/line");
-                    for (int j = 0; j < lineItems.size(); j++) {
-                        Node lineItem = lineItems.get(j);
-                        IRow row = dataSet.createRow();
-                        addValue(row, FreshbooksInvoiceLineSource.INVOICE_ID, invoiceID, keys);
-                        String lineItemID = queryField(lineItem, "line_id/text()");
-                        String amountString = queryField(lineItem, "amount/text()");
-                        String quantityString = queryField(lineItem, "quantity/text()");
-                        String unitCostString = queryField(lineItem, "unit_cost/text()");
-                        String description = queryField(lineItem, "description/text()");
-                        String name = queryField(lineItem, "name/text()");
-                        addValue(row, FreshbooksInvoiceLineSource.DESCRIPTION, description, keys);
-                        addValue(row, FreshbooksInvoiceLineSource.LINE_ID, lineItemID, keys);
-                        addValue(row, FreshbooksInvoiceLineSource.NAME, name, keys);
-                        addValue(row, FreshbooksInvoiceLineSource.COUNT, 1, keys);
-                        if (amountString != null) addValue(row, FreshbooksInvoiceLineSource.AMOUNT, Double.parseDouble(amountString), keys);
-                        if (amountString != null) addValue(row, FreshbooksInvoiceLineSource.QUANTITY, Double.parseDouble(quantityString), keys);
-                        if (amountString != null) addValue(row, FreshbooksInvoiceLineSource.UNIT_COST, Double.parseDouble(unitCostString), keys);
+                    for (int i = 0; i < invoices.size(); i++) {
+                        Node invoice = invoices.get(i);
+                        String invoiceID = queryField(invoice, "invoice_id/text()");
+                        Nodes lineItems = invoice.query("lines/line");
+                        for (int j = 0; j < lineItems.size(); j++) {
+                            Node lineItem = lineItems.get(j);
+                            IRow row = dataSet.createRow();
+                            addValue(row, FreshbooksInvoiceLineSource.INVOICE_ID, invoiceID, keys);
+                            String lineItemID = queryField(lineItem, "line_id/text()");
+                            String amountString = queryField(lineItem, "amount/text()");
+                            String quantityString = queryField(lineItem, "quantity/text()");
+                            String unitCostString = queryField(lineItem, "unit_cost/text()");
+                            String description = queryField(lineItem, "description/text()");
+                            String name = queryField(lineItem, "name/text()");
+                            addValue(row, FreshbooksInvoiceLineSource.DESCRIPTION, description, keys);
+                            addValue(row, FreshbooksInvoiceLineSource.LINE_ID, lineItemID, keys);
+                            addValue(row, FreshbooksInvoiceLineSource.NAME, name, keys);
+                            addValue(row, FreshbooksInvoiceLineSource.COUNT, 1, keys);
+                            if (amountString != null) addValue(row, FreshbooksInvoiceLineSource.AMOUNT, Double.parseDouble(amountString), keys);
+                            if (amountString != null) addValue(row, FreshbooksInvoiceLineSource.QUANTITY, Double.parseDouble(quantityString), keys);
+                            if (amountString != null) addValue(row, FreshbooksInvoiceLineSource.UNIT_COST, Double.parseDouble(unitCostString), keys);
+                        }
                     }
+                    requestPage++;
+                } else {
+                    break;
                 }
-                requestPage++;
             } while (currentPage < pages);
             return dataSet;
         } catch (ReportException re) {

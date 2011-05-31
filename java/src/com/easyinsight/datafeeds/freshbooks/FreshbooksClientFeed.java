@@ -39,47 +39,52 @@ public class FreshbooksClientFeed extends FreshbooksFeed {
             int currentPage;
             do {
                 Document invoicesDoc = query("client.list", "<page>" + requestPage + "</page>", conn);
-                Node invoicesSummaryNode = invoicesDoc.query("/response/clients").get(0);
-                String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
-                String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
-                pages = Integer.parseInt(pageString);
-                currentPage = Integer.parseInt(currentPageString);
-                Nodes invoices = invoicesDoc.query("/response/clients/client");
-                for (int i = 0; i < invoices.size(); i++) {
-                    Node invoice = invoices.get(i);
-                    String firstName = queryField(invoice, "first_name/text()");
-                    String lastName = queryField(invoice, "last_name/text()");
-                    String name = firstName + " " + lastName;
-                    String userName = queryField(invoice, "username/text()");
-                    String email = queryField(invoice, "email/text()");
-                    String clientID = queryField(invoice, "client_id/text()");
-                    String workPhone = queryField(invoice, "work_phone/text()");
-                    String address1 = queryField(invoice, "p_street1/text()");
-                    String address2 = queryField(invoice, "p_street2/text()");
-                    String city = queryField(invoice, "p_city/text()");
-                    String state = queryField(invoice, "p_state/text()");
-                    String zip = queryField(invoice, "p_code/text()");
-                    String country = queryField(invoice, "p_country/text()");
-                    String organization = queryField(invoice, "organization/text()");
+                Nodes nodes = invoicesDoc.query("/response/clients");
+                if (nodes.size() > 0) {
+                    Node invoicesSummaryNode = nodes.get(0);
+                    String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                    String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                    pages = Integer.parseInt(pageString);
+                    currentPage = Integer.parseInt(currentPageString);
+                    Nodes invoices = invoicesDoc.query("/response/clients/client");
+                    for (int i = 0; i < invoices.size(); i++) {
+                        Node invoice = invoices.get(i);
+                        String firstName = queryField(invoice, "first_name/text()");
+                        String lastName = queryField(invoice, "last_name/text()");
+                        String name = firstName + " " + lastName;
+                        String userName = queryField(invoice, "username/text()");
+                        String email = queryField(invoice, "email/text()");
+                        String clientID = queryField(invoice, "client_id/text()");
+                        String workPhone = queryField(invoice, "work_phone/text()");
+                        String address1 = queryField(invoice, "p_street1/text()");
+                        String address2 = queryField(invoice, "p_street2/text()");
+                        String city = queryField(invoice, "p_city/text()");
+                        String state = queryField(invoice, "p_state/text()");
+                        String zip = queryField(invoice, "p_code/text()");
+                        String country = queryField(invoice, "p_country/text()");
+                        String organization = queryField(invoice, "organization/text()");
 
-                    IRow row = dataSet.createRow();
-                    addValue(row, FreshbooksClientSource.FIRST_NAME, firstName, keys);
-                    addValue(row, FreshbooksClientSource.CLIENT_ID, clientID, keys);
-                    addValue(row, FreshbooksClientSource.LAST_NAME, lastName, keys);
-                    addValue(row, FreshbooksClientSource.NAME, name, keys);
-                    addValue(row, FreshbooksClientSource.USERNAME, userName, keys);
-                    addValue(row, FreshbooksClientSource.EMAIL, email, keys);
-                    addValue(row, FreshbooksClientSource.WORK_PHONE, workPhone, keys);
-                    addValue(row, FreshbooksClientSource.PRIMARY_STREET1, address1, keys);
-                    addValue(row, FreshbooksClientSource.PRIMARY_STREET2, address2, keys);
-                    addValue(row, FreshbooksClientSource.CITY, city, keys);
-                    addValue(row, FreshbooksClientSource.STATE, state, keys);
-                    addValue(row, FreshbooksClientSource.POSTAL, zip, keys);
-                    addValue(row, FreshbooksClientSource.COUNTRY, country, keys);
-                    addValue(row, FreshbooksClientSource.ORGANIZATION, organization, keys);
-                    addValue(row, FreshbooksClientSource.COUNT, 1, keys);
+                        IRow row = dataSet.createRow();
+                        addValue(row, FreshbooksClientSource.FIRST_NAME, firstName, keys);
+                        addValue(row, FreshbooksClientSource.CLIENT_ID, clientID, keys);
+                        addValue(row, FreshbooksClientSource.LAST_NAME, lastName, keys);
+                        addValue(row, FreshbooksClientSource.NAME, name, keys);
+                        addValue(row, FreshbooksClientSource.USERNAME, userName, keys);
+                        addValue(row, FreshbooksClientSource.EMAIL, email, keys);
+                        addValue(row, FreshbooksClientSource.WORK_PHONE, workPhone, keys);
+                        addValue(row, FreshbooksClientSource.PRIMARY_STREET1, address1, keys);
+                        addValue(row, FreshbooksClientSource.PRIMARY_STREET2, address2, keys);
+                        addValue(row, FreshbooksClientSource.CITY, city, keys);
+                        addValue(row, FreshbooksClientSource.STATE, state, keys);
+                        addValue(row, FreshbooksClientSource.POSTAL, zip, keys);
+                        addValue(row, FreshbooksClientSource.COUNTRY, country, keys);
+                        addValue(row, FreshbooksClientSource.ORGANIZATION, organization, keys);
+                        addValue(row, FreshbooksClientSource.COUNT, 1, keys);
+                    }
+                    requestPage++;
+                } else {
+                    break;
                 }
-                requestPage++;
             } while (currentPage < pages);
             return dataSet;
         } catch (ReportException re) {

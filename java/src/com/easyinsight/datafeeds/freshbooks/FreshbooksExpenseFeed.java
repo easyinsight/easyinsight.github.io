@@ -39,39 +39,45 @@ public class FreshbooksExpenseFeed extends FreshbooksFeed {
             int pages;
             int currentPage;
             do {
-                Document invoicesDoc = query("expense.list", "", conn);
-                Node invoicesSummaryNode = invoicesDoc.query("/response/expenses").get(0);
-                String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
-                String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
-                pages = Integer.parseInt(pageString);
-                currentPage = Integer.parseInt(currentPageString);
-                Nodes invoices = invoicesDoc.query("/response/expenses/expense");
-                DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-                for (int i = 0; i < invoices.size(); i++) {
-                    Node invoice = invoices.get(i);
-                    String expenseID = queryField(invoice, "expense_id/text()");
-                    String staffID = queryField(invoice, "staff_id/text()");
-                    String categoryID = queryField(invoice, "category_id/text()");
-                    String projectID = queryField(invoice, "project_id/text()");
-                    String clientID = queryField(invoice, "client_id/text()");
-                    String notes = queryField(invoice, "notes/text()");
-                    String vendor = queryField(invoice, "vendor/text()");
-                    String amountString = queryField(invoice, "amount/text()");
-                    String invoiceDateString = queryField(invoice, "date/text()");
-                    Date invoiceDate = df.parse(invoiceDateString);
-                    IRow row = dataSet.createRow();
-                    addValue(row, FreshbooksExpenseSource.STAFF_ID, staffID, keys);
-                    addValue(row, FreshbooksExpenseSource.EXPENSE_ID, expenseID, keys);
-                    addValue(row, FreshbooksExpenseSource.CLIENT_ID, clientID, keys);
-                    addValue(row, FreshbooksExpenseSource.CATEGORY_ID, categoryID, keys);
-                    addValue(row, FreshbooksExpenseSource.PROJECT_ID, projectID, keys);
-                    addValue(row, FreshbooksExpenseSource.NOTES, notes, keys);
-                    addValue(row, FreshbooksExpenseSource.VENDOR, vendor, keys);
-                    if (amountString != null) {
-                        addValue(row, FreshbooksExpenseSource.AMOUNT, Double.parseDouble(amountString), keys);
+                String string = "<page>" + requestPage + "</page>";
+                Document invoicesDoc = query("expense.list", string, conn);
+                Nodes expenseNodes = invoicesDoc.query("/response/expenses");
+                if (expenseNodes.size() > 0) {
+                    Node invoicesSummaryNode = expenseNodes.get(0);
+                    String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                    String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                    pages = Integer.parseInt(pageString);
+                    currentPage = Integer.parseInt(currentPageString);
+                    Nodes invoices = invoicesDoc.query("/response/expenses/expense");
+                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+                    for (int i = 0; i < invoices.size(); i++) {
+                        Node invoice = invoices.get(i);
+                        String expenseID = queryField(invoice, "expense_id/text()");
+                        String staffID = queryField(invoice, "staff_id/text()");
+                        String categoryID = queryField(invoice, "category_id/text()");
+                        String projectID = queryField(invoice, "project_id/text()");
+                        String clientID = queryField(invoice, "client_id/text()");
+                        String notes = queryField(invoice, "notes/text()");
+                        String vendor = queryField(invoice, "vendor/text()");
+                        String amountString = queryField(invoice, "amount/text()");
+                        String invoiceDateString = queryField(invoice, "date/text()");
+                        Date invoiceDate = df.parse(invoiceDateString);
+                        IRow row = dataSet.createRow();
+                        addValue(row, FreshbooksExpenseSource.STAFF_ID, staffID, keys);
+                        addValue(row, FreshbooksExpenseSource.EXPENSE_ID, expenseID, keys);
+                        addValue(row, FreshbooksExpenseSource.CLIENT_ID, clientID, keys);
+                        addValue(row, FreshbooksExpenseSource.CATEGORY_ID, categoryID, keys);
+                        addValue(row, FreshbooksExpenseSource.PROJECT_ID, projectID, keys);
+                        addValue(row, FreshbooksExpenseSource.NOTES, notes, keys);
+                        addValue(row, FreshbooksExpenseSource.VENDOR, vendor, keys);
+                        if (amountString != null) {
+                            addValue(row, FreshbooksExpenseSource.AMOUNT, Double.parseDouble(amountString), keys);
+                        }
+                        addValue(row, FreshbooksExpenseSource.DATE, invoiceDate, keys);
+                        addValue(row, FreshbooksExpenseSource.COUNT, 1, keys);
                     }
-                    addValue(row, FreshbooksExpenseSource.DATE, invoiceDate, keys);
-                    addValue(row, FreshbooksExpenseSource.COUNT, 1, keys);
+                } else {
+                    break;
                 }
                 requestPage++;
             } while (currentPage < pages);

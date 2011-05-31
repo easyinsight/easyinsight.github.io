@@ -39,32 +39,37 @@ public class FreshbooksTaskFeed extends FreshbooksFeed {
             int currentPage;
             do {
                 Document invoicesDoc = query("task.list", "<page>" + requestPage + "</page>", conn);
-                Node invoicesSummaryNode = invoicesDoc.query("/response/tasks").get(0);
-                String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
-                String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
-                pages = Integer.parseInt(pageString);
-                currentPage = Integer.parseInt(currentPageString);
-                Nodes invoices = invoicesDoc.query("/response/tasks/task");
+                Nodes nodes = invoicesDoc.query("/response/tasks");
+                if (nodes.size() > 0) {
+                    Node invoicesSummaryNode = nodes.get(0);
+                    String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                    String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                    pages = Integer.parseInt(pageString);
+                    currentPage = Integer.parseInt(currentPageString);
+                    Nodes invoices = invoicesDoc.query("/response/tasks/task");
 
-                for (int i = 0; i < invoices.size(); i++) {
-                    Node invoice = invoices.get(i);
-                    String taskID = queryField(invoice, "task_id/text()");
-                    String name = queryField(invoice, "name/text()");
-                    String description = queryField(invoice, "description/text()");
-                    String billable = queryField(invoice, "billable/text()");
-                    String rate = queryField(invoice, "rate/text()");
+                    for (int i = 0; i < invoices.size(); i++) {
+                        Node invoice = invoices.get(i);
+                        String taskID = queryField(invoice, "task_id/text()");
+                        String name = queryField(invoice, "name/text()");
+                        String description = queryField(invoice, "description/text()");
+                        String billable = queryField(invoice, "billable/text()");
+                        String rate = queryField(invoice, "rate/text()");
 
-                    IRow row = dataSet.createRow();
-                    addValue(row, FreshbooksTaskSource.TASK_ID, taskID, keys);
-                    addValue(row, FreshbooksTaskSource.NAME, name, keys);
-                    addValue(row, FreshbooksTaskSource.DESCRIPTION, description, keys);
-                    addValue(row, FreshbooksTaskSource.BILLABLE, billable, keys);
-                    if (rate != null) {
-                        addValue(row, FreshbooksTaskSource.RATE,  Double.parseDouble(rate), keys);
+                        IRow row = dataSet.createRow();
+                        addValue(row, FreshbooksTaskSource.TASK_ID, taskID, keys);
+                        addValue(row, FreshbooksTaskSource.NAME, name, keys);
+                        addValue(row, FreshbooksTaskSource.DESCRIPTION, description, keys);
+                        addValue(row, FreshbooksTaskSource.BILLABLE, billable, keys);
+                        if (rate != null) {
+                            addValue(row, FreshbooksTaskSource.RATE,  Double.parseDouble(rate), keys);
+                        }
+                        addValue(row, FreshbooksTaskSource.COUNT, 1, keys);
                     }
-                    addValue(row, FreshbooksTaskSource.COUNT, 1, keys);
+                    requestPage++;
+                } else {
+                    break;
                 }
-                requestPage++;
             } while (currentPage < pages);
             return dataSet;
         } catch (ReportException re) {

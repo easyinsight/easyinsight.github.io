@@ -42,33 +42,38 @@ public class FreshbooksProjectFeed extends FreshbooksFeed {
             int currentPage;
             do {
                 Document invoicesDoc = query("project.list", "<page>" + requestPage + "</page>", conn);
-                Node invoicesSummaryNode = invoicesDoc.query("/response/projects").get(0);
-                String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
-                String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
-                pages = Integer.parseInt(pageString);
-                currentPage = Integer.parseInt(currentPageString);
-                Nodes invoices = invoicesDoc.query("/response/projects/projects");
+                Nodes nodes = invoicesDoc.query("/response/projects");
+                if (nodes.size() > 0) {
+                    Node invoicesSummaryNode = nodes.get(0);
+                    String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                    String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                    pages = Integer.parseInt(pageString);
+                    currentPage = Integer.parseInt(currentPageString);
+                    Nodes invoices = invoicesDoc.query("/response/projects/projects");
 
-                for (int i = 0; i < invoices.size(); i++) {
-                    Node invoice = invoices.get(i);
-                    String projectID = queryField(invoice, "project_id/text()");
-                    String name = queryField(invoice, "name/text()");
-                    String description = queryField(invoice, "description/text()");
-                    String billMethod = queryField(invoice, "bill_method/text()");
-                    String clientID = queryField(invoice, "client_id/text()");
-                    String rateString = queryField(invoice, "rate/text()");
-                    IRow row = dataSet.createRow();
-                    addValue(row, FreshbooksProjectSource.PROJECT_ID, projectID, keys);
-                    addValue(row, FreshbooksProjectSource.CLIENT_ID, clientID, keys);
-                    addValue(row, FreshbooksProjectSource.DESCRIPTION, description, keys);
-                    addValue(row, FreshbooksProjectSource.NAME, name, keys);
-                    addValue(row, FreshbooksProjectSource.BILL_METHOD, billMethod, keys);
-                    if (rateString != null) {
-                        addValue(row, FreshbooksProjectSource.RATE, Double.parseDouble(rateString), keys);
+                    for (int i = 0; i < invoices.size(); i++) {
+                        Node invoice = invoices.get(i);
+                        String projectID = queryField(invoice, "project_id/text()");
+                        String name = queryField(invoice, "name/text()");
+                        String description = queryField(invoice, "description/text()");
+                        String billMethod = queryField(invoice, "bill_method/text()");
+                        String clientID = queryField(invoice, "client_id/text()");
+                        String rateString = queryField(invoice, "rate/text()");
+                        IRow row = dataSet.createRow();
+                        addValue(row, FreshbooksProjectSource.PROJECT_ID, projectID, keys);
+                        addValue(row, FreshbooksProjectSource.CLIENT_ID, clientID, keys);
+                        addValue(row, FreshbooksProjectSource.DESCRIPTION, description, keys);
+                        addValue(row, FreshbooksProjectSource.NAME, name, keys);
+                        addValue(row, FreshbooksProjectSource.BILL_METHOD, billMethod, keys);
+                        if (rateString != null) {
+                            addValue(row, FreshbooksProjectSource.RATE, Double.parseDouble(rateString), keys);
+                        }
+                        addValue(row, FreshbooksProjectSource.COUNT, 1, keys);
                     }
-                    addValue(row, FreshbooksProjectSource.COUNT, 1, keys);
+                    requestPage++;
+                } else {
+                    break;
                 }
-                requestPage++;
             } while (currentPage < pages);
             return dataSet;
         } catch (ReportException re) {

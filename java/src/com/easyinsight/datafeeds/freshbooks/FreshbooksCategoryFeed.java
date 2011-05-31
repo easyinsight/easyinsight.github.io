@@ -38,21 +38,26 @@ public class FreshbooksCategoryFeed extends FreshbooksFeed {
             int currentPage;
             do {
                 Document invoicesDoc = query("category.list", "<page>" + requestPage + "</page>", conn);
-                Node invoicesSummaryNode = invoicesDoc.query("/response/categories").get(0);
-                String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
-                String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
-                pages = Integer.parseInt(pageString);
-                currentPage = Integer.parseInt(currentPageString);
-                Nodes invoices = invoicesDoc.query("/response/categories/category");
-                for (int i = 0; i < invoices.size(); i++) {
-                    Node invoice = invoices.get(i);
-                    String categoryID = queryField(invoice, "category_id/text()");
-                    String categoryName = queryField(invoice, "name/text()");
-                    IRow row = dataSet.createRow();
-                    addValue(row, FreshbooksCategorySource.CATEGORY_ID, categoryID, keys);
-                    addValue(row, FreshbooksCategorySource.CATEGORY_NAME, categoryName, keys);
+                Nodes nodes = invoicesDoc.query("/response/categories");
+                if (nodes.size() > 0) {
+                    Node invoicesSummaryNode = nodes.get(0);
+                    String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                    String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                    pages = Integer.parseInt(pageString);
+                    currentPage = Integer.parseInt(currentPageString);
+                    Nodes invoices = invoicesDoc.query("/response/categories/category");
+                    for (int i = 0; i < invoices.size(); i++) {
+                        Node invoice = invoices.get(i);
+                        String categoryID = queryField(invoice, "category_id/text()");
+                        String categoryName = queryField(invoice, "name/text()");
+                        IRow row = dataSet.createRow();
+                        addValue(row, FreshbooksCategorySource.CATEGORY_ID, categoryID, keys);
+                        addValue(row, FreshbooksCategorySource.CATEGORY_NAME, categoryName, keys);
+                    }
+                    requestPage++;
+                } else {
+                    break;
                 }
-                requestPage++;
             } while (currentPage < pages);
             return dataSet;
         } catch (ReportException re) {
