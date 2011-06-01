@@ -33,6 +33,7 @@
         import com.easyinsight.framework.HierarchyOverride;
         import com.easyinsight.report.EmbeddedReportExportWindow;
         import com.easyinsight.report.ReportExportWindow;
+        import com.easyinsight.report.ReportSetupEvent;
         import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
@@ -229,26 +230,29 @@
                 dataViewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
                 dataViewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
                 dataViewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
-                dataViewFactory.retrieveData(false);
+                dataViewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onSetup);
+                dataViewFactory.setup();
             } else {
                 Alert.show("Failed to load the report");
             }
         }
 
+        private var report:AnalysisDefinition;
+
+        private function onSetup(event:ReportSetupEvent):void {
+            report = event.reportInfo.report;
+            if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
+                filterDefinitions = report.filterDefinitions;
+                filterIndex = 1;
+            } else {
+                filterIndex = 0;
+                filterDefinitions = new ArrayCollection();
+            }
+            dataViewFactory.retrieveData();
+        }
 
         private function signup(event:MouseEvent):void {
             navigateToURL(new URLRequest("https://www.easy-insight.com/app/#page=account"))
-        }
-
-        protected override function createChildren():void {
-            super.createChildren();
-            /*var signUpLabel:Label = new Label();
-             signUpLabel.text = "Want to publish your own data or save your own reports?";
-             addReportBox.addChild(signUpLabel);
-             var signUpButton:Button = new Button();
-             signUpButton.label = "Free account signup";
-             signUpButton.addEventListener(MouseEvent.CLICK, signup);
-             addReportBox.addChild(signUpButton);*/
         }
 
         private function transformsUpdated(event:TransformsUpdatedEvent):void {
@@ -257,15 +261,7 @@
         }
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
-            var report:AnalysisDefinition = event.analysisDefinition;
             dataSource = event.dataSourceInfo;
-            if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
-                filterDefinitions = report.filterDefinitions;
-                filterIndex = 1;
-            } else {
-                filterIndex = 0;
-                filterDefinitions = new ArrayCollection();
-            }
         }
 
         //        private var showFilters:Boolean = false;
@@ -345,7 +341,7 @@
                                                   updatedTransforms="transformsUpdated(event)" width="100%"
                                                   paddingLeft="10"
                                                   paddingTop="10" paddingBottom="10"
-                                                  paddingRight="10" feedID="{_dataSourceID}"/>
+                                                  paddingRight="10" feedID="{_dataSourceID}" reportView="true" reportID="{_analysisID}"/>
         </mx:VBox>
     </mx:ViewStack>
     <mx:Canvas id="coreVBox" height="100%" width="100%">
