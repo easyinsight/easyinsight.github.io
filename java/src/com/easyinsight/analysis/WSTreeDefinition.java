@@ -10,6 +10,12 @@ import java.util.*;
 public class WSTreeDefinition extends WSAnalysisDefinition {
 
     private long treeDefinitionID;
+    private int rowColor1;
+    private int rowColor2;
+    private int headerColor1;
+    private int headerColor2;
+    private int textColor;
+    private int headerTextColor;
 
     public long getTreeDefinitionID() {
         return treeDefinitionID;
@@ -90,5 +96,75 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
                 }
             }
         }
+    }
+
+    public int getRowColor1() {
+        return rowColor1;
+    }
+
+    public void setRowColor1(int rowColor1) {
+        this.rowColor1 = rowColor1;
+    }
+
+    public int getRowColor2() {
+        return rowColor2;
+    }
+
+    public void setRowColor2(int rowColor2) {
+        this.rowColor2 = rowColor2;
+    }
+
+    public int getHeaderColor1() {
+        return headerColor1;
+    }
+
+    public void setHeaderColor1(int headerColor1) {
+        this.headerColor1 = headerColor1;
+    }
+
+    public int getHeaderColor2() {
+        return headerColor2;
+    }
+
+    public void setHeaderColor2(int headerColor2) {
+        this.headerColor2 = headerColor2;
+    }
+
+    public int getTextColor() {
+        return textColor;
+    }
+
+    public void setTextColor(int textColor) {
+        this.textColor = textColor;
+    }
+
+    public int getHeaderTextColor() {
+        return headerTextColor;
+    }
+
+    public void setHeaderTextColor(int headerTextColor) {
+        this.headerTextColor = headerTextColor;
+    }
+
+    @Override
+    public void populateProperties(List<ReportProperty> properties) {
+        super.populateProperties(properties);
+        rowColor1 = (int) findNumberProperty(properties, "rowColor1", 0xffffff);
+        rowColor2 = (int) findNumberProperty(properties, "rowColor2", 0xF7F7F7);
+        headerColor1 = (int) findNumberProperty(properties, "headerColor1", 0xffffff);
+        headerColor2 = (int) findNumberProperty(properties, "headerColor2", 0xEFEFEF);
+        textColor = (int) findNumberProperty(properties, "textColor", 0x000000);
+        headerTextColor = (int) findNumberProperty(properties, "headerTextColor", 0x000000);
+    }
+
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportNumericProperty("rowColor1", rowColor1));
+        properties.add(new ReportNumericProperty("rowColor2", rowColor2));
+        properties.add(new ReportNumericProperty("headerColor1", headerColor1));
+        properties.add(new ReportNumericProperty("headerColor2", headerColor2));
+        properties.add(new ReportNumericProperty("textColor", textColor));
+        properties.add(new ReportNumericProperty("headerTextColor", headerTextColor));
+        return properties;
     }
 }

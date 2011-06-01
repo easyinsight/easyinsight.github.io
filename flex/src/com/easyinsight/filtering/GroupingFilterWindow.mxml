@@ -19,13 +19,13 @@
         }
 
         private function addComboBox():void {
-            var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, _item);
+            var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, _item, 0, 0);
             dispatchEvent(new FilterCreationEvent(comboBoxFilter));
             PopUpManager.removePopUp(this);
         }
 
         private function addAutoComplete():void {
-            var autoCompleteFilter:AutoCompleteFilter = new AutoCompleteFilter(_feedID, _item);
+            var autoCompleteFilter:AutoCompleteFilter = new AutoCompleteFilter(_feedID, _item, 0, 0);
             dispatchEvent(new FilterCreationEvent(autoCompleteFilter));
             PopUpManager.removePopUp(this);
         }
@@ -43,7 +43,6 @@
         public function set item(value:AnalysisItem):void {
             _item = value;
         }
-
         ]]></mx:Script>
     <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" horizontalAlign="center" verticalGap="10">
         <mx:Label text="What type of filter do you want to create?" fontSize="16"/>

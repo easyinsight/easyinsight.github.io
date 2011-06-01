@@ -12,34 +12,25 @@ public class EmbeddedDataServiceEvent extends Event {
     public var dataSet:ArrayCollection;
     public var analysisDefinition:AnalysisDefinition;
     public var dataSourceAccessible:Boolean;
-    public var attribution:String;
     public var reportFault:ReportFault;
-    public var ratingsAverage:Number;
-    public var ratingsCount:int;
-    public var myRating:int;
     public var reportAuthor:String;
     public var dataSourceInfo:DataSourceInfo;
     public var additionalProperties:Object;
 
     public function EmbeddedDataServiceEvent(type:String, dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, dataSourceAccessible:Boolean,
-            attribution:String, reportFault:ReportFault, dataSourceInfo:DataSourceInfo, ratingsAverage:Number,
-                ratingsCount:int, myRating:int, additionalProperties:Object) {
+            reportFault:ReportFault, dataSourceInfo:DataSourceInfo, additionalProperties:Object) {
         super(type);
         this.dataSet = dataSet;
         this.analysisDefinition = analysisDefinition;
         this.dataSourceAccessible = dataSourceAccessible;
-        this.attribution = attribution;
         this.reportFault = reportFault;
         this.dataSourceInfo = dataSourceInfo;
-        this.ratingsAverage = ratingsAverage;
-        this.ratingsCount = ratingsCount;
-        this.myRating = myRating;
         this.additionalProperties = additionalProperties;
     }
 
     override public function clone():Event {
-        return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, dataSourceAccessible, attribution,
-                reportFault, dataSourceInfo, ratingsAverage, ratingsCount, myRating, additionalProperties);
+        return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, dataSourceAccessible,
+                reportFault, dataSourceInfo, additionalProperties);
     }
 }
 }

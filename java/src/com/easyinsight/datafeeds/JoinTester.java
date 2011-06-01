@@ -27,10 +27,10 @@ public class JoinTester {
         DataService dataService = new DataService();
         FeedDefinition sourceData = new FeedStorage().getFeedDefinitionData(connection.getSourceFeedID());
         AnalysisItem sourceItem = getAnalysisItem(sourceData, connection.getSourceJoin());
-        AnalysisDimensionResultMetadata sourceMetadata = (AnalysisDimensionResultMetadata) dataService.getAnalysisItemMetadata(connection.getSourceFeedID(), sourceItem, 0);
+        AnalysisDimensionResultMetadata sourceMetadata = (AnalysisDimensionResultMetadata) dataService.getAnalysisItemMetadata(connection.getSourceFeedID(), sourceItem, 0, 0, 0);
         FeedDefinition targetData = new FeedStorage().getFeedDefinitionData(connection.getTargetFeedID());
         AnalysisItem targetItem = getAnalysisItem(targetData, connection.getTargetJoin());
-        AnalysisDimensionResultMetadata targetMetadata = (AnalysisDimensionResultMetadata) dataService.getAnalysisItemMetadata(connection.getTargetFeedID(), targetItem, 0);
+        AnalysisDimensionResultMetadata targetMetadata = (AnalysisDimensionResultMetadata) dataService.getAnalysisItemMetadata(connection.getTargetFeedID(), targetItem, 0, 0, 0);
 
         // how many items matched, how many didn't match from each side
 

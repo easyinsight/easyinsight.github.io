@@ -45,6 +45,8 @@ public class DashboardBox extends VBox {
 
     private var dropBox:Box;
 
+    public var dashboardEditorMetadata:DashboardEditorMetadata;
+
     protected override function createChildren():void {
         super.createChildren();
         var topBox:HBox = new HBox();
@@ -74,7 +76,7 @@ public class DashboardBox extends VBox {
         addChild(dropBox);
         if (element != null) {
             dropBox.setStyle("backgroundColor", 0xEEEEEE);
-            dropBox.addChild(element.createEditorComponent());
+            dropBox.addChild(element.createEditorComponent(dashboardEditorMetadata));
         } else {
             dropBox.setStyle("backgroundColor", 0xFFFFFF);
             dropBox.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
@@ -137,7 +139,7 @@ public class DashboardBox extends VBox {
         }
         this.element = element;
         errorString = null;
-        dropBox.addChild(element.createEditorComponent());
+        dropBox.addChild(element.createEditorComponent(dashboardEditorMetadata));
         dropBox.setStyle("backgroundColor", 0xEEEEEE);
         dropBox.removeEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
         dropBox.removeEventListener(DragEvent.DRAG_DROP, dragDropHandler);

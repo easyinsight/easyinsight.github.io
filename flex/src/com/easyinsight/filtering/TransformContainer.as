@@ -34,6 +34,8 @@ public class TransformContainer extends HBox
     private var filterDefinitions:ArrayCollection = new ArrayCollection();
     private var filterTile:FlowBox;
     private var _feedID:int;
+    private var _reportID:int;
+    private var _dashboardID:int;
     private var noFilters:Boolean = true;
     // private var dropHereBox:VBox;
     private var _filterEditable:Boolean = true;
@@ -53,6 +55,14 @@ public class TransformContainer extends HBox
         this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);
         setStyle("borderThickness", 1);
         setStyle("borderStyle", "solid");
+    }
+
+    public function set reportID(value:int):void {
+        _reportID = value;
+    }
+
+    public function set dashboardID(value:int):void {
+        _dashboardID = value;
     }
 
     public function reset():void {
@@ -121,11 +131,10 @@ public class TransformContainer extends HBox
             loadingFromReport = true;
             blah = true;
             _filterDefinitions = value;
-            for each (var filterDefinition:FilterDefinition in _filterDefinitions) {
-                addFilterDefinition(filterDefinition);
-                /*filterMap[filter.filterDefinition.field.qualifiedName()] = filter;
-                filterDefinitions.addItem(filter.filterDefinition);
-                filter.analysisItems = _analysisItems;*/
+            if (filterTile != null) {
+                for each (var filterDefinition:FilterDefinition in _filterDefinitions) {
+                    addFilterDefinition(filterDefinition);
+                }
             }
             loadingFromReport = false;
         }
@@ -135,13 +144,10 @@ public class TransformContainer extends HBox
         for each (var filter:IFilter in filterMap) {
             if (filter.filterDefinition.field.qualifiedName() == item.qualifiedName()) {
                 filterTile.removeChild(filter as DisplayObject);
-                //delete filterMap[filter.filterDefinition.field.qualifiedName()];
                 var index:int = filterDefinitions.getItemIndex(filter.filterDefinition);
                 filterDefinitions.removeItemAt(index);
                 if (filterDefinitions.length == 0) {
                     noFilters = true;
-                    //removeChild(filterTile);
-                    //addChild(dropHereBox);
                 }
             }
         }
@@ -150,33 +156,6 @@ public class TransformContainer extends HBox
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
         _analysisItems = analysisItems;
-    }
-
-    //private var dropToolTip:ToolTip;
-
-    public function showDropMessage():void {
-
-        /*if (dropToolTip == null) {
-
-            var point:Point = new Point();
-            point.x = 0;
-            point.y = 0;
-            point = this.localToGlobal(point);
-            var x:int = point.x + this.width / 2 - 100;
-            var y:int = point.y + this.height / 2 - 15;
-
-            dropToolTip = ToolTipManager.createToolTip("Drop Items Here to Filter", x, y) as ToolTip;
-            dropToolTip.width = 250;
-            dropToolTip.height = 35;
-            dropToolTip.setStyle("fontSize", 18);
-        }*/
-    }
-
-    public function closeDropMessage():void {
-        /*if (dropToolTip != null) {
-            ToolTipManager.destroyToolTip(dropToolTip);
-            dropToolTip = null;
-        }*/
     }
 
     override protected function createChildren():void {
@@ -240,15 +219,15 @@ public class TransformContainer extends HBox
             var filterValueDefinition:FilterValueDefinition = filterDefinition as FilterValueDefinition;
             if (filterValueDefinition.singleValue) {
                 if (filterValueDefinition.autoComplete) {
-                    filter = new AutoCompleteFilter(_feedID, filterDefinition.field);
+                    filter = new AutoCompleteFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
                 } else {
-                    filter = new ComboBoxFilter(_feedID, filterDefinition.field);
+                    filter = new ComboBoxFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
                 }
             } else {
                 filter = new MultiValueFilter(_feedID, filterDefinition.field);
             }
         } else if (filterDefinition.getType() == FilterDefinition.DATE) {
-            filter = new SliderDateFilter(_feedID, filterDefinition.field);
+            filter = new SliderDateFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
         } else if (filterDefinition.getType() == FilterDefinition.RANGE) {
             filter = new SliderMeasureFilter(_feedID, filterDefinition.field);
         } else if (filterDefinition.getType() == FilterDefinition.ROLLING_DATE) {
@@ -266,6 +245,8 @@ public class TransformContainer extends HBox
             filter.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, passThrough);
         } else if (filterDefinition.getType() == FilterDefinition.NAMED_REF) {
             filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.NAMED_REF);
+        } else {
+            Alert.show("unknown filter type = " + filterDefinition.getType());
         }
         filter.filterEditable = _filterEditable;
         filter.showLabel = _showLabel;
@@ -510,7 +491,7 @@ public class TransformContainer extends HBox
                     var filterDateRangeDefinition:FilterDateRangeDefinition = new FilterDateRangeDefinition();
                     filterDateRangeDefinition.field = key;
                     filterDefinition = filterDateRangeDefinition;
-                    filter = new SliderDateFilter(_feedID, key);
+                    filter = new SliderDateFilter(_feedID, key, _reportID, _dashboardID);
                 } else if (key.hasType(AnalysisItemTypes.DIMENSION)) {
                     var filterValueDefinition:FilterValueDefinition = new FilterValueDefinition();
                     filterValueDefinition.field = key;
@@ -518,7 +499,7 @@ public class TransformContainer extends HBox
                     filterValueDefinition.inclusive = includeFilter;
                     filterDefinition = filterValueDefinition;
                     if (values.length == 1 && includeFilter) {
-                        filter = new ComboBoxFilter(_feedID, key);
+                        filter = new ComboBoxFilter(_feedID, key, _reportID, _dashboardID);
                     } else {
                         filter = new MultiValueFilter(_feedID, key);
                     }

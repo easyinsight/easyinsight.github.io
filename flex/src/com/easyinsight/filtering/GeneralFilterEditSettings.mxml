@@ -102,8 +102,8 @@
             }*/
             _filterDefinition.applyBeforeAggregation = aggregationCheckbox.selected;
             _filterDefinition.showOnReportView = reportViewCheckbox.selected;
-            /*_filterDefinition.filterName = filterNameInput.text;
-            _filterDefinition.templateFilter = parameterFilterCheckbox.selected;*/
+            _filterDefinition.filterName = filterNameInput.text;
+            _filterDefinition.templateFilter = parameterFilterCheckbox.selected;
 
             dispatchEvent(new FilterEditEvent(_filterDefinition, previousDefinition, null, rebuild));
             PopUpManager.removePopUp(this);
@@ -122,12 +122,12 @@
             <mx:FormItem label="Show on Report View:">
                 <mx:CheckBox label="Show On Report View:" selected="{showOnReportView}" id="reportViewCheckbox"/>
             </mx:FormItem>
-            <!--<mx:FormItem label="Filter Name:">
+            <mx:FormItem label="Filter Name:">
                 <mx:TextInput id="filterNameInput" text="{filterName}"/>
             </mx:FormItem>
             <mx:FormItem label="Parameter Filter:">
                 <mx:CheckBox id="parameterFilterCheckbox" selected="{parameterFilter}"/>
-            </mx:FormItem>-->
+            </mx:FormItem>
         </mx:Form>
         <mx:Box id="filterDetailBox"/>
 		<mx:HBox width="100%" horizontalAlign="center">

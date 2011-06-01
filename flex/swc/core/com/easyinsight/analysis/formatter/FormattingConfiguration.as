@@ -20,6 +20,8 @@ import mx.formatters.CurrencyFormatter;
 		public var formattingConfigurationID:int;
 		public var formattingType:int;
 		public var textUom:String;
+
+        public var precision:int = 2;
 		
 		public function FormattingConfiguration()
 		{
@@ -30,12 +32,12 @@ import mx.formatters.CurrencyFormatter;
 			switch (formattingType) {
 				case NUMBER:
 					var numberFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();
-					numberFormatter.precision = 2;
+					numberFormatter.precision = precision;
 					formatter = numberFormatter;
 					break;
 				case CURRENCY:
 					var currencyFormatter:CurrencyFormatter = new CurrencyFormatter();
-					currencyFormatter.precision = 2;
+					currencyFormatter.precision = precision;
                     currencyFormatter.currencySymbol = User.getInstance().currencySymbol; 
 					formatter = currencyFormatter;
 					break;

@@ -25,7 +25,6 @@ import java.util.Date;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Session;
 import org.apache.jcs.access.exception.CacheException;
 
@@ -37,6 +36,27 @@ import org.apache.jcs.access.exception.CacheException;
 public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
+
+    public ReportInfo getReportInfo(long reportID) {
+        SecurityUtil.authorizeInsight(reportID);
+        try {
+            WSAnalysisDefinition report = openAnalysisDefinition(reportID);
+            boolean dataSourceAccessible;
+            try {
+                SecurityUtil.authorizeFeedAccess(report.getDataFeedID());
+                dataSourceAccessible = true;
+            } catch (Exception e) {
+                dataSourceAccessible = false;
+            }
+            ReportInfo reportInfo = new ReportInfo();
+            reportInfo.setAdmin(dataSourceAccessible);
+            reportInfo.setReport(report);
+            return reportInfo;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
 
     public ReportJoins determineOverrides(long dataSourceID, List<AnalysisItem> items) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
@@ -192,7 +212,7 @@ public class AnalysisService {
         try {
             conn.setAutoCommit(false);
             Session session = Database.instance().createSession(conn);
-            AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition, session);
+            AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
             Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
             AnalysisDefinition clone = analysisDefinition.clone(null, feed.getFields(), false);
             clone.setAuthorName(SecurityUtil.getUserName());
@@ -418,7 +438,7 @@ public class AnalysisService {
             stmt.setLong(1, wsAnalysisDefinition.getAnalysisID());
             stmt.executeUpdate();
 
-            AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(wsAnalysisDefinition, session);
+            AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(wsAnalysisDefinition);
             analysisDefinition.setUserBindings(bindings);
             analysisDefinition.setAuthorName(SecurityUtil.getUserName());
             analysisStorage.saveAnalysis(analysisDefinition, session);

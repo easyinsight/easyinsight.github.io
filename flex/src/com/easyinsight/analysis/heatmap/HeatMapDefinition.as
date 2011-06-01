@@ -2,7 +2,6 @@ package com.easyinsight.analysis.heatmap {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
-import com.easyinsight.analysis.NumericReportFormItem;
 
 import mx.collections.ArrayCollection;
 
@@ -51,12 +50,6 @@ public class HeatMapDefinition extends AnalysisDefinition {
         if (measures.length > 0) {
             measure = measures.getItemAt(0) as AnalysisItem;
         }
-    }
-
-    override public function createFormItems():ArrayCollection {
-        var items:ArrayCollection = super.createFormItems();
-        items.addItem(new NumericReportFormItem("Precision", "precision", precision, this, 0, 3));
-        return items;
     }
 }
 }

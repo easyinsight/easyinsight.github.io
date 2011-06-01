@@ -87,11 +87,5 @@ public class ChartDefinition extends AnalysisDefinition {
         }
         return selected;
     }
-
-    override public function createFormItems():ArrayCollection {
-        var items:ArrayCollection = super.createFormItems();
-        items.addItem(new CheckBoxReportFormItem("Show Legend", "showLegend", showLegend, this));
-        return items;
-    }
 }
 }

@@ -14,6 +14,7 @@ package com.easyinsight.framework
         public var title:String;
         public var personaID:int;
         public var optInEmail:Boolean;
+        public var fixedDashboardID:int;
 		
 		public function UserTransferObject()
 		{

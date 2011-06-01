@@ -294,13 +294,6 @@ public class SliderMeasureFilter extends HBox implements IFilter
 
     }
 
-    /*private function gotMetadata(event:ResultEvent):void {
-     var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
-     var measureMetadata:AnalysisMeasureResultMetadata = metadata as AnalysisMeasureResultMetadata;
-
-
-     }*/
-
     private function onRelease(event:SliderEvent):void {
         var slider:HSlider = event.currentTarget as HSlider;
         if (_filterDefinition.startValueDefined && _filterDefinition.endValueDefined) {

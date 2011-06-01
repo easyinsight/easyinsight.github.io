@@ -37,18 +37,6 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
         return ChartTypes.COLUMN_FAMILY;
     }
 
-    override public function createFormItems():ArrayCollection {
-        var items:ArrayCollection = super.createFormItems();
-        items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", colorScheme,
-                    this, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
-        items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", useChartColor, this));
-        items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", chartColor, this));
-        items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", columnSort, this,
-                [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
-                ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
-        return items;
-    }
-
     public function populateGroupings(dataSet:ArrayCollection, uniques:ArrayCollection):ArrayCollection {
         var map:Object = new Object();
         var results:ArrayCollection = new ArrayCollection();

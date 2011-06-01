@@ -1,11 +1,7 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.definitions.WSForm;
-import com.easyinsight.analysis.definitions.WSGanttChartDefinition;
-import com.easyinsight.analysis.definitions.WSHeatMap;
-import com.easyinsight.analysis.definitions.WSTimeline;
+import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.analysis.gauge.GaugeDefinitionState;
-import org.hibernate.Session;
 
 /**
  * User: James Boe
@@ -14,7 +10,7 @@ import org.hibernate.Session;
  */
 public class AnalysisDefinitionFactory {
 
-    public static AnalysisDefinition fromWSDefinition(WSAnalysisDefinition wsAnalysisDefinition, Session session) {
+    public static AnalysisDefinition fromWSDefinition(WSAnalysisDefinition wsAnalysisDefinition) {
         AnalysisDefinitionState analysisDefinitionState;
         if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.CROSSTAB)) {
             WSCrosstabDefinition wsCrosstabDefinition = (WSCrosstabDefinition) wsAnalysisDefinition;
@@ -79,7 +75,7 @@ public class AnalysisDefinitionFactory {
             TimelineDefinitionState timelineDefinitionState = new TimelineDefinitionState();
             timelineDefinitionState.setDefinitionID(wsTimeline.getTimelineID());
             timelineDefinitionState.setFilter(wsTimeline.getSequence());
-            timelineDefinitionState.setContainedReport(AnalysisDefinitionFactory.fromWSDefinition(wsTimeline.getReport(), session));
+            timelineDefinitionState.setContainedReport(AnalysisDefinitionFactory.fromWSDefinition(wsTimeline.getReport()));
             analysisDefinitionState = timelineDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.HEATMAP)) {
             WSHeatMap heatMap = (WSHeatMap) wsAnalysisDefinition;
@@ -100,6 +96,11 @@ public class AnalysisDefinitionFactory {
             GanttChartDefinitionState ganttChartDefinitionState = new GanttChartDefinitionState();
             ganttChartDefinitionState.setGanttDefinitionID(gantt.getGanttDefinitionID());
             analysisDefinitionState = ganttChartDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.VERTICAL_LIST)) {
+            WSVerticalListDefinition verticalListDefinition = (WSVerticalListDefinition) wsAnalysisDefinition;
+            VerticalListDefinitionState verticalListDefinitionState = new VerticalListDefinitionState();
+            verticalListDefinitionState.setVerticalListID(verticalListDefinition.getVerticalListID());
+            analysisDefinitionState = verticalListDefinitionState;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());
         }
@@ -130,9 +131,6 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setMarketplaceVisible(wsAnalysisDefinition.isMarketplaceVisible());
         analysisDefinition.setTemporaryReport(wsAnalysisDefinition.isTemporaryReport());
         analysisDefinition.setSolutionVisible(wsAnalysisDefinition.isSolutionVisible());
-        analysisDefinition.setInsecureEmbedEnabled(wsAnalysisDefinition.isInsecureEmbedEnabled());
-        analysisDefinition.setEmbedPassword(wsAnalysisDefinition.getEmbedPassword());
-        analysisDefinition.setEmbedUserName(wsAnalysisDefinition.getEmbedUserName());
         analysisDefinition.setVisibleAtFeedLevel(wsAnalysisDefinition.isVisibleAtFeedLevel());
         return analysisDefinition;
     }

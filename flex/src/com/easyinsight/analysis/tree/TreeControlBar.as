@@ -5,14 +5,14 @@ import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
+import com.easyinsight.analysis.FeedMetadata;
 import com.easyinsight.analysis.HierarchyDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
-import com.easyinsight.analysis.list.TreeDefinitionEditWindow;
-import com.easyinsight.util.PopUpUtil;
+import com.easyinsight.analysis.list.EnableLookupEditingEvent;
 
 import flash.events.MouseEvent;
 
@@ -20,7 +20,6 @@ import mx.collections.ArrayCollection;
 
 import mx.controls.Button;
 import mx.controls.Label;
-import mx.managers.PopUpManager;
 
 public class TreeControlBar extends ReportControlBar implements IReportControlBar {
     private var hierarchyGrouping:ListDropAreaGrouping;
@@ -39,28 +38,28 @@ public class TreeControlBar extends ReportControlBar implements IReportControlBa
         itemGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
     }
 
-    [Embed(source="../../../../../assets/table_edit.png")]
-    public var tableEditIcon:Class;
-
-    private function editLimits(event:MouseEvent):void {
-        var window:TreeDefinitionEditWindow = new TreeDefinitionEditWindow();
-        window.treeDefinition = treeDefinition;
-        window.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, onUpdate);
-        PopUpManager.addPopUp(window, this, true);
-        PopUpUtil.centerPopUp(window);
-    }
+    [Embed(source="../../../../../assets/tables_x16.png")]
+    public var lookupTableIcon:Class;
 
     private function onUpdate(event:AnalysisItemUpdateEvent):void {
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
+    private var _feedMetadata:FeedMetadata;
+
+    public function set feedMetadata(value:FeedMetadata):void {
+        _feedMetadata = value;
+    }
+
     override protected function createChildren():void {
         super.createChildren();
-        var pieEditButton:Button = new Button();
-        pieEditButton.setStyle("icon", tableEditIcon);
-        pieEditButton.toolTip = "Edit Tree Properties...";
-        pieEditButton.addEventListener(MouseEvent.CLICK, editLimits);
-        addChild(pieEditButton);
+        if (_feedMetadata.lookupTables.length > 0) {
+            var lookupTableButton:Button = new Button();
+            lookupTableButton.setStyle("icon", lookupTableIcon);
+            lookupTableButton.toolTip = "Edit Lookup Tables";
+            lookupTableButton.addEventListener(MouseEvent.CLICK, editLookupTables);
+            addChild(lookupTableButton);
+        }
         var groupingLabel:Label = new Label();
         groupingLabel.text = "Hierarchy:";
         groupingLabel.setStyle("fontSize", 14);
@@ -94,6 +93,11 @@ public class TreeControlBar extends ReportControlBar implements IReportControlBa
         treeDefinition.hierarchy = hierarchyGrouping.getListColumns()[0];
         treeDefinition.items = new ArrayCollection(itemGrouping.getListColumns());
         return treeDefinition;
+    }
+
+    private function editLookupTables(event:MouseEvent):void {
+        dispatchEvent(new EnableLookupEditingEvent());
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA, false));
     }
 
     public function isDataValid():Boolean {

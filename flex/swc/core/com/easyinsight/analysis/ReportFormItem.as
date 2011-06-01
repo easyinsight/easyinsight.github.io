@@ -8,14 +8,16 @@ public class ReportFormItem extends FormItem {
     public var report:Object;
     public var value:Object;
     public var enabledProperty:String;
+    public var reloadOnChange:Boolean;
 
-    public function ReportFormItem(label:String, property:String, value:Object, report:Object, enabledProperty:String = null) {
+    public function ReportFormItem(label:String = null, property:String = null, value:Object = null, report:Object = null, enabledProperty:String = null, reloadOnChange:Boolean = false) {
         super();
         this.label = label;
         this.value = value;
         this.report = report;
         this.property = property;
         this.enabledProperty = enabledProperty;
+        this.reloadOnChange = reloadOnChange;
         direction = "horizontal";
     }
 

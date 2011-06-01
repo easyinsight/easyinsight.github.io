@@ -127,39 +127,6 @@ import mx.controls.Label;
                 _filterDefinition.inclusive = true;
                 _filterDefinition.field = _analysisItem;
             }
-		}
-		
-		override protected function commitProperties():void {
-			super.commitProperties();						
-			dataService = new RemoteObject();
-			dataService.destination = "data";
-			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset());
-		}
-		
-		private function gotMetadata(event:ResultEvent):void {
-			var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as 
-				AnalysisDimensionResultMetadata;
-			/*var strings:ArrayCollection = new ArrayCollection();
-			for each (var value:Value in analysisDimensionResultMetadata.values) {
-				var string:String = String(value.getValue());
-				if (!strings.contains(string)) {
-					strings.addItem(string);
-				}
-			}
-			var sort:Sort = new Sort();
-			strings.sort = sort;
-			strings.refresh();			
-			comboBox.dataProvider = strings;
-			comboBox.rowCount = Math.min(strings.length, 15);
-			var selectedValue:String;
-			if (_filterDefinition.filteredValues.length == 0) {
-				_filterDefinition.filteredValues.addItem(strings.getItemAt(0));
-			}
-			selectedValue = _filterDefinition.filteredValues.getItemAt(0) as String;							
-			comboBox.selectedItem = selectedValue;
-			comboBox.enabled = true;
-			deleteButton.enabled = true;*/
             if (deleteButton != null) {
 			    deleteButton.enabled = true;
             }
@@ -169,9 +136,8 @@ import mx.controls.Label;
             } else {
                 dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
             }
-
 		}
-		
+
 		public function toInclusive(filterValues:ArrayCollection):void {
 			_filterDefinition.inclusive = true;
 			_filterDefinition.filteredValues = filterValues;

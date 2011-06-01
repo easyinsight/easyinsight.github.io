@@ -13,10 +13,6 @@ public class EmbeddedResults implements Serializable, Cloneable {
     protected WSAnalysisDefinition definition;
     private boolean dataSourceAccessible;
     protected DataSourceInfo dataSourceInfo;
-    protected double ratingsAverage;
-    protected int ratingsCount;
-    protected int myRating;
-    protected String attribution;
     private ReportFault reportFault;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -36,41 +32,9 @@ public class EmbeddedResults implements Serializable, Cloneable {
         this.reportFault = reportFault;
     }
 
-    public int getMyRating() {
-        return myRating;
-    }
-
-    public void setMyRating(int myRating) {
-        this.myRating = myRating;
-    }
-
     @Override
     public EmbeddedResults clone() throws CloneNotSupportedException {
         return (EmbeddedResults) super.clone();
-    }
-
-    public double getRatingsAverage() {
-        return ratingsAverage;
-    }
-
-    public void setRatingsAverage(double ratingsAverage) {
-        this.ratingsAverage = ratingsAverage;
-    }
-
-    public int getRatingsCount() {
-        return ratingsCount;
-    }
-
-    public void setRatingsCount(int ratingsCount) {
-        this.ratingsCount = ratingsCount;
-    }
-
-    public String getAttribution() {
-        return attribution;
-    }
-
-    public void setAttribution(String attribution) {
-        this.attribution = attribution;
     }
 
     public DataSourceInfo getDataSourceInfo() {

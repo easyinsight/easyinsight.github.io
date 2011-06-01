@@ -90,8 +90,9 @@ public class DashboardStorage {
     public void saveDashboard(Dashboard dashboard, EIConnection conn) throws SQLException {
         if (dashboard.getId() == 0) {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD (DASHBOARD_NAME, URL_KEY, " +
-                    "ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE, UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, TEMPORARY_DASHBOARD) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    "ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE, UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, TEMPORARY_DASHBOARD," +
+                    "PUBLIC_VISIBLE, PADDING_LEFT, PADDING_RIGHT, FILTER_BORDER_STYLE, FILTER_BORDER_COLOR, filter_background_color, FILTER_BACKGROUND_ALPHA) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             insertStmt.setString(1, dashboard.getName());
             insertStmt.setString(2, dashboard.getUrlKey());
             insertStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -102,12 +103,21 @@ public class DashboardStorage {
             insertStmt.setBoolean(8, dashboard.isExchangeVisible());
             insertStmt.setString(9, dashboard.getAuthorName());
             insertStmt.setBoolean(10, dashboard.isTemporary());
+            insertStmt.setBoolean(11, dashboard.isPublicVisible());
+            insertStmt.setInt(12, dashboard.getPaddingLeft());
+            insertStmt.setInt(13, dashboard.getPaddingRight());
+            insertStmt.setString(14, dashboard.getFilterBorderStyle());
+            insertStmt.setInt(15, dashboard.getFilterBorderColor());
+            insertStmt.setInt(16, dashboard.getFilterBackgroundColor());
+            insertStmt.setDouble(16, dashboard.getFilterBackgroundAlpha());
             insertStmt.execute();
             dashboard.setId(Database.instance().getAutoGenKey(insertStmt));
             insertStmt.close();
         } else {
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET DASHBOARD_NAME = ?," +
-                    "URL_KEY = ?, ACCOUNT_VISIBLE = ?, UPDATE_DATE = ?, DESCRIPTION = ?, EXCHANGE_VISIBLE = ?, AUTHOR_NAME = ?, TEMPORARY_DASHBOARD = ? WHERE DASHBOARD_ID = ?");
+                    "URL_KEY = ?, ACCOUNT_VISIBLE = ?, UPDATE_DATE = ?, DESCRIPTION = ?, EXCHANGE_VISIBLE = ?, AUTHOR_NAME = ?, TEMPORARY_DASHBOARD = ?," +
+                    "PUBLIC_VISIBLE = ?, PADDING_LEFT = ?, PADDING_RIGHT = ?, filter_border_style = ?, filter_border_color = ?, filter_background_color = ?," +
+                    "filter_background_alpha = ? WHERE DASHBOARD_ID = ?");
             updateStmt.setString(1, dashboard.getName());
             updateStmt.setString(2, dashboard.getUrlKey());
             updateStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -116,7 +126,14 @@ public class DashboardStorage {
             updateStmt.setBoolean(6, dashboard.isExchangeVisible());
             updateStmt.setString(7, dashboard.getAuthorName());
             updateStmt.setBoolean(8, dashboard.isTemporary());
-            updateStmt.setLong(9, dashboard.getId());
+            updateStmt.setBoolean(9, dashboard.isPublicVisible());
+            updateStmt.setInt(10, dashboard.getPaddingLeft());
+            updateStmt.setInt(11, dashboard.getPaddingRight());
+            updateStmt.setString(12, dashboard.getFilterBorderStyle());
+            updateStmt.setInt(13, dashboard.getFilterBorderColor());
+            updateStmt.setInt(14, dashboard.getFilterBackgroundColor());
+            updateStmt.setDouble(15, dashboard.getFilterBackgroundAlpha());
+            updateStmt.setLong(16, dashboard.getId());
             updateStmt.executeUpdate();
             updateStmt.close();
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ?");
@@ -173,7 +190,8 @@ public class DashboardStorage {
     public Dashboard getDashboard(long dashboardID, EIConnection conn) throws Exception {
         Dashboard dashboard;
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, URL_KEY, ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE," +
-                    "UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, temporary_dashboard FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                    "UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, temporary_dashboard, public_visible, padding_left, padding_right," +
+                "filter_border_style, filter_border_color, filter_background_color, filter_background_alpha FROM DASHBOARD WHERE DASHBOARD_ID = ?");
         queryStmt.setLong(1, dashboardID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -189,6 +207,13 @@ public class DashboardStorage {
             dashboard.setExchangeVisible(rs.getBoolean(8));
             dashboard.setAuthorName(rs.getString(9));
             dashboard.setTemporary(rs.getBoolean(10));
+            dashboard.setPublicVisible(rs.getBoolean(11));
+            dashboard.setPaddingLeft(rs.getInt(12));
+            dashboard.setPaddingRight(rs.getInt(13));
+            dashboard.setFilterBorderStyle(rs.getString(14));
+            dashboard.setFilterBorderColor(rs.getInt(15));
+            dashboard.setFilterBackgroundColor(rs.getInt(16));
+            dashboard.setFilterBackgroundAlpha(rs.getDouble(16));
             PreparedStatement findElementsStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, ELEMENT_TYPE FROM " +
                     "DASHBOARD_ELEMENT, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ? AND DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID = DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID");
             findElementsStmt.setLong(1, dashboardID);

@@ -113,7 +113,7 @@ public class SecurityUtil {
                         user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                         user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
                         account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()),
-                        account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail());
+                        account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID());
             } else {
                 throw new SecurityException();
             }
@@ -494,15 +494,17 @@ public class SecurityUtil {
         boolean feedVisibility = false;
         boolean accountVisibility = false;
         long dataFeedID = 0;
+        boolean publicVisibility = false;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT FEED_VISIBILITY, ACCOUNT_VISIBLE, DATA_FEED_ID FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT FEED_VISIBILITY, ACCOUNT_VISIBLE, DATA_FEED_ID, PUBLICLY_VISIBLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
             authorizeStmt.setLong(1, insightID);
             ResultSet rs = authorizeStmt.executeQuery();
             if (rs.next()) {
                 feedVisibility = rs.getBoolean(1);
                 accountVisibility = rs.getBoolean(2);
                 dataFeedID = rs.getLong(3);
+                publicVisibility = rs.getBoolean(4);
             } else {
                 throw new SecurityException();
             }
@@ -511,6 +513,18 @@ public class SecurityUtil {
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
+        }
+
+        UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+        if (userPrincipal == null) {
+            userPrincipal = threadLocal.get();
+            if(userPrincipal == null) {
+                if (!publicVisibility) {
+                    throw new SecurityException();
+                } else {
+                    return Roles.SUBSCRIBER;
+                }
+            }
         }
 
         if (accountVisibility) {
@@ -522,14 +536,22 @@ public class SecurityUtil {
                 ResultSet rs = query.executeQuery();
                 if (rs.next()) {
                     long accountID = rs.getLong(1);
-                    if (accountID == getAccountID()) {
+                    if (accountID == userPrincipal.getAccountID()) {
                         return Roles.OWNER;
                         // all good
                     } else {
-                        throw new SecurityException();
+                        if (!publicVisibility) {
+                            throw new SecurityException();
+                        } else {
+                            return Roles.SUBSCRIBER;
+                        }
                     }
                 } else {
-                    throw new SecurityException();
+                    if (!publicVisibility) {
+                        throw new SecurityException();
+                    } else {
+                        return Roles.SUBSCRIBER;
+                    }
                 }
             } catch (SQLException e) {
                 LogClass.error(e);
@@ -541,16 +563,13 @@ public class SecurityUtil {
             authorizeFeedAccess(dataFeedID);
             return Roles.OWNER;
         } else {
-            UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
-            if (userPrincipal == null) {
-                userPrincipal = threadLocal.get();
-                if(userPrincipal == null) {
-                    throw new SecurityException();
-                }
-            }
             int role = getInsightRole(userPrincipal.getUserID(), insightID);
             if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
-                throw new SecurityException();
+                if (!publicVisibility) {
+                    throw new SecurityException();
+                } else {
+                    return Roles.SUBSCRIBER;
+                }
             }
             return role;
         }

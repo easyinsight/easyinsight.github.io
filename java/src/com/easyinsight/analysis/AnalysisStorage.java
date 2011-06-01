@@ -107,26 +107,6 @@ public class AnalysisStorage {
         return analysisDefinition;
     }
 
-    public AnalysisDefinition cloneReport(long analysisID, Connection conn, List<AnalysisItem> analysisItems) {
-        AnalysisDefinition analysisDefinition = null;
-        Session session = Database.instance().createSession(conn);
-        try {
-            session.beginTransaction();
-            List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
-            if (results.size() > 0) {
-                analysisDefinition = (AnalysisDefinition) results.get(0);
-                analysisDefinition = analysisDefinition.clone(null, analysisItems, false);
-            }
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-        return analysisDefinition;
-    }
-
     public AnalysisDefinition getPersistableReport(long analysisID, Connection conn) {
         AnalysisDefinition analysisDefinition = null;
         Session session = Database.instance().createSession(conn);

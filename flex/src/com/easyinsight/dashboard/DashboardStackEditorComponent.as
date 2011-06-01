@@ -49,6 +49,7 @@ public class DashboardStackEditorComponent extends HBox implements IDashboardEdi
         removeAllChildren();
         for (var i:int = 0; i < dashboardStack.count; i++) {
             var box:DashboardBox = new DashboardBox();
+            box.dashboardEditorMetadata = dashboardEditorMetadata;
             if (dashboardStack.gridItems.length > i) {
                 var e:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
                 box.element = e.dashboardElement;
@@ -76,9 +77,14 @@ public class DashboardStackEditorComponent extends HBox implements IDashboardEdi
         return valid;
     }
 
+    public var dashboardEditorMetadata:DashboardEditorMetadata;
+
     public function edit():void {
         var window:StackDimensionsWindow = new StackDimensionsWindow();
         window.dashboardStack = dashboardStack;
+        window.availableDimensions = dashboardEditorMetadata.availableFields;
+        window.dataSourceID = dashboardEditorMetadata.dataSourceID;
+        window.allFields = dashboardEditorMetadata.allFields;
         window.addEventListener(GridDimensionEvent.GRID_DIMENSION, onDimensions, false, 0, true);
         PopUpManager.addPopUp(window, this, true);
         PopUpUtil.centerPopUp(window);

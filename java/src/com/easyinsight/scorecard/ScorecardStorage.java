@@ -80,11 +80,13 @@ public class ScorecardStorage {
         clearKPILinksStmt.setLong(1, scorecard.getScorecardID());
         clearKPILinksStmt.executeUpdate();
         clearKPILinksStmt.close();
-        PreparedStatement addLinkStmt = conn.prepareStatement("INSERT INTO SCORECARD_TO_KPI (SCORECARD_ID, KPI_ID) VALUES (?, ?)");
+        PreparedStatement addLinkStmt = conn.prepareStatement("INSERT INTO SCORECARD_TO_KPI (SCORECARD_ID, KPI_ID, KPI_INDEX) VALUES (?, ?, ?)");
+        int i = 0;
         for (KPI kpi : scorecard.getKpis()) {
             new KPIStorage().saveKPI(kpi, conn);
             addLinkStmt.setLong(1, scorecard.getScorecardID());
             addLinkStmt.setLong(2, kpi.getKpiID());
+            addLinkStmt.setInt(3, i++);
             addLinkStmt.execute();
         }
         addLinkStmt.close();
@@ -152,7 +154,7 @@ public class ScorecardStorage {
             }
             scorecard.setDataSourceID(dataSourceID);
             PreparedStatement getKPIStmt = conn.prepareStatement("SELECT SCORECARD_TO_KPI.KPI_ID FROM SCORECARD_TO_KPI WHERE " +
-                    "scorecard_to_kpi.scorecard_id = ?");
+                    "scorecard_to_kpi.scorecard_id = ? order by scorecard_to_kpi.kpi_index");
             getKPIStmt.setLong(1, scorecard.getScorecardID());
             List<KPI> kpis = new ArrayList<KPI>();
             ResultSet kpiRS = getKPIStmt.executeQuery();
@@ -247,10 +249,11 @@ public class ScorecardStorage {
     }
 
     public void linkKPIToScorecard(KPI kpi, long scorecardID, EIConnection conn) throws Exception {
-        PreparedStatement addLinkStmt = conn.prepareStatement("INSERT INTO SCORECARD_TO_KPI (SCORECARD_ID, KPI_ID) VALUES (?, ?)");
+        PreparedStatement addLinkStmt = conn.prepareStatement("INSERT INTO SCORECARD_TO_KPI (SCORECARD_ID, KPI_ID, kpi_index) VALUES (?, ?, ?)");
         
         addLinkStmt.setLong(1, scorecardID);
         addLinkStmt.setLong(2, kpi.getKpiID());
+        addLinkStmt.setInt(3, 0);
         addLinkStmt.execute();
         addLinkStmt.close();
     }

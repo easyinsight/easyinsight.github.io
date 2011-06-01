@@ -24,6 +24,41 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private int headerColor1;
     private int headerColor2;
     private int textColor;
+    private int headerTextColor;
+    private int summaryRowTextColor;
+    private int summaryRowBackgroundColor;
+
+    public int getSummaryRowTextColor() {
+        return summaryRowTextColor;
+    }
+
+    public void setSummaryRowTextColor(int summaryRowTextColor) {
+        this.summaryRowTextColor = summaryRowTextColor;
+    }
+
+    public int getSummaryRowBackgroundColor() {
+        return summaryRowBackgroundColor;
+    }
+
+    public void setSummaryRowBackgroundColor(int summaryRowBackgroundColor) {
+        this.summaryRowBackgroundColor = summaryRowBackgroundColor;
+    }
+
+    public int getTextColor() {
+        return textColor;
+    }
+
+    public void setTextColor(int textColor) {
+        this.textColor = textColor;
+    }
+
+    public int getHeaderTextColor() {
+        return headerTextColor;
+    }
+
+    public void setHeaderTextColor(int headerTextColor) {
+        this.headerTextColor = headerTextColor;
+    }
 
     public int getHeaderColor1() {
         return headerColor1;
@@ -159,11 +194,14 @@ public class WSListDefinition extends WSAnalysisDefinition {
     @Override
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
-        rowColor1 = (int) findNumberProperty(properties, "rowColor1", 0xffffff);
-        rowColor2 = (int) findNumberProperty(properties, "rowColor2", 0xeeeded);
+        rowColor1 = (int) findNumberProperty(properties, "rowColor1", 0xF7F7F7);
+        rowColor2 = (int) findNumberProperty(properties, "rowColor2", 0xFFFFFF);
         headerColor1 = (int) findNumberProperty(properties, "headerColor1", 0xffffff);
-        headerColor2 = (int) findNumberProperty(properties, "headerColor2", 0xdddddd);
-        headerColor2 = (int) findNumberProperty(properties, "textColor", 0x000000);
+        headerColor2 = (int) findNumberProperty(properties, "headerColor2", 0xEFEFEF);
+        textColor = (int) findNumberProperty(properties, "textColor", 0x000000);
+        headerTextColor = (int) findNumberProperty(properties, "headerTextColor", 0x000000);
+        summaryRowTextColor = (int) findNumberProperty(properties, "summaryRowTextColor", 0x6699ff);
+        summaryRowBackgroundColor = (int) findNumberProperty(properties, "summaryRowBackgroundColor", 0x000000);
     }
 
     public List<ReportProperty> createProperties() {
@@ -172,7 +210,10 @@ public class WSListDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("rowColor2", rowColor2));
         properties.add(new ReportNumericProperty("headerColor1", headerColor1));
         properties.add(new ReportNumericProperty("headerColor2", headerColor2));
-        properties.add(new ReportNumericProperty("textColor", headerColor2));
+        properties.add(new ReportNumericProperty("textColor", textColor));
+        properties.add(new ReportNumericProperty("headerTextColor", headerTextColor));
+        properties.add(new ReportNumericProperty("summaryRowTextColor", summaryRowTextColor));
+        properties.add(new ReportNumericProperty("summaryRowBackgroundColor", summaryRowBackgroundColor));
         return properties;
     }
 }

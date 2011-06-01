@@ -4,6 +4,7 @@ import com.easyinsight.analysis.ReportFault;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIOutcome;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ import java.util.List;
  */
 public class ScorecardResults {
     private ReportFault reportFault;
-    private List<KPIOutcome> outcomes;
+    private List<KPIOutcome> outcomes = new ArrayList<KPIOutcome>();
 
     public ReportFault getReportFault() {
         return reportFault;

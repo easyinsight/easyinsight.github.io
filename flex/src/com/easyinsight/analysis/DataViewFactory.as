@@ -12,6 +12,8 @@ import com.easyinsight.util.UserAudit;
 import flash.display.DisplayObject;
 import flash.events.Event;
 
+import flash.system.ApplicationDomain;
+
 import mx.binding.utils.BindingUtils;
 import mx.binding.utils.ChangeWatcher;
 import mx.collections.ArrayCollection;
@@ -163,7 +165,9 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _controlBar.addEventListener(ReportDataEvent.REQUEST_DATA, onDataRequest, false, 0, true);
         _controlBar.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromControlBar, false, 0, true);
         _controlBar.analysisDefinition = _analysisDefinition;
-        //BindingUtils.bindProperty(_controlBar, "width", this, "controlBarWidth");
+        if (Object(_controlBar).hasOwnProperty("feedMetadata")) {
+            _controlBar["feedMetadata"] = _feedMetadata;
+        }
         var box2:Box = new Box();
         box2.setStyle("paddingLeft", 5);
         box2.setStyle("paddingRight", 5);
@@ -254,7 +258,16 @@ public class DataViewFactory extends VBox implements IRetrievable {
             retrieveData();
         } else {
             _analysisDefinition = _controlBar.createAnalysisDefinition();
-            _reportRenderer.renderReport(_lastData, _analysisDefinition, new Object(), null);
+            _reportRenderer.renderReport(_lastData, _analysisDefinition, new Object(), _lastProperties);
+        }
+    }
+
+    public function rerender():void {
+        if (_lastData == null) {
+            retrieveData();
+        } else {
+            _analysisDefinition = _controlBar.createAnalysisDefinition();
+            _reportRenderer.renderReport(_lastData, _analysisDefinition, new Object(), _lastProperties);
         }
     }
 
@@ -273,6 +286,12 @@ public class DataViewFactory extends VBox implements IRetrievable {
                 }
             }
         }
+    }
+
+    private var _feedMetadata:FeedMetadata;
+
+    public function set feedMetadata(value:FeedMetadata):void {
+        _feedMetadata = value;
     }
 
     public function forceRetrieve():void {
@@ -294,6 +313,8 @@ public class DataViewFactory extends VBox implements IRetrievable {
         return _controlBar.isDataValid();
     }
 
+    private var _lastProperties:Object;
+
     private function gotData(event:DataServiceEvent):void {
         dispatchEvent(event);
         if (event.reportFault != null) {
@@ -301,6 +322,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         } else {
             _controlBar.onDataReceipt(event);
             _lastData = event.dataSet;
+            _lastProperties = event.additionalProperties;
             _reportRenderer.renderReport(event.dataSet, _analysisDefinition, new Object(), event.additionalProperties);
         }
     }
@@ -316,7 +338,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _loadingDisplay = new LoadingModuleDisplay();
         _loadingDisplay.moduleInfo = moduleInfo;
         reportCanvas.addChild(_loadingDisplay);
-        moduleInfo.load();
+        moduleInfo.load(ApplicationDomain.currentDomain);
     }
             
     private function reportLoadHandler(event:ModuleEvent):void {
@@ -335,6 +357,9 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
             _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
             _reportRenderer.addEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, itemChange, false, 0, true);
+            if (Object(_reportRenderer).hasOwnProperty("feedMetadata")) {
+                _reportRenderer["feedMetadata"] = _feedMetadata;
+            }
             if (_reportRenderer is ISelectableReportRenderer) {
                 reportSelectable = true;
                 reportWatcher = BindingUtils.bindProperty(_reportRenderer, "selectionEnabled", this, "reportSelectionEnabled");

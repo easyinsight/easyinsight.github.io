@@ -3,7 +3,6 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.ChartDefinition;
-import com.easyinsight.analysis.ComboBoxReportFormItem;
 
 import mx.collections.ArrayCollection;
 [Bindable]
@@ -102,17 +101,6 @@ public class TwoAxisDefinition extends ChartDefinition{
             }
         }
         return fields;
-    }
-
-    override public function createFormItems():ArrayCollection {
-        var items:ArrayCollection = super.createFormItems();
-        items.addItem(new ComboBoxReportFormItem("Form", "form", form,
-                this, ["segment", "step", "reverseStep", "horizontal", "curve"]));
-        items.addItem(new ComboBoxReportFormItem("Base Y Axis at Zero", "baseAtZero", baseAtZero,
-                this, ["true", "false"]));
-        items.addItem(new ComboBoxReportFormItem("Interpolate Values", "interpolateValues", interpolateValues,
-                this, ["true", "false"]));
-        return items;
     }
 }
 }

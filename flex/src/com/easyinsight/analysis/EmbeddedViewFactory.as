@@ -3,12 +3,14 @@ package com.easyinsight.analysis {
 import com.easyinsight.analysis.service.EmbeddedDataService;
 import com.easyinsight.analysis.service.ReportRetrievalFault;
 import com.easyinsight.customupload.ProblemDataEvent;
+import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.framework.Constants;
 import com.easyinsight.framework.DataServiceLoadingEvent;
-import com.easyinsight.report.AbstractViewFactory;
 import com.easyinsight.report.ReportCanvas;
 import com.easyinsight.report.ReportEventProcessor;
+import com.easyinsight.report.ReportInfo;
 import com.easyinsight.report.ReportNavigationEvent;
+import com.easyinsight.report.ReportSetupEvent;
 import com.easyinsight.util.EIErrorEvent;
 
 import flash.display.DisplayObject;
@@ -19,13 +21,23 @@ import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.Canvas;
+import mx.containers.VBox;
 import mx.controls.Alert;
 import mx.controls.ProgressBar;
 import mx.events.ModuleEvent;
 import mx.modules.IModuleInfo;
 import mx.modules.ModuleManager;
+import mx.rpc.events.ResultEvent;
+import mx.rpc.remoting.RemoteObject;
 
-public class EmbeddedViewFactory extends AbstractViewFactory implements IRetrievable {
+public class EmbeddedViewFactory extends VBox implements IRetrievable {
+
+    private var _reportID:int;
+    private var _dataSourceID:int;
+    private var _availableFields:ArrayCollection;
+    private var _filterDefinitions:ArrayCollection;
+    private var _additionalFilterDefinitions:ArrayCollection;
+    private var _reportType:int;
 
     private var _reportRendererModule:String;
     //private var _newDefinition:Class;
@@ -40,23 +52,25 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
     private var _reportRenderer:IReportRenderer;
     private var _dataService:IEmbeddedDataService = new EmbeddedDataService();
 
-
-
     private var pendingRequest:Boolean = false;
 
     public function EmbeddedViewFactory() {
+        super();
+        this.percentHeight = 100;
+        this.percentWidth = 100;
     }
 
+    public function set additionalFilterDefinitions(value:ArrayCollection):void {
+        _additionalFilterDefinitions = value;
+    }
 
     public function get reportRendererModule():String {
         return _reportRendererModule;
     }
 
-    override public function set prefix(val:String):void {
+    public function set prefix(val:String):void {
         _prefix = val;
     }
-
-
 
     public function set reportDataService(val:Class):void {
         _reportDataService = val;
@@ -66,20 +80,13 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         _reportRendererModule = val;
     }
 
-    /*public function set newDefinition(val:Class):void {
-        _newDefinition = val;
-    }*/
-
     public function get dataService():IEmbeddedDataService {
         return _dataService;
     }
 
-    private var canvas:Canvas;
-
     private var reportCanvas:ReportCanvas;
 
     private var _showLoading:Boolean = false;
-
 
     [Bindable(event="showLoadingChanged")]
     public function get showLoading():Boolean {
@@ -106,7 +113,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         _dataService.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
         _dataService.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, retrievalFault);
         _dataService.addEventListener(EIErrorEvent.ERROR, onError);
-        canvas = new Canvas();
+        var canvas:Canvas = new Canvas();
         canvas.percentHeight = 100;
         canvas.percentWidth = 100;
         var box:Box = new Box();
@@ -139,7 +146,62 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         loadReportRenderer();
     }
 
-    private function retrievalFault(event:ReportRetrievalFault):void {
+    public function get reportType():int {
+        return _reportType;
+    }
+
+    public function set reportType(value:int):void {
+        _reportType = value;
+    }
+
+    public function set availableFields(val:ArrayCollection):void {
+        _availableFields = val;
+    }
+
+    public function set reportID(val:int):void {
+        _reportID = val;
+    }
+
+    public function loadRenderer():void {
+
+    }
+
+    public function set dataSourceID(value:int):void {
+        _dataSourceID = value;
+    }
+
+
+    public function get reportID():int {
+        return _reportID;
+    }
+
+    public function get dataSourceID():int {
+        return _dataSourceID;
+    }
+
+    public function get availableFields():ArrayCollection {
+        return _availableFields;
+    }
+
+    public function set filterDefinitions(value:ArrayCollection):void {
+        _filterDefinitions = value;
+    }
+
+    public function get filterDefinitions():ArrayCollection {
+        return _filterDefinitions;
+    }
+
+    private var _drillthroughFilters:ArrayCollection;
+
+    public function set drillthroughFilters(value:ArrayCollection):void {
+        _drillthroughFilters = value;
+    }
+
+    public function get drillthroughFilters():ArrayCollection {
+        return _drillthroughFilters;
+    }
+
+     private function retrievalFault(event:ReportRetrievalFault):void {
         overlayIndex = 2;
         dispatchEvent(event);
     }
@@ -150,11 +212,22 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         dispatchEvent(event);
     }
 
-    private function onDataRequest(event:ReportDataEvent):void {
-        retrieveData(false);
+    private var analysisService:RemoteObject;
+
+    public function setup():void {
+        analysisService = new RemoteObject();
+        analysisService.destination = "analysisDefinition";
+        analysisService.getReportInfo.addEventListener(ResultEvent.RESULT, gotReport);
+        analysisService.getReportInfo.send(_reportID);
     }
 
-    override public function retrieveData(allSources:Boolean = false):void {
+    public function gotReport(event:ResultEvent):void {
+        var info:ReportInfo = analysisService.getReportInfo.lastResult as ReportInfo;
+        report = info.report;
+        dispatchEvent(new ReportSetupEvent(info));
+    }
+
+    public function retrieveData(allSources:Boolean = false):void {
         if (_reportRenderer == null) {
             pendingRequest = true;
         } else {
@@ -162,26 +235,45 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
             for each (var hierarchyOverride:AnalysisItemOverride in overrideObj) {
                 overrides.addItem(hierarchyOverride);
             }
-            _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, allSources, drillthroughFilters, _noCache, overrides);
+            var filters:ArrayCollection;
+            if (filterDefinitions == null) {
+                filters = new ArrayCollection();
+            } else {
+                filters = new ArrayCollection(filterDefinitions.toArray());
+            }
+            if (_additionalFilterDefinitions != null) {
+                for each (var filter:FilterDefinition in _additionalFilterDefinitions) {
+                    filters.addItem(filter);
+                }
+            }
+            _dataService.retrieveData(reportID, dataSourceID, filters, allSources, drillthroughFilters, _noCache, overrides);
         }
     }
 
     private var overrideObj:Object = new Object();
 
-    override public function addOverride(hierarchyOverride:AnalysisItemOverride):void {
+    public function addOverride(hierarchyOverride:AnalysisItemOverride):void {
         overrideObj[hierarchyOverride.analysisItemID] = hierarchyOverride;
     }
 
     private var _noCache:Boolean = false;
 
-    override public function set noCache(value:Boolean):void {
+    public function set noCache(value:Boolean):void {
         _noCache = value;
     }
 
     private var _report:AnalysisDefinition;
 
-    override public function get report():AnalysisDefinition {
+
+    [Bindable(event="reportChanged")]
+    public function get report():AnalysisDefinition {
         return _report;
+    }
+
+    public function set report(value:AnalysisDefinition):void {
+        if (_report == value) return;
+        _report = value;
+        dispatchEvent(new Event("reportChanged"));
     }
 
     private function onProblem(event:ProblemDataEvent):void {
@@ -192,7 +284,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, false, drillthroughFilters, _noCache, overrides);
     }
 
-    override public function gotData(event:EmbeddedDataServiceEvent):void {
+    public function gotData(event:EmbeddedDataServiceEvent):void {
         if (event.reportFault != null) {
             event.reportFault.popup(this, onProblem);
         } else {
@@ -258,8 +350,6 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         dispatchEvent(new Event("loadingChanged"));
     }
 
-// stackTrace="{stackTrace}" overlayIndex="{overlayIndex}" loading="{loading}"
-
     private function reportLoadHandler(event:ModuleEvent):void {
         _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
         _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender, false, 0, true);
@@ -305,13 +395,11 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
 
     }
 
-
-
     private function customChangeFromControlBar(event:CustomChangeEvent):void {
         _reportRenderer.onCustomChangeEvent(event);
     }
 
-    override public function updateExportMetadata():void {
+    public function updateExportMetadata():void {
         _reportRenderer.updateExportMetadata();
     }
 

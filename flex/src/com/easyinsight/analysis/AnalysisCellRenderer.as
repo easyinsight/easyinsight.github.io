@@ -2,6 +2,7 @@ package com.easyinsight.analysis
 {
 
 
+import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.pseudocontext.PseudoContextWindow;
 import com.easyinsight.pseudocontext.StandardContextWindow;
 
@@ -99,6 +100,14 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
                     this.text = "";
                 } else {
                     this.text = formatter.format(objVal.getValue());
+                }
+                if (_report is ListDefinition) {
+                    var listDefinition:ListDefinition = _report as ListDefinition;
+                    if (objVal.summary) {
+                        setColor(listDefinition.summaryRowTextColor);
+                    } else {
+                        setColor(listDefinition.textColor);
+                    }
                 }
             } else {
                 if (value[field] != null) {

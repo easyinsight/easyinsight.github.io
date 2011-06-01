@@ -1,6 +1,6 @@
 package com.easyinsight.analysis.charts.xaxisbased.column {
 import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.analysis.charts.xaxisbased.*;
+import com.easyinsight.analysis.ReportPropertiesEvent;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
@@ -13,21 +13,14 @@ import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
-import com.easyinsight.analysis.charts.ChartDefinitionEditWindow;
-import com.easyinsight.analysis.charts.ChartRotationEvent;
-
-import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-import mx.containers.HBox;
-import mx.controls.Button;
 import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.events.FlexEvent;
-import mx.managers.PopUpManager;
 
 public class StackedColumnChartControlBar extends ReportControlBar implements IReportControlBar  {
 
@@ -53,16 +46,8 @@ public class StackedColumnChartControlBar extends ReportControlBar implements IR
         setStyle("verticalAlign", "middle");
     }
 
-    [Embed(source="../../../../../../../assets/table_edit.png")]
-    public var tableEditIcon:Class;
-
     override protected function createChildren():void {
         super.createChildren();
-        var pieEditButton:Button = new Button();
-        pieEditButton.setStyle("icon", tableEditIcon);
-        pieEditButton.toolTip = "Edit Chart Properties...";
-        pieEditButton.addEventListener(MouseEvent.CLICK, editLimits);
-        addChild(pieEditButton);
         var measureLabel:Label = new Label();
         measureLabel.text = "Y Axis Measure:";
         measureLabel.setStyle("fontSize", 14);
@@ -91,7 +76,9 @@ public class StackedColumnChartControlBar extends ReportControlBar implements IR
         }
         var limitLabel:LinkButton = new LinkButton();
         limitLabel.setStyle("textDecoration", "underline");
-        limitLabel.addEventListener(MouseEvent.CLICK, editLimits);
+        limitLabel.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
+            dispatchEvent(new ReportPropertiesEvent(2));
+        });
         BindingUtils.bindProperty(limitLabel, "label", this, "limitText");
         addChild(limitLabel);
     }
@@ -106,14 +93,6 @@ public class StackedColumnChartControlBar extends ReportControlBar implements IR
     public function set limitText(val:String):void {
         _limitText = val;
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
-    }
-
-    private function editLimits(event:MouseEvent):void {
-        var window:ChartDefinitionEditWindow = new ChartDefinitionEditWindow();
-        window.chartDefinition = xAxisDefinition;
-        window.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, onUpdate);
-        PopUpManager.addPopUp(window, this, true);
-        PopUpUtil.centerPopUp(window);
     }
 
     private function onUpdate(event:AnalysisItemUpdateEvent):void {

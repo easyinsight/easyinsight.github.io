@@ -185,13 +185,14 @@
 
             if (results.reportFault != null) {
                 results.reportFault.popup(this, onProblem);
-            }
-            var outcomes:ArrayCollection = results.outcomes;
-            for each (var outcome:KPIOutcome in outcomes) {
-                for each (var kpi:KPI in kpis) {
-                    if (outcome.kpiName == kpi.name) {
-                        kpi.kpiOutcome = outcome;
-                        break;
+            } else {
+                var outcomes:ArrayCollection = results.outcomes;
+                for each (var outcome:KPIOutcome in outcomes) {
+                    for each (var kpi:KPI in kpis) {
+                        if (outcome.kpiName == kpi.name) {
+                            kpi.kpiOutcome = outcome;
+                            break;
+                        }
                     }
                 }
             }
@@ -206,7 +207,7 @@
             invalidateSize();
         }
 
-        protected override function measure():void {
+        /*protected override function measure():void {
             super.measure();
             if (kpis != null) {
                 if (adminGrid != null) {
@@ -214,7 +215,7 @@
                     adminGrid.height = adminGrid.measureHeightOfItems(0, kpis.length) + adminGrid.headerHeight + 4;
                 }
             }
-        }
+        }*/
 
         private function addKPI():void {
             var kpiWindow:KPIParentWindow = new KPIParentWindow();
@@ -256,7 +257,7 @@
             <mx:Button label="Add KPI..." click="addKPI()" icon="@Embed(source='../../../../assets/add.png')"/>
         </mx:HBox>
         <mx:HRule width="100%"/>
-        <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="970" id="adminGrid">
+        <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="970" id="adminGrid" dropEnabled="true" dragMoveEnabled="true">
             <mx:columns>
                 <util:EIDataGridColumn headerText="" dataField="name"
                                        itemRenderer="{kpiIconFactory}" width="50"

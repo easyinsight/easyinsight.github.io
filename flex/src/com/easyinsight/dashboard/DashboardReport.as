@@ -17,22 +17,16 @@ public class DashboardReport extends DashboardElement {
         super();
     }
 
-    override public function createEditorComponent():UIComponent {
+    override public function createEditorComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
         var comp:DashboardReportEditorComponent = new DashboardReportEditorComponent();
         comp.report = this;
         return comp;
     }
 
-    override public function createViewComponent():UIComponent {
+    override public function createViewComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
         var comp:DashboardReportViewComponent = new DashboardReportViewComponent();
         comp.dashboardReport = this;
         return comp;
-    }
-
-    override public function editableProperties():ArrayCollection {
-        var properties:ArrayCollection = new ArrayCollection();
-        properties.addItem(new CheckBoxReportFormItem("Show Label", "showLabel", showLabel, this));
-        return properties;
     }
 }
 }

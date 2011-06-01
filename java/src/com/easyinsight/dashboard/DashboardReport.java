@@ -100,6 +100,7 @@ public class DashboardReport extends DashboardElement {
             dashboardReport.setReport(new InsightDescriptor(rs.getLong(4), rs.getString(1), rs.getLong(2), rs.getInt(3), rs.getString(5), Roles.SUBSCRIBER));
             dashboardReport.setLabelPlacement(rs.getInt(6));
             dashboardReport.setShowLabel(rs.getBoolean(7));
+            dashboardReport.loadElement(elementID, conn);
         }
         queryStmt.close();
         return dashboardReport;

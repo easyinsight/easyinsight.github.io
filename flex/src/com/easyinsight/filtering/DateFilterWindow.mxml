@@ -36,7 +36,7 @@
         }
 
         private function addAbsolute():void {
-            var sliderDateFilter:SliderDateFilter = new SliderDateFilter(_feedID, _item);
+            var sliderDateFilter:SliderDateFilter = new SliderDateFilter(_feedID, _item, 0, 0);
             dispatchEvent(new FilterCreationEvent(sliderDateFilter));
             PopUpManager.removePopUp(this);
         }

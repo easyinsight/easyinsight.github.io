@@ -12,6 +12,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItemOverrideEvent;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
+        import com.easyinsight.analysis.EmbeddedViewFactory;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.service.ReportRetrievalFault;
@@ -209,15 +210,15 @@
         [Bindable]
         private var receivedData:Boolean;
 
-        private var _viewFactory:AbstractViewFactory;
+        private var _viewFactory:EmbeddedViewFactory;
 
 
         [Bindable(event="viewFactoryChanged")]
-        public function get viewFactory():AbstractViewFactory {
+        public function get viewFactory():EmbeddedViewFactory {
             return _viewFactory;
         }
 
-        public function set viewFactory(value:AbstractViewFactory):void {
+        public function set viewFactory(value:EmbeddedViewFactory):void {
             if (_viewFactory == value) return;
             _viewFactory = value;
             dispatchEvent(new Event("viewFactoryChanged"));
@@ -240,14 +241,14 @@
             _reportType = value;
         }
 
-        override protected function commitProperties():void {
+        /*override protected function commitProperties():void {
             super.commitProperties();
 
             if (retrievedDataOnce) {
                 viewFactory.retrieveData();
             }
         }
-
+*/
         private var retrievedDataOnce:Boolean = false;
 
         [Bindable]
@@ -269,45 +270,7 @@
             if (event.reportFault != null) {
                 event.reportFault.popup(this, onProblem);
             } else {
-                UserAudit.instance().audit(UserAudit.OPEN_REPORT_VIEW);
-                report = event.analysisDefinition;
                 dataSource = event.dataSourceInfo;
-                reportName = report.name;
-                description = report.description;
-                admin = event.dataSourceAccessible;
-
-                if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
-                    filterDefinitions = report.filterDefinitions;
-                    filterIndex = 1;
-                } else {
-                    if (leftButtonBar.contains(filterButton)) {
-                        leftButtonBar.removeChild(filterButton);
-                        filterIndex = 0;
-                        filterDefinitions = new ArrayCollection();
-                    }
-                }
-
-                transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-                if (!admin) {
-                    if (leftButtonBar.contains(editReportButton)) {
-                        leftButtonBar.removeChild(editReportButton);
-                    }
-                    showReportEditor = false;
-                }
-                // lastDataTime = dateFormatter.format(event.lastDataTime);
-                if (!_showAddBar) {
-                    var feedFragmentObject:Object = new Object();
-                    feedFragmentObject.reportID = report.urlKey;
-                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                    BrowserManager.getInstance().setFragment(feedFragmentString);
-                    BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-                } else {
-                    var templateFragmentObject:Object = new Object();
-                    templateFragmentObject.reportTemplateID = exchangeItem.descriptor.urlKey;
-                    var templateFragmentString:String = URLUtil.objectToString(templateFragmentObject);
-                    BrowserManager.getInstance().setFragment(templateFragmentString);
-                    BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-                }
                 loading = false;
                 overlayIndex = 0;
                 receivedData = true;
@@ -435,18 +398,61 @@
                 viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
                 viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
                 viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
+                viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onSetup);
 
                 loading = true;
 
                 // if filters were passed in
-                overlayIndex = 1;
+                overlayIndex = 0;
                 if (_reportID != 0) {
                     UserAudit.instance().log(new ActionReportLog(ActionReportLog.VIEW, _reportID));
                 }
-                viewFactory.retrieveData(false);
+                viewFactory.setup();
             } catch(e:Error) {
                 Alert.show(e.message);
             }
+        }
+
+        private function onSetup(event:ReportSetupEvent):void {
+            report = event.reportInfo.report;
+
+            reportName = report.name;
+            description = report.description;
+            admin = event.reportInfo.admin;
+
+
+            if (!admin) {
+                if (leftButtonBar.contains(editReportButton)) {
+                    leftButtonBar.removeChild(editReportButton);
+                }
+                showReportEditor = false;
+            }
+            if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
+                filterDefinitions = report.filterDefinitions;
+                viewFactory.filterDefinitions = filterDefinitions;
+                filterIndex = 1;
+            } else {
+                if (leftButtonBar.contains(filterButton)) {
+                    leftButtonBar.removeChild(filterButton);
+                    filterIndex = 0;
+                    filterDefinitions = new ArrayCollection();
+                }
+            }
+            transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+            if (!_showAddBar) {
+                var feedFragmentObject:Object = new Object();
+                feedFragmentObject.reportID = report.urlKey;
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
+                BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+            } else {
+                var templateFragmentObject:Object = new Object();
+                templateFragmentObject.reportTemplateID = exchangeItem.descriptor.urlKey;
+                var templateFragmentString:String = URLUtil.objectToString(templateFragmentObject);
+                BrowserManager.getInstance().setFragment(templateFragmentString);
+                BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+            }
+            viewFactory.retrieveData();
         }
 
         private function onError(event:EIErrorEvent):void {
@@ -615,7 +621,7 @@
                                               width="100%" paddingLeft="10"
                                               paddingTop="10" paddingBottom="10"
                                               paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
-                                              backgroundColor="#FFFFFF" reportView="true"/>
+                                              backgroundColor="#FFFFFF" reportView="true" reportID="{_reportID}"/>
             </mx:VBox>
         </mx:ViewStack>
         <report:ReportCanvas id="reportCanvas" stackTrace="{stackTrace}" overlayIndex="{overlayIndex}"

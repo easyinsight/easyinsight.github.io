@@ -39,6 +39,7 @@ public class UserServiceResponse
     public var apiKey:String;
     public var apiSecretKey:String;
     public var newsletterEnabled:Boolean;
+    public var fixedDashboardID:int;
 
     public function UserServiceResponse()
         {

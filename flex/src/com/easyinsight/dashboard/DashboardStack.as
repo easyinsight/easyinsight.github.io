@@ -1,4 +1,6 @@
 package com.easyinsight.dashboard {
+import com.easyinsight.skin.ImageDescriptor;
+
 import mx.collections.ArrayCollection;
 import mx.core.UIComponent;
 
@@ -24,15 +26,17 @@ public class DashboardStack extends DashboardElement {
     }
 
 
-    override public function createEditorComponent():UIComponent {
+    override public function createEditorComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
         var comp:DashboardStackEditorComponent = new DashboardStackEditorComponent();
         comp.dashboardStack = this;
+        comp.dashboardEditorMetadata = dashboardEditorMetadata;
         return comp;
     }
 
-    override public function createViewComponent():UIComponent {
+    override public function createViewComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
         var comp:DashboardStackViewComponent = new DashboardStackViewComponent();
         comp.dashboardStack = this;
+        comp.dashboardEditorMetadata = dashboardEditorMetadata;
         return comp;
     }
 }

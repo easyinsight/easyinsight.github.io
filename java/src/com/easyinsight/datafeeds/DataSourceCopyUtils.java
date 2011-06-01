@@ -171,7 +171,7 @@ public class DataSourceCopyUtils {
         Session session = Database.instance().createSession(conn);
         try {
             while (rs.next()) {
-                analyses.add(AnalysisDefinitionFactory.fromWSDefinition(analysisStorage.getAnalysisDefinition(rs.getLong(1), conn), session));
+                analyses.add(AnalysisDefinitionFactory.fromWSDefinition(analysisStorage.getAnalysisDefinition(rs.getLong(1), conn)));
             }
         } finally {
             session.close();

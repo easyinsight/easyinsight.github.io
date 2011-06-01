@@ -10,10 +10,6 @@ public class EmbeddedResults {
     public var definition:AnalysisDefinition;
     public var dataSourceAccessible:Boolean;
     public var dataSourceInfo:DataSourceInfo;
-    public var attribution:String;
-    public var ratingsAverage:Number;
-    public var ratingsCount:int;
-    public var myRating:int;
     public var reportFault:ReportFault;
     public var additionalProperties:Object;
 

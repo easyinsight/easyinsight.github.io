@@ -1,12 +1,13 @@
 package com.easyinsight.analysis {
 
+import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
 import mx.utils.ObjectUtil;
 
 public class SortFunctionFactory {
     public function SortFunctionFactory() {
     }
     
-    public static function createSortFunction(myHeader:AnalysisItem, sortDescending:Boolean):Function {
+    public static function createSortFunction(myHeader:AnalysisItem, sortDescending:Boolean, column:AdvancedDataGridColumn = null):Function {
             return function(obj1:Object, obj2:Object, fields:Array = null):int {
                 var value1:Value;
                 var value2:Value;
@@ -45,7 +46,7 @@ public class SortFunctionFactory {
                 }
 
                 if (value1.summary) {
-                    if (sortDescending) {
+                    if ((column != null && column.sortDescending) || sortDescending) {
                         return -1;
                     } else {
                         return 1;
@@ -53,7 +54,7 @@ public class SortFunctionFactory {
                 }
 
                 if (value2.summary) {
-                    if (sortDescending) {
+                    if ((column != null && column.sortDescending) || sortDescending) {
                         return 1;
                     } else {
                         return -1;

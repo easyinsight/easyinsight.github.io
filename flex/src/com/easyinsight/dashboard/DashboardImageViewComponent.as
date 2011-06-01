@@ -1,7 +1,4 @@
 package com.easyinsight.dashboard {
-import com.easyinsight.analysis.EmbeddedControllerLookup;
-import com.easyinsight.analysis.IEmbeddedReportController;
-import com.easyinsight.report.AbstractViewFactory;
 
 import flash.display.Bitmap;
 import flash.display.Loader;
@@ -12,10 +9,7 @@ import flash.utils.ByteArray;
 
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
-import mx.containers.Canvas;
-import mx.containers.VBox;
 import mx.controls.Image;
-import mx.controls.Label;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 

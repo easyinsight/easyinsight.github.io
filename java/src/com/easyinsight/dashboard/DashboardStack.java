@@ -1,13 +1,17 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.scorecard.Scorecard;
+import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 
 /**
@@ -82,7 +86,8 @@ public class DashboardStack extends DashboardElement {
     @Override
     public long save(EIConnection conn) throws SQLException {
         long id = super.save(conn);
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_STACK (DASHBOARD_ELEMENT_ID, STACK_SIZE, EFFECT, EFFECT_DURATION, STACK_CONTROL) VALUES (?, ?, ?, ?, ?)",
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_STACK (DASHBOARD_ELEMENT_ID, STACK_SIZE, EFFECT, EFFECT_DURATION, STACK_CONTROL) " +
+                "VALUES (?, ?, ?, ?, ?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, getElementID());
         insertStmt.setInt(2, count);
@@ -94,6 +99,7 @@ public class DashboardStack extends DashboardElement {
         for (DashboardStackItem gridItem : gridItems) {
             gridItem.save(conn, gridID);
         }
+        insertStmt.close();
         return id;
     }
 
@@ -109,6 +115,7 @@ public class DashboardStack extends DashboardElement {
             dashboardGrid.setEffectType(rs.getInt(3));
             dashboardGrid.setEffectDuration(rs.getInt(4));
             dashboardGrid.setStackControl(rs.getInt(5));
+            dashboardGrid.loadElement(elementID, conn);
             PreparedStatement gridItemStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, DASHBOARD_ELEMENT.element_type, " +
                     "ITEM_POSITION FROM DASHBOARD_STACK_ITEM, DASHBOARD_ELEMENT WHERE DASHBOARD_STACK_ID = ? AND DASHBOARD_STACK_ITEM.dashboard_element_id = dashboard_element.dashboard_element_id");
             gridItemStmt.setLong(1, gridID);
@@ -122,8 +129,26 @@ public class DashboardStack extends DashboardElement {
                 item.setDashboardElement(DashboardStorage.getElement(conn, gridElementID, elementType));
                 items.add(item);
             }
+            gridItemStmt.close();
             dashboardGrid.setGridItems(items);
+            List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+            Session session = Database.instance().createSession(conn);
+            try {
+                PreparedStatement filterStmt = conn.prepareStatement("SELECT FILTER_ID FROM dashboard_element_to_filter where dashboard_element_id = ?");
+                filterStmt.setLong(1, elementID);
+                ResultSet filterRS = filterStmt.executeQuery();
+                while (filterRS.next()) {
+                    FilterDefinition filter = (FilterDefinition) session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterRS.getLong(1)).list().get(0);
+                    filter.afterLoad();
+                    filters.add(filter);
+                }
+                filterStmt.close();
+            } finally {
+                session.close();
+            }
+            dashboardGrid.setFilters(filters);
         }
+        queryStmt.close();
         return dashboardGrid;
     }
 

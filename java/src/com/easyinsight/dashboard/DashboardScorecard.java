@@ -103,6 +103,7 @@ public class DashboardScorecard extends DashboardElement {
             dashboardReport.setScorecard(new ScorecardDescriptor(rs.getString(1), rs.getLong(3), rs.getString(4), rs.getLong(2)));
             dashboardReport.setLabelPlacement(rs.getInt(5));
             dashboardReport.setShowLabel(rs.getBoolean(6));
+            dashboardReport.loadElement(elementID, conn);
         }
         queryStmt.close();
         return dashboardReport;

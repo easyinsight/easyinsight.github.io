@@ -4,6 +4,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.etl.LookupTable;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.security.SecurityUtil;
@@ -28,8 +29,14 @@ public class DataService {
 
 
 
-    public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset) {
-        SecurityUtil.authorizeFeedAccess(feedID);
+    public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID) {
+        if (reportID > 0) {
+            SecurityUtil.authorizeInsight(reportID);
+        } else if (dashboardID > 0) {
+            SecurityUtil.authorizeDashboard(dashboardID);
+        } else {
+            SecurityUtil.authorizeFeedAccess(feedID);
+        }
         EIConnection conn = Database.instance().getConnection();
         try {
             if (analysisItem == null) {
@@ -79,6 +86,13 @@ public class DataService {
             feedMetadata.getDataSourceInfo().setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed());
+            List<LookupTable> lookupTables = new ArrayList<LookupTable>();
+            for (AnalysisItem field : feedItems) {
+                if (field.getLookupTableID() != null && field.getLookupTableID() > 0) {
+                    lookupTables.add(new FeedService().getLookupTable(field.getLookupTableID(), conn));
+                }
+            }
+            feedMetadata.setLookupTables(lookupTables);
             return feedMetadata;
         } catch (Exception e) {
             LogClass.error(e);
@@ -135,17 +149,11 @@ public class DataService {
             conn.setAutoCommit(false);
             Feed feed = feedRegistry.getFeed(dataSourceID, conn);
 
-            WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
+            WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             if (analysisDefinition == null) {
                 return null;
             }
-            boolean dataSourceAccessible;
-            try {
-                SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
-                dataSourceAccessible = true;
-            } catch (Exception e) {
-                dataSourceAccessible = false;
-            }
+
             if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
             }
@@ -193,23 +201,16 @@ public class DataService {
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
             DataResults listDataResults = pipeline.toList(dataSet);
             results = listDataResults.toEmbeddedResults();
-            results.setDataSourceAccessible(dataSourceAccessible);
             results.setDefinition(analysisDefinition);
 
-            ReportMetrics reportMetrics = new AnalysisStorage().getRating(reportID, conn);
-            results.setRatingsAverage(reportMetrics.getAverage());
-            results.setRatingsCount(reportMetrics.getCount());
-            results.setMyRating(reportMetrics.getMyRating());
+
             if (dataSet.getLastTime() == null) {
                 dataSet.setLastTime(new Date());
             }
             DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
             dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
             results.setDataSourceInfo(dataSourceInfo);
-            results.setAttribution(feed.getAttribution());
-            //}
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
-            /*new AdminService().logAction(new ActionReportLog(SecurityUtil.getUserID(), ActionLog.VIEW, analysisDefinition.getAnalysisID()), conn);*/
             conn.commit();
             return results;
         } catch (ReportException re) {

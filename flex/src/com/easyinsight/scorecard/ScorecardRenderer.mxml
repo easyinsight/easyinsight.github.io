@@ -59,13 +59,14 @@
 
             if (results.reportFault != null) {
                 results.reportFault.popup(this, onProblem);
-            }
-            var outcomes:ArrayCollection = results.outcomes;
-            for each (var outcome:KPIOutcome in outcomes) {
-                for each (var kpi:KPI in kpis) {
-                    if (outcome.kpiName == kpi.name) {
-                        kpi.kpiOutcome = outcome;
-                        break;
+            } else {
+                var outcomes:ArrayCollection = results.outcomes;
+                for each (var outcome:KPIOutcome in outcomes) {
+                    for each (var kpi:KPI in kpis) {
+                        if (outcome.kpiName == kpi.name) {
+                            kpi.kpiOutcome = outcome;
+                            break;
+                        }
                     }
                 }
             }

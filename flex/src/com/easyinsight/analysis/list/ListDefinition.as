@@ -12,6 +12,14 @@ import mx.collections.ArrayCollection;
 		public var showLineNumbers:Boolean;
 		public var listLimitsMetadata:ListLimitsMetadata;
         public var summaryTotal:Boolean;
+        public var textColor:uint = 0x000000;
+        public var headerTextColor:uint = 0x000000;
+        public var rowColor1:uint = 0xF7F7F7;
+        public var rowColor2:uint = 0xFFFFFF;
+        public var headerColor1:uint = 0xFFFFFF;
+        public var headerColor2:uint = 0xEFEFEF;
+        public var summaryRowBackgroundColor:uint = 0x6699ff;
+        public var summaryRowTextColor:uint = 0x000000;
 
 		public function ListDefinition()
 		{
@@ -28,11 +36,6 @@ import mx.collections.ArrayCollection;
                     columns.addItem(field);
                 }
             }            
-        }
-
-        override public function createFormItems():ArrayCollection {
-            var items:ArrayCollection = super.createFormItems();
-            return items;
         }
 
         override public function createDefaultLimits():void {

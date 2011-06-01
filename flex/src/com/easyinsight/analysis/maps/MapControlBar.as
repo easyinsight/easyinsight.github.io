@@ -11,6 +11,7 @@ import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
+import com.easyinsight.analysis.ReportPropertiesEvent;
 import com.easyinsight.map.MapDropAreaGrouping;
 import com.easyinsight.util.PopUpUtil;
 
@@ -56,11 +57,6 @@ public class MapControlBar extends ReportControlBar implements IReportControlBar
 
     override protected function createChildren():void {
         super.createChildren();
-        var listEditButton:Button = new Button();
-        listEditButton.setStyle("icon", tableEditIcon);
-        listEditButton.toolTip = "Edit List Properties...";
-        listEditButton.addEventListener(MouseEvent.CLICK, editList);
-        addChild(listEditButton);
         addDropAreaGrouping(xAxisGrouping);
         addDropAreaGrouping(measureGrouping);
          if (mapDefinition.geography != null) {
@@ -71,18 +67,10 @@ public class MapControlBar extends ReportControlBar implements IReportControlBar
         }
         var limitLabel:Label = new Label();
         BindingUtils.bindProperty(limitLabel, "text", this, "limitText");
+        limitLabel.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
+            dispatchEvent(new ReportPropertiesEvent(2));
+        });
         addChild(limitLabel);
-    }
-
-    [Embed(source="../../../../../assets/table_edit.png")]
-    public var tableEditIcon:Class;
-
-    private function editList(event:MouseEvent):void {
-        var listWindow:MapDefinitionEditWindow = new MapDefinitionEditWindow();
-        listWindow.mapDefinition = mapDefinition;
-        listWindow.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
-        PopUpManager.addPopUp(listWindow, this, true);
-        PopUpUtil.centerPopUp(listWindow);
     }
 
     private var _limitText:String;

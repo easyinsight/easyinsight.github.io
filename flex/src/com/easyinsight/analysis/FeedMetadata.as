@@ -21,6 +21,7 @@ import mx.collections.ArrayCollection;
         public var dataSourceInfo:DataSourceInfo;
         public var exchangeSave:Boolean;
         public var customJoinsAllowed:Boolean;
+    public var lookupTables:ArrayCollection;
 		
 		public function FeedMetadata()
 			{

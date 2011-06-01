@@ -136,6 +136,10 @@ public class ScorecardService {
             ScorecardResults scorecardResults = new ScorecardResults();
             scorecardResults.setOutcomes(kpis);
             return scorecardResults;
+        } catch (ReportException re) {
+            ScorecardResults scorecardResults = new ScorecardResults();
+            scorecardResults.setReportFault(re.getReportFault());
+            return scorecardResults;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -154,16 +158,6 @@ public class ScorecardService {
             throw new RuntimeException(e);
         }
     }
-
-    /*public List<Scorecard> getScorecardsForUser(List<CredentialFulfillment> credentials) {
-        long userID = SecurityUtil.getUserID();
-        try {
-            return scorecardStorage.getScorecardsForUser(userID, credentials);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }*/
 
     public void addKPIsToDefaultScorecard() {
 

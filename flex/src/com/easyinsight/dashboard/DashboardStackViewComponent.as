@@ -1,9 +1,17 @@
 package com.easyinsight.dashboard {
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.filtering.TransformContainer;
+import com.easyinsight.filtering.TransformsUpdatedEvent;
+import com.easyinsight.skin.BackgroundImage;
+import com.easyinsight.skin.ImageLoadEvent;
+import com.easyinsight.skin.ImageLoader;
+
+import flash.events.Event;
 
 import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
+import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
@@ -20,6 +28,8 @@ import org.efflex.mx.viewStackEffects.Slide;
 public class DashboardStackViewComponent extends VBox implements IDashboardViewComponent {
 
     public var dashboardStack:DashboardStack;
+
+    public var dashboardEditorMetadata:DashboardEditorMetadata;
 
     public function DashboardStackViewComponent() {
         super();
@@ -84,10 +94,40 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             rightEffect.duration = dashboardStack.effectDuration;
             FlipPapervision3D(rightEffect).direction = "right";
         }
+        var headerArea:Box = new Box();
+        headerArea.setStyle("backgroundColor", dashboardStack.headerBackgroundColor);
+        headerArea.setStyle("backgroundAlpha", dashboardStack.headerBackgroundAlpha);
+        headerArea.setStyle("horizontalAlign", "center");
+        headerArea.percentWidth = 100;
+        var headerBackgroundImage:BackgroundImage = new BackgroundImage();
+        headerBackgroundImage.applyCenterScreenLogic = false;
         var headerbar:HBox = new HBox();
-        headerbar.height = 30;
+        if (dashboardStack.headerBackground != null) {
+            var headerBarLoader:ImageLoader = new ImageLoader();
+            headerBarLoader.addEventListener(ImageLoadEvent.IMAGE_LOADED, function(event:ImageLoadEvent):void {
+                headerBackgroundImage.width = event.bitmap.width;
+                headerBackgroundImage.height = event.bitmap.height;
+                headerBackgroundImage.backgroundImageSource = event.bitmap;
+            });
+            headerBarLoader.load(dashboardStack.headerBackground.id);
+        }
         headerbar.percentWidth = 100;
+        headerbar.percentHeight = 100;
         headerbar.setStyle("horizontalAlign", "center");
+        headerbar.setStyle("verticalAlign", "bottom");
+        headerbar.setStyle("paddingBottom", 5);
+        headerBackgroundImage.addChild(headerbar);
+        headerArea.addChild(headerBackgroundImage);
+
+        /*
+            <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid"
+                                                  borderThickness="1"
+                                                  existingFilters="{filterDefinitions}"
+                                                  width="100%" paddingLeft="10"
+                                                  paddingTop="10" paddingBottom="10"
+                                                  paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
+                                                  backgroundColor="#FFFFFF" backgroundAlpha=".8" reportView="true"/>
+         */
         viewStack = new ViewStack();
         viewStack.percentHeight = 100;
         viewStack.percentWidth = 100;
@@ -107,15 +147,43 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                     rightEffect = null;
                 }
             } else {
-                topButton.label = String(i);
+                if (report.label != null && report.label != "") {
+                    topButton.label = report.label;
+                } else {
+                    topButton.label = String(i);
+                }
             }
             headerbar.addChild(topButton);
-            var comp:UIComponent = report.createViewComponent();
+            var comp:UIComponent = report.createViewComponent(dashboardEditorMetadata);
             viewChildren.addItem(comp);
             viewStack.addChild(comp);
         }
-        addChild(headerbar);
+        addChild(headerArea);
+        if (dashboardStack.filters.length > 0) {
+            transformContainer = new TransformContainer();
+            transformContainer.setStyle("borderStyle", dashboardStack.filterBorderStyle);
+            transformContainer.setStyle("borderColor", dashboardStack.filterBorderColor);
+            transformContainer.setStyle("backgroundColor", dashboardStack.filterBackgroundColor);
+            transformContainer.setStyle("backgroundAlpha", dashboardStack.filterBackgroundAlpha);
+            transformContainer.filterEditable = false;
+            transformContainer.existingFilters = dashboardStack.filters;
+            transformContainer.percentWidth = 100;
+            transformContainer.setStyle("paddingLeft", 10);
+            transformContainer.setStyle("paddingRight", 10);
+            transformContainer.setStyle("paddingTop", 10);
+            transformContainer.setStyle("paddingBottom", 10);
+            transformContainer.reportView = true;
+            transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
+            transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+            addChild(transformContainer);
+        }
         addChild(viewStack);
+    }
+
+    private var transformContainer:TransformContainer;
+
+    private function transformsUpdated(event:Event):void {
+        refresh(transformContainer.getFilterDefinitions());
     }
     
     public function refresh(filters:ArrayCollection):void {

@@ -168,7 +168,7 @@
                width="180"/>
     <mx:Button toolTip="Add Dashboard..." click="createDashboard()" icon="{dashboardIcon}"
                id="createDashboardButton"
-               label="New Dashboard" labelPlacement="right" fontSize="12" styleName="grayButton"
+               label="New Dashboard..." labelPlacement="right" fontSize="12" styleName="grayButton"
                width="180"/>
     <mx:Button toolTip="Add Scorecard..." click="createScorecard()" icon="{scorecardIcon}"
                id="createScorecardButton"

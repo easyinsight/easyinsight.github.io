@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.list.*">
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="600" height="400">
     <mx:Script>
 		<![CDATA[
-
+        import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
@@ -19,36 +19,151 @@
             this._definition = definition;
         }
 
-        protected override function commitProperties():void {
+        override protected function commitProperties():void {
             super.commitProperties();
+            reportName = _definition.name;
+            reportDescription = _definition.description;
+            accountVisible = _definition.accountVisible;
+            exchangeVisible = _definition.solutionVisible;
+            publiclyVisible = _definition.publiclyVisible;
+        }
+
+        private var _startIndex:int;
+
+
+        [Bindable(event="startIndexChanged")]
+        public function get startIndex():int {
+            return _startIndex;
+        }
+
+        public function set startIndex(value:int):void {
+            if (_startIndex == value) return;
+            _startIndex = value;
+            dispatchEvent(new Event("startIndexChanged"));
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
             reportItems = new ArrayCollection();
-            for each (var formItem:ReportFormItem in _definition.createFormItems()) {
+            for each (var formItem:ReportFormItem in StyleConfiguration.getFormItems(_definition)) {
                 form.addChild(formItem);
                 reportItems.addItem(formItem);
             }
+            limitItems = StyleConfiguration.getLimitItems(_definition, _allFields);
+            if (limitItems.length > 0) {
+                var formBox:Box = new Box();
+                formBox.verticalScrollPolicy = "on";
+                formBox.percentWidth = 100;
+                formBox.percentHeight = 100;
+                formBox.setStyle("borderThickness", 1);
+                formBox.setStyle("borderStyle", "solid");
+                formBox.setStyle("borderColor", 0xCCCCCC);
+                formBox.setStyle("paddingLeft", 5);
+                formBox.setStyle("paddingTop", 5);
+                formBox.setStyle("paddingBottom", 5);
+                formBox.setStyle("horizontalAlign", "center");
+                formBox.label = "Limits";
+                var limitForm:Form = new Form();
+                formBox.addChild(limitForm);
+                for each (var limitItem:ReportFormItem in limitItems) {
+                    limitForm.addChild(limitItem);
+                }
+                tabNavigator.addChild(formBox);
+            }
+            addEventListener("refreshNecessary", function(event:Event):void {
+                refreshNecessary = true;
+            });
         }
 
+        private var refreshNecessary:Boolean = false;
+
+        private var limitItems:ArrayCollection;
+
         private var reportItems:ArrayCollection;
+
+        private var _allFields:ArrayCollection;
+
+        public function set allFields(value:ArrayCollection):void {
+            _allFields = value;
+        }
+
+        private var lastTab:int;
+
+        private function onEvent(event:Event):void {
+            if (lastTab != tabNavigator.selectedIndex) {
+                lastTab = tabNavigator.selectedIndex;
+                PopUpUtil.centerPopUp(this);
+            }
+        }
 
         public function save():void {
             for each (var reportFormItem:ReportFormItem in reportItems) {
                 reportFormItem.save();
             }
-            dispatchEvent(new AnalysisItemUpdateEvent());
+            for each (var limitItem:ReportFormItem in limitItems) {
+                limitItem.save();
+            }
+            _definition.name = reportNameInput.text;
+            _definition.description = reportDescriptionInput.text;
+            _definition.accountVisible = accountVisibleCheckbox.selected;
+            _definition.solutionVisible = exchangeVisibleCheckbox.selected;
+            _definition.publiclyVisible = publiclyVisibleCheckbox.selected;
+            dispatchEvent(new ReportPreferencesEvent(refreshNecessary));
             PopUpManager.removePopUp(this);
         }
+
+        [Bindable]
+        private var reportName:String;
+
+        [Bindable]
+        private var reportDescription:String;
+
+        [Bindable]
+        private var accountVisible:Boolean;
+
+        [Bindable]
+        private var exchangeVisible:Boolean;
+
+        [Bindable]
+        private var publiclyVisible:Boolean;
 
         public function cancel():void {
             PopUpManager.removePopUp(this);
         }
-		]]>
+        ]]>
     </mx:Script>
-    <mx:VBox paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5">
-    <mx:Form id="form" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
-    </mx:Form>
-        <mx:HBox width="100%" horizontalAlign="center">
-            <util:SaveButton label="Save" click="save()"/>
-            <util:CancelButton label="Cancel" click="cancel()"/>
-        </mx:HBox>
-    </mx:VBox>
+    <mx:TabNavigator id="tabNavigator" creationPolicy="all" selectedIndex="{startIndex}" width="100%" height="325" paddingLeft="5" paddingRight="5"
+            paddingTop="5" paddingBottom="5">
+        <mx:Box width="100%" height="100%" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
+            horizontalAlign="center" label="Additional Properties" verticalScrollPolicy="on">
+            <mx:Form label="General Properties">
+                <mx:FormItem label="Report Name:">
+                    <mx:TextInput id="reportNameInput" width="380" text="{reportName}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Report Description:">
+                    <mx:TextArea width="380" height="75" id="reportDescriptionInput"
+                                             text="{reportDescription}" borderStyle="inset" borderThickness="1"/>
+                </mx:FormItem>
+                <mx:FormItem label="Account Visible:">
+                    <mx:CheckBox id="accountVisibleCheckbox" selected="{accountVisible}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Publicly Visible:">
+                    <mx:CheckBox id="publiclyVisibleCheckbox" selected="{publiclyVisible}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Exchange Visible:">
+                    <mx:CheckBox id="exchangeVisibleCheckbox" selected="{exchangeVisible}"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:Box>
+        <mx:Box width="100%" height="300" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
+            horizontalAlign="center" label="Additional Properties" verticalScrollPolicy="on">
+            <mx:Form id="form">
+
+            </mx:Form>
+        </mx:Box>
+    </mx:TabNavigator>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="cancel()"/>
+    </mx:HBox>
 </util:EISlimWindow>

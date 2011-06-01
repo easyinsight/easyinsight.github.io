@@ -5,7 +5,6 @@
     </mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-
         import mx.binding.utils.BindingUtils;
         import mx.collections.Sort;
         import mx.rpc.remoting.RemoteObject;
@@ -23,6 +22,18 @@
         private var sourceValues:ArrayCollection;
         [Bindable]
         private var targetValues:ArrayCollection;
+
+        private var _reportID:int;
+
+        private var _dashboardID:int;
+
+        public function set reportID(value:int):void {
+            _reportID = value;
+        }
+
+        public function set dashboardID(value:int):void {
+            _dashboardID = value;
+        }
 
         private var _feedID:int;
 
@@ -57,7 +68,7 @@
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field, new Date().getTimezoneOffset());
+            dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field, new Date().getTimezoneOffset(), _reportID,  _dashboardID);
         }
 
         private function compare(obj1:Object, obj2:Object, fields:Array = null):int {
@@ -208,7 +219,7 @@
         private var stackIndex:int = 0;
 
         private var _typeChangeAllowed:Boolean = true;
-        
+
         [Bindable(event="typeChangeAllowedChanged")]
         public function get typeChangeAllowed():Boolean {
             return _typeChangeAllowed;
@@ -219,9 +230,7 @@
             _typeChangeAllowed = value;
             dispatchEvent(new Event("typeChangeAllowedChanged"));
         }
-
-
-		]]>
+        ]]>
 	</mx:Script>
     <mx:HBox visible="{typeChangeAllowed}">
         <mx:RadioButtonGroup id="typeGroup" change="onTypeChange()"/>

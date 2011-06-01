@@ -18,9 +18,11 @@
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.scorecard.ScorecardDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.ActionDashboardLog;
         import com.easyinsight.util.PopUpUtil;
 
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
@@ -117,6 +119,8 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        private var metadata:DashboardEditorMetadata = new DashboardEditorMetadata();
+
         private function gotDashboard():void {
             _dashboard = dashboardService.getDashboard.lastResult as Dashboard;
             dataSourceID = _dashboard.dataSourceID;
@@ -125,6 +129,7 @@
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
             var box:DashboardBox = new DashboardBox();
+            box.dashboardEditorMetadata = metadata;
             box.element = _dashboard.rootElement;
             box.allowDelete = false;
             dashboardCanvas.addChild(box);
@@ -132,6 +137,7 @@
             analysisService.getInsightDescriptorsForDataSource.send(_dashboard.dataSourceID);
             scorecardService.getScorecardDescriptorsForDataSource.send(_dashboard.dataSourceID);
             dashboardFilters = _dashboard.filters;
+            UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.EDIT, _dashboardID));
             dataService.getFeedMetadata.send(_dashboard.dataSourceID);
         }
 
@@ -140,6 +146,7 @@
             grid.rows = event.rows;
             grid.columns = event.columns;
             var box:DashboardBox = new DashboardBox();
+            box.dashboardEditorMetadata = metadata;
             box.element = grid;
             box.allowDelete = false;
             dashboardCanvas.addChild(box);
@@ -211,6 +218,13 @@
             }
         }
 
+        private function configureDashboard():void {
+            var window:DashboardWindow = new DashboardWindow();
+            window.dashboard = _dashboard;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         [Bindable]
         private var allFields:ArrayCollection;
 
@@ -237,6 +251,9 @@
                     transformContainer.addFilterDefinition(filter);
                 }
             }
+            metadata.allFields = allFields;
+            metadata.dataSourceID = dataSourceID;
+            metadata.availableFields = availableDimensions;
         }
 
         public function gotFocus():void {
@@ -267,6 +284,8 @@
                    toolTip="Save" labelPlacement="right" label="Save"/>
         <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="viewDashboard()"
                    toolTip="View Dashboard" label="Dashboard View" labelPlacement="right"/>
+        <mx:Button icon="@Embed(source='../../../../assets/document_edit.png')" click="configureDashboard()"
+                   toolTip="Configure Dashboard" label="Configure Dashboard" labelPlacement="right"/>
     </mx:HBox>
     <mx:HBox width="100%" height="100%">
         <mx:VBox height="100%" horizontalAlign="center" width="200" paddingTop="20" paddingBottom="20">

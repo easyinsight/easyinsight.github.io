@@ -581,7 +581,9 @@ public class FeedService {
                 PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM LOOKUP_TABLE WHERE LOOKUP_TABLE_ID = ?");
                 deleteStmt.setLong(1, lookupTableID);
                 deleteStmt.executeUpdate();
+                deleteStmt.close();
             }
+            queryStmt.close();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -598,9 +600,26 @@ public class FeedService {
     public LookupTable getLookupTable(long lookupTableID) {
         LookupTable lookupTable;
         EIConnection conn = Database.instance().getConnection();
-        Session session = Database.instance().createSession(conn);
+
         try {
             conn.setAutoCommit(false);
+            lookupTable = getLookupTable(lookupTableID, conn);
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+        return lookupTable;
+    }
+
+    public LookupTable getLookupTable(long lookupTableID, EIConnection conn) throws SQLException {
+        LookupTable lookupTable;
+        Session session = Database.instance().createSession(conn);
+        try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, LOOKUP_TABLE_NAME, SOURCE_ITEM_ID," +
                     "TARGET_ITEM_ID, URL_KEY FROM LOOKUP_TABLE WHERE LOOKUP_TABLE_ID = ?");
             queryStmt.setLong(1, lookupTableID);
@@ -662,18 +681,14 @@ public class FeedService {
                     lookupPair.setLookupPairID(pairsRS.getLong(5));
                     pairs.add(lookupPair);
                 }
+                getPairsStmt.close();
                 lookupTable.setLookupPairs(pairs);
             } else {
                 return null;
             }
-            conn.commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
+            queryStmt.close();
         } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
+            session.close();
         }
         return lookupTable;
     }

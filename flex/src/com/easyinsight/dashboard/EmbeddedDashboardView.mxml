@@ -112,7 +112,9 @@
                 filterIndex = 1;
             }
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-            rootView = dashboard.rootElement.createViewComponent() as IDashboardViewComponent;
+            var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
+            dashboardEditorMetadata.dataSourceID = _dataSourceID;
+            rootView = dashboard.rootElement.createViewComponent(dashboardEditorMetadata) as IDashboardViewComponent;
             dashboardCanvas.addChild(rootView as UIComponent);
         }
 
@@ -182,7 +184,7 @@
     <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
         <mx:Box/>
         <mx:VBox width="100%" horizontalAlign="center">
-            <filtering:EmbeddedTransformContainer id="transformContainer" filterEditable="false"
+            <filtering:TransformContainer id="transformContainer" filterEditable="false"
                           existingFilters="{filterDefinitions}"
                           updatedTransforms="transformsUpdated(event)" width="100%" paddingLeft="10"
                           paddingTop="10" paddingBottom="10"

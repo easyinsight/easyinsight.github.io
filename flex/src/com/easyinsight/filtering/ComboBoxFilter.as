@@ -42,6 +42,17 @@ public class ComboBoxFilter extends HBox implements IFilter
 
         private var _filterEnabled:Boolean;
 
+    private var _reportID:int;
+
+    private var _dashboardID:int;
+
+    public function set reportID(value:int):void {
+        _reportID = value;
+    }
+
+    public function set dashboardID(value:int):void {
+        _dashboardID = value;
+    }
 
         [Bindable(event="filterEnabledChanged")]
         public function get filterEnabled():Boolean {
@@ -62,11 +73,13 @@ public class ComboBoxFilter extends HBox implements IFilter
         [Embed(source="../../../../assets/pencil.png")]
         public var editIcon:Class;
 		
-		public function ComboBoxFilter(feedID:int, analysisItem:AnalysisItem)
+		public function ComboBoxFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int)
 		{
 			super();
 			this._feedID = feedID;
 			this._analysisItem = analysisItem;
+            this.reportID = reportID;
+            this.dashboardID = dashboardID;
             setStyle("verticalAlign", "middle");
 
 
@@ -107,7 +120,7 @@ public class ComboBoxFilter extends HBox implements IFilter
                 dataService = new RemoteObject();
 			    dataService.destination = "data";
 			    dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-                dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, new Date().getTimezoneOffset());
+                dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, new Date().getTimezoneOffset(), _reportID,  _dashboardID);
             }
 		}
 
@@ -187,7 +200,7 @@ public class ComboBoxFilter extends HBox implements IFilter
             dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset());
+			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset(), _reportID,  _dashboardID);
 		}
 
     private var newFilter:Boolean = true;

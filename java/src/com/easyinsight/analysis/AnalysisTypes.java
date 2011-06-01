@@ -18,4 +18,5 @@ public interface AnalysisTypes {
     public static final String HEATMAP = "Heatmap";
     public static final String GANTT = "Gantt";
     public static final String FORM = "Form";
+    public static final String VERTICAL_LIST = "VerticalList";
 }

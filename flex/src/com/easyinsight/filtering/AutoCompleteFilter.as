@@ -40,7 +40,17 @@ public class AutoCompleteFilter extends HBox implements IFilter {
     private var editButton:Button;
     private var _analysisItems:ArrayCollection;
 
-    private var _credentials:Object;
+    private var _reportID:int;
+
+    private var _dashboardID:int;
+
+    public function set reportID(value:int):void {
+        _reportID = value;
+    }
+
+    public function set dashboardID(value:int):void {
+        _dashboardID = value;
+    }
 
     private var _filterEnabled:Boolean;
 
@@ -56,6 +66,8 @@ public class AutoCompleteFilter extends HBox implements IFilter {
         dispatchEvent(new Event("filterEnabledChanged"));
     }
 
+
+
     [Bindable]
     [Embed(source="../../../../assets/navigate_cross.png")]
     public var deleteIcon:Class;
@@ -64,23 +76,19 @@ public class AutoCompleteFilter extends HBox implements IFilter {
     [Embed(source="../../../../assets/pencil.png")]
     public var editIcon:Class;
 
-    public function AutoCompleteFilter(feedID:int, analysisItem:AnalysisItem) {
+    public function AutoCompleteFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
         super();
         this._feedID = feedID;
         this._analysisItem = analysisItem;
+        this.reportID = reportID;
+        this.dashboardID = dashboardID;
         setStyle("verticalAlign", "middle");
-
-
     }
 
     private var _filterEditable:Boolean = true;
 
     public function set filterEditable(editable:Boolean):void {
         _filterEditable = editable;
-    }
-
-    public function set credentials(value:Object):void {
-        _credentials = value;
     }
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -192,7 +200,7 @@ public class AutoCompleteFilter extends HBox implements IFilter {
         dataService = new RemoteObject();
         dataService.destination = "data";
         dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-        dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset());
+        dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID);
     }
 
     private var newFilter:Boolean = true;

@@ -1,11 +1,12 @@
 package com.easyinsight.dashboard {
 import com.easyinsight.analysis.EmbeddedControllerLookup;
+import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IEmbeddedReportController;
-import com.easyinsight.report.AbstractViewFactory;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.report.ReportExportWindow;
+import com.easyinsight.report.ReportSetupEvent;
 
 import com.easyinsight.util.PopUpUtil;
 
@@ -22,7 +23,7 @@ import mx.managers.PopUpManager;
 public class DashboardReportViewComponent extends Canvas implements IDashboardViewComponent  {
 
     public var dashboardReport:DashboardReport;
-    private var viewFactory:AbstractViewFactory;
+    private var viewFactory:EmbeddedViewFactory;
 
     public function DashboardReportViewComponent() {
         super();
@@ -74,12 +75,18 @@ public class DashboardReportViewComponent extends Canvas implements IDashboardVi
         var menu:ContextMenu = new ContextMenu();
         menu.hideBuiltInItems();
         menu.customItems = [ navigateItem, editItem, exportItem ];
-        viewFactory.retrieveData();
+        viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onReportSetup);
+        viewFactory.setup();
         viewFactory.contextMenu = menu;
     }
 
+    private function onReportSetup(event:ReportSetupEvent):void {
+        viewFactory.filterDefinitions = event.reportInfo.report.filterDefinitions;
+        viewFactory.retrieveData();
+    }
+
     public function refresh(filters:ArrayCollection):void {
-        viewFactory.filterDefinitions = filters;
+        viewFactory.additionalFilterDefinitions = filters;
         viewFactory.retrieveData();
     }
 

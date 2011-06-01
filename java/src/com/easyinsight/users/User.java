@@ -64,7 +64,8 @@ public class User {
     @Column(name="opt_in_email")
     private boolean optInEmail;
 
-
+    @Column(name="fixed_dashboard_id")
+    private Long fixedDashboardID;
 
     @ManyToOne
     @JoinColumn (name="account_id")
@@ -90,10 +91,17 @@ public class User {
         userTransferObject.setTitle(title);
         userTransferObject.setFirstName(firstName);
         userTransferObject.setPersonaID(personaID != null ? personaID : 0);
+        userTransferObject.setFixedDashboardID(fixedDashboardID != null ? fixedDashboardID : 0);
         return userTransferObject;
     }
 
+    public Long getFixedDashboardID() {
+        return fixedDashboardID;
+    }
 
+    public void setFixedDashboardID(Long fixedDashboardID) {
+        this.fixedDashboardID = fixedDashboardID;
+    }
 
     public String getHashType() {
         return hashType;
@@ -257,5 +265,10 @@ public class User {
         setName(transferObject.getName());
         setTitle(transferObject.getTitle());
         setOptInEmail(transferObject.isOptInEmail());
+        if (transferObject.getFixedDashboardID() == 0) {
+            setFixedDashboardID(null);
+        } else {
+            setFixedDashboardID(transferObject.getFixedDashboardID());
+        }
     }
 }

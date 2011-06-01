@@ -22,6 +22,7 @@ public class UserTransferObject {
 
     private boolean accountAdmin;
     private boolean optInEmail;
+    private long fixedDashboardID;
 
     public UserTransferObject() {
     }
@@ -32,6 +33,14 @@ public class UserTransferObject {
         this.email = email;
         this.name = name;
         this.firstName = firstName;
+    }
+
+    public long getFixedDashboardID() {
+        return fixedDashboardID;
+    }
+
+    public void setFixedDashboardID(long fixedDashboardID) {
+        this.fixedDashboardID = fixedDashboardID;
     }
 
     public boolean isOptInEmail() {
@@ -125,6 +134,9 @@ public class UserTransferObject {
         user.setName(getName());
         user.setUserName(getUserName());
         user.setOptInEmail(isOptInEmail());
+        if (getFixedDashboardID() > 0) {
+            user.setFixedDashboardID(getFixedDashboardID());
+        }
         return user;
     }
 }

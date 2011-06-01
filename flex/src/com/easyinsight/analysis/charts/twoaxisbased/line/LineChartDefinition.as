@@ -1,10 +1,7 @@
 package com.easyinsight.analysis.charts.twoaxisbased.line {
-import com.easyinsight.analysis.NumericReportFormItem;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
 import com.easyinsight.analysis.AnalysisDefinition;
-
-import mx.collections.ArrayCollection;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSLineChartDefinition")]
@@ -32,12 +29,6 @@ public class LineChartDefinition extends TwoAxisDefinition{
 
     override public function getChartFamily():int {
         return ChartTypes.LINE_FAMILY;
-    }
-
-    override public function createFormItems():ArrayCollection {
-        var items:ArrayCollection = super.createFormItems();
-        items.addItem(new NumericReportFormItem("Stroke Weight", "strokeWeight", strokeWeight, this, 1, 10));
-        return items;
     }
 }
 }

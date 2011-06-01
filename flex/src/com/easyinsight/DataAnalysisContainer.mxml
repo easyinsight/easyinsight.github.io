@@ -20,6 +20,7 @@
         import com.easyinsight.analysis.DataServiceEvent;
         import com.easyinsight.analysis.FeedNode;
         import com.easyinsight.analysis.FieldDoubleClickEvent;
+        import com.easyinsight.analysis.GenericDefinitionEditWindow;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
         import com.easyinsight.analysis.DataViewFactory;
@@ -29,6 +30,8 @@
         import com.easyinsight.analysis.ImprovedSaveWindow;
         import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.ReportEditorFieldEvent;
+        import com.easyinsight.analysis.ReportPreferencesEvent;
+        import com.easyinsight.analysis.ReportPropertiesEvent;
         import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.datasources.DataSourceInfo;
@@ -208,7 +211,7 @@
             dataView.addEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, loadingEvent);
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, loadingEvent);
-
+            dataView.feedMetadata = feedMetadata;
             viewWatcher = BindingUtils.bindProperty(dataViewFactory, "adHocMode", adHocButton, "adHoc");
             selectableWatcher = BindingUtils.bindProperty(this, "reportSelectable", dataViewFactory, "reportSelectable");
             selectionWatcher = BindingUtils.bindProperty(dataViewFactory, "reportSelectionEnabled", this, "reportSelectionEnabled");
@@ -460,6 +463,7 @@
                 uiConfig();
                 rendererFactory = new ClassFactory(AvailableFieldRenderer);
                 commandProcessor = new CommandProcessor();
+                addEventListener(ReportPropertiesEvent.REPORT_PROPERTIES, onReportPropertiesEvent);
                 addEventListener(ReportEditorFieldEvent.ITEM_ADD_TO_REPORT, addFieldToReport);
                 addEventListener(ReportEditorFieldEvent.ITEM_COPY, fieldEventHandler.copyField);
                 addEventListener(ReportEditorFieldEvent.ITEM_DELETE, fieldEventHandler.deleteField);
@@ -809,6 +813,26 @@
             dispatchEvent(new Event("reportSelectionEnabledChanged"));
         }
 
+        private function editReportProperties(index:int = 0):void {
+            var window:GenericDefinitionEditWindow = new GenericDefinitionEditWindow();
+            window.definition = analysisDefinition;
+            window.allFields = wrappers;
+            window.startIndex = index;
+            window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, function(event:ReportPreferencesEvent):void {
+                if (event.refreshData) {
+                    dataView.forceRetrieve();
+                } else {
+                    dataView.rerender();
+                }
+            }, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onReportPropertiesEvent(event:ReportPropertiesEvent):void {
+            editReportProperties(event.startIndex);
+        }
+
         [Bindable]
         private var fieldsIndex:int = 0;
 
@@ -871,14 +895,6 @@
                                           width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".9"
                                           feedID="{dataSourceID}"
                                           analysisItems="{wrappers}" minHeight="40">
-                <!--<mx:Button id="selectionModeButton" icon="@Embed(source='../../../assets/funnel.png')"
-                           toolTip="{reportSelectableTooltip}" click="reportSelectionEnabled = !reportSelectionEnabled"
-                           enabled="{reportSelectable}"/>
-                <mx:Button id="filterButton" icon="@Embed(source='../../../assets/funnel_new.png')"
-                           toolTip="{includeFilterDataTooltip}" click="createFilter()"
-                           enabled="{reportSelectionEnabled}"/>
-                <mx:Button id="excludeButton" icon="@Embed(source='../../../assets/funnel_delete.png')"
-                           toolTip="{excludeFilterDataTooltip}" click="exclude()" enabled="{reportSelectionEnabled}"/>-->
                 <mx:Button icon="@Embed(source='../../../assets/funnel.png')"
                            toolTip="{excludeFilterDataTooltip}" click="transformContainer.addNewFilter()" label="New Filter"/>
             </filtering:TransformContainer>
@@ -892,8 +908,10 @@
                 <analysis:AnalysisStatePopupButton analysisStateChange="onAnalysisStateChange(event)"
                                                    id="analysisState"
                                                    mode="all" x="91" y="0"/>
+                <mx:Button id="propsButton" icon="@Embed(source='../../../assets/table_edit.png')" click="editReportProperties()"
+                       toolTip="Edit Report Properties..." label="Edit Report Properties..." labelPlacement="right" x="30" y="31"/>
                 <mx:Canvas height="100%" width="100%" borderThickness="1" borderColor="#DCE2F8"
-                         borderStyle="solid" dropShadowEnabled="true" x="0" y="29">
+                         borderStyle="solid" dropShadowEnabled="true" x="0" y="62">
                     <mx:Canvas width="100%" height="5" backgroundColor="#10319A" left="0" right="0"/>
                     <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center" verticalAlign="middle"
                             height="28" x="0" y="5">

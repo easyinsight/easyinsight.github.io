@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:visualization="com.michaelvandaniker.visualization.*"
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
            implements="com.easyinsight.analysis.IReportRenderer" initialize="onInitialize()" width="100%" height="100%">
     <mx:Fade id="fadeInEffect" alphaFrom="0.0" alphaTo="0.57" duration="1000" />
     <mx:Script><![CDATA[

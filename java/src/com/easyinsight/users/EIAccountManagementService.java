@@ -16,6 +16,7 @@ import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
@@ -51,23 +52,21 @@ public class EIAccountManagementService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.email, USER.first_name, USER.name FROM USER, ACCOUNT WHERE ACCOUNT_STATE = ? AND " +
-                    "USER.account_id = account.account_id and user.account_admin = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCOUNT.ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_STATE = ? AND " +
+                    "account.creation_date < ?");
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_STATE = ?");
             queryStmt.setLong(1, Account.DELINQUENT);
-            queryStmt.setBoolean(2, true);
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.YEAR, 2010);
+            cal.set(Calendar.DAY_OF_YEAR, 364);
+            queryStmt.setTimestamp(2, new Timestamp(cal.getTimeInMillis()));
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                // send email
-                String email = rs.getString(1);
-                String firstName = rs.getString(2);
-                String lastName = rs.getString(3);
-
-                String message = "Hello {0}, We've been making a constant stream of improvements to every aspect ";
+                long accountID = rs.getLong(1);
+                updateStmt.setInt(1, Account.REACTIVATION_POSSIBLE);
+                updateStmt.setLong(2, accountID);
+                updateStmt.executeUpdate();
             }
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_STATE = ?");
-            updateStmt.setInt(1, Account.REACTIVATION_POSSIBLE);
-            updateStmt.setInt(2, Account.DELINQUENT);
-            updateStmt.executeUpdate();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -200,7 +199,7 @@ public class EIAccountManagementService {
                             !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
                             account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()),
-                            account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail());
+                            account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID());
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
                 }

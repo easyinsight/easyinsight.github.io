@@ -63,6 +63,7 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
                 gridItem.percentWidth = 100;
                 gridItem.percentHeight = 100;
                 var box:DashboardBox = new DashboardBox();
+                box.dashboardEditorMetadata = dashboardEditorMetadata;
                 if (e != null && e.dashboardElement != null) {
                     box.element = e.dashboardElement;
                 }
@@ -103,6 +104,8 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         }
         return valid;
     }
+
+    public var dashboardEditorMetadata:DashboardEditorMetadata;
 
     public function edit():void {
         var window:DashboardEditWindow = new DashboardEditWindow();

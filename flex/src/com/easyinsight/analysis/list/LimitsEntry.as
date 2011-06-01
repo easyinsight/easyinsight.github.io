@@ -7,8 +7,11 @@ import com.easyinsight.analysis.*;
 		private var _top:Boolean;
 		private var _number:int; 
 		
-		public function LimitsEntry()
+		public function LimitsEntry(name:String = null, top:Boolean = true, number:int = 0)
 		{
+            this.name = name;
+            this.top = top;
+            this.number = number;
 		}
 		
 		public function set name(name:String):void {

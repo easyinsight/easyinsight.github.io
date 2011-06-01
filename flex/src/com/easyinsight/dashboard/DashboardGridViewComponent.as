@@ -9,6 +9,8 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
 
     public var dashboardGrid:DashboardGrid;
 
+    public var dashboardEditorMetadata:DashboardEditorMetadata;
+
     public function DashboardGridViewComponent() {
         super();
         this.percentWidth = 100;
@@ -28,13 +30,13 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
             for (var j:int = 0; j < dashboardGrid.columns; j++) {
                 var e:DashboardGridItem = findItem(i, j);
                 var gridItem:GridItem = new GridItem();
-                gridItem.setStyle("paddingLeft", 5);
-                gridItem.setStyle("paddingTop", 5);
-                gridItem.setStyle("paddingRight", 5);
-                gridItem.setStyle("paddingBottom", 5);
+                gridItem.setStyle("paddingLeft", dashboardGrid.paddingLeft);
+                gridItem.setStyle("paddingRight", dashboardGrid.paddingRight);
+                gridItem.setStyle("paddingTop", dashboardGrid.paddingTop);
+                gridItem.setStyle("paddingBottom", dashboardGrid.paddingBottom);
                 gridItem.percentWidth = 100;
                 gridItem.percentHeight = 100;
-                var child:UIComponent = e.dashboardElement.createViewComponent();
+                var child:UIComponent = e.dashboardElement.createViewComponent(dashboardEditorMetadata);
                 viewChildren.addItem(child);
                 gridItem.addChild(child);
                 gridRow.addChild(gridItem);

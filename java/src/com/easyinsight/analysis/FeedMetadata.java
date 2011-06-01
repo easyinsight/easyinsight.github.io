@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.datafeeds.FeedNode;
+import com.easyinsight.etl.LookupTable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -25,6 +26,15 @@ public class FeedMetadata implements Serializable {
     private ReportFault reportFault;
     private List<FilterDefinition> intrinsicFilters = new ArrayList<FilterDefinition>();
     private boolean customJoinsAllowed;
+    private List<LookupTable> lookupTables;
+
+    public List<LookupTable> getLookupTables() {
+        return lookupTables;
+    }
+
+    public void setLookupTables(List<LookupTable> lookupTables) {
+        this.lookupTables = lookupTables;
+    }
 
     public boolean isExchangeSave() {
         return exchangeSave;

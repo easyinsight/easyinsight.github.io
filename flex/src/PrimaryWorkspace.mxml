@@ -178,9 +178,6 @@
                      dataAnalysis = null;
                      }*/
                     switch (page) {
-                        case "myData":
-                            navigation(new NavigationEvent("My Data"));
-                            break;
                         case "kpis":
                             navigation(new NavigationEvent("Scorecards"));
                             break;
@@ -237,9 +234,15 @@
                     removeListeners(dataAnalysis);
                     coreVBox.removeChild(dataAnalysis);
                 } else {
-                    coreVBox.removeChild(headerBar);
-                    coreVBox.removeChild(highBar);
-                    coreVBox.removeChild(coreSpace);
+                    if (headerBar != null) {
+                        coreVBox.removeChild(headerBar);
+                    }
+                    if (highBar != null) {
+                        coreVBox.removeChild(highBar);
+                    }
+                    if (coreSpace != null) {
+                        coreVBox.removeChild(coreSpace);
+                    }
                 }
                 if (perspectiveInfo != null) {
                     var perspective:ModulePerspective = new ModulePerspective(perspectiveInfo);
@@ -324,6 +327,7 @@
             var authResult:UserServiceResponse = userService.isSessionLoggedIn.lastResult as UserServiceResponse;
             var browserSetup:Boolean = false;
             if (authResult != null) {
+                browserSetup = true;
                 if (authResult.accountState == Account.DELINQUENT) {
                     toLogin(LoginPage.DELINQUENT);
                 } else if (authResult.accountState == Account.REACTIVATION_POSSIBLE) {
@@ -339,9 +343,15 @@
                     toLogin(LoginPage.INITIAL_USER_SETUP);
                 } else {
                     quietLogin(authResult, false);
-                    toMain();
+                    if (authResult.fixedDashboardID > 0) {
+                        limitedMain();
+                        browserSetup = false;
+                        internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID, fixedID: true})))
+                    } else {
+                        toMain();
+                    }
                 }
-                browserSetup = true;
+
             } else {
                 var sessionToken:String = CookieUtil.getCookie("eisession") as String;
                 if (sessionToken == null) {
@@ -377,14 +387,21 @@
                                     dispatchEvent(new LoginEvent(LoginEvent.LOGIN, authResult));
                                     if (authResult.accountState == Account.DELINQUENT) {
                                         toLogin(LoginPage.DELINQUENT);
+                                        browserInit();
                                     } else if (authResult.accountState == Account.REACTIVATION_POSSIBLE) {
                                         quietLogin(authResult, false);
                                         toLogin(LoginPage.REACTIVATE);
+                                        browserInit();
                                     } else {
                                         quietLogin(authResult, false);
-                                        toMain();
+                                        if (authResult.fixedDashboardID > 0) {
+                                            internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID})))
+                                        } else {
+                                            toMain();
+                                            browserInit();
+                                        }
                                     }
-                                    browserInit();
+
                                     break;
                                 default:
                                     trace(event.result);
@@ -408,8 +425,13 @@
         }
 
         private function login(event:LoginEvent):void {
-            toMain();
-            quietLogin(event.authResponse, true);
+            if (event.authResponse.fixedDashboardID > 0) {
+                quietLogin(event.authResponse, true);
+                internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.authResponse.fixedDashboardID})))
+            } else {
+                toMain();
+                quietLogin(event.authResponse, true);
+            }
         }
 
         private function quietLogin(authResponse:UserServiceResponse, navigate:Boolean):void {
@@ -469,6 +491,11 @@
 
         public function set dividerColor(value:uint):void {
             highBar.setStyle("backgroundColor", value);
+        }
+
+        private function limitedMain():void {
+            masterCanvas.removeAllChildren();
+            coreVBox = masterCanvas;
         }
 
         private function toMain():void {

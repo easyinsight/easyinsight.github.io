@@ -35,6 +35,14 @@ public class Dashboard implements Cloneable {
     private Date updateDate;
     private String authorName;
     private boolean temporary;
+    private boolean publicVisible;
+    private int paddingLeft;
+    private int paddingRight;
+    private String filterBorderStyle;
+    private int filterBorderColor;
+    private int filterBackgroundColor;
+    private double filterBackgroundAlpha;
+    private int headerStyle;
 
     public Dashboard clone() throws CloneNotSupportedException {
         Dashboard dashboard = (Dashboard) super.clone();
@@ -211,5 +219,69 @@ public class Dashboard implements Cloneable {
 
     public Set<Long> containedScorecards() {
         return rootElement.containedScorecards();
+    }
+
+    public boolean isPublicVisible() {
+        return publicVisible;
+    }
+
+    public void setPublicVisible(boolean publicVisible) {
+        this.publicVisible = publicVisible;
+    }
+
+    public int getPaddingLeft() {
+        return paddingLeft;
+    }
+
+    public void setPaddingLeft(int paddingLeft) {
+        this.paddingLeft = paddingLeft;
+    }
+
+    public int getPaddingRight() {
+        return paddingRight;
+    }
+
+    public void setPaddingRight(int paddingRight) {
+        this.paddingRight = paddingRight;
+    }
+
+    public String getFilterBorderStyle() {
+        return filterBorderStyle;
+    }
+
+    public void setFilterBorderStyle(String filterBorderStyle) {
+        this.filterBorderStyle = filterBorderStyle;
+    }
+
+    public int getFilterBorderColor() {
+        return filterBorderColor;
+    }
+
+    public void setFilterBorderColor(int filterBorderColor) {
+        this.filterBorderColor = filterBorderColor;
+    }
+
+    public int getFilterBackgroundColor() {
+        return filterBackgroundColor;
+    }
+
+    public void setFilterBackgroundColor(int filterBackgroundColor) {
+        this.filterBackgroundColor = filterBackgroundColor;
+    }
+
+    public int getHeaderStyle() {
+        return headerStyle;
+    }
+
+    public void setHeaderStyle(int headerStyle) {
+        this.headerStyle = headerStyle;
+    }
+
+    public double getFilterBackgroundAlpha() {
+        return filterBackgroundAlpha;
+    }
+
+    public void setFilterBackgroundAlpha(double filterBackgroundAlpha) {
+        this.filterBackgroundAlpha = filterBackgroundAlpha;
     }
 }

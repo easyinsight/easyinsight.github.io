@@ -6,6 +6,10 @@
                      implements="com.easyinsight.listing.IPerspective" xmlns:report="com.easyinsight.report.*">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.util.CookieUtil;
+        import com.easyinsight.framework.User;
+
+        import mx.messaging.config.ServerConfig;
 
         import com.easyinsight.analysis.IRetrievable;
         import com.easyinsight.commands.CommandEvent;
@@ -14,12 +18,15 @@
 
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
+        import com.easyinsight.framework.LoginEvent;
 
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.report.ReportNavigationEvent;
+        import com.easyinsight.util.ActionDashboardLog;
 
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
         import mx.controls.TextArea;
@@ -38,6 +45,13 @@
         [Embed(source="../../../../assets/table.png")]
         private var exportIcon:Class;
 
+        private var _fixedID:Boolean = false;
+
+
+        public function set fixedID(value:Boolean):void {
+            _fixedID = value;
+        }
+
         private var _dashboardID:int;
 
         [Bindable]
@@ -54,6 +68,16 @@
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(ReportNavigationEvent.TO_REPORT, onNavigation);
+            var logoutItem:ContextMenuItem = new ContextMenuItem("Log Out");
+            logoutItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+                User.destroy();
+                CookieUtil.deleteCookie("eisession");
+                ServerConfig.getChannelSet(dashboardService.destination).logout();
+                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
+            });
+            var contextMenu:ContextMenu = new ContextMenu();
+            contextMenu.customItems = [ logoutItem ];
+            this.contextMenu = contextMenu;
         }
 
         private function onNavigation(event:ReportNavigationEvent):void {
@@ -96,10 +120,10 @@
         private function gotDashboard():void {
             dashboard = dashboardService.getDashboard.lastResult as Dashboard;
             var grid:DashboardGrid = dashboard.rootElement as DashboardGrid;
-            if (grid.width == 0) {
-                dashboardWidth = 1000;
+            if (grid.width != 0) {
+                dashboardCanvas.width = grid.width;
             } else {
-                dashboardWidth = grid.width;
+                dashboardCanvas.percentWidth = 100;
             }
             dashboardCanvas.setStyle("backgroundAlpha", grid.backgroundAlpha);
             if (grid.backgroundColor != 0) {
@@ -109,6 +133,8 @@
             description = dashboard.description;
             dataSourceID = dashboard.dataSourceID;
             filterDefinitions = dashboard.filters;
+            dashboardPaddingLeft = dashboard.paddingLeft;
+            dashboardPaddingRight = dashboard.paddingRight;
             var feedFragmentObject:Object = new Object();
             if (exchangeItem == null) {
                 feedFragmentObject.dashboardID = String(dashboard.urlKey);
@@ -122,9 +148,15 @@
                 filterIndex = 1;
             }
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-            rootView = dashboard.rootElement.createViewComponent() as IDashboardViewComponent;
+            var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
+            dashboardEditorMetadata.dataSourceID = dataSourceID;
+            rootView = dashboard.rootElement.createViewComponent(dashboardEditorMetadata) as IDashboardViewComponent;
             dashboardCanvas.addChild(rootView as UIComponent);
+            UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.VIEW, _dashboardID));
             generateState();
+            if (_fixedID) {
+                primary.removeChild(topDisplay);
+            }
         }
 
         override protected function generateState():void {
@@ -261,6 +293,12 @@
         [Bindable]
         private var dataSource:DataSourceInfo;
 
+        [Bindable]
+        private var dashboardPaddingLeft:int;
+
+        [Bindable]
+        private var dashboardPaddingRight:int;
+
         public function cleanup():void {
             cleanupBindings();
         }
@@ -269,9 +307,9 @@
         <mx:method name="getDashboard" result="gotDashboard()"/>
         <mx:method name="keepDashboard" result="keptDashboard()"/>
     </mx:RemoteObject>
-    <mx:VBox width="100%" height="100%" paddingLeft="10" paddingRight="10" verticalGap="0"
+    <mx:VBox width="100%" height="100%" verticalGap="0"
              horizontalAlign="center"
-             direction="vertical">
+             direction="vertical" id="primary" paddingLeft="{dashboardPaddingLeft}" paddingRight="{dashboardPaddingRight}">
         <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay"
                  backgroundColor="#FFFFFF">
                 <mx:VBox width="1000" id="highBox" paddingLeft="10" paddingRight="10">
@@ -279,8 +317,6 @@
                         <mx:Button click="close()" icon="{closeIcon}" labelPlacement="right"
                                    id="backButton"
                                    toolTip="Close the report view" label="Close Dashboard"/>
-                        <!--<mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="right"
-                                   id="fullScreenButton" toolTip="View full screen" label="Full Screen"/>-->
                         <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="right"
                                    id="refreshButton" toolTip="Refresh this dashboard" label="Refresh"/>
                         <mx:Button icon="{exportIcon}" click="exportDashboard()"
@@ -331,7 +367,7 @@
                                                   backgroundColor="#FFFFFF" backgroundAlpha=".8" reportView="true"/>
                 </mx:VBox>
             </mx:ViewStack>
-            <util:AntiScrollCanvas width="{dashboardWidth}" height="100%" id="dashboardCanvas" backgroundColor="#FFFFFF"
+            <util:AntiScrollCanvas height="100%" id="dashboardCanvas" backgroundColor="#FFFFFF"
                        backgroundAlpha=".8"/>
         </mx:VBox>
     </mx:VBox>

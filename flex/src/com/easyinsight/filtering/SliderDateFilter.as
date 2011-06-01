@@ -46,6 +46,18 @@ import mx.rpc.events.ResultEvent;
     public function set loadingFromReport(value:Boolean):void {
         _loadingFromReport = value;
     }
+
+        private var _reportID:int;
+
+    private var _dashboardID:int;
+
+    public function set reportID(value:int):void {
+        _reportID = value;
+    }
+
+    public function set dashboardID(value:int):void {
+        _dashboardID = value;
+    }
 		
 		[Bindable]
         [Embed(source="../../../../assets/navigate_cross.png")]
@@ -55,14 +67,14 @@ import mx.rpc.events.ResultEvent;
         [Embed(source="../../../../assets/pencil.png")]
         public var editIcon:Class;
 		
-		public function SliderDateFilter(feedID:int, analysisItem:AnalysisItem) {
+		public function SliderDateFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
 			super();
 			this.analysisItem = analysisItem;
 			dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
             dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
-			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, new Date().getTimezoneOffset());
+			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, new Date().getTimezoneOffset(), reportID, dashboardID);
 		}
 
         private function onFault(event:FaultEvent):void {

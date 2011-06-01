@@ -1,7 +1,7 @@
 package com.easyinsight.dashboard {
 import com.easyinsight.analysis.ColorReportFormItem;
-
 import com.easyinsight.analysis.NumericReportFormItem;
+import com.easyinsight.analysis.TextReportFormItem;
 
 import mx.collections.ArrayCollection;
 import mx.core.UIComponent;
@@ -24,24 +24,18 @@ public class DashboardGrid extends DashboardElement {
     }
 
 
-    override public function createEditorComponent():UIComponent {
+    override public function createEditorComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
         var comp:DashboardGridEditorComponent = new DashboardGridEditorComponent();
         comp.dashboardGrid = this;
+        comp.dashboardEditorMetadata = dashboardEditorMetadata;
         return comp;
     }
 
-    override public function createViewComponent():UIComponent {
+    override public function createViewComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
         var comp:DashboardGridViewComponent = new DashboardGridViewComponent();
         comp.dashboardGrid = this;
+        comp.dashboardEditorMetadata = dashboardEditorMetadata;
         return comp;
-    }
-
-    override public function editableProperties():ArrayCollection {
-        var properties:ArrayCollection = new ArrayCollection();
-        properties.addItem(new NumericReportFormItem("Width", "width", width, this, 0, 2000));
-        properties.addItem(new ColorReportFormItem("Background Color", "backgroundColor", backgroundColor, this));
-        properties.addItem(new NumericReportFormItem("Background Alpha", "backgroundAlpha", backgroundAlpha, this, 0, 1));
-        return properties;
     }
 }
 }

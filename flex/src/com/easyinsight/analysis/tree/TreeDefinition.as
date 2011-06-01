@@ -12,6 +12,12 @@ public class TreeDefinition extends AnalysisDefinition{
     public var hierarchy:AnalysisItem;
     public var items:ArrayCollection = new ArrayCollection();
     public var treeDefinitionID:int;
+    public var textColor:uint = 0x000000;
+    public var headerTextColor:uint = 0x000000;
+    public var rowColor1:uint = 0xF7F7F7;
+    public var rowColor2:uint = 0xFFFFFF;
+    public var headerColor1:uint = 0xFFFFFF;
+    public var headerColor2:uint = 0xEFEFEF;
 
     public function TreeDefinition() {
         super();

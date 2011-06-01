@@ -21,7 +21,6 @@ import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.containers.VBox;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.managers.PopUpManager;
 

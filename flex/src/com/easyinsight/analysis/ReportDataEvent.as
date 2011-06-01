@@ -3,6 +3,7 @@ import flash.events.Event;
 public class ReportDataEvent extends Event{
 
     public static const REQUEST_DATA:String = "requestData";
+    public static const REFRESH_SCREEN:String = "refreshScreen";
 
     public var reload:Boolean = false;
 

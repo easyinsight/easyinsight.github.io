@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*"
-         xmlns:datasources="com.easyinsight.datasources.*"
          width="100%" height="100%" creationComplete="initStuff()" paddingLeft="0" paddingBottom="0" paddingRight="0"
          paddingTop="0"
          borderStyle="solid" borderThickness="1">
@@ -341,7 +340,7 @@
                   selectedIndex="{showFilters ? filterIndex : 0}">
         <mx:Box/>
         <mx:VBox width="100%" horizontalAlign="center">
-            <filtering:EmbeddedTransformContainer id="transformContainer" filterEditable="false"
+            <filtering:TransformContainer id="transformContainer" filterEditable="false"
                                                   existingFilters="{filterDefinitions}"
                                                   updatedTransforms="transformsUpdated(event)" width="100%"
                                                   paddingLeft="10"

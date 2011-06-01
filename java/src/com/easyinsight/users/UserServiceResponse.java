@@ -42,6 +42,7 @@ public class UserServiceResponse {
     private String apiKey;
     private String apiSecretKey;
     private boolean newsletterEnabled;
+    private long fixedDashboardID;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -55,7 +56,7 @@ public class UserServiceResponse {
                                boolean firstLogin, Date lastLoginDate, String accountName,
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
-                               String apiKey, String apiSecretKey, boolean newsletterEnabled) {
+                               String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -84,6 +85,18 @@ public class UserServiceResponse {
         this.apiKey = apiKey;
         this.apiSecretKey = apiSecretKey;
         this.newsletterEnabled = newsletterEnabled;
+        if (fixedDashboardID == null) {
+            fixedDashboardID = 0L;
+        }
+        this.fixedDashboardID = fixedDashboardID;
+    }
+
+    public long getFixedDashboardID() {
+        return fixedDashboardID;
+    }
+
+    public void setFixedDashboardID(long fixedDashboardID) {
+        this.fixedDashboardID = fixedDashboardID;
     }
 
     public String getApiKey() {

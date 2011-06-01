@@ -12,9 +12,6 @@ public class EmbeddedDataResults extends EmbeddedResults {
         this.definition = results.definition;
         this.rows = results.rows;
         this.dataSourceInfo = results.dataSourceInfo;
-        this.ratingsAverage = results.ratingsAverage;
-        this.ratingsCount = results.ratingsCount;
-        this.attribution = results.attribution;
     }
 
     public AnalysisItem[] getHeaders() {

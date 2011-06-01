@@ -43,6 +43,7 @@ import mx.collections.ArrayCollection;
         public static const FORM:int = 30;
         public static const STACKED_COLUMN:int = 31;
         public static const STACKED_BAR:int = 32;
+        public static const VERTICAL_LIST:int = 33;
 
 		public var dataFeedID:int;
         public var urlKey:String;
@@ -61,7 +62,6 @@ import mx.collections.ArrayCollection;
 		public var addedItems:ArrayCollection;
 		public var canSaveDirectly:Boolean;
 		public var visibleAtFeedLevel:Boolean;
-        public var outerJoin:Boolean;
 		public var publiclyVisible:Boolean;
 		public var marketplaceVisible:Boolean;
         public var reportStateID:int;
@@ -75,9 +75,7 @@ import mx.collections.ArrayCollection;
         public var fixedWidth:int = 0;
         public var accountVisible:Boolean;
         public var joinOverrides:ArrayCollection;
-        public var embedUserName:String;
-        public var embedPassword:String;
-        public var insecureEmbedEnabled:Boolean;
+
 
 		public function AnalysisDefinition()
 		{
@@ -110,16 +108,6 @@ import mx.collections.ArrayCollection;
 
         public function createDefaultLimits():void {
             
-        }
-
-        public function createFormItems():ArrayCollection {
-            var items:ArrayCollection = new ArrayCollection();
-            items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", fontName, this, ["Arial", "Arial Black", "Comic Sans MS",
-                "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
-            items.addItem(new NumericReportFormItem("Font Size", "fontSize", fontSize, this, 8, 48));
-            items.addItem(new NumericReportFormItem("Background Alpha", "backgroundAlpha", backgroundAlpha, this, 0, 1));
-            items.addItem(new NumericReportFormItem("Fixed Report Width", "fixedWidth", fixedWidth, this, 0, 5000));
-            return items;
         }
 
         public function showDrilldown(analysisItem:AnalysisItem):Boolean {

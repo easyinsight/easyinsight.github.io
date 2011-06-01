@@ -1,16 +1,12 @@
 package com.easyinsight.report {
+import com.easyinsight.analysis.AnalysisDefinition;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.ReportInfo")]
 public class ReportInfo {
 
-    public var role:int;
-    public var name:String;
-    public var tags:String;
-    public var attribution:String;
-    public var ownerName:String;
-    public var viewCount:int;
-    public var rating:Number;
-    public var ratingCount:int;
+    public var admin:Boolean;
+    public var report:AnalysisDefinition;
 
     public function ReportInfo() {
     }

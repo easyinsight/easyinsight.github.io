@@ -33,6 +33,18 @@ public class DashboardService {
         }
     }
 
+    public List<DashboardDescriptor> getDashboards() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            return dashboardStorage.getDashboards(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn).values();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void keepDashboard(long dashboardID, long sourceDashboardID) {
         SecurityUtil.authorizeDashboard(dashboardID);
         EIConnection conn = Database.instance().getConnection();

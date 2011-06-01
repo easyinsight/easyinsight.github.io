@@ -6,12 +6,13 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
+import com.easyinsight.analysis.FeedMetadata;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
-import com.easyinsight.util.PopUpUtil;
+import com.easyinsight.analysis.ReportPropertiesEvent;
 
 import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
@@ -20,18 +21,17 @@ import mx.controls.Button;
 
 import mx.controls.LinkButton;
 import mx.events.FlexEvent;
-import mx.managers.PopUpManager;
 
 public class ListControlBar extends ReportControlBar implements IReportControlBar {
 
     private var listViewGrouping:ListDropAreaGrouping;
     private var listDefinition:ListDefinition;
 
-    [Embed(source="../../../../../assets/table_edit.png")]
-    public var tableEditIcon:Class;
-
     [Embed(source="../../../../../assets/find.png")]
     public var findIcon:Class;
+
+    [Embed(source="../../../../../assets/tables_x16.png")]
+    public var lookupTableIcon:Class;
 
     public function ListControlBar() {
         super();
@@ -44,11 +44,13 @@ public class ListControlBar extends ReportControlBar implements IReportControlBa
 
     override protected function createChildren():void {
         super.createChildren();
-        var listEditButton:Button = new Button();
-        listEditButton.setStyle("icon", tableEditIcon);
-        listEditButton.toolTip = "Edit List Properties...";
-        listEditButton.addEventListener(MouseEvent.CLICK, editList);
-        addChild(listEditButton);
+        if (_feedMetadata.lookupTables.length > 0) {
+            var lookupTableButton:Button = new Button();
+            lookupTableButton.setStyle("icon", lookupTableIcon);
+            lookupTableButton.toolTip = "Edit Lookup Tables";
+            lookupTableButton.addEventListener(MouseEvent.CLICK, editLookupTables);
+            addChild(lookupTableButton);
+        }
         var findButton:Button = new Button();
         findButton.setStyle("icon", findIcon);
         findButton.toolTip = "Search Keyword...";
@@ -64,7 +66,9 @@ public class ListControlBar extends ReportControlBar implements IReportControlBa
         }
         var limitLabel:LinkButton = new LinkButton();
         limitLabel.setStyle("textDecoration", "underline");
-        limitLabel.addEventListener(MouseEvent.CLICK, editList);
+        limitLabel.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
+            dispatchEvent(new ReportPropertiesEvent(2));
+        });
         BindingUtils.bindProperty(limitLabel, "label", this, "limitText");
         addChild(limitLabel);
     }
@@ -73,12 +77,15 @@ public class ListControlBar extends ReportControlBar implements IReportControlBa
         dispatchEvent(new EnableKeywordEvent());
     }
 
-    private function editList(event:MouseEvent):void {
-        var listWindow:ListDefinitionEditWindow = ListDefinitionEditWindow(PopUpManager.createPopUp(this, ListDefinitionEditWindow, true));
-        listWindow.fields = analysisItems;
-        listWindow.listDefinition = listDefinition;
-        listWindow.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
-        PopUpUtil.centerPopUp(listWindow);
+    private var _feedMetadata:FeedMetadata;
+
+    public function set feedMetadata(value:FeedMetadata):void {
+        _feedMetadata = value;
+    }
+
+    private function editLookupTables(event:MouseEvent):void {
+        dispatchEvent(new EnableLookupEditingEvent());
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA, false));
     }
 
     private var _limitText:String;

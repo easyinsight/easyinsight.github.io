@@ -11,10 +11,8 @@ import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
-import com.easyinsight.analysis.charts.ChartDefinitionEditWindow;
+import com.easyinsight.analysis.ReportPropertiesEvent;
 import com.easyinsight.analysis.charts.ChartRotationEvent;
-
-import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -24,13 +22,11 @@ import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
-import mx.controls.Button;
 import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.controls.RadioButton;
 import mx.controls.RadioButtonGroup;
 import mx.events.FlexEvent;
-import mx.managers.PopUpManager;
 
 public class TwoAxisControlBar extends ReportControlBar implements IReportControlBar {
     private var xAxisGrouping:ListDropAreaGrouping;
@@ -59,10 +55,6 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
         measuresGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         setStyle("verticalAlign", "middle");
     }
-
-    [Embed(source="../../../../../../assets/table_edit.png")]
-    public var tableEditIcon:Class;
-
     private var stack:ViewStack;
 
     private function onChange(event:Event):void {
@@ -77,11 +69,6 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
 
     override protected function createChildren():void {
         super.createChildren();
-        var pieEditButton:Button = new Button();
-        pieEditButton.setStyle("icon", tableEditIcon);
-        pieEditButton.toolTip = "Edit Chart Properties...";
-        pieEditButton.addEventListener(MouseEvent.CLICK, editLimits);
-        addChild(pieEditButton);
 
         var xAxisGroupingLabel:Label = new Label();
         xAxisGroupingLabel.text = "X Axis Grouping:";
@@ -152,17 +139,11 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
         }
         var limitLabel:LinkButton = new LinkButton();
         limitLabel.setStyle("textDecoration", "underline");
-        limitLabel.addEventListener(MouseEvent.CLICK, editLimits);
+        limitLabel.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
+            dispatchEvent(new ReportPropertiesEvent(2));
+        });
         BindingUtils.bindProperty(limitLabel, "label", this, "limitText");
         addChild(limitLabel);
-    }
-
-    private function editLimits(event:MouseEvent):void {
-        var window:ChartDefinitionEditWindow = new ChartDefinitionEditWindow();
-        window.chartDefinition = xAxisDefinition;
-        window.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, onUpdate);
-        PopUpManager.addPopUp(window, this, true);
-        PopUpUtil.centerPopUp(window);
     }
 
     private function onUpdate(event:AnalysisItemUpdateEvent):void {

@@ -1,9 +1,50 @@
 <?xml version="1.0"?>
-<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                   xmlns:filtering="com.easyinsight.filtering.*"
+        creationComplete="populateData()">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.ReportFormItem;
+        import com.easyinsight.analysis.StyleConfiguration;
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.filtering.FilterDefinition;
+        import com.easyinsight.skin.ImageDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.events.FlexEvent;
+
         import mx.managers.PopUpManager;
 
         private var _dashboardStack:DashboardStack;
+
+        private var commandProcessor:CommandProcessor;
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
+        }
+
+        private function populateData():void {
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
+            for each (var filter:FilterDefinition in _dashboardStack.filters) {
+                transformContainer.addFilterDefinition(filter);
+            }
+            items = StyleConfiguration.getDashboardElementItems(_dashboardStack);
+            var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
+            lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
+            for each (var item:ReportFormItem in items) {
+                form.addChild(item);
+            }
+        }
+
+        [Bindable]
+        private var headerBackground:ImageDescriptor;
+
+        [Bindable]
+        private var headerBackgroundColor:uint = 0xFFFFFF;
+
+        [Bindable]
+        private var headerBackgroundAlpha:String = "0";
 
         [Bindable]
         private var selectedEffect:int = DashboardStack.SLIDE;
@@ -11,12 +52,39 @@
         [Bindable]
         private var transitionTime:String = "500";
 
+        [Bindable]
+        public var availableDimensions:ArrayCollection;
+
+        [Bindable]
+        public var dataSourceID:int;
+
+        private var lastTab:int;
+
+        [Bindable]
+        public var allFields:ArrayCollection;
+
+        private var items:ArrayCollection;
+
+        private function onDone(event:FlexEvent):void {
+            PopUpUtil.centerPopUp(this);
+        }
+
         public function set dashboardStack(value:DashboardStack):void {
             _dashboardStack = value;
             if (value.count > 0) {
                 transitionTime = String(value.effectDuration);
                 selectedEffect = value.effectType;
                 reportCount = value.count;
+                headerBackground = value.headerBackground;
+                headerBackgroundColor = value.headerBackgroundColor;
+                headerBackgroundAlpha = String(value.headerBackgroundAlpha);
+            }
+        }
+
+        private function onEvent(event:Event):void {
+            if (lastTab != tabNavigator.selectedIndex) {
+                lastTab = tabNavigator.selectedIndex;
+                PopUpUtil.centerPopUp(this);
             }
         }
 
@@ -24,38 +92,78 @@
         private var reportCount:int = 2;
 
         private function save():void {
-            _dashboardStack.count = reportStepper.value;
-            _dashboardStack.effectType = animationComboBox.selectedItem.data;
-            _dashboardStack.effectDuration = int(transitionInput.text);
-            dispatchEvent(new GridDimensionEvent(0, 0));
-            PopUpManager.removePopUp(this);
+            var valid:Boolean = true;
+            for each (var validateItem:ReportFormItem in items) {
+                valid = valid && validateItem.validate();
+            }
+            if (valid) {
+                for each (var item:ReportFormItem in items) {
+                    item.save();
+                }
+                _dashboardStack.count = reportStepper.value;
+                _dashboardStack.effectType = animationComboBox.selectedItem.data;
+                _dashboardStack.effectDuration = int(transitionInput.text);
+                _dashboardStack.filters = transformContainer.getFilterDefinitions();
+                dispatchEvent(new GridDimensionEvent(0, 0));
+                PopUpManager.removePopUp(this);
+            }
         }
         ]]></mx:Script>
     <mx:VBox horizontalAlign="center">
-        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-            <mx:FormItem label="How many reports will this stack contain?">
-                <mx:NumericStepper id="reportStepper" minimum="1" maximum="10" value="{reportCount}"/>
-            </mx:FormItem>
-            <mx:FormItem label="What animation should be used in transitions between reports?">
-                <util:SmartComboBox id="animationComboBox" selectedProperty="data" selectedValue="{selectedEffect}">
-                    <util:dataProvider>
-                        <mx:ArrayCollection>
-                            <mx:Array>
-                                <mx:Object data="{DashboardStack.FADE}" label="Fade"/>
-                                <mx:Object data="{DashboardStack.FLIP}" label="Flip"/>
-                                <mx:Object data="{DashboardStack.NONE}" label="None"/>
-                                <mx:Object data="{DashboardStack.PIXELATE}" label="Pixelate"/>
-                                <mx:Object data="{DashboardStack.SLIDE}" label="Slide"/>
-                            </mx:Array>
-                        </mx:ArrayCollection>
-                    </util:dataProvider>
-                </util:SmartComboBox>
-            </mx:FormItem>
-            <mx:FormItem label="How long should the transition take in milliseconds?">
-                <mx:TextInput id="transitionInput" text="{transitionTime}"/>
-            </mx:FormItem>
-        </mx:Form>
-        <mx:Button label="Save" styleName="grayButton" click="save()"/>
+        <mx:TabNavigator resizeToContent="true" id="tabNavigator" creationPolicy="all">
+            <mx:Box label="Stack Properties" paddingLeft="5" paddingTop="5" paddingBottom="5"
+                horizontalAlign="center" height="300" updateComplete="onEvent(event)" width="800" verticalScrollPolicy="on">
+                <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                    <mx:FormItem label="How many reports will this stack contain?">
+                        <mx:NumericStepper id="reportStepper" minimum="1" maximum="10" value="{reportCount}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="What animation should be used in transitions between reports?">
+                        <util:SmartComboBox id="animationComboBox" selectedProperty="data" selectedValue="{selectedEffect}">
+                            <util:dataProvider>
+                                <mx:ArrayCollection>
+                                    <mx:Array>
+                                        <mx:Object data="{DashboardStack.FADE}" label="Fade"/>
+                                        <mx:Object data="{DashboardStack.FLIP}" label="Flip"/>
+                                        <mx:Object data="{DashboardStack.NONE}" label="None"/>
+                                        <mx:Object data="{DashboardStack.PIXELATE}" label="Pixelate"/>
+                                        <mx:Object data="{DashboardStack.SLIDE}" label="Slide"/>
+                                    </mx:Array>
+                                </mx:ArrayCollection>
+                            </util:dataProvider>
+                        </util:SmartComboBox>
+                    </mx:FormItem>
+                    <mx:FormItem label="How long should the transition take in milliseconds?">
+                        <mx:TextInput id="transitionInput" text="{transitionTime}"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:Box>
+            <mx:Box label="Styling" paddingLeft="5" paddingTop="5" paddingBottom="5"
+                horizontalAlign="center" height="300" width="800" verticalScrollPolicy="on">
+                <mx:Form id="form"/>
+            </mx:Box>
+            <mx:HDividedBox height="300" width="800" backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5"
+                                paddingRight="5" paddingTop="10" label="Filters">
+                <mx:List dataProvider="{availableDimensions}" labelField="display"
+                         dragEnabled="true"
+                         dragMoveEnabled="false" width="30%"
+                         height="100%"/>
+                <mx:Canvas width="70%" height="100%">
+                    <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
+                                                  borderStyle="solid"
+                                                  borderThickness="1" backgroundColor="#ffffff"
+                                                  backgroundAlpha=".1" feedID="{dataSourceID}"
+                                                  analysisItems="{allFields}"
+                                                  showLabel="true"
+                                                  paddingBottom="5" paddingLeft="5" paddingRight="5"
+                                                  paddingTop="5"/>
+                </mx:Canvas>
+            </mx:HDividedBox>
+        </mx:TabNavigator>
+        <mx:HBox>
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+
     </mx:VBox>
 
 </util:EISlimWindow>
