@@ -71,6 +71,7 @@
         <mapping class="com.easyinsight.analysis.CrosstabDefinitionState"/>
         <mapping class="com.easyinsight.analysis.HeatMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.FormDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.VerticalListDefinitionState"/>
         <mapping class="com.easyinsight.analysis.gauge.GaugeDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeDefinitionState"/>
@@ -140,6 +141,7 @@
         <mapping class="com.easyinsight.audit.ActionReportLog" />
         <mapping class="com.easyinsight.audit.ActionDashboardLog" />
         <mapping class="com.easyinsight.audit.ActionDataSourceLog" />
+        <mapping class="com.easyinsight.audit.ActionScorecardLog" />
     </session-factory>
 
 </hibernate-configuration>

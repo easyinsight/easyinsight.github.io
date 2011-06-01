@@ -18,10 +18,12 @@
         import com.easyinsight.kpi.KPIEvent;
         import com.easyinsight.kpi.KPIOutcome;
         import com.easyinsight.kpi.KPIParentWindow;
+        import com.easyinsight.util.ActionScorecardLog;
 
         import com.easyinsight.util.PopUpUtil;
 
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
         import mx.events.CollectionEvent;
@@ -83,6 +85,7 @@
             if (_scorecardID > 0) {
                 ProgressAlert.alert(this, "Retrieving scorecard...", null, scorecardService.getScorecard);
                 scorecardService.getScorecard.send(_scorecardID);
+                UserAudit.instance().log(new ActionScorecardLog(ActionScorecardLog.EDIT, _scorecardID));
             } else {
                 if (_startDataSourceID == 0) {
                     var window:KPITreeSetupWindow = new KPITreeSetupWindow();

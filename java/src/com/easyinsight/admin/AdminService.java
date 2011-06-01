@@ -1,10 +1,7 @@
 package com.easyinsight.admin;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.audit.ActionDashboardLog;
-import com.easyinsight.audit.ActionDataSourceLog;
-import com.easyinsight.audit.ActionLog;
-import com.easyinsight.audit.ActionReportLog;
+import com.easyinsight.audit.*;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.Database;
@@ -23,6 +20,7 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.*;
 
+import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
@@ -84,6 +82,20 @@ public class AdminService {
                 String urlKey = reportRS.getString(6);
                 Date actionDate = new Date(reportRS.getTimestamp(7).getTime());
                 actions.add(new ActionReportLog(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey, Roles.OWNER), actionType, actionDate));
+            }
+            PreparedStatement queryScorecardStmt = conn.prepareStatement("SELECT action_scorecard_log.scorecard_id, action_log.action_type, scorecard.data_source_id," +
+                    "scorecard.scorecard_name, scorecard.url_key, action_log.action_date from scorecard, action_log, action_scorecard_log where action_log.action_log_id = action_scorecard_log.action_log_id and " +
+                    "action_scorecard_log.scorecard_id = scorecard.scorecard_id and action_log.user_id = ? order by action_log.action_date desc");
+            queryScorecardStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet scorecardRS = queryScorecardStmt.executeQuery();
+            while (scorecardRS.next()) {
+                long scorecardID = scorecardRS.getLong(1);
+                int actionType = scorecardRS.getInt(2);
+                long dataSourceID = scorecardRS.getLong(3);
+                String reportName = scorecardRS.getString(4);
+                String urlKey = scorecardRS.getString(5);
+                Date actionDate = new Date(scorecardRS.getTimestamp(6).getTime());
+                actions.add(new ActionScorecardLog(new ScorecardDescriptor(reportName, scorecardID, urlKey, dataSourceID), actionType, actionDate));
             }
             PreparedStatement queryDashboardStmt = conn.prepareStatement("SELECT action_dashboard_log.dashboard_id, action_log.action_type, dashboard.data_source_id," +
                     "dashboard.dashboard_name, dashboard.url_key, action_log.action_date from dashboard, action_log, action_dashboard_log where action_log.action_log_id = action_dashboard_log.action_log_id and " +

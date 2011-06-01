@@ -1,19 +1,14 @@
 <?xml version="1.0"?>
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:skin="com.easyinsight.skin.*"
                       xmlns:scorecard="com.easyinsight.scorecard.*"
-                      implements="com.easyinsight.listing.IPerspective">
+                      implements="com.easyinsight.listing.IPerspective" creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
-        import com.easyinsight.customupload.ProblemDataEvent;
-
-        import com.easyinsight.framework.InsightRequestMetadata;
-
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.kpi.KPI;
-        import com.easyinsight.kpi.KPIOutcome;
-        import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.ActionScorecardLog;
+        import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
         import mx.managers.BrowserManager;
@@ -23,6 +18,10 @@
         private var kpis:ArrayCollection;
 
         private var _scorecard:Scorecard;
+
+        private function onCreation():void {
+            UserAudit.instance().log(new ActionScorecardLog(ActionScorecardLog.VIEW, _scorecardID));
+        }
 
         public function set scorecard(value:Scorecard):void {
             _scorecard = value;
