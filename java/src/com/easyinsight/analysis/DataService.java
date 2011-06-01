@@ -277,14 +277,13 @@ public class DataService {
         }
     }
 
-    public DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
-        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+    public static DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
 
         if (insightRequestMetadata == null) {
             insightRequestMetadata = new InsightRequestMetadata();
         }
         insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
-        Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID(), conn);
+        Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
         if (analysisDefinition.getAddedItems() != null) {
             allFields.addAll(analysisDefinition.getAddedItems());
