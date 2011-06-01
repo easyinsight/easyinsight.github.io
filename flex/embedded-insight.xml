@@ -17,6 +17,7 @@
         <library-path>
             <path-element>${flexlib}/libs/flex.swc</path-element>
             <path-element>${flexlib}/libs/utilities.swc</path-element>
+            <path-element>libs/flexlib.swc</path-element>
             <path-element>libs/analytics.swc</path-element>
             <path-element>libs/as3corelib.swc</path-element>
             <path-element>${flexlib}/locale/{locale}</path-element>
