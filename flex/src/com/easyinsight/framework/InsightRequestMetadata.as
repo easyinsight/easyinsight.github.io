@@ -14,6 +14,7 @@ import mx.collections.ArrayCollection;
         public var refreshAllSources:Boolean;
         public var noCache:Boolean;
         public var hierarchyOverrides:ArrayCollection;
+    public var reportEditor:Boolean;
 		
 		public function InsightRequestMetadata()
 		{
