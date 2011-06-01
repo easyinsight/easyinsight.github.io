@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<analysis:ReportFormItem xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
+                         xmlns:list="com.easyinsight.analysis.list.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.list.LimitsEntry;
+
+        import mx.collections.ArrayCollection;
+
+        private function limitsEnabledCheck():void {
+            limitsEnabled = limitsEnabledCheckbox.selected;
+            if (limitsEnabled) {
+                customLimitEnabled = (limitsBox.selectedItem == topN || limitsBox.selectedItem == bottomN);
+            } else {
+                customLimitEnabled = false;
+            }
+        }
+
+        private function limitValueChanged():void {
+            var limitsEntry:LimitsEntry = limitsBox.selectedItem as LimitsEntry;
+            customLimitEnabled = (limitsEntry == topN || limitsEntry == bottomN);
+        }
+
+        private var _allFields:ArrayCollection;
+
+        public function set allFields(value:ArrayCollection):void {
+            _allFields = value;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            direction = "vertical";
+            var fields:ArrayCollection = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in _allFields) {
+                if (wrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE) ||
+                        wrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                    fields.addItem(wrapper.analysisItem);
+                }
+            }
+            availableFields = fields;
+            var existingLimits:LimitsMetadata = report.limitsMetadata;
+            if (existingLimits != null) {
+                limitsEnabled = existingLimits.limitEnabled;
+
+                var matchedEntry:LimitsEntry = null;
+                for each (var limitsEntry:LimitsEntry in limitsBox.dataProvider) {
+                    if (limitsEntry.number == existingLimits.number && limitsEntry.top == existingLimits.top) {
+                        matchedEntry = limitsEntry;
+                    }
+                }
+                if (matchedEntry == null) {
+                    customLimitEnabled = true;
+                    if (existingLimits.top) {
+                        matchedEntry = topN;
+                    } else {
+                        matchedEntry = bottomN;
+                    }
+                    customLimitInput.text = String(existingLimits.number);
+                }
+                limitsBox.selectedItem = matchedEntry;
+            }
+        }
+
+        [Bindable]
+        private var availableFields:ArrayCollection;
+
+        [Bindable]
+        private var limitsEnabled:Boolean;
+
+        [Bindable]
+        private var customLimitEnabled:Boolean;
+
+        override public function save():void {
+            var limitsMetadata:LimitsMetadata = new LimitsMetadata();
+            limitsMetadata.limitEnabled = limitsEnabled;
+            var limitsEntry:LimitsEntry = limitsBox.selectedItem as LimitsEntry;
+            if (limitsEntry == topN || limitsEntry == bottomN) {
+                limitsEntry.number = Number(customLimitInput.text);
+            }
+            limitsEntry.toLimitsMetadata(limitsMetadata);
+            report.limitsMetadata = limitsMetadata;
+        }
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Should results be limited?">
+            <mx:CheckBox id="limitsEnabledCheckbox" click="limitsEnabledCheck()" selected="{limitsEnabled}" change="dispatchEvent(new Event('refreshNecessary'))"/>
+        </mx:FormItem>
+        <mx:FormItem label="What's the limit value?">
+            <mx:ComboBox id="limitsBox" enabled="{limitsEnabled}" close="limitValueChanged()" labelField="name" change="dispatchEvent(new Event('refreshNecessary'))">
+                <list:LimitsEntry name="Top 5" number="5" top="true"/>
+                <list:LimitsEntry name="Top 10" number="10" top="true"/>
+                <list:LimitsEntry id="topN" name="Top N" top="true"/>
+                <list:LimitsEntry name="Bottom 5" number="5" top="false"/>
+                <list:LimitsEntry name="Bottom 10" number="10" top="false"/>
+                <list:LimitsEntry id="bottomN" name="Bottom N" top="true"/>
+            </mx:ComboBox>
+        </mx:FormItem>
+        <mx:FormItem>
+            <mx:TextInput id="customLimitInput" enabled="{customLimitEnabled}" change="dispatchEvent(new Event('refreshNecessary'))"/>
+        </mx:FormItem>
+    </mx:Form>
+</analysis:ReportFormItem>
