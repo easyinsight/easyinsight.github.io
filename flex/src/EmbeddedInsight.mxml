@@ -18,6 +18,7 @@
         import com.easyinsight.analysis.AnalysisStep;
         import com.easyinsight.analysis.ComplexAnalysisMeasure;
         import com.easyinsight.analysis.DefaultMenuFactory;
+        import com.easyinsight.analysis.InsightResponse;
         import com.easyinsight.analysis.PopupMenuFactory;
 
         import com.easyinsight.analysis.SixSigmaMeasure;
@@ -126,6 +127,16 @@
                     //toMain();
                 }
             } else {
+                analysisService.openAnalysisIfPossible.send(urlKey);
+
+            }
+        }
+
+        private function gotReportInfo():void {
+            var info:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
+            if (info.status == InsightResponse.SUCCESS) {
+                stackIndex = 2;
+            } else {
                 stackIndex = 1;
             }
         }
@@ -151,6 +162,9 @@
             
 		]]>
 	</mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="openAnalysisIfPossible" result="gotReportInfo()"/>
+    </mx:RemoteObject>
     <mx:RemoteObject id="userService" destination="login">
         <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
         <mx:method name="getBuildPath" result="gotBuildPath()"/>
