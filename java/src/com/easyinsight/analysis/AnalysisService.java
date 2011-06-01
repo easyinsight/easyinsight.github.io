@@ -524,16 +524,16 @@ public class AnalysisService {
         InsightResponse insightResponse;
         try {
             try {
-                long analysisID = SecurityUtil.authorizeInsight(urlKey);
-                //AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID);
                 Connection conn = Database.instance().getConnection();
                 try {
-                    PreparedStatement queryStmt = conn.prepareStatement("SELECT TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
-                    queryStmt.setLong(1, analysisID);
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS WHERE URL_KEY = ?");
+                    queryStmt.setString(1, urlKey);
                     ResultSet rs = queryStmt.executeQuery();
                     rs.next();
-                    insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(1),
-                            rs.getLong(2), rs.getInt(3), urlKey, Roles.NONE));
+                    long analysisID = rs.getLong(1);
+                    SecurityUtil.authorizeInsight(analysisID);
+                    insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(2),
+                            rs.getLong(3), rs.getInt(4), urlKey, Roles.NONE));
                 } finally {
                     Database.closeConnection(conn);
                 }
