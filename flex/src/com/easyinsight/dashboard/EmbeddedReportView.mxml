@@ -25,6 +25,7 @@
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.IEmbeddedReportController;
         import com.easyinsight.analysis.InsightResponse;
+        import com.easyinsight.analysis.list.ListDefinition;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.datasources.DataSourceInfo;
@@ -239,6 +240,10 @@
 
         private var report:AnalysisDefinition;
 
+        private function blah():void {
+            var listDef:ListDefinition;
+        }
+
         private function onSetup(event:ReportSetupEvent):void {
             report = event.reportInfo.report;
             Alert.show("got results");
@@ -251,11 +256,8 @@
                 filterDefinitions = new ArrayCollection();
             }
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+            Alert.show("retrieving data?");
             dataViewFactory.retrieveData();
-        }
-
-        private function signup(event:MouseEvent):void {
-            navigateToURL(new URLRequest("https://www.easy-insight.com/app/#page=account"))
         }
 
         private function transformsUpdated(event:TransformsUpdatedEvent):void {
