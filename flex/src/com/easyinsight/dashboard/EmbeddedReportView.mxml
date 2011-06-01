@@ -241,13 +241,16 @@
 
         private function onSetup(event:ReportSetupEvent):void {
             report = event.reportInfo.report;
+            Alert.show("got results");
             if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
+                Alert.show("filters len = " + report.filterDefinitions.length);
                 filterDefinitions = report.filterDefinitions;
                 filterIndex = 1;
             } else {
                 filterIndex = 0;
                 filterDefinitions = new ArrayCollection();
             }
+            transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             dataViewFactory.retrieveData();
         }
 
@@ -338,7 +341,7 @@
         <mx:VBox width="100%" horizontalAlign="center">
             <filtering:TransformContainer id="transformContainer" filterEditable="false"
                                                   existingFilters="{filterDefinitions}"
-                                                  updatedTransforms="transformsUpdated(event)" width="100%"
+                                                  width="100%"
                                                   paddingLeft="10"
                                                   paddingTop="10" paddingBottom="10"
                                                   paddingRight="10" feedID="{_dataSourceID}" reportView="true" reportID="{_analysisID}"/>
