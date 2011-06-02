@@ -100,6 +100,7 @@
         private var dashboard:Dashboard;
 
         private function gotDashboard():void {
+            Alert.show("got dashboard");
             dashboard = dashboardService.getDashboard.lastResult as Dashboard;
             var grid:DashboardGrid = dashboard.rootElement as DashboardGrid;
             dashboardCanvas.setStyle("backgroundAlpha", grid.backgroundAlpha);
