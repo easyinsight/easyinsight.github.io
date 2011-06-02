@@ -198,9 +198,11 @@ public class DashboardService {
     }
 
     public Dashboard getDashboard(long dashboardID) {
-        SecurityUtil.authorizeDashboard(dashboardID);
         try {
-            return dashboardStorage.getDashboard(dashboardID);
+            SecurityUtil.authorizeDashboard(dashboardID);
+            Dashboard dashboard = dashboardStorage.getDashboard(dashboardID);
+            System.out.println("blah");
+            return dashboard;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
