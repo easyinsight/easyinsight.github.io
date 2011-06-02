@@ -97,12 +97,21 @@
                 s.showToolbar = !s.showToolbar;
             });
 
+            var exportItem:ContextMenuItem = new ContextMenuItem("Export " + reportName);
+            exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+                exportReport();
+            });
+
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
-            menu.customItems = [ showFiltersMenu, showToolbarMenu ];
+            menu.customItems = [ showFiltersMenu, showToolbarMenu, exportItem ];
             this.contextMenu = menu;
             // session check
             userService.getBuildPath.send();
+        }
+
+        private function exportReport():void {
+
         }
 
         private function gotBuildPath():void {

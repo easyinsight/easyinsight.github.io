@@ -416,6 +416,19 @@
         private function onSetup(event:ReportSetupEvent):void {
             report = event.reportInfo.report;
 
+            var editItem:ContextMenuItem = new ContextMenuItem("Edit " + report.name);
+            editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+                toReportEditor();
+            });
+            var exportItem:ContextMenuItem = new ContextMenuItem("Export " + report.name);
+            exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+                exportExcel();
+            });
+            var menu:ContextMenu = new ContextMenu();
+            menu.hideBuiltInItems();
+            menu.customItems = [ editItem, exportItem ];
+            viewFactory.contextMenu = menu;
+
             reportName = report.name;
             description = report.description;
             admin = event.reportInfo.admin;

@@ -99,7 +99,7 @@ public class DashboardStorage {
         }
         ueryAccountStmt.close();
         ownerStmt.close();
-        PreparedStatement dashboardGroupStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.data_source_id, dashboard.URL_KEY, group_to_user_join.binding_type, create_date FROM dashboard, group_to_user_join," +
+        PreparedStatement dashboardGroupStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.data_source_id, dashboard.URL_KEY, group_to_user_join.binding_type, dashboard.creation_date FROM dashboard, group_to_user_join," +
                 "group_to_dashboard WHERE " +
                 "dashboard.dashboard_id = group_to_dashboard.dashboard_id and group_to_dashboard.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and dashboard.temporary_dashboard = ?");
         dashboardGroupStmt.setLong(1, userID);
@@ -248,7 +248,7 @@ public class DashboardStorage {
             dashboard.setFilterBorderStyle(rs.getString(14));
             dashboard.setFilterBorderColor(rs.getInt(15));
             dashboard.setFilterBackgroundColor(rs.getInt(16));
-            dashboard.setFilterBackgroundAlpha(rs.getDouble(16));
+            dashboard.setFilterBackgroundAlpha(rs.getDouble(17));
             PreparedStatement findElementsStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, ELEMENT_TYPE FROM " +
                     "DASHBOARD_ELEMENT, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ? AND DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID = DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID");
             findElementsStmt.setLong(1, dashboardID);
