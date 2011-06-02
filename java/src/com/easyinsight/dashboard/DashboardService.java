@@ -27,7 +27,22 @@ public class DashboardService {
 
     public long canAccessDashboard(String urlKey) {
         try {
-            return SecurityUtil.authorizeDashboard(urlKey);
+            long dashboardID = 0;
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                PreparedStatement stmt = conn.prepareStatement("SELECT DASHBOARD_ID FROM DASHBOARD WHERE URL_KEY = ?");
+                stmt.setString(1, urlKey);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    dashboardID = rs.getLong(1);
+                }
+            } catch (SQLException se) {
+                LogClass.error(se);
+                throw new RuntimeException(se);
+            } finally {
+                Database.closeConnection(conn);
+            }
+            return SecurityUtil.authorizeDashboard(dashboardID);
         } catch (com.easyinsight.security.SecurityException e) {
             return 0;
         }
