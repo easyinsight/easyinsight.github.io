@@ -144,7 +144,7 @@ public class DashboardStorage {
             insertStmt.setString(14, dashboard.getFilterBorderStyle());
             insertStmt.setInt(15, dashboard.getFilterBorderColor());
             insertStmt.setInt(16, dashboard.getFilterBackgroundColor());
-            insertStmt.setDouble(16, dashboard.getFilterBackgroundAlpha());
+            insertStmt.setDouble(17, dashboard.getFilterBackgroundAlpha());
             insertStmt.execute();
             dashboard.setId(Database.instance().getAutoGenKey(insertStmt));
             insertStmt.close();
