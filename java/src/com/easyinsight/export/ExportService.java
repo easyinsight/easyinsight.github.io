@@ -1,8 +1,11 @@
 package com.easyinsight.export;
 
+import com.easyinsight.admin.AdminService;
 import com.easyinsight.analysis.DataService;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.audit.ActionLog;
+import com.easyinsight.audit.ActionReportLog;
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -289,11 +292,14 @@ public class ExportService {
             if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                 analysisDefinition.updateMetadata();
-                ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
+                ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
                 toListPDFInDatabase(analysisDefinition, listDataResults, conn, insightRequestMetadata);
             } else {
                 toImagePDFDatabase(analysisDefinition, bytes, width, height, conn);
             }
+            /*if (insightRequestMetadata.isReportEditor()) {
+                new AdminService().logAction(new ActionReportLog(SecurityUtil.getUserID(), ActionReportLog.EXPORT_PDF, analysisDefinition.getAnalysisID()));
+            }*/
         } catch (Exception e) {
             LogClass.error(e.getMessage() + " on saving report " + analysisDefinition.getAnalysisID() + " - " + analysisDefinition.getReportType(), e);
             throw new RuntimeException(e);
@@ -484,13 +490,19 @@ public class ExportService {
     public byte[] exportToExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+        EIConnection conn = Database.instance().getConnection();
         try {
             analysisDefinition.updateMetadata();
-            ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
+            ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
+            /*if (insightRequestMetadata.isReportEditor()) {
+                new AdminService().logAction(new ActionReportLog(SecurityUtil.getUserID(), ActionReportLog.EXPORT_XLS, analysisDefinition.getAnalysisID()));
+            }*/
             return toExcel(analysisDefinition, listDataResults, insightRequestMetadata);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
