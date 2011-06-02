@@ -42,7 +42,8 @@ public class DashboardService {
             } finally {
                 Database.closeConnection(conn);
             }
-            return SecurityUtil.authorizeDashboard(dashboardID);
+            SecurityUtil.authorizeDashboard(dashboardID);
+            return dashboardID;
         } catch (com.easyinsight.security.SecurityException e) {
             return 0;
         }
