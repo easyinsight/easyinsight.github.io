@@ -75,14 +75,12 @@
                     //toMain();
                 }
             } else {
-                Alert.show("blah");
                 dashboardService.canAccessDashboard.send(urlKey);
             }
         }
 
         private function accessInfo():void {
             var id:int = dashboardService.canAccessDashboard.lastResult as int;
-            Alert.show(String(id));
             if (id > 0) {
                 stackIndex = 2;
             } else {
