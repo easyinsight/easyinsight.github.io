@@ -51,7 +51,8 @@
         private function setup():void {
             addEventListener(RemoveItemFromGroupEvent.REMOVE_DATA_SOURCE_FROM_GROUP, removeFromGroup);
             addEventListener(RemoveItemFromGroupEvent.REMOVE_REPORT_FROM_GROUP, removeFromGroup);
-            addEventListener(RemoveItemFromGroupEvent.REMOVE_GOAL_TREE_FROM_GROUP, removeFromGroup);
+            addEventListener(RemoveItemFromGroupEvent.REMOVE_DASHBOARD_FROM_GROUP, removeFromGroup);
+            addEventListener(RemoveItemFromGroupEvent.REMOVE_SCORECARD_FROM_GROUP, removeFromGroup);
             addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
             gotFocus();
         }
@@ -116,8 +117,10 @@
                 groupService.removeDataSourceFromGroup.send(event.id, groupID);
             } else if (event.type == RemoveItemFromGroupEvent.REMOVE_REPORT_FROM_GROUP) {
                 groupService.removeReportFromGroup.send(event.id, groupID);
-            } else if (event.type == RemoveItemFromGroupEvent.REMOVE_GOAL_TREE_FROM_GROUP) {
-                groupService.removeGoalTreeFromGroup.send(event.id, groupID);
+            } else if (event.type == RemoveItemFromGroupEvent.REMOVE_DASHBOARD_FROM_GROUP) {
+                groupService.removeDashboardFromGroup.send(event.id, groupID);
+            } else if (event.type == RemoveItemFromGroupEvent.REMOVE_SCORECARD_FROM_GROUP) {
+                groupService.removeScorecardFromGroup.send(event.id, groupID);
             }
         }
 
@@ -134,7 +137,8 @@
         <mx:method name="getGroup" result="gotGroupDetails()"/>
         <mx:method name="removeDataSourceFromGroup" result="removed()"/>
         <mx:method name="removeReportFromGroup" result="removed()"/>
-        <mx:method name="removeKPITreeFromGroup" result="removed()"/>
+        <mx:method name="removeDashboardFromGroup" result="removed()"/>
+        <mx:method name="removeScorecardFromGroup" result="removed()"/>
     </mx:RemoteObject>
     <mx:VBox width="800" height="400" id="primaryCanvas" paddingTop="10" paddingLeft="10" paddingRight="10"
              paddingBottom="10" horizontalAlign="center">

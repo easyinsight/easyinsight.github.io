@@ -31,6 +31,20 @@ public class ScorecardInternalService {
         }
     }
 
+    public RolePrioritySet<ScorecardDescriptor> getScorecardsForGroup(long groupID, EIConnection conn) throws SQLException {
+        RolePrioritySet<ScorecardDescriptor> descriptors = new RolePrioritySet<ScorecardDescriptor>();
+        PreparedStatement userGroupStmt = conn.prepareStatement("select SCORECARD.scorecard_id, scorecard.scorecard_name, scorecard.url_key, scorecard.data_source_id FROM scorecard, " +
+                "group_to_scorecard WHERE " +
+                "scorecard.scorecard_id = group_to_scorecard.scorecard_id and group_to_scorecard.group_id = ?");
+        userGroupStmt.setLong(1, groupID);
+        ResultSet groupRS = userGroupStmt.executeQuery();
+        while (groupRS.next()) {
+            descriptors.add(new ScorecardDescriptor(groupRS.getString(2), groupRS.getLong(1), groupRS.getString(3), groupRS.getLong(4)));
+        }
+        userGroupStmt.close();
+        return descriptors;
+    }
+
     public RolePrioritySet<ScorecardDescriptor> getScorecards(long userID, long accountID, EIConnection conn) throws SQLException {
         RolePrioritySet<ScorecardDescriptor> scorecards = new RolePrioritySet<ScorecardDescriptor>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, SCORECARD.creation_date, SCORECARD.data_source_id from " +

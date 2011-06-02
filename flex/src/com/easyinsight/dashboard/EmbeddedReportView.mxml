@@ -25,7 +25,28 @@
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.IEmbeddedReportController;
         import com.easyinsight.analysis.InsightResponse;
+        import com.easyinsight.analysis.charts.bubble.BubbleChartDefinition;
+        import com.easyinsight.analysis.charts.plot.PlotChartDefinition;
+        import com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartDefinition;
+        import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartDefinition;
+        import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartDefinition;
+        import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartDefinition;
+        import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartDefinition;
+        import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartDefinition;
+        import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartDefinition;
+        import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartDefinition;
+        import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartDefinition;
+        import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartDefinition;
+        import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
+        import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartDefinition;
+        import com.easyinsight.analysis.crosstab.CrosstabDefinition;
+        import com.easyinsight.analysis.form.FormReport;
+        import com.easyinsight.analysis.gantt.GanttReport;
+        import com.easyinsight.analysis.gauge.GaugeDefinition;
+        import com.easyinsight.analysis.heatmap.HeatMapDefinition;
         import com.easyinsight.analysis.list.ListDefinition;
+        import com.easyinsight.analysis.tree.TreeDefinition;
+        import com.easyinsight.analysis.treemap.TreeMapDefinition;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.datasources.DataSourceInfo;
@@ -33,9 +54,7 @@
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.HierarchyOverride;
         import com.easyinsight.report.EmbeddedReportExportWindow;
-        import com.easyinsight.report.ReportExportWindow;
         import com.easyinsight.report.ReportSetupEvent;
-        import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
@@ -242,13 +261,32 @@
 
         private function blah():void {
             var listDef:ListDefinition;
+            var columnChartDef:ColumnChartDefinition;
+            var columnChartDef3D:Column3DChartDefinition;
+            var barChartDef:BarChartDefinition;
+            var barChartDef3D:Bar3DChartDefinition;
+            var pieChartDef:PieChartDefinition;
+            var pieChartDef3D:Pie3DChartDefinition;
+            var lineChartDef:LineChartDefinition;
+            var lineChartDef3D:Line3DChartDefinition;
+            var areaChartDef:AreaChartDefinition;
+            var areaChartDef3D:Area3DChartDefinition;
+            var crosstab:CrosstabDefinition;
+            var plotChartDef:PlotChartDefinition;
+            var bubbleChartDef:BubbleChartDefinition;
+            var stackedColumn:StackedColumnChartDefinition;
+            var stackedBar:StackedBarChartDefinition;
+            var gauge:GaugeDefinition;
+            var gantt:GanttReport;
+            var treeDef:TreeDefinition;
+            var treeMapDef:TreeMapDefinition;
+            var form:FormReport;
+            var heatMap:HeatMapDefinition;
         }
 
         private function onSetup(event:ReportSetupEvent):void {
             report = event.reportInfo.report;
-            Alert.show("got results");
             if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
-                Alert.show("filters len = " + report.filterDefinitions.length);
                 filterDefinitions = report.filterDefinitions;
                 filterIndex = 1;
             } else {

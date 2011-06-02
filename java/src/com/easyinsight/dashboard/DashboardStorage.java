@@ -1,6 +1,7 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.RolePrioritySet;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -36,6 +37,20 @@ public class DashboardStorage {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
+    }
+
+    public RolePrioritySet<DashboardDescriptor> getDashboardForGroup(long groupID, EIConnection conn) throws SQLException {
+        RolePrioritySet<DashboardDescriptor> descriptors = new RolePrioritySet<DashboardDescriptor>();
+        PreparedStatement userGroupStmt = conn.prepareStatement("select DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id FROM dashboard, " +
+                "group_to_dashboard WHERE " +
+                "dashboard.dashboard_id = group_to_dashboard.dashboard_id and group_to_dashboard.group_id = ?");
+        userGroupStmt.setLong(1, groupID);
+        ResultSet groupRS = userGroupStmt.executeQuery();
+        while (groupRS.next()) {
+            descriptors.add(new DashboardDescriptor(groupRS.getString(2), groupRS.getLong(1), groupRS.getString(3), groupRS.getLong(4), Roles.SUBSCRIBER, null));
+        }
+        userGroupStmt.close();
+        return descriptors;
     }
 
     public RolePrioritySet<DashboardDescriptor> getDashboards(long userID, long accountID, EIConnection conn) throws SQLException {
@@ -84,6 +99,26 @@ public class DashboardStorage {
         }
         ueryAccountStmt.close();
         ownerStmt.close();
+        PreparedStatement dashboardGroupStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.data_source_id, dashboard.URL_KEY, group_to_user_join.binding_type, create_date FROM dashboard, group_to_user_join," +
+                "group_to_dashboard WHERE " +
+                "dashboard.dashboard_id = group_to_dashboard.dashboard_id and group_to_dashboard.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and dashboard.temporary_dashboard = ?");
+        dashboardGroupStmt.setLong(1, userID);
+        dashboardGroupStmt.setBoolean(2, false);
+        ResultSet dashboardRS = dashboardGroupStmt.executeQuery();
+        while (dashboardRS.next()) {
+            ownerStmt.setLong(1, dashboardRS.getLong(1));
+            ownerStmt.setInt(2, Roles.OWNER);
+            ResultSet ownerRS = ownerStmt.executeQuery();
+            String name;
+            if (ownerRS.next()) {
+                String firstName = ownerRS.getString(1);
+                String lastName = ownerRS.getString(2);
+                name = firstName != null ? firstName + " " + lastName : lastName;
+            } else {
+                name = "";
+            }
+            dashboards.add(new DashboardDescriptor(dashboardRS.getString(2), dashboardRS.getLong(1),  dashboardRS.getString(4), dashboardRS.getLong(3), Roles.SUBSCRIBER, name));
+        }
         return dashboards;
     }
 

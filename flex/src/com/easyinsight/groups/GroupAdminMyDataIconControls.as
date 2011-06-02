@@ -1,6 +1,10 @@
 package com.easyinsight.groups
 {
+import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.listing.*;
+import com.easyinsight.scorecard.ScorecardDescriptor;
+import com.easyinsight.solutions.DataSourceDescriptor;
+import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -58,7 +62,15 @@ public class GroupAdminMyDataIconControls extends HBox
     }
 
     private function deleteCalled(event:MouseEvent):void {
-        dispatchEvent(new DeleteDataSourceEvent(obj));
+        if (obj is DataSourceDescriptor) {
+            dispatchEvent(new RemoveItemFromGroupEvent(RemoveItemFromGroupEvent.REMOVE_DATA_SOURCE_FROM_GROUP, obj.id));
+        } else if (obj is InsightDescriptor) {
+            dispatchEvent(new RemoveItemFromGroupEvent(RemoveItemFromGroupEvent.REMOVE_REPORT_FROM_GROUP, obj.id));
+        } else if (obj is DashboardDescriptor) {
+            dispatchEvent(new RemoveItemFromGroupEvent(RemoveItemFromGroupEvent.REMOVE_DASHBOARD_FROM_GROUP, obj.id));
+        } else if (obj is ScorecardDescriptor) {
+            dispatchEvent(new RemoveItemFromGroupEvent(RemoveItemFromGroupEvent.REMOVE_SCORECARD_FROM_GROUP, obj.id));
+        }
     }
 
     override public function set data(value:Object):void {

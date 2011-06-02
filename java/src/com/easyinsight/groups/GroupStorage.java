@@ -356,6 +356,30 @@ public class GroupStorage {
         }
     }
 
+    public void removeDashboardFromGroup(long dashboardID, long groupID) throws SQLException {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM group_to_dashboard WHERE dashboard_id = ? AND GROUP_ID = ?");
+            deleteStmt.setLong(1, dashboardID);
+            deleteStmt.setLong(2, groupID);
+            deleteStmt.executeUpdate();
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void removeScorecardFromGroup(long scorecardID, long groupID) throws SQLException {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM group_to_scorecard WHERE scorecard_id = ? AND GROUP_ID = ?");
+            deleteStmt.setLong(1, scorecardID);
+            deleteStmt.setLong(2, groupID);
+            deleteStmt.executeUpdate();
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void removeGoalTreeFromGroup(long dataSourceID, long groupID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
@@ -370,7 +394,6 @@ public class GroupStorage {
 
     public void addReportToGroup(long reportID, long groupID) throws SQLException {
         EIConnection conn = Database.instance().getConnection();
-        Session s = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_INSIGHT_ID FROM GROUP_TO_INSIGHT WHERE " +
@@ -401,7 +424,80 @@ public class GroupStorage {
             conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            s.close();
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void addDashboardToGroup(long dashboardID, long groupID) throws SQLException {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT group_to_dashboard_id FROM group_to_dashboard WHERE " +
+                    "GROUP_ID = ? AND dashboard_id = ?");
+            existingLinkQuery.setLong(1, groupID);
+            existingLinkQuery.setLong(2, dashboardID);
+            ResultSet existingRS = existingLinkQuery.executeQuery();
+            if (existingRS.next()) {
+                long existingID = existingRS.getLong(1);
+                PreparedStatement updateLinkStmt = conn.prepareStatement("UPDATE group_to_dashboard SET ROLE = ? WHERE " +
+                        "group_to_dashboard_id = ?");
+                updateLinkStmt.setLong(1, Roles.OWNER);
+                updateLinkStmt.setLong(2, existingID);
+                updateLinkStmt.executeUpdate();
+                updateLinkStmt.close();
+            } else {
+                PreparedStatement insightReportStmt = conn.prepareStatement("INSERT INTO group_to_dashboard (GROUP_ID, dashboard_id, ROLE) " +
+                        "VALUES (?, ?, ?)");
+                insightReportStmt.setLong(1, groupID);
+                insightReportStmt.setLong(2, dashboardID);
+                insightReportStmt.setLong(3, Roles.OWNER);
+                insightReportStmt.execute();
+                insightReportStmt.close();
+            }
+            existingLinkQuery.close();
+            conn.commit();
+        } catch (Exception e) {
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void addScorecardToGroup(long scorecardID, long groupID) throws SQLException {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT group_to_scorecard_id FROM group_to_scorecard WHERE " +
+                    "GROUP_ID = ? AND scorecard_id = ?");
+            existingLinkQuery.setLong(1, groupID);
+            existingLinkQuery.setLong(2, scorecardID);
+            ResultSet existingRS = existingLinkQuery.executeQuery();
+            if (existingRS.next()) {
+                long existingID = existingRS.getLong(1);
+                PreparedStatement updateLinkStmt = conn.prepareStatement("UPDATE group_to_scorecard SET ROLE = ? WHERE " +
+                        "group_to_scorecard_id = ?");
+                updateLinkStmt.setLong(1, Roles.OWNER);
+                updateLinkStmt.setLong(2, existingID);
+                updateLinkStmt.executeUpdate();
+                updateLinkStmt.close();
+            } else {
+                PreparedStatement insightReportStmt = conn.prepareStatement("INSERT INTO group_to_scorecard (GROUP_ID, scorecard_id, ROLE) " +
+                        "VALUES (?, ?, ?)");
+                insightReportStmt.setLong(1, groupID);
+                insightReportStmt.setLong(2, scorecardID);
+                insightReportStmt.setLong(3, Roles.OWNER);
+                insightReportStmt.execute();
+                insightReportStmt.close();
+            }
+            existingLinkQuery.close();
+            conn.commit();
+        } catch (Exception e) {
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }

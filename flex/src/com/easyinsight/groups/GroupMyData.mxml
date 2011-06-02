@@ -1,7 +1,9 @@
 <?xml version="1.0" ?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:groups="com.easyinsight.groups.*" width="100%" height="100%">
     <mx:Script><![CDATA[
+        import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.listing.MyDataTree;
+        import com.easyinsight.scorecard.ScorecardDescriptor;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
@@ -38,25 +40,49 @@
             displayTreeData.refresh();
         }
 
-        [Bindable]
         [Embed(source="../../../../assets/data_blue_x16.png")]
         public var listIcon:Class;
 
-        [Bindable]
         [Embed(source="../../../../assets/chart_column.png")]
         public var crosstabIcon:Class;
+
+        [Embed(source="../../../../assets/presentation_chart.png")]
+        private var dashboardIcon:Class;
+
+        [Embed(source="../../../../assets/arrow2_up_green.png")]
+        private var scorecardIcon:Class;
 
         private function simpleIconFunction(item:Object):Class {
             if (item is DataSourceDescriptor) {
                 return listIcon;
             } else if (item is InsightDescriptor) {
                 return crosstabIcon;
+            } else if (item is DashboardDescriptor) {
+                return dashboardIcon;
+            } else if (item is ScorecardDescriptor) {
+                return scorecardIcon;
             }
             return null;
         }
 
         private function addDataSource():void {
             var window:AddDataSourceToGroupWindow = new AddDataSourceToGroupWindow();
+            window.groupID = _groupID;
+            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function addDashboard():void {
+            var window:AddDashboardToGroupWindow = new AddDashboardToGroupWindow();
+            window.groupID = _groupID;
+            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function addScorecard():void {
+            var window:AddScorecardToGroupWindow = new AddScorecardToGroupWindow();
             window.groupID = _groupID;
             window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
@@ -158,8 +184,12 @@
                 <mx:HRule width="100%"/>
                 <mx:LinkButton label="Add data source..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
                                click="addDataSource()"/>
+                <mx:LinkButton label="Add dashboard..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
+                               click="addDashboard()"/>
                 <mx:LinkButton label="Add report..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
                                click="addReport()"/>
+                <mx:LinkButton label="Add scorecard..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
+                               click="addScorecard()"/>
             </mx:VBox>
         </mx:HBox>
     </mx:ViewStack>

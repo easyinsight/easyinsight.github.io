@@ -124,6 +124,8 @@ public class UserUploadService {
                 objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn).values());
             } else {
                 objects.addAll(analysisStorage.getReportsForGroup(groupID, conn).values());
+                objects.addAll(new DashboardStorage().getDashboardForGroup(groupID, conn).values());
+                objects.addAll(new ScorecardInternalService().getScorecardsForGroup(groupID, conn).values());
             }
 
             Iterator<EIDescriptor> iter = objects.iterator();
@@ -157,8 +159,8 @@ public class UserUploadService {
                 }
             }
 
+            results.addAll(objects);
             if (groupID == 0) {
-                results.addAll(objects);
                 for (LookupTableDescriptor lookupTableDescriptor : feedStorage.getLookupTableDescriptors(conn)) {
                     DataSourceDescriptor feedDescriptor = descriptorMap.get(lookupTableDescriptor.getDataSourceID());
                     if (feedDescriptor != null) {

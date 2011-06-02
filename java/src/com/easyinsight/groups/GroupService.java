@@ -247,6 +247,26 @@ public class GroupService {
         }
     }
 
+    public void removeDashboardFromGroup(long dashboardID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        try {
+            groupStorage.removeDashboardFromGroup(dashboardID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void removeScorecardFromGroup(long scorecardID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        try {
+            groupStorage.removeScorecardFromGroup(scorecardID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void removeGoalTreeFromGroup(long goalTreeID, long groupID) {
         SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
         try {
@@ -279,6 +299,28 @@ public class GroupService {
         SecurityUtil.authorizeInsight(insightID);
         try {
             groupStorage.addReportToGroup(insightID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addDashboardToGroup(long dashboardID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
+        SecurityUtil.authorizeDashboard(dashboardID);
+        try {
+            groupStorage.addDashboardToGroup(dashboardID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addScorecardToGroup(long scorecardID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
+        SecurityUtil.authorizeScorecard(scorecardID);
+        try {
+            groupStorage.addScorecardToGroup(scorecardID, groupID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

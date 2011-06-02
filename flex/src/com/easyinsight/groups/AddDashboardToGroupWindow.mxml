@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+	creationComplete="dashboardService.getDashboards.send()">
+	<mx:Script>
+		<![CDATA[
+        import com.easyinsight.dashboard.DashboardDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.managers.PopUpManager;
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var descriptors:ArrayCollection;
+
+        private var _groupID:int;
+
+
+        public function set groupID(val:int):void {
+            _groupID = val;
+        }
+
+        private function gotDashboards():void {
+            var descriptors:ArrayCollection = dashboardService.getDashboards.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name", true) ];
+            descriptors.sort = sort;
+            descriptors.refresh();
+            this.descriptors = descriptors;
+        }
+
+        private function chose():void {
+            var descriptor:DashboardDescriptor = feedBox.selectedItem as DashboardDescriptor;
+            groupService.addDashboardToGroup.send(descriptor.id, _groupID);
+        }
+
+        private function addedDashboardToGroup():void {
+            dispatchEvent(new GroupRefreshEvent());
+            PopUpManager.removePopUp(this);
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+		]]>
+	</mx:Script>
+    <mx:RemoteObject destination="groupService" id="groupService">
+		<mx:method name="addDashboardToGroup" result="addedDashboardToGroup()"/>
+	</mx:RemoteObject>
+	<mx:RemoteObject destination="dashboardService" id="dashboardService">
+		<mx:method name="getDashboards" result="gotDashboards()"/>
+	</mx:RemoteObject>
+	<mx:Form styleName="TitleWindowContents">
+		<mx:FormItem label="Choose a Dashboard:">
+			<mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name"/>		
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal">
+			<util:SaveButton label="OK" click="chose()"/>
+			<util:CancelButton label="Cancel" click="cancel()"/>
+		</mx:FormItem>
+	</mx:Form>
+</util:EITitleWindow>
