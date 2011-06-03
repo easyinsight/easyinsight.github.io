@@ -43,6 +43,7 @@ public class PDFCreator {
         }
         var insightMetadata:InsightRequestMetadata = new InsightRequestMetadata();
         insightMetadata.utcOffset = new Date().getTimezoneOffset();
+        insightMetadata.reportEditor = true;
         ProgressAlert.alert(parent, "Generating the PDF...", null, upload.exportToPDF);
         upload.exportToPDF.send(report, insightMetadata, jpgStream, coreView.width, coreView.height);
     }

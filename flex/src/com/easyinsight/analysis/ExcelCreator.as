@@ -17,28 +17,19 @@ public class ExcelCreator {
         upload = new RemoteObject();
         upload.destination = "exportService";
         upload.exportToExcel.addEventListener(ResultEvent.RESULT, gotExcelID);
-        upload.exportReportIDToExcel.addEventListener(ResultEvent.RESULT, gotExcelByReportID);
     }
 
     private var upload:RemoteObject;
-    private var report:AnalysisDefinition;
 
     private function gotExcelID(event:ResultEvent):void {
-        var url:URLRequest = new URLRequest("/app/excel");
-        navigateToURL(url, "_blank");
-
-    }
-
-    private function gotExcelByReportID(event:ResultEvent):void {
         var url:URLRequest = new URLRequest("/app/excel");
         navigateToURL(url, "_blank");
     }
 
     public function exportExcel(definition:AnalysisDefinition, parent:UIComponent):void {
-        report = definition;
         var insightMetadata:InsightRequestMetadata = new InsightRequestMetadata();
         insightMetadata.utcOffset = new Date().getTimezoneOffset();
-        UserAudit.instance().audit(UserAudit.EXPORTED_TO_EXCEL);
+        insightMetadata.reportEditor = true;
         ProgressAlert.alert(parent, "Generating the Excel spreadsheet...", null, upload.exportToExcel);
         upload.exportToExcel.send(definition, insightMetadata);
     }
