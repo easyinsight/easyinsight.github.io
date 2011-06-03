@@ -519,7 +519,7 @@ public class ExportService {
     }
 
     private void toDatabase(String reportName, byte[] bytes, EIConnection conn) throws SQLException {
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PNG_EXPORT (USER_ID, PNG_IMAGE, REPORT_NAME, ANONYMOUS_ID) VALUES (?, ?, ?)",
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PNG_EXPORT (USER_ID, PNG_IMAGE, REPORT_NAME, ANONYMOUS_ID) VALUES (?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         BufferedInputStream bis = new BufferedInputStream(bais, 1024);
