@@ -149,11 +149,6 @@
         }
 
         private function onNewItem(event:AnalysisItemEditEvent):void {
-            if (event.analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                UserAudit.instance().audit(UserAudit.CREATED_CALCULATION);
-            } else if (event.analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-                UserAudit.instance().audit(UserAudit.CREATED_HIERARCHY);
-            }
             dispatchEvent(new AnalysisChangedEvent());
             dispatchEvent(event);
             var node:AnalysisItemNode = new AnalysisItemNode();
