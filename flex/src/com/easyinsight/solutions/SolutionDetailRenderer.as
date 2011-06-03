@@ -106,7 +106,6 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     }
 
     private function postInstall():void {
-        UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
         var desc:DataSourceDescriptor = new DataSourceDescriptor();
         desc.id = installResult.dataFeedID;
         desc.name = installResult.feedName;
