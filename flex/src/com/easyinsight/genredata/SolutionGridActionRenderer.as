@@ -7,7 +7,6 @@ import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
-import com.easyinsight.util.UserAudit;
 
 import flash.events.MouseEvent;
 
@@ -83,7 +82,6 @@ public class SolutionGridActionRenderer extends HBox{
     }
 
     private function dataSourceChoice(event:DataSourceSelectionEvent):void {
-        UserAudit.instance().audit(UserAudit.USED_REPORT_IN_EXCHANGE);
         ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installEntity);
         solutionService.installEntity.send(exchangeItem.descriptor, event.dataSource.id);
     }

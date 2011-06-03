@@ -146,6 +146,12 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
         loadReportRenderer();
     }
 
+    private var _dashboardID:int;
+
+    public function set dashboardID(value:int):void {
+        _dashboardID = value;
+    }
+
     public function get reportType():int {
         return _reportType;
     }

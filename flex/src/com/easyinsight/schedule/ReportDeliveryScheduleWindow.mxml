@@ -9,7 +9,6 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
-        import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
@@ -120,7 +119,6 @@
                 _activity.body = bodyTextInput.text;
                 _activity.subject = subjectInput.text;
                 var utcOffset:int = new Date().getTimezoneOffset();
-                UserAudit.instance().audit(UserAudit.SET_UP_EMAIL);
                 ProgressAlert.alert(this, "Saving...", null, exportService.addOrUpdateSchedule);
                 exportService.addOrUpdateSchedule.send(_activity, utcOffset);
             }

@@ -3,7 +3,6 @@ import com.easyinsight.analysis.IRetrievable;
 import com.easyinsight.framework.User;
 import com.easyinsight.util.AutoSizeTextArea;
 import com.easyinsight.util.PopUpUtil;
-import com.easyinsight.util.UserAudit;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -155,7 +154,6 @@ public class DataSourceDisplay extends VBox {
     }
 
     private function onClick(event:MouseEvent):void {
-        UserAudit.instance().audit(UserAudit.REFRESHED_DATA);
         var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
         dsRefreshWindow.dataSourceID = _dataSource.dataSourceID;
         PopUpManager.addPopUp(dsRefreshWindow, this, true);

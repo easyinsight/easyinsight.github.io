@@ -265,7 +265,6 @@
                     analysisItem.hidden = hiddenCheckbox.selected;                    
                     detailEditor.save(analysisItem);
                     dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
-                    UserAudit.instance().audit(UserAudit.EDITED_FIELD);
                 }
             }
         }

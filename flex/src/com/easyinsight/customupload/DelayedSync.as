@@ -19,7 +19,6 @@ import com.easyinsight.solutions.PostInstallSource;
 import com.easyinsight.util.CancelButton;
 import com.easyinsight.util.EISlimWindow;
 import com.easyinsight.util.ProgressAlert;
-import com.easyinsight.util.UserAudit;
 
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
@@ -123,7 +122,6 @@ public class DelayedSync extends EISlimWindow {
             descriptor.id = _dataSourceDefinition.dataFeedID;
             descriptor.name = _dataSourceDefinition.feedName;
             dispatchEvent(new AnalyzeEvent(new PostInstallSource(descriptor)));
-            UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
             PopUpManager.removePopUp(this);
         } else if (callData.status == CallData.FAILED) {
             timer.stop();

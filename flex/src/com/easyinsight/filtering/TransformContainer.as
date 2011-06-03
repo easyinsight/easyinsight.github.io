@@ -5,7 +5,6 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemWrapper;
 import com.easyinsight.util.PopUpUtil;
-import com.easyinsight.util.UserAudit;
 
 import flash.display.DisplayObject;
 
@@ -316,7 +315,6 @@ public class TransformContainer extends HBox
     }
 
     public function createNewFilter(analysisItem:AnalysisItem, stageX:int, stageY:int):void {
-        UserAudit.instance().audit(UserAudit.CREATED_FILTER);
         if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
             var window:DateFilterWindow = new DateFilterWindow();
             window.feedID = _feedID;

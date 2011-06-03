@@ -6,28 +6,15 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
-        import com.easyinsight.analysis.AnalysisCalculation;
-        import com.easyinsight.analysis.AnalysisDateDimension;
-        import com.easyinsight.analysis.AnalysisDimension;
-        import com.easyinsight.analysis.AnalysisHierarchyItem;
-        import com.easyinsight.analysis.AnalysisLatitude;
-        import com.easyinsight.analysis.AnalysisList;
-        import com.easyinsight.analysis.AnalysisLongitude;
-        import com.easyinsight.analysis.AnalysisMeasure;
-        import com.easyinsight.analysis.AnalysisRangeDimension;
-        import com.easyinsight.analysis.AnalysisStep;
-        import com.easyinsight.analysis.ComplexAnalysisMeasure;
         import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.PopupMenuFactory;
 
-        import com.easyinsight.analysis.SixSigmaMeasure;
         import com.easyinsight.framework.Constants;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.TORegistry;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
-
-        import mx.controls.Alert;
+        import com.easyinsight.report.EmbedReportContextMenuFactory;
 
         [Bindable]
         private var urlKey:String;
@@ -44,6 +31,7 @@
         private function handleFlashVars():void {
             Constants.setup();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
+            PopupMenuFactory.reportFactory = new EmbedReportContextMenuFactory();
             this.urlKey = String(Application.application.parameters.id);
             this.showControls = Boolean(Application.application.parameters.showControls);
             // session check
@@ -71,7 +59,7 @@
                 if (authResult.accountState == Account.DELINQUENT) {
                     //toLogin(1);
                 } else {
-                    quietLogin(authResult, false);
+                    quietLogin(authResult);
                     //toMain();
                 }
             } else {
@@ -89,10 +77,10 @@
         }
 
         private function login(event:LoginEvent):void {
-            quietLogin(event.authResponse, true);
+            quietLogin(event.authResponse);
         }
 
-        private function quietLogin(authResponse:UserServiceResponse, navigate:Boolean):void {
+        private function quietLogin(authResponse:UserServiceResponse):void {
             User.initializeUser(authResponse);
             User.getInstance().userName = authResponse.userName;            
             stackIndex = 2;

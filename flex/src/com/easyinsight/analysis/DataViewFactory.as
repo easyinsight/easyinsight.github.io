@@ -7,7 +7,6 @@ import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.report.ReportEventProcessor;
 
 import com.easyinsight.report.ReportNavigationEvent;
-import com.easyinsight.util.UserAudit;
 
 import flash.display.DisplayObject;
 import flash.events.Event;
@@ -280,7 +279,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
                 if (_controlBar.isDataValid()) {
                     _analysisDefinition.createDefaultLimits();
                     _dataService.retrieveData(_analysisDefinition, refreshAllSources);
-                    UserAudit.instance().audit(UserAudit.VALID_REPORT);
                 } else {
                     _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object(), null);
                 }
@@ -302,7 +300,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
             if (_controlBar.isDataValid()) {
                 _analysisDefinition.createDefaultLimits();
                 _dataService.retrieveData(_analysisDefinition, false);
-                UserAudit.instance().audit(UserAudit.VALID_REPORT);
             } else {
                 _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object(), null);
             }

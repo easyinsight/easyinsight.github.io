@@ -8,7 +8,6 @@
 
 
         import com.easyinsight.solutions.Solution;
-        import com.easyinsight.util.UserAudit;
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
@@ -18,7 +17,6 @@
         private function setupListeners():void {
             solutionService.getSolutions.send();
             BindingUtils.bindProperty(solutionDataController, "solution", this, "solution");
-            UserAudit.instance().audit(UserAudit.VISITED_EXCHANGE);
         }
 
         private function toState(index:int):void {

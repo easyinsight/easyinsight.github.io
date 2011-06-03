@@ -330,7 +330,6 @@
                 }
 
                 if (analysisDefinition == null) {
-                    UserAudit.instance().audit(UserAudit.NEW_REPORT);
                     saveAsEnabled = false;
                     newAnalysis(User.getInstance().defaultReportSharing);
                     for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {

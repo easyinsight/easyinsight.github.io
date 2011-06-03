@@ -106,7 +106,6 @@
                 descriptor.id = dataSourceDefinition.dataFeedID;
                 descriptor.name = dataSourceDefinition.feedName;
                 dispatchEvent(new DataSourceConfiguredEvent(descriptor));
-                UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
                 stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
                 PopUpManager.removePopUp(this);
             } else if (callData.status == CallData.FAILED) {
@@ -153,7 +152,6 @@
                     descriptor.id = dataSourceDefinition.dataFeedID;
                     descriptor.name = dataSourceDefinition.feedName;
                     dispatchEvent(new DataSourceConfiguredEvent(descriptor));
-                    UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
                     stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
                     PopUpManager.removePopUp(this);
                 }

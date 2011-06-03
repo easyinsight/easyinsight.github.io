@@ -3,7 +3,6 @@
                     xmlns:schedule="com.easyinsight.schedule.*">
     <mx:Script><![CDATA[
         import com.easyinsight.solutions.DataSourceDescriptor;
-        import com.easyinsight.util.UserAudit;
 
         import mx.managers.PopUpManager;
 
@@ -63,7 +62,6 @@
 
         private function saved():void {
             if (newActivity) {
-                UserAudit.instance().audit(UserAudit.SCHEDULED_REFRESH);
                 dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.NEW_ACTIVITY, _activity));
             } else {
                 dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.EDIT_ACTIVITY, _activity));

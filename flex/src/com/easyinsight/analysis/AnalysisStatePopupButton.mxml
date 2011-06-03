@@ -99,7 +99,7 @@
         <node label="Gauge" type="{AnalysisDefinition.GAUGE}"/>
         <node label="Gantt" type="{AnalysisDefinition.GANTT}"/>
         <node label="Form" type="{AnalysisDefinition.FORM}"/>
-        <!-- <node label="Split" state="Split"/>-->
+        <node label="Vertical List" type="{AnalysisDefinition.VERTICAL_LIST}"/>
     </mx:XMLList>
     <mx:XMLList id="splitSource">        
     	<node label="List" state=""/>

@@ -27,6 +27,7 @@
         import com.easyinsight.framework.TORegistry;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.report.EmbedReportContextMenuFactory;
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.util.UserAudit;
         import mx.controls.Alert;
@@ -65,6 +66,7 @@
             Constants.setup();
             UserAudit.initialize();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
+            PopupMenuFactory.reportFactory = new EmbedReportContextMenuFactory();
             this.urlKey = String(Application.application.parameters.analysisID);
             this.reportType = int(Application.application.parameters.reportType);
             this.dataSourceID = int(Application.application.parameters.dataSourceID);
@@ -82,6 +84,7 @@
             }
 
 
+
             var showFiltersMenu:ContextMenuItem = new ContextMenuItem("Toggle Filters");
             var showToolbarMenu:ContextMenuItem = new ContextMenuItem("Toggle Toolbar");
 
@@ -97,21 +100,12 @@
                 s.showToolbar = !s.showToolbar;
             });
 
-            var exportItem:ContextMenuItem = new ContextMenuItem("Export " + reportName);
-            exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-                exportReport();
-            });
-
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
-            menu.customItems = [ showFiltersMenu, showToolbarMenu, exportItem ];
+            menu.customItems = [ showFiltersMenu, showToolbarMenu ];
             this.contextMenu = menu;
             // session check
             userService.getBuildPath.send();
-        }
-
-        private function exportReport():void {
-
         }
 
         private function gotBuildPath():void {
