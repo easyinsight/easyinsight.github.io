@@ -103,14 +103,16 @@
             userService.updateUsers.send(users);
         }
 
+        [Bindable]
+        private var changesIndex:int;
+
         <!--private function importUsers():void {
             var window:ImportUsersStartWindow = new ImportUsersStartWindow();
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }-->
 
-        [Bindable]
-        private var changesIndex:int;
+
         ]]>
     </mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
