@@ -23,13 +23,22 @@ public class PDFServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Long imageID = (Long) req.getSession().getAttribute("imageID");
         Long userID = (Long) req.getSession().getAttribute("userID");
-        if (imageID != null && userID != null) {
+        String anonID = (String) req.getSession().getAttribute("anonID");
+        if (imageID != null && (userID != null || anonID != null)) {
             EIConnection conn = Database.instance().getConnection();
             try {
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT PNG_IMAGE, REPORT_NAME FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ? AND " +
-                        "USER_ID = ?");
-                queryStmt.setLong(1, imageID);
-                queryStmt.setLong(2, userID);
+                PreparedStatement queryStmt;
+                if (userID != null) {
+                    queryStmt = conn.prepareStatement("SELECT PNG_IMAGE, REPORT_NAME FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ? AND " +
+                            "USER_ID = ?");
+                    queryStmt.setLong(1, imageID);
+                    queryStmt.setLong(2, userID);
+                } else {
+                    queryStmt = conn.prepareStatement("SELECT PNG_IMAGE, REPORT_NAME FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ? AND " +
+                            "anonymous_id = ?");
+                    queryStmt.setLong(1, imageID);
+                    queryStmt.setString(2, anonID);
+                }
                 ResultSet rs = queryStmt.executeQuery();
                 if (rs.next()) {
                     byte[] bytes = rs.getBytes(1);

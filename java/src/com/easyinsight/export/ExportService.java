@@ -1,11 +1,8 @@
 package com.easyinsight.export;
 
-import com.easyinsight.admin.AdminService;
 import com.easyinsight.analysis.DataService;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
-import com.easyinsight.audit.ActionLog;
-import com.easyinsight.audit.ActionReportLog;
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -25,6 +22,7 @@ import com.easyinsight.analysis.ListRow;
 import com.easyinsight.analysis.*;
 
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.util.RandomTextGenerator;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 
@@ -37,10 +35,7 @@ import org.apache.poi.ss.usermodel.Font;
 
 import java.io.*;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -315,11 +310,16 @@ public class ExportService {
     public byte[] toListPDF(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-        dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
-        ResultSet rs = dateFormatStmt.executeQuery();
-        rs.next();
-        int dateFormat = rs.getInt(1);
+        int dateFormat;
+        try {
+            PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = dateFormatStmt.executeQuery();
+            rs.next();
+            dateFormat = rs.getInt(1);
+        } catch (com.easyinsight.security.SecurityException se) {
+            dateFormat = 1;
+        }
         int time = insightRequestMetadata.getUtcOffset() / 60;
         String string;
         if (time > 0) {
@@ -519,16 +519,24 @@ public class ExportService {
     }
 
     private void toDatabase(String reportName, byte[] bytes, EIConnection conn) throws SQLException {
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PNG_EXPORT (USER_ID, PNG_IMAGE, REPORT_NAME) VALUES (?, ?, ?)",
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PNG_EXPORT (USER_ID, PNG_IMAGE, REPORT_NAME, ANONYMOUS_ID) VALUES (?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         BufferedInputStream bis = new BufferedInputStream(bais, 1024);
-        insertStmt.setLong(1, SecurityUtil.getUserID());
+        long userID = SecurityUtil.getUserID(false);
+        if (userID == 0) {
+            insertStmt.setNull(1, Types.BIGINT);
+        } else {
+            insertStmt.setLong(1, SecurityUtil.getUserID());
+        }
         insertStmt.setBinaryStream(2, bis, bytes.length);
         insertStmt.setString(3, reportName == null ? "export" : reportName);
+        String anonID = RandomTextGenerator.generateText(20);
+        insertStmt.setString(4, anonID);
         insertStmt.execute();
         long id = Database.instance().getAutoGenKey(insertStmt);
         FlexContext.getHttpRequest().getSession().setAttribute("imageID", id);
+        FlexContext.getHttpRequest().getSession().setAttribute("anonID", anonID);
     }
 
     public byte[] toExcel(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, InsightRequestMetadata insightRequestMetadata) throws IOException, SQLException {
@@ -553,11 +561,15 @@ public class ExportService {
             TimeZone timeZone = TimeZone.getTimeZone(string);
             Calendar cal = Calendar.getInstance();
             cal.setTimeZone(timeZone);
-            PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-            dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = dateFormatStmt.executeQuery();
-            rs.next();
-            dateFormat = rs.getInt(1);
+            try {
+                PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+                dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = dateFormatStmt.executeQuery();
+                rs.next();
+                dateFormat = rs.getInt(1);
+            } catch (com.easyinsight.security.SecurityException se) {
+                dateFormat = 1;
+            }
 
             HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, listDataResults, dateFormat, cal);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -565,16 +577,19 @@ public class ExportService {
             byte[] bytes = baos.toByteArray();
             baos.close();
 
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCEL_EXPORT (USER_ID, EXCEL_FILE, REPORT_NAME) VALUES (?, ?, ?)",
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCEL_EXPORT (USER_ID, EXCEL_FILE, REPORT_NAME, ANONYMOUS_ID) VALUES (?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             BufferedInputStream bis = new BufferedInputStream(bais, 1024);
             insertStmt.setLong(1, SecurityUtil.getUserID());
             insertStmt.setBinaryStream(2, bis, bytes.length);
+            String anonID = RandomTextGenerator.generateText(20);
             insertStmt.setString(3, analysisDefinition.getName() == null ? "export" : analysisDefinition.getName());
+            insertStmt.setString(4, anonID);
             insertStmt.execute();
             long id = Database.instance().getAutoGenKey(insertStmt);
             FlexContext.getHttpRequest().getSession().setAttribute("imageID", id);
+            FlexContext.getHttpRequest().getSession().setAttribute("anonID", anonID);
             return bytes;
         } finally {
             Database.closeConnection(conn);
@@ -602,11 +617,15 @@ public class ExportService {
         TimeZone timeZone = TimeZone.getTimeZone(string);
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(timeZone);
-        PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-        dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
-        ResultSet rs = dateFormatStmt.executeQuery();
-        rs.next();
-        dateFormat = rs.getInt(1);
+        try {
+            PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = dateFormatStmt.executeQuery();
+            rs.next();
+            dateFormat = rs.getInt(1);
+        } catch (com.easyinsight.security.SecurityException se) {
+            dateFormat = 1;
+        }
 
         HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, listDataResults, dateFormat, cal);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -849,11 +868,16 @@ public class ExportService {
         if (listDataResults.getReportFault() != null) {
             return listDataResults.getReportFault().toString();
         }
-        PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-        dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
-        ResultSet rs = dateFormatStmt.executeQuery();
-        rs.next();
-        int dateFormat = rs.getInt(1);
+        int dateFormat;
+        try {
+            PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = dateFormatStmt.executeQuery();
+            rs.next();
+            dateFormat = rs.getInt(1);
+        } catch (com.easyinsight.security.SecurityException e) {
+            dateFormat = 1;
+        }
         int time = insightRequestMetadata.getUtcOffset() / 60;
         String string;
         if (time > 0) {
