@@ -581,7 +581,12 @@ public class ExportService {
                     Statement.RETURN_GENERATED_KEYS);
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             BufferedInputStream bis = new BufferedInputStream(bais, 1024);
-            insertStmt.setLong(1, SecurityUtil.getUserID());
+            long userID = SecurityUtil.getUserID(false);
+            if (userID == 0) {
+                insertStmt.setNull(1, Types.BIGINT);
+            } else {
+                insertStmt.setLong(1, userID);
+            }
             insertStmt.setBinaryStream(2, bis, bytes.length);
             String anonID = RandomTextGenerator.generateText(20);
             insertStmt.setString(3, analysisDefinition.getName() == null ? "export" : analysisDefinition.getName());
