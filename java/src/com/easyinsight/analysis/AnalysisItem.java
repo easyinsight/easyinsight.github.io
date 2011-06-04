@@ -127,6 +127,13 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.originalDisplayName = originalDisplayName;
     }
 
+    public String toOriginalDisplayName() {
+        if (originalDisplayName == null) {
+            return toDisplay();
+        }
+        return originalDisplayName;
+    }
+
     public Long getLookupTableID() {
         return lookupTableID;
     }

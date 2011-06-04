@@ -559,5 +559,8 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         return false;
     }
 
-
+    @Override
+    public boolean checkDateTime(String name) {
+        return false;
+    }
 }

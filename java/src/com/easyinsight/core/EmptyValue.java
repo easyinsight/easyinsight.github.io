@@ -21,7 +21,7 @@ public class EmptyValue extends Value {
 
     @Nullable
     public Double toDouble() {
-        return null;
+        return 0.;
     }
 
     /*public boolean equals(Object o) {

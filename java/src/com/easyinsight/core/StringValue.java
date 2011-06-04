@@ -48,7 +48,7 @@ public class StringValue extends Value implements Serializable {
         try {
             return NumericValue.produceDoubleValue(value);
         } catch (NumberFormatException e) {
-            return null;
+            return 0.;
         }
     }
 

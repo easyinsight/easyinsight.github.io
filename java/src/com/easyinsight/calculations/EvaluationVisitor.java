@@ -46,10 +46,8 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
             Value result2 = node2.getResult();
             if (result.type() == Value.STRING || result2.type() == Value.STRING) {
                 result = new StringValue(minusQuotes(result) + minusQuotes(result2));
-            } else if(!(node2.getResult() instanceof EmptyValue) && node1.getResult().toDouble() != null && node2.getResult().toDouble() != null)
+            } else
                 result = new NumericValue(result.toDouble() + node2.getResult().toDouble());
-            else
-                result = new EmptyValue();
         }
     }
 
@@ -98,8 +96,6 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
                 DateValue dateValue = (DateValue) result2;
                 long delta = (long) (result.toDouble() - dateValue.getDate().getTime());
                 result = new NumericValue(delta);
-            } else if(node2.getResult() instanceof EmptyValue || node2.getResult().toDouble() == null) {
-                result = new EmptyValue();
             } else {
                 result = new NumericValue(result.toDouble() - node2.getResult().toDouble());
             }
@@ -115,12 +111,7 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
 
         EvaluationVisitor node2 = new EvaluationVisitor(row);
         ((CalculationTreeNode) node.getChild(1)).accept(node2);
-        if(node1.getResult() instanceof EmptyValue || node1.getResult().toDouble() == null || node2.getResult() instanceof EmptyValue || node2.getResult().toDouble() == null) {
-            result = new EmptyValue();
-        }
-        else {
-            result = new NumericValue(node1.getResult().toDouble() * node2.getResult().toDouble());
-        }
+        result = new NumericValue(node1.getResult().toDouble() * node2.getResult().toDouble());
     }
 
     public void visit(DivideNode node) {
@@ -129,10 +120,9 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
                 
         EvaluationVisitor node2 = new EvaluationVisitor(row);
         ((CalculationTreeNode) node.getChild(1)).accept(node2);
-        if(node1.getResult() instanceof EmptyValue || node1.getResult().toDouble() == null || node2.getResult() instanceof EmptyValue || node2.getResult().toDouble() == null) {
+        if (node2.getResult().toDouble() == 0) {
             result = new EmptyValue();
-        }
-        else {
+        } else {
             result = new NumericValue(node1.getResult().toDouble() / node2.getResult().toDouble());
         }
     }
