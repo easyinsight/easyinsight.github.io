@@ -184,8 +184,12 @@ public class DropArea extends HBox
             var newAnalysisItem:AnalysisItemWrapper = initialList.selectedItem as AnalysisItemWrapper;
             analysisItem = newAnalysisItem.analysisItem;
         } else if (event.dragInitiator is DropArea) {
-            var dropArea:DropArea = event.dragInitiator as DropArea;
-            analysisItem = dropArea.analysisItem;
+            if (this.analysisItem == null) {
+                okay = false;
+            } else {
+                var dropArea:DropArea = event.dragInitiator as DropArea;
+                analysisItem = dropArea.analysisItem;
+            }
         } else if (event.dragInitiator is AdvancedDataGrid) {
             var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
             newAnalysisItem = analysisItemLabel.selectedItem as AnalysisItemWrapper;
