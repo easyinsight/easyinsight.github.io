@@ -200,8 +200,8 @@ public class WSListDefinition extends WSAnalysisDefinition {
         headerColor2 = (int) findNumberProperty(properties, "headerColor2", 0xEFEFEF);
         textColor = (int) findNumberProperty(properties, "textColor", 0x000000);
         headerTextColor = (int) findNumberProperty(properties, "headerTextColor", 0x000000);
-        summaryRowTextColor = (int) findNumberProperty(properties, "summaryRowTextColor", 0x6699ff);
-        summaryRowBackgroundColor = (int) findNumberProperty(properties, "summaryRowBackgroundColor", 0x000000);
+        summaryRowTextColor = (int) findNumberProperty(properties, "summaryRowTextColor", 0x000000);
+        summaryRowBackgroundColor = (int) findNumberProperty(properties, "summaryRowBackgroundColor", 0x6699ff);
     }
 
     public List<ReportProperty> createProperties() {

@@ -197,6 +197,7 @@
             }
             this.listDef = def;
             if (dataSet.length > 0) {
+                dataSet = new ArrayCollection(dataSet.toArray());
                 stackIndex = 0;
                 summaryRows = new ArrayCollection();
                 if (def.summaryTotal) {
