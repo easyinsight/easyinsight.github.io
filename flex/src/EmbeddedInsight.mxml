@@ -6,31 +6,17 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
-        import com.easyinsight.analysis.AnalysisCalculation;
-        import com.easyinsight.analysis.AnalysisDateDimension;
-        import com.easyinsight.analysis.AnalysisDimension;
-        import com.easyinsight.analysis.AnalysisHierarchyItem;
-        import com.easyinsight.analysis.AnalysisLatitude;
-        import com.easyinsight.analysis.AnalysisList;
-        import com.easyinsight.analysis.AnalysisLongitude;
-        import com.easyinsight.analysis.AnalysisMeasure;
-        import com.easyinsight.analysis.AnalysisRangeDimension;
-        import com.easyinsight.analysis.AnalysisStep;
-        import com.easyinsight.analysis.ComplexAnalysisMeasure;
         import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.InsightResponse;
         import com.easyinsight.analysis.PopupMenuFactory;
 
-        import com.easyinsight.analysis.SixSigmaMeasure;
         import com.easyinsight.framework.Constants;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.TORegistry;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
         import com.easyinsight.report.EmbedReportContextMenuFactory;
-        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.util.UserAudit;
-        import mx.controls.Alert;
 
 
         [Bindable]
@@ -178,7 +164,7 @@
         <framework:LoginComponent loginEvent2="stackIndex = 2"/>
         <dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
                                       dataSourceID="{dataSourceID}" reportType="{reportType}"
-                                      prefix="https://staging.easy-insight.com" showToolbar="{showToolbar}"
+                                      prefix="https://www.easy-insight.com" showToolbar="{showToolbar}"
                                         showFilters="{showFilters}" />
     </mx:ViewStack>
 </mx:Application>

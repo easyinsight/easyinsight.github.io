@@ -109,6 +109,6 @@
         <mx:Box/>
         <framework:LoginComponent loginEvent2="stackIndex = 2"/>
         <dashboard:EmbeddedDashboardView id="panel" urlKey="{urlKey}"
-                                      prefix="https://staging.easy-insight.com" showControls="{showControls}"/>
+                                      prefix="https://www.easy-insight.com" showControls="{showControls}"/>
     </mx:ViewStack>
 </mx:Application>
