@@ -1,6 +1,6 @@
 package com.easyinsight.datafeeds.google;
 
-import com.easyinsight.analysis.ReportException;
+import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
@@ -8,9 +8,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
 import com.easyinsight.core.*;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.userupload.IDataTypeGuesser;
 import com.easyinsight.userupload.DataTypeGuesser;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -237,6 +234,19 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
 
     public FeedType getFeedType() {
         return FeedType.GOOGLE;
+    }
+
+    @Override
+    public boolean checkDateTime(String name) {
+        for (AnalysisItem field : getFields()) {
+            if (field.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                AnalysisDateDimension date = (AnalysisDateDimension) field;
+                if (field.toOriginalDisplayName().equals(name)) {
+                    return !(date.getCustomDateFormat() != null && !date.getCustomDateFormat().contains("H") && !date.getCustomDateFormat().contains("h"));
+                }
+            }
+        }
+        return true;
     }
 
     @Override
