@@ -89,14 +89,14 @@
         ]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="Should results be limited?">
-            <mx:CheckBox id="limitsEnabledCheckbox" click="limitsEnabledCheck()" selected="{limitsEnabled}" change="dispatchEvent(new Event('refreshNecessary'))"/>
+            <mx:CheckBox id="limitsEnabledCheckbox" click="limitsEnabledCheck()" selected="{limitsEnabled}" change="dispatchEvent(new Event('refreshNecessary', true))"/>
         </mx:FormItem>
         <mx:FormItem label="Which field will be the limit?">
             <util:SmartComboBox id="fieldSelectionBox" dataProvider="{availableFields}" labelField="display" selectedProperty="qualifiedName"
-                selectedValue="{selectedField}" enabled="{limitsEnabled}" change="dispatchEvent(new Event('refreshNecessary'))"/>
+                selectedValue="{selectedField}" enabled="{limitsEnabled}" change="dispatchEvent(new Event('refreshNecessary', true))"/>
         </mx:FormItem>
         <mx:FormItem label="What's the limit value?">
-            <mx:ComboBox id="limitsBox" enabled="{limitsEnabled}" close="limitValueChanged()" labelField="name" change="dispatchEvent(new Event('refreshNecessary'))">
+            <mx:ComboBox id="limitsBox" enabled="{limitsEnabled}" close="limitValueChanged()" labelField="name" change="dispatchEvent(new Event('refreshNecessary', true))">
                 <list:LimitsEntry name="Top 5" number="5" top="true"/>
                 <list:LimitsEntry name="Top 10" number="10" top="true"/>
                 <list:LimitsEntry id="topN" name="Top N" top="true"/>
@@ -106,7 +106,7 @@
             </mx:ComboBox>
         </mx:FormItem>
         <mx:FormItem>
-            <mx:TextInput id="customLimitInput" enabled="{customLimitEnabled}" change="dispatchEvent(new Event('refreshNecessary'))"/>
+            <mx:TextInput id="customLimitInput" enabled="{customLimitEnabled}" change="dispatchEvent(new Event('refreshNecessary', true))"/>
         </mx:FormItem>
     </mx:Form>
 </analysis:ReportFormItem>
