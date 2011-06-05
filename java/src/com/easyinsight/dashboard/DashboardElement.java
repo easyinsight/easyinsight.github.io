@@ -175,7 +175,11 @@ public abstract class DashboardElement implements Cloneable {
         rs.next();
         int i = 1;
         setLabel(rs.getString(i++));
-        setFilterBorderStyle(rs.getString(i++));
+        String borderStyle = rs.getString(i++);
+        if (borderStyle == null) {
+            borderStyle = "solid";
+        }
+        setFilterBorderStyle(borderStyle);
         setFilterBorderColor(rs.getInt(i++));
         setFilterBackgroundColor(rs.getInt(i++));
         setFilterBackgroundAlpha(rs.getDouble(i++));

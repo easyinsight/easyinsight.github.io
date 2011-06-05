@@ -245,7 +245,7 @@ public class DashboardStorage {
             dashboard.setPublicVisible(rs.getBoolean(11));
             dashboard.setPaddingLeft(rs.getInt(12));
             dashboard.setPaddingRight(rs.getInt(13));
-            dashboard.setFilterBorderStyle(rs.getString(14));
+            dashboard.setFilterBorderStyle(rs.getString(14) == null ? "solid" : rs.getString(14));
             dashboard.setFilterBorderColor(rs.getInt(15));
             dashboard.setFilterBackgroundColor(rs.getInt(16));
             dashboard.setFilterBackgroundAlpha(rs.getDouble(17));
