@@ -13,6 +13,9 @@ import oauth.signpost.OAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.http.HttpRequest;
 import oauth.signpost.signature.PlainTextMessageSigner;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
@@ -20,8 +23,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.util.EntityUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
@@ -75,9 +83,24 @@ public abstract class FreshbooksFeed extends Feed {
             entity.setContentLength(content.length);
             httpRequest.setEntity(entity);
             consumer.sign(httpRequest);
-            
-            HttpClient client = new DefaultHttpClient();
-            ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+            HttpParams params = new BasicHttpParams();
+            HttpProtocolParams.setContentCharset(params, "utf-8");
+            HttpClient client = new DefaultHttpClient(params);
+
+            ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
+                public String handleResponse(final HttpResponse response)
+                    throws IOException {
+                    StatusLine statusLine = response.getStatusLine();
+                    if (statusLine.getStatusCode() >= 300) {
+                        throw new HttpResponseException(statusLine.getStatusCode(),
+                                statusLine.getReasonPhrase());
+                    }
+
+                    HttpEntity entity = response.getEntity();
+                    return entity == null ? null : EntityUtils.toString(entity, "UTF-8");
+                }
+            };
 
             String string = client.execute(httpRequest, responseHandler);
             string = string.replace("xmlns=\"http://www.freshbooks.com/api/\"", "");            
