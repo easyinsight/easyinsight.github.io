@@ -300,7 +300,7 @@
                         if (myLookupTable != null) {
                             var found:Boolean = false;
                             for each (var lookupTest:AnalysisItem in def.columns) {
-                                if (lookupTest.qualifiedName() == myLookupTable.sourceField.qualifiedName()) {
+                                if (lookupTest.key.internalString() == myLookupTable.sourceField.key.internalString()) {
                                     found = true;
                                     break;
                                 }

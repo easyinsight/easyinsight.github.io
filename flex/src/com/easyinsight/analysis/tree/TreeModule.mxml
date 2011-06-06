@@ -233,14 +233,14 @@
                         if (myLookupTable != null) {
                             var found:Boolean = false;
                             for each (var lookupTest:AnalysisItem in analysisItems) {
-                                if (lookupTest.qualifiedName() == myLookupTable.sourceField.qualifiedName()) {
+                                if (lookupTest.key.internalString() == myLookupTable.sourceField.key.internalString()) {
                                     found = true;
                                     break;
                                 }
                             }
                             if (!found) {
                                 for each (var hierLevel:HierarchyLevel in hierarchy.hierarchyLevels) {
-                                    if (hierLevel.analysisItem.qualifiedName() == myLookupTable.sourceField.qualifiedName()) {
+                                    if (hierLevel.analysisItem.key.internalString() == myLookupTable.sourceField.key.internalString()) {
                                         found = true;
                                         break;
                                     }
