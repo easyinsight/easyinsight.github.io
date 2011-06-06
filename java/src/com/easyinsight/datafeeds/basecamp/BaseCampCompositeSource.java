@@ -45,11 +45,20 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     private boolean includeMilestoneComments;
     private boolean includeTodoComments;
     private String token;
+    private boolean incrementalRefresh = true;
 
     private transient BaseCampCache basecampCache;
 
     public BaseCampCompositeSource() {
         setFeedName("Basecamp");
+    }
+
+    public boolean isIncrementalRefresh() {
+        return incrementalRefresh;
+    }
+
+    public void setIncrementalRefresh(boolean incrementalRefresh) {
+        this.incrementalRefresh = incrementalRefresh;
     }
 
     public BaseCampCache getOrCreateCache(HttpClient httpClient) throws ParsingException, BaseCampLoginException, ReportException {
@@ -218,13 +227,14 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         clearStmt.executeUpdate();
         clearStmt.close();
         PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO BASECAMP (DATA_FEED_ID, URL, INCLUDE_ARCHIVED," +
-                "include_inactive, INCLUDE_COMMENTS, INCLUDE_TODO_COMMENTS) VALUES (?, ?, ?, ?, ?, ?)");
+                "include_inactive, INCLUDE_COMMENTS, INCLUDE_TODO_COMMENTS, INCREMENTAL_REFRESH) VALUES (?, ?, ?, ?, ?, ?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
         basecampStmt.setString(2, getUrl());
         basecampStmt.setBoolean(3, isIncludeArchived());
         basecampStmt.setBoolean(4, isIncludeInactive());
         basecampStmt.setBoolean(5, isIncludeMilestoneComments());
         basecampStmt.setBoolean(6, isIncludeTodoComments());
+        basecampStmt.setBoolean(7, incrementalRefresh);
         basecampStmt.execute();
         basecampStmt.close();
         if (this.token != null && !"".equals(this.token.trim())) {
@@ -238,7 +248,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, INCLUDE_ARCHIVED, INCLUDE_INACTIVE, INCLUDE_COMMENTS, INCLUDE_TODO_COMMENTS FROM " +
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, INCLUDE_ARCHIVED, INCLUDE_INACTIVE, INCLUDE_COMMENTS, INCLUDE_TODO_COMMENTS, INCREMENTAL_REFRESH FROM " +
                 "BASECAMP WHERE DATA_FEED_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
@@ -248,6 +258,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
             this.setIncludeInactive(rs.getBoolean(3));
             this.setIncludeMilestoneComments(rs.getBoolean(4));
             this.setIncludeTodoComments(rs.getBoolean(5));
+            this.setIncrementalRefresh(rs.getBoolean(6));
         }
         loadStmt.close();
     }

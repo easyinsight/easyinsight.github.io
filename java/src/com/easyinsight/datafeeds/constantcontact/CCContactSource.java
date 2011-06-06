@@ -152,7 +152,7 @@ public class CCContactSource extends ConstantContactBaseSource {
         }
     }
 
-    protected boolean clearsData() {
+    protected boolean clearsData(FeedDefinition parentSource) {
         return false;
     }
 

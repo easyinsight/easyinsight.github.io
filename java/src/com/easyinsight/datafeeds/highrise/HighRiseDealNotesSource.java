@@ -14,16 +14,10 @@ import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Node;
-import nu.xom.Nodes;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -68,7 +62,7 @@ public class HighRiseDealNotesSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_DEAL_NOTES;
     }
 
-    protected boolean clearsData() {
+    protected boolean clearsData(FeedDefinition parentSource) {
         return false;
     }
 

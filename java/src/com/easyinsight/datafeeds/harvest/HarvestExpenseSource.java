@@ -162,7 +162,7 @@ public class HarvestExpenseSource extends HarvestBaseSource {
     }
 
     @Override
-    protected boolean clearsData() {
+    protected boolean clearsData(FeedDefinition parentSource) {
         return false;
     }
 }

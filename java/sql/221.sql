@@ -1,0 +1,1 @@
+alter table basecamp add incremental_refresh tinyint(4) not null default 1;

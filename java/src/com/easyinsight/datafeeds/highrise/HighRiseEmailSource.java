@@ -18,7 +18,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
-import java.text.DateFormat;
 import java.util.*;
 
 /**
@@ -64,7 +63,7 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
     }
 
     @Override
-    protected boolean clearsData() {
+    protected boolean clearsData(FeedDefinition parentSource) {
         return false;
     }
 

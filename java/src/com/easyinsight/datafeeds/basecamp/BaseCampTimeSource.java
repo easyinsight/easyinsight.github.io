@@ -57,10 +57,11 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
         return FeedType.BASECAMP_TIME;
     }
 
-    /*@Override
-    protected boolean clearsData() {
-        return false;
-    }*/
+    @Override
+    protected boolean clearsData(FeedDefinition parentSource) {
+        BaseCampCompositeSource source = (BaseCampCompositeSource) parentSource;
+        return !source.isIncrementalRefresh();
+    }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         BaseCampCompositeSource baseCampCompositeSource = (BaseCampCompositeSource) parentDefinition;
@@ -84,23 +85,23 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                 String projectName = queryField(curProject, "name/text()");
                 String projectChangedOnString = queryField(curProject, "last-changed-on/text()");
 
-                /*Date projectChangedAt;
+                Date projectChangedAt;
                 if (projectChangedOnString == null) {
                     projectChangedAt = new Date();
                 } else {
                     projectChangedAt = deadlineTimeFormat.parse(projectChangedOnString);
-                }*/
+                }
 
-                /*if (lastRefreshDate == null) {
+                if (lastRefreshDate == null) {
                     lastRefreshDate = new Date(1);
                 }
                 long delta = lastRefreshDate.getTime() - projectChangedAt.getTime();
 
                 long daysSinceChange = delta / (60 * 60 * 1000 * 24);
 
-                if (daysSinceChange > 2) {
+                if (baseCampCompositeSource.isIncrementalRefresh() && daysSinceChange > 2) {
                     continue;
-                }*/
+                }
                 loadingProgress(i, projectNodes.size(), "Synchronizing with time tracking data of " + projectName + "...", callDataID);
                 String projectStatus = queryField(curProject, "status/text()");
                 if ("template".equals(projectStatus)) {
@@ -162,9 +163,8 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                     row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
                     row.addValue(keys.get(PROJECTNAME), projectName);
                 }
-                //StringWhere stringWhere = new StringWhere(keys.get(PROJECTID), projectIdToRetrieve);
-                //dataStorage.updateData(ds, Arrays.asList((IWhere) stringWhere));
-                dataStorage.insertData(ds);
+                StringWhere stringWhere = new StringWhere(keys.get(PROJECTID), projectIdToRetrieve);
+                dataStorage.updateData(ds, Arrays.asList((IWhere) stringWhere));
             }
         } catch (ReportException re) {
             throw re;

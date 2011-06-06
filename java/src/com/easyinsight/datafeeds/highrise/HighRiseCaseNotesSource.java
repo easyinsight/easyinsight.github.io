@@ -64,7 +64,7 @@ public class HighRiseCaseNotesSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_CASE_NOTES;
     }
 
-    protected boolean clearsData() {
+    protected boolean clearsData(FeedDefinition parentSource) {
         return false;
     }
 

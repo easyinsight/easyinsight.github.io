@@ -83,10 +83,11 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         return FeedType.BASECAMP;
     }
 
-    /*@Override
-    protected boolean clearsData() {
-        return false;
-    }*/
+    @Override
+    protected boolean clearsData(FeedDefinition parentSource) {
+        BaseCampCompositeSource source = (BaseCampCompositeSource) parentSource;
+        return !source.isIncrementalRefresh();
+    }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
@@ -126,16 +127,16 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     projectChangedAt = deadlineTimeFormat.parse(projectChangedOnString);
                 }
 
-                /*if (lastRefreshDate == null) {
+                if (lastRefreshDate == null) {
                     lastRefreshDate = new Date(1);
                 }
                 long delta = lastRefreshDate.getTime() - projectChangedAt.getTime();
 
                 long daysSinceChange = delta / (60 * 60 * 1000 * 24);
 
-                if (daysSinceChange > 2) {
+                if (source.isIncrementalRefresh() && daysSinceChange > 2) {
                     continue;
-                }*/
+                }
 
                 String announcement = queryField(curProject, "announcement/text()"); 
                 loadingProgress(i, projectNodes.size(), "Synchronizing with todo items of " + projectName + "...", callDataID);
@@ -329,7 +330,13 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                         row.addValue(keys.get(MILESTONE_ID), entry.getKey());
                     }
                 }
-                dataStorage.insertData(ds);
+
+                if (source.isIncrementalRefresh()) {
+                    StringWhere stringWhere = new StringWhere(keys.get(PROJECTID), projectIdToRetrieve);
+                    dataStorage.updateData(ds, Arrays.asList((IWhere) stringWhere));
+                } else {
+                    dataStorage.insertData(ds);
+                }
             }
         } catch (ReportException re) {
             throw re;

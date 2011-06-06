@@ -176,7 +176,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     }
 
     @Override
-    protected boolean clearsData() {
+    protected boolean clearsData(FeedDefinition parentSource) {
         return false;
     }
 

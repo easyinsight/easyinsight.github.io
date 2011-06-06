@@ -45,7 +45,7 @@ public class HighRiseCompanyNotesSource extends HighRiseBaseSource {
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        analysisItems.add(new AnalysisDimension(keys.get(BODY), true));
+        analysisItems.add(new AnalysisText(keys.get(BODY)));
         analysisItems.add(new AnalysisDimension(keys.get(NOTE_ID), true));
         AnalysisDimension noteContactDim = new AnalysisDimension(keys.get(NOTE_COMPANY_ID), true);
         noteContactDim.setHidden(true);
@@ -62,7 +62,7 @@ public class HighRiseCompanyNotesSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_COMPANY_NOTES;
     }
 
-    protected boolean clearsData() {
+    protected boolean clearsData(FeedDefinition parentSource) {
         return false;
     }
 

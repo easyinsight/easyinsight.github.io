@@ -187,7 +187,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             }
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
             System.out.println("Refreshing " + getDataFeedID() + " for account " + accountID + " at " + new Date());
-            if (clearsData() || lastRefreshTime == null || lastRefreshTime.getTime() < 100) {
+            if (clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100) {
                 dataStorage.truncate(); 
             }
             DataSet dataSet = getDataSet(keys, now, parentDefinition, dataStorage, conn, callDataID, lastRefreshTime);
@@ -207,7 +207,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         return changed;
     }
 
-    protected boolean clearsData() {
+    protected boolean clearsData(FeedDefinition parentSource) {
         return true;
     }
 

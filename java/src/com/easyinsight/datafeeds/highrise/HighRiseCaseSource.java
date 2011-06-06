@@ -85,7 +85,7 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
             info.currentPage = 1;
             do {*/
                 loadingProgress(0, 1, "Synchronizing with cases...", callDataID);
-                Document companies = runRestRequest("/kases/open.xml", client, builder, url, true, false, parentDefinition);
+                Document companies = runRestRequest("/kases/open.xml", client, builder, url, true, true, parentDefinition);
                 Nodes companyNodes = companies.query("/kases/kase");
                 for (int i = 0; i < companyNodes.size(); i++) {
                     IRow row = ds.createRow();
