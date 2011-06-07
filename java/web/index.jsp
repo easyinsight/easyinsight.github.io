@@ -48,6 +48,8 @@ var requiredRevision = 0;
 
 <%
     String versionDir = new com.easyinsight.users.UserService().getBuildPath();
+    boolean isSubdomain = request.getParameterMap().containsKey("subdomain");
+    String subdomain = request.getParameter("subdomain");
 %>
 
 <body scroll="no">
@@ -105,6 +107,9 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 			"name", "PrimaryWorkspace",
 			"allowScriptAccess","sameDomain",
 			"type", "application/x-shockwave-flash",
+            <% if(isSubdomain) { %>
+            "flashvars", "subdomain=<%= subdomain %>",
+            <% } %>
 			"pluginspage", "http://www.adobe.com/go/getflashplayer",
 			"wmode", "window",
             "allowFullScreen", "true"
@@ -133,6 +138,9 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 				loop="false"
 				quality="high"
 				allowScriptAccess="sameDomain"
+                <% if(isSubdomain) { %>
+                flashvars="subdomain=<%=subdomain%>"
+                <%}%>
 				type="application/x-shockwave-flash"
 				pluginspage="http://www.adobe.com/go/getflashplayer">
 			</embed>
