@@ -2,7 +2,7 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Label text="A new version of Easy Insight is available."/>
     <mx:HBox>
-        <util:SaveButton label="Reload Application" click="var urlRequest:URLRequest = new URLRequest(Application.application.url);
+        <util:SaveButton label="Reload Application" click="var urlRequest:URLRequest = new URLRequest('https://www.easy-insight.com/app');
             navigateToURL(urlRequest,'_self');"/>
         <util:CancelButton label="Ignore" click="PopUpManager.removePopUp(this)"/>
     </mx:HBox>
