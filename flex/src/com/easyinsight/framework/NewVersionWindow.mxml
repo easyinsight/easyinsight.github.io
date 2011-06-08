@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Label text="A new version of Easy Insight is available."/>
+    <mx:HBox>
+        <util:SaveButton label="Reload Application" click="var urlRequest:URLRequest = new URLRequest(Application.application.url);
+            navigateToURL(urlRequest,'_self');"/>
+        <util:CancelButton label="Ignore" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+    <mx:Script><![CDATA[
+        import mx.core.Application;
+        import mx.managers.PopUpManager;
+        ]]></mx:Script>
+</util:EISlimWindow>
