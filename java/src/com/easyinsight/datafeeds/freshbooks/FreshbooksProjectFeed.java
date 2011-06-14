@@ -49,7 +49,7 @@ public class FreshbooksProjectFeed extends FreshbooksFeed {
                     String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
                     pages = Integer.parseInt(pageString);
                     currentPage = Integer.parseInt(currentPageString);
-                    Nodes invoices = invoicesDoc.query("/response/projects/projects");
+                    Nodes invoices = invoicesDoc.query("/response/projects/project");
 
                     for (int i = 0; i < invoices.size(); i++) {
                         Node invoice = invoices.get(i);
