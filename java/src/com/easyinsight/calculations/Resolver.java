@@ -64,6 +64,9 @@ public class Resolver {
     }
 
     public void addKey(Key key) {
+        if (key == null) {
+            return;
+        }
         List<Key> keys = keyMap.get(key.toKeyString());
         if (keys == null) {
             keys = new ArrayList<Key>();
