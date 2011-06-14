@@ -21,6 +21,7 @@
         import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.analysis.SixSigmaMeasure;
         import com.easyinsight.framework.Constants;
+        import com.easyinsight.framework.TORegistry;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
 
@@ -70,19 +71,7 @@
         }
 
         private function dependancies():void {
-            var analysisDate:AnalysisDateDimension;
-            var dim:AnalysisDimension;
-            var measure:AnalysisMeasure;
-            var complex:ComplexAnalysisMeasure;
-            var range:AnalysisRangeDimension;
-            var list:AnalysisList;
-            var hierarchy:AnalysisHierarchyItem;
-            var step:AnalysisStep;
-            var calculation:AnalysisCalculation;
-            var sigma:SixSigmaMeasure;
-            var latitude:AnalysisLatitude;
-            var longitude:AnalysisLongitude;
-            var derived:DerivedAnalysisDimension;
+            TORegistry.registerTypes();
         }
 
         private function authenticated():void {
