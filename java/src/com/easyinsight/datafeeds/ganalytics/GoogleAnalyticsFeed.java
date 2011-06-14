@@ -222,6 +222,13 @@ public class GoogleAnalyticsFeed extends Feed {
                 }
             }
 
+            if (startDate == null && endDate == null) {
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.YEAR, -1);
+                endDate = new Date();
+                startDate = cal.getTime();
+            }
+
 
             String startDateString = outboundDateFormat.format(startDate);
             String endDateString = outboundDateFormat.format(endDate);
