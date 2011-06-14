@@ -936,12 +936,14 @@ public class DataStorage {
                 sqlBuilder.append(column);
                 sqlBuilder.append(")");
                 sqlBuilder.append(",");
+                indexCount++;
             } else if (keyMetadata.getType() == Value.DATE) {
                 sqlBuilder.append("INDEX (");
                 String column = keyMetadata.getKey().toSQL();
                 sqlBuilder.append(column);
                 sqlBuilder.append(")");
                 sqlBuilder.append(",");
+                indexCount++;
             }
             if (keyMetadata.getType() == Value.DATE) {
                 sqlBuilder.append("INDEX (");
@@ -949,8 +951,8 @@ public class DataStorage {
                 sqlBuilder.append(column);
                 sqlBuilder.append(")");
                 sqlBuilder.append(",");
+                indexCount++;
             }
-            indexCount++;
             if (indexCount == 63) {
                 break;
             }
