@@ -93,8 +93,8 @@
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
             User.getEventNotifier().addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
             //GAHelper.initialize(tracker);
-            globalTimer = new EIGlobalTimer();
-            globalTimer.start();
+            /*globalTimer = new EIGlobalTimer();
+            globalTimer.start();*/
             userService.getBuildPath.send();
         }
 
