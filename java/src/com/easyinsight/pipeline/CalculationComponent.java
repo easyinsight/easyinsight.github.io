@@ -19,6 +19,10 @@ public class CalculationComponent implements IComponent {
         this.analysisCalculation = analysisCalculation;
     }
 
+    public AnalysisCalculation getAnalysisCalculation() {
+        return analysisCalculation;
+    }
+
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         for (IRow row : dataSet.getRows()) {
             Value value = analysisCalculation.calculate(row, pipelineData.getAllItems());

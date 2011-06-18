@@ -1,29 +1,18 @@
 <?xml version="1.0" ?>
-<genredata:ExchangePage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:genredata="com.easyinsight.genredata.*"
-                        width="100%" height="100%" creationComplete="addListeners()">
+<mx:DataGrid xmlns:mx="http://www.adobe.com/2006/mxml"
+                        width="100%"
+        variableRowHeight="true" selectable="false">
     <mx:Script><![CDATA[
 
         private var _solution:Object;
 
-        private function addListeners():void {
-            addEventListener(AnalyzeEvent.ANALYZE, onAnalyze);
-        }
-
-        private function onAnalyze(event:AnalyzeEvent):void {
-            event.perspectiveInfo.properties["reportList"] = dataProvider2;
-            event.perspectiveInfo.properties["reportIndex"] = dataProvider2.getItemIndex(event.perspectiveInfo.properties["exchangeItem"]);
-        }
-
         ]]></mx:Script>
-        <mx:DataGrid dataProvider="{dataProvider2}" width="100%" height="100%" variableRowHeight="true" selectable="false">
-            <mx:columns>
-                <mx:DataGridColumn headerText="Name" dataField="name" fontSize="14" width="200"/>
-                <mx:DataGridColumn headerText="Description" dataField="description" itemRenderer="com.easyinsight.genredata.ExchangeDescriptionRenderer"
-                        width="300" fontSize="14" sortable="false"/>
-                <mx:DataGridColumn headerText="Connection" dataField="solutionName" width="120" fontSize="14"/>
-                <mx:DataGridColumn headerText="" sortable="false"
-                                   itemRenderer="com.easyinsight.genredata.SolutionGridActionRenderer" width="50"/>
-            </mx:columns>
-        </mx:DataGrid>
 
-</genredata:ExchangePage>
+        <mx:columns>
+            <mx:DataGridColumn headerText="Name" dataField="name" fontSize="14" width="300" itemRenderer="com.easyinsight.genredata.SolutionNameRenderer"/>
+            <mx:DataGridColumn headerText="Description" dataField="description" itemRenderer="com.easyinsight.genredata.ExchangeDescriptionRenderer"
+                    fontSize="14" sortable="false"/>
+        </mx:columns>
+
+
+</mx:DataGrid>

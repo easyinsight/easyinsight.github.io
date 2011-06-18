@@ -723,21 +723,29 @@ public class FeedService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(lookupTable.getDataSourceID(), conn);
-            dataSource.getFields().add(lookupTable.getTargetField());
-            new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
+
             PreparedStatement insertTableStmt = conn.prepareStatement("INSERT INTO LOOKUP_TABLE (DATA_SOURCE_ID," +
                     "LOOKUP_TABLE_NAME, SOURCE_ITEM_ID, TARGET_ITEM_ID, URL_KEY) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             insertTableStmt.setLong(1, lookupTable.getDataSourceID());
             insertTableStmt.setString(2, lookupTable.getName());
             insertTableStmt.setLong(3, lookupTable.getSourceField().getAnalysisItemID());
-            insertTableStmt.setLong(4, lookupTable.getTargetField().getAnalysisItemID());
+            //insertTableStmt.setLong(4, lookupTable.getTargetField().getAnalysisItemID());
+            insertTableStmt.setNull(4, Types.BIGINT);
             insertTableStmt.setString(5, RandomTextGenerator.generateText(20));
             insertTableStmt.execute();
             id = Database.instance().getAutoGenKey(insertTableStmt);
+
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(lookupTable.getDataSourceID(), conn);
             lookupTable.getTargetField().setLookupTableID(id);
-            new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
-            FeedRegistry.instance().flushCache(dataSource.getDataFeedID());
+            dataSource.getFields().add(lookupTable.getTargetField());
+
+            lookupTable.getTargetField().setLookupTableID(id);
+            new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
+
+            PreparedStatement updateLookupStmt = conn.prepareStatement("UPDATE LOOKUP_TABLE SET TARGET_ITEM_ID = ? WHERE LOOKUP_TABLE_ID = ?");
+            updateLookupStmt.setLong(1, lookupTable.getTargetField().getAnalysisItemID());
+            updateLookupStmt.setLong(2, id);
+            updateLookupStmt.executeUpdate();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);

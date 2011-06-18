@@ -18,9 +18,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -56,9 +54,161 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 reportDelivery(conn);        
             } else if (type == ScheduledActivity.SCORECARD_DELIVERY) {
                 scorecardDelivery(conn);
+            } else if (type == ScheduledActivity.GENERAL_DELIVERY) {
+                generalDelivery(conn);
             }
         }
         typeStmt.close();
+    }
+
+    private void generalDelivery(EIConnection conn) throws Exception {
+        PreparedStatement getInfoStmt = conn.prepareStatement("SELECT SUBJECT, BODY, HTML_EMAIL, TIMEZONE_OFFSET, GENERAL_DELIVERY_ID, USER_ID FROM GENERAL_DELIVERY, " +
+                "SCHEDULED_ACCOUNT_ACTIVITY WHERE GENERAL_DELIVERY.SCHEDULED_ACCOUNT_ACTIVITY_ID = ? AND GENERAL_DELIVERY.scheduled_account_activity_id = SCHEDULED_ACCOUNT_ACTIVITY.SCHEDULED_ACCOUNT_ACTIVITY_ID");
+        getInfoStmt.setLong(1, activityID);
+        ResultSet deliveryInfoRS = getInfoStmt.executeQuery();
+        if (deliveryInfoRS.next()) {
+            final String subject = deliveryInfoRS.getString(1);
+            String body = deliveryInfoRS.getString(2);
+            final boolean htmlEmail = deliveryInfoRS.getBoolean(3);
+            int timezoneOffset = deliveryInfoRS.getInt(4);
+            long id = deliveryInfoRS.getLong(5);
+            long ownerID = deliveryInfoRS.getLong(6);
+            PreparedStatement getReportStmt = conn.prepareStatement("SELECT REPORT_ID, TITLE, DELIVERY_INDEX, DELIVERY_FORMAT FROM DELIVERY_TO_REPORT, ANALYSIS WHERE GENERAL_DELIVERY_ID = ? AND " +
+                    "delivery_to_report.report_id = analysis.analysis_id");
+            getReportStmt.setLong(1, id);
+            List<DeliveryInfo> infos = new ArrayList<DeliveryInfo>();
+            ResultSet reports = getReportStmt.executeQuery();
+            while (reports.next()) {
+                DeliveryInfo deliveryInfo = new DeliveryInfo();
+                deliveryInfo.setId(reports.getLong(1));
+                deliveryInfo.setName(reports.getString(2));
+                deliveryInfo.setIndex(reports.getInt(3));
+                deliveryInfo.setFormat(reports.getInt(4));
+                deliveryInfo.setType(DeliveryInfo.REPORT);
+                infos.add(deliveryInfo);
+            }
+            PreparedStatement getScorecardStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD_NAME, DELIVERY_INDEX, DELIVERY_FORMAT FROM delivery_to_scorecard, scorecard WHERE GENERAL_DELIVERY_ID = ? AND " +
+                    "delivery_to_scorecard.scorecard_id = scorecard.scorecard_id");
+            getScorecardStmt.setLong(1, id);
+            ResultSet scorecards = getScorecardStmt.executeQuery();
+            while (scorecards.next()) {
+                DeliveryInfo deliveryInfo = new DeliveryInfo();
+                deliveryInfo.setId(scorecards.getLong(1));
+                deliveryInfo.setName(scorecards.getString(2));
+                deliveryInfo.setIndex(scorecards.getInt(3));
+                deliveryInfo.setFormat(scorecards.getInt(4));
+                deliveryInfo.setType(DeliveryInfo.SCORECARD);
+                infos.add(deliveryInfo);
+            }
+            Collections.sort(infos, new Comparator<DeliveryInfo>() {
+
+                public int compare(DeliveryInfo deliveryInfo, DeliveryInfo deliveryInfo1) {
+                    return ((Integer) deliveryInfo.getIndex()).compareTo(deliveryInfo1.getIndex());
+                }
+            });
+
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
+                    "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID FROM USER, ACCOUNT " +
+                        "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
+            queryStmt.setInt(1, Account.ACTIVE);
+            queryStmt.setInt(2, Account.TRIAL);
+            queryStmt.setLong(3, ownerID);
+            ResultSet queryRS = queryStmt.executeQuery();
+            if (!queryRS.next()) {
+                return;
+            }
+
+            String userName = queryRS.getString(1);
+            int accountType = queryRS.getInt(2);
+            boolean accountAdmin = queryRS.getBoolean(3);
+            int firstDayOfWeek = queryRS.getInt(4);
+            String firstName = queryRS.getString(5);
+            String lastName = queryRS.getString(6);
+            long accountID = queryRS.getLong(8);
+
+            SecurityUtil.populateThreadLocal(userName, ownerID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
+            try {
+
+                List<AttachmentInfo> attachmentInfos = new ArrayList<AttachmentInfo>();
+                for (DeliveryInfo deliveryInfo : infos) {
+                    body = handleDeliveryInfo(deliveryInfo, body, attachmentInfos, conn, timezoneOffset);
+                }
+
+                PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, delivery_to_user WHERE delivery_to_user.scheduled_account_activity_id = ? and " +
+                    "delivery_to_user.user_id = user.user_id");
+                List<UserInfo> userStubs = new ArrayList<UserInfo>();
+                userStmt.setLong(1, activityID);
+                ResultSet rs = userStmt.executeQuery();
+                while (rs.next()) {
+                    String email = rs.getString(1);
+                    String userFirstName = rs.getString(2);
+                    String userLastName = rs.getString(3);
+                    userStubs.add(new UserInfo(email, userFirstName, userLastName));
+                }
+                userStmt.close();
+
+                String senderName = null;
+                String senderEmail = null;
+                PreparedStatement getSernderStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, REPORT_DELIVERY WHERE REPORT_DELIVERY.sender_user_id = user.user_id and " +
+                        "REPORT_DELIVERY.scheduled_account_activity_id = ?");
+                getSernderStmt.setLong(1, activityID);
+                ResultSet senderRS = getSernderStmt.executeQuery();
+                if (senderRS.next()) {
+                    String email = senderRS.getString(1);
+                    String userFirstName = senderRS.getString(2);
+                    String userLastName = senderRS.getString(3);
+                    senderName = userFirstName + " " + userLastName;
+                    senderEmail = email;
+                }
+                getSernderStmt.close();
+
+                PreparedStatement emailQueryStmt = conn.prepareStatement("SELECT EMAIL_ADDRESS FROM delivery_to_email where scheduled_account_activity_id = ?");
+                emailQueryStmt.setLong(1, activityID);
+                List<String> emails = new ArrayList<String>();
+                ResultSet emailRS = emailQueryStmt.executeQuery();
+                while (emailRS.next()) {
+                    String email = emailRS.getString(1);
+                    emails.add(email);
+                }
+                emailQueryStmt.close();
+
+
+                for (UserInfo userInfo : userStubs) {
+                    new SendGridEmail().sendMultipleAttachmentsEmail(userInfo.email, subject, body, htmlEmail, senderEmail, senderName, attachmentInfos);
+                }
+                for (String email : emails) {
+                    new SendGridEmail().sendMultipleAttachmentsEmail(email, subject, body, htmlEmail, senderEmail, senderName, attachmentInfos);
+                }
+            } finally {
+                SecurityUtil.clearThreadLocal();
+            }
+        }
+    }
+
+    private String handleDeliveryInfo(DeliveryInfo deliveryInfo, String body, List<AttachmentInfo> attachmentInfos, EIConnection conn, int timezoneOffset) throws Exception {
+        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+        insightRequestMetadata.setUtcOffset(timezoneOffset);
+        if (deliveryInfo.getFormat() == ReportDelivery.EXCEL) {
+            WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
+            analysisDefinition.updateMetadata();
+
+            DataResults dataResults = DataService.list(analysisDefinition, insightRequestMetadata, conn);
+            ListDataResults listDataResults = (ListDataResults) dataResults;
+            byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, listDataResults, conn, insightRequestMetadata);
+            attachmentInfos.add(new AttachmentInfo(bytes, deliveryInfo.getName() + ".xls", "application/xls"));
+        } else if (deliveryInfo.getFormat() == ReportDelivery.HTML_TABLE) {
+            if (deliveryInfo.getType() == DeliveryInfo.REPORT) {
+                 WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
+                        analysisDefinition.updateMetadata();
+                        DataResults dataResults = DataService.list(analysisDefinition, insightRequestMetadata, conn);
+                        ListDataResults listDataResults = (ListDataResults) dataResults;
+                        String table = ExportService.toTable(analysisDefinition, listDataResults, conn, insightRequestMetadata);
+                body += table;
+            } else if (deliveryInfo.getType() == DeliveryInfo.SCORECARD) {
+                body += ExportService.exportScorecard(deliveryInfo.getId(), insightRequestMetadata, conn);
+            }
+        }
+        return body;
     }
 
     private void scorecardDelivery(EIConnection conn) throws Exception {

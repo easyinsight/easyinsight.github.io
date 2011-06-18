@@ -1,15 +1,11 @@
 package com.easyinsight.pipeline;
 
-import cern.colt.list.DoubleArrayList;
 import com.easyinsight.analysis.*;
-import com.easyinsight.analysis.definitions.WSPlotChartDefinition;
+import com.easyinsight.calculations.CalcGraph;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
-import org.apache.commons.math.stat.correlation.PearsonsCorrelation;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -22,8 +18,32 @@ public class ListSummaryComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
 
+        Set<AnalysisItem> reportItems = new HashSet<AnalysisItem>(pipelineData.getReportItems());
+        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true);
+        components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false));
+
+        Iterator<IComponent> iter = components.iterator();
+        while (iter.hasNext()) {
+            IComponent component = iter.next();
+            if (!(component instanceof CalculationComponent)) {
+                iter.remove();
+            }
+            CalculationComponent calculationComponent = (CalculationComponent) component;
+            if (!calculationComponent.getAnalysisCalculation().isRecalculateSummary()) {
+                iter.remove();
+            }
+        }
+
+        DataSet tempSet = new DataSet();
+        IRow tempRow = tempSet.createRow();
         for (AnalysisItem reportItem : pipelineData.getReportItems()) {
             if (reportItem.hasType(AnalysisItemTypes.MEASURE)) {
+                if (reportItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) reportItem;
+                    if (analysisCalculation.isRecalculateSummary()) {
+                        continue;
+                    }
+                }
                 AnalysisMeasure analysisMeasure = (AnalysisMeasure) reportItem;
                 AggregationFactory aggregationFactory = new AggregationFactory(analysisMeasure, false);
                 Aggregation aggregation = aggregationFactory.getAggregation();
@@ -33,6 +53,15 @@ public class ListSummaryComponent implements IComponent {
                 }
                 Value aggregateValue = aggregation.getValue();
                 aggregationMap.put(analysisMeasure, aggregateValue);
+                tempRow.addValue(analysisMeasure.createAggregateKey(), aggregateValue);
+            }
+        }
+        for (IComponent component : components) {
+            component.apply(tempSet, pipelineData);
+        }
+        for (AnalysisItem reportItem : pipelineData.getReportItems()) {
+            if (reportItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                aggregationMap.put((AnalysisMeasure) reportItem, tempSet.getRow(0).getValue(reportItem));
             }
         }
         return dataSet;

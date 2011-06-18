@@ -120,6 +120,10 @@ public class FeedType {
     public static final FeedType AMAZON_RDS = new FeedType(112);
     public static final FeedType HARVEST_INVOICES = new FeedType(113);
     public static final FeedType AMAZON_S3 = new FeedType(114);
+    public static final FeedType SAMPLE_COMPOSITE = new FeedType(115);
+    public static final FeedType SAMPLE_SALES = new FeedType(116);
+    public static final FeedType SAMPLE_CUSTOMER = new FeedType(117);
+    public static final FeedType SAMPLE_PRODUCT = new FeedType(118);
 
     private int type;
 

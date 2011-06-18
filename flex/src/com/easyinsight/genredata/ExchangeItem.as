@@ -17,6 +17,7 @@ public class ExchangeItem {
     public var solutionID:int;
     public var solutionName:String;
     public var url:String;
+    public var recommended:Boolean;
 
     public function ExchangeItem() {
     }        

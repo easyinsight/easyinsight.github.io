@@ -94,6 +94,9 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "rating_average")
     private double ratingAverage;
 
+    @Column(name = "recommended_exchange")
+    private boolean recommendedExchange;
+
     @Column(name = "marketplace_visible")
     private boolean marketplaceVisible;
 
@@ -124,6 +127,14 @@ public class AnalysisDefinition implements Cloneable {
 
     @Column(name = "account_visible")
     private boolean accountVisible;
+
+    public boolean isRecommendedExchange() {
+        return recommendedExchange;
+    }
+
+    public void setRecommendedExchange(boolean recommendedExchange) {
+        this.recommendedExchange = recommendedExchange;
+    }
 
     public List<JoinOverride> getJoinOverrides() {
         return joinOverrides;

@@ -9,30 +9,29 @@
 
         import com.easyinsight.solutions.Solution;
 
-        import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
 
         private function setupListeners():void {
             solutionService.getSolutions.send();
-            BindingUtils.bindProperty(solutionDataController, "solution", this, "solution");
+            solutionService.getInstalledConnections.send();
         }
 
-        private function toState(index:int):void {
-            viewMode = index;
-            listsBox.removeAllChildren();
-            exchangeController = solutionDataController;
-            updateURL();
-            listsBox.addChild(exchangeController.selectedPage);
-            exchangeController.refreshData();
+        private var installedConnections:Object;
+
+        private function gotInstalledConnections():void {
+            var connections:ArrayCollection = solutionService.getInstalledConnections.lastResult as ArrayCollection;
+            installedConnections = new Object();
+            for each (var solutionID:int in connections) {
+                installedConnections[String(solutionID)] = solutionID;
+            }
+            solutionService.getSolutionReports.send();
         }
 
         private function updateURL():void {
             var fragmentObject:Object = new Object();
             fragmentObject.page = "exchange";
-            fragmentObject.view = viewMode;
-            fragmentObject.subTopicID = subTopicID;
             //exchangeController.decorateObject(fragmentObject);
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             fragmentString = stringReplaceAll(fragmentString, ";", "&");
@@ -48,57 +47,13 @@
          }*/
 
         private function refreshExchange():void {
-            listsBox.removeAllChildren();
-            listsBox.addChild(exchangeController.selectedPage);
-            exchangeController.refreshData();
+            solutionService.getSolutionReports.send();
         }
 
         public function gotFocus():void {
             BrowserManager.getInstance().setTitle("Easy Insight - Exchange");
-            exchangeController = solutionDataController;
-            if (subTopicID > 0) {
-                exchangeController.subTopicID = subTopicID;
-            }
-            solutionDataController.initBehavior();
             updateURL();
-            if (listsBox.getChildren().length == 0) {
-                refreshExchange();
-            }
         }
-
-        private function onChangeView(event:ExchangeControllerEvent):void {
-            listsBox.removeAllChildren();
-            listsBox.addChild(event.exchangePage);
-        }
-
-        private var _viewMode:int = 0;
-
-        private var _subTopicID:int = 0;
-
-        [Bindable(event="subTopicIDChanged")]
-        public function get subTopicID():int {
-            return _subTopicID;
-        }
-
-        public function set subTopicID(value:int):void {
-            if (_subTopicID == value) return;
-            _subTopicID = value;
-            dispatchEvent(new Event("subTopicIDChanged"));
-        }
-
-        [Bindable(event="viewModeChanged")]
-        public function get viewMode():int {
-            return _viewMode;
-        }
-
-        public function set viewMode(value:int):void {
-            if (_viewMode == value) return;
-            _viewMode = value;
-            dispatchEvent(new Event("viewModeChanged"));
-        }
-
-        private var exchangeController:ExchangeController;
-
 
         [Bindable(event="solutionChanged")]
         public function get solution():Object {
@@ -108,11 +63,6 @@
         public function set solution(value:Object):void {
             if (_solution == value) return;
             _solution = value;
-            if (value is Solution) {
-                subTopicID = value.solutionID;
-            } else {
-                subTopicID = 0;
-            }
             updateURL();
             dispatchEvent(new Event("solutionChanged"));
         }
@@ -140,6 +90,7 @@
 
         private function changeSolution():void {
             solution = solutionBox.selectedItem;
+            reports.refresh();
         }
 
         private function gotSolutions():void {
@@ -158,18 +109,72 @@
             this.solutions.addItemAt(myConnections, 0);
             this.solutions.addItemAt(ph, 1);
             solutionRows = solutions.length;
-            if (subTopicID > 0) {
-                for each (var solObj:Object in this.solutions) {
-                    if (solObj is Solution) {
-                        var sol:Solution = solObj as Solution;
-                        if (sol.solutionID == subTopicID) {
-                            solution = sol;
-                        }
-                    }
-                }
-            }
             if (solution == null) {
                 solution = this.solutions.getItemAt(0);
+            }
+        }
+
+        private function onData():void {
+            var reports:ArrayCollection = solutionService.getSolutionReports.lastResult as ArrayCollection;
+            var recommendedReports:ArrayCollection = new ArrayCollection(reports.toArray());
+            recommendedReports.filterFunction = filterRecommended;
+            recommendedReports.refresh();
+            reports.filterFunction = filterData;
+            reports.refresh();
+            this.reports = reports;
+            this.recommendedReports = recommendedReports;
+        }
+
+        [Bindable]
+        private var reports:ArrayCollection;
+
+        [Bindable]
+        private var recommendedReports:ArrayCollection;
+
+        protected function filterRecommended(object:Object):Boolean {
+            var reportExchangeItem:ExchangeItem = object as ExchangeItem;
+            if (solution == null) {
+                return false;
+            }
+            if (!reportExchangeItem.recommended) {
+                return false;
+            }
+            var matched:Boolean = true;
+            if (solution is Solution) {
+                matched = reportExchangeItem.solutionID == solution.solutionID;
+            } else if (solution.name == "[ My Connections ]") {
+                matched = installedConnections[String(reportExchangeItem.solutionID)] != null;
+            }
+            return matched;
+        }
+
+        protected function filterData(object:Object):Boolean {
+            var reportExchangeItem:ExchangeItem = object as ExchangeItem;
+            if (solution == null) {
+                return false;
+            }
+            var matched:Boolean = true;
+            if (solution is Solution) {
+                matched = reportExchangeItem.solutionID == solution.solutionID;
+            } else if (solution.name == "[ My Connections ]") {
+                matched = installedConnections[String(reportExchangeItem.solutionID)] != null;
+            }
+            /*if (matched) {
+                if (keyword != null && keyword.length > 0) {
+                    matched = reportExchangeItem.name.toLowerCase().indexOf(keyword) != -1;
+                }
+            }*/
+            return matched;
+        }
+
+        protected override function measure():void {
+            super.measure();
+            if (recommendedReports != null) {
+                recGrid.verticalScrollPolicy = "off";
+                recGrid.height = recGrid.measureHeightOfItems(0, recommendedReports.length) + recGrid.headerHeight + 4;
+            }
+            if (reports != null) {
+                reportGrid.height = reportGrid.measureHeightOfItems(0, reports.length) + reportGrid.headerHeight + 4;
             }
         }
 
@@ -177,12 +182,11 @@
 	</mx:Script>
     <mx:RemoteObject destination="solutionService" id="solutionService">
         <mx:method name="getSolutions" result="gotSolutions()"/>
+        <mx:method name="getSolutionReports" result="onData()"/>
+        <mx:method name="getInstalledConnections" result="gotInstalledConnections()"/>
     </mx:RemoteObject>
-    <!--<genredata:PublicDataController id="publicDataController" changeView="onChangeView(event)"/>-->
-    <genredata:SolutionExchangeController id="solutionDataController" changeView="onChangeView(event)"
-                                          solution="{solution}" updateURL="updateURL()"/>
-
-    <mx:VBox>
+    <mx:Canvas verticalScrollPolicy="on">
+    <mx:VBox horizontalAlign="center" paddingLeft="10" paddingRight="10" paddingBottom="10" width="100%">
         <mx:HBox verticalAlign="middle" paddingTop="20" paddingBottom="20" paddingLeft="20"
                  paddingRight="20" width="100%">
             <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name"
@@ -197,9 +201,11 @@
             <mx:Button icon="@Embed(source='../../../../assets/refresh.png')" toolTip="Refresh Listing" click="refreshExchange()" labelPlacement="right"
                     label="Refresh Listing"/>
         </mx:HBox>
-        <mx:HBox width="100%" height="100%" id="listsBox" paddingTop="5" paddingBottom="5" paddingLeft="20"
-                 paddingRight="20">
-            
-        </mx:HBox>
+        <mx:Label text="Recommended Reports and Dashboards" fontSize="16" fontWeight="bold"/>
+            <genredata:SolutionExchangeGridPage dataProvider="{recommendedReports}" verticalScrollPolicy="off" id="recGrid"/>
+        <mx:Label text="All Reports and Dashboards" fontSize="16" fontWeight="bold"/>
+            <genredata:SolutionExchangeGridPage dataProvider="{reports}" height="100%" verticalScrollPolicy="off" id="reportGrid"/>
+
     </mx:VBox>
+    </mx:Canvas>
 </skin:BackgroundImage>

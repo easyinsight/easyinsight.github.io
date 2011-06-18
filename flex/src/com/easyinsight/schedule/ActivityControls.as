@@ -81,6 +81,12 @@ public class ActivityControls extends UIComponent implements IListItemRenderer {
             scorecardWindow.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, passThrough, false, 0, true);
             PopUpManager.addPopUp(scorecardWindow, this, true);
             PopUpUtil.centerPopUp(scorecardWindow);
+        } else if (activity is GeneralDelivery) {
+            var generalWindow:GeneralDeliveryScheduleWindow = new GeneralDeliveryScheduleWindow();
+            generalWindow.activity = activity;
+            generalWindow.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, passThrough, false, 0, true);
+            PopUpManager.addPopUp(generalWindow, this, true);
+            PopUpUtil.centerPopUp(generalWindow);
         }
     }
 

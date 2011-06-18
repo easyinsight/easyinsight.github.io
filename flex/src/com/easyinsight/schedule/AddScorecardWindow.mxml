@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+                   creationComplete="scorecardService.getScorecardDescriptors.send()">
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.scorecard.ScorecardDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.managers.PopUpManager;
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var descriptors:ArrayCollection;
+
+        private function gotScorecards():void {
+            var descriptors:ArrayCollection = scorecardService.getScorecardDescriptors.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name", true) ];
+            descriptors.sort = sort;
+            descriptors.refresh();
+            this.descriptors = descriptors;
+        }
+
+        private function chose():void {
+            var descriptor:ScorecardDescriptor = feedBox.selectedItem as ScorecardDescriptor;
+            var info:DeliveryInfo = new DeliveryInfo();
+            info.type = DeliveryInfo.SCORECARD;
+            info.id = descriptor.id;
+            info.name = descriptor.name;
+            dispatchEvent(new DeliveryInfoEvent(DeliveryInfoEvent.ADD_SCORECARD, info));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]>
+	</mx:Script>
+    <mx:RemoteObject destination="scorecardService" id="scorecardService">
+        <mx:method name="getScorecardDescriptors" result="gotScorecards()"/>
+    </mx:RemoteObject>
+
+
+    <mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name"/>
+
+    <mx:HBox>
+        <util:SaveButton label="OK" click="chose()"/>
+        <util:CancelButton label="Cancel" click="cancel()"/>
+    </mx:HBox>
+
+
+</util:EISlimWindow>

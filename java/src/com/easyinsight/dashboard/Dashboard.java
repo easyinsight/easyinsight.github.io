@@ -43,12 +43,21 @@ public class Dashboard implements Cloneable {
     private int filterBackgroundColor;
     private double filterBackgroundAlpha;
     private int headerStyle;
+    private boolean recommendedExchange;
 
     public Dashboard clone() throws CloneNotSupportedException {
         Dashboard dashboard = (Dashboard) super.clone();
         dashboard.setId(0);
         dashboard.setRootElement(rootElement.clone());
         return dashboard;
+    }
+
+    public boolean isRecommendedExchange() {
+        return recommendedExchange;
+    }
+
+    public void setRecommendedExchange(boolean recommendedExchange) {
+        this.recommendedExchange = recommendedExchange;
     }
 
     public boolean isTemporary() {
@@ -181,6 +190,7 @@ public class Dashboard implements Cloneable {
         dashboard.setAdministrators(Arrays.asList((FeedConsumer) new UserStub(SecurityUtil.getUserID(), null, null, null, 0, null)));
         dashboard.setCreationDate(new Date());
         dashboard.setExchangeVisible(false);
+        dashboard.setRecommendedExchange(false);
         List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
 
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();

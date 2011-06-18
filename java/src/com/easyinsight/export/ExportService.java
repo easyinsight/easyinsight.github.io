@@ -10,6 +10,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIOutcome;
 import com.easyinsight.scorecard.Scorecard;
@@ -189,6 +190,7 @@ public class ExportService {
                 try {
                     activities.add(ScheduledActivity.createActivity(activityType, activityID, conn));
                 } catch (Exception e) {
+                    LogClass.error(e);
                     // blah
                 }
             }
@@ -305,6 +307,27 @@ public class ExportService {
 
     public void toListPDFInDatabase(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
         toDatabase(analysisDefinition.getName(), toListPDF(analysisDefinition, listDataResults, conn, insightRequestMetadata), conn);
+    }
+
+    public void emailReport(WSAnalysisDefinition analysisDefinition, int format, InsightRequestMetadata insightRequestMetadata, String email) {
+        if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
+        else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            analysisDefinition.updateMetadata();
+            ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
+            /*if (insightRequestMetadata.isReportEditor()) {
+                new AdminService().logAction(new ActionReportLog(SecurityUtil.getUserID(), ActionReportLog.EXPORT_XLS, analysisDefinition.getAnalysisID()));
+            }*/
+            byte[] bytes = toExcel(analysisDefinition, listDataResults, insightRequestMetadata);
+            new SendGridEmail().sendAttachmentEmail(email, analysisDefinition.getName(), "", bytes, analysisDefinition.getName() + ".xls", false, "reports@easy-insight.com", "Easy Insight",
+                    "application/excel");
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public byte[] toListPDF(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {

@@ -1,0 +1,264 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:schedule="com.easyinsight.schedule.*"
+                    creationComplete="setup()" title="Report Email Delivery">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.sharing.UserStub;
+        import com.easyinsight.analysis.PromptEvent;
+        import com.easyinsight.analysis.SavePromptWindow;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
+
+        [Bindable]
+        private var reports:ArrayCollection;
+
+        private var _activity:GeneralDelivery;
+
+        private function setup():void {
+            addEventListener(RecipientEvent.DELETE_RECIPIENT, deleteRecipient);
+            addEventListener(DeliveryInfoEvent.REMOVE, onDelete);
+            shareService.getUserStubs.send(false);
+        }
+
+        private function deleteRecipient(event:RecipientEvent):void {
+            if (event.user != null) recipients.removeItemAt(recipients.getItemIndex(event.user));
+            else recipients.removeItemAt(recipients.getItemIndex(event.email));
+        }
+
+
+        [Bindable(event="activityChanged")]
+        public function get activity():ScheduledActivity {
+            return _activity;
+        }
+
+        public function set activity(value:ScheduledActivity):void {
+            if (_activity == value) return;
+            _activity = value as GeneralDelivery;
+            dispatchEvent(new Event("activityChanged"));
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_activity != null) {
+                htmlEmail = _activity.htmlEmail;
+                for each (var user:UserStub in _activity.users) {
+                    recipients.addItem(user);
+                }
+                for each (var email:String in _activity.emails) {
+                    recipients.addItem(email);
+                }
+                body = _activity.body;
+                deliveryInfos = _activity.deliveryInfos;
+                subjectLine = _activity.subject;
+                fromUserID = _activity.senderID;
+            } else {
+                fromUserID = User.getInstance().userID;
+            }
+        }
+
+        private var newActivity:Boolean;
+
+        private function save():void {
+            var subjectResults:Array = Validator.validateAll([subjectValidator]);
+            if (subjectResults.length > 0) {
+                subjectInput.setFocus();
+                subjectInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            var users:ArrayCollection = new ArrayCollection();
+            var emails:ArrayCollection = new ArrayCollection();
+            for each (var obj:Object in recipients) {
+                if (obj is UserStub) {
+                    users.addItem(obj);
+                } else {
+                    emails.addItem(obj);
+                }
+            }
+            if (users.length == 0 && emails.length == 0) {
+                var window:SavePromptWindow = new SavePromptWindow();
+                window.prompt = "You must define at least one recipient.";
+                window.defineOption("Add Recipient", PromptEvent.PROMPT_SAVE);
+                window.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
+                window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                    addRecipient();
+                }, false, 0, true);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+                return;
+            }
+            newActivity = _activity == null;
+            if (activity == null) {
+                activity = new GeneralDelivery();
+            }
+            if (scheduleConfiguration.save()) {
+
+                _activity.users = users;
+                _activity.emails = emails;
+                _activity.deliveryInfos = deliveryInfos;
+                _activity.htmlEmail = htmlEmailCheckbox.selected;
+
+                _activity.senderID = fromComboBox.selectedItem.userID;
+                _activity.body = bodyTextInput.text;
+                _activity.subject = subjectInput.text;
+                var utcOffset:int = new Date().getTimezoneOffset();
+                ProgressAlert.alert(this, "Saving...", null, exportService.addOrUpdateSchedule);
+                exportService.addOrUpdateSchedule.send(_activity, utcOffset);
+            }
+        }
+
+        private function saved():void {
+            if (newActivity) {
+                dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.NEW_ACTIVITY, _activity));
+            } else {
+                dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.EDIT_ACTIVITY, _activity));
+            }
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var htmlEmail:Boolean = true;
+
+        [Bindable]
+        private var recipients:ArrayCollection = new ArrayCollection();
+
+        private function gotReports():void {
+            reports = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+        }
+
+        private function addRecipient():void {
+            var window:RecipientWindow = new RecipientWindow();
+            window.addEventListener(RecipientEvent.ADD_RECIPIENT, onAddUser, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onAddUser(event:RecipientEvent):void {
+            if (event.user != null) recipients.addItem(event.user);
+            else recipients.addItem(event.email);
+        }
+
+        private function gotUserStubs():void {
+            var users:ArrayCollection = shareService.getUserStubs.lastResult as ArrayCollection;
+            var fakeUser:UserStub = new UserStub();
+            fakeUser.userID = 0;
+            fakeUser.firstName = null;
+            fakeUser.fullName = "reports@easy-insight.com";
+            users.addItemAt(fakeUser, 0);
+            this.users = users;
+        }
+
+        [Bindable]
+        private var users:ArrayCollection;
+
+        [Bindable]
+        private var fromUserID:int;
+
+        [Bindable]
+        private var body:String;
+
+        [Bindable]
+        private var subjectLine:String;
+
+        [Bindable]
+        private var formatValue:String;
+
+        private function addReport():void {
+            var window:AddReportWindow = new AddReportWindow();
+            window.addEventListener(DeliveryInfoEvent.ADD_REPORT, onNewDeliveryInfo, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        [Bindable]
+        private var deliveryInfos:ArrayCollection = new ArrayCollection();
+
+        private function onNewDeliveryInfo(event:DeliveryInfoEvent):void {
+            deliveryInfos.addItem(event.deliveryInfo);
+        }
+
+        private function onDelete(event:DeliveryInfoEvent):void {
+            deliveryInfos.removeItemAt(deliveryInfos.getItemIndex(event.deliveryInfo));
+        }
+
+        private function addScorecard():void {
+            var window:AddScorecardWindow = new AddScorecardWindow();
+            window.addEventListener(DeliveryInfoEvent.ADD_SCORECARD, onNewDeliveryInfo, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="exportService" id="exportService">
+        <mx:method name="addOrUpdateSchedule" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="getInsightDescriptors" result="gotReports()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="shareService" destination="share">
+		<mx:method name="getUserStubs" result="gotUserStubs()"/>
+	</mx:RemoteObject>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" backgroundColor="#FFFFFF">
+        <mx:TabNavigator creationPolicy="all" width="600" height="500">
+            <mx:VBox label="Reports and Scorecards" paddingLeft="10" paddingTop="10">
+                <mx:HBox>
+                    <util:SaveButton label="Add Report..." click="addReport()"/>
+                    <util:SaveButton label="Add Scorecard..." click="addScorecard()"/>
+                </mx:HBox>
+                <mx:DataGrid dataProvider="{deliveryInfos}">
+                    <mx:columns>
+                        <util:EIDataGridColumn headerText="Name" dataField="name" width="300"/>
+                        <util:EIDataGridColumn headerText="Format" sortable="false" itemRenderer="com.easyinsight.schedule.DeliveryFormatSelection"
+                                width="150"/>
+                        <util:EIDataGridColumn headerText="" sortable="false" itemRenderer="com.easyinsight.schedule.DeliveryActions"
+                                width="50"/>
+                    </mx:columns>
+                </mx:DataGrid>
+            </mx:VBox>
+            <mx:VBox label="Scheduling and Recipients" paddingLeft="10" paddingTop="10">
+                <schedule:ScheduleConfiguration activity="{activity}" id="scheduleConfiguration"/>
+                <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                    <mx:FormItem label="Send From:">
+                        <util:SmartComboBox dataProvider="{users}" selectedValue="{fromUserID}" selectedProperty="userID" id="fromComboBox" labelField="displayName"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Recipients:">
+                        <mx:VBox>
+                            <mx:Button label="Add Recipient..." click="addRecipient()"/>
+                            <mx:DataGrid dataProvider="{recipients}" rowHeight="28">
+                                <mx:columns>
+                                    <util:EIDataGridColumn headerText="User" dataField="displayName" width="300"
+                                            itemRenderer="com.easyinsight.schedule.RecipientRenderer"/>
+                                    <util:EIDataGridColumn headerText="" dataField="displayName"
+                                                           itemRenderer="com.easyinsight.schedule.RecipientControls"
+                                                           width="50"
+                                                           sortable="false"/>
+                                </mx:columns>
+                            </mx:DataGrid>
+                        </mx:VBox>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center" label="Email Setup">
+                <mx:Label text="How do you want to set up the email?"/>
+                <mx:CheckBox label="HTML Email" selected="{htmlEmail}" id="htmlEmailCheckbox"/>
+                <mx:Form>
+                    <mx:FormItem label="Subject Line:">
+                        <mx:TextInput width="400" id="subjectInput" text="{subjectLine}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Email Body:">
+                        <schedule:CursorTextArea id="bodyTextInput" text="{body}" width="400" height="300"
+                                                 borderStyle="inset" borderThickness="1"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:VBox>
+        </mx:TabNavigator>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+    <mx:StringValidator id="subjectValidator" source="{subjectInput}" property="text" minLength="1"/>
+</util:EITitleWindow>

@@ -283,6 +283,9 @@
         }
 
         [Bindable]
+        protected var summaryRecalc:Boolean;
+
+        [Bindable]
         protected var example1:String;
 
         [Bindable]
@@ -347,6 +350,9 @@
             </mx:FormItem>
             <mx:FormItem label="Formatting: " visible="{showMeasures}">
                 <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Recalculate on Summary: " visible="{showMeasures}">
+                <mx:CheckBox id="summaryCheckbox" selected="{summaryRecalc}"/>
             </mx:FormItem>
             <mx:FormItem label="Row Level: " visible="{showMeasures}" direction="horizontal">
                 <mx:CheckBox id="rowLevelCheckbox" selected="{applyBefore}"/>

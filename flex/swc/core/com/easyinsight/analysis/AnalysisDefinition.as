@@ -75,7 +75,7 @@ import mx.collections.ArrayCollection;
         public var fixedWidth:int = 0;
         public var accountVisible:Boolean;
         public var joinOverrides:ArrayCollection;
-
+        public var recommendedExchange:Boolean;
 
 		public function AnalysisDefinition()
 		{

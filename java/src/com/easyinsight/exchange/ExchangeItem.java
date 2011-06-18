@@ -19,12 +19,13 @@ public class ExchangeItem {
     private com.easyinsight.core.EIDescriptor descriptor;
     private long solutionID;
     private String solutionName;
+    private boolean recommended;
 
     public ExchangeItem() {
     }
 
     public ExchangeItem(String name, long id, int installs, Date dateAdded, String description,
-                        String author, EIDescriptor descriptor, long solutionID, String solutionName) {
+                        String author, EIDescriptor descriptor, long solutionID, String solutionName, boolean recommended) {
         this.name = name;
         this.id = id;
         this.installs = installs;
@@ -34,6 +35,15 @@ public class ExchangeItem {
         this.descriptor = descriptor;
         this.solutionID = solutionID;
         this.solutionName = solutionName;
+        this.recommended = recommended;
+    }
+
+    public boolean isRecommended() {
+        return recommended;
+    }
+
+    public void setRecommended(boolean recommended) {
+        this.recommended = recommended;
     }
 
     public EIDescriptor getDescriptor() {

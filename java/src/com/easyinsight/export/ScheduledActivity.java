@@ -21,9 +21,20 @@ public abstract class ScheduledActivity {
     public static final int DATA_SOURCE_REFRESH = 1;
     public static final int REPORT_DELIVERY = 2;
     public static final int SCORECARD_DELIVERY = 3;
+    public static final int GENERAL_DELIVERY = 4;
 
     private String problemMessage;
     private int problemLevel;
+
+    private long userID;
+
+    public long getUserID() {
+        return userID;
+    }
+
+    public void setUserID(long userID) {
+        this.userID = userID;
+    }
 
     public String getProblemMessage() {
         return problemMessage;
@@ -63,10 +74,11 @@ public abstract class ScheduledActivity {
 
     public void save(EIConnection conn, int utcOffset) throws SQLException {
         if (scheduledActivityID == 0) {
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SCHEDULED_ACCOUNT_ACTIVITY (ACCOUNT_ID, ACTIVITY_TYPE) VALUES (?, ?)",
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SCHEDULED_ACCOUNT_ACTIVITY (ACCOUNT_ID, ACTIVITY_TYPE, USER_ID) VALUES (?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             insertStmt.setLong(1, SecurityUtil.getAccountID());
             insertStmt.setInt(2, retrieveType());
+            insertStmt.setLong(3, SecurityUtil.getUserID());
             insertStmt.execute();
             this.scheduledActivityID = Database.instance().getAutoGenKey(insertStmt);
             insertStmt.close();
@@ -104,6 +116,9 @@ public abstract class ScheduledActivity {
                 break;
             case ScheduledActivity.SCORECARD_DELIVERY:
                 scheduledActivity = new ScorecardDelivery();
+                break;
+            case ScheduledActivity.GENERAL_DELIVERY:
+                scheduledActivity = new GeneralDelivery();
                 break;
             default:
                 throw new RuntimeException();

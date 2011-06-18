@@ -36,6 +36,17 @@ public class AnalysisCalculation extends AnalysisMeasure {
     @Column(name="apply_before_aggregation")
     private boolean applyBeforeAggregation;
 
+    @Column(name="recalculate_summary")
+    private boolean recalculateSummary;
+
+    public boolean isRecalculateSummary() {
+        return recalculateSummary;
+    }
+
+    public void setRecalculateSummary(boolean recalculateSummary) {
+        this.recalculateSummary = recalculateSummary;
+    }
+
     private transient CalculationTreeNode calculationTreeNode;
 
     public String getCalculationString() {

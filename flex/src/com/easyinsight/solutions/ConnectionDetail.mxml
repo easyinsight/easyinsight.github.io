@@ -82,6 +82,9 @@
                 case DataSourceType.SALESFORCE:
                     result = new SalesforceSolutionDetail();
                     break;
+                case DataSourceType.SAMPLE:
+                    result = new SampleSolutionDetail();
+                    break;
             }
             return result;
         }

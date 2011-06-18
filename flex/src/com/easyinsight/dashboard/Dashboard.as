@@ -28,6 +28,7 @@ public class Dashboard {
     public var filterBackgroundColor:uint = 0xFFFFFF;
     public var filterBackgroundAlpha:Number = 0;
     public var headerStyle:int;
+    public var recommendedExchange:Boolean;
 
     public function Dashboard() {
     }

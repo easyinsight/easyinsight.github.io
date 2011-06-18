@@ -101,14 +101,8 @@
             solutionColl.filterFunction = filterFunction;
             solutionColl.refresh();
             this.availableSolutions = solutionColl;
+            invalidateSize();
             stackIndex = 1;
-        }
-
-        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
-            super.updateDisplayList(unscaledWidth, unscaledHeight);
-            var availableColumns:int = (vbox.width - 40) / (240);
-            //Alert.show("unscaled width = " + (vbox.width - 40) + " available columns = " + availableColumns);
-            solutionGrid.width = availableColumns * 240 + 20;
         }
 
         private function filterFunction(item:Object):Boolean {
@@ -142,6 +136,18 @@
         public function cleanup():void {
         }
 
+        override protected function measure():void {
+            super.measure();
+            if (availableSolutions != null) {
+                var availableColumns:int = (vbox.width - 50) / (240);
+                //Alert.show("unscaled width = " + (vbox.width - 40) + " available columns = " + availableColumns);
+                solutionGrid.width = availableColumns * 240 + 2;
+                var itemsPerRow:int = solutionGrid.width / solutionGrid.columnWidth;
+                var rows:int = availableSolutions.length / itemsPerRow;
+                solutionGrid.height = solutionGrid.rowHeight * rows + 4;
+            }
+        }
+
         [Bindable]
         private var stackIndex:int;
         ]]>
@@ -149,7 +155,8 @@
     <mx:RemoteObject destination="solutionService" id="solutionService">
         <mx:method name="getSolutions" result="gotAllSolutions()"/>
     </mx:RemoteObject>
-    <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10" id="vbox" horizontalAlign="center">
+    <mx:Canvas verticalScrollPolicy="auto" horizontalScrollPolicy="off">
+    <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10" id="vbox" horizontalAlign="center" width="100%" paddingBottom="10">
     <mx:HBox width="100%" horizontalAlign="center">
         <mx:VBox width="100%" height="100%" horizontalAlign="center">
             <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
@@ -159,6 +166,7 @@
         </mx:VBox>
     </mx:HBox>
         <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView" dataProvider="{availableSolutions}" id="solutionGrid"
-            columnWidth="240" rowHeight="160"/>
+            columnWidth="240" rowHeight="160" verticalScrollPolicy="off"/>
     </mx:VBox>
+    </mx:Canvas>
 </skin:BackgroundImage>

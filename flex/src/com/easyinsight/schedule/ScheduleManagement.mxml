@@ -75,6 +75,12 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        private function newGeneral():void {
+            var window:GeneralDeliveryScheduleWindow = new GeneralDeliveryScheduleWindow();
+            window.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, newActivity, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
 
         private function gotActivities():void {
             this.activities = exportService.getScheduledActivities.lastResult as ArrayCollection;
@@ -122,6 +128,7 @@
         <mx:HBox width="100%">            
             <mx:Button label="Add Report Delivery..." click="newReportDelivery()" styleName="grayButton" fontSize="12"/>
             <mx:Button label="Add Scorecard Delivery..." click="newScorecard()" styleName="grayButton" fontSize="12"/>
+            <mx:Button label="Add General Delivery..." click="newGeneral()" styleName="grayButton" fontSize="12"/>
         </mx:HBox>
         <mx:Canvas width="90%" maxHeight="200">
             <mx:VBox id="dataSourceWarnings"/>

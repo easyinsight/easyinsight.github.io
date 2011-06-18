@@ -6,6 +6,7 @@ package com.easyinsight.analysis
 	{
 		public var calculationString:String;
         public var applyBeforeAggregation:Boolean;
+        public var recalculateSummary:Boolean;
 		
 		public function AnalysisCalculation(aggregation:int=11)
 		{

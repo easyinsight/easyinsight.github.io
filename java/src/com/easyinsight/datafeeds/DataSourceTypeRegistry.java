@@ -25,6 +25,10 @@ import com.easyinsight.datafeeds.quickbase.QuickbaseDatabaseSource;
 import com.easyinsight.datafeeds.redirect.RedirectDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceSObjectSource;
+import com.easyinsight.datafeeds.sample.SampleCustomerDataSource;
+import com.easyinsight.datafeeds.sample.SampleDataSource;
+import com.easyinsight.datafeeds.sample.SampleProductDataSource;
+import com.easyinsight.datafeeds.sample.SampleSalesDataSource;
 import com.easyinsight.datafeeds.sendgrid.SendGridDataSource;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
@@ -164,6 +168,10 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.AMAZON_EBS, AmazonEBSSource.class);
         registerType(FeedType.AMAZON_SQS, AmazonSQSSource.class);
         registerType(FeedType.AMAZON_RDS, AmazonRDSSource.class);
+        registerType(FeedType.SAMPLE_COMPOSITE, SampleDataSource.class);
+        registerType(FeedType.SAMPLE_CUSTOMER, SampleCustomerDataSource.class);
+        registerType(FeedType.SAMPLE_PRODUCT, SampleProductDataSource.class);
+        registerType(FeedType.SAMPLE_SALES, SampleSalesDataSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

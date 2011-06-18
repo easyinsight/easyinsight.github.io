@@ -20,6 +20,7 @@ public class CalculationMeasureWindow extends CalculationWindow {
             aggregation = analysisCalculation.aggregation;
             formattingConfiguration = analysisCalculation.formattingConfiguration;
             applyBefore = analysisCalculation.applyBeforeAggregation;
+            summaryRecalc = analysisCalculation.recalculateSummary;
         }
         detailIndex = 2;
         detailItemLabel = "Aggregation:";
@@ -47,6 +48,7 @@ public class CalculationMeasureWindow extends CalculationWindow {
         analysisCalculation.aggregation = measureAggregationBox.selectedItem.value;
         analysisCalculation.calculationString = calculationInput.text;
         analysisCalculation.formattingConfiguration = formattingSetup.formattingConfiguration;
+        analysisCalculation.recalculateSummary = summaryCheckbox.selected;
         return analysisCalculation;
     }
 }

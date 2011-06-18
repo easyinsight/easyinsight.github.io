@@ -2,6 +2,7 @@ package com.easyinsight.email;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.export.AttachmentInfo;
 import com.easyinsight.logging.LogClass;
 
 import javax.activation.DataHandler;
@@ -13,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -216,6 +218,69 @@ public class SendGridEmail {
         bodyPart.setDisposition(Part.ATTACHMENT);
 
         multipart.addBodyPart(bodyPart);
+
+        message.setContent(multipart);
+
+        if (fromAddress == null) {
+            fromAddress = "reports@easy-insight.com";
+        }
+        if (fromName == null) {
+            fromName = "Easy Insight Reports";
+        }
+        message.setFrom(new InternetAddress(fromAddress, fromName));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailAddress));
+
+        transport.connect();
+        transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
+        transport.close();
+    }
+
+    public void sendMultipleAttachmentsEmail(String emailAddress, String subject, String htmlBody, boolean htmlEmail, String fromAddress, String fromName,
+                                             List<AttachmentInfo> attachments)
+            throws MessagingException, UnsupportedEncodingException {
+
+
+        // Then add to your message:
+        //messageContent.addBodyPart(bodyPart);
+        Properties props = new Properties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.host", SMTP_HOST_NAME);
+        props.put("mail.smtp.auth", "true");
+        props.put("vendor", "SendGrid");
+
+        Authenticator auth = new SMTPAuthenticator();
+        Session mailSession = Session.getInstance(props, auth);
+        // uncomment for debugging infos to stdout
+        // mailSession.setDebug(true);
+        Transport transport = mailSession.getTransport();
+
+        MimeMessage message = new MimeMessage(mailSession);
+
+
+
+        Multipart multipart = new MimeMultipart();
+
+        message.setSubject(subject, "UTF-8");
+
+        if (htmlEmail) {
+            BodyPart part2 = new MimeBodyPart();
+            part2.setContent(htmlBody, "text/html;charset=UTF-8");
+            multipart.addBodyPart(part2);
+        } else {
+            BodyPart part1 = new MimeBodyPart();
+            part1.setContent(htmlBody,"text/plain;charset=utf-8");
+            multipart.addBodyPart(part1);
+        }
+
+        for (AttachmentInfo attachmentInfo : attachments) {
+            BodyPart bodyPart = new MimeBodyPart();
+            DataSource source = new ByteArrayDataSource(attachmentInfo.getBody(), attachmentInfo.getEncoding());
+            bodyPart.setDataHandler(new DataHandler(source));
+            bodyPart.setFileName(attachmentInfo.getName());
+            bodyPart.setDisposition(Part.ATTACHMENT);
+
+            multipart.addBodyPart(bodyPart);
+        }
 
         message.setContent(multipart);
 

@@ -301,7 +301,7 @@ public class SolutionService {
         try {
             ReportTemplateInfo reportTemplateInfo = new ReportTemplateInfo();
             ExchangeItem srei;
-            PreparedStatement reportQueryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, DATA_FEED_ID, TITLE, CREATE_DATE, AUTHOR_NAME, DESCRIPTION " +
+            PreparedStatement reportQueryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, DATA_FEED_ID, TITLE, CREATE_DATE, AUTHOR_NAME, DESCRIPTION, RECOMMENDED_EXCHANGE " +
                     "FROM ANALYSIS WHERE ANALYSIS.solution_visible = ? AND ANALYSIS.url_key = ?");
             reportQueryStmt.setBoolean(1, true);
             reportQueryStmt.setString(2, urlKey);
@@ -314,6 +314,7 @@ public class SolutionService {
                 Date dateCreated = new Date(rs.getTimestamp(4).getTime());
                 String authorName = rs.getString(5);
                 String description = rs.getString(6);
+                boolean recommended = rs.getBoolean(7);
                 EIDescriptor descriptor = new InsightDescriptor(reportID, null, dataSourceID, 0, null, Roles.NONE);
                 PreparedStatement ratingStmt = conn.prepareStatement("SELECT count(exchange_report_install_id) from " +
                     "exchange_report_install where report_id = ?");
@@ -323,10 +324,10 @@ public class SolutionService {
                 int installs = ratingRS.getInt(1);
                 blah = determineDataSourceForReport(reportID, conn);
                 srei = new ExchangeItem(reportName, reportID, installs, dateCreated, description,
-                        authorName, descriptor, blah.connectionID, blah.connectionName);
+                        authorName, descriptor, blah.connectionID, blah.connectionName, recommended);
             } else {
                 PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD_ID, URL_KEY, DASHBOARD_NAME, CREATION_DATE," +
-                        "AUTHOR_NAME, DESCRIPTION FROM DASHBOARD WHERE DASHBOARD.exchange_visible = ? and " +
+                        "AUTHOR_NAME, DESCRIPTION, recommended_exchange FROM DASHBOARD WHERE DASHBOARD.exchange_visible = ? and " +
                         "DASHBOARD.url_key = ?");
                 dashboardQueryStmt.setBoolean(1, true);
                 dashboardQueryStmt.setString(2, urlKey);
@@ -338,6 +339,7 @@ public class SolutionService {
                     Date dateCreated = new Date(dashboardRS.getTimestamp(4).getTime());
                     String authorName = dashboardRS.getString(5);
                     String description = dashboardRS.getString(6);
+                    boolean recommended = dashboardRS.getBoolean(7);
                     EIDescriptor descriptor = new DashboardDescriptor(null, dashboardID, dashboardURLKey, 0, Roles.NONE, null);
                     blah = determineDataSourceForDashboard(dashboardID, conn);
                     PreparedStatement ratingStmt = conn.prepareStatement("SELECT count(exchange_dashboard_install_id) FROM EXCHANGE_DASHBOARD_INSTALL WHERE DASHBOARD_ID = ?");
@@ -346,7 +348,7 @@ public class SolutionService {
                     ratingRS.next();
                     int installs = ratingRS.getInt(1);
                     srei = new ExchangeItem(dashboardName, dashboardID, installs, dateCreated, description,
-                            authorName, descriptor, blah.connectionID, blah.connectionName);
+                            authorName, descriptor, blah.connectionID, blah.connectionName, recommended);
                 } else {
                     return null;
                 }
@@ -634,6 +636,7 @@ public class SolutionService {
     private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report) throws CloneNotSupportedException {
         AnalysisDefinition clonedReport = report.clone(localDefinition, localDefinition.getFields(), true);
         clonedReport.setSolutionVisible(false);
+        clonedReport.setRecommendedExchange(false);
         clonedReport.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
         clonedReport.setDataFeedID(localDefinition.getDataFeedID());
 
@@ -650,7 +653,7 @@ public class SolutionService {
         try {
             PreparedStatement analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE, " +
                     "analysis.create_date, ANALYSIS.DESCRIPTION, DATA_FEED.FEED_NAME, ANALYSIS.AUTHOR_NAME," +
-                    "DATA_FEED.PUBLICLY_VISIBLE, SOLUTION.NAME, SOLUTION.SOLUTION_ID, ANALYSIS.url_key FROM DATA_FEED, SOLUTION, ANALYSIS " +
+                    "DATA_FEED.PUBLICLY_VISIBLE, SOLUTION.NAME, SOLUTION.SOLUTION_ID, ANALYSIS.url_key, analysis.recommended_exchange FROM DATA_FEED, SOLUTION, ANALYSIS " +
                     " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                     "DATA_FEED.feed_type = SOLUTION.data_source_type AND ANALYSIS.SOLUTION_VISIBLE = ?");
 
@@ -679,19 +682,20 @@ public class SolutionService {
                 String connectionName = analysisRS.getString(10);
                 long connectionID = analysisRS.getLong(11);
                 String urlKey = analysisRS.getString(12);
+                boolean recommended = analysisRS.getBoolean(13);
                 getReportRatingStmt.setLong(1, analysisID);
                 ResultSet ratingRS = getReportRatingStmt.executeQuery();
                 ratingRS.next();
                 int installs = ratingRS.getInt(1);
                 InsightDescriptor insightDescriptor = new InsightDescriptor(analysisID, title, dataSourceID, reportType, urlKey, Roles.NONE);
                 ExchangeItem item = new ExchangeItem(title, analysisID,
-                        installs, created, description, authorName, insightDescriptor, connectionID, connectionName);
+                        installs, created, description, authorName, insightDescriptor, connectionID, connectionName, recommended);
                 reports.add(item);
             }
 
             PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD.DASHBOARD_NAME, " +
                     "SOLUTION.NAME, SOLUTION.SOLUTION_ID, dashboard.creation_date, dashboard.description," +
-                    "dashboard.author_name, dashboard.url_key FROM DATA_FEED, SOLUTION, dashboard " +
+                    "dashboard.author_name, dashboard.url_key, dashboard.recommended_exchange FROM DATA_FEED, SOLUTION, dashboard " +
                     " WHERE dashboard.data_source_id = DATA_FEED.DATA_FEED_ID AND " +
                     "data_feed.feed_type = solution.data_source_type AND dashboard.exchange_visible = ? " +
                     "AND dashboard.temporary_dashboard = ?");
@@ -710,6 +714,7 @@ public class SolutionService {
                 String description = dashboardRS.getString(6);
                 String authorName = dashboardRS.getString(7);
                 String urlKey = dashboardRS.getString(8);
+                boolean recommended = dashboardRS.getBoolean(9);
 
                 getRatingDashboardStmt.setLong(1, dashboardID);
                 ResultSet ratingRS = getRatingDashboardStmt.executeQuery();
@@ -718,7 +723,7 @@ public class SolutionService {
                 int installs = ratingRS.getInt(1);
                 DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey, 0, Roles.NONE, null);
                 ExchangeItem item = new ExchangeItem(dashboardName, dashboardID, installs,
-                        createdDate, description, authorName, dashboardDescriptor, connectionID, connectionName);
+                        createdDate, description, authorName, dashboardDescriptor, connectionID, connectionName, recommended);
                 reports.add(item);
             }
             Collections.sort(reports, new Comparator<ExchangeItem>() {
