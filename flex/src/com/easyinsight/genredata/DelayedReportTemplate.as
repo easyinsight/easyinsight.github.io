@@ -12,6 +12,7 @@ import flash.display.DisplayObject;
 import flash.events.EventDispatcher;
 
 import mx.collections.ArrayCollection;
+import mx.controls.Alert;
 import mx.core.Application;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
@@ -38,6 +39,10 @@ public class DelayedReportTemplate extends EventDispatcher {
 
     private function onDetermine(event:ResultEvent):void {
         info = solutionService.determineDataSourceForURLKey.lastResult as ReportTemplateInfo;
+        if (info == null) {
+            Alert.show("The requested report template URL was not found.");
+            return;
+        }
         var dataSources:ArrayCollection = info.dataSources;
         if (dataSources.length == 0) {
             var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
