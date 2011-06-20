@@ -7,7 +7,7 @@
     </licenses>
     <target-player>10.0.0</target-player>    
     <compiler>
-        <debug>true</debug>
+        <debug>false</debug>
         <external-library-path>
          <path-element>${flexlib}/libs/player/10/playerglobal.swc</path-element>
             <path-element>${flexlib}/libs/datavisualization.swc</path-element>
