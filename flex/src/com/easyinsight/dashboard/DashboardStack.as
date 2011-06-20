@@ -24,20 +24,5 @@ public class DashboardStack extends DashboardElement {
     public function DashboardStack() {
         super();
     }
-
-
-    override public function createEditorComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
-        var comp:DashboardStackEditorComponent = new DashboardStackEditorComponent();
-        comp.dashboardStack = this;
-        comp.dashboardEditorMetadata = dashboardEditorMetadata;
-        return comp;
-    }
-
-    override public function createViewComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
-        var comp:DashboardStackViewComponent = new DashboardStackViewComponent();
-        comp.dashboardStack = this;
-        comp.dashboardEditorMetadata = dashboardEditorMetadata;
-        return comp;
-    }
 }
 }

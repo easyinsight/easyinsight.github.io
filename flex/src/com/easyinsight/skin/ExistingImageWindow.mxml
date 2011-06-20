@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="setup()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.controls.Alert;
+        import mx.events.ListEvent;
+        import mx.managers.PopUpManager;
+
+        private function setup():void {
+            preferencesService.getImages.send();
+        }
+
+        [Bindable]
+        private var images:ArrayCollection;
+
+        private function gotImages():void {
+            images = preferencesService.getImages.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name") ];
+            images.sort = sort;
+            images.refresh();
+        }
+
+        private function onItemClick(event:ListEvent):void {
+            var imageDescriptor:ImageDescriptor = images.getItemAt(event.rowIndex) as ImageDescriptor;
+            var loader:ImageLoader = new ImageLoader();
+            loader.addEventListener(ImageLoadEvent.IMAGE_LOADED, function(event:ImageLoadEvent):void {
+                image.source = event.bitmap;
+            });
+            loader.load(imageDescriptor.id);
+        }
+
+        private function save():void {
+            if (list.selectedItem == null) {
+                Alert.show("You need to select an image from the list.");
+            } else {
+                dispatchEvent(new ImageUploadEvent(list.selectedItem as ImageDescriptor));
+                PopUpManager.removePopUp(this);
+            }
+        }
+
+        private function upload():void {
+            var window:ImageUploadWindow = new ImageUploadWindow();
+            window.addEventListener(ImageUploadEvent.IMAGE_UPLOAD, onUpload, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onUpload(event:ImageUploadEvent):void {
+            images.addItem(event.imageDescriptor);
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <mx:List dataProvider="{images}" labelField="name" itemClick="onItemClick(event)" id="list" width="300" height="300"/>
+        <mx:Image id="image" scaleContent="true" maxWidth="400" maxHeight="300"/>
+    </mx:HBox>
+    <mx:HBox>
+        <util:SaveButton click="save()" label="Use Selected Image"/>
+        <util:SaveButton click="upload()" label="Upload a New Image"/>
+        <util:CancelButton click="PopUpManager.removePopUp(this)" label="Cancel"/>
+    </mx:HBox>
+    <mx:RemoteObject destination="preferencesService" id="preferencesService">
+        <mx:method name="getImages" result="gotImages()"/>
+    </mx:RemoteObject>
+</util:EISlimWindow>

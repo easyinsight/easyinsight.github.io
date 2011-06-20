@@ -24,6 +24,7 @@
         import com.easyinsight.analysis.PNGCreator;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.framework.DataServiceLoadingEvent;
+        import com.easyinsight.report.ReportSetupEvent;
         import com.easyinsight.util.PNGEnc;
         import com.easyinsight.util.UserAudit;
 
@@ -141,6 +142,32 @@
 
         private var timer:Timer;
 
+        private var _reportWidth:int;
+
+        private var _reportHeight:int;
+
+        [Bindable(event="reportWidthChanged")]
+        public function get reportWidth():int {
+            return _reportWidth;
+        }
+
+        public function set reportWidth(value:int):void {
+            if (_reportWidth == value) return;
+            _reportWidth = value;
+            dispatchEvent(new Event("reportWidthChanged"));
+        }
+
+        [Bindable(event="reportHeightChanged")]
+        public function get reportHeight():int {
+            return _reportHeight;
+        }
+
+        public function set reportHeight(value:int):void {
+            if (_reportHeight == value) return;
+            _reportHeight = value;
+            dispatchEvent(new Event("reportHeightChanged"));
+        }
+
         private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
             if (event.type == DataServiceLoadingEvent.LOADING_STOPPED) {
                 timer = new Timer(5000);
@@ -178,8 +205,14 @@
                 coreVBox.addChild(dataViewFactory);
                 dataViewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
                 dataViewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
-                dataViewFactory.retrieveData(false);
+                dataViewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onSetup);
+                dataViewFactory.setup();
             }
+        }
+
+        private function onSetup(event:ReportSetupEvent):void {
+            dataViewFactory.filterDefinitions = event.reportInfo.report.filterDefinitions;
+            dataViewFactory.retrieveData(false);
         }
 
         private var _snapshotOnLoad:Boolean = false;
@@ -202,7 +235,7 @@
         public function refreshData():void {
             dataViewFactory.retrieveData(false);
         }
-                ]]>
+        ]]>
     </mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="openAnalysisIfPossible" result="gotReportInfo()"/>
@@ -210,6 +243,6 @@
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="seleniumDraw" result="sent()"/>
     </mx:RemoteObject>
-    <mx:Canvas id="coreVBox" height="100%" width="100%">
+    <mx:Canvas id="coreVBox" width="{reportWidth}" height="{reportHeight}">
     </mx:Canvas>
 </mx:VBox>

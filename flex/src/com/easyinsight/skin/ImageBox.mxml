@@ -19,8 +19,7 @@
         public var publicImage:Boolean;
 
         private function onEdit():void {
-            var window:ImageUploadWindow = new ImageUploadWindow();
-            window.publicImage = publicImage;
+            var window:ExistingImageWindow = new ExistingImageWindow();
             window.addEventListener(ImageUploadEvent.IMAGE_UPLOAD, onImageUpload, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
@@ -30,6 +29,7 @@
             var desc:ImageDescriptor = event.imageDescriptor;
             imageName = desc.name;
             this.imageDescriptor = desc;
+            dispatchEvent(event);
         }
 
         private function onDelete():void {

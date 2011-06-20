@@ -99,6 +99,8 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
                     box.errorString = "You need to configure this section of the grid.";
                     box.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
                     valid = false;
+                } else {
+                    valid = valid && box.validate();
                 }
             }
         }

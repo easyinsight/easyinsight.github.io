@@ -1,4 +1,5 @@
 package com.easyinsight.dashboard {
+import com.easyinsight.dashboard.DashboardElementFactory;
 import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
@@ -76,7 +77,7 @@ public class DashboardBox extends VBox {
         addChild(dropBox);
         if (element != null) {
             dropBox.setStyle("backgroundColor", 0xEEEEEE);
-            dropBox.addChild(element.createEditorComponent(dashboardEditorMetadata));
+            dropBox.addChild(DashboardElementFactory.createEditorUIComponent(element, dashboardEditorMetadata));
         } else {
             dropBox.setStyle("backgroundColor", 0xFFFFFF);
             dropBox.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
@@ -139,7 +140,7 @@ public class DashboardBox extends VBox {
         }
         this.element = element;
         errorString = null;
-        dropBox.addChild(element.createEditorComponent(dashboardEditorMetadata));
+        dropBox.addChild(DashboardElementFactory.createEditorUIComponent(element, dashboardEditorMetadata));
         dropBox.setStyle("backgroundColor", 0xEEEEEE);
         dropBox.removeEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
         dropBox.removeEventListener(DragEvent.DRAG_DROP, dragDropHandler);

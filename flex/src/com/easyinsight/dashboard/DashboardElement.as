@@ -25,12 +25,12 @@ public class DashboardElement {
     public function DashboardElement() {
     }
 
-    public function createEditorComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
+    /*public function createEditorComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
         return null;
     }
 
     public function createViewComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
         return null;
-    }
+    }*/
 }
 }

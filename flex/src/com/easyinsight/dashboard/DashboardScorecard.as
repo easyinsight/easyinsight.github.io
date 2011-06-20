@@ -16,17 +16,5 @@ public class DashboardScorecard extends DashboardElement {
     public function DashboardScorecard() {
         super();
     }
-
-    override public function createEditorComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
-        var comp:DashboardScorecardEditorComponent = new DashboardScorecardEditorComponent();
-        comp.scorecard = this;
-        return comp;
-    }
-
-    override public function createViewComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
-        var comp:DashboardScorecardViewComponent = new DashboardScorecardViewComponent();
-        comp.dashboardScorecard = this;
-        return comp;
-    }
 }
 }

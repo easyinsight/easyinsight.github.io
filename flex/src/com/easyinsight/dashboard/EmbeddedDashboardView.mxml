@@ -114,7 +114,7 @@
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = _dataSourceID;
-            rootView = dashboard.rootElement.createViewComponent(dashboardEditorMetadata) as IDashboardViewComponent;
+            rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
             dashboardCanvas.addChild(rootView as UIComponent);
         }
 

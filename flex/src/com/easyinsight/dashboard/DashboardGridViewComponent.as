@@ -36,7 +36,7 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
                 gridItem.setStyle("paddingBottom", dashboardGrid.paddingBottom);
                 gridItem.percentWidth = 100;
                 gridItem.percentHeight = 100;
-                var child:UIComponent = e.dashboardElement.createViewComponent(dashboardEditorMetadata);
+                var child:UIComponent = DashboardElementFactory.createViewUIComponent(e, dashboardEditorMetadata);
                 viewChildren.addItem(child);
                 gridItem.addChild(child);
                 gridRow.addChild(gridItem);

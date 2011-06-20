@@ -12,17 +12,5 @@ public class DashboardImage extends DashboardElement {
     public function DashboardImage() {
         super();
     }
-
-    override public function createEditorComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
-        var comp:DashboardImageEditorComponent = new DashboardImageEditorComponent();
-        comp.image = this;
-        return comp;
-    }
-
-    override public function createViewComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
-        var comp:DashboardImageViewComponent = new DashboardImageViewComponent();
-        comp.dashboardImage = this;
-        return comp;
-    }
 }
 }

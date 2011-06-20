@@ -16,17 +16,5 @@ public class DashboardReport extends DashboardElement {
     public function DashboardReport() {
         super();
     }
-
-    override public function createEditorComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
-        var comp:DashboardReportEditorComponent = new DashboardReportEditorComponent();
-        comp.report = this;
-        return comp;
-    }
-
-    override public function createViewComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
-        var comp:DashboardReportViewComponent = new DashboardReportViewComponent();
-        comp.dashboardReport = this;
-        return comp;
-    }
 }
 }

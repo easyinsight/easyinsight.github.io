@@ -154,7 +154,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                 }
             }
             headerbar.addChild(topButton);
-            var comp:UIComponent = report.createViewComponent(dashboardEditorMetadata);
+            var comp:UIComponent = DashboardElementFactory.createViewUIComponent(report, dashboardEditorMetadata);
             viewChildren.addItem(comp);
             viewStack.addChild(comp);
         }

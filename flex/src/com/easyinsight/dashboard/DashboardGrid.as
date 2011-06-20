@@ -22,20 +22,5 @@ public class DashboardGrid extends DashboardElement {
     public function DashboardGrid() {
         super();
     }
-
-
-    override public function createEditorComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
-        var comp:DashboardGridEditorComponent = new DashboardGridEditorComponent();
-        comp.dashboardGrid = this;
-        comp.dashboardEditorMetadata = dashboardEditorMetadata;
-        return comp;
-    }
-
-    override public function createViewComponent(dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
-        var comp:DashboardGridViewComponent = new DashboardGridViewComponent();
-        comp.dashboardGrid = this;
-        comp.dashboardEditorMetadata = dashboardEditorMetadata;
-        return comp;
-    }
 }
 }

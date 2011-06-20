@@ -150,7 +150,7 @@
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = dataSourceID;
-            rootView = dashboard.rootElement.createViewComponent(dashboardEditorMetadata) as IDashboardViewComponent;
+            rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
             dashboardCanvas.addChild(rootView as UIComponent);
             UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.VIEW, _dashboardID));
             generateState();
