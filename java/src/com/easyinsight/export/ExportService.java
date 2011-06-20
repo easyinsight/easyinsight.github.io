@@ -430,10 +430,15 @@ public class ExportService {
         Image image = Image.getInstance(bytes);
         image.setAlignment(Element.ALIGN_CENTER);
         // ratio = 1.5
-        float pageWidth = document.getPageSize().getWidth();
-        float ratio = pageWidth / width;
-        float adjustedHeight = height * ratio;
-        image.scaleAbsolute(pageWidth, adjustedHeight);
+        System.out.println("pdf width = " + document.getPageSize().getWidth());
+        System.out.println("pdf height = " + document.getPageSize().getHeight());
+        float pageWidth = document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin();
+        float pageHeight = document.getPageSize().getHeight() - document.topMargin() - document.bottomMargin();
+        //float ratio = pageWidth / width;
+        //float adjustedHeight = height * ratio;
+        System.out.println("inbound " + width + " and " + height);
+        System.out.println("scaling to " + pageWidth + " and " + pageHeight);
+        image.scaleAbsolute(pageWidth, pageHeight);
         document.add(image);
         document.close();
         return baos.toByteArray();

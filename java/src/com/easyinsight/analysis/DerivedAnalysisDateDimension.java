@@ -58,6 +58,8 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
             tree.accept(visitor);
         } catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage() + " in calculating " + derivationCode, e);
         }
@@ -112,11 +114,13 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
             visitor = new ResolverVisitor(analysisItems, new FunctionFactory());
             calculationTreeNode.accept(visitor);
 
-            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
+            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, this);
             calculationTreeNode.accept(rowVisitor);
             return rowVisitor.getResult();
         } catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage() + " in calculating " + derivationCode, e);
         }

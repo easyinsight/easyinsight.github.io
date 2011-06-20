@@ -86,6 +86,8 @@ public class AnalysisCalculation extends AnalysisMeasure {
             tree.accept(visitor);
         }  catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage() + " in calculating " + calculationString, e);
         }
@@ -166,7 +168,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
             }
             visitor = new ResolverVisitor(analysisItems, new FunctionFactory());
             calculationTreeNode.accept(visitor);
-            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
+            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, this);
             calculationTreeNode.accept(rowVisitor);
             Value result = rowVisitor.getResult();
             if (result.type() == Value.EMPTY) {
@@ -178,6 +180,8 @@ public class AnalysisCalculation extends AnalysisMeasure {
             }
         } catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage(), this));
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage() + " in calculating " + calculationString, e);
         }

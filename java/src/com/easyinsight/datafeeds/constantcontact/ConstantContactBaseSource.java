@@ -83,6 +83,8 @@ public abstract class ConstantContactBaseSource extends ServerDataSourceDefiniti
         } catch (HttpResponseException e) {
             if ("Unauthorized".equals(e.getMessage())) {
                 throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Constant Contact data.", parentSource));
+            } else if ("Bad Request".equals(e.getMessage())) {
+                throw new RuntimeException("Bad request on query of " + queryString);
             } else {
                 throw e;
             }

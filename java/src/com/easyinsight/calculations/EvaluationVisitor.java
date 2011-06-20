@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 
 import java.util.List;
@@ -19,8 +19,16 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         row = null;
     }
 
-    public EvaluationVisitor(IRow r) {
+    private boolean emptyAsZero = false;
+
+    public EvaluationVisitor(IRow r, AnalysisItem analysisItem) {
         row = r;
+        this.analysisItem = analysisItem;
+        if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+            AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
+            emptyAsZero = analysisCalculation.getFormattingConfiguration().getFormattingType() != FormattingConfiguration.MILLISECONDS &&
+                    analysisCalculation.getFormattingConfiguration().getFormattingType() != FormattingConfiguration.SECONDS;
+        }
     }
 
     public void visit(CalculationTreeNode node) {
@@ -36,18 +44,26 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(AddNode node) {
-        EvaluationVisitor node1 = new EvaluationVisitor(row);
+        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem);
 
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
         result = node1.getResult();
         if(node.getChildCount() == 2) {
-            EvaluationVisitor node2 = new EvaluationVisitor(row);
+            EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem);
             ((CalculationTreeNode) node.getChild(1)).accept(node2);
             Value result2 = node2.getResult();
             if (result.type() == Value.STRING || result2.type() == Value.STRING) {
                 result = new StringValue(minusQuotes(result) + minusQuotes(result2));
-            } else
+            } else if(!(node2.getResult() instanceof EmptyValue) && node1.getResult().toDouble() != null && node2.getResult().toDouble() != null)
                 result = new NumericValue(result.toDouble() + node2.getResult().toDouble());
+            else {
+                if (emptyAsZero) {
+                    result = new NumericValue(result.toDouble() + node2.getResult().toDouble());
+                } else {
+                    result = new EmptyValue();
+                }
+            }
+
         }
     }
 
@@ -67,7 +83,7 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(SubtractNode node) {
-        EvaluationVisitor node1 = new EvaluationVisitor(row);
+        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem);
 
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
         result = node1.getResult();
@@ -77,7 +93,7 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
             return;
         }
         if(node.getChildCount() == 2) {
-            EvaluationVisitor node2 = new EvaluationVisitor(row);
+            EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem);
             ((CalculationTreeNode) node.getChild(1)).accept(node2);
             Value result2 = node2.getResult();
             if (result.type() == Value.NUMBER && result2.type() == Value.NUMBER) {
@@ -96,6 +112,12 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
                 DateValue dateValue = (DateValue) result2;
                 long delta = (long) (result.toDouble() - dateValue.getDate().getTime());
                 result = new NumericValue(delta);
+            } else if(node2.getResult().type() == Value.EMPTY || node1.getResult().type() == Value.EMPTY) {
+                if (emptyAsZero) {
+                    result = new NumericValue(result.toDouble() - node2.getResult().toDouble());
+                } else {
+                    result = new EmptyValue();
+                }
             } else {
                 result = new NumericValue(result.toDouble() - node2.getResult().toDouble());
             }
@@ -106,34 +128,52 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(MultiplyNode node) {
-        EvaluationVisitor node1 = new EvaluationVisitor(row);
+        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem);
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
 
-        EvaluationVisitor node2 = new EvaluationVisitor(row);
+        EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem);
         ((CalculationTreeNode) node.getChild(1)).accept(node2);
-        result = new NumericValue(node1.getResult().toDouble() * node2.getResult().toDouble());
+        if(node1.getResult() instanceof EmptyValue || node1.getResult().toDouble() == null || node2.getResult() instanceof EmptyValue || node2.getResult().toDouble() == null) {
+            if (emptyAsZero) {
+                result = new NumericValue(node1.getResult().toDouble() * node2.getResult().toDouble());
+            } else {
+                result = new EmptyValue();
+            }
+        }
+        else {
+            result = new NumericValue(node1.getResult().toDouble() * node2.getResult().toDouble());
+        }
     }
 
     public void visit(DivideNode node) {
-        EvaluationVisitor node1 = new EvaluationVisitor(row);
+        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem);
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
-                
-        EvaluationVisitor node2 = new EvaluationVisitor(row);
+
+        EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem);
         ((CalculationTreeNode) node.getChild(1)).accept(node2);
-        if (node2.getResult().toDouble() == 0) {
-            result = new EmptyValue();
-        } else {
+        if(node1.getResult() instanceof EmptyValue || node1.getResult().toDouble() == null || node2.getResult() instanceof EmptyValue || node2.getResult().toDouble() == null) {
+            if (emptyAsZero) {
+                result = new NumericValue(node1.getResult().toDouble() / node2.getResult().toDouble());
+            } else {
+                result = new EmptyValue();
+            }
+        }
+        else {
             result = new NumericValue(node1.getResult().toDouble() / node2.getResult().toDouble());
         }
     }
 
     public void visit(ExponentNode node) {
-        EvaluationVisitor node1 = new EvaluationVisitor(row);
+        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem);
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
-        EvaluationVisitor node2 = new EvaluationVisitor(row);
+        EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem);
         ((CalculationTreeNode) node.getChild(1)).accept(node2);
         if(node1.getResult() instanceof EmptyValue || node1.getResult().toDouble() == null || node2.getResult() instanceof EmptyValue || node2.getResult().toDouble() == null) {
-            result = new EmptyValue();
+            if (emptyAsZero) {
+                result = new NumericValue(Math.pow(node1.getResult().toDouble(), node2.getResult().toDouble()));
+            } else {
+                result = new EmptyValue();
+            }
         }
         else {
             result = new NumericValue(Math.pow(node1.getResult().toDouble(), node2.getResult().toDouble()));
@@ -148,7 +188,7 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         IFunction f = node.getFunction();
         List<Value> params = new LinkedList<Value>();
         for(int i = 1;i < node.getChildCount();i++) {
-            EvaluationVisitor subNode = new EvaluationVisitor(row);
+            EvaluationVisitor subNode = new EvaluationVisitor(row, analysisItem);
             ((CalculationTreeNode) node.getChild(i)).accept(subNode);
             // TODO: Better handling of empty values in functions
             if(subNode.getResult() instanceof EmptyValue) {
@@ -169,6 +209,7 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
 
     private IRow row;
     private Map<Key, List<Value>> columnSlicedData;
+    private AnalysisItem analysisItem;
 
     public void setRow(IRow r) {
         row = r;

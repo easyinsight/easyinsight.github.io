@@ -24,10 +24,10 @@
       <param name="quality" value="high" />
       <param name="bgcolor" value="#869ca7" />
       <param name="allowScriptAccess" value="always" />
-      <param name="flashvars" value="analysisID=<%=reportID%>&reportType=<%=reportType%>&dataSourceID=<%=dataSourceID%>&reportName=<%=reportName%>&userName=<%=userName%>&password=<%=password%>&seleniumID=<%=seleniumID%>"/> 
+      <param name="flashvars" value="analysisID=<%=reportID%>&reportType=<%=reportType%>&dataSourceID=<%=dataSourceID%>&reportName=<%=reportName%>&userName=<%=userName%>&password=<%=password%>&seleniumID=<%=seleniumID%>&width=<%=width%>&height=<%=height%>"/>
       <embed src="https://www.easy-insight.com/app/<%=versionDir%>/SeleniumReportView.swf" quality="high" bgcolor="##869ca7" width="<%= width %>" height="<%= height %>"
              name="PrimaryWorkspace" align="middle" play="true" loop="false" quality="high" allowScriptAccess="always"
-             flashvars="analysisID=<%=reportID%>&reportType=<%=reportType%>&dataSourceID=<%=dataSourceID%>&reportName=<%=reportName%>&userName=<%=userName%>&password=<%=password%>&seleniumID=<%=seleniumID%>"
+             flashvars="analysisID=<%=reportID%>&reportType=<%=reportType%>&dataSourceID=<%=dataSourceID%>&reportName=<%=reportName%>&userName=<%=userName%>&password=<%=password%>&seleniumID=<%=seleniumID%>&width=<%=width%>&height=<%=height%>"
              type="application/x-shockwave-flash" pluginspage="http://www.adobe.com/go/getflashplayer">
       </embed>
   </object>

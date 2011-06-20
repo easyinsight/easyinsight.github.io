@@ -88,10 +88,20 @@ public class PreferencesService {
         }
     }
 
-    public ImageDescriptor getImages() {
+    public List<ImageDescriptor> getImages() {
+        List<ImageDescriptor> images = new ArrayList<ImageDescriptor>();
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
+            PreparedStatement stmt = conn.prepareStatement("SELECT USER_IMAGE.image_name, USER_IMAGE.user_image_id FROM USER_IMAGE, USER WHERE USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID");
+            stmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                ImageDescriptor imageDescriptor = new ImageDescriptor();
+                imageDescriptor.setName(rs.getString(1));
+                imageDescriptor.setId(rs.getLong(2));
+                images.add(imageDescriptor);
+            }
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -100,7 +110,7 @@ public class PreferencesService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
-        return null;
+        return images;
     }
 
     public ApplicationSkin getGlobalSkin() {

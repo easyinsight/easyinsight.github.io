@@ -33,7 +33,7 @@ public class VariableNode extends CalculationTreeNode {
             }
         }
         if (analysisItem == null) {
-            throw new RuntimeException("Could not find field " + s + ".");
+            throw new FunctionException("We could not find a field named " + s);
         }
     }
 
@@ -64,7 +64,7 @@ public class VariableNode extends CalculationTreeNode {
             }
         }
         if (analysisItem == null) {
-            throw new RuntimeException("Could not find " + s);
+            throw new FunctionException("We could not find a field named " + s);
         }
     }
 

@@ -54,6 +54,8 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
             tree.accept(visitor);
         } catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage() + " in calculating " + derivationCode, e);
         }
@@ -108,11 +110,13 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
             visitor = new ResolverVisitor(analysisItems, new FunctionFactory());
             calculationTreeNode.accept(visitor);
 
-            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
+            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, this);
             calculationTreeNode.accept(rowVisitor);
             return new StringValue(rowVisitor.getResult().toString());
         } catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage() + " in calculating " + derivationCode, e);
         }
@@ -131,6 +135,10 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
 
     @Override
     public boolean isDerived() {
+        return true;
+    }
+
+    public boolean isCalculated() {
         return true;
     }
 }
