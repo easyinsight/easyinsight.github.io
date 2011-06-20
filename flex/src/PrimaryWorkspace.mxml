@@ -93,8 +93,8 @@
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
             User.getEventNotifier().addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
             //GAHelper.initialize(tracker);
-            /*globalTimer = new EIGlobalTimer();
-            globalTimer.start();*/
+            globalTimer = new EIGlobalTimer();
+            globalTimer.start();
             userService.getBuildPath.send();
         }
 
@@ -448,9 +448,6 @@
                 ApplicationSkin.instance().applyUserSettings(User.getInstance().applicationSkin);
             }
             Constants.instance().userName = authResponse.userName;
-            /*if (User.getInstance().guestUser) {
-                FloatingGuestWindow.newWindow(this);
-            }*/
             loggedIn = true;
             User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
             User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
@@ -507,11 +504,6 @@
 
         private function toMain():void {
             masterCanvas.removeAllChildren();
-            /*var canvas:Canvas = new Canvas();
-             canvas.percentHeight = 100;
-             canvas.percentWidth = 100;*/
-            /*canvas.setStyle("paddingLeft", 0);
-             canvas.setStyle("paddingRight", 0);*/
             var headerBar:HeaderBar = new HeaderBar();
             headerBar.percentWidth = 100;
             headerBar.setStyle("paddingTop", 5);
