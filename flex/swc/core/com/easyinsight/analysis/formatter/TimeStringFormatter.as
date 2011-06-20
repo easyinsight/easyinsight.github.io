@@ -14,7 +14,11 @@ public class TimeStringFormatter extends Formatter{
         var resultString:String;
         var num:Number = Number(value);
         num = num * baseInterval;
-        if (num < 1000) {
+        var pos:Boolean = num >= 0;
+        num = Math.abs(num);
+        if (num == 0) {
+            resultString = "";
+        } else if (num < 1000) {
             // < 1 second, display milliseconds
             resultString = num + " ms";
         } else if (num < 60000) {
@@ -53,6 +57,9 @@ public class TimeStringFormatter extends Formatter{
             } else {
                 resultString = days + "d:" + dayRemainder + "h";
             }
+        }
+        if (!pos) {
+            resultString = "(" + resultString + ")";
         }
         return resultString;
     }
