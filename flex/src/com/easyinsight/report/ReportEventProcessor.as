@@ -115,7 +115,7 @@ public class ReportEventProcessor extends EITitleWindow {
         box.addChild(reportCanvas);
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(reportType);
         var controller:IEmbeddedReportController = new controllerClass();
-        var viewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
+        viewFactory = controller.createEmbeddedView();
         viewFactory.reportID = reportID;
         viewFactory.prefix = "";
         viewFactory.dataSourceID = dataSourceID;
@@ -126,8 +126,16 @@ public class ReportEventProcessor extends EITitleWindow {
         viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
         viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
         viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
+        viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onReportSetup);
         this.loading = true;
         this.overlayIndex = 1;
+        viewFactory.setup();
+    }
+
+    private var viewFactory:EmbeddedViewFactory;
+
+    private function onReportSetup(event:ReportSetupEvent):void {
+        viewFactory.filterDefinitions = event.reportInfo.report.filterDefinitions;
         viewFactory.retrieveData(false);
     }
 
