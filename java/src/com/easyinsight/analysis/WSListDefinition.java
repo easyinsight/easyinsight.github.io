@@ -27,6 +27,15 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private int headerTextColor;
     private int summaryRowTextColor;
     private int summaryRowBackgroundColor;
+    private boolean rolloverIcon;
+
+    public boolean isRolloverIcon() {
+        return rolloverIcon;
+    }
+
+    public void setRolloverIcon(boolean rolloverIcon) {
+        this.rolloverIcon = rolloverIcon;
+    }
 
     public int getSummaryRowTextColor() {
         return summaryRowTextColor;
@@ -202,6 +211,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         headerTextColor = (int) findNumberProperty(properties, "headerTextColor", 0x000000);
         summaryRowTextColor = (int) findNumberProperty(properties, "summaryRowTextColor", 0x000000);
         summaryRowBackgroundColor = (int) findNumberProperty(properties, "summaryRowBackgroundColor", 0x6699ff);
+        rolloverIcon = findBooleanProperty(properties, "rolloverIcon", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -214,6 +224,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("headerTextColor", headerTextColor));
         properties.add(new ReportNumericProperty("summaryRowTextColor", summaryRowTextColor));
         properties.add(new ReportNumericProperty("summaryRowBackgroundColor", summaryRowBackgroundColor));
+        properties.add(new ReportBooleanProperty("rolloverIcon", rolloverIcon));
         return properties;
     }
 }

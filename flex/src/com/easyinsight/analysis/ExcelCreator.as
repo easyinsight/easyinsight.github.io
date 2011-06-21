@@ -1,7 +1,6 @@
 package com.easyinsight.analysis {
 import com.easyinsight.framework.InsightRequestMetadata;
 import com.easyinsight.util.ProgressAlert;
-import com.easyinsight.util.UserAudit;
 
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
@@ -29,7 +28,6 @@ public class ExcelCreator {
     public function exportExcel(definition:AnalysisDefinition, parent:UIComponent):void {
         var insightMetadata:InsightRequestMetadata = new InsightRequestMetadata();
         insightMetadata.utcOffset = new Date().getTimezoneOffset();
-        insightMetadata.reportEditor = true;
         ProgressAlert.alert(parent, "Generating the Excel spreadsheet...", null, upload.exportToExcel);
         upload.exportToExcel.send(definition, insightMetadata);
     }

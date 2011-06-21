@@ -83,6 +83,10 @@
         public var scrollUpIcon:Class;
 
         [Bindable]
+        [Embed(source="../../../../../assets/hand_point.png")]
+        public var handIcon:Class;
+
+        [Bindable]
         private var myDataSet:ArrayCollection = new ArrayCollection();
         private var columnMap:Object = new Object();
 
@@ -333,7 +337,7 @@
                         variableHeight = true;
                     }
                     if (myLookupTable == null) {
-                        factory.properties = { analysisItem: myHeader, selectionEnabled: selectionEnabled, report: def };
+                        factory.properties = { analysisItem: myHeader, selectionEnabled: selectionEnabled, report: def, rolloverIcon: listDef.rolloverIcon ? handIcon : null };
                     } else {
                         factory.properties = { analysisItem: myHeader, lookupTable: myLookupTable, pairMap: pairMap };
                     }

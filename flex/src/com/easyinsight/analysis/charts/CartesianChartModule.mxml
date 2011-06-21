@@ -17,10 +17,12 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.ChartDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
+        import com.easyinsight.analysis.Value;
         import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
@@ -148,7 +150,8 @@
         }
 
         private function renderDimensionAxis(item:Object, prevValue:Object, axis:CategoryAxis, categoryItem:Object):String {
-            return dimensionFormatter.format(item);
+            var value:Value = categoryItem[dimensionAxisItem.qualifiedName()];
+            return dimensionFormatter.format(value.getValue());
         }
 
         public function createFilterRawData():FilterRawData {

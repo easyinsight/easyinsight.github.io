@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:range="com.easyinsight.analysis.range.*"
-        xmlns:analysis="com.easyinsight.analysis.*"
-        creationComplete="initStuff()" creationPolicy="all"
-        implements="com.easyinsight.analysis.IAnalysisItemEditor" horizontalAlign="center" paddingLeft="10">
+         xmlns:analysis="com.easyinsight.analysis.*" xmlns:icons="com.easyinsight.icons.*"
+         creationComplete="initStuff()" creationPolicy="all"
+         implements="com.easyinsight.analysis.IAnalysisItemEditor" horizontalAlign="center" paddingLeft="10">
     <mx:states>
 
         <mx:State name="Measure">
@@ -186,6 +186,7 @@
             this.displayName = analysisItem.display;
             this.key = analysisItem.key;
             this.hidden = analysisItem.hidden;
+            this.fieldTooltip = analysisItem.tooltip;
         }
 
         private function indexOfType(option:String):int {
@@ -262,7 +263,8 @@
                     analysisItem.displayName = fieldNameInput.text;
                     analysisItem.originalDisplayName = startingAnalysisItem.originalDisplayName;
                     analysisItem.key = key;
-                    analysisItem.hidden = hiddenCheckbox.selected;                    
+                    analysisItem.hidden = hiddenCheckbox.selected;
+                    analysisItem.tooltip = fieldTooltipInput.text;
                     detailEditor.save(analysisItem);
                     dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
                 }
@@ -351,6 +353,8 @@
             aggregationChange(prepareAggregationBox(index));
         }
 
+        [Bindable]
+        private var fieldTooltip:String;
 
         ]]>
     </mx:Script>
@@ -369,6 +373,10 @@
         </mx:FormItem>
         <mx:FormItem label="Hidden: " direction="horizontal" id="hiddenText">
             <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Tooltip: ">
+            <mx:TextArea text="{fieldTooltip}" id="fieldTooltipInput" width="250" height="50" borderStyle="inset"
+                    borderThickness="1"/>
         </mx:FormItem>
         <mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
             <mx:ViewStack resizeToContent="true" creationPolicy="all" selectedIndex="{aggIndex}">

@@ -20,6 +20,7 @@ import mx.collections.ArrayCollection;
         public var headerColor2:uint = 0xEFEFEF;
         public var summaryRowBackgroundColor:uint = 0x6699ff;
         public var summaryRowTextColor:uint = 0x000000;
+        public var rolloverIcon:Boolean;
 
 		public function ListDefinition()
 		{

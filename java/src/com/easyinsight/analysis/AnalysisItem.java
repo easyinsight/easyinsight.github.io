@@ -64,6 +64,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="sort_sequence")
     private int sortSequence;
 
+    @Column(name="tooltip")
+    private String tooltip;
+
     @Column(name="sort")
     private int sort;
 
@@ -109,6 +112,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public String getTooltip() {
+        return tooltip;
+    }
+
+    public void setTooltip(String tooltip) {
+        this.tooltip = tooltip;
     }
 
     public String getFolder() {

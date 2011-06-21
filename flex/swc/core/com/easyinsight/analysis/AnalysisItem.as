@@ -30,6 +30,7 @@ import mx.formatters.Formatter;
         public var filters:ArrayCollection = new ArrayCollection();
         public var lookupTableID:int = 0;
         public var originalDisplayName:String;
+        public var tooltip:String;
 		
 		public function AnalysisItem() {
 			super();
