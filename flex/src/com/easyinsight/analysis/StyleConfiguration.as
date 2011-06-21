@@ -118,6 +118,7 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", ListDefinition(report).headerColor2, report));
             items.addItem(new ColorReportFormItem("Summary Row Text Color", "summaryRowTextColor", ListDefinition(report).summaryRowTextColor, report));
             items.addItem(new ColorReportFormItem("Summary Row Background Color", "summaryRowBackgroundColor", ListDefinition(report).summaryRowBackgroundColor, report));
+            items.addItem(new CheckBoxReportFormItem("Show Rollover Icon", "rolloverIcon", ListDefinition(report).rolloverIcon, report, null, true));
         }
         if (report is TreeDefinition) {
             items.addItem(new ColorReportFormItem("Text Color", "textColor", TreeDefinition(report).textColor, report));
