@@ -75,6 +75,9 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 
     public function set analysisItem(val:AnalysisItem):void {
         _analysisItem = val;
+        if (_analysisItem != null) {
+            toolTip = _analysisItem.tooltip;
+        }
     }
 
     public function validateProperties():void {
