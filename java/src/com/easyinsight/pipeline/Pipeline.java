@@ -3,7 +3,6 @@ package com.easyinsight.pipeline;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
-import test.core.ReportItemTest;
 
 import java.util.*;
 
