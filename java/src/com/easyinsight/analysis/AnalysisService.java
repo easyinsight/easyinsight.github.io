@@ -529,11 +529,14 @@ public class AnalysisService {
                     PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS WHERE URL_KEY = ?");
                     queryStmt.setString(1, urlKey);
                     ResultSet rs = queryStmt.executeQuery();
-                    rs.next();
-                    long analysisID = rs.getLong(1);
-                    SecurityUtil.authorizeInsight(analysisID);
-                    insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(2),
-                            rs.getLong(3), rs.getInt(4), urlKey, Roles.NONE));
+                    if (rs.next()) {
+                        long analysisID = rs.getLong(1);
+                        SecurityUtil.authorizeInsight(analysisID);
+                        insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(2),
+                                rs.getLong(3), rs.getInt(4), urlKey, Roles.NONE));
+                    } else {
+                        insightResponse = new InsightResponse(InsightResponse.REJECTED, null);
+                    }
                 } finally {
                     Database.closeConnection(conn);
                 }
