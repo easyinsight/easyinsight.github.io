@@ -22,14 +22,16 @@
 <div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:108px"></div>
     <div style="width:1000px;margin:0 auto;">
     	<div style="width:1000px;margin:0 auto;">
-    	<div id="topBar">
-        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
-        <div class="signupHeadline">
-            <a href="https://www.easy-insight.com/app/">Customer Login</a>
-            <a href="/app/newaccount/">Pricing &amp; Free Trial Signup</a>
-            <a href="/contactus.html">Contacts</a>
-        </div>
-    </div>
+            <div id="topBar">
+                <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+
+                <div class="signupHeadline">
+                    <a href="/app/">Customer Login</a>
+                    <a href="/app/htmlreport/">Mobile Login</a>
+                    <a href="/app/newaccount/">Sign Up</a>
+                    <a href="/contactus.html">Contact Us</a>
+                </div>
+            </div>
     <div class="headline">
         <a class="inactive" href="/product.html">Features</a>
         <a class="inactive" href="/data.html">Connections</a>
@@ -59,6 +61,7 @@ Need help using Easy Insight with Basecamp? Here's the documentation to guide yo
                     <li><a href="basecamp.html#r4">How do I embed Easy Insight reports into my Basecamp page?</a></li>
                     <li><a href="basecamp.html#r5">How much does Easy Insight reporting on Basecamp cost?</a></li>
                     <li><a href="basecamp.html#r6">How do I measure the number of projects?</a></li>
+                    <li><a href="basecamp.html#r7">How do I add estimates to my todo items?</a></li>
                 </ul>
                 <h2><a name="r1">How do I connect to <a href="http://basecamphq.com/">Basecamp?</a></a></h2>
                 <p>First, you need an Easy Insight account! If you don't already have an account, you can create one <a href="/app/newaccount/">by clicking here</a>. Once you've created an account, you'll either be taken directly to the Highrise connection page or to the standard application landing page. From the standard application landing page, you can install a connection to Basecamp by clicking over to the Connections page, clicking on the Basecamp button, and clicking on Get Started Now.</p>
@@ -80,6 +83,12 @@ Need help using Easy Insight with Basecamp? Here's the documentation to guide yo
                 <img src="../images/FieldType.png" style="float:left;padding:10px;" alt="Display of Reports under My Data" />
                 <p>At first, the field editor is showing you the default Grouping form of the project name. Click on the Measure button in the bar, as shown to the left. Rename the field to something more appropriate, as we've done here with Project Count. Finally, change the field type from Sum to Count--you want this field to show the number of projects.</p>
                 <p style="padding-bottom:20px">Once this field is saved, you can build the final report. Drag in Company Name from the Company folder, then drag in the newly created Project Count field. The resulting report provides you with a view of the number of projects summarized in terms of associated customer.</p>
+                <h2><a name="r7">How do I add estimates to my todo items?</a></h2>
+                <p>You can add estimates to your todo items in Easy Insight through two approaches. The first approach is through lookup tables:</p>
+                <p>First, create a lookup table from your Home page. If you don't see the New Lookup Table button, click on Customize Page and enable the Create Lookup Table option. Select your Basecamp data source and click New Lookup Table. Choose To-do Name as the source field. Name the new field as Estimate, and change the type to Measure. Go ahead and click Save.</p>
+                <p>At this point, we have a very large list of todo items, which makes it difficult to actually manage and assign estimates. Click on Close Editor and open up the report editor on your Basecamp data source. Switch the report type over to Tree. Change over to the Data tab, click on New Hierarchy, add Todo Project Name and Todo Name to the hierarchy window, and name the hierarchy. Save that and add the newly created hierarchy to the report. From here, go ahead and add both Hours and Estimate to the report.</p>
+                <p>From here, we can actually define estimate values. If you click on the Edit Lookup Tables button, you'll switch into editing mode. Opening up the tree shows the different todo items and enables you to add estimate values on a per todo basis. Once you've made changes, click on Save Lookup Tables to save the estimates. Refreshing the report shows the changed sum totals.</p>
+                <p>The second approach is to use a bracketed value on the todo item itself.</p>
             </div>
             <div id="contentHeaderEnd"></div>
     		<!-- InstanceEndEditable -->
@@ -93,7 +102,7 @@ Need help using Easy Insight with Basecamp? Here's the documentation to guide yo
                         |
                     </div>
                     <div style="float:left;padding-left:40px;">
-                        <a href="/app/newaccount/">Pricing</a>
+                        <a href="/pricing.html">Pricing</a>
                     </div>
                     <div style="float:left;padding-left:40px;">
                         |

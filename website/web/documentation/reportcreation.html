@@ -56,6 +56,8 @@ Need help building reports in Easy Insight? Here's the documentation to guide yo
         <div id="midContent">
                 <h2><a href="toc.html">Table of Contents</a></h2>
                 <ul>
+                    <li><a href="reportcreation.html#r1">Creating a simple list</a></li>
+                    <li><a href="reportcreation.html#r2">Creating a new report</a></li>
                     <li><a href="reportediting.html#r1">How do I create a new report?</a></li>
                     <li><a href="reportediting.html#r2">How do I assemble a basic report?</a></li>
                     <li><a href="reportediting.html#r3">What are these field types?</a></li>
@@ -74,8 +76,26 @@ Need help building reports in Easy Insight? Here's the documentation to guide yo
                     <li><a href="reportediting.html#r16">How do I automatically email out a report on a scheduled basis?</a></li>
                 </ul>
                 <h2><a name="r1">How do I create a new report?</a></h2>
-                <p>You can create reports from the My Data page by double clicking on a Data Source or clicking the Analyze... button on the right side of the Data Source row under My Data.</p>
-                <img src="../images/docs/mydata.jpg" style="float:left;padding:10px;" alt="Display of Reports under My Data" />
+            <a href="../images/docs/image1.png" rel="lightbox-getting-started"><img src="../images/docs/image1small.png" style="float:right;padding:10px;" alt="Display of Reports under My Data" /></a>
+            <p>The image to the right shows you the core Easy Insight user interface. The buttons along the top of the screen provide the navigation system for the basic set of pages. The Home page is where you can define new reports, dashboards, and scorecards, as well as open up ones that you previously created. The Connections page is your center for connecting to different data sources. The Exchange provides you with a library of prebuilt reports contributed by the community--you can apply any of these reports to your own data. The Scheduling page is where you can configure the scheduled delivery of reports by email and synchronization of data. The Account page contains the various administration pages for adding users, configuring styling, and more.</p>
+        <p>The first step in using Easy Insight is to actually connect to some source of data. From the Connections page, you can choose from a wide variety of sources. For this guide, we'll be connecting to the "Sample Data" source, but the same concepts are applicable across all connections. From the Connections page, click on the source icon. Within the actual connection page, click on the Connect button. Depending on the target system, you may need to add one or more parameters of information such as credentials or other configuration to create the connection. Fill in that information and click on the Create button. Upon successful connection, you will have your first data source.</p>
+            <p>NEW TERM: Data Source</p>
+            <p>A data source represents a source of data within the Easy Insight system. For example, your connection to a particular Highrise system becomes one data source.</p>
+            <p>Now that you have a data source, you'll see it on your Home page. The next step is to actually create a report against that data source. Click on the "New Report..." button in the upper left corner of the Home page to open up the report editor, the Easy Insight screen for creating and modifying reports.</p>
+            <p>NEW TERM: Report</p>
+            <p>A report is a view of the data from a data source. Lists, crosstabs, charts, maps, and so on are all examples of reports.</p>
+            <a href="../images/docs/image2.png" rel="lightbox-getting-started"><img src="../images/docs/image2small.png" style="float:left;padding:10px;" alt="Display of Reports under My Data" /></a>
+            <p style="padding-top:75px; padding-bottom: 75px">The image to the left shows you the report editor. Let's walk through the different sections inside the report editor:</p>
+            <img src="../images/docs/image3.png"/>
+            <p>First, the buttons along the top of the page provide general, common actions such as saving the report, closing the editor, and refreshing the report contents.</p>
+            <img src="../images/docs/image4small.png" style="float:left;padding: 10px"/>
+            <p style="padding-top:20px; padding-bottom: 20px">The tabbed area below those buttons provides the next level of detail, with different tabs for creating calculations and hierarchies, filtering the data to only show certain key segments, and exporting the results to Excel, PDF, and more.</p>
+            <img src="../images/docs/image5.png" style="float:left;padding: 10px"/>
+            <p style="padding-top:20px; padding-bottom: 20px">The report type dropdown box enables you to change the report from a List to a Crosstab to a Column Chart and so on. The "Edit Report Properties..." button provides a variety of more advanced options for customizing a report's appearance or behavior.</p>
+            <img src="../images/docs/image6.png" style="float:left;padding: 10px"/>
+            <p style="padding-top:40px; padding-bottom: 40px">The field list down the left hand side of the report editor shows the various fields available within your data source. These fields are often broken up into folders to make the results more manageable--you can open up folders by clicking on the carat to the left of the folder to see its contents. To build a report, drag the field from this field into the report area to the right.</p>
+            <img src="../images/docs/image7small.png" style="float:left;padding: 10px"/>
+            <p>As you drop fields from the field list into the report area, you'll start to gradually assemble a report. For example, the image to the left shows a simple list report where Customer and Quantity from the Sample Data source have been added to the report.</p>
                 <h2><a name="r2">How do I assemble a basic report?</a></h2>
                 <p>
                     For the data source you've opened, you'll have a set of available fields down the left hand side of the report editor. You can create reports by dragging these fields into the Drop Areas to the right. You can also double click on fields to automatically add them to the report. And finally, you can right click on fields and choose "Add to Report."

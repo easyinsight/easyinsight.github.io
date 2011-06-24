@@ -21,14 +21,16 @@
 <div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
 <div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:108px"></div>
     <div style="width:1000px;margin:0 auto;">
-    	<div id="topBar">
-        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
-        <div class="signupHeadline">
-            <a href="https://www.easy-insight.com/app/">Customer Login</a>
-            <a href="/app/newaccount/">Pricing &amp; Free Trial Signup</a>
-            <a href="/contactus.html">Contacts</a>
+        <div id="topBar">
+            <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+
+            <div class="signupHeadline">
+                <a href="/app/">Customer Login</a>
+                <a href="/app/htmlreport/">Mobile Login</a>
+                <a href="/app/newaccount/">Sign Up</a>
+                <a href="/contactus.html">Contact Us</a>
+            </div>
         </div>
-    </div>
     <div class="headline">
         <a class="inactive" href="/product.html">Features</a>
         <a class="inactive" href="/data.html">Connections</a>
@@ -61,7 +63,7 @@ Need help connecting data in Easy Insight? Here's the documentation to guide you
                     <li><a href="datasources.html#r7">How do I connect to Sendgrid?</a></li>
                     <li><a href="datasources.html#r8">How do I connect to Pivotal Tracker?</a></li>
                     <li><a href="datasources.html#r9">How do I connect to Cloudwatch?</a></li>
-                    <li><a href="datasources.html#r10">How do I connect to Freshbooks?</a></li>
+                    <li><a href="datasources.html#r10">How do I connect to FreshBooks?</a></li>
                     <li><a href="datasources.html#r11">How do I pull data from MySQL, SQL Server, or Oracle?</a></li>
                     <li><a href="datasources.html#r12">How do I combine data sources?</a></li>
                     <li><a href="datasources.html#r13">How do I use lookup tables?</a></li>
@@ -94,8 +96,8 @@ Need help connecting data in Easy Insight? Here's the documentation to guide you
                 <p>Navigate to the Connections page of Easy Insight. Click on the Pivotal Tracker button. Click Get Started Now and fill in your user name and password for your Pivotal Tracker account. Once you click Create, Easy Insight will begin synchronizing key aggregate data from your Pivotal Tracker account into the Easy Insight data warehouse. Depending on the size of your Pivotal Tracker instance, this process may take a while--if you have hundreds of iterations and thousands of stories, it might be several minutes to copy all of the necessary data across. Once synchronization is complete, a wizard will walk you through an initial scorecard and next steps with the data source.</p>
                 <h2><a name="r9">How do I connect to <a href="http://aws.amazon.com/cloudwatch/">Cloudwatch?</a></a></h2>
                 <p>Navigate to the Connections page of Easy Insight. Click on the Cloudwatch button. Click Get Started now. Fill in your Amazon Web Services key and secret key. After a moment you'll be presented with an initial scorecard of your EC2 infrastructure data. From here, a wizard will walk you through next steps with the data source.</p>
-                <h2><a name="r10">How do I connect to <a href="http://www.freshbooks.com/">Freshbooks?</a></a></h2>
-                <p>Navigate to the Connections page of Easy Insight. Click on the Freshbooks button. Click Get Started now. You'll be prompted for your Freshbooks path. Click Authorize Easy Insight Access and you'll be redirected to Freshbooks. Log in, grant access to Easy Insight, then copy the verifier value shown. Return to the Easy Insight connection page and paste that verifier value into the provided input. Click Create to actually create the connection to Freshbooks.</p>
+                <h2><a name="r10">How do I connect to <a href="http://www.freshbooks.com/">FreshBooks?</a></a></h2>
+                <p>Navigate to the Connections page of Easy Insight. Click on the FreshBooks button. Click Get Started now. You'll be prompted for your FreshBooks path. Click Authorize Easy Insight Access and you'll be redirected to FreshBooks. Log in, grant access to Easy Insight, then copy the verifier value shown. Return to the Easy Insight connection page and paste that verifier value into the provided input. Click Create to actually create the connection to FreshBooks.</p>
                 <h2><a name="r11">How do I pull data from <a href="http://www.mysql.com/">MySQL</a>, <a href="http://www.microsoft.com/sqlserver/">SQL Server</a>, or <a href="http://www.oracle.com/">Oracle?</a></a></h2>
                 <p>Detailed documentation for these connections is available at <a href="http://www.easy-insight.com/documentation/database.html">http://www.easy-insight.com/documentation/database.html</a>.</p>
                 <h2><a name="r12">How do I combine data sources?</a></h2>
@@ -121,7 +123,7 @@ Need help connecting data in Easy Insight? Here's the documentation to guide you
                     |
                 </div>
                 <div style="float:left;padding-left:40px;">
-                    <a href="/app/newaccount/">Pricing</a>
+                    <a href="/pricing.html">Pricing</a>
                 </div>
                 <div style="float:left;padding-left:40px;">
                     |
