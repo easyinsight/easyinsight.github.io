@@ -13,6 +13,7 @@ public class InvalidFieldsException extends RuntimeException {
     private Set<AnalysisItem> analysisItems;
 
     public InvalidFieldsException(Set<AnalysisItem> analysisItems) {
+        super("Unable to find fields " + analysisItems.toString());
         this.analysisItems = analysisItems;
     }
 
