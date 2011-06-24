@@ -117,7 +117,7 @@ public class FilterDefinition implements Serializable, Cloneable {
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
-        return getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false, criteria);
+        return getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria);
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {

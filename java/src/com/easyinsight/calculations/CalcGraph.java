@@ -40,7 +40,7 @@ public class CalcGraph {
                 nodeMap.put(item.createAggregateKey(), item);
             }
             for (AnalysisItem analysisItem : nodeMap.values()) {
-                List<AnalysisItem> requiredItems = analysisItem.getAnalysisItems(allItems, reportItems, false, true, false, CleanupComponent.AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> requiredItems = analysisItem.getAnalysisItems(allItems, reportItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
                 for (AnalysisItem item : requiredItems) {
                     AnalysisItem requiredNode = nodeMap.get(item.createAggregateKey());
                     if (requiredNode != null && requiredNode != analysisItem) {

@@ -75,7 +75,7 @@ public class SixSigmaMeasure extends AnalysisMeasure {
     }
 
     @Override
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow, int criteria) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
         List<AnalysisItem> objectList = new ArrayList<AnalysisItem>();
         objectList.addAll(Arrays.asList(totalDefectsMeasure, totalOpportunitiesMeasure));
         return objectList;

@@ -391,7 +391,7 @@ public class CompositeFeed extends Feed {
                     break;
                 }
             }
-            List<AnalysisItem> items = analysisItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(analysisItem), false, true, false, CleanupComponent.AGGREGATE_CALCULATIONS);
+            List<AnalysisItem> items = analysisItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(analysisItem), false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
             for (AnalysisItem item : items) {
                 addItem(item);
                 joinItems.add(item);
@@ -433,9 +433,9 @@ public class CompositeFeed extends Feed {
             } else {
                 pipeline = new AltCompositeReportPipeline(joinItems);
             }
-            WSListDefinition analysisDefinition = new WSListDefinition();
-            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(queryData.neededItems));
-            pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+            /*WSListDefinition analysisDefinition = new WSListDefinition();
+            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(queryData.neededItems));*/
+            pipeline.setup(queryData.neededItems);
             return pipeline.toDataSet(dataSet);
         }
 

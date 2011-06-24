@@ -3,6 +3,7 @@ package com.easyinsight.pipeline;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
+import test.core.ReportItemTest;
 
 import java.util.*;
 
@@ -23,6 +24,12 @@ public abstract class Pipeline {
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
         }
+        return this;
+    }
+
+    public Pipeline setup(Set<AnalysisItem> analysisItems) {
+        pipelineData = new PipelineData(null, analysisItems, null, new ArrayList<AnalysisItem>(), new HashMap<String, String>(), analysisItems);
+        components = generatePipelineCommands(analysisItems, analysisItems, new ArrayList<FilterDefinition>(), null, null);
         return this;
     }
 
@@ -48,7 +55,7 @@ public abstract class Pipeline {
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
-                List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, false, CleanupComponent.AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
                 allNeededAnalysisItems.addAll(baseItems);
                 List<AnalysisItem> linkItems = item.addLinkItems(allFields, allRequestedAnalysisItems);
                 allNeededAnalysisItems.addAll(linkItems);
@@ -82,7 +89,6 @@ public abstract class Pipeline {
 
     public DataResults toList(DataSet dataSet) {
         for (IComponent component : components) {
-            //System.out.println(component.getClass().getName() + " - " + dataSet);
             dataSet = component.apply(dataSet, pipelineData);
         }
         DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()));

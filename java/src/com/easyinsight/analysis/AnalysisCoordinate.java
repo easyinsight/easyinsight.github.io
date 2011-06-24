@@ -61,8 +61,8 @@ public abstract class AnalysisCoordinate extends AnalysisDimension {
     }
 
     @Override
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow, int criteria) {
-        List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, completelyShallow, criteria);
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
+        List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria);
         if (analysisZipCode != null) {
             items.add(analysisZipCode);
         }

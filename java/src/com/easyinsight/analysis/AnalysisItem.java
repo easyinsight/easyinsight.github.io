@@ -369,7 +369,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow, int criteria) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(this);
         if (includeFilters && getFilters().size() > 0) {
@@ -380,7 +380,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (getLookupTableID() != null && getLookupTableID() > 0 && includeFilters) {
             LookupTable lookupTable = new FeedService().getLookupTable(getLookupTableID());
             if (lookupTable != null) {
-                items.addAll(lookupTable.getSourceField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, completelyShallow, criteria));
+                items.addAll(lookupTable.getSourceField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
             }
         }
         return items;

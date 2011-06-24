@@ -38,7 +38,7 @@ public class StandardReportPipeline extends Pipeline {
         for (AnalysisItem item : allNeededAnalysisItems) {
             if (item.hasType(AnalysisItemTypes.CALCULATION) || item.hasType(AnalysisItemTypes.DERIVED_DIMENSION) ||
                     item.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-                items.addAll(item.getAnalysisItems(allItems, reportItems, false, false, false, CleanupComponent.AGGREGATE_CALCULATIONS));
+                items.addAll(item.getAnalysisItems(allItems, reportItems, false, false, CleanupComponent.AGGREGATE_CALCULATIONS));
             }
         }
         

@@ -324,7 +324,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
-                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, false, CleanupComponent.AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID()) {
                     if (!columnSet.contains(item)) {

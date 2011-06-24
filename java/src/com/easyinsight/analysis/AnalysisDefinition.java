@@ -395,7 +395,7 @@ public class AnalysisDefinition implements Cloneable {
                     clonedItem = replacementMap.get(analysisItem.getAnalysisItemID());
                 }
                 addedItems.add(clonedItem);
-                List<AnalysisItem> items = analysisItem.getAnalysisItems(allFields, reportItems, true, true, false, CleanupComponent.AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS);
                 for (AnalysisItem item : items) {
                     if (replacementMap.get(item.getAnalysisItemID()) == null) {
                         AnalysisItem subclonedItem = item.clone();
@@ -417,7 +417,7 @@ public class AnalysisDefinition implements Cloneable {
                 cleanup(clonedItem, changingDataSource);
                 replacementMap.put(baseItem.getAnalysisItemID(), clonedItem);
             }
-            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true, false, CleanupComponent.AGGREGATE_CALCULATIONS);
+            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS);
             for (AnalysisItem item : items) {
                 if (replacementMap.get(item.getAnalysisItemID()) == null) {
                     AnalysisItem clonedItem = item.clone();
@@ -466,7 +466,7 @@ public class AnalysisDefinition implements Cloneable {
                 AnalysisItem clonedItem = entry.getValue().clone();
                 replacementMap.put(entry.getValue().getAnalysisItemID(), clonedItem);
                 clonedStructure.put(entry.getKey(), clonedItem);
-                List<AnalysisItem> items = entry.getValue().getAnalysisItems(allFields, reportItems, false, true, false, CleanupComponent.AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> items = entry.getValue().getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS);
                 for (AnalysisItem item : items) {
                     if (replacementMap.get(item.getAnalysisItemID()) == null) {
                         AnalysisItem clonedChildItem = item.clone();
