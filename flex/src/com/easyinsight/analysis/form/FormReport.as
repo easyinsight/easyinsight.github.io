@@ -12,6 +12,10 @@ public class FormReport extends AnalysisDefinition {
 
     public var columns:ArrayCollection;
     public var formID:int;
+    public var direction:String = "Left";
+    public var labelFont:String = "Tahoma";
+    public var labelFontSize:int = 12;
+    public var columnCount:int = 1;
 
     public function FormReport() {
         super();

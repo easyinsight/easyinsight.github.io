@@ -11,11 +11,14 @@
         import mx.collections.ArrayCollection;
         import mx.containers.Form;
         import mx.containers.FormItem;
+        import mx.containers.HBox;
+        import mx.containers.VBox;
+        import mx.controls.Alert;
+        import mx.core.UIComponent;
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var formReport:FormReport = analysisDefinition as FormReport;
-            setStyle("fontSize", formReport.fontSize);
-            setStyle("fontName", formReport.fontName);
+            //setStyle("backgroundAlpha", formReport.backgroundAlpha);
             removeAllChildren();
             if (dataSet.length == 0) {
 
@@ -29,24 +32,51 @@
             }
         }
 
-        private function createForm(row:Object, formReport:FormReport):Form {
-            var form:Form = new Form();
-            for each (var item:AnalysisItem in formReport.columns) {
-                var formItem:FormItem = new FormItem();
-                formItem.setStyle("fontWeight", "normal");
+        private function createForm(row:Object, formReport:FormReport):UIComponent {
+            var hbox:HBox = new HBox();
+            hbox.percentHeight = 100;
+            hbox.percentWidth = 100;
+            var fieldsPerColumn:int = formReport.columns.length / formReport.columnCount;
+            var remainder:int = formReport.columns.length % formReport.columnCount;
+            var l:int = 0;
+            for (var i:int = 0; i < formReport.columnCount; i++) {
+                if (formReport.direction == "Left") {
 
+                    var form:Form = new Form();
 
-                formItem.label = item.display + ":";
+                    for (var j:int = 0; j < (fieldsPerColumn + (i == 0 ? remainder : 0)); j++) {
+                        var item:AnalysisItem = formReport.columns.getItemAt(l++) as AnalysisItem;
+                        var formItem:FormItem = new FormItem();
+                        formItem.setStyle("fontWeight", "normal");
+                        formItem.setStyle("fontSize", formReport.labelFontSize);
+                        formItem.setStyle("fontFamily", formReport.labelFont);
 
-                var renderer:FormCellRenderer = new FormCellRenderer();
-                renderer.analysisItem = item;
-                renderer.report = formReport;
-                renderer.data = row;
-                formItem.addChild(renderer);
+                        formItem.label = item.display + ":";
 
-                form.addChild(formItem);
+                        var renderer:FormCellRenderer = new FormCellRenderer();
+                        renderer.analysisItem = item;
+                        renderer.report = formReport;
+                        renderer.data = row;
+                        formItem.addChild(renderer);
+
+                        form.addChild(formItem);
+                    }
+                    hbox.addChild(form);
+                } else if (formReport.direction == "Bottom" || formReport.direction == "Top") {
+                    var vbox:VBox = new VBox();
+                    for (var k:int = 0; k < (fieldsPerColumn + (i == 0 ? remainder : 0)); k++) {
+                        var xItem:AnalysisItem = formReport.columns.getItemAt(l++) as AnalysisItem;
+                        var vRenderer:VerticalFormCellRenderer = new VerticalFormCellRenderer();
+                        vRenderer.analysisItem = xItem;
+                        vRenderer.report = formReport;
+                        vRenderer.labelTop = formReport.direction == "Top";
+                        vRenderer.data = row;
+                        vbox.addChild(vRenderer);
+                    }
+                    hbox.addChild(vbox);
+                }
             }
-            return form;
+            return hbox;
         }
 
         public function createFilterRawData():FilterRawData {

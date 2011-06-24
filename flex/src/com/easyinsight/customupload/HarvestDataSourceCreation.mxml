@@ -49,7 +49,5 @@
             <mx:TextInput id="passwordInput" fontWeight="normal" fontFamily="Lucida Grande"
                           width="350" displayAsPassword="true" />
         </mx:FormItem>
-        <mx:FormItem label="You can find the token on your Basecamp page under My Info - API Token." fontSize="10"/>
-
 	</mx:Form>
 </mx:HBox>

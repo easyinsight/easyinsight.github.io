@@ -145,8 +145,8 @@
                 lineChart.dataTipFunction = dataTipFunction;
                 var verticalAxis:LinearAxis = new LinearAxis();
                 verticalAxis.baseAtZero = lineChartDef.baseAtZero == "true";
-                if (!lineChartDef.multiMeasure && lineChartDef.yaxis != null) {
-                    verticalAxis.title = lineChartDef.yaxis.display;
+                if (!lineChartDef.multiMeasure && lineChartDef.measure != null) {
+                    verticalAxis.title = lineChartDef.measure.display;
                 } else {
                     verticalAxis.title = "Measures";
                 }

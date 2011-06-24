@@ -130,8 +130,8 @@
             areaChart.selectionMode = "multiple";
             var verticalAxis:LinearAxis = new LinearAxis();
             verticalAxis.baseAtZero = areaChartDef.baseAtZero == "true";
-            if (!areaChartDef.multiMeasure && areaChartDef.yaxis != null) {
-                verticalAxis.title = areaChartDef.yaxis.display;
+            if (!areaChartDef.multiMeasure && areaChartDef.measure != null) {
+                verticalAxis.title = areaChartDef.measure.display;
             } else {
                 verticalAxis.title = "Measures";
             }

@@ -195,8 +195,7 @@ public class CompositeFeed extends Feed {
 
         if (neededNodes.size() == 1) {
             QueryStateNode queryStateNode = neededNodes.values().iterator().next();
-            queryStateNode.produceDataSet(insightRequestMetadata);
-            return queryStateNode.queryData.dataSet;
+            return queryStateNode.produceDataSet(insightRequestMetadata);
         }
 
         if (neededNodes.size() == 0) {
@@ -292,10 +291,17 @@ public class CompositeFeed extends Feed {
         List<String> auditStrings = new ArrayList<String>();
         ClosestFirstIterator<QueryStateNode, Edge> iter = new ClosestFirstIterator<QueryStateNode, Edge>(reducedGraph, firstVertex);
 
+        Map<Long, QueryData> map = new HashMap<Long, QueryData>();
+
+        for (QueryStateNode queryStateNode : neededNodes.values()) {
+            map.put(queryStateNode.feedID, queryStateNode.queryData);
+        }
+
         while (iter.hasNext()) {
             QueryStateNode sourceNode = iter.next();
-            if (sourceNode.queryData.dataSet == null) {
-                sourceNode.produceDataSet(insightRequestMetadata);
+            QueryData sourceQueryData = map.get(sourceNode.feedID);
+            if (sourceQueryData.dataSet == null) {
+                sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
             }
             Edge last = iter.getSpanningTreeEdge(sourceNode);
             if (last != null) {
@@ -306,33 +312,48 @@ public class CompositeFeed extends Feed {
                 } else {
                     targetNode = reducedGraph.getEdgeSource(last);
                 }
-                if (targetNode.queryData.dataSet == null) {
-                    targetNode.produceDataSet(insightRequestMetadata);
+                QueryData targetQueryData = map.get(targetNode.feedID);
+                if (targetQueryData.dataSet == null) {
+                    targetQueryData.dataSet = targetNode.produceDataSet(insightRequestMetadata);
                 }
                 if (last.connection.getSourceFeedID() != sourceNode.feedID) {
                     QueryStateNode swap = sourceNode;
                     sourceNode = targetNode;
                     targetNode = swap;
+                    QueryData swapData = sourceQueryData;
+                    sourceQueryData = targetQueryData;
+                    targetQueryData = swapData;
                 }
-                MergeAudit mergeAudit = last.connection.merge(sourceNode.queryData.dataSet, targetNode.queryData.dataSet,
-                        sourceNode.queryData.neededItems, targetNode.queryData.neededItems,
+                MergeAudit mergeAudit = last.connection.merge(sourceQueryData.dataSet, targetQueryData.dataSet,
+                        sourceQueryData.neededItems, targetQueryData.neededItems,
                         sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID);
                 dataSet = mergeAudit.getDataSet();
                 auditStrings.addAll(mergeAudit.getMergeStrings());
-                sourceNode.queryData.dataSet = dataSet;
-                sourceNode.queryData.neededItems.addAll(targetNode.queryData.neededItems);
-                targetNode.queryData = sourceNode.queryData;
+                sourceQueryData.dataSet = dataSet;
+                sourceQueryData.neededItems.addAll(targetQueryData.neededItems);
+                sourceQueryData.ids.addAll(targetQueryData.ids);
+                for (Long id : sourceQueryData.ids) {
+                    map.put(id, sourceQueryData);
+                }
             }
 
         }
         dataSet.setAudits(auditStrings);
-
-        return dataSet;
+        CompositeReportPipeline pipeline = new CompositeReportPipeline();
+        WSListDefinition analysisDefinition = new WSListDefinition();
+        analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
+        pipeline.setup(analysisDefinition, this, insightRequestMetadata);
+        return pipeline.toDataSet(dataSet);
     }
 
     private class QueryData {
         private DataSet dataSet;
         private Set<AnalysisItem> neededItems = new HashSet<AnalysisItem>();
+        private Set<Long> ids = new HashSet<Long>();
+
+        private QueryData(long id) {
+            ids.add(id);
+        }
     }
 
     protected boolean alwaysPassThrough(AnalysisItem analysisItem) {
@@ -341,7 +362,7 @@ public class CompositeFeed extends Feed {
 
     private class QueryStateNode {
         private long feedID;
-        private QueryData queryData = new QueryData();
+        private QueryData queryData;
         private Set<AnalysisItem> neededItems = new HashSet<AnalysisItem>();
         private List<AnalysisItem> allAnalysisItems = new ArrayList<AnalysisItem>();
         private Collection<FilterDefinition> filters = new ArrayList<FilterDefinition>();
@@ -352,6 +373,7 @@ public class CompositeFeed extends Feed {
 
         private QueryStateNode(long feedID, EIConnection conn) {
             this.feedID = feedID;
+            queryData = new QueryData(feedID);
             Feed feed = FeedRegistry.instance().getFeed(feedID, conn);
             this.conn = conn;
             dataSourceName = feed.getName();
@@ -399,7 +421,7 @@ public class CompositeFeed extends Feed {
             }
         }
 
-        public void produceDataSet(InsightRequestMetadata insightRequestMetadata) throws ReportException {
+        public DataSet produceDataSet(InsightRequestMetadata insightRequestMetadata) throws ReportException {
 
             Feed feed = FeedRegistry.instance().getFeed(feedID, conn);
 
@@ -414,7 +436,7 @@ public class CompositeFeed extends Feed {
             WSListDefinition analysisDefinition = new WSListDefinition();
             analysisDefinition.setColumns(new ArrayList<AnalysisItem>(queryData.neededItems));
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
-            queryData.dataSet = pipeline.toDataSet(dataSet);
+            return pipeline.toDataSet(dataSet);
         }
 
         public void addFilter(FilterDefinition filterDefinition) {

@@ -51,6 +51,12 @@
         [Bindable]
         private var requestID:int;
 
+        [Bindable]
+        private var reportWidth:int;
+
+        [Bindable]
+        private var reportHeight:int;
+
         private function handleFlashVars():void {
             Constants.setup();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
@@ -61,6 +67,8 @@
             this.userName = String(Application.application.parameters.userName);
             this.password = String(Application.application.parameters.password);
             this.requestID = int(Application.application.parameters.seleniumID);
+            this.reportWidth = int(Application.application.parameters.reportWidth);
+            this.reportHeight = int(Application.application.parameters.reportHeight);
             // session check
             userService.getBuildPath.send();
         }
@@ -119,6 +127,6 @@
         <mx:Box/>
         <dashboard:SeleniumReport id="panel" urlKey="{urlKey}" reportName="{reportName}" seleniumID="{requestID}"
                                       dataSourceID="{dataSourceID}" reportType="{reportType}"
-                                      prefix="https://www.easy-insight.com"/>
+                                      prefix="https://www.easy-insight.com" reportWidth="{reportWidth}" reportHeight="{reportHeight}"/>
     </mx:ViewStack>
 </mx:Application>

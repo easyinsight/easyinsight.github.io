@@ -10,6 +10,7 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 
 import mx.containers.Box;
+import mx.containers.VBox;
 import mx.controls.Alert;
 import mx.controls.Label;
 import mx.controls.TextArea;
@@ -17,17 +18,22 @@ import mx.controls.TextArea;
 import mx.managers.PopUpManager;
 
 
-public class FormCellRenderer extends Box
+public class VerticalFormCellRenderer extends VBox
 {
     private var _data:Object;
     private var _analysisItem:AnalysisItem;
     private var _report:FormReport;
+    private var _labelTop:Boolean;
 
-    public function FormCellRenderer() {
+    public function VerticalFormCellRenderer() {
         super();
         addEventListener(MouseEvent.CLICK, onClick);
     }
 
+
+    public function set labelTop(value:Boolean):void {
+        _labelTop = value;
+    }
 
     public function set report(value:FormReport):void {
         _report = value;
@@ -72,6 +78,15 @@ public class FormCellRenderer extends Box
                     label.text = text;
                     addChild(label);
                 }
+            }
+            var fieldLabel:Label = new Label();
+            fieldLabel.setStyle("fontSize", _report.labelFontSize);
+            fieldLabel.setStyle("fontFamily", _report.labelFont);
+            fieldLabel.text = _analysisItem.display;
+            if (_labelTop) {
+                addChildAt(fieldLabel, 0);
+            } else {
+                addChild(fieldLabel);
             }
             new StandardContextWindow(analysisItem, passThrough, this, _data);
         } catch(e:Error) {

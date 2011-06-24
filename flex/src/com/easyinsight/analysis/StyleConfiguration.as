@@ -17,6 +17,7 @@ import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartDefinition;
+import com.easyinsight.analysis.form.FormReport;
 import com.easyinsight.analysis.heatmap.HeatMapDefinition;
 import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.analysis.maps.MapDefinition;
@@ -222,6 +223,13 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", StackedColumnChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                     ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
+        }
+        if (report is FormReport) {
+            items.addItem(new ComboBoxReportFormItem("Label Font Name", "labelFont", FormReport(report).labelFont, report, ["Arial", "Arial Black", "Comic Sans MS",
+                "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
+            items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", FormReport(report).labelFontSize, report, 8, 48));
+            items.addItem(new ComboBoxReportFormItem("Label Placement", "direction", FormReport(report).direction, report,  ["Left", "Top", "Bottom"]));
+            items.addItem(new NumericReportFormItem("Number of Columns", "columnCount", FormReport(report).columnCount, report, 1, 3));
         }
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];

@@ -92,7 +92,8 @@
             for each (var obj:Object in s.getChildren()) {
                 if (obj is GraphLine) {
                     var graphLine:GraphLine = obj as GraphLine;
-                    if (graphLine.fromNodeID == event.connection.sourceFeedID && graphLine.toNodeID == event.connection.targetFeedID) {
+                    if ((graphLine.fromNodeID == event.connection.sourceFeedID && graphLine.toNodeID == event.connection.targetFeedID) ||
+                            (graphLine.fromNodeID == event.connection.targetFeedID && graphLine.toNodeID == event.connection.sourceFeedID)) {
                         connLine = graphLine;
                     }
                 }
