@@ -196,8 +196,8 @@ public class SecurityUtil {
             if (rs.next()) {
 
                 long scorecardUserID = rs.getLong(1);
-                boolean accountVisible = rs.getBoolean(2);
-                long accountID = rs.getLong(3);
+                boolean accountVisible = rs.getBoolean(3);
+                long accountID = rs.getLong(2);
                 if (scorecardUserID != userID) {
                     if (accountVisible) {
                         if (accountID != getAccountID()) {
