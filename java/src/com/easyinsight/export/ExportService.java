@@ -190,7 +190,7 @@ public class ExportService {
                 try {
                     activities.add(ScheduledActivity.createActivity(activityType, activityID, conn));
                 } catch (Exception e) {
-                    LogClass.error(e);
+                    //LogClass.error(e);
                     // blah
                 }
             }
