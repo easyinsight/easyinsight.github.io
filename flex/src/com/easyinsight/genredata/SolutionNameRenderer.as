@@ -29,6 +29,8 @@ public class SolutionNameRenderer extends LinkButton {
     private var exchangeItem:ExchangeItem;
     private var solutionService:RemoteObject;
 
+    private var _grid:SolutionExchangeGridPage;
+
     public function SolutionNameRenderer() {
         solutionService = new RemoteObject();
         solutionService.destination = "solutionService";
@@ -37,6 +39,10 @@ public class SolutionNameRenderer extends LinkButton {
         addEventListener(MouseEvent.CLICK, viewReport);
         setStyle("textDecoration", "underline");
         setStyle("textAlign", "left");
+    }
+
+    public function set grid(value:SolutionExchangeGridPage):void {
+        _grid = value;
     }
 
     private function viewReport(event:MouseEvent):void {
@@ -48,9 +54,9 @@ public class SolutionNameRenderer extends LinkButton {
         var descriptor:EIDescriptor = solutionService.installEntity.lastResult as EIDescriptor;
         if (descriptor is InsightDescriptor) {
             var insightDescriptor:InsightDescriptor = descriptor as InsightDescriptor;
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, exchangeItem)));
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, exchangeItem, _grid.dataProvider as ArrayCollection)));
         } else if (descriptor is DashboardDescriptor ){
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, exchangeItem: exchangeItem})));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, exchangeItem: exchangeItem, reportList: _grid.dataProvider})));
         }
     }
 
