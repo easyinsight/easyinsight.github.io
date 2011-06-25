@@ -54,9 +54,9 @@ public class SolutionNameRenderer extends LinkButton {
         var descriptor:EIDescriptor = solutionService.installEntity.lastResult as EIDescriptor;
         if (descriptor is InsightDescriptor) {
             var insightDescriptor:InsightDescriptor = descriptor as InsightDescriptor;
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, exchangeItem, _grid.dataProvider as ArrayCollection)));
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, exchangeItem, _grid.dataProvider as ArrayCollection, _grid.dataProvider.getItemIndex(exchangeItem))));
         } else if (descriptor is DashboardDescriptor ){
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, exchangeItem: exchangeItem, reportList: _grid.dataProvider})));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, exchangeItem: exchangeItem, reportList: _grid.dataProvider, reportIndex: _grid.dataProvider.getItemIndex(exchangeItem)})));
         }
     }
 
