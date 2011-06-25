@@ -120,11 +120,11 @@ public class ScorecardService {
     }
 
     public Scorecard getScorecard(long scorecardID) {
-        SecurityUtil.authorizeScorecard(scorecardID);
         try {
+            SecurityUtil.authorizeScorecard(scorecardID);
             return scorecardStorage.getScorecard(scorecardID);
         } catch (Exception e) {
-            LogClass.error(e);
+            LogClass.error("Retrieving scorecard " + scorecardID, e);
             throw new RuntimeException(e);
         }
     }
