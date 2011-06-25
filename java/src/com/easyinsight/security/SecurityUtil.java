@@ -199,7 +199,11 @@ public class SecurityUtil {
                 boolean accountVisible = rs.getBoolean(2);
                 long accountID = rs.getLong(3);
                 if (scorecardUserID != userID) {
-                    if (!accountVisible || accountID != getAccountID()) {
+                    if (accountVisible) {
+                        if (accountID != getAccountID()) {
+                            throw new SecurityException();
+                        }
+                    } else {
                         PreparedStatement queryGroupStmt = conn.prepareStatement("SELECT GROUP_TO_USER_JOIN.group_to_user_join_id FROM " +
                                 "SCORECARD, GROUP_TO_USER_JOIN WHERE SCORECARD.group_id = GROUP_TO_USER_JOIN.group_id AND " +
                                 "GROUP_TO_USER_JOIN.user_id = ? AND scorecard.scorecard_id = ?");
