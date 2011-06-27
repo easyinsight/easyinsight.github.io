@@ -47,7 +47,7 @@ public class HighRiseCaseNotesSource extends HighRiseBaseSource {
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        analysisItems.add(new AnalysisDimension(keys.get(BODY), true));
+        analysisItems.add(new AnalysisText(keys.get(BODY)));
         AnalysisDimension noteContactDim = new AnalysisDimension(keys.get(NOTE_CASE_ID), true);
         noteContactDim.setHidden(true);
         analysisItems.add(noteContactDim);
