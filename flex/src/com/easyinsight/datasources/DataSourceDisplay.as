@@ -12,11 +12,13 @@ import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.TextArea;
 import mx.formatters.DateFormatter;
 import mx.managers.PopUpManager;
 
+[Event(name="dataSourceRefreshed", type="com.easyinsight.datasources.DataSourceRefreshEvent")]
 public class DataSourceDisplay extends VBox {
 
     private var _dataSource:DataSourceInfo;
@@ -52,54 +54,58 @@ public class DataSourceDisplay extends VBox {
     public function set dataSource(value:DataSourceInfo):void {
         _dataSource = value;
         if (_dataSource != null) {
-            var dateFormatter:DateFormatter = new DateFormatter();
-            switch (User.getInstance().dateFormat) {
-                case 0:
-                    dateFormatter.formatString = "MM/DD/YYYY HH:NN";
-                    break;
-                case 1:
-                    dateFormatter.formatString = "YYYY-MM-DD HH:NN";
-                    break;
-                case 2:
-                    dateFormatter.formatString = "DD-MM-YYYY HH:NN";
-                    break;
-                case 3:
-                    dateFormatter.formatString = "DD/MM/YYYY HH:NN";
-                    break;
-                case 4:
-                    dateFormatter.formatString = "DD.MM.YYYY HH:NN";
-                    break;
-            }
-            var dateString:String = dateFormatter.format(value.lastDataTime);
-            if (_dataSource.type == DataSourceInfo.STORED_PUSH) {
-                if (dataSource.originName == null) {
-                    labelText = "This data source is displaying data pushed into Easy Insight at " + dateString + ".";
-                } else {
-                    labelText = "This data source is displaying data pushed into Easy Insight at " + dateString + " from " + dataSource.originName + ".";
-                }
-            } else if (_dataSource.type == DataSourceInfo.STORED_PULL || _dataSource.type == DataSourceInfo.COMPOSITE_PULL) {
-                if (dataSource.originName == null) {
-                    labelText = "This data source is displaying data pulled into Easy Insight at " + dateString + ".";
-                } else {
-                    labelText = "This data source is displaying data pulled into Easy Insight at " + dateString + " from " + dataSource.originName + ".";
-                }
-                stackIndex = 1;
-            } else if (_dataSource.type == DataSourceInfo.LIVE) {
-                if (dataSource.originName == null) {
-                    labelText = "This data source is displaying live data as of " + dateString + ".";
-                } else {
-                    labelText = "This data source is displaying live data as of " + dateString + " from " + dataSource.originName + ".";
-                }
-            } else if (_dataSource.type == DataSourceInfo.COMPOSITE) {
-                labelText = "This data source combines other data sources.";
-                for each (var childSource:DataSourceInfo in _dataSource.childSources) {
-
-                }
-            } else {
-                labelText = "Unknown";
-            }
+            updateString(value.lastDataTime);
         }
 
+    }
+
+    private function updateString(date:Date):void {
+        var dateFormatter:DateFormatter = new DateFormatter();
+        switch (User.getInstance().dateFormat) {
+            case 0:
+                dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+                break;
+            case 1:
+                dateFormatter.formatString = "YYYY-MM-DD HH:NN";
+                break;
+            case 2:
+                dateFormatter.formatString = "DD-MM-YYYY HH:NN";
+                break;
+            case 3:
+                dateFormatter.formatString = "DD/MM/YYYY HH:NN";
+                break;
+            case 4:
+                dateFormatter.formatString = "DD.MM.YYYY HH:NN";
+                break;
+        }
+        var dateString:String = dateFormatter.format(date);
+        if (_dataSource.type == DataSourceInfo.STORED_PUSH) {
+            if (dataSource.originName == null) {
+                labelText = "This data source is displaying data pushed into Easy Insight at " + dateString + ".";
+            } else {
+                labelText = "This data source is displaying data pushed into Easy Insight at " + dateString + " from " + dataSource.originName + ".";
+            }
+        } else if (_dataSource.type == DataSourceInfo.STORED_PULL || _dataSource.type == DataSourceInfo.COMPOSITE_PULL) {
+            if (dataSource.originName == null) {
+                labelText = "This data source is displaying data pulled into Easy Insight at " + dateString + ".";
+            } else {
+                labelText = "This data source is displaying data pulled into Easy Insight at " + dateString + " from " + dataSource.originName + ".";
+            }
+            stackIndex = 1;
+        } else if (_dataSource.type == DataSourceInfo.LIVE) {
+            if (dataSource.originName == null) {
+                labelText = "This data source is displaying live data as of " + dateString + ".";
+            } else {
+                labelText = "This data source is displaying live data as of " + dateString + " from " + dataSource.originName + ".";
+            }
+        } else if (_dataSource.type == DataSourceInfo.COMPOSITE) {
+            labelText = "This data source combines other data sources.";
+            for each (var childSource:DataSourceInfo in _dataSource.childSources) {
+
+            }
+        } else {
+            labelText = "Unknown";
+        }
     }
 
     private var _stackIndex:int;
@@ -156,8 +162,14 @@ public class DataSourceDisplay extends VBox {
     private function onClick(event:MouseEvent):void {
         var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
         dsRefreshWindow.dataSourceID = _dataSource.dataSourceID;
+        dsRefreshWindow.addEventListener(DataSourceRefreshEvent.DATA_SOURCE_REFRESH, onRefresh, false, 0, true);
         PopUpManager.addPopUp(dsRefreshWindow, this, true);
         PopUpUtil.centerPopUp(dsRefreshWindow);
+    }
+
+    private function onRefresh(event:DataSourceRefreshEvent):void {
+        updateString(event.newDateTime);
+        dispatchEvent(event);
     }
 }
 }

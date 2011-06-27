@@ -72,6 +72,8 @@
             var callData:CallData = asyncService.getCallData.lastResult as CallData;
             if (callData.status == CallData.DONE) {
                 timer.stop();
+                var newDate:Date = callData.result as Date;
+                dispatchEvent(new DataSourceRefreshEvent(newDate));
                 PopUpManager.removePopUp(this);
             } else if (callData.status == CallData.FAILED) {
                 timer.stop();

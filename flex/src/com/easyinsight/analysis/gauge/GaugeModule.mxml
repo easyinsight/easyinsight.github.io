@@ -37,6 +37,7 @@
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             gaugeDefinition = analysisDefinition as GaugeDefinition;
+            box.setStyle("backgroundAlpha", gaugeDefinition.backgroundAlpha);
             if (dataSet.length > 0) {
                 var row:Object = dataSet.getItemAt(0);
                 maxValue = gaugeDefinition.maxValue;

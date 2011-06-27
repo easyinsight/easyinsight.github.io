@@ -616,7 +616,7 @@
                                click="saveReport(event)"/>
                 </mx:VBox>
                 <datasources:DataSourceDisplay dataSource="{dataSource}" dataView="{viewFactory}"
-                                           id="dataSourceDisplay"/>
+                                           id="dataSourceDisplay" dataSourceRefreshed="refreshData()"/>
                 <mx:Spacer width="100%"/>
                 <mx:Button icon="{nextReportArrow}" labelPlacement="bottom" toolTip="{nextReportLabel}"
                         click="toNextReport()" id="nextReportButton" visible="{nextReportAvailable}"/>

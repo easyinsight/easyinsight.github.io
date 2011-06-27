@@ -61,5 +61,5 @@
     </mx:Box>
     <mx:Button icon="@Embed(source='../../../../assets/report/help.png')"
                        click="tutorial()" toolTip="Help!" label="Help!" x="542" y="28"/>
-    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}" id="dataSourceDisplay" visible="false" x="650" y="16"/>
+    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}" id="dataSourceDisplay" visible="false" x="650" y="16" dataSourceRefreshed="dataView.forceRetrieve()"/>
 </mx:Canvas>

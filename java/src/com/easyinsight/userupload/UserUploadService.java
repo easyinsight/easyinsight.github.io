@@ -605,7 +605,7 @@ public class UserUploadService {
                                 } else {
                                     feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
                                 }
-                                ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE);
+                                ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, now);
                                 conn.commit();
                             } catch (ReportException re) {
                                 conn.rollback();
@@ -823,7 +823,7 @@ public class UserUploadService {
                                 feedStorage.updateDataFeedConfiguration(dataSource, conn);
                             }
                             conn.commit();
-                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE);
+                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, now);
                         } catch (ReportException re) {
                             conn.rollback();
                             ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault());
