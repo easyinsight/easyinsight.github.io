@@ -91,6 +91,7 @@
         private function changeSolution():void {
             solution = solutionBox.selectedItem;
             reports.refresh();
+            recommendedReports.refresh();
         }
 
         private function gotSolutions():void {
