@@ -18,6 +18,10 @@ public class LookupTableCellRenderer extends TextInput {
         addEventListener(Event.CHANGE, onChange);
     }
 
+    public function set rolloverIcon(value:Class):void {
+
+    }
+
     private function onChange(event:Event):void {
         var srcString:String;
         if (_data[_lookupTable.sourceField.qualifiedName()] is Value) {

@@ -32,6 +32,10 @@ public class TextCellRenderer extends Text
         _selectionEnabled = value;
     }
 
+    public function set rolloverIcon(value:Class):void {
+
+    }
+
     public function set report(value:AnalysisDefinition):void {
         _report = value;
     }
