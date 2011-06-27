@@ -27,6 +27,7 @@ public class ListSummaryComponent implements IComponent {
             IComponent component = iter.next();
             if (!(component instanceof CalculationComponent)) {
                 iter.remove();
+                continue;
             }
             CalculationComponent calculationComponent = (CalculationComponent) component;
             if (!calculationComponent.getAnalysisCalculation().isRecalculateSummary()) {
