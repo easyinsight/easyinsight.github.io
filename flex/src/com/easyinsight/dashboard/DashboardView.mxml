@@ -52,7 +52,7 @@
             _fixedID = value;
         }
 
-        private var _dashboardID:int;
+        private var _dashboardID:int = -1;
 
         [Bindable]
         private var dataSourceID:int;
@@ -78,6 +78,7 @@
             var contextMenu:ContextMenu = new ContextMenu();
             contextMenu.customItems = [ logoutItem ];
             this.contextMenu = contextMenu;
+            dashboardService.getDashboard.send(_dashboardID);
         }
 
         private function onNavigation(event:ReportNavigationEvent):void {
@@ -110,11 +111,6 @@
 
         public function set dashboardID(value:int):void {
             _dashboardID = value;
-        }
-
-        override protected function createChildren():void {
-            super.createChildren();
-            dashboardService.getDashboard.send(_dashboardID);
         }
 
         private function gotDashboard():void {
