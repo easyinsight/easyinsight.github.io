@@ -1,5 +1,6 @@
 package com.easyinsight.analysis.charts.xaxisbased.column {
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.ChartDefinition;
 import com.easyinsight.analysis.CheckBoxReportFormItem;
 import com.easyinsight.analysis.ColorReportFormItem;
@@ -35,6 +36,22 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
 
     override public function getChartFamily():int {
         return ChartTypes.COLUMN_FAMILY;
+    }
+
+    override public function populate(fields:ArrayCollection):void {
+        super.populate(fields);
+        var dimensions:ArrayCollection = findItems(fields, AnalysisItemTypes.DIMENSION);
+        if (dimensions.length > 1) {
+            stackItem = dimensions.getItemAt(1) as AnalysisItem;
+        }
+    }
+
+    override public function getFields():ArrayCollection {
+        var fields:ArrayCollection = super.getFields();
+        if (stackItem != null) {
+            fields.addItem(stackItem);
+        }
+        return fields;
     }
 
     public function populateGroupings(dataSet:ArrayCollection, uniques:ArrayCollection):ArrayCollection {

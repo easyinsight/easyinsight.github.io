@@ -1,5 +1,6 @@
 package com.easyinsight.analysis.charts.yaxisbased.bar {
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.ChartDefinition;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.AnalysisDefinition;
@@ -32,6 +33,22 @@ public class StackedBarChartDefinition extends YAxisDefinition{
 
     override public function getChartFamily():int {
         return ChartTypes.BAR_FAMILY;
+    }
+
+    override public function getFields():ArrayCollection {
+        var fields:ArrayCollection = super.getFields();
+        if (stackItem != null) {
+            fields.addItem(stackItem);
+        }
+        return fields;
+    }
+
+    override public function populate(fields:ArrayCollection):void {
+        super.populate(fields);
+        var dimensions:ArrayCollection = findItems(fields, AnalysisItemTypes.DIMENSION);
+        if (dimensions.length > 1) {
+            stackItem = dimensions.getItemAt(1) as AnalysisItem;
+        }
     }
 
     public function populateGroupings(dataSet:ArrayCollection, uniques:ArrayCollection):ArrayCollection {
