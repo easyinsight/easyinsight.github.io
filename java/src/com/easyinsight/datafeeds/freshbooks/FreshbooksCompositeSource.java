@@ -228,4 +228,9 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
     public List<DataSourceMigration> getMigrations() {
         return Arrays.asList((DataSourceMigration) new FreshbooksComposite1To2(this));
     }
+
+    @Override
+    public boolean checkDateTime(String name) {
+        return false;
+    }
 }
