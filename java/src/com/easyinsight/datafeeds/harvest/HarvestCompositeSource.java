@@ -294,5 +294,10 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
         }
         return doc;
     }
+
+    @Override
+    public boolean checkDateTime(String name) {
+        return false;
+    }
 }
 
