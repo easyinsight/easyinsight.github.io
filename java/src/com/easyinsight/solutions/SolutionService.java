@@ -808,6 +808,18 @@ public class SolutionService {
         }
     }
 
+    public List<Solution> getExchangeConnections() {
+        List<Solution> solutions = getSolutions();
+        Set<Integer> exchangeTypes = new DataSourceTypeRegistry().getExchangeTypes();
+        List<Solution> availableSolutions = new ArrayList<Solution>();
+        for (Solution solution : solutions) {
+            if (exchangeTypes.contains(solution.getDataSourceType())) {
+                availableSolutions.add(solution);
+            }
+        }
+        return availableSolutions;
+    }
+
     public List<Solution> getSolutions() {
         int accountType = 0;
         if (SecurityUtil.getUserID(false) > 0) {

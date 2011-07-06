@@ -14,7 +14,7 @@
         import mx.managers.BrowserManager;
 
         private function setupListeners():void {
-            solutionService.getSolutions.send();
+            solutionService.getExchangeConnections.send();
             solutionService.getInstalledConnections.send();
         }
 
@@ -92,10 +92,11 @@
             solution = solutionBox.selectedItem;
             reports.refresh();
             recommendedReports.refresh();
+            invalidateSize();
         }
 
         private function gotSolutions():void {
-            var solutions:ArrayCollection = solutionService.getSolutions.lastResult as ArrayCollection;
+            var solutions:ArrayCollection = solutionService.getExchangeConnections.lastResult as ArrayCollection;
             var myConnections:Object = new Object();
             myConnections["name"] = "[ My Connections ]";
             var ph:Object = new Object();
@@ -182,7 +183,7 @@
                 ]]>
 	</mx:Script>
     <mx:RemoteObject destination="solutionService" id="solutionService">
-        <mx:method name="getSolutions" result="gotSolutions()"/>
+        <mx:method name="getExchangeConnections" result="gotSolutions()"/>
         <mx:method name="getSolutionReports" result="onData()"/>
         <mx:method name="getInstalledConnections" result="gotInstalledConnections()"/>
     </mx:RemoteObject>
