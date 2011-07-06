@@ -76,6 +76,10 @@ public class DataSourceTypeRegistry {
         exchangeTypes.add(FeedType.HARVEST_COMPOSITE.getType());
     }
 
+    public Set<Integer> getExchangeTypes() {
+        return exchangeTypes;
+    }
+
     private void registerTypes() {
         registerType(FeedType.STATIC, FileBasedFeedDefinition.class);
         registerType(FeedType.ANALYSIS_BASED, AnalysisBasedFeedDefinition.class);
@@ -126,6 +130,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.HIGHRISE_COMPANY_NOTES, HighRiseCompanyNotesSource.class);
         registerType(FeedType.HIGHRISE_CONTACT_NOTES, HighRiseContactNotesSource.class);
         registerType(FeedType.HIGHRISE_DEAL_NOTES, HighRiseDealNotesSource.class);
+        registerType(FeedType.HIGHRISE_CASE_JOIN, HighRiseCaseJoinSource.class);
         registerType(FeedType.CONSTANT_CONTACT, ConstantContactCompositeSource.class);
         registerType(FeedType.CONSTANT_CONTACT_CONTACT_LISTS, CCContactListSource.class);
         registerType(FeedType.CONSTANT_CONTACT_CONTACTS, CCContactSource.class);

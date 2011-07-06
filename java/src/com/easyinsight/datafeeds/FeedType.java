@@ -124,6 +124,7 @@ public class FeedType {
     public static final FeedType SAMPLE_SALES = new FeedType(116);
     public static final FeedType SAMPLE_CUSTOMER = new FeedType(117);
     public static final FeedType SAMPLE_PRODUCT = new FeedType(118);
+    public static final FeedType HIGHRISE_CASE_JOIN = new FeedType(119);
 
     private int type;
 
