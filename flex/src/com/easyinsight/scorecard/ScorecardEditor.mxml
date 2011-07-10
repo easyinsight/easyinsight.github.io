@@ -83,6 +83,7 @@
             addEventListener(KPIEvent.KPI_REMOVED, deletedKPI);
             kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
             if (_scorecardID > 0) {
+                viewable = true;
                 ProgressAlert.alert(this, "Retrieving scorecard...", null, scorecardService.getScorecard);
                 scorecardService.getScorecard.send(_scorecardID);
                 UserAudit.instance().log(new ActionScorecardLog(ActionScorecardLog.EDIT, _scorecardID));
@@ -137,6 +138,7 @@
         }
 
         private function saved(event:ScorecardSaveEvent):void {
+            viewable = true;
             _scorecardID = event.scorecard.scorecardID;
             this.kpis = event.scorecard.kpis;
             this.scorecard = event.scorecard;
@@ -146,6 +148,9 @@
             BrowserManager.getInstance().setFragment(feedFragmentString);
             scorecardChanged = false;
         }
+
+        [Bindable]
+        private var viewable:Boolean = false;
 
         private function viewScorecard():void {
             if (scorecardChanged) {
@@ -256,7 +261,7 @@
             <mx:Button icon="@Embed(source='../../../../assets/refresh.png')" click="refreshValues()"
                        toolTip="Refresh the Scorecard" label="Refresh" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="viewScorecard()"
-                       toolTip="View Scorecard" label="View Scorecard" labelPlacement="right"/>
+                       toolTip="View Scorecard" label="View Scorecard" labelPlacement="right" enabled="{viewable}"/>
             <mx:Button label="Add KPI..." click="addKPI()" icon="@Embed(source='../../../../assets/add.png')"/>
         </mx:HBox>
         <mx:HRule width="100%"/>
