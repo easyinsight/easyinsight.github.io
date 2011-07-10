@@ -50,6 +50,7 @@
                 ProgressAlert.alert(this, "Retrieving reports...", null, feedService.searchForSubscribedFeeds, scorecardService.getScorecardDescriptorsForDataSource);
                 feedService.searchForSubscribedFeeds.send();
             } else {
+                dashboardViewable = true;
                 ProgressAlert.alert(this, "Retrieving data...", null, dashboardService.getDashboard);
                 dashboardService.getDashboard.send(_dashboardID);
             }
@@ -191,6 +192,7 @@
 
         private function onSave(event:DashboardSaveEvent):void {
             dashboardChanged = false;
+            dashboardViewable = true;
             this._dashboard = event.dashboard;
         }
 
@@ -256,6 +258,9 @@
             metadata.availableFields = availableDimensions;
         }
 
+        [Bindable]
+        private var dashboardViewable:Boolean = false;
+
         public function gotFocus():void {
         }
 
@@ -283,7 +288,7 @@
         <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
                    toolTip="Save" labelPlacement="right" label="Save"/>
         <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="viewDashboard()"
-                   toolTip="View Dashboard" label="Dashboard View" labelPlacement="right"/>
+                   toolTip="View Dashboard" label="Dashboard View" labelPlacement="right" enabled="{dashboardViewable}"/>
         <mx:Button icon="@Embed(source='../../../../assets/document_edit.png')" click="configureDashboard()"
                    toolTip="Configure Dashboard" label="Configure Dashboard" labelPlacement="right"/>
     </mx:HBox>
