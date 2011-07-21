@@ -733,6 +733,9 @@
             if (field.isAnalysisItem()) {
                 dataView.addItem(field.analysisItem);
                 dispatchEvent(new AnalysisChangedEvent(false));
+            } else {
+                var open:Boolean = fieldGrid.isItemOpen(field);
+                fieldGrid.expandItem(field, !open);
             }
         }
 
