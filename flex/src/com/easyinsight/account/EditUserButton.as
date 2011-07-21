@@ -62,6 +62,7 @@ import mx.containers.HBox;
         private function onDelete(event:MouseEvent):void {
             if (user.userID == User.getInstance().userID) {
                 Alert.show("You can't delete yourself.");
+                return;
             }
             dispatchEvent(new DeleteUserEvent(user.userID));
         }
