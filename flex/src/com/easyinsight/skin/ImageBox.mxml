@@ -14,7 +14,19 @@
         [Embed(source="../../../../assets/navigate_cross.png")]
         private var deleteIcon:Class;
 
-        public var imageDescriptor:ImageDescriptor;
+        private var _imageDescriptor:ImageDescriptor;
+
+        [Bindable(event="imageDescriptorChanged")]
+        public function get imageDescriptor():ImageDescriptor {
+            return _imageDescriptor;
+        }
+
+        public function set imageDescriptor(value:ImageDescriptor):void {
+            if (_imageDescriptor == value) return;
+            _imageDescriptor = value;
+            invalidateProperties();
+            dispatchEvent(new Event("imageDescriptorChanged"));
+        }
 
         public var publicImage:Boolean;
 
@@ -39,12 +51,13 @@
 
         protected override function commitProperties():void {
             super.commitProperties();
-            if (imageDescriptor == null) {
+            if (_imageDescriptor == null) {
                 imageName = "( No Image )";
             } else {
-                imageName = imageDescriptor.name;
+                imageName = _imageDescriptor.name;
             }
-        }]]></mx:Script>
+        }
+        ]]></mx:Script>
     <mx:Label text="{imageName}"/>
     <mx:Button icon="{editIcon}" click="onEdit()"/>
     <mx:Button icon="{deleteIcon}" click="onDelete()"/>
