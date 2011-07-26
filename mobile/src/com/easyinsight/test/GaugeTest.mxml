@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+        xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:bttc="com.betterthantomorrow.components.*">
+    <fx:Declarations>
+        <mx:NumberFormatter precision="1" id="formatter" rounding="nearest"/>
+    </fx:Declarations>
+    <bttc:Gauge id="gauge"
+       diameter="300" width="300"
+       verticalCenter="0" horizontalCenter="0"
+       minValue="1"  maxValue="10" value="3" valueFormatter="{formatter}"
+       bigTicks="9" smallTicks="45" showMinMax="true" showValue="true" />
+</s:View>

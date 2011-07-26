@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    title="Home" viewActivate="onActivate()">
+    <s:layout>
+        <s:VerticalLayout gap="5" horizontalAlign="center" paddingTop="10"/>
+    </s:layout>
+    <fx:Script><![CDATA[
+        import com.easyinsight.test.SubjectList;
+        import com.easyinsight.util.ActionDashboardLog;
+        import com.easyinsight.util.ActionDataSourceLog;
+        import com.easyinsight.util.ActionLog;
+        import com.easyinsight.util.ActionReportLog;
+        import com.easyinsight.util.ActionScorecardLog;
+
+        import mx.collections.ArrayCollection;
+        import mx.rpc.events.FaultEvent;
+
+        [Bindable]
+        private var busy:Boolean = false;
+
+        private function onActivate():void {
+            busy = true;
+            adminService.getRecentActions.send();
+        }
+
+        private function toMyData():void {
+            navigator.pushView(SubjectList);
+        }
+
+        private function blah():void {
+            var actionReportLog:ActionReportLog;
+            var actionScorecardLog:ActionScorecardLog;
+            var actionDashboardLog:ActionDashboardLog;
+            var actionDataSourceLog:ActionDataSourceLog;
+        }
+
+        private function gotRecentActions():void {
+            var recentActions:ArrayCollection = adminService.getRecentActions.lastResult as ArrayCollection;
+            for each (var actionLog:ActionLog in recentActions) {
+                if (actionLog is ActionDataSourceLog) {
+                    continue;
+                } else if (actionLog is ActionReportLog) {
+                    if (actionLog.actionType == ActionReportLog.EDIT) {
+                        continue;
+                    }
+                } else if (actionLog is ActionDashboardLog) {
+                    if (actionLog.actionType == ActionDashboardLog.EDIT) {
+                        continue;
+                    }
+                } else if (actionLog is ActionScorecardLog) {
+                    if (actionLog.actionType == ActionScorecardLog.EDIT) {
+                        continue;
+                    }
+                }
+                var button:ActionButton = new ActionButton(actionLog, navigator);
+                button.width = 300;
+                actionGroup.addElement(button);
+            }
+            busy = false;
+        }
+
+        [Bindable]
+        private var faultMessage:String;
+
+        private function onFault(event:FaultEvent):void {
+            busy = false;
+            faultMessage = event.fault.faultString;
+        }
+        ]]></fx:Script>
+    <fx:Declarations>
+        <s:RemoteObject id="adminService" destination="admin" endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
+            <s:method name="getRecentActions" result="gotRecentActions()" fault="onFault(event)"/>
+        </s:RemoteObject>
+    </fx:Declarations>
+    <s:titleContent>
+        <s:Label text="Easy Insight" color="#FFFFFF"/>
+    </s:titleContent>
+    <s:actionContent>
+        <s:BusyIndicator visible="{busy}" id="busyIndicator" symbolColor="#FFFFFF"/>
+    </s:actionContent>
+    <s:Image source="@Embed('../../../../assets/logo.jpg')"/>
+    <s:Button label="My Data" click="toMyData()" width="300"/>
+    <s:Label text="{faultMessage}"/>
+    <s:VGroup id="actionGroup">
+
+    </s:VGroup>
+</s:View>

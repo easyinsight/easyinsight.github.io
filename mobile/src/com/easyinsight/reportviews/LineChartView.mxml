@@ -1,0 +1,230 @@
+<?xml version="1.0"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:mx="library://ns.adobe.com/flex/mx" implements="com.easyinsight.reportviews.IReportView">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDateDimension;
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisMeasure;
+
+        import com.easyinsight.analysis.FillProvider;
+        import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartDefinition;
+
+        import mx.charts.CategoryAxis;
+        import mx.charts.DateTimeAxis;
+        import mx.charts.HitData;
+        import mx.charts.Legend;
+        import mx.charts.LineChart;
+        import mx.charts.LinearAxis;
+        import mx.charts.chartClasses.IAxis;
+        import mx.charts.renderers.CircleItemRenderer;
+        import mx.charts.series.LineSeries;
+        import mx.charts.series.items.LineSeriesItem;
+        import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.graphics.IStroke;
+        import mx.graphics.SolidColor;
+        import mx.graphics.SolidColorStroke;
+
+        [Bindable]
+        private var chartData:ArrayCollection;
+
+        private var lineChart:LineChart;
+
+        private var xAxisItem:AnalysisItem;
+        private var yAxisItem:AnalysisItem;
+        private var measureItem:AnalysisItem;
+
+        private var def:LineChartDefinition;
+
+        [Bindable]
+        private var legend:Legend;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (lineChart == null) {
+                lineChart = new LineChart();
+                lineChart.percentHeight = 100;
+                lineChart.percentWidth = 100;
+            }
+            addElement(lineChart);
+            if (legend == null) {
+                legend = new Legend();
+                legend.direction = "vertical";
+                legend.percentHeight = 100;
+            }
+            addElement(legend);
+        }
+
+        private function dataTipFunction(hitData:HitData):String {
+            var string:String;
+            var lineSeries:LineSeries = hitData.element as LineSeries;
+            var lineSeriesItem:LineSeriesItem = hitData.chartItem as LineSeriesItem;
+            if (def.multiMeasure) {
+                for each (var aMeasure:AnalysisMeasure in def.measures) {
+                    if (aMeasure.display == lineSeries.displayName) {
+                        string = lineSeries.displayName + "\n" +
+                                xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + aMeasure.getFormatter().format(lineSeriesItem.yValue);
+                        break;
+                    }
+                }
+            } else {
+                string = lineSeries.displayName + "\n" +
+                        xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
+            }
+            return string;
+        }
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition):void {
+
+            var lineChartDef:LineChartDefinition = analysisDefinition as LineChartDefinition;
+
+            if (dataSet.length > 0) {
+
+                this.def = lineChartDef;
+
+                this.chartData = new ArrayCollection(dataSet.toArray());
+
+                removeElement(lineChart);
+
+                lineChart = new LineChart();
+                legend.visible = true;
+                lineChart.percentHeight = 100;
+                lineChart.percentWidth = 100;
+                lineChart.dataProvider = chartData;
+                lineChart.showDataTips = true;
+                lineChart.dataTipFunction = dataTipFunction;
+                var verticalAxis:LinearAxis = new LinearAxis();
+                verticalAxis.baseAtZero = lineChartDef.baseAtZero == "true";
+                if (!lineChartDef.multiMeasure && lineChartDef.measure != null) {
+                    verticalAxis.title = lineChartDef.measure.display;
+                } else {
+                    verticalAxis.title = "Measures";
+                }
+                lineChart.verticalAxis = verticalAxis;
+
+                var strokes:Array = [];
+                var colors:Array = FillProvider.createSolidColors();
+                for each (var color:SolidColor in colors) {
+                    var newStroke:SolidColorStroke = new SolidColorStroke();
+                    newStroke.color = color.color;
+                    newStroke.alpha = 1;
+                    strokes.push(newStroke);
+                }
+                var xAxisDimension:AnalysisItem = lineChartDef.xaxis;
+
+                var sort:Sort = new Sort();
+                var sortField:SortField = new SortField(xAxisDimension.qualifiedName(), true);
+                sort.fields = [ sortField ];
+                if (chartData.length > 0) {
+                    var firstObj:Object = chartData.getItemAt(0);
+                    var firstVal:Object = firstObj[xAxisDimension.qualifiedName()];
+                    if (firstVal is Number) {
+                        sortField.numeric = true;
+                    }
+
+                    chartData.sort = sort;
+                    chartData.refresh();
+
+                    if (firstVal is Number) {
+                        var categories:ArrayCollection = new ArrayCollection();
+                        for each (var obj:Object in chartData) {
+                            var valObj:Object = obj[xAxisDimension.qualifiedName()];
+                            if (categories.getItemIndex(valObj) == -1) {
+                                categories.addItem(valObj);
+                            }
+                        }
+                    }
+                }
+
+
+                var xAxis:IAxis;
+                xAxisItem = xAxisDimension;
+                yAxisItem = lineChartDef.yaxis;
+                if (xAxisDimension.hasType(AnalysisItemTypes.DATE)) {
+                    var dateDimension:AnalysisDateDimension = xAxisDimension as AnalysisDateDimension;
+                    var dateAxis:DateTimeAxis = new DateTimeAxis();
+                    switch (dateDimension.dateLevel) {
+                        case AnalysisItemTypes.YEAR_LEVEL:
+                            dateAxis.dataUnits = "years";
+                            break;
+                        case AnalysisItemTypes.MONTH_LEVEL:
+                        case AnalysisItemTypes.QUARTER_OF_YEAR:
+                            dateAxis.dataUnits = "months";
+                            break;
+                        case AnalysisItemTypes.DAY_LEVEL:
+                            dateAxis.dataUnits = "days";
+                            break;
+                        case AnalysisItemTypes.HOUR_LEVEL:
+                            dateAxis.dataUnits = "hours";
+                            break;
+                        case AnalysisItemTypes.MINUTE_LEVEL:
+                            dateAxis.dataUnits = "minutes";
+                            break;
+                    }
+                    dateAxis.displayName = dateDimension.display;
+                    dateAxis.title = dateDimension.display;
+                    xAxis = dateAxis;
+                } else {
+                    var categoryAxis:CategoryAxis = new CategoryAxis();
+                    categoryAxis.displayName = xAxisDimension.display;
+                    categoryAxis.dataProvider = categories;
+                    categoryAxis.title = xAxisDimension.display;
+                    xAxis = categoryAxis;
+                }
+
+                lineChart.horizontalAxis = xAxis;
+
+                var mySeries:Array = new Array();
+                measureItem = lineChartDef.measure as AnalysisMeasure;
+                var uniques:ArrayCollection = new ArrayCollection();
+
+                var seriesData:Object = new Object();
+                lineChartDef.populateData(dataSet, seriesData, uniques);
+                for (var i:int = 0; i < uniques.length; i++) {
+                    var key:String = uniques.getItemAt(i) as String;
+                    var uniqueLineSeries:LineSeries = new LineSeries();
+                    uniqueLineSeries.setStyle("form", lineChartDef.form);
+                    uniqueLineSeries.selectable = true;
+                    uniqueLineSeries.setStyle("fill", colors[i % colors.length]);
+                    uniqueLineSeries.interpolateValues = lineChartDef.interpolateValues == "true";
+                    var stroke:IStroke = strokes[i % strokes.length];
+                    stroke.weight = lineChartDef.strokeWeight;
+                    uniqueLineSeries.setStyle("lineStroke", stroke);
+                    uniqueLineSeries.setStyle("stroke", stroke);
+                    uniqueLineSeries.setStyle("itemRenderer", new ClassFactory(CircleItemRenderer));
+                    uniqueLineSeries.xField = lineChartDef.xaxis.qualifiedName();
+                    if (key == null || key == "") {
+                        key = "[ No Value ]";
+                    }
+                    uniqueLineSeries.yField = key;
+                    uniqueLineSeries.displayName = key;
+                    uniqueLineSeries.dataProvider = seriesData[key];
+                    mySeries.push(uniqueLineSeries);
+                }
+
+                lineChart.series = mySeries;
+
+                addElementAt(lineChart, 0);
+
+                legend.dataProvider = lineChart;
+                legend.direction = "vertical";
+            }
+            /*else {
+             if ((!lineChartDef.multiMeasure && lineChartDef.measure != null && lineChartDef.xaxis != null && lineChartDef.yaxis != null) ||
+             (lineChartDef.measures != null && lineChartDef.measures.length > 0 && lineChartDef.xaxis != null)) stackIndex = 2;
+             else stackIndex = 1;
+             if (lineChart != null) {
+             lineChart.visible = false;
+             legend.visible = false;
+             }
+             }*/
+        }
+
+        public function preserveValues():Boolean {
+            return false;
+        }
+        ]]></fx:Script>
+</s:HGroup>

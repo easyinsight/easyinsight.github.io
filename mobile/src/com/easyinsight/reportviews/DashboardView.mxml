@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:mx="library://ns.adobe.com/flex/mx" viewActivate="onActivate()">
+    <fx:Script><![CDATA[
+        import com.easyinsight.dashboard.Dashboard;
+        import com.easyinsight.dashboard.DashboardDescriptor;
+
+        private var dashboardDescriptor:DashboardDescriptor;
+
+        private function onActivate():void {
+            dashboardDescriptor = data as DashboardDescriptor;
+            dashboardName = dashboardDescriptor.name;
+            trace("retrieving dashboard...");
+            dashboardService.getDashboard.send(dashboardDescriptor.id);
+        }
+
+        private function gotDashboard():void {
+            var dashboard:Dashboard = dashboardService.getDashboard.lastResult as Dashboard;
+            trace("got dashboard");
+            addElement(DashboardMobileFactory.createViewUIComponent(dashboard.rootElement, null));
+        }
+
+        [Bindable]
+        private var busy:Boolean = false;
+
+        [Bindable]
+        private var dashboardName:String;
+        ]]></fx:Script>
+    <fx:Declarations>
+        <mx:RemoteObject id="dashboardService" destination="dashboardService" endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
+            <mx:method name="getDashboard" result="gotDashboard()"/>
+        </mx:RemoteObject>
+    </fx:Declarations>
+    <s:navigationContent>
+        <s:Button label="Back" click="navigator.popView()"/>
+    </s:navigationContent>
+    <s:titleContent>
+        <s:Label text="{dashboardName}" color="#FFFFFF"/>
+    </s:titleContent>
+    <s:actionContent>
+        <s:BusyIndicator visible="{busy}" id="busyIndicator" symbolColor="#FFFFFF"/>
+    </s:actionContent>
+</s:View>

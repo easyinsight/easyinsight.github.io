@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:mx="library://ns.adobe.com/flex/mx" viewActivate="onAct()">
+    <fx:Script><![CDATA[
+        private function onAct():void {
+            trace("argh");
+        }
+        ]]></fx:Script>
+</s:View>

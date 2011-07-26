@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<s:DataGrid xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:mx="library://ns.adobe.com/flex/mx" implements="com.easyinsight.reportviews.IReportView">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.list.ListDefinition;
+
+        import mx.collections.ArrayCollection;
+
+        import spark.components.gridClasses.GridColumn;
+
+        public function renderReport(data:ArrayCollection, report:AnalysisDefinition):void {
+            var columns:Array = [];
+            var listDef:ListDefinition = report as ListDefinition;
+            for each (var item:AnalysisItem in listDef.columns) {
+                var column:GridColumn = new GridColumn();
+                column.dataField = item.qualifiedName();
+                column.headerText = item.display;
+                columns.push(column);
+            }
+            this.columns = new ArrayCollection(columns);
+            this.dataProvider = data;
+        }
+
+        public function preserveValues():Boolean {
+            return false;
+        }
+        ]]></fx:Script>
+</s:DataGrid>

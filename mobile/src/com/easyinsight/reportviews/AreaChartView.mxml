@@ -1,0 +1,206 @@
+<?xml version="1.0"?>
+<s:HGroup xmlns:s="spark.components.*"
+        xmlns:fx="http://ns.adobe.com/mxml/2009"
+        implements="com.easyinsight.reportviews.IReportView">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDateDimension;
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisMeasure;
+
+        import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartDefinition;
+
+        import mx.charts.CategoryAxis;
+        import mx.charts.DateTimeAxis;
+        import mx.charts.HitData;
+        import mx.charts.Legend;
+        import mx.charts.AreaChart;
+        import mx.charts.LinearAxis;
+        import mx.charts.chartClasses.IAxis;
+        import mx.charts.renderers.CircleItemRenderer;
+        import mx.charts.series.AreaSeries;
+        import mx.charts.series.items.AreaSeriesItem;
+        import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+
+        [Bindable]
+        private var chartData:ArrayCollection;
+
+        private var areaChart:AreaChart;
+
+        private var xAxisItem:AnalysisItem;
+        private var yAxisItem:AnalysisItem;
+        private var measureItem:AnalysisItem;
+
+        [Bindable]
+        private var legend:Legend;
+
+        private var def:AreaChartDefinition;
+
+        private function dataTipFunction(hitData:HitData):String {
+            var string:String;
+            var lineSeries:AreaSeries = hitData.element as AreaSeries;
+            var lineSeriesItem:AreaSeriesItem = hitData.chartItem as AreaSeriesItem;
+            if (def.multiMeasure) {
+                for each (var aMeasure:AnalysisMeasure in def.measures) {
+                    if (aMeasure.display == lineSeries.displayName) {
+                        string = lineSeries.displayName + "\n" +
+                                xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + aMeasure.getFormatter().format(lineSeriesItem.yValue);
+                        break;
+                    }
+                }
+            } else {
+                string = lineSeries.displayName + "\n" +
+                        xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
+            }
+            return string;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (areaChart == null) {
+                areaChart = new AreaChart();
+                areaChart.percentHeight = 100;
+                areaChart.percentWidth = 100;
+            }
+            addElement(areaChart);
+            if (legend == null) {
+                legend = new Legend();
+                legend.direction = "vertical";
+                legend.percentHeight = 100;
+            }
+            addElement(legend);
+        }
+
+        public function preserveValues():Boolean {
+            return false;
+        }
+
+        private var areaChartDef:AreaChartDefinition;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition):void {
+
+            areaChartDef = analysisDefinition as AreaChartDefinition;
+
+            this.chartData = new ArrayCollection(dataSet.toArray());
+
+            removeElement(areaChart);
+
+            areaChart = new AreaChart();
+            areaChart.showDataTips = true;
+            areaChart.dataTipFunction = dataTipFunction;
+            areaChart.percentHeight = 100;
+            areaChart.percentWidth = 100;
+            areaChart.dataProvider = chartData;
+            areaChart.type = areaChartDef.stackingType;
+            var verticalAxis:LinearAxis = new LinearAxis();
+            verticalAxis.baseAtZero = areaChartDef.baseAtZero == "true";
+            if (!areaChartDef.multiMeasure && areaChartDef.measure != null) {
+                verticalAxis.title = areaChartDef.measure.display;
+            } else {
+                verticalAxis.title = "Measures";
+            }
+            areaChart.verticalAxis = verticalAxis;
+
+            if (dataSet.length > 0) {
+
+                this.def = areaChartDef;
+                var xAxisDimension:AnalysisItem = areaChartDef.xaxis;
+
+                xAxisItem = xAxisDimension;
+                yAxisItem = areaChartDef.yaxis;
+                measureItem = areaChartDef.measure;
+
+                var sort:Sort = new Sort();
+                var sortField:SortField = new SortField(xAxisDimension.qualifiedName(), true);
+                sort.fields = [ sortField ];
+                if (chartData.length > 0) {
+                    var firstObj:Object = chartData.getItemAt(0);
+                    var firstVal:Object = firstObj[xAxisDimension.qualifiedName()];
+                    if (firstVal is Number) {
+                        sortField.numeric = true;
+                    }
+
+                    chartData.sort = sort;
+                    chartData.refresh();
+
+                    if (firstVal is Number) {
+                        var categories:ArrayCollection = new ArrayCollection();
+                        for each (var obj:Object in chartData) {
+                            var valObj:Object = obj[xAxisDimension.qualifiedName()];
+                            if (categories.getItemIndex(valObj) == -1) {
+                                categories.addItem(valObj);
+                            }
+                        }
+                    }
+                }
+
+
+                var xAxis:IAxis;
+
+                if (xAxisDimension.hasType(AnalysisItemTypes.DATE)) {
+                    var dateDimension:AnalysisDateDimension = xAxisDimension as AnalysisDateDimension;
+                    var dateAxis:DateTimeAxis = new DateTimeAxis();
+                    switch (dateDimension.dateLevel) {
+                        case AnalysisItemTypes.YEAR_LEVEL:
+                            dateAxis.dataUnits = "years";
+                            break;
+                        case AnalysisItemTypes.MONTH_LEVEL:
+                        case AnalysisItemTypes.QUARTER_OF_YEAR:
+                            dateAxis.dataUnits = "months";
+                            break;
+                        case AnalysisItemTypes.DAY_LEVEL:
+                            dateAxis.dataUnits = "days";
+                            break;
+                        case AnalysisItemTypes.HOUR_LEVEL:
+                            dateAxis.dataUnits = "hours";
+                            break;
+                        case AnalysisItemTypes.MINUTE_LEVEL:
+                            dateAxis.dataUnits = "minutes";
+                            break;
+                    }
+                    dateAxis.displayName = dateDimension.display;
+                    dateAxis.title = xAxisDimension.display;
+                    xAxis = dateAxis;
+                } else {
+                    var categoryAxis:CategoryAxis = new CategoryAxis();
+                    categoryAxis.displayName = xAxisDimension.display;
+                    categoryAxis.dataProvider = categories;
+                    categoryAxis.title = xAxisDimension.display;
+                    xAxis = categoryAxis;
+                }
+
+                areaChart.horizontalAxis = xAxis;
+
+                var mySeries:Array = new Array();
+                var analysisMeasure:AnalysisMeasure = areaChartDef.measure as AnalysisMeasure;
+                var uniques:ArrayCollection = new ArrayCollection();
+
+                var seriesData:Object = new Object();
+                areaChartDef.populateData(dataSet, seriesData, uniques);
+                for (var i:int = 0; i < uniques.length; i++) {
+                    var key:String = uniques.getItemAt(i) as String;
+                    var uniqueLineSeries:AreaSeries = new AreaSeries();
+                    uniqueLineSeries.setStyle("form", areaChartDef.form);
+                    uniqueLineSeries.setStyle("itemRenderer", new ClassFactory(CircleItemRenderer));
+                    uniqueLineSeries.xField = areaChartDef.xaxis.qualifiedName();
+                    if (key == null || key == "") {
+                        key = "[ No Value ]";
+                    }
+                    uniqueLineSeries.yField = key;
+                    uniqueLineSeries.displayName = key;
+                    uniqueLineSeries.dataProvider = seriesData[key];
+                    mySeries.push(uniqueLineSeries);
+                }
+
+                areaChart.series = mySeries;
+            }
+
+            legend.dataProvider = areaChart;
+            legend.direction = "vertical";
+            addElementAt(areaChart, 0);
+        }
+    ]]></fx:Script>
+</s:HGroup>

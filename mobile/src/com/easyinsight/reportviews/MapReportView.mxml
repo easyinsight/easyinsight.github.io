@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:mx="library://ns.adobe.com/flex/mx" implements="com.easyinsight.reportviews.IReportView">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.google.maps.MapEvent;
+
+        import mx.collections.ArrayCollection;
+
+        private function map_mapevent_mapreadyHandler(event:MapEvent):void {
+            //onMapReady(event);
+        }
+
+        public function renderReport(data:ArrayCollection, report:AnalysisDefinition):void {
+        }
+
+        public function preserveValues():Boolean {
+            return false;
+        }
+        ]]></fx:Script>
+    <maps:Map xmlns:maps="com.google.maps.*" id="map" mapevent_mapready="map_mapevent_mapreadyHandler(event)"
+  width="100%" height="100%" key="ABQIAAAA2117HwaIOF-a5ho2SalSZxQw7JNcT96mmHPfRfrQHk2xuzdGoxSekTo3OqnayhJZONwWnFdGSn_0HQ"
+            sensor="false"/>
+</s:VGroup>

@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:mx="library://ns.adobe.com/flex/mx">
+    <fx:Script><![CDATA[
+        import com.easyinsight.framework.UserServiceResponse;
+
+        import mx.messaging.config.ServerConfig;
+        import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncToken;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+
+        private var sqlConnection:SQLConnection;
+
+        private function onCreation():void {
+            sqlConnection = new SQLConnection();
+            sqlConnection.open(File.applicationStorageDirectory.resolvePath("credentials.db"));
+            var stmt:SQLStatement = new SQLStatement();
+            stmt.sqlConnection = sqlConnection;
+            stmt.text = "CREATE TABLE IF NOT EXISTS credentials (session_cookie TEXT)";
+            stmt.execute();
+            var queryStmt:SQLStatement = new SQLStatement();
+            queryStmt.text = "SELECT session_cookie FROM credentials";
+            queryStmt.addEventListener(SQLEvent.RESULT, onResults);
+            queryStmt.execute();
+        }
+
+        private function onResults(event:SQLEvent):void {
+            var query:SQLStatement = event.currentTarget as SQLStatement;
+            var data:Array = query.getResult().data;
+            if (data.length > 0) {
+                sessionToken = data[0];
+                var parts:Array = sessionToken.split("-");
+                var userName:String = parts[0];
+                var token:String = parts[1];
+                authService.sessionCookieCheck.send(userName, token);
+            }
+        }
+
+        private var sessionToken:String;
+
+        private function sessionCookieCheck():void {
+            var response:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
+            if (response.successful) {
+                if (authService.channelSet == null) {
+                    authService.channelSet = ServerConfig.getChannelSet(authService.destination);
+                }
+                var parts:Array = sessionToken.split("-");
+                var userName:String = parts[0];
+                var cookie:String = parts[1];
+                var token:AsyncToken = authService.channelSet.login(userName, cookie);
+                token.addResponder(new AsyncResponder(
+                        function (event:ResultEvent, token:Object = null):void {
+                            switch (event.result) {
+                                case "success":
+                                    navigator.replaceView(HomeScreen);
+                                    break;
+                                default:
+                                    navigator.replaceView(MobileLoginComponent);
+                            }
+                        },
+                        function (event:FaultEvent, token:Object = null):void {
+                            switch (event.fault.faultCode) {
+                                case "Client.Authentication":
+                                default:
+                                    navigator.replaceView(MobileLoginComponent);
+                            }
+                        }
+                ));
+            } else {
+                navigator.replaceView(MobileLoginComponent);
+            }
+        }
+        ]]></fx:Script>
+    <fx:Declarations>
+        <mx:RemoteObject id="authService" destination="login" endpoint="https://www.easy-insight.com/app">
+            <mx:method name="sessionCookieCheck" result="sessionCookieCheck()"/>
+        </mx:RemoteObject>
+    </fx:Declarations>
+</s:View>

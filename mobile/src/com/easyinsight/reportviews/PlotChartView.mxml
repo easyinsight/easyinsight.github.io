@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<mx:PlotChart xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:mx="library://ns.adobe.com/flex/mx" dataProvider="{graphData}" showDataTips="true"
+        implements="com.easyinsight.reportviews.IReportView">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.charts.plot.PlotChartDefinition;
+
+        import mx.charts.chartClasses.IAxis;
+        import mx.charts.series.PlotSeries;
+        import mx.collections.ArrayCollection;
+        import mx.formatters.Formatter;
+
+        [Bindable]
+        private var graphData:ArrayCollection;
+
+        [Bindable]
+        private var measure1Name:String;
+
+        [Bindable]
+        private var measure2Name:String;
+
+        private var measure1Formatter:Formatter;
+
+        private var measure2Formatter:Formatter;
+
+        private function renderXAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {
+            if (measure1Formatter != null) {
+                return measure1Formatter.format(labelValue);
+            } else {
+                return String(labelValue);
+            }
+        }
+
+        public function renderReport(data:ArrayCollection, report:AnalysisDefinition):void {
+            var plotChartDef:PlotChartDefinition = report as PlotChartDefinition;
+            measure1Name = plotChartDef.xaxisMeasure.display;
+            measure2Name = plotChartDef.yaxisMeasure.display;
+            measure1Formatter = plotChartDef.xaxisMeasure.getFormatter();
+            measure2Formatter = plotChartDef.yaxisMeasure.getFormatter();
+            /*dimension = plotChartDef.dimension.qualifiedName();
+             dimensionItem = plotChartDef.dimension;*/
+            var defaultSeries:PlotSeries = new PlotSeries();
+            defaultSeries.xField = plotChartDef.xaxisMeasure.qualifiedName();
+            //defaultSeries.radius = 10;
+            defaultSeries.yField = plotChartDef.yaxisMeasure.qualifiedName();
+            defaultSeries.displayName = plotChartDef.dimension.display;
+            series = [ defaultSeries ];
+            graphData = data;
+        }
+
+        private function renderYAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {
+            if (measure2Formatter != null) {
+                return measure2Formatter.format(labelValue);
+            } else {
+                return String(labelValue);
+            }
+        }
+
+        public function preserveValues():Boolean {
+            return false;
+        }
+        ]]></fx:Script>
+    <mx:horizontalAxis>
+        <mx:LinearAxis labelFunction="renderXAxis" baseAtZero="false" title="{measure1Name}" id="xAxis"/>
+    </mx:horizontalAxis>
+    <mx:horizontalAxisRenderers>
+        <mx:AxisRenderer axis="{xAxis}">
+
+        </mx:AxisRenderer>
+    </mx:horizontalAxisRenderers>
+    <mx:verticalAxis>
+        <mx:LinearAxis labelFunction="renderYAxis" baseAtZero="false" title="{measure2Name}" id="yAxis"/>
+    </mx:verticalAxis>
+    <mx:verticalAxisRenderers>
+        <mx:AxisRenderer axis="{yAxis}">
+
+        </mx:AxisRenderer>
+    </mx:verticalAxisRenderers>
+</mx:PlotChart>

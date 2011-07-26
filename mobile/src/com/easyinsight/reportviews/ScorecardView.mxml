@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:mx="library://ns.adobe.com/flex/mx" viewActivate="onActivate()">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.formatter.PercentageNumberFormatter;
+        import com.easyinsight.framework.InsightRequestMetadata;
+        import com.easyinsight.kpi.KPI;
+        import com.easyinsight.kpi.KPIOutcome;
+        import com.easyinsight.scorecard.Scorecard;
+        import com.easyinsight.scorecard.ScorecardDescriptor;
+        import com.easyinsight.scorecard.ScorecardResults;
+
+        import mx.collections.ArrayCollection;
+
+        private function onActivate():void {
+            trace("sending...");
+            var scorecardDescriptor:ScorecardDescriptor = data as ScorecardDescriptor;
+            scorecardName = scorecardDescriptor.name;
+            busy = true;
+            scorecardService.getScorecard.send(scorecardDescriptor.id);
+        }
+
+        [Bindable]
+        private var kpis:ArrayCollection;
+
+        private var scorecard:Scorecard;
+
+        private function gotScorecard():void {
+            trace("got scorecard...");
+            scorecard = scorecardService.getScorecard.lastResult as Scorecard;
+            kpis = scorecard.kpis;
+            var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+            metadata.utcOffset = new Date().getTimezoneOffset();
+
+            scorecardService.getValues.send(scorecard, metadata);
+        }
+
+        private function gotValues():void {
+            trace("got values...");
+            busy = false;
+            var results:ScorecardResults = scorecardService.getValues.lastResult as ScorecardResults;
+
+            if (results.reportFault != null) {
+                //results.reportFault.popup(this, onProblem);
+            } else {
+                var outcomes:ArrayCollection = results.outcomes;
+                for each (var outcome:KPIOutcome in outcomes) {
+                    for each (var kpi:KPI in kpis) {
+                        if (outcome.kpiName == kpi.name) {
+                            kpi.kpiOutcome = outcome;
+                            break;
+                        }
+                    }
+                }
+            }
+            grid.dataProvider = kpis;
+        }
+
+        private function latestValue(item:Object, column:GridColumn):String {
+            var kpi:KPI = item as KPI;
+            return kpi.analysisMeasure.getFormatter().format(kpi.kpiOutcome.outcomeValue);
+        }
+
+        private function percentChange(item:Object, column:GridColumn):String {
+            var kpi:KPI = item as KPI;
+            var formatter:PercentageNumberFormatter = new PercentageNumberFormatter();
+            formatter.precision = 2;
+            return formatter.format(kpi.kpiOutcome.percentChange);
+        }
+
+        [Bindable]
+        private var scorecardName:String;
+
+        [Bindable]
+        private var busy:Boolean;
+        ]]></fx:Script>
+    <fx:Declarations>
+        <mx:RemoteObject destination="scorecardService" id="scorecardService" endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
+            <mx:method name="getScorecard" result="gotScorecard()"/>
+            <mx:method name="getValues" result="gotValues()"/>
+        </mx:RemoteObject>
+    </fx:Declarations>
+    <!--
+    <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="100%" id="adminGrid">
+        <mx:columns>
+            <util:EIDataGridColumn headerText="" dataField="name"
+                                   itemRenderer="{kpiIconFactory}" width="50"
+                                   sortable="false"/>
+            <util:EIDataGridColumn headerText="KPI Name" dataField="name" itemRenderer="{kpiNameFactory}"/>
+            <util:EIDataGridColumn headerText="Latest Value" dataField="name"
+                                   itemRenderer="com.easyinsight.scorecard.KPIValueRenderer" width="110"/>
+            <util:EIDataGridColumn headerText="" dataField="name"
+                                   itemRenderer="com.easyinsight.scorecard.KPIStatusRenderer" width="30"
+                                   sortable="false"/>
+            <util:EIDataGridColumn headerText="Time" dataField="name"
+                                   itemRenderer="com.easyinsight.scorecard.KPITimeRenderer" width="100"/>
+            <util:EIDataGridColumn headerText="% Change" dataField="name"
+                                   itemRenderer="com.easyinsight.scorecard.KPIChangeRenderer" width="110"/>
+        </mx:columns>
+    </mx:DataGrid>
+    -->
+    <s:navigationContent>
+        <s:Button label="Back" click="navigator.popView()"/>
+    </s:navigationContent>
+    <s:titleContent>
+        <s:Label text="{scorecardName}" color="#FFFFFF"/>
+    </s:titleContent>
+    <s:actionContent>
+        <s:BusyIndicator visible="{busy}" id="busyIndicator" symbolColor="#FFFFFF"/>
+    </s:actionContent>
+    <s:DataGrid id="grid" width="100%" height="100%">
+        <s:columns>
+            <s:ArrayList>
+                <s:GridColumn dataField="name" headerText="KPI Name"/>
+                <s:GridColumn dataField="name" headerText="Latest Value" labelFunction="latestValue"/>
+                <s:GridColumn dataField="name" headerText="% Change" labelFunction="percentChange"/>
+            </s:ArrayList>
+        </s:columns>
+    </s:DataGrid>
+</s:View>

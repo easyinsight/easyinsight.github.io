@@ -1,0 +1,160 @@
+<?xml version="1.0"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:mx="library://ns.adobe.com/flex/mx" viewActivate="onActivate()">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.EmbeddedDataResults;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.framework.InsightRequestMetadata;
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.core.UIComponent;
+
+        private function onActivate():void {
+            var metadata:ReportMetadata = data as ReportMetadata;
+            report = metadata.descriptor;
+            reportName = report.name;
+            createReportDisplay(report.reportType);
+        }
+
+        private var report:InsightDescriptor;
+
+        private var reportView:IReportView;
+
+        private var _preserveValues:Boolean;
+
+        private function createReportDisplay(type:int):void {
+            if (type == AnalysisDefinition.LIST) {
+                reportView = new ListReportView();
+            } else if (type == AnalysisDefinition.PIE || type == AnalysisDefinition.PIE3D) {
+                reportView = new PieChartView();
+            } else if (type == AnalysisDefinition.COLUMN || type == AnalysisDefinition.COLUMN3D) {
+                reportView = new ColumnChartView();
+            } else if (type == AnalysisDefinition.BAR || type == AnalysisDefinition.BAR3D) {
+                reportView = new BarChartView();
+            } else if (type == AnalysisDefinition.PLOT) {
+                reportView = new PlotChartView();
+            } else if (type == AnalysisDefinition.LINE) {
+                reportView = new LineChartView();
+            } else if (type == AnalysisDefinition.AREA) {
+                reportView = new AreaChartView();
+            } else if (type == AnalysisDefinition.BUBBLE) {
+                reportView = new BubbleChartView();
+            } else if (type == AnalysisDefinition.TREE) {
+
+            } else {
+
+            }
+            _preserveValues = reportView.preserveValues();
+            var component:UIComponent = reportView as UIComponent;
+            component.percentHeight = 100;
+            component.percentWidth = 100;
+            addElement(component);
+            var requestMetadata:InsightRequestMetadata = new InsightRequestMetadata();
+            requestMetadata.utcOffset = new Date().getTimezoneOffset();
+            busy = true;
+            var metadata:ReportMetadata = data as ReportMetadata;
+            var filters:ArrayCollection = null;
+            if (metadata.report != null) {
+                trace("using existing filters of size = " + metadata.report.filterDefinitions.length);
+
+                filters = metadata.report.filterDefinitions;
+            }
+            dataService.getEmbeddedResults.send(report.id, report.dataFeedID, filters, requestMetadata, new ArrayCollection());
+            // mx.core.FlexGlobals.topLevelApplication.viewMenuOpen=true;
+        }
+
+        private function toggleMenu():void {
+            //FlexGlobals.topLevelApplication.viewMenuOpen=!FlexGlobals.topLevelApplication.viewMenuOpen;
+        }
+
+        private function gotResults():void {
+            trace("got data again");
+            var results:EmbeddedDataResults = dataService.getEmbeddedResults.lastResult as EmbeddedDataResults;
+            var metadata:ReportMetadata = data as ReportMetadata;
+            if (metadata.report == null) {
+                metadata.report = results.definition;
+            }
+            reportView.renderReport(translateResults(results), results.definition);
+            busy = false;
+        }
+
+        private function translateResults(listData:EmbeddedDataResults):ArrayCollection {
+            var headers:ArrayCollection = new ArrayCollection(listData.headers);
+            var rows:ArrayCollection = new ArrayCollection(listData.rows);
+            var data:ArrayCollection = new ArrayCollection();
+            for (var i:int = 0; i < rows.length; i++) {
+                var row:Object = rows.getItemAt(i);
+                var values:Array = row.values as Array;
+                var endObject:Object = new Object();
+                for (var j:int = 0; j < headers.length; j++) {
+                    var headerDimension:AnalysisItem = headers[j] as AnalysisItem;
+                    var value:Value = values[j];
+                    var key:String = headerDimension.qualifiedName();
+                    if (_preserveValues) {
+                        endObject[key] = value;
+                    } else {
+                        endObject[key] = value.getValue();
+                    }
+
+                    if (value.links != null) {
+                        for (var linkKey:String in value.links) {
+                            endObject[linkKey + "_link"] = value.links[linkKey];
+                        }
+                    }
+                }
+                data.addItem(endObject);
+            }
+            return data;
+        }
+
+        private function exportReport():void {
+            var metadata:ReportMetadata = data as ReportMetadata;
+            navigator.pushView(ExportView, metadata.report);
+        }
+
+        private function filter():void {
+            var metadata:ReportMetadata = data as ReportMetadata;
+            navigator.pushView(FilterView, metadata.report);
+        }
+
+        [Bindable]
+        [Embed(source="../../../../assets/funnel.png")]
+        private var filterIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/table.png")]
+        private var exportIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/19-gear2.png")]
+        private var gearIcon:Class;
+
+        [Bindable]
+        private var busy:Boolean;
+
+        [Bindable]
+        private var reportName:String;
+        ]]></fx:Script>
+    <fx:Declarations>
+        <s:RemoteObject destination="data" id="dataService" endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
+            <s:method name="getEmbeddedResults" result="gotResults()"/>
+        </s:RemoteObject>
+    </fx:Declarations>
+    <s:navigationContent>
+        <s:Button label="Back" click="navigator.popView()"/>
+    </s:navigationContent>
+    <s:titleContent>
+        <s:Label text="{reportName}" color="#FFFFFF"/>
+    </s:titleContent>
+    <s:actionContent>
+        <s:Button icon="{gearIcon}" click="toggleMenu()"/>
+        <s:BusyIndicator visible="{busy}" id="busyIndicator" symbolColor="#FFFFFF"/>
+    </s:actionContent>
+    <!--<s:viewMenuItems>
+        <s:ViewMenuItem label="Filter" click="filter()" icon="{filterIcon}"  iconPlacement="left" />
+        <s:ViewMenuItem label="Export" click="exportReport()" icon="{exportIcon}" iconPlacement="left" />
+</s:viewMenuItems>-->
+</s:View>

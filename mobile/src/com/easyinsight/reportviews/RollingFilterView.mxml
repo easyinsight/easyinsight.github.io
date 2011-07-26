@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+        xmlns:mx="library://ns.adobe.com/flex/mx" viewActivate="onActivate()">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
+        import com.easyinsight.analysis.AnalysisItemResultMetadata;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.filtering.FilterDefinition;
+        import com.easyinsight.filtering.FilterValueDefinition;
+        import com.easyinsight.filtering.FilterValueDefinition;
+        import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
+
+        import mx.collections.ArrayCollection;
+        import mx.core.ClassFactory;
+        import mx.events.ItemClickEvent;
+
+        import spark.collections.Sort;
+        import spark.components.RadioButtonGroup;
+
+        [Bindable]
+        private var filterValues:ArrayCollection;
+
+        private var filterInfo:FilterInfo;
+
+        [Bindable]
+        private var itemRenderer:IFactory;
+        [Bindable]
+        private var filterEnabled:Boolean;
+
+        private var radioGroup:RadioButtonGroup;
+
+        private function onActivate():void {
+            filterInfo = data as FilterInfo;
+            filterName = filterInfo.filterDefinition.label;
+            filterEnabled = filterInfo.filterDefinition.enabled;
+            radioGroup = new RadioButtonGroup();
+            var factory:ClassFactory = new ClassFactory(FilterRadioButton);
+            factory.properties = { filterDefinition: filterInfo.filterDefinition, radioGroup: radioGroup};
+            itemRenderer = factory;
+            list.dataProvider = filterOptions;
+        }
+
+        [Bindable]
+        private var filterName:String;
+
+        [Bindable]
+        private var busy:Boolean;
+        ]]></fx:Script>
+    <fx:Declarations>
+        <s:ArrayCollection id="filterOptions">
+            <fx:Object label="Last Day" interval="{RollingDateRangeFilterDefinition.DAY}"/>
+            <fx:Object label="Last 7 Days" interval="{RollingDateRangeFilterDefinition.WEEK}"/>
+            <fx:Object label="Last 30 Days" interval="{RollingDateRangeFilterDefinition.MONTH}"/>
+            <fx:Object label="Last 90 Days" interval="{RollingDateRangeFilterDefinition.QUARTER}"/>
+            <fx:Object label="Last 365 Days" interval="{RollingDateRangeFilterDefinition.YEAR}"/>
+            <fx:Object label="Today" interval="{RollingDateRangeFilterDefinition.DAY_TO_NOW}"/>
+            <fx:Object label="Week to Date" interval="{RollingDateRangeFilterDefinition.WEEK_TO_NOW}"/>
+            <fx:Object label="Month to Date" interval="{RollingDateRangeFilterDefinition.MONTH_TO_NOW}"/>
+            <fx:Object label="Quarter to Date" interval="{RollingDateRangeFilterDefinition.QUARTER_TO_NOW}"/>
+            <fx:Object label="Year to Date" interval="{RollingDateRangeFilterDefinition.YEAR_TO_NOW}"/>
+            <fx:Object label="Last Full Day" interval="{RollingDateRangeFilterDefinition.LAST_FULL_DAY}"/>
+            <fx:Object label="Last Full Week" interval="{RollingDateRangeFilterDefinition.LAST_FULL_WEEK}"/>
+            <fx:Object label="Last Full Month" interval="{RollingDateRangeFilterDefinition.LAST_FULL_MONTH}"/>
+            <fx:Object label="Last Day of Data" interval="{RollingDateRangeFilterDefinition.LAST_DAY}"/>
+            <fx:Object label="Custom" interval="{RollingDateRangeFilterDefinition.CUSTOM}"/>
+        </s:ArrayCollection>
+    </fx:Declarations>
+    <s:navigationContent>
+        <s:Button label="Back" click="navigator.popView()"/>
+    </s:navigationContent>
+    <s:titleContent>
+        <s:Label text="{filterName}" color="#FFFFFF"/>
+    </s:titleContent>
+    <s:actionContent>
+
+    </s:actionContent>
+
+    <s:VGroup width="100%" height="100%">
+        <s:CheckBox label="Filter Enabled:" selected="{filterEnabled}" change="filterInfo.filterDefinition.enabled = enabledCheckbox.selected; filterEnabled = enabledCheckbox.selected" id="enabledCheckbox"/>
+        <s:List itemRenderer="{itemRenderer}" width="100%" height="100%" enabled="{filterEnabled}" labelField="label" id="list">
+        </s:List>
+    </s:VGroup>
+</s:View>

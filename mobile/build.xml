@@ -1,0 +1,15 @@
+<project default="compileFlex" basedir="." name="Flex Build">
+    <property file="local.build.properties"/>
+    <taskdef resource="flexTasks.tasks" classpath="${flex.sdk.dir}/ant/lib/flexTasks.jar"/>
+
+    <property name="FLEX_HOME" value="${flex.sdk.dir}"/>
+
+    <taskdef resource="ei.tasks" classpath="${flex.sdk.dir}/ant/lib/swfanalysis.jar"/>
+
+    <target name="compileFlex">
+        <mxmlc file="src/MobileTest.mxml" output="${deployment.path}/MobileTest.swf"
+               static-rsls="true" incremental="false">
+            <load-config filename="air-config.xml"/>
+        </mxmlc>
+    </target>
+</project>

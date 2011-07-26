@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    title="Log In to Easy Insight" viewActivate="setup()">
+    <fx:Script><![CDATA[
+        import com.easyinsight.framework.UserServiceResponse;
+
+        import mx.messaging.config.ServerConfig;
+
+        import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncToken;
+
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+
+        private var sqlConnection:SQLConnection;
+
+        private function setup():void {
+            sqlConnection = new SQLConnection();
+            sqlConnection.open(File.applicationStorageDirectory.resolvePath("credentials.db"));
+            var stmt:SQLStatement = new SQLStatement();
+            stmt.sqlConnection = sqlConnection;
+            stmt.text = "CREATE TABLE IF NOT EXISTS credentials (eiusername TEXT, eipassword TEXT)";
+            //stmt.text = "DROP TABLE credentials";
+            stmt.execute();
+            query = new SQLStatement();
+            query.sqlConnection = sqlConnection;
+            query.text = "SELECT eiusername, eipassword FROM credentials";
+            query.addEventListener(SQLEvent.RESULT, onResults);
+            //query.addEventListener(SQLEvent., onResults);
+            query.execute();
+            //var sqlResult:SQLResult = query.getResult();
+            //trace("blah");
+        }
+
+        private var query:SQLStatement;
+
+        private function onResults(event:SQLEvent):void {
+            var sqlResult:SQLResult = query.getResult();
+            trace(sqlResult.complete);
+            var data:Array = sqlResult.data;
+            if (data != null && data.length > 0) {
+                var userName:String = data[0].eiusername;
+                var password:String = data[0].eipassword;
+                emailInput.text = userName;
+                passwordInput.text = password;
+            }
+        }
+
+        private function login():void {
+            busyIndicator.visible = true;
+            failureMessage = null;
+            authService.authenticate.send(emailInput.text, passwordInput.text, false);
+        }
+
+        private function loggedIn():void {
+            busyIndicator.visible = false;
+            var response:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
+            trace(response.successful + " - " + response.failureMessage);
+            if (response.successful) {
+                var deleteStmt:SQLStatement = new SQLStatement();
+                deleteStmt.sqlConnection = sqlConnection;
+                deleteStmt.text = "DELETE FROM credentials";
+                deleteStmt.execute();
+                var addStmt:SQLStatement = new SQLStatement();
+                addStmt.sqlConnection = sqlConnection;
+                addStmt.text = "INSERT INTO credentials (eiusername, eipassword) VALUES (:eiusername, :eipassword)";
+                addStmt.parameters[":eiusername"] = emailInput.text;
+                addStmt.parameters[":eipassword"] = passwordInput.text;
+                addStmt.execute();
+                if (authService.channelSet == null) {
+                    authService.channelSet = ServerConfig.getChannelSet(authService.destination);
+                }
+                var token:AsyncToken = authService.channelSet.login(emailInput.text, passwordInput.text);
+                token.addResponder(new AsyncResponder(
+                        function (event:ResultEvent, token:Object = null):void {
+                            switch (event.result) {
+                                case "success":
+                                        //User.initializeUser(response);
+                                    navigator.replaceView(HomeScreen);
+                                    break;
+                                default:
+                                    failureMessage = String(event.result);
+                                    trace(event.result);
+                            }
+                        },
+                        function (event:FaultEvent, token:Object = null):void {
+                            switch (event.fault.faultCode) {
+                                case "Client.Authentication":
+                                default:
+                                    failureMessage = String(event.fault.faultString);
+                                    trace("failed");
+                            }
+                        }
+                ));
+            } else {
+                failureMessage = response.failureMessage;
+            }
+
+        }
+
+        [Bindable]
+        private var failureMessage:String;
+        ]]></fx:Script>
+    <fx:Declarations>
+        <s:RemoteObject destination="login" id="authService" endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
+            <s:method name="authenticate" result="loggedIn()"/>
+        </s:RemoteObject>
+    </fx:Declarations>
+    <s:layout>
+        <s:VerticalLayout gap="5" horizontalAlign="center" paddingTop="10"/>
+    </s:layout>
+    <s:Image source="@Embed('../../../../assets/logo.jpg')"/>
+    <s:HGroup width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5">
+        <s:Label text="Email:" width="50%"/>
+        <s:TextInput id="emailInput" width="50%"/>
+    </s:HGroup>
+    <s:HGroup width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5">
+        <s:Label text="Password:" width="50%"/>
+        <s:TextInput id="passwordInput" displayAsPassword="true" width="50%"/>
+    </s:HGroup>
+    <s:HGroup>
+        <s:Button label="Log In" click="login()"/>
+        <s:BusyIndicator id="busyIndicator" visible="false"/>
+    </s:HGroup>
+    <s:Label text="Version: 0.1.6"/>
+    <s:Label text="{failureMessage}" visible="{failureMessage != null}"/>
+
+</s:View>
