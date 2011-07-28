@@ -25,9 +25,6 @@ public class AnalysisMeasure extends AnalysisItem {
     @Column(name="fp_precision")
     private int precision;
 
-    @Column(name="reaggregation")
-    private int reaggregation;
-
     public AnalysisMeasure() {
     }
 
@@ -70,14 +67,6 @@ public class AnalysisMeasure extends AnalysisItem {
 
     public void setRowCountField(boolean rowCountField) {
         this.rowCountField = rowCountField;
-    }
-
-    public int getReaggregation() {
-        return reaggregation;
-    }
-
-    public void setReaggregation(int reaggregation) {
-        this.reaggregation = reaggregation;
     }
 
     public int getPrecision() {
