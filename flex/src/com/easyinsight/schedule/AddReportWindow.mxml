@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
-                   creationComplete="analysisService.getInsightDescriptors.send()">
+                   creationComplete="setup()">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.solutions.InsightDescriptor;
@@ -12,6 +12,29 @@
 
         [Bindable]
         private var descriptors:ArrayCollection;
+
+        private var _dataSourceID:int;
+
+        private function setup():void {
+            if (_dataSourceID == 0) {
+                analysisService.getInsightDescriptors.send();
+            } else {
+                analysisService.getInsightDescriptorsForDataSource.send(_dataSourceID);
+            }
+        }
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        private function gotReportsForDataSource():void {
+            var descriptors:ArrayCollection = analysisService.getInsightDescriptorsForDataSource.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name", true) ];
+            descriptors.sort = sort;
+            descriptors.refresh();
+            this.descriptors = descriptors;
+        }
 
         private function gotReports():void {
             var descriptors:ArrayCollection = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
@@ -39,6 +62,7 @@
 	</mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptors" result="gotReports()"/>
+        <mx:method name="getInsightDescriptorsForDataSource" result="gotReportsForDataSource()"/>
     </mx:RemoteObject>
 
 

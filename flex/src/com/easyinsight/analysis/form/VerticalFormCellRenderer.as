@@ -71,7 +71,7 @@ public class VerticalFormCellRenderer extends VBox
                     addChild(textArea);
                 } else {
                     var label:Label = new Label();
-                    label.width = 400;
+                    //label.width = 400;
                     label.setStyle("fontWeight", "normal");
                     label.setStyle("fontSize", _report.fontSize);
                     label.setStyle("fontFamily", _report.fontName);

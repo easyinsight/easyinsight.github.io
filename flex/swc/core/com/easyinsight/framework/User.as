@@ -1,5 +1,6 @@
 package com.easyinsight.framework
 {
+import com.easyinsight.analysis.ReportTypeOptions;
 import com.easyinsight.guest.Scenario;
 import com.easyinsight.preferences.UIConfiguration;
 import com.easyinsight.preferences.UISettings;
@@ -42,6 +43,7 @@ public class User extends EventDispatcher
     public var apiKey:String;
     public var apiSecretKey:String;
     public var newsletterEnabled:Boolean;
+    public var reportTypeOptions:ReportTypeOptions;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -117,6 +119,7 @@ public class User extends EventDispatcher
         _user.apiSecretKey = response.apiSecretKey;
         _user.newsletterEnabled = response.newsletterEnabled;
         _user.guestUser = response.guestUser;
+        _user.reportTypeOptions = response.reportTypeOptions;
         if (response.uiSettings != null) {
             _user.uiConfiguration = UIConfiguration.fromUISettings(response.uiSettings);
         }

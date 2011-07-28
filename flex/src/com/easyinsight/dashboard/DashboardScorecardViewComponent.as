@@ -46,33 +46,23 @@ public class DashboardScorecardViewComponent extends Canvas implements IDashboar
         } else {
             addChild(scorecardRenderer);
         }
-        /*var navigateItem:ContextMenuItem = new ContextMenuItem("View " + dashboardReport.report.name);
-        navigateItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(dashboardReport.report)));
-        });
-        var editItem:ContextMenuItem = new ContextMenuItem("Edit " + dashboardReport.report.name);
-        editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-            dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(dashboardReport.report)));
-        });
-        var exportItem:ContextMenuItem = new ContextMenuItem("Export " + dashboardReport.report.name);
-        exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-            exportReport();
-        });
-        var menu:ContextMenu = new ContextMenu();
-        menu.hideBuiltInItems();
-        menu.customItems = [ navigateItem, editItem, exportItem ];*/
-        //scorecardRenderer.refreshValues();
-        //viewFactory.contextMenu = menu;
     }
 
     public function refresh(filters:ArrayCollection):void {
-        /*viewFactory.filterDefinitions = filters;
-        viewFactory.retrieveData();*/
         scorecardRenderer.refreshValues();
     }
 
     public function retrieveData(refreshAllSources:Boolean = false):void {
         scorecardRenderer.refreshValues();
+    }
+
+    public function updateAdditionalFilters(filters:ArrayCollection):void {
+    }
+
+    public function activeStatus(status:Boolean):void {
+    }
+
+    public function initialRetrieve():void {
     }
 }
 }

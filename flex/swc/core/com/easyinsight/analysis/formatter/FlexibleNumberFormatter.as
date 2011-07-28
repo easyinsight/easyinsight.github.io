@@ -4,8 +4,15 @@ import mx.formatters.NumberBase;
 import mx.formatters.NumberBaseRoundType;
 import mx.formatters.NumberFormatter;
 public class FlexibleNumberFormatter extends NumberFormatter{
+
+    private var _minPrecision:int;
+
     public function FlexibleNumberFormatter() {
         super();
+    }
+
+    public function set minPrecision(value:int):void {
+        _minPrecision = value;
     }
 
     override public function format(value:Object):String {
@@ -54,7 +61,7 @@ public class FlexibleNumberFormatter extends NumberFormatter{
         var workingPrecision:int;
 
         if (numFraction == 0) {
-            workingPrecision = 0;
+            workingPrecision = Math.max(0, _minPrecision);
         } else {
             workingPrecision = int(precision);
         }

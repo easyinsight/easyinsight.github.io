@@ -40,8 +40,18 @@ public class FilterDefinition implements Serializable, Cloneable {
     private String filterName;
     @Column(name="column_level_template")
     private boolean templateFilter;
+    @Column(name="toggle_enabled")
+    private boolean toggleEnabled;
 
     public FilterDefinition() {
+    }
+
+    public boolean isToggleEnabled() {
+        return toggleEnabled;
+    }
+
+    public void setToggleEnabled(boolean toggleEnabled) {
+        this.toggleEnabled = toggleEnabled;
     }
 
     public boolean isTemplateFilter() {

@@ -29,6 +29,9 @@ import com.easyinsight.analysis.maps.WorldMapController;
 import com.easyinsight.analysis.timeline.TimelineController;
 import com.easyinsight.analysis.tree.TreeController;
 import com.easyinsight.analysis.treemap.TreeMapController;
+import com.easyinsight.analysis.verticallist.CombinedVerticalListController;
+import com.easyinsight.analysis.verticallist.VerticalListController;
+import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 
 public class ControllerLookup {
 
@@ -127,6 +130,12 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.FORM:
                 controller = FormController;
+                break;
+            case AnalysisDefinition.VERTICAL_LIST:
+                controller = VerticalListController;
+                break;
+            case AnalysisDefinition.COMBINED_VERTICAL_LIST:
+                controller = CombinedVerticalListController;
                 break;
         }
         return controller;

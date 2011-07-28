@@ -52,6 +52,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int FORM = 30;
     public static final int STACKED_COLUMN = 31;
     public static final int STACKED_BAR = 32;
+    public static final int VERTICAL_LIST = 33;
+    public static final int VERTICAL_LIST_COMBINED = 34;
 
     private String name;
     private String authorName;
@@ -76,10 +78,19 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private int fixedWidth;
     private boolean accountVisible;
     private List<JoinOverride> joinOverrides;
+    private boolean optimized;
 
     private String fontName = "Tahoma";
     private int fontSize = 12;
     private double backgroundAlpha = 1;
+
+    public boolean isOptimized() {
+        return optimized;
+    }
+
+    public void setOptimized(boolean optimized) {
+        this.optimized = optimized;
+    }
 
     public double getBackgroundAlpha() {
         return backgroundAlpha;
@@ -460,6 +471,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         fontSize = (int) findNumberProperty(properties, "fontSize", 12);
         fixedWidth = (int) findNumberProperty(properties, "fixedWidth", 0);
         backgroundAlpha =  findNumberProperty(properties, "backgroundAlpha", 1);
+        optimized =  findBooleanProperty(properties, "optimized", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -468,6 +480,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportNumericProperty("fontSize", fontSize));
         properties.add(new ReportNumericProperty("fixedWidth", fixedWidth));
         properties.add(new ReportNumericProperty("backgroundAlpha", backgroundAlpha));
+        properties.add(new ReportBooleanProperty("optimized", optimized));
         return properties;
     }
 

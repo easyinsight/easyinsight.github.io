@@ -19,4 +19,5 @@ public interface AnalysisTypes {
     public static final String GANTT = "Gantt";
     public static final String FORM = "Form";
     public static final String VERTICAL_LIST = "VerticalList";
+    public static final String COMBINED_VERTICAL_LIST = "CombinedVerticalList";
 }

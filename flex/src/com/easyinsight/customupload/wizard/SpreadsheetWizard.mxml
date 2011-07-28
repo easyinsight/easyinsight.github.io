@@ -15,6 +15,7 @@
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
+        import mx.core.UIComponent;
 
         private var _uploadContext:UploadContext;
 
@@ -31,11 +32,18 @@
         private var fieldPanels:ArrayCollection;
 
         private function next(event:KPITutorialEvent):void {
+            if ((viewStack.getChildren().length - 2) < (panelIndex + 1)) {
+                createPanel(panelIndex + 1);
+            }
             panelIndex++;
         }
 
         private function back(event:KPITutorialEvent):void {
             panelIndex--;
+        }
+
+        private function createPanel(i:int):void {
+            viewStack.addChild(fieldPanels.getItemAt(i) as UIComponent);
         }
 
         [Bindable]
@@ -50,7 +58,7 @@
                 tutorialPanel.percentHeight = 100;
                 tutorialPanel.percentWidth = 100;
                 var panel:SpreadsheetTutorialWindow = new SpreadsheetTutorialWindow();
-                fieldPanels.addItem(panel);
+                fieldPanels.addItem(tutorialPanel);
                 panel.info = field;
                 tutorialPanel.addChild(panel);
                 var controls:TutorialButtons = new TutorialButtons();
@@ -63,14 +71,14 @@
                 controls.addEventListener(KPITutorialEvent.CANCEL, onCancel);
                 controls.tutorialPanel = panel;
                 tutorialPanel.addChild(controls);
-                viewStack.addChild(tutorialPanel);
+                //viewStack.addChild(tutorialPanel);
             }
         }
 
         private function onFinish(event:KPITutorialEvent):void {
             var fields:ArrayCollection = new ArrayCollection();
-            for each (var panel:SpreadsheetTutorialWindow in fieldPanels) {
-                fields.addItem(panel.analysisItem);
+            for each (var panel:TutorialPanel in fieldPanels) {
+                fields.addItem(SpreadsheetTutorialWindow(panel.getChildAt(0)).analysisItem);
             }
             ProgressAlert.alert(this, "Creating the data source...", null, uploadService.createDataSource);
             uploadService.createDataSource.send(dataSourceName, _uploadContext, fields, accountVisible);
@@ -113,7 +121,7 @@
         </mx:VBox>
         <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
             <mx:ViewStack selectedIndex="{panelIndex}" change="onChange(event)"
-                          id="viewStack" resizeToContent="true" width="1000" height="550" creationPolicy="all"
+                          id="viewStack" resizeToContent="true" width="1000" height="550"
                           backgroundColor="0xFFFFFF">
                 <kpi:TutorialPanel width="100%" height="100%">
                     <wizard:DataSourceNamePanel id="dsNamePanel"/>
@@ -126,7 +134,7 @@
                     <wizard:SpreadsheetFieldIntro id="explainPanel"/>
                     <kpi:TutorialButtons tutorialPanel="{explainPanel}" backEnabled="true" nextEnabled="true"
                                          finishEnabled="true"
-                                         kpiTutorialNext="panelIndex++"
+                                         kpiTutorialNext="next(null)"
                                          kpiTutorialPrevious="panelIndex--"
                                          kpiTutorialFinish="onFinish(event)"
                                          kpiTutorialCancel="onCancel(event)"/>

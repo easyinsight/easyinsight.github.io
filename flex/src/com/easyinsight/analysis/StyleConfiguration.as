@@ -23,6 +23,7 @@ import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.analysis.maps.MapDefinition;
 import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
+import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardElement;
 import com.easyinsight.dashboard.DashboardElement;
@@ -231,6 +232,7 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Label Placement", "direction", FormReport(report).direction, report,  ["Left", "Top", "Bottom"]));
             items.addItem(new NumericReportFormItem("Number of Columns", "columnCount", FormReport(report).columnCount, report, 1, 3));
         }
+        items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];
         items.sort = sort;

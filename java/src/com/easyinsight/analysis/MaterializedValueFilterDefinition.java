@@ -13,11 +13,18 @@ import java.util.Set;
 public class MaterializedValueFilterDefinition extends MaterializedFilterDefinition {
     private Set<Value> values;
     private boolean inclusive;
+    private boolean all = false;
 
     public MaterializedValueFilterDefinition(AnalysisItem key, Set<Value> possibleValues, boolean inclusive) {
         super(key);
         this.inclusive = inclusive;
         values = possibleValues;
+        if (values.size() == 1) {
+            Value value = values.iterator().next();
+            if (value.toString().equals("All")) {
+                all = true;
+            }
+        }
     }
 
     public boolean isInclusive() {
@@ -26,6 +33,9 @@ public class MaterializedValueFilterDefinition extends MaterializedFilterDefinit
 
     public boolean allows(Value value) {
         boolean allows;
+        if (all) {
+            return true;
+        }
         if (getKey().hasType(AnalysisItemTypes.LISTING)) {
             AnalysisList analysisList = (AnalysisList) getKey();
             Value[] values = analysisList.transformToMultiple(value);

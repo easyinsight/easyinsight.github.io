@@ -523,21 +523,16 @@ public class DataStorage {
         StringBuilder groupByBuilder = new StringBuilder();
         Collection<Key> groupByItems = new HashSet<Key>();
         boolean aggregateQuery = insightRequestMetadata.isAggregateQuery();
-        createSelectClause(reportItems, selectBuilder, groupByItems, aggregateQuery);
+        createSelectClause(reportItems, selectBuilder, groupByBuilder, aggregateQuery, insightRequestMetadata.isOptimized());
         selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
         createFromClause(version, fromBuilder);
         createWhereClause(filters, whereBuilder);
-        if (aggregateQuery) {
-            groupByBuilder = createGroupByClause(groupByBuilder, groupByItems);
-        } else {
-            groupByItems = new HashSet<Key>();
-        }
         createSQL(filters, limit, queryBuilder, selectBuilder, fromBuilder, whereBuilder, groupByBuilder, groupByItems);
         PreparedStatement queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
         ResultSet dataRS = queryStmt.executeQuery();
-        processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery, insightRequestMetadata.isGmtData(), insightRequestMetadata.getUtcOffset());
+        processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery, insightRequestMetadata.isOptimized());
         dataSet.setLastTime(metadata.getLastData());
         return dataSet;
     }
@@ -556,7 +551,7 @@ public class DataStorage {
     }
 
     private void processQueryResults(@NotNull Collection<AnalysisItem> reportItems, @NotNull Map<Key, KeyMetadata> keys, @NotNull DataSet dataSet, @NotNull ResultSet dataRS,
-                                     boolean aggregateQuery, boolean gmtData, long timeOffset) throws SQLException {
+                                     boolean aggregateQuery, boolean optimized) throws SQLException {
         while (dataRS.next()) {
             IRow row = dataSet.createRow();
             int i = 1;
@@ -566,16 +561,26 @@ public class DataStorage {
                 KeyMetadata keyMetadata = keys.get(key);
                 if (keyMetadata != null) {
                     if (keyMetadata.getType() == Value.DATE) {
-                        try {
-                            Timestamp time = dataRS.getTimestamp(i++);
-                            if (dataRS.wasNull()) {
+                        AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                        if (optimized && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL)) {
+                            int month = dataRS.getInt(i++);
+                            int year = dataRS.getInt(i++);
+                            Calendar cal = Calendar.getInstance();
+                            cal.set(Calendar.MONTH, month - 1);
+                            cal.set(Calendar.YEAR, year);
+                            row.addValue(aggregateKey, new DateValue(cal.getTime()));
+                        } else {
+                            try {
+                                Timestamp time = dataRS.getTimestamp(i++);
+                                if (dataRS.wasNull()) {
+                                    row.addValue(aggregateKey, new EmptyValue());
+                                } else {
+                                    long milliseconds = time.getTime();
+                                    row.addValue(aggregateKey, new DateValue(new Date(milliseconds)));
+                                }
+                            } catch (SQLException e) {
                                 row.addValue(aggregateKey, new EmptyValue());
-                            } else {
-                                long milliseconds = time.getTime();
-                                row.addValue(aggregateKey, new DateValue(new Date(milliseconds)));
                             }
-                        } catch (SQLException e) {
-                            row.addValue(aggregateKey, new EmptyValue());
                         }
                     } else if (keyMetadata.getType() == Value.NUMBER) {
                         try {
@@ -639,7 +644,7 @@ public class DataStorage {
             queryBuilder.append(" WHERE ");
             queryBuilder.append(whereBuilder.toString());
         }
-        if (groupByItems.size() > 0) {
+        if (groupByBuilder.length() > 0) {
             queryBuilder.append(" GROUP BY ");
             queryBuilder.append(groupByBuilder.toString());
         }
@@ -689,7 +694,7 @@ public class DataStorage {
         }
     }
 
-    private void createSelectClause(Collection<AnalysisItem> reportItems, StringBuilder selectBuilder, Collection<Key> groupByItems, boolean aggregateQuery) {
+    private void createSelectClause(Collection<AnalysisItem> reportItems, StringBuilder selectBuilder, StringBuilder groupByBuilder, boolean aggregateQuery, boolean optimized) {
         for (AnalysisItem analysisItem : reportItems) {
             if (analysisItem.isDerived()) {
                 throw new RuntimeException("Attempt made to query derived analysis item " + analysisItem.toDisplay() + " of class " + analysisItem.getClass().getName());
@@ -709,13 +714,32 @@ public class DataStorage {
                 } else if (aggregation == AggregationTypes.MIN) {
                     columnName = "MIN(" + columnName + ")";
                 } else {
-                    groupByItems.add(analysisItem.getKey().toBaseKey());
+                    groupByBuilder.append("binary(" + columnName + ")");
+                    groupByBuilder.append(",");
+                }
+                selectBuilder.append(columnName);
+                selectBuilder.append(",");
+            } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                if (optimized && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL)) {
+                    selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
+                    groupByBuilder.append("month" + columnName + ", year" + columnName + ",");
+                } else {
+                    selectBuilder.append(columnName);
+                    selectBuilder.append(",");
+                    groupByBuilder.append("binary(" + columnName + ")");
+                    groupByBuilder.append(",");
                 }
             } else {
-                groupByItems.add(analysisItem.getKey().toBaseKey());
+                groupByBuilder.append("binary(" + columnName + ")");
+                groupByBuilder.append(",");
+                selectBuilder.append(columnName);
+                selectBuilder.append(",");
             }
-            selectBuilder.append(columnName);
-            selectBuilder.append(",");
+
+        }
+        if (groupByBuilder.length() > 0) {
+            groupByBuilder.deleteCharAt(groupByBuilder.length() - 1);
         }
     }
 
@@ -953,7 +977,7 @@ public class DataStorage {
                 sqlBuilder.append(",");
                 indexCount++;
             }
-            if (indexCount == 63) {
+            if (indexCount == 60) {
                 break;
             }
         }

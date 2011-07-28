@@ -11,23 +11,20 @@ import com.easyinsight.core.Value;
  */
 public class TypeTransformComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        DataSet targetSet = new DataSet();
+        //DataSet targetSet = new DataSet();
         for (IRow row : dataSet.getRows()) {
-            IRow targetRow = targetSet.createRow();
+            //IRow targetRow = targetSet.createRow();
             for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
                 Value value = row.getValue(analysisItem.createAggregateKey());
-                // TODO: why was this here?
-                //Value preFilterValue = analysisItem.renameMeLater(value);
                 boolean shift = false;
                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                     shift = ((AnalysisDateDimension) analysisItem).isTimeshift();
                 }
                 Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift);
-
-                targetRow.addValue(analysisItem.createAggregateKey(), transformedValue);
+                row.addValue(analysisItem.createAggregateKey(), transformedValue);
             }
         }
-        return targetSet;
+        return dataSet;
     }
 
     public void decorate(DataResults listDataResults) {

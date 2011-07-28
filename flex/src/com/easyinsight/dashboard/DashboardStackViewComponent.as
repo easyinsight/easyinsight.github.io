@@ -15,6 +15,7 @@ import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.core.UIComponent;
 import mx.effects.Effect;
@@ -54,6 +55,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         } else {
             return;
         }
+        IDashboardViewComponent(newComp).initialRetrieve();
         viewStack.selectedIndex = targetIndex;
     }
 
@@ -101,6 +103,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         headerArea.percentWidth = 100;
         var headerBackgroundImage:BackgroundImage = new BackgroundImage();
         headerBackgroundImage.applyCenterScreenLogic = false;
+        headerBackgroundImage.useBindings = false;
         var headerbar:HBox = new HBox();
         if (dashboardStack.headerBackground != null) {
             var headerBarLoader:ImageLoader = new ImageLoader();
@@ -118,20 +121,10 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         headerbar.setStyle("paddingBottom", 5);
         headerBackgroundImage.addChild(headerbar);
         headerArea.addChild(headerBackgroundImage);
-
-        /*
-            <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid"
-                                                  borderThickness="1"
-                                                  existingFilters="{filterDefinitions}"
-                                                  width="100%" paddingLeft="10"
-                                                  paddingTop="10" paddingBottom="10"
-                                                  paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
-                                                  backgroundColor="#FFFFFF" backgroundAlpha=".8" reportView="true"/>
-         */
         viewStack = new ViewStack();
         viewStack.percentHeight = 100;
         viewStack.percentWidth = 100;
-        viewStack.creationPolicy = "all";
+        //viewStack.creationPolicy = "all";
         viewChildren = new ArrayCollection();
         for (var i:int = 0; i < dashboardStack.gridItems.length; i++) {
             var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
@@ -153,7 +146,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                     topButton.label = String(i);
                 }
             }
-            headerbar.addChild(topButton);
+            if (dashboardStack.gridItems.length > 1) {
+                headerbar.addChild(topButton);
+            }
             var comp:UIComponent = DashboardElementFactory.createViewUIComponent(report, dashboardEditorMetadata);
             viewChildren.addItem(comp);
             viewStack.addChild(comp);
@@ -167,6 +162,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             transformContainer.setStyle("backgroundAlpha", dashboardStack.filterBackgroundAlpha);
             transformContainer.filterEditable = false;
             transformContainer.existingFilters = dashboardStack.filters;
+            updateAdditionalFilters(dashboardStack.filters);
             transformContainer.percentWidth = 100;
             transformContainer.setStyle("paddingLeft", 10);
             transformContainer.setStyle("paddingRight", 10);
@@ -183,19 +179,26 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     private var transformContainer:TransformContainer;
 
     private function transformsUpdated(event:Event):void {
+        updateAdditionalFilters(transformContainer.getFilterDefinitions());
         refresh(transformContainer.getFilterDefinitions());
     }
-    
-    public function refresh(filters:ArrayCollection):void {
+
+    public function updateAdditionalFilters(filters:ArrayCollection):void {
         for each (var comp:IDashboardViewComponent in viewChildren) {
-            comp.refresh(filters);
+            comp.updateAdditionalFilters(filters);
         }
     }
 
+    public function refresh(filters:ArrayCollection):void {
+        IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).refresh(filters);
+    }
+
     public function retrieveData(refreshAllSources:Boolean = false):void {
-        for each (var comp:IDashboardViewComponent in viewChildren) {
-            comp.retrieveData(refreshAllSources);
-        }
+        IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).retrieveData(refreshAllSources);
+    }
+
+    public function initialRetrieve():void {
+        IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).initialRetrieve();
     }
 }
 }

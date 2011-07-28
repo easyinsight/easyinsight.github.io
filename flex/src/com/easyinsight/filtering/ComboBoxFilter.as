@@ -13,6 +13,7 @@ import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.containers.HBox;
 import mx.containers.ViewStack;
+import mx.controls.Alert;
 
 import mx.controls.Button;
 import mx.controls.CheckBox;
@@ -141,11 +142,13 @@ public class ComboBoxFilter extends HBox implements IFilter
             var hbox:HBox = new HBox();
             hbox.percentHeight = 100;
             hbox.setStyle("verticalAlign", "middle");
+            if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
                 var checkbox:CheckBox = new CheckBox();
                 checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
                 checkbox.toolTip = "Click to disable this filter.";
                 checkbox.addEventListener(Event.CHANGE, onChange);
                 addChild(checkbox);
+            }
             //}
             if (_showLabel) {
                 var label:Label = new Label();
@@ -228,8 +231,14 @@ public class ComboBoxFilter extends HBox implements IFilter
 
     private function filterValueChanged(event:DropdownEvent):void {
 			var newValue:String = event.currentTarget.selectedLabel;
-			
-			var selectedValue:String = _filterDefinition.filteredValues.getItemAt(0) as String;
+
+        var filterObj:Object = _filterDefinition.filteredValues.getItemAt(0);
+        var selectedValue:String;
+                if (filterObj is Value) {
+                    selectedValue = String(filterObj.getValue());
+                } else {
+                    selectedValue = filterObj as String;
+                }
 			if (newValue != selectedValue) {
 				var newFilteredValues:ArrayCollection = new ArrayCollection();
 				newFilteredValues.addItem(newValue);
@@ -252,8 +261,17 @@ public class ComboBoxFilter extends HBox implements IFilter
                     }
                 }
             }
+            if (_filterDefinition != null && _filterDefinition.excludeEmpty) {
+                var index:int = strings.getItemIndex("");
+                if (index != -1) {
+                    strings.removeItemAt(index);
+                }
+            }
 			strings.sort = new Sort();
-			strings.refresh();			
+			strings.refresh();
+            if (_filterDefinition != null && _filterDefinition.allOption) {
+                strings.addItemAt("All", 0);
+            }
 			comboBox.dataProvider = strings;
 			comboBox.rowCount = Math.min(strings.length, 15);
             if (_filterDefinition == null) {
@@ -292,6 +310,7 @@ public class ComboBoxFilter extends HBox implements IFilter
                     dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this, event.bubbles));
                 }
             } else {
+
                 loadingFromReport = false;
                 newFilter = false;
             }

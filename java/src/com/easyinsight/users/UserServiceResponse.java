@@ -1,5 +1,6 @@
 package com.easyinsight.users;
 
+import com.easyinsight.analysis.ReportTypeOptions;
 import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.UISettings;
 
@@ -43,6 +44,7 @@ public class UserServiceResponse {
     private String apiSecretKey;
     private boolean newsletterEnabled;
     private long fixedDashboardID;
+    private ReportTypeOptions reportTypeOptions;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -56,7 +58,7 @@ public class UserServiceResponse {
                                boolean firstLogin, Date lastLoginDate, String accountName,
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
-                               String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID) {
+                               String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -89,6 +91,15 @@ public class UserServiceResponse {
             fixedDashboardID = 0L;
         }
         this.fixedDashboardID = fixedDashboardID;
+        this.reportTypeOptions = reportTypeOptions;
+    }
+
+    public ReportTypeOptions getReportTypeOptions() {
+        return reportTypeOptions;
+    }
+
+    public void setReportTypeOptions(ReportTypeOptions reportTypeOptions) {
+        this.reportTypeOptions = reportTypeOptions;
     }
 
     public long getFixedDashboardID() {

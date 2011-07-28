@@ -26,6 +26,18 @@
             </mx:AddChild>
         </mx:State>
 
+        <mx:State name="ReaggregateMeasure">
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <analysis:ReaggregateMeasureDetailEditor addedToStage="detailEditor = reaggregateDetailEditor"
+                                                     id="reaggregateDetailEditor"
+                                                     dimensionFields="{dimensionFields}"
+                                                     dateDimensionFields="{dateFields}"
+                                                     measureObjects="{measureObjects}"
+                                                     measureFields="{measureFields}"
+                                                     analysisItem="{startingAnalysisItem}"/>
+            </mx:AddChild>
+        </mx:State>
+
         <mx:State name="SixSigmaMeasure">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:SixSigmaDetailEditor addedToStage="detailEditor = sigmaDetailEditor" id="sigmaDetailEditor"
@@ -243,7 +255,7 @@
         }
 
         protected function getComplexOptions():ArrayCollection {
-            return new ArrayCollection(["Normality", "Step", "Six Sigma"]);
+            return new ArrayCollection(["Normality", "Step", "Six Sigma", "Reaggregate"]);
         }
 
         public function validate():Boolean {
@@ -324,6 +336,9 @@
                     break;
                 case "Text":
                     currentState = "Text";
+                    break;
+                case "Reaggregate":
+                    currentState = "ReaggregateMeasure";
                     break;
             }
             invalidateDisplayList();
@@ -423,6 +438,7 @@
                                 <mx:String>Normality</mx:String>
                                 <mx:String>Step</mx:String>
                                 <mx:String>Six Sigma</mx:String>
+                                <mx:String>Reaggregate</mx:String>
                             </mx:Array>
                         </mx:dataProvider>
                     </mx:ComboBox>

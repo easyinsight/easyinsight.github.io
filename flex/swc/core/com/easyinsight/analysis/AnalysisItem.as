@@ -91,7 +91,7 @@ import mx.formatters.Formatter;
 		}
 		
 		public function getFormatter():Formatter {
-			return formattingConfiguration.getFormatter();					
+			return formattingConfiguration.getFormatter(2, 0);
 		}
 
         public function getSortFunction():Function {

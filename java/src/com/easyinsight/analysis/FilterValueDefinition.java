@@ -33,6 +33,12 @@ public class FilterValueDefinition extends FilterDefinition {
     @Column(name="auto_complete")
     private boolean autoComplete;
 
+    @Column(name="exclude_empty")
+    private boolean excludeEmpty;
+
+    @Column(name="all_option")
+    private boolean allOption;
+
     public FilterValueDefinition() {        
     }
 
@@ -40,6 +46,22 @@ public class FilterValueDefinition extends FilterDefinition {
         super(field);
         this.inclusive = inclusive;
         this.filteredValues = filteredValues;
+    }
+
+    public boolean isExcludeEmpty() {
+        return excludeEmpty;
+    }
+
+    public void setExcludeEmpty(boolean excludeEmpty) {
+        this.excludeEmpty = excludeEmpty;
+    }
+
+    public boolean isAllOption() {
+        return allOption;
+    }
+
+    public void setAllOption(boolean allOption) {
+        this.allOption = allOption;
     }
 
     public boolean isAutoComplete() {
@@ -233,10 +255,10 @@ public class FilterValueDefinition extends FilterDefinition {
             Object value = filteredValues.get(0);
             if (value instanceof String) {
                 String string = (String) value;
-                return !"".equals(string);
+                return !"".equals(string) && !"All".equals(string);
             } else if (value instanceof StringValue) {
                 StringValue stringValue = (StringValue) value;
-                return !"".equals(stringValue.toString());
+                return !"".equals(stringValue.toString()) && !"All".equals(stringValue.toString());
             } else if (value instanceof EmptyValue) {
                 return false;
             }

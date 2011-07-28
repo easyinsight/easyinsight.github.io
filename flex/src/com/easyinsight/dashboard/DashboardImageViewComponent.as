@@ -57,5 +57,14 @@ public class DashboardImageViewComponent extends Box implements IDashboardViewCo
 
     public function retrieveData(refreshAllSources:Boolean = false):void {
     }
+
+    public function updateAdditionalFilters(filters:ArrayCollection):void {
+    }
+
+    public function activeStatus(status:Boolean):void {
+    }
+
+    public function initialRetrieve():void {
+    }
 }
 }

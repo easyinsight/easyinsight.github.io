@@ -296,6 +296,15 @@
 
         [Bindable]
         protected var example2Explanation:String;
+
+        [Bindable]
+        protected var underline:Boolean;
+
+        [Bindable]
+        protected var precision:int;
+
+        [Bindable]
+        protected var minPrecision:int;
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
@@ -320,7 +329,7 @@
             </mx:FormItem>
             <mx:FormItem label="" direction="vertical" fontFamily="Lucida Grande" fontWeight="normal">
                 <mx:TextArea text="You can build calculations using fields from the report editor list and the functions listed to the left. You can drag fields from the report editor list into the input below."
-                        width="400" height="50" editable="false" selectable="false" focusEnabled="false"/>
+                        width="300" height="65" editable="false" selectable="false" focusEnabled="false"/>
                 <mx:Label text="Here are examples of calculation syntax:"/>
                 <mx:Grid horizontalGap="0">
                     <mx:GridRow>
@@ -338,7 +347,7 @@
             <mx:FormItem label="Calculation: " direction="horizontal" width="100%">
                 <schedule:CursorTextArea id="calculationInput" dragEnter="dragEnterHandler(event)"
                                          dragDrop="dragDropHandler(event)"
-                                         width="400" height="100"
+                                         width="300" height="100"
                                          text="{calcText}" borderStyle="solid" borderThickness="1"/>
             </mx:FormItem>
             <mx:FormItem label="" direction="horizontal">
@@ -348,39 +357,21 @@
                 <mx:Button label="/" click="appendSymbol('/')" toolTip="Divide"/>
                 <mx:Button label="^" click="appendSymbol('^')" toolTip="Exponent"/>
             </mx:FormItem>
-            <mx:FormItem label="Formatting: " visible="{showMeasures}">
-                <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Recalculate on Summary: " visible="{showMeasures}">
-                <mx:CheckBox id="summaryCheckbox" selected="{summaryRecalc}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Row Level: " visible="{showMeasures}" direction="horizontal">
-                <mx:CheckBox id="rowLevelCheckbox" selected="{applyBefore}"/>
-                <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you specify row level calculation, Easy Insight will apply your calculation before aggregating the data together."/>
-            </mx:FormItem>
-            <mx:FormItem label="{detailItemLabel}" visible="{applyBefore}" direction="horizontal">
-                <mx:ViewStack resizeToContent="true" selectedIndex="{detailIndex}">
-                    <mx:Box/>
-                    <mx:Box>
-                        <util:SmartComboBox id="dateBox" rowCount="10" selectedValue="{dateLevel}" selectedProperty="dateLevel">
-                            <mx:ArrayCollection>
-                                <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
-                                <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
-                                <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
-                                <mx:Object label="Day - Month - Year - Hour" data="{AnalysisItemTypes.HOUR_LEVEL}"/>
-                                <mx:Object label="Day - Month - Year - Hour - Minute"
-                                           data="{AnalysisItemTypes.MINUTE_LEVEL}"/>
-
-                                <mx:Object label="Week - Year" data="{AnalysisItemTypes.WEEK_LEVEL}"/>
-                                <mx:Object label="Month" data="{AnalysisItemTypes.MONTH_FLAT}"/>
-                                <mx:Object label="Day of Year" data="{AnalysisItemTypes.DAY_OF_YEAR_FLAT}"/>
-                                <mx:Object label="Day of Week" data="{AnalysisItemTypes.DAY_OF_WEEK_FLAT}"/>
-                                <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
-                            </mx:ArrayCollection>
-                        </util:SmartComboBox>
-                    </mx:Box>
-                </mx:ViewStack>
-                <mx:Box>
+        </mx:Form>
+        <mx:ViewStack resizeToContent="true" selectedIndex="{detailIndex}">
+            <mx:Box/>
+            <mx:Form>
+                <mx:FormItem label="Formatting:">
+                    <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Recalculate on Summary:">
+                    <mx:CheckBox id="summaryCheckbox" selected="{summaryRecalc}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Row Level:" direction="horizontal">
+                    <mx:CheckBox id="rowLevelCheckbox" selected="{applyBefore}"/>
+                    <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you specify row level calculation, Easy Insight will apply your calculation before aggregating the data together."/>
+                </mx:FormItem>
+                <mx:FormItem label="Aggregation:">
                     <util:SmartComboBox id="measureAggregationBox" rowCount="8" selectedProperty="value" selectedValue="{aggregation}">
                         <util:dataProvider>
                             <mx:Array>
@@ -395,11 +386,40 @@
                             </mx:Array>
                         </util:dataProvider>
                     </util:SmartComboBox>
-                </mx:Box>
+                </mx:FormItem>
+                <mx:FormItem label="Underline:">
+                    <mx:CheckBox id="underlineCheckbox" selected="{underline}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Floating Point Precision:">
+                    <mx:NumericStepper id="precisionInput" value="{precision}" minimum="0" maximum="50"/>
+                </mx:FormItem>
+                <mx:FormItem label="Minimum Precision:">
+                    <mx:NumericStepper id="minPrecisionInput" value="{minPrecision}" minimum="0" maximum="50"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Form>
+                <mx:FormItem label="{detailItemLabel}" direction="horizontal">
+                    <util:SmartComboBox id="dateBox" rowCount="10" selectedValue="{dateLevel}" selectedProperty="dateLevel">
+                        <mx:ArrayCollection>
+                            <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
+                            <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
+                            <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
+                            <mx:Object label="Day - Month - Year - Hour" data="{AnalysisItemTypes.HOUR_LEVEL}"/>
+                            <mx:Object label="Day - Month - Year - Hour - Minute"
+                                       data="{AnalysisItemTypes.MINUTE_LEVEL}"/>
 
-            </mx:FormItem>
-        </mx:Form>
+                            <mx:Object label="Week - Year" data="{AnalysisItemTypes.WEEK_LEVEL}"/>
+                            <mx:Object label="Month" data="{AnalysisItemTypes.MONTH_FLAT}"/>
+                            <mx:Object label="Day of Year" data="{AnalysisItemTypes.DAY_OF_YEAR_FLAT}"/>
+                            <mx:Object label="Day of Week" data="{AnalysisItemTypes.DAY_OF_WEEK_FLAT}"/>
+                            <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
+                        </mx:ArrayCollection>
+                    </util:SmartComboBox>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Form>
+            </mx:Form>
+         </mx:ViewStack>
     </mx:HBox>
     <mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="3"/>
-    <!--<analysis:CalculationValidator id="calcValidator" source="{calculationInput}" property="text" failureMessage="{failureMessage}"/>-->
 </mx:Canvas>

@@ -50,6 +50,7 @@
         <mapping class="com.easyinsight.analysis.AnalysisLatitude"/>
         <mapping class="com.easyinsight.analysis.AnalysisMeasure"/>
         <mapping class="com.easyinsight.analysis.AnalysisDateDimension"/>
+        <mapping class="com.easyinsight.analysis.ReaggregateAnalysisMeasure"/>
         <mapping class="com.easyinsight.analysis.AnalysisList"/>
         <mapping class="com.easyinsight.analysis.AnalysisText"/>
         <mapping class="com.easyinsight.analysis.AnalysisZipCode"/>
@@ -72,6 +73,7 @@
         <mapping class="com.easyinsight.analysis.HeatMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.FormDefinitionState"/>
         <mapping class="com.easyinsight.analysis.VerticalListDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.CombinedVerticalListDefinitionState"/>
         <mapping class="com.easyinsight.analysis.gauge.GaugeDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeDefinitionState"/>
@@ -79,6 +81,7 @@
         <mapping class="com.easyinsight.analysis.AnalysisStep"/>
         <mapping class="com.easyinsight.analysis.LastValueFilter"/>
         <mapping class="com.easyinsight.analysis.FirstValueFilter"/>
+        <mapping class="com.easyinsight.analysis.FlatDateFilter"/>
         <mapping class="com.easyinsight.analysis.NullFilter"/>
         <mapping class="com.easyinsight.analysis.OrFilter"/>
         <mapping class="com.easyinsight.analysis.OrderedFilterDefinition"/>

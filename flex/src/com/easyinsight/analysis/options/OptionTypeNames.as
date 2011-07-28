@@ -16,6 +16,7 @@ package com.easyinsight.analysis.options
         public static const VARIANCE:String = "Variance";
         public static const RANK:String = "Ranking";
         public static const PERCENT_OF_TOTAL:String = "Percent of Total";
+        public static const REAGGREGATE:String = "Reaggregate";
 
 		public static const STEP:String = "Step";
 		public static const GROUPING:String = "Grouping";

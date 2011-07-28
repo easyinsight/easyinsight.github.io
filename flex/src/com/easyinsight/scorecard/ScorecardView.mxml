@@ -4,10 +4,12 @@
                       implements="com.easyinsight.listing.IPerspective" creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.framework.InsightRequestMetadata;
 
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.util.ActionScorecardLog;
+        import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
@@ -60,6 +62,18 @@
             dispatchEvent(new AnalysisCloseEvent());
         }
 
+        public function exportScorecard():void {
+            var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+            metadata.utcOffset = new Date().getTimezoneOffset();
+            ProgressAlert.alert(this, "Exporting scorecard...", null, exportService.exportScorecardToXLS);
+            exportService.exportScorecardToXLS.send(_scorecardID, metadata);
+        }
+
+        private function exported():void {
+            var url:URLRequest = new URLRequest("/app/excel");
+            navigateToURL(url, "_blank");
+        }
+
         public function gotFocus():void {
         }
 
@@ -67,12 +81,17 @@
             cleanupBindings();
         }
         ]]></mx:Script>
+    <mx:RemoteObject destination="exportService" id="exportService">
+        <mx:method name="exportScorecardToXLS" result="exported()"/>
+    </mx:RemoteObject>
     <mx:VBox height="100%" width="1000" verticalGap="20" horizontalAlign="center" paddingLeft="10" paddingRight="10">
         <mx:HBox width="100%" paddingTop="15">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()"
                        toolTip="Close" label="Close Editor" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/refresh.png')" click="scorecardRenderer.refreshValues()"
                        toolTip="Refresh the Scorecard" label="Refresh" labelPlacement="right"/>
+            <mx:Button icon="@Embed(source='../../../../assets/table.png')" click="exportScorecard()"
+                       toolTip="Export the Scorecard" label="Export" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/pencil.png')" click="scorecardView()"
                                    labelPlacement="right" id="editReportButton"
                                    toolTip="Open this scorecard in the scorecard editor..."

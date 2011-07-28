@@ -1,57 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" toolTip="(F5)">
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" toolTip="(F5)">
 	<mx:Metadata>
 		[Event(name="analysisStateChange", type="com.easyinsight.analysis.AnalysisStateChangeEvent")]
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.analysis.charts.ChartTypes;
-            import mx.events.MenuEvent;
-            
-            [Bindable]
-            private var xmlList:XMLList;
-            
-            public function set mode(mode:String):void {
-            	if (mode == "all") {
-            		xmlList = all;
-            	} else if (mode == "splitSource") {
-            		xmlList = splitSource;
-            	} else if (mode == "splitTarget") {
-            		xmlList = splitTarget;
-            	}
+        import com.easyinsight.framework.User;
+
+        import mx.events.MenuEvent;
+
+        [Bindable]
+        private var xmlList:XMLList;
+
+        public function set mode(mode:String):void {
+            if (mode == "all") {
+                xmlList = all;
+
             }
-			
-			private function itemClickHandler(event:MenuEvent):void {
-                if (event.item != null && event.item.@controller != null) {
-                    event.currentTarget.label= event.label;
-                    var controllerClass:Class = ControllerLookup.controllerForType(event.item.@type);
-                    if (controllerClass != null) {
-                        var controller:IReportController = new controllerClass();
-                        dispatchEvent(new AnalysisStateChangeEvent(controller));
-                    }
+        }
+
+        private var _reportTypeOptions:ReportTypeOptions = User.getInstance().reportTypeOptions;
+
+        public function set reportTypeOptions(value:ReportTypeOptions):void {
+            _reportTypeOptions = value;
+            invalidateProperties();
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (_reportTypeOptions != null) {
+                recurse(all);
+            }
+        }
+
+        private function recurse(nodes:XMLList):void {
+            for (var i:int = 0; i < nodes.length(); i++) {
+                var xmlNode:XMLList = XMLList(nodes[i]);
+                var type:int = xmlNode.@type;
+                var keep:Boolean = _reportTypeOptions.hasType(type);
+                if (!keep) {
+                    delete nodes[i];
+                } else {
+                    recurse(XMLList(xmlNode.children()));
                 }
             }
-            
-            public function set selectedLabel(type:int):void {
-                setLabel(all, type);
-            	//p2.label = selectedLabel;
-            }
+        }
 
-            private function setLabel(parent:XMLList, type:int):void {
-                var nodes:XMLList = parent.children();
-                for (var i:int = 0; i < nodes.length(); i++) {
-                    var node:XMLList = XMLList(nodes[i]);
-                    if (node.@type == type) {
-                        p2.label = node.@label;     
-                    }
-                    setLabel(node, type);
+        private function itemClickHandler(event:MenuEvent):void {
+            if (event.item != null && event.item.@controller != null) {
+                event.currentTarget.label = event.label;
+                var controllerClass:Class = ControllerLookup.controllerForType(event.item.@type);
+                if (controllerClass != null) {
+                    var controller:IReportController = new controllerClass();
+                    dispatchEvent(new AnalysisStateChangeEvent(controller));
                 }
             }
+        }
 
-            public function openPopup():void {
-                p2.open();
+        public function set selectedLabel(type:int):void {
+            setLabel(all, type);
+            //p2.label = selectedLabel;
+        }
+
+        private function setLabel(parent:XMLList, type:int):void {
+            var nodes:XMLList = parent.children();
+            for (var i:int = 0; i < nodes.length(); i++) {
+                var node:XMLList = XMLList(nodes[i]);
+                if (node.@type == type) {
+                    p2.label = node.@label;
+                }
+                setLabel(node, type);
             }
-		]]>
+        }
+
+        public function openPopup():void {
+            p2.open();
+        }
+        ]]>
 	</mx:Script>
 	  <mx:XMLList id="all">
         <node label="Grid        ">
@@ -85,39 +110,15 @@
         	<node label="Plot" type="{AnalysisDefinition.PLOT}"/>
         	<node label="Bubble" type="{AnalysisDefinition.BUBBLE}"/>
         </node>
-        <node label="Maps" icon="">
-            <node label="World" type="{AnalysisDefinition.MAP_WORLD}"/>
-            <node label="USA" type="{AnalysisDefinition.MAP_USA}"/>
-            <node label="Americas" type="{AnalysisDefinition.MAP_AMERICAS}"/>
-            <node label="Europe" type="{AnalysisDefinition.MAP_EUROPE}"/>
-            <node label="Asia" type="{AnalysisDefinition.MAP_ASIA}"/>
-            <node label="Middle East" type="{AnalysisDefinition.MAP_MIDDLE_EAST}"/>
-            <node label="Africa" type="{AnalysisDefinition.MAP_AFRICA}"/>
-        </node>
         <node label="Google Map" type="{AnalysisDefinition.HEATMAP}"/>
         <node label="Tree Map" type="{AnalysisDefinition.TREEMAP}"/>
         <node label="Gauge" type="{AnalysisDefinition.GAUGE}"/>
         <node label="Gantt" type="{AnalysisDefinition.GANTT}"/>
         <node label="Form" type="{AnalysisDefinition.FORM}"/>
-        <node label="Vertical List" type="{AnalysisDefinition.VERTICAL_LIST}"/>
-    </mx:XMLList>
-    <mx:XMLList id="splitSource">        
-    	<node label="List" state=""/>
-    </mx:XMLList>
-    <mx:XMLList id="splitTarget">
-        <node label="Grid" icon="">
-        	<node label="Crosstab" state="Crosstab"/>
+        <node label="Advanced" icon="">
+            <node label="Vertical List" type="{AnalysisDefinition.VERTICAL_LIST}"/>
+            <node label="Combined Vertical List" type="{AnalysisDefinition.COMBINED_VERTICAL_LIST}"/>
         </node>
-        <node label="Chart" icon="">
-        	<node label="Column" state="BasicChart" subState="{ChartTypes.COLUMN_FAMILY}"/>
-        	<node label="Bar" state="BasicChart" subState="{ChartTypes.BAR_FAMILY}"/>
-        	<node label="Line" state="BasicChart" subState="{ChartTypes.LINE_FAMILY}"/>
-        	<node label="Pie" state="BasicChart" subState="{ChartTypes.PIE_FAMILY}"/>
-        </node>
-        <node label="Map" icon="">
-        	<node label="Country and State" state="ILogMap"/>
-        	<node label="Satellite and Street" state="YahooMap"/>
-        </node>        
     </mx:XMLList>
     <mx:PopUpMenuButton id="p2" 
             dataProvider="{xmlList}"

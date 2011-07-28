@@ -35,10 +35,8 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
         _preserveValues = value;
     }
 
-    private function processListData(event:ResultEvent):void {
-        var listData:EmbeddedDataResults = dataRemoteSource.getEmbeddedResults.lastResult as EmbeddedDataResults;
-        if (listData.reportFault == null) {
-            var headers:ArrayCollection = new ArrayCollection(listData.headers);
+    protected function translate(listData:EmbeddedDataResults):ArrayCollection {
+        var headers:ArrayCollection = new ArrayCollection(listData.headers);
             var rows:ArrayCollection = new ArrayCollection(listData.rows);
             var data:ArrayCollection = new ArrayCollection();
             for (var i:int = 0; i < rows.length; i++) {
@@ -63,8 +61,15 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
                 }
                 data.addItem(endObject);
             }
+        return data;
+    }
+
+    private function processListData(event:ResultEvent):void {
+        var listData:EmbeddedDataResults = dataRemoteSource.getEmbeddedResults.lastResult as EmbeddedDataResults;
+        if (listData.reportFault == null) {
+
         }
-        dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, data, listData.definition, listData.dataSourceAccessible,
+        dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, translate(listData), listData.definition, listData.dataSourceAccessible,
                 listData.reportFault, listData.dataSourceInfo, listData.additionalProperties));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }

@@ -1,5 +1,8 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.pipeline.CrosstabComponent;
+import com.easyinsight.pipeline.IComponent;
+
 import java.util.*;
 
 /**
@@ -68,5 +71,10 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
         setColumns(items("column", structure));
         setRows(items("row", structure));
         setMeasures(items("measure", structure));
+    }
+
+    @Override
+    public List<IComponent> createComponents() {
+        return Arrays.asList((IComponent) new CrosstabComponent());
     }
 }

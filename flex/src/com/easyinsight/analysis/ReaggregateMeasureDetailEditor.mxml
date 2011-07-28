@@ -1,0 +1,84 @@
+<?xml version="1.0" ?>
+<analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
+                                   xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var aggregationString:String;
+
+        override public function createAnalysisItem(aggregation:String):AnalysisItem {
+            var measure:ReaggregateAnalysisMeasure = new ReaggregateAnalysisMeasure();
+            return measure;
+        }
+
+        override public function set analysisItem(val:AnalysisItem):void {
+            super.analysisItem = val;
+            if (val is ReaggregateAnalysisMeasure) {
+                var measure:ReaggregateAnalysisMeasure = val as ReaggregateAnalysisMeasure;
+                aggregateDimension = measure.aggregationItem as AnalysisDimension;
+                wrappedMeasure = measure.wrappedMeasure as AnalysisMeasure;
+                var measureString:String;
+                switch (measure.aggregation) {
+                    case AggregationTypes.SUM:
+                        measureString = "Sum";
+                        break;
+                    case AggregationTypes.AVERAGE:
+                        measureString = "Average";
+                        break;
+                    case AggregationTypes.MIN:
+                        measureString = "Min";
+                        break;
+                    case AggregationTypes.MAX:
+                        measureString = "Max";
+                        break;
+                    case AggregationTypes.COUNT:
+                        measureString = "Count";
+                        break;
+                }
+                aggregationString = measureString;
+            }
+        }
+
+        override public function save(analysisItem:AnalysisItem):void {
+            super.save(analysisItem);
+            var measure:ReaggregateAnalysisMeasure = analysisItem as ReaggregateAnalysisMeasure;
+            measure.wrappedMeasure = measureComboBox.selectedItem as AnalysisItem;
+            measure.aggregationItem = dimensionKeyComboBox.selectedItem as AnalysisItem;
+            var complexAggregationType:int;
+            switch (complexWrappedAggregations.selectedLabel) {
+                case "Sum":
+                    complexAggregationType = AggregationTypes.SUM;
+                    break;
+                case "Average":
+                    complexAggregationType = AggregationTypes.AVERAGE;
+                    break;
+                case "Max":
+                    complexAggregationType = AggregationTypes.MAX;
+                    break;
+                case "Min":
+                    complexAggregationType = AggregationTypes.MIN;
+                    break;
+                case "Count":
+                    complexAggregationType = AggregationTypes.COUNT;
+                    break;
+            }
+            measure.aggregation = complexAggregationType;
+        }
+
+        [Bindable]
+        private var aggregateDimension:AnalysisItem;
+
+        [Bindable]
+        private var wrappedMeasure:AnalysisItem;
+        ]]></mx:Script>
+    <mx:FormItem label="Wrapped Aggregation: ">
+        <mx:ComboBox dataProvider="{measureObjects}" id="complexWrappedAggregations" selectedItem="{aggregationString}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Measure: ">
+        <util:SmartComboBox dataProvider="{measureFields}" id="measureComboBox" labelField="display"
+                selectedValue="{wrappedMeasure}" selectedProperty="display"/>
+    </mx:FormItem>
+    <mx:FormItem label="Grouping: ">
+        <util:SmartComboBox dataProvider="{dimensionFields}" id="dimensionKeyComboBox" labelField="display"
+                selectedValue="{aggregateDimension}" selectedProperty="display"/>
+    </mx:FormItem>
+</analysis:AnalysisItemDetailEditor>

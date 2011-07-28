@@ -21,13 +21,16 @@ public class CalculationMeasureWindow extends CalculationWindow {
             formattingConfiguration = analysisCalculation.formattingConfiguration;
             applyBefore = analysisCalculation.applyBeforeAggregation;
             summaryRecalc = analysisCalculation.recalculateSummary;
+            underline = analysisCalculation.underline;
+            precision = analysisCalculation.precision;
+            minPrecision = analysisCalculation.minPrecision;
         }
-        detailIndex = 2;
+        detailIndex = 1;
         detailItemLabel = "Aggregation:";
         example1 = "[Revenue] / [Units]";
         example1Explanation = "Produces Revenue Divided by Units";
-        example2 = "max([Units], 100)";
-        example2Explanation = "Produces the maximum value of Units or 100";
+        example2 = "namedbracketvalue([Deal Description], \"Prob\")";
+        example2Explanation = "";
     }
 
     override protected function get calculationItem():AnalysisItem {
@@ -49,6 +52,9 @@ public class CalculationMeasureWindow extends CalculationWindow {
         analysisCalculation.calculationString = calculationInput.text;
         analysisCalculation.formattingConfiguration = formattingSetup.formattingConfiguration;
         analysisCalculation.recalculateSummary = summaryCheckbox.selected;
+        analysisCalculation.precision = precisionInput.value;
+        analysisCalculation.underline = underlineCheckbox.selected;
+        analysisCalculation.minPrecision = minPrecisionInput.value;
         return analysisCalculation;
     }
 }

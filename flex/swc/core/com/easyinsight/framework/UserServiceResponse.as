@@ -1,5 +1,6 @@
 package com.easyinsight.framework
 {
+import com.easyinsight.analysis.ReportTypeOptions;
 import com.easyinsight.guest.Scenario;
 import com.easyinsight.preferences.UISettings;
 import com.easyinsight.skin.ApplicationSkinTO;
@@ -40,6 +41,7 @@ public class UserServiceResponse
     public var apiSecretKey:String;
     public var newsletterEnabled:Boolean;
     public var fixedDashboardID:int;
+    public var reportTypeOptions:ReportTypeOptions;
 
     public function UserServiceResponse()
         {

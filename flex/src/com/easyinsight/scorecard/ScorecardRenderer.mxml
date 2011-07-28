@@ -70,6 +70,7 @@
                     }
                 }
             }
+            invalidateSize();
         }
 
         override protected function commitProperties():void {
@@ -81,11 +82,26 @@
                 scorecardService.getScorecard.send(_scorecardID);
             }
         }
+
+
+        /*override protected function measure():void {
+            super.measure();
+            if (kpis != null) {
+                var availableColumns:int = (this.width - 50) / (240);
+                //Alert.show("unscaled width = " + (vbox.width - 40) + " available columns = " + availableColumns);
+                kpiGrid.width = availableColumns * 240 + 2;
+                var itemsPerRow:int = kpiGrid.width / kpiGrid.columnWidth;
+                var rows:int = kpis.length / itemsPerRow;
+                kpiGrid.height = kpiGrid.rowHeight * rows + 4;
+            }
+        }*/
         ]]></mx:Script>
     <mx:RemoteObject id="scorecardService" destination="scorecardService">
         <mx:method name="getScorecard" result="gotScorecard()"/>
         <mx:method name="getValues" result="gotValues()"/>
     </mx:RemoteObject>
+    <!--<mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.scorecard.AltScorecardRenderer" dataProvider="{kpis}" id="kpiGrid"
+            columnWidth="250" rowHeight="200" verticalScrollPolicy="off" selectable="false"/>-->
     <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="100%" id="adminGrid">
         <mx:columns>
             <util:EIDataGridColumn headerText="" dataField="name"

@@ -23,6 +23,9 @@
         private var beforeAgg:Boolean;
 
         [Bindable]
+        private var toggle:Boolean;
+
+        [Bindable]
         private var showOnReportView:Boolean;
 
         private var _detailClass:Class;
@@ -50,6 +53,7 @@
             showOnReportView = _filterDefinition.showOnReportView;
             filterName = _filterDefinition.filterName;
             parameterFilter = _filterDefinition.templateFilter;
+            toggle = _filterDefinition.toggleEnabled;
         }
 
         private function onFilterEdit(event:FilterEditEvent):void {
@@ -104,7 +108,7 @@
             _filterDefinition.showOnReportView = reportViewCheckbox.selected;
             _filterDefinition.filterName = filterNameInput.text;
             _filterDefinition.templateFilter = parameterFilterCheckbox.selected;
-
+            _filterDefinition.toggleEnabled = toggleCheckbox.selected;
             dispatchEvent(new FilterEditEvent(_filterDefinition, previousDefinition, null, rebuild));
             PopUpManager.removePopUp(this);
         }
@@ -127,6 +131,9 @@
             </mx:FormItem>
             <mx:FormItem label="Parameter Filter:">
                 <mx:CheckBox id="parameterFilterCheckbox" selected="{parameterFilter}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Hide Toggle:">
+                <mx:CheckBox id="toggleCheckbox" selected="{toggle}"/>
             </mx:FormItem>
         </mx:Form>
         <mx:Box id="filterDetailBox"/>

@@ -19,7 +19,7 @@ public class DerivedDateWindow extends CalculationWindow {
             calcName = derivedGrouping.display;
             dateLevel = derivedGrouping.dateLevel;
         }
-        detailIndex = 1;
+        detailIndex = 2;
         detailItemLabel = "Date Level:";
         example1 = "namedbracketdate([Deal Description], \"Close Date\", \"yyyy-MM-dd\")";
         example1Explanation = "";
@@ -41,6 +41,7 @@ public class DerivedDateWindow extends CalculationWindow {
         } else {
             derivedGrouping.displayName = nameInput.text;
         }
+        derivedGrouping.dateLevel = int(dateBox.selectedItem.data);
         derivedGrouping.derivationCode = calculationInput.text;
         return derivedGrouping;
     }

@@ -9,6 +9,8 @@
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.framework.User;
 
+        import mx.events.FlexEvent;
+
         import mx.messaging.config.ServerConfig;
 
         import com.easyinsight.analysis.IRetrievable;
@@ -131,11 +133,13 @@
             filterDefinitions = dashboard.filters;
             dashboardPaddingLeft = dashboard.paddingLeft;
             dashboardPaddingRight = dashboard.paddingRight;
-            var feedFragmentObject:Object = new Object();
-            if (exchangeItem == null) {
-                feedFragmentObject.dashboardID = String(dashboard.urlKey);
-            } else {
-                feedFragmentObject.reportTemplateID = String(dashboard.urlKey);
+            if (!_fixedID) {
+                var feedFragmentObject:Object = new Object();
+                if (exchangeItem == null) {
+                    feedFragmentObject.dashboardID = String(dashboard.urlKey);
+                } else {
+                    feedFragmentObject.reportTemplateID = String(dashboard.urlKey);
+                }
             }
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
@@ -147,6 +151,9 @@
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = dataSourceID;
             rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
+            UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
+                rootView.retrieveData();
+            });
             dashboardCanvas.addChild(rootView as UIComponent);
             UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.VIEW, _dashboardID));
             generateState();

@@ -170,11 +170,13 @@ public class TransformContainer extends HBox
         if (noFilters && _filterDefinitions == null) {
 
         } else {
+            loadingFromReport = true;
             if (_filterDefinitions != null) {
                 for each (var filter:FilterDefinition in _filterDefinitions) {
                     addFilterDefinition(filter);
                 }
             }
+            loadingFromReport = false;
         }
     }
 
@@ -194,22 +196,6 @@ public class TransformContainer extends HBox
         var filter:IFilter = createFilter(filterDefinition);
         commandFilterAdd(filter);
         return filter;
-    }
-
-    private var _preparedFilters:ArrayCollection;
-
-
-    public function set preparedFilters(value:ArrayCollection):void {
-        _preparedFilters = value;
-    }
-
-    override protected function commitProperties():void {
-        super.commitProperties();
-        if (_preparedFilters != null) {
-            for each (var filter:FilterDefinition in _preparedFilters) {
-                addFilterDefinition(filter);
-            }
-        }
     }
 
     private function createFilter(filterDefinition:FilterDefinition):IFilter {
@@ -244,6 +230,8 @@ public class TransformContainer extends HBox
             filter.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, passThrough);
         } else if (filterDefinition.getType() == FilterDefinition.NAMED_REF) {
             filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.NAMED_REF);
+        } else if (filterDefinition.getType() == FilterDefinition.FLAT_DATE) {
+            filter = new FlatDateFilter(_feedID,  filterDefinition.field, _reportID,  _dashboardID);
         } else {
             Alert.show("unknown filter type = " + filterDefinition.getType());
         }

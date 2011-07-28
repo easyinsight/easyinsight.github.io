@@ -24,6 +24,12 @@
             PopUpManager.removePopUp(this);
         }
 
+        private function addFlatValue():void {
+            var filter:FlatDateFilter = new FlatDateFilter(_feedID, _item, 0, 0);
+            dispatchEvent(new FilterCreationEvent(filter));
+            PopUpManager.removePopUp(this);
+        }
+
         private var _item:AnalysisItem;
         private var _feedID:int;
 
@@ -107,6 +113,16 @@
                         rollOut="nullValueBox.setStyle('backgroundColor', 0xFFFFFF)">
                     <mx:Label text="No Date" fontSize="14"/>
                     <mx:TextArea text="Restrict this field to values where this date is not set"
+                            borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
+                            textAlign="center"/>
+                </mx:VBox>
+                <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addFlatValue()" mouseChildren="false"
+                        buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                        id="flatValueBox"
+                        rollOver="flatValueBox.setStyle('backgroundColor', 0xDDDDDD)"
+                        rollOut="flatValueBox.setStyle('backgroundColor', 0xFFFFFF)">
+                    <mx:Label text="Single Value" fontSize="14"/>
+                    <mx:TextArea text="Restrict this field to a single month or year"
                             borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
                             textAlign="center"/>
                 </mx:VBox>

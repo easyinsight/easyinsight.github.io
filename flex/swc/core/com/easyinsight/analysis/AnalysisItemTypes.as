@@ -20,6 +20,7 @@ package com.easyinsight.analysis
         public static const ZIP_CODE:int = 65536;
         public static const DERIVED_GROUPING:int = 131072;
         public static const DERIVED_DATE:int = 262144;
+        public static const REAGGREGATE_MEASURE:int = 524288;
 
 		public static const YEAR_LEVEL:int = 1;
 		public static const MONTH_LEVEL:int = 2;

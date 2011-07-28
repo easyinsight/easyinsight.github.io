@@ -20,6 +20,15 @@ public class InsightRequestMetadata implements Serializable {
     private boolean aggregateQuery = true;
     private boolean gmtData;
     private List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
+    private boolean optimized;
+
+    public boolean isOptimized() {
+        return optimized;
+    }
+
+    public void setOptimized(boolean optimized) {
+        this.optimized = optimized;
+    }
 
     public List<JoinOverride> getJoinOverrides() {
         return joinOverrides;

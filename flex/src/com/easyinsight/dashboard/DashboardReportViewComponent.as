@@ -8,6 +8,7 @@ import com.easyinsight.report.ReportSetupEvent;
 import mx.collections.ArrayCollection;
 import mx.containers.Canvas;
 import mx.containers.VBox;
+import mx.controls.Alert;
 import mx.controls.Label;
 
 public class DashboardReportViewComponent extends Canvas implements IDashboardViewComponent  {
@@ -47,18 +48,63 @@ public class DashboardReportViewComponent extends Canvas implements IDashboardVi
         viewFactory.contextMenu = PopupMenuFactory.reportFactory.createReportContextMenu(dashboardReport.report, viewFactory, this);
     }
 
+    private var additionalFilters:ArrayCollection;
+
+    public function updateAdditionalFilters(filters:ArrayCollection):void {
+        additionalFilters = filters;
+    }
+
+    private var setup:Boolean;
+
+    private var queued:Boolean;
+
     private function onReportSetup(event:ReportSetupEvent):void {
         viewFactory.filterDefinitions = event.reportInfo.report.filterDefinitions;
-        viewFactory.retrieveData();
+        viewFactory.additionalFilterDefinitions = additionalFilters;
+        setup = true;
+        if (queued) {
+            queued = false;
+            retrievedDataOnce = true;
+            viewFactory.retrieveData();
+        }
+        /*if (_activeStatus) {
+            Alert.show("active status = " + _activeStatus);
+            viewFactory.retrieveData();
+        }*/
     }
 
     public function refresh(filters:ArrayCollection):void {
-        viewFactory.additionalFilterDefinitions = filters;
-        viewFactory.retrieveData();
+        if (setup) {
+            retrievedDataOnce = true;
+            viewFactory.additionalFilterDefinitions = additionalFilters;
+            viewFactory.retrieveData();
+        } else {
+            queued = true;
+        }
     }
 
     public function retrieveData(refreshAllSources:Boolean = false):void {
-        viewFactory.retrieveData();
+        if (setup) {
+            retrievedDataOnce = true;
+            viewFactory.additionalFilterDefinitions = additionalFilters;
+            viewFactory.retrieveData();
+        } else {
+            queued = true;
+        }
+    }
+
+    private var retrievedDataOnce:Boolean;
+
+    public function initialRetrieve():void {
+        if (!retrievedDataOnce) {
+            if (setup) {
+                retrievedDataOnce = true;
+                viewFactory.additionalFilterDefinitions = additionalFilters;
+                viewFactory.retrieveData();
+            } else {
+                queued = true;
+            }
+        }
     }
 }
 }

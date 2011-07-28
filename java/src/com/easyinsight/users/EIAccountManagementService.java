@@ -1,5 +1,6 @@
 package com.easyinsight.users;
 
+import com.easyinsight.analysis.ReportTypeOptions;
 import com.easyinsight.database.EIConnection;
 
 import com.easyinsight.email.SendGridEmail;
@@ -199,7 +200,8 @@ public class EIAccountManagementService {
                             !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
                             account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()),
-                            account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID());
+                            account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
+                    new ReportTypeOptions());
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
                 }

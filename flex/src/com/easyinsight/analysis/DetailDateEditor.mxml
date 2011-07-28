@@ -17,6 +17,7 @@
                 var date:AnalysisDateDimension = val as AnalysisDateDimension;
                 dateLevel = date.dateLevel;
                 dateFormat = date.customDateFormat;
+                outputFormat = date.outputDateFormat;
             }
         }
 
@@ -25,7 +26,11 @@
             var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
             date.dateLevel = dateBox.selectedItem.data;
             date.customDateFormat = dateFormat;
+            date.outputDateFormat = outputFormatInput.text;
         }
+
+        [Bindable]
+        private var outputFormat:String;
         ]]></mx:Script>
     <mx:FormItem label="Date Level:" direction="horizontal">
         <util:SmartComboBox id="dateBox" rowCount="12" selectedValue="{dateLevel}" selectedProperty="data">
@@ -46,6 +51,9 @@
                 <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
             </mx:ArrayCollection>
         </util:SmartComboBox>
+    </mx:FormItem>
+    <mx:FormItem label="Output Format (leave blank for default):">
+        <mx:TextInput id="outputFormatInput" text="{outputFormat}"/>
     </mx:FormItem>
 
 </analysis:AnalysisItemDetailEditor>

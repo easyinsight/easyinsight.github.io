@@ -964,6 +964,118 @@ public class ExportService {
         return sb.toString();
     }
 
+    public void exportScorecardToXLS(long scorecardID, InsightRequestMetadata insightRequestMetadata) throws Exception {
+        SecurityUtil.authorizeScorecard(scorecardID);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            int time = insightRequestMetadata.getUtcOffset() / 60;
+            String string;
+            if (time > 0) {
+                string = "GMT-"+Math.abs(time);
+            } else if (time < 0) {
+                string = "GMT+"+Math.abs(time);
+            } else {
+                string = "GMT";
+            }
+            TimeZone timeZone = TimeZone.getTimeZone(string);
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeZone(timeZone);
+            Scorecard scorecard = new ScorecardStorage().getScorecard(scorecardID, conn);
+            List<KPIOutcome> outcomes = new ScorecardService().getValues(scorecard.getKpis(), conn, insightRequestMetadata);
+            for (KPI kpi : scorecard.getKpis()) {
+                for (KPIOutcome outcome : outcomes) {
+                    if (kpi.getName().equals(outcome.getKpiName())) {
+                        kpi.setKpiOutcome(outcome);
+                        break;
+                    }
+                }
+            }
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            Map<String, HSSFCellStyle> styleMap = new HashMap<String, HSSFCellStyle>();
+            HSSFCellStyle currencyStyle = workbook.createCellStyle();
+            currencyStyle.setDataFormat(workbook.createDataFormat().getFormat("$##,##0.00"));
+            styleMap.put(CURRENCY_STYLE, currencyStyle);
+            HSSFCellStyle genericStyle = workbook.createCellStyle();
+            genericStyle.setDataFormat(workbook.createDataFormat().getFormat("0"));
+            styleMap.put(GENERIC_STYLE, genericStyle);
+            HSSFCellStyle percentStyle = workbook.createCellStyle();
+            percentStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00%"));
+            styleMap.put(PERCENT_STYLE, percentStyle);
+
+            HSSFSheet sheet = workbook.createSheet();
+            workbook.setSheetName(0, "Data");
+            sheet.setColumnWidth(0, 12000);
+            sheet.setColumnWidth(1, 4000);
+            sheet.setColumnWidth(2, 4000);
+            sheet.setColumnWidth(3, 4000);
+            Font font = workbook.createFont();
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            HSSFCellStyle cellStyle = workbook.createCellStyle();
+            cellStyle.setFont(font);
+            HSSFRow headerRow = sheet.createRow(0);
+            {
+                HSSFCell kpiNameCell = headerRow.createCell(0);
+                kpiNameCell.setCellValue(new HSSFRichTextString("KPI Name"));
+                kpiNameCell.setCellStyle(cellStyle);
+                HSSFCell kpiValueCell = headerRow.createCell(1);
+                kpiValueCell.setCellValue(new HSSFRichTextString("KPI Value"));
+                kpiValueCell.setCellStyle(cellStyle);
+                HSSFCell kpiTimeCell = headerRow.createCell(2);
+                kpiTimeCell.setCellValue(new HSSFRichTextString("Time"));
+                kpiTimeCell.setCellStyle(cellStyle);
+                HSSFCell kpiChangeCell = headerRow.createCell(3);
+                kpiChangeCell.setCellValue(new HSSFRichTextString("KPI Change"));
+                kpiChangeCell.setCellStyle(cellStyle);
+            }
+            int i = 1;
+            for (KPI kpi : scorecard.getKpis()) {
+                HSSFRow kpiRow = sheet.createRow(i++);
+                HSSFCell kpiNameCell = kpiRow.createCell(0);
+                kpiNameCell.setCellValue(new HSSFRichTextString(kpi.getName()));
+                HSSFCell kpiValueCell = kpiRow.createCell(1);
+                kpiValueCell.setCellValue(kpi.getKpiOutcome().getOutcomeValue());
+                HSSFCellStyle style = getStyle(styleMap, kpi.getAnalysisMeasure(), workbook, 0, new NumericValue(kpi.getKpiOutcome().getOutcomeValue()));
+                kpiValueCell.setCellStyle(style);
+                HSSFCell timeCell = kpiRow.createCell(2);
+                timeCell.setCellValue(kpi.getDayWindow());
+                HSSFCell percentCell = kpiRow.createCell(3);
+                if (kpi.getKpiOutcome().getPercentChange() == null) {
+                    percentCell.setCellValue("");
+                } else {
+                    percentCell.setCellStyle(percentStyle);
+                    percentCell.setCellValue(kpi.getKpiOutcome().getPercentChange() / 100);
+                }
+            }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            workbook.write(baos);
+            byte[] bytes = baos.toByteArray();
+            baos.close();
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCEL_EXPORT (USER_ID, EXCEL_FILE, REPORT_NAME, ANONYMOUS_ID) VALUES (?, ?, ?, ?)",
+                        Statement.RETURN_GENERATED_KEYS);
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            BufferedInputStream bis = new BufferedInputStream(bais, 1024);
+            long userID = SecurityUtil.getUserID(false);
+            if (userID == 0) {
+                insertStmt.setNull(1, Types.BIGINT);
+            } else {
+                insertStmt.setLong(1, userID);
+            }
+            insertStmt.setBinaryStream(2, bis, bytes.length);
+            String anonID = RandomTextGenerator.generateText(20);
+            insertStmt.setString(3, scorecard.getName() == null ? "export" : scorecard.getName());
+            insertStmt.setString(4, anonID);
+            insertStmt.execute();
+            long id = Database.instance().getAutoGenKey(insertStmt);
+            FlexContext.getHttpRequest().getSession().setAttribute("imageID", id);
+            FlexContext.getHttpRequest().getSession().setAttribute("anonID", anonID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public static String exportScorecard(long scorecardID, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws Exception {
         SecurityUtil.authorizeScorecard(scorecardID);
         int time = insightRequestMetadata.getUtcOffset() / 60;

@@ -235,7 +235,7 @@
         }
 
         private function doAnalyze(perspectiveInfo:PerspectiveInfo):void {
-            try {
+            //try {
                 if (dataAnalysis != null) {
                     fullScreenPage.cleanup();
                     removeListeners(dataAnalysis);
@@ -258,9 +258,9 @@
                     fullScreenPage = perspective;
                     coreVBox.addChild(dataAnalysis);
                 }
-            } catch(e:Error) {
+            /*} catch(e:Error) {
                 Alert.show(e.message);
-            }
+            }*/
         }
 
         private function analysisClosed(event:AnalysisCloseEvent):void {
@@ -402,7 +402,7 @@
                                     } else {
                                         quietLogin(authResult, false);
                                         if (authResult.fixedDashboardID > 0) {
-                                            internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID})))
+                                            internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID, fixedID: true})))
                                         } else {
                                             toMain();
                                             browserInit();
@@ -433,8 +433,9 @@
 
         private function login(event:LoginEvent):void {
             if (event.authResponse.fixedDashboardID > 0) {
-                quietLogin(event.authResponse, true);
-                internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.authResponse.fixedDashboardID})))
+                quietLogin(event.authResponse, false);
+                coreVBox = masterCanvas;
+                internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.authResponse.fixedDashboardID, fixedID: true})))
             } else {
                 toMain();
                 quietLogin(event.authResponse, true);

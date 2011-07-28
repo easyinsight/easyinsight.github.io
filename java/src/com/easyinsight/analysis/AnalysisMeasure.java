@@ -19,6 +19,15 @@ public class AnalysisMeasure extends AnalysisItem {
     @Column(name="row_count_field")
     private boolean rowCountField;
 
+    @Column(name="underline")
+    private boolean underline;
+
+    @Column(name="fp_precision")
+    private int precision;
+
+    @Column(name="reaggregation")
+    private int reaggregation;
+
     public AnalysisMeasure() {
     }
 
@@ -61,6 +70,30 @@ public class AnalysisMeasure extends AnalysisItem {
 
     public void setRowCountField(boolean rowCountField) {
         this.rowCountField = rowCountField;
+    }
+
+    public int getReaggregation() {
+        return reaggregation;
+    }
+
+    public void setReaggregation(int reaggregation) {
+        this.reaggregation = reaggregation;
+    }
+
+    public int getPrecision() {
+        return precision;
+    }
+
+    public void setPrecision(int precision) {
+        this.precision = precision;
+    }
+
+    public boolean isUnderline() {
+        return underline;
+    }
+
+    public void setUnderline(boolean underline) {
+        this.underline = underline;
     }
 
     private transient AggregateMeasureKey cachedMeasureKey;

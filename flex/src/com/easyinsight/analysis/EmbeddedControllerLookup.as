@@ -29,6 +29,8 @@ import com.easyinsight.analysis.maps.WorldMapEmbeddedController;
 import com.easyinsight.analysis.timeline.TimelineEmbeddedController;
 import com.easyinsight.analysis.tree.TreeEmbeddedController;
 import com.easyinsight.analysis.treemap.TreeMapEmbeddedController;
+import com.easyinsight.analysis.verticallist.CombinedVerticalListEmbeddedController;
+import com.easyinsight.analysis.verticallist.VerticalListEmbeddedController;
 
 public class EmbeddedControllerLookup {
 
@@ -127,6 +129,12 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.FORM:
                 controller = FormEmbeddedController;
+                break;
+            case AnalysisDefinition.VERTICAL_LIST:
+                controller = VerticalListEmbeddedController;
+                break;
+            case AnalysisDefinition.COMBINED_VERTICAL_LIST:
+                controller = CombinedVerticalListEmbeddedController;
                 break;
         }
         return controller;

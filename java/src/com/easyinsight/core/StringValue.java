@@ -28,6 +28,7 @@ public class StringValue extends Value implements Serializable {
 
     public StringValue(String value, Value originalValue) {
         super(originalValue);
+        setSortValue(originalValue);
         this.value = value;
     }
 

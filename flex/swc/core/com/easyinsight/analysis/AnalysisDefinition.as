@@ -44,6 +44,7 @@ import mx.collections.ArrayCollection;
         public static const STACKED_COLUMN:int = 31;
         public static const STACKED_BAR:int = 32;
         public static const VERTICAL_LIST:int = 33;
+        public static const COMBINED_VERTICAL_LIST:int = 34;
 
 		public var dataFeedID:int;
         public var urlKey:String;
@@ -76,6 +77,7 @@ import mx.collections.ArrayCollection;
         public var accountVisible:Boolean;
         public var joinOverrides:ArrayCollection;
         public var recommendedExchange:Boolean;
+        public var optimized:Boolean;
 
 		public function AnalysisDefinition()
 		{

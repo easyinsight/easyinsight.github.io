@@ -14,6 +14,7 @@ import mx.formatters.NumberFormatter;
 	{
 		public var dateLevel:int;
 		public var customDateFormat:String;
+        public var outputDateFormat:String;
 		
 		public function AnalysisDateDimension(dateLevel:int = AnalysisItemTypes.DAY_LEVEL, 
 			customDateFormat:String = "yyyy-MM-dd") {				
@@ -29,6 +30,11 @@ import mx.formatters.NumberFormatter;
 		override public function getFormatter():Formatter {
             var format:int = User.getInstance().dateFormat;
             var formatter:Formatter;
+            if (outputDateFormat != null && outputDateFormat != "") {
+                var outputFormatter:DateFormatter = new DateFormatter();
+                outputFormatter.formatString = outputDateFormat;
+                return outputFormatter;
+            }
             if (dateLevel <= AnalysisItemTypes.WEEK_LEVEL) {
                 var dateFormatter:DateFormatter = new DateFormatter();
                 switch (this.dateLevel) {

@@ -99,8 +99,6 @@
             if (_editorClass == null) {
                 editor = new AnalysisItemEditorPerspective(new PerspectiveInfo(PerspectiveInfo.ANALYSIS_ITEM_EDITOR, {dataSourceID: _dataSourceID,
                     analysisItem: _analysisItem, analysisItems: _analysisItems}));
-                /*this.width = 600;
-                this.height = 480;*/
             } else {
                 editor = new _editorClass();
                 editor.dataSourceID = _dataSourceID;

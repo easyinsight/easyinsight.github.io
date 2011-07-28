@@ -20,30 +20,29 @@ import mx.formatters.CurrencyFormatter;
 		public var formattingConfigurationID:int;
 		public var formattingType:int;
 		public var textUom:String;
-
-        public var precision:int = 2;
 		
 		public function FormattingConfiguration()
 		{
 		}
 
-		public function getFormatter():Formatter {
+		public function getFormatter(precision:int, minPrecision:int):Formatter {
 			var formatter:Formatter;
 			switch (formattingType) {
 				case NUMBER:
 					var numberFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();
 					numberFormatter.precision = precision;
+                    numberFormatter.minPrecision = minPrecision;
 					formatter = numberFormatter;
 					break;
 				case CURRENCY:
-					var currencyFormatter:CurrencyFormatter = new CurrencyFormatter();
+					var currencyFormatter:CurrencyFormatter = new EICurrencyFormatter();
 					currencyFormatter.precision = precision;
-                    currencyFormatter.currencySymbol = User.getInstance().currencySymbol; 
+                    currencyFormatter.currencySymbol = User.getInstance().currencySymbol;
 					formatter = currencyFormatter;
 					break;
 				case PERCENTAGE:
                     var percentageFormatter:PercentageNumberFormatter = new PercentageNumberFormatter();
-                    percentageFormatter.precision = 2;
+                    percentageFormatter.precision = precision;
                     formatter = percentageFormatter;
                     break;
                 case MILLISECONDS:
@@ -57,7 +56,7 @@ import mx.formatters.CurrencyFormatter;
                     break;
 				default:
 					var defaultFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();
-					defaultFormatter.precision = 2;
+					defaultFormatter.precision = precision;
 					formatter = defaultFormatter;
 					break;				
 			}

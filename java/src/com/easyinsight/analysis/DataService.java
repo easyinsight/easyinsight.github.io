@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.analysis.definitions.WSCombinedVerticalListDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -23,11 +24,7 @@ import java.util.*;
 
 public class DataService {
 
-
-
     private FeedRegistry feedRegistry = FeedRegistry.instance();
-
-
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID) {
         if (reportID > 0) {
@@ -140,8 +137,35 @@ public class DataService {
         return dataSet;
     }
 
+    public EmbeddedVerticalResults getEmbeddedVerticalDataResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
+        try {
+            long startTime = System.currentTimeMillis();
+            System.out.println("evr request for " + reportID);
+            SecurityUtil.authorizeInsight(reportID);
+            WSCombinedVerticalListDefinition analysisDefinition = (WSCombinedVerticalListDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
+            insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
+            if (customFilters != null) {
+                analysisDefinition.setFilterDefinitions(customFilters);
+            }
+            List<EmbeddedResults> list = new ArrayList<EmbeddedResults>();
+            for (WSAnalysisDefinition analysis : analysisDefinition.getReports()) {
+                list.add(getEmbeddedResults(analysis.getAnalysisID(), dataSourceID, analysisDefinition.getFilterDefinitions(), insightRequestMetadata, null));
+            }
+            System.out.println("overall time = " + (System.currentTimeMillis() - startTime) / 1000);
+            EmbeddedVerticalResults verticalDataResults = new EmbeddedVerticalResults();
+            verticalDataResults.setList(list);
+            verticalDataResults.setReport(analysisDefinition);
+            return verticalDataResults;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters) {
+        System.out.println("request for " + reportID);
+        long beginTime = System.currentTimeMillis();
         SecurityUtil.authorizeInsight(reportID);
 
         EIConnection conn = Database.instance().getConnection();
@@ -196,10 +220,18 @@ public class DataService {
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
             timeshift(validQueryItems, filters, feed, insightRequestMetadata);
+            long dsStartTime = System.currentTimeMillis();
             DataSet dataSet = getDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
+            if (System.currentTimeMillis() - dsStartTime > 1000) {
+                //System.out.println((System.currentTimeMillis() - dsStartTime) / 1000 + " seconds to retrieve data");
+            }
+            startTime = System.currentTimeMillis();
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
             DataResults listDataResults = pipeline.toList(dataSet);
+            if (System.currentTimeMillis() - startTime > 1000) {
+                //System.out.println((System.currentTimeMillis() - startTime) / 1000 + " seconds to pipeline data");
+            }
             results = listDataResults.toEmbeddedResults();
             results.setDefinition(analysisDefinition);
 
@@ -212,6 +244,7 @@ public class DataService {
             results.setDataSourceInfo(dataSourceInfo);
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             conn.commit();
+            //System.out.println("Took " + (System.currentTimeMillis() - beginTime) / 1000 + " seconds to retrieve " + reportID);
             return results;
         } catch (ReportException re) {
             EmbeddedDataResults results = new EmbeddedDataResults();
@@ -219,8 +252,9 @@ public class DataService {
             return results;
         } catch (Exception e) {
             LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
+            EmbeddedDataResults results = new EmbeddedDataResults();
+            results.setReportFault(new ServerError(e.getMessage()));
+            return results;
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
@@ -393,11 +427,24 @@ public class DataService {
         }
     }
 
+    public VerticalDataResults getVerticalDataResults(WSCombinedVerticalListDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+        insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
+        List<DataResults> list = new ArrayList<DataResults>();
+        for (WSAnalysisDefinition analysis : analysisDefinition.getReports()) {
+            analysis.setFilterDefinitions(analysisDefinition.getFilterDefinitions());
+            DataResults dataResults = list(analysis, insightRequestMetadata);
+            list.add(dataResults);
+        }
+        VerticalDataResults verticalDataResults = new VerticalDataResults();
+        verticalDataResults.setMap(list);
+        return verticalDataResults;
+    }
+
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         try {
-            long startTime = System.currentTimeMillis();
             Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
             if (insightRequestMetadata == null) {
                 insightRequestMetadata = new InsightRequestMetadata();
@@ -428,9 +475,6 @@ public class DataService {
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
             timeshift(validQueryItems, filters, feed, insightRequestMetadata);
             DataSet dataSet = getDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
-            List<String> auditMessages = dataSet.getAudits();
-            auditMessages.add("At raw data source level, had " + dataSet.getRows().size() + " rows of data");
-            //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
             results = pipeline.toList(dataSet);
@@ -439,14 +483,7 @@ public class DataService {
                 dataSet.setLastTime(new Date());
             }
             dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
-            //dataSourceInfo.setLastDataTime(dataSet.getLastTime());
             results.setDataSourceInfo(dataSourceInfo);
-            results.setAuditMessages(auditMessages);
-            // }
-            BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
-            /*if (insightRequestMetadata.isReportEditor()) {
-                new AdminService().logAction(new ActionReportLog(SecurityUtil.getUserID(), ActionLog.EDIT, analysisDefinition.getAnalysisID()), conn);
-            }*/
             return results;
         } catch (ReportException dae) {
             ListDataResults embeddedDataResults = new ListDataResults();

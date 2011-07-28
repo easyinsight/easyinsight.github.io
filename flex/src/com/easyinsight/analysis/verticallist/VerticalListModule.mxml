@@ -1,0 +1,180 @@
+<?xml version="1.0"?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer" verticalScrollPolicy="off" width="100%">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.Value;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
+
+        [Bindable]
+        private var dataColl:ArrayCollection;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+            var vert:VerticalListDefinition = analysisDefinition as VerticalListDefinition;
+            var dColl:ArrayCollection = new ArrayCollection();
+            var columns:ArrayCollection = new ArrayCollection();
+            var labelColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+            labelColumn.sortable = false;
+            labelColumn.width = 130;
+            var labelHeaderFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
+            labelHeaderFactory.properties = { headerText: "" };
+            labelColumn.headerRenderer = labelHeaderFactory;
+            labelColumn.dataField = "Label";
+            columns.addItem(labelColumn);
+            var firstRow:Boolean = true;
+            for each (var measure:AnalysisMeasure in vert.measures) {
+                var obj:Object = new Object();
+                obj["Label"] = measure.display;
+                obj["baseMeasure"] = measure;
+                for each (var row:Object in dataSet) {
+                    var columnValue:String;
+                    var val:Value;
+                    if (vert.column == null) {
+                        columnValue = vert.name == null ? "VertName" : vert.name;
+                    } else {
+                        val = row[vert.column.qualifiedName()];
+                        columnValue = val.toString();
+                    }
+                    if (val != null && val.type() == Value.EMPTY) {
+                        continue;
+                    }
+                    /*var columnValue:String;
+                    if (vert.column == null) {
+                        columnValue = vert.name == null ? "VertName" : vert.name;
+                    } else {
+                        columnValue = row[vert.column.qualifiedName()].toString();
+                    }*/
+                    obj[columnValue] = row[measure.qualifiedName()];
+                    obj[columnValue + "measure"] = measure;
+                    if (firstRow) {
+                        //var dataColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                        var dataColumn:SortableAdvancedDataGridColumn = new SortableAdvancedDataGridColumn(0, val == null ? 0 : val.toSortValue().toNumber());
+                        dataColumn.width = 73;
+                        dataColumn.headerText = columnValue;
+                        dataColumn.dataField = columnValue;
+                        var factory:ClassFactory = new ClassFactory(VerticalListRenderer);
+                        factory.properties = { qualifiedName: columnValue };
+                        dataColumn.itemRenderer = factory;
+                        dataColumn.sortable = false;
+                        var headerFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
+                        headerFactory.properties = { headerText: columnValue };
+                        dataColumn.headerRenderer = headerFactory;
+                        columns.addItem(dataColumn);
+                    }
+                }
+                if (firstRow) {
+                    firstRow = false;
+                }
+                dColl.addItem(obj);
+            }
+            dataGrid.columns = columns.toArray();
+            dataGrid.rowCount = dColl.length + 1;
+            dataGrid.dataProvider = dColl;
+            /*dataColl = new ArrayCollection();
+            var proceduresMeasure:AnalysisMeasure = new AnalysisMeasure();
+            proceduresMeasure.displayName = "Procedures";
+            var hoursMeasure:AnalysisMeasure = new AnalysisMeasure();
+            hoursMeasure.displayName = "Hours";
+            var wtdProceduresMeasure:AnalysisMeasure = new AnalysisMeasure();
+            wtdProceduresMeasure.displayName = "Wtd Procedures";
+            var wtdProceduresMeasureHr:AnalysisMeasure = new AnalysisMeasure();
+            wtdProceduresMeasureHr.displayName = "Wtd Procedures/Hr";
+            var wtdProceduresMeasureVisit:AnalysisMeasure = new AnalysisMeasure();
+            wtdProceduresMeasureVisit.displayName = "Wtd Procedures/Visit";
+            var initEvals:AnalysisMeasure = new AnalysisMeasure();
+            initEvals.displayName = "Init Evals";
+            var visits8:AnalysisMeasure = new AnalysisMeasure();
+            visits8.displayName = "Visits/8-Hr Day";
+            var visits:AnalysisMeasure = new AnalysisMeasure();
+            visits.displayName = "Visits";
+            var visitsPatient:AnalysisMeasure = new AnalysisMeasure();
+            visitsPatient.displayName = "Visits/Patient";
+            var charges:AnalysisMeasure = new AnalysisMeasure(AggregationTypes.SUM, FormattingConfiguration.CURRENCY);
+            charges.displayName = "Charges";
+            charges.formattingConfiguration.precision = 0;
+            var payments:AnalysisMeasure = new AnalysisMeasure(AggregationTypes.SUM, FormattingConfiguration.CURRENCY);
+            payments.displayName = "Payments";
+            payments.formattingConfiguration.precision = 0;
+            var paymentsWtd:AnalysisMeasure = new AnalysisMeasure(AggregationTypes.SUM, FormattingConfiguration.CURRENCY);
+            paymentsWtd.displayName = "Payments/Wtd Procedure";
+            var paymentVisit:AnalysisMeasure = new AnalysisMeasure(AggregationTypes.SUM, FormattingConfiguration.CURRENCY);
+            paymentVisit.displayName = "Payments/Visit";
+            var janModifier:AnalysisItemModifier = new AnalysisItemModifier("Jan");
+            var febModifier:AnalysisItemModifier = new AnalysisItemModifier("Feb");
+            var marModifier:AnalysisItemModifier = new AnalysisItemModifier("Mar");
+            var aprModifier:AnalysisItemModifier = new AnalysisItemModifier("Apr");
+            var mayModifier:AnalysisItemModifier = new AnalysisItemModifier("May");
+            var junModifier:AnalysisItemModifier = new AnalysisItemModifier("Jun");
+            var julModifier:AnalysisItemModifier = new AnalysisItemModifier("Jul");
+            var augModifier:AnalysisItemModifier = new AnalysisItemModifier("Aug");
+            var sepModifier:AnalysisItemModifier = new AnalysisItemModifier("Sep");
+            var octModifier:AnalysisItemModifier = new AnalysisItemModifier("Oct");
+            var novModifier:AnalysisItemModifier = new AnalysisItemModifier("Nov");
+            var decModifier:AnalysisItemModifier = new AnalysisItemModifier("Dec");
+            var ytdModifier:AnalysisItemModifier = new AnalysisItemModifier("YTD");
+            var monthlyModifier:AnalysisItemModifier = new AnalysisItemModifier("Average");
+            var bkModifier:AnalysisItemModifier = new AnalysisItemModifier("BK");
+            var variationModifier:AnalysisItemModifier = new AnalysisItemModifier("Variation");
+            var modifiers:Array = [ janModifier, febModifier, marModifier, aprModifier, mayModifier, junModifier, julModifier, augModifier, sepModifier, octModifier, novModifier, decModifier, ytdModifier, monthlyModifier, bkModifier, variationModifier];
+            var data:ArrayCollection = new ArrayCollection([
+                { baseMeasure: proceduresMeasure, Jan:12173, Feb:12445, Mar:15361, Apr:14512, May:14667, Jun:15397, Jul:15588, Aug:16748, Sep:16731, Oct:16413, YTD:150035, Average:15004},
+                { baseMeasure: hoursMeasure, Jan:4587, Feb:4451, Mar:4496, Apr:4586, May:4541, Jun:4515, Jul:4689, Aug:4831, Sep:4840, Oct:4765, YTD:46298, Average:4630, divider:true},
+                { baseMeasure: wtdProceduresMeasure, Jan:13939, Feb:14264, Mar:17467, Apr:16407, May:16234, Jun:16733, Jul:16831, Aug:17929, Sep:17877, Oct:17217, YTD:164897, Average:16490},
+                { baseMeasure: wtdProceduresMeasureHr, Jan:3.0, Feb:3.2, Mar:3.9, Apr:3.6, May:3.6, Jun:3.7, Jul:3.6, Aug:3.7, Sep:3.7, Oct:3.6, YTD:3.6, Average:3.6, BK:4.6, Variation:-22.6},
+                { baseMeasure: wtdProceduresMeasureVisit, Jan:2.6, Feb:2.7, Mar:2.7, Apr:2.6, May:2.9, Jun:2.8, Jul:2.8, Aug:2.7, Sep:2.9, Oct:2.8, YTD:2.8, Average:2.8, BK:3.4, Variation:-18.8, divider:true},
+                { baseMeasure: initEvals, Jan:1054, Feb:1064, Mar:1214, Apr:1162, May:1055, Jun:966, Jul:919, Aug:998, Sep:960, Oct:889, YTD:10281, Average:1028},
+                { baseMeasure: visits8, Jan:9.2, Feb:9.5, Mar:11.7, Apr:10.9, May:9.8, Jun:10.5, Jul:10.3, Aug:10.9, Sep:10.2, Oct:10.3, YTD:10.3, Average:10.3, BK:11.5, Variation:-10.3},
+                { baseMeasure: visits, Jan:5274, Feb:5311, Mar:6550, Apr:6222, May:5546, Jun:5950, Jul:6011, Aug:6568, Sep:6145, Oct:6152, YTD:59729, Average:5973},
+                { baseMeasure: visitsPatient, Jan:5, Feb:5, Mar:5.4, Apr:5.4, May:5.3, Jun:6.2, Jul:6.5, Aug:6.6, Sep:6.4, Oct:6.9, YTD:5.8, Average:5.8, divider:true},
+                { baseMeasure: charges, Jan:814371, Feb:860109, Mar:1018212, Apr:986989, May:965585, Jun:1041469, Jul:1071832, Aug:1118630, Sep:1138948, Oct:1092738, YTD:10108884, Average:1010888},
+                { baseMeasure: payments, Jan:324702, Feb:346322, Mar:462061, Apr:420593, May:448836, Jun:424059, Jul:487557, Aug:512716, Sep:500584, Oct:548661, YTD:4476091, Average:447609},
+                { baseMeasure: paymentsWtd, Jan:23.29, Feb:24.28, Mar:26.45, Apr:25.63, May:27.65, Jun:25.34, Jul:28.97, Aug:28.60, Sep:28, Oct:31.87, YTD:27.14, Average:27.14, BK:26, Variation:4.4},
+                { baseMeasure: paymentVisit, Jan:61.57, Feb:65.21, Mar:70.54, Apr:67.60, May:80.93, Jun:71.27, Jul:81.11, Aug:78.06, Sep:81.46, Oct:89.18, YTD:74.94, Average:74.94, BK:88, Variation:-14.8}
+            ]);
+            var columns:Array = [];
+            var displayColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+            displayColumn.headerText = "";
+            var displayFactory:ClassFactory = new ClassFactory(VerticalListRenderer);
+            displayColumn.itemRenderer = displayFactory;
+            displayColumn.sortable = false;
+            displayColumn.width = 150;
+            displayColumn.headerRenderer = new ClassFactory(VerticalListHeaderRenderer);
+            columns.push(displayColumn);
+            for each (var modifier:AnalysisItemModifier in modifiers) {
+                var column:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                column.width = 73;
+                column.headerText = modifier.name;
+                column.dataField = modifier.name;
+                var factory:ClassFactory = new ClassFactory(VerticalListRenderer);
+                factory.properties = { modifier: modifier};
+                column.itemRenderer = factory;
+                column.sortable = false;
+                var headerFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
+                headerFactory.properties = {headerText: modifier.name};
+                column.headerRenderer = headerFactory;
+                columns.push(column);
+            }
+            dataGrid.columns = columns;
+            dataGrid.dataProvider = data;
+            dataGrid.rowCount = data.length + 1;*/
+        }
+
+        public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }
+
+        public function preserveValues():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:Box width="100%" horizontalAlign="center">
+        <mx:AdvancedDataGrid id="dataGrid" headerColors="{[0x333333, 0x333333]}" fontSize="10" verticalScrollPolicy="off" variableRowHeight="true" horizontalGridLines="false" horizontalGridLineColor="#DDDDDD" verticalGridLines="false"
+                alternatingItemColors="{[0xFFFFFF, 0xFFFFFF]}" backgroundColor="#FFFFFF" borderStyle="none">
+        </mx:AdvancedDataGrid>
+    </mx:Box>
+</mx:Module>

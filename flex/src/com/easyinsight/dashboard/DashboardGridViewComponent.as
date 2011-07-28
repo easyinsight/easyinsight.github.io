@@ -64,5 +64,17 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
             comp.retrieveData(refreshAllSources);
         }
     }
+
+    public function updateAdditionalFilters(filters:ArrayCollection):void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.updateAdditionalFilters(filters);
+        }
+    }
+
+    public function initialRetrieve():void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.initialRetrieve();
+        }
+    }
 }
 }

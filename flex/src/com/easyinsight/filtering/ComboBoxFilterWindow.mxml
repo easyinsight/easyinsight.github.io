@@ -17,18 +17,30 @@
             } else {
                 FilterValueDefinition(_filterDefinition).singleValue = true;
                 FilterValueDefinition(_filterDefinition).autoComplete = false;
+                FilterValueDefinition(_filterDefinition).excludeEmpty = excludeEmptyCheckbox.selected;
+                FilterValueDefinition(_filterDefinition).allOption = allOptionCheckbox.selected;
             }
             return _filterDefinition;
         }
 
         public function set filterDefinition(filterDefinition:FilterDefinition):void {
             _filterDefinition = filterDefinition;
+            if (_filterDefinition is FilterValueDefinition) {
+                excludeEmpty = FilterValueDefinition(_filterDefinition).excludeEmpty;
+                allOption = FilterValueDefinition(_filterDefinition).allOption;
+            }
         }
 
         public function set feedID(feedID:int):void {
         }
 
         private var _fields:ArrayCollection;
+
+        [Bindable]
+        private var allOption:Boolean;
+
+        [Bindable]
+        private var excludeEmpty:Boolean;
 
         public function set fields(value:ArrayCollection):void {
             _fields = value;
@@ -51,4 +63,6 @@
         <mx:RadioButton group="{typeGroup}" label="Pattern Match" value="pattern"/>
         <mx:RadioButton group="{typeGroup}" label="Auto Complete" value="autoComplete"/>
     </mx:HBox>
+    <mx:CheckBox label="All Option" id="allOptionCheckbox" selected="{allOption}"/>
+    <mx:CheckBox label="Exclude Empty Values" id="excludeEmptyCheckbox" selected="{excludeEmpty}"/>
 </mx:VBox>

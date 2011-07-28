@@ -3,6 +3,9 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.analysis.gauge.GaugeDefinitionState;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * User: James Boe
  * Date: Jan 10, 2008
@@ -100,6 +103,16 @@ public class AnalysisDefinitionFactory {
             WSVerticalListDefinition verticalListDefinition = (WSVerticalListDefinition) wsAnalysisDefinition;
             VerticalListDefinitionState verticalListDefinitionState = new VerticalListDefinitionState();
             verticalListDefinitionState.setVerticalListID(verticalListDefinition.getVerticalListID());
+            analysisDefinitionState = verticalListDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.COMBINED_VERTICAL_LIST)) {
+            WSCombinedVerticalListDefinition verticalListDefinition = (WSCombinedVerticalListDefinition) wsAnalysisDefinition;
+            CombinedVerticalListDefinitionState verticalListDefinitionState = new CombinedVerticalListDefinitionState();
+            verticalListDefinitionState.setCombinedVerticalListID(verticalListDefinition.getCombinedVerticalListDefinitionID());
+            List<AnalysisDefinition> reports = new ArrayList<AnalysisDefinition>();
+            for (WSAnalysisDefinition child : verticalListDefinition.getReports()) {
+                reports.add(AnalysisDefinitionFactory.fromWSDefinition(child));
+            }
+            verticalListDefinitionState.setChildReports(reports);
             analysisDefinitionState = verticalListDefinitionState;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());

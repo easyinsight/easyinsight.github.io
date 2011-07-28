@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="setup()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.schedule.AddReportWindow;
+        import com.easyinsight.schedule.DeliveryInfoEvent;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var reports:ArrayCollection;
+
+        private var _report:CombinedVerticalListDefinition;
+
+        private function setup():void {
+            addEventListener("removeReport", onRemoveReport);
+        }
+
+        private function onRemoveReport(event:CombinedVerticalReportEvent):void {
+            var report:AnalysisDefinition = event.report;
+            reports.removeItemAt(reports.getItemIndex(report));
+        }
+
+        public function set report(value:CombinedVerticalListDefinition):void {
+            _report = value;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            reports = _report.reports;
+        }
+
+        private function addReport():void {
+            var window:AddReportWindow = new AddReportWindow();
+            window.dataSourceID = _report.dataFeedID;
+            window.addEventListener(DeliveryInfoEvent.ADD_REPORT, onChose, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function save():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onChose(event:DeliveryInfoEvent):void {
+            analysisService.openAnalysisDefinition.send(event.deliveryInfo.id);
+        }
+
+        private function gotReport():void {
+            reports.addItem(analysisService.openAnalysisDefinition.lastResult);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="openAnalysisDefinition" result="gotReport()"/>
+    </mx:RemoteObject>
+    <mx:Button label="Add Report..." click="addReport()"/>
+    <mx:DataGrid dataProvider="{reports}">
+        <mx:columns>
+            <util:EIDataGridColumn headerText="Name" dataField="name" width="300"/>
+            <util:EIDataGridColumn headerText="" dataField="name" sortable="false" itemRenderer="com.easyinsight.analysis.verticallist.CombinedVerticalListControls" width="50"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

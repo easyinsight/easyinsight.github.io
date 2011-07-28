@@ -46,6 +46,15 @@
         [Bindable]
         private var highGood:String;
 
+        [Bindable]
+        private var underline:Boolean;
+
+        [Bindable]
+        private var precision:int;
+
+        [Bindable]
+        private var minPrecision:int;
+
         override public function save(analysisItem:AnalysisItem):void {
             var analysisMeasure:AnalysisMeasure = analysisItem as AnalysisMeasure;
             /*var measureConditionRange:MeasureConditionRange = measureRangeSelection.createMeasureConditionRange();
@@ -54,6 +63,9 @@
             }*/
             analysisMeasure.highIsGood = highGroup.selectedValue == "yes";
             analysisMeasure.formattingConfiguration = formattingSetup.formattingConfiguration;
+            analysisMeasure.precision = precisionInput.value;
+            analysisMeasure.underline = underlineCheckbox.selected;
+            analysisMeasure.minPrecision = minPrecisionInput.value;
         }
 
         override public function set analysisItem(val:AnalysisItem):void {
@@ -61,6 +73,9 @@
             if (val is AnalysisMeasure) {
                 var analysisMeasure:AnalysisMeasure = val as AnalysisMeasure;
                 formattingConfiguration = analysisMeasure.formattingConfiguration;
+                precision = analysisMeasure.precision;
+                minPrecision = analysisMeasure.minPrecision;
+                underline = analysisMeasure.underline;
                 this.highGood = analysisMeasure.highIsGood ? "yes" : "no";
             }
         }]]></mx:Script>
@@ -71,6 +86,15 @@
     </mx:FormItem>
     <mx:FormItem label="Formatting: ">
         <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Underline:">
+        <mx:CheckBox id="underlineCheckbox" selected="{underline}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Floating Point Precision:">
+        <mx:NumericStepper id="precisionInput" value="{precision}" minimum="0" maximum="50"/>
+    </mx:FormItem>
+    <mx:FormItem label="Minimum Precision:">
+        <mx:NumericStepper id="minPrecisionInput" value="{minPrecision}" minimum="0" maximum="50"/>
     </mx:FormItem>
     <!--<mx:FormItem label="">
         <analysis:ColorSelection id="measureRangeSelection" measureConditionRange="{measureConditionRange}"/>

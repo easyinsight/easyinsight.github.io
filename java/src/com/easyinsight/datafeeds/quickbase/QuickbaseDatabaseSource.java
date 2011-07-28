@@ -34,14 +34,19 @@ import java.util.*;
  */
 public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
-    private static final String REQUEST = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt><options>num-20000</options></qdbapi>";
-    private static final String REQUEST_2 = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt><options>num-20000.skp-{3}</options></qdbapi>";
+    private static final String REQUEST = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt><options>num-1000</options></qdbapi>";
+    private static final String REQUEST_2 = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt><options>num-1000.skp-{3}</options></qdbapi>";
 
     private String databaseID;
 
     @Override
     public int getDataSourceType() {
         return DataSourceInfo.STORED_PULL;
+    }
+
+    @Override
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
+        return new ArrayList<AnalysisItem>();
     }
 
     @Override
@@ -135,6 +140,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 } else {
                     requestBody = MessageFormat.format(REQUEST_2, sessionTicket, applicationToken, columnBuilder.toString(), String.valueOf(masterCount));
                 }
+                System.out.println(requestBody);
                 byte[] contentBytes = requestBody.getBytes();
                 entity.setContent(new ByteArrayInputStream(contentBytes));
                 entity.setContentLength(contentBytes.length);
@@ -185,7 +191,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 }
                 dataStorage.insertData(dataSet);
                 dataSet = new DataSet();
-            } while (count == 20000);
+            } while (count == 1000);
             return null;
         } catch (ReportException re) {
             throw re;

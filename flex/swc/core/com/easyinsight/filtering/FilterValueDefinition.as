@@ -10,6 +10,8 @@ package com.easyinsight.filtering
 		public var inclusive:Boolean;
         public var singleValue:Boolean;
         public var autoComplete:Boolean;
+    public var excludeEmpty:Boolean;
+    public var allOption:Boolean;
 
 		public function FilterValueDefinition()
 		{

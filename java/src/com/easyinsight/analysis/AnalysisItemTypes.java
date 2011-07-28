@@ -25,4 +25,5 @@ public interface AnalysisItemTypes {
     public static final int ZIP_CODE = 65536;
     public static final int DERIVED_DIMENSION = 131072;
     public static final int DERIVED_DATE = 262144;
+    public static final int REAGGREGATE_MEASURE = 524288;
 }

@@ -27,6 +27,10 @@ public class AnalysisDateDimension extends AnalysisDimension {
     private int dateLevel;
     @Column(name="custom_date_format")
     private String customDateFormat = "yyyy-MM-dd";
+
+    @Column(name="output_date_format")
+    private String outputDateFormat;
+
     private transient DateFormat cachedDateFormat;
 
     private transient boolean timeshift = true;
@@ -68,6 +72,14 @@ public class AnalysisDateDimension extends AnalysisDimension {
     }
 
     public AnalysisDateDimension() {
+    }
+
+    public String getOutputDateFormat() {
+        return outputDateFormat;
+    }
+
+    public void setOutputDateFormat(String outputDateFormat) {
+        this.outputDateFormat = outputDateFormat;
     }
 
     public boolean isTimeshift() {
@@ -124,6 +136,8 @@ public class AnalysisDateDimension extends AnalysisDimension {
             return new EmptyValue();
     }
 
+    private transient Calendar calendar = Calendar.getInstance();
+
     public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata, boolean timezoneShift) {
         if (cachedDateFormat == null) {
             if (customDateFormat == null) {
@@ -151,7 +165,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
         Value resultValue;
         if (tempDate != null) {
             //System.out.println("came in as " + tempDate);
-            Calendar calendar = Calendar.getInstance();
+
             //calendar.setTime(tempDate);
             if (timezoneShift) {
                 int time = insightRequestMetadata.getUtcOffset() / 60;

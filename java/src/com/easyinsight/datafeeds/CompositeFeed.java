@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
@@ -8,12 +9,15 @@ import com.easyinsight.core.DerivedKey;
 
 import com.easyinsight.analysis.*;
 
+import java.io.Serializable;
 import java.util.*;
 
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.AltCompositeReportPipeline;
 import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.pipeline.CompositeReportPipeline;
 import com.easyinsight.pipeline.Pipeline;
+import org.apache.jcs.JCS;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.SimpleGraph;
@@ -28,6 +32,18 @@ public class CompositeFeed extends Feed {
 
     private List<CompositeFeedNode> compositeFeedNodes;
     private List<CompositeFeedConnection> connections;
+
+    private JCS resultCache = null;
+
+    private JCS getCache(String cacheName) {
+
+        try {
+            return JCS.getInstance(cacheName);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
 
     public CompositeFeed() {
     }
@@ -82,38 +98,58 @@ public class CompositeFeed extends Feed {
         return metadata;
     }
 
-    /*public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
-        if (analysisItem.getKey() instanceof DerivedKey) {
-            DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
-            return findMetadataForComposite(derivedKey, analysisItem, insightRequestMetadata, conn);
-        } else {
-            if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
-                AnalysisItemResultMetadata analysisItemResultMetadata = analysisItem.createResultMetadata();
-                Map<Value, Value> lookupMap = new HashMap<Value, Value>();
-                LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
-                AnalysisDimensionResultMetadata sourceMetadata = (AnalysisDimensionResultMetadata) getMetadata(lookupTable.getSourceField(), insightRequestMetadata, conn);
-                for (LookupPair lookupPair : lookupTable.getLookupPairs()) {
-                    lookupMap.put(lookupPair.getSourceValue(), lookupPair.getTargetValue());
-                }
-                for (Value value : sourceMetadata.getValues()) {
-                    Value targetValue = lookupMap.get(value);
-                    if (targetValue == null) {
-                        targetValue = new EmptyValue();
-                    }
-                    analysisItemResultMetadata.addValue(analysisItem, targetValue, insightRequestMetadata);
-                }
-                return analysisItemResultMetadata;
-            } else {
-                AnalysisItemResultMetadata analysisItemResultMetadata = analysisItem.createResultMetadata();
+    private static class CacheKey implements Serializable {
+        private Set<AnalysisItem> analysisItems;
+        private Collection<FilterDefinition> filters;
 
-            }
+        private CacheKey(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters) {
+            this.analysisItems = analysisItems;
+            this.filters = filters;
         }
-        return null;
-    }*/
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            CacheKey cacheKey = (CacheKey) o;
+
+            if (!analysisItems.equals(cacheKey.analysisItems)) return false;
+            if (!filters.equals(cacheKey.filters)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = analysisItems.hashCode();
+            result = 31 * result + filters.hashCode();
+            return result;
+        }
+    }
 
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            return getDataSet(analysisItems, filters, insightRequestMetadata, conn);
+            DataSet dataSet = null;
+            /*if (resultCache != null) {
+                dataSet = (DataSet) resultCache.get(new CacheKey(analysisItems, filters));
+                if (dataSet != null) {
+                    System.out.println("got " + dataSet.getRows().size() + " on " + getFeedID());
+                }
+            }*/
+            //if (dataSet == null) {
+                dataSet = getDataSet(analysisItems, filters, insightRequestMetadata, conn);
+                /*if (resultCache != null) {
+                    DataSet copySet = new DataSet();
+                    for (IRow row : dataSet.getRows()) {
+                        IRow copyRow = copySet.createRow();
+                        copyRow.addValues(row);
+                    }
+                    System.out.println("saving set with rows " + copySet.getRows().size() + " on " + getFeedID());
+                    resultCache.put(new CacheKey(analysisItems, filters), copySet);
+                }*/
+            //}
+            return dataSet;
         } catch (ReportException re) {
             throw re;
         } catch (InvalidFieldsException ife) {
@@ -272,8 +308,22 @@ public class CompositeFeed extends Feed {
         }
 
         QueryStateNode firstVertex = null;
+        Map<Long, Collection<CompositeFeedConnection>> conns = new HashMap<Long, Collection<CompositeFeedConnection>>();
+        Map<CompositeFeedConnection, FilterDefinition> filterMap = new HashMap<CompositeFeedConnection, FilterDefinition>();
         for (CompositeFeedConnection connection : connections) {
             if (neededNodes.containsKey(connection.getSourceFeedID()) && neededNodes.containsKey(connection.getTargetFeedID())) {
+                Collection<CompositeFeedConnection> sourceConnList = conns.get(connection.getSourceFeedID());
+                if (sourceConnList == null) {
+                    sourceConnList = new ArrayList<CompositeFeedConnection>();
+                    conns.put(connection.getSourceFeedID(), sourceConnList);
+                }
+                sourceConnList.add(connection);
+                Collection<CompositeFeedConnection> targetConnList = conns.get(connection.getTargetFeedID());
+                if (targetConnList == null) {
+                    targetConnList = new ArrayList<CompositeFeedConnection>();
+                    conns.put(connection.getTargetFeedID(), targetConnList);
+                }
+                targetConnList.add(connection);
                 Edge edge = new Edge(connection);
                 QueryStateNode source = queryNodeMap.get(connection.getSourceFeedID());
                 if (firstVertex == null) {
@@ -291,17 +341,40 @@ public class CompositeFeed extends Feed {
         List<String> auditStrings = new ArrayList<String>();
         ClosestFirstIterator<QueryStateNode, Edge> iter = new ClosestFirstIterator<QueryStateNode, Edge>(reducedGraph, firstVertex);
 
+
         Map<Long, QueryData> map = new HashMap<Long, QueryData>();
 
         for (QueryStateNode queryStateNode : neededNodes.values()) {
             map.put(queryStateNode.feedID, queryStateNode.queryData);
         }
-
         while (iter.hasNext()) {
             QueryStateNode sourceNode = iter.next();
             QueryData sourceQueryData = map.get(sourceNode.feedID);
             if (sourceQueryData.dataSet == null) {
+                Collection<CompositeFeedConnection> myConnections = conns.get(sourceNode.feedID);
+                for (CompositeFeedConnection myConn : myConnections) {
+                    FilterDefinition filter = filterMap.get(myConn);
+                    if (filter != null) {
+                        if (insightRequestMetadata.isOptimized()) {
+                            sourceNode.addFilter(filter);
+                        }
+                    }
+                }
                 sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
+                for (CompositeFeedConnection myConn : myConnections) {
+                    FilterDefinition filter = filterMap.get(myConn);
+                    if (filter == null) {
+                        QueryStateNode targetNode;
+                        if (sourceNode.feedID == myConn.getSourceFeedID()) {
+                            targetNode = queryNodeMap.get(myConn.getTargetFeedID());
+                        } else {
+                            targetNode = queryNodeMap.get(myConn.getSourceFeedID());
+                        }
+                        //System.out.println("defining filter between " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
+                        FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, myConn);
+                        filterMap.put(myConn, joinFilter);
+                    }
+                }
             }
             Edge last = iter.getSpanningTreeEdge(sourceNode);
             if (last != null) {
@@ -312,11 +385,13 @@ public class CompositeFeed extends Feed {
                 } else {
                     targetNode = reducedGraph.getEdgeSource(last);
                 }
+
+                //System.out.println("joining " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
+
                 QueryData targetQueryData = map.get(targetNode.feedID);
-                if (targetQueryData.dataSet == null) {
-                    targetQueryData.dataSet = targetNode.produceDataSet(insightRequestMetadata);
-                }
+                boolean swapped = false;
                 if (last.connection.getSourceFeedID() != sourceNode.feedID) {
+                    swapped = true;
                     QueryStateNode swap = sourceNode;
                     sourceNode = targetNode;
                     targetNode = swap;
@@ -324,6 +399,23 @@ public class CompositeFeed extends Feed {
                     sourceQueryData = targetQueryData;
                     targetQueryData = swapData;
                 }
+                FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, last.connection);
+                if (!swapped) {
+                    if (targetQueryData.dataSet == null) {
+                        if (insightRequestMetadata.isOptimized()) {
+                            targetNode.addFilter(joinFilter);
+                        }
+                        targetQueryData.dataSet = targetNode.produceDataSet(insightRequestMetadata);
+                    }
+                } else {
+                    if (sourceQueryData.dataSet == null) {
+                        if (insightRequestMetadata.isOptimized()) {
+                            sourceNode.addFilter(joinFilter);
+                        }
+                        sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
+                    }
+                }
+
                 MergeAudit mergeAudit = last.connection.merge(sourceQueryData.dataSet, targetQueryData.dataSet,
                         sourceQueryData.neededItems, targetQueryData.neededItems,
                         sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID);
@@ -339,11 +431,82 @@ public class CompositeFeed extends Feed {
 
         }
         dataSet.setAudits(auditStrings);
-        CompositeReportPipeline pipeline = new CompositeReportPipeline();
-        WSListDefinition analysisDefinition = new WSListDefinition();
-        analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
-        pipeline.setup(analysisDefinition, this, insightRequestMetadata);
-        return pipeline.toDataSet(dataSet);
+        if (!insightRequestMetadata.isOptimized()) {
+            CompositeReportPipeline pipeline = new CompositeReportPipeline();
+            WSListDefinition analysisDefinition = new WSListDefinition();
+            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
+            pipeline.setup(analysisDefinition, this, insightRequestMetadata);
+            return pipeline.toDataSet(dataSet);
+        } else {
+            return dataSet;
+        }
+        /**/
+        //return dataSet;
+    }
+
+    private FilterDefinition createJoinFilter(QueryStateNode sourceNode, DataSet dataSet, QueryStateNode targetNode, CompositeFeedConnection connection) {
+        FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+        if (connection.getTargetJoin() == null) {
+            if (connection.getTargetItem().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                return null;
+            }
+            filterValueDefinition.setField(connection.getTargetItem());
+        } else {
+            AnalysisItem target = findFieldForKey(targetNode.neededItems, connection.getTargetJoin(), targetNode.feedID);
+            if (target.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                return null;
+            }
+            filterValueDefinition.setField(target);
+        }
+        filterValueDefinition.setInclusive(true);
+        if (connection.getSourceJoin() == null) {
+            filterValueDefinition.setFilteredValues(obtainValues(dataSet, connection.getSourceItem()));
+        } else {
+            filterValueDefinition.setFilteredValues(obtainValues(dataSet, findFieldForKey(sourceNode.neededItems, connection.getSourceJoin(), sourceNode.feedID)));
+        }
+        return filterValueDefinition;
+    }
+
+    private List<Object> obtainValues(DataSet dataSet, AnalysisItem analysisItem) {
+        List<Object> objects = new ArrayList<Object>();
+        for (IRow row : dataSet.getRows()) {
+            Value value = row.getValue(analysisItem.createAggregateKey());
+            objects.add(value);
+        }
+        return objects;
+    }
+
+    private AnalysisItem findFieldForKey(Collection<AnalysisItem> analysisItems, Key key, long sourceID) {
+
+        for (AnalysisItem analysisItem : analysisItems) {
+            if (matches(analysisItem, key, sourceID)) {
+                return analysisItem;
+            }
+        }
+        for (AnalysisItem analysisItem : analysisItems) {
+            if (matches(analysisItem, key)) {
+                return analysisItem;
+            }
+        }
+        return null;
+    }
+
+    private boolean matches(AnalysisItem source, Key targetKey, long sourceID) {
+        Key key = source.getKey();
+        if (key.toKeyString().equals(targetKey.toKeyString())) {
+            if (key instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                if (derivedKey.getFeedID() == sourceID) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean matches(AnalysisItem source, Key targetKey) {
+        Key key = source.getKey();
+        return (key.toKeyString().equals(targetKey.toKeyString()));
     }
 
     private class QueryData {

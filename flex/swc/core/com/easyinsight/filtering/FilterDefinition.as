@@ -19,6 +19,7 @@ import flash.events.EventDispatcher;
         public static const OR:int = 9;
         public static const NULL:int = 10;
         public static const NAMED_REF:int = 11;
+        public static const FLAT_DATE:int = 12;
 
 		public var field:AnalysisItem;
 		public var applyBeforeAggregation:Boolean = true;
@@ -28,6 +29,7 @@ import flash.events.EventDispatcher;
         public var showOnReportView:Boolean = true;
     public var filterName:String;
     public var templateFilter:Boolean;
+    public var toggleEnabled:Boolean;
 		
 		public function FilterDefinition()
 			{
@@ -36,6 +38,10 @@ import flash.events.EventDispatcher;
 
     public function matches(filterDefinition:FilterDefinition):Boolean {
         return field != null && filterDefinition.field != null && field.matches(filterDefinition.field) && getType() == filterDefinition.getType();
+    }
+
+    public function get label():String {
+        return field.display;
     }
 
 		public function getType():int {
