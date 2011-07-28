@@ -4,6 +4,7 @@ import com.easyinsight.administration.feed.GoogleFeedDefinition;
 import com.easyinsight.administration.feed.PersistableStringValue;
 import com.easyinsight.administration.feed.PersistableValue;
 import com.easyinsight.administration.sharing.UserStub;
+import com.easyinsight.analysis.AggregateAnalysisMeasure;
 import com.easyinsight.analysis.AnalysisCalculation;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItemFault;
@@ -89,6 +90,7 @@ import com.easyinsight.filtering.FilterPatternDefinition;
 import com.easyinsight.filtering.FilterRangeDefinition;
 import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.filtering.FirstValueFilterDefinition;
+import com.easyinsight.filtering.FlatDateFilterDefinition;
 import com.easyinsight.filtering.LastValueFilterDefinition;
 import com.easyinsight.filtering.NamedFilterReference;
 import com.easyinsight.filtering.NullValueFilterDefinition;
@@ -136,6 +138,7 @@ public class TORegistry {
         var analysisText:AnalysisText;
         var analysisRange:AnalysisRangeDimension;
         var analysisZip:AnalysisZipCode;
+        var agg:AggregateAnalysisMeasure;
         var sigma:SixSigmaMeasure;
         var cam:ComplexAnalysisMeasure;
         var tags:AnalysisList;
@@ -160,6 +163,7 @@ public class TORegistry {
         var filter7:LastValueFilterDefinition;
         var filter8:NullValueFilterDefinition;
         var filter9:NamedFilterReference;
+        var filter10:FlatDateFilterDefinition;
         var icon:Icon;
         var scorecard:Scorecard;
         var persString:PersistableStringValue;
@@ -170,7 +174,6 @@ public class TORegistry {
         var kpiOutcome:KPIOutcome;
         var folderNode:FolderNode;
         var feedFolder:FeedFolder;
-        var kpiWrapper:KPITreeWrapper;
         var excelUploadFormat:ExcelUploadFormat;
         var xssfExcelUploadFormat:XSSFExcelUploadFormat;
         var flatFileUploadFormat:FlatFileUploadFormat;
@@ -186,7 +189,6 @@ public class TORegistry {
         var googleDoc:GoogleFeedDefinition;
         var pivotal:PivotalTrackerBaseSource;
         var sendGrid:SendGridDataSource;
-        var meetup:MeetupDataSource;
         var linked:LinkedInDataSource;
         var freshbooks:FreshbooksDataSource;
         var batchbook:BatchbookDataSource;

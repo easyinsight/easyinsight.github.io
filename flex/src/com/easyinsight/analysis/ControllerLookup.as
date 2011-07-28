@@ -19,19 +19,11 @@ import com.easyinsight.analysis.gantt.GanttController;
 import com.easyinsight.analysis.gauge.GaugeController;
 import com.easyinsight.analysis.heatmap.HeatMapController;
 import com.easyinsight.analysis.list.ListController;
-import com.easyinsight.analysis.maps.AfricaMapController;
-import com.easyinsight.analysis.maps.AmericasMapController;
-import com.easyinsight.analysis.maps.AsiaMapController;
-import com.easyinsight.analysis.maps.EuropeMapController;
-import com.easyinsight.analysis.maps.MiddleEastMapController;
-import com.easyinsight.analysis.maps.USMapController;
-import com.easyinsight.analysis.maps.WorldMapController;
 import com.easyinsight.analysis.timeline.TimelineController;
 import com.easyinsight.analysis.tree.TreeController;
 import com.easyinsight.analysis.treemap.TreeMapController;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListController;
 import com.easyinsight.analysis.verticallist.VerticalListController;
-import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 
 public class ControllerLookup {
 
@@ -52,27 +44,6 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.STACKED_BAR:
                 controller = StackedBarChartController;
-                break;
-            case AnalysisDefinition.MAP_USA:
-                controller = USMapController;
-                break;
-            case AnalysisDefinition.MAP_EUROPE:
-                controller = EuropeMapController;
-                break;
-            case AnalysisDefinition.MAP_WORLD:
-                controller = WorldMapController;
-                break;
-            case AnalysisDefinition.MAP_ASIA:
-                controller = AsiaMapController;
-                break;
-            case AnalysisDefinition.MAP_AMERICAS:
-                controller = AmericasMapController;
-                break;
-            case AnalysisDefinition.MAP_AFRICA:
-                controller = AfricaMapController;
-                break;
-            case AnalysisDefinition.MAP_MIDDLE_EAST:
-                controller = MiddleEastMapController;
                 break;
             case AnalysisDefinition.COLUMN:
                 controller = ColumnChartController;

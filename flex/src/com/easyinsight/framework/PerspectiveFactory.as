@@ -37,12 +37,12 @@ public class PerspectiveFactory implements IPerspectiveFactory {
             case PerspectiveInfo.COMPOSITE_WORKSPACE:
                 perspective = new DirectUIComponent(new NewCompositeFeedWorkspace());
                 break;
-            case PerspectiveInfo.KPI_TREE_ADMIN:
+/*            case PerspectiveInfo.KPI_TREE_ADMIN:
                 perspective = new ModuleUIComponent("KPITreeAdmin", "Loading the KPI tree configuration page...");
                 break;
             case PerspectiveInfo.KPI_TREE_VIEW:
                 perspective = new ModuleUIComponent("KPITreeView", "Loading the KPI tree view page...");
-                break;
+                break;*/
             case PerspectiveInfo.DATA_SOURCE_ADMIN:
                 perspective = new ModuleUIComponent("DataSourceAdmin", "Loading the data source administration page...");
                 break;
