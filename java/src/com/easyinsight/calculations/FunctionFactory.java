@@ -77,6 +77,8 @@ public class FunctionFactory {
             return new NamedBracketDateFunction();
         } else if (s.equals("replace")) {
             return new Replace();
+        } else if (s.equals("blah")) {
+            return new BlahFunction();
         } else {
             return null;
         }
