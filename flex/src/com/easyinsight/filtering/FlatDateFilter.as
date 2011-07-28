@@ -71,7 +71,6 @@ import mx.rpc.events.ResultEvent;
         private function onChange(event:Event):void {
             var checkbox:CheckBox = event.currentTarget as CheckBox;
             _filterDefinition.enabled = checkbox.selected;
-            Alert.show("emitting event 2");
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
 
@@ -135,15 +134,6 @@ import mx.rpc.events.ResultEvent;
                     _filterDefinition.applyBeforeAggregation = false;    
                 }
 			} else {
-
-                /*if (_filterDefinition.sliding && _filterDefinition.startDate != null && _filterDefinition.endDate != null) {
-                    var nowDelta:int = highDate.getTime() - _filterDefinition.endDate.getTime();
-                    _filterDefinition.startDate = new Date(_filterDefinition.startDate.getTime() + nowDelta);
-                    _filterDefinition.endDate = new Date(_filterDefinition.endDate.getTime() + nowDelta);
-                }
-				if (_filterDefinition.startDate == null) {
-					_filterDefinition.startDate = lowDate;
-				}*/
 			}
 
             var dp:ArrayCollection = new ArrayCollection();
@@ -155,6 +145,8 @@ import mx.rpc.events.ResultEvent;
             comboBox.dataProvider = dp;
             if (dp.getItemIndex(String(_filterDefinition.value)) != -1) {
                 comboBox.selectedItem = String(_filterDefinition.value);
+            } else {
+                _filterDefinition.value = int(dp.getItemAt(0));
             }
 
             if (_filterEditable) {
@@ -182,7 +174,6 @@ import mx.rpc.events.ResultEvent;
                 _loadingFromReport = false;
                 newFilter = false;
             } else {
-                Alert.show("emitting event 1");
 			    if (newFilter) {
                     dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
                     newFilter = false;

@@ -114,11 +114,17 @@ public class RollingRangeFilter extends HBox implements IFilter
 
     override protected function createChildren():void {
         super.createChildren();
-        var checkbox:CheckBox = new CheckBox();
-        checkbox.selected = rollingFilter == null ? true : rollingFilter.enabled;
-        checkbox.toolTip = "Click to disable this filter.";
-        checkbox.addEventListener(Event.CHANGE, onChange);
-        addChild(checkbox);
+        if (rollingFilter == null || !rollingFilter.toggleEnabled) {
+            var checkbox:CheckBox = new CheckBox();
+            checkbox.selected = rollingFilter == null ? true : rollingFilter.enabled;
+            checkbox.toolTip = "Click to disable this filter.";
+            checkbox.addEventListener(Event.CHANGE, onChange);
+            addChild(checkbox);
+            if (rollingFilter != null && rollingFilter.intrinsic) {
+                checkbox.enabled = false;
+                checkbox.toolTip = "This filter is an intrinsic part of the data source and cannot be disabled.";
+            }
+        }
         if (_showLabel) {
             var label:Label = new Label();
             label.text = _analysisItem.display + ":";
@@ -185,10 +191,6 @@ public class RollingRangeFilter extends HBox implements IFilter
                 }
             }
             addChild(deleteButton);
-        }
-        if (rollingFilter.intrinsic) {
-            checkbox.enabled = false;
-            checkbox.toolTip = "This filter is an intrinsic part of the data source and cannot be disabled.";
         }
     }
 
