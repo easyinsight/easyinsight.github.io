@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
-
         import com.easyinsight.analysis.AnalysisItemWrapper;
 
         import mx.collections.ArrayCollection;
@@ -25,6 +24,11 @@
             PopUpManager.removePopUp(this);
         }
 
+        private function newFieldChoiceFilter():void {
+            dispatchEvent(new NewFilterEvent(NewFilterEvent.FIELD_CHOICE_FILTER, AnalysisItemWrapper(aFieldBox.selectedItem).analysisItem));
+            PopUpManager.removePopUp(this);
+        }
+
         [Bindable]
         private var stackIndex:int = 0;
 
@@ -32,18 +36,20 @@
             if (typeGroup.selectedValue == "fieldFilter") {
                 stackIndex = 0;
             } else if (typeGroup.selectedValue == "namedRef") {
+                stackIndex = 3;
+            } else if (typeGroup.selectedValue == "fieldChoiceFilter") {
                 stackIndex = 2;
             } else {
                 stackIndex = 1;
             }
         }
-
         ]]></mx:Script>
     <mx:VBox>
         <mx:RadioButtonGroup id="typeGroup" change="updateStack()" selectedValue="fieldFilter"/>
         <mx:HBox>
             <mx:RadioButton label="Create a Filter on a Field" groupName="typeGroup" value="fieldFilter"/>
             <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
+            <mx:RadioButton label="Create a Field Choice Filter" groupName="typeGroup" value="fieldChoiceFilter"/>
             <!--<mx:RadioButton label="Create a Named Reference Filter" groupName="typeGroup" value="namedRef"/>-->
         </mx:HBox>
         <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
@@ -59,6 +65,14 @@
                 <util:SaveButton label="Create a new Or Filter" click="newOrFilter()"/>
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
+            <mx:VBox>
+                <mx:Label text="Choose a field for the filter:"/>
+                <mx:ComboBox dataProvider="{availableFields}" id="aFieldBox" labelField="displayName"/>
+                <mx:HBox>
+                    <util:SaveButton label="Create a new Field Choice Filter" click="newFieldChoiceFilter()"/>
+                    <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+                </mx:HBox>
+            </mx:VBox>
             <mx:HBox>
                 <util:SaveButton label="Create a new Named Reference Filter" click="newRefFilter()"/>
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

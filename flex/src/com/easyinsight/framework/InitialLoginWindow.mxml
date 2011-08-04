@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="center"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" horizontalAlign="center"
          verticalAlign="middle"
-         width="100%" height="100%" verticalGap="20">
+         width="100%" height="100%" verticalGap="20" creationComplete="onCreation()">
     <mx:Metadata>
         [Event(name="kpiTutorialNext", type="com.easyinsight.kpi.KPITutorialEvent")]
     </mx:Metadata>
@@ -11,6 +11,16 @@
 
         import mx.controls.Alert;
         import mx.validators.Validator;
+
+        private function onCreation():void {
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
+        }
+
+        private function onKey(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                finish();
+            }
+        }
 
         private function finish():void {
             var passwordResults:Array = Validator.validateAll([ passwordValidator ]);
@@ -32,6 +42,7 @@
         }
 
         private function updated():void {
+            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
             dispatchEvent(new KPITutorialEvent(KPITutorialEvent.NEXT));
         }
         ]]></mx:Script>
@@ -54,7 +65,7 @@
             </mx:Form>
             <mx:Spacer height="100%"/>
             <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10">
-                <mx:Button label="Finish" click="finish()" fontSize="14"/>
+                <util:SaveButton label="Finish" click="finish()" fontSize="14"/>
             </mx:HBox>
         </mx:VBox>
     </mx:VBox>

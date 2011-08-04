@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:black="ilog.gauges.controls.black.*" width="100%"
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:black="ilog.gauges.controls.black.*"
+           xmlns:bttc="com.betterthantomorrow.components.*" width="100%"
            height="100%" implements="com.easyinsight.analysis.IReportRenderer">
-    <mx:states>
+    <!--<mx:states>
         <mx:State name="Circular">
             <mx:AddChild relativeTo="{box}">
                 <black:BlackCircularGauge width="100%" height="100%" value="{value}" minimum="0" maximum="{maxValue}" startAngle="210"
@@ -15,13 +16,15 @@
                                             trackMinimum="0" trackMaximum="{maxValue}" orientation="clockwise" fontFamily="Tahoma"/>
             </mx:AddChild>
         </mx:State>
-    </mx:states>
+    </mx:states>-->
+
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.filtering.FilterRawData;
 
         import mx.collections.ArrayCollection;
+        import mx.formatters.NumberFormatter;
 
         [Bindable]
         private var value:Number = 0;
@@ -42,11 +45,11 @@
                 var row:Object = dataSet.getItemAt(0);
                 maxValue = gaugeDefinition.maxValue;
                 value = Math.min(maxValue, Number(row[gaugeDefinition.measure.qualifiedName()]));
-                if (gaugeDefinition.gaugeType == GaugeDefinition.CIRCULAR_GAUGE) {
-                    currentState = "Circular";
-                } else if (gaugeDefinition.gaugeType == GaugeDefinition.HORIZONTAL_GAUGE) {
-                    currentState = "Horizontal";
-                }
+                gauge.alertRatios = [ gaugeDefinition.alertPoint1, gaugeDefinition.alertPoint2 ];
+                gauge.width = Math.min(box.width, box.height);
+                gauge.diameter = Math.min(box.width, box.height);
+                gauge.invalidateSize();
+                gauge.invalidateDisplayList();
                 /*gauge.value = value;
                  gauge.maximum = maxValue;*/
                 //currentState = "hasData";
@@ -56,10 +59,6 @@
             }
         }
 
-        public function createFilterRawData():FilterRawData {
-            return null;
-        }
-
         public function updateExportMetadata():void {
         }
 
@@ -67,13 +66,22 @@
             return false;
         }
 
+        [Bindable]
+        private var numFormatter:NumberFormatter = new NumberFormatter();
+
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
             if (event is GaugeTypeEvent) {
                 var gaugeEvent:GaugeTypeEvent = event as GaugeTypeEvent;
 
             }
         }]]></mx:Script>
-    <mx:Box id="box" width="100%" height="100%"/>
+    <mx:Box id="box" width="100%" height="100%" horizontalAlign="center">
+        <bttc:Gauge id="gauge"
+           diameter="300" width="300"
+           verticalCenter="0" horizontalCenter="0"  valueFormatter="{numFormatter}"
+           minValue="1"  maxValue="{maxValue}" value="{value}"
+           bigTicks="9" smallTicks="45" showMinMax="true" showValue="true" fontColor="#FFFFFF"/>
+    </mx:Box>
     <!--<black:BlackCircularGauge width="100%" height="100%"
         value="20"
         orientation="clockwise"

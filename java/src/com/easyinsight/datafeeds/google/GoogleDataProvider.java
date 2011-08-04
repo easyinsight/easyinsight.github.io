@@ -242,7 +242,7 @@ public class GoogleDataProvider {
             ClearDBResponse response = new ClearDBResponse();
             response.setSuccessful(true);
             response.setEiDescriptor(new DataSourceDescriptor(clearDBCompositeSource.getFeedName(), clearDBCompositeSource.getDataFeedID(),
-                    clearDBCompositeSource.getFeedType().getType()));
+                    clearDBCompositeSource.getFeedType().getType(), false));
             conn.commit();
             return response;
         } catch (ClearDBQueryException e) {
@@ -404,7 +404,7 @@ public class GoogleDataProvider {
             conn.commit();
 
             return new DataSourceDescriptor(quickbaseCompositeSource.getFeedName(), quickbaseCompositeSource.getDataFeedID(),
-                    quickbaseCompositeSource.getFeedType().getType());
+                    quickbaseCompositeSource.getFeedType().getType(), false);
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();

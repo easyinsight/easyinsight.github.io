@@ -59,7 +59,7 @@ public class DataSourceCopyUtils {
         boolean requiresConfig = solutionID > 0 && feedDefinition.requiresConfiguration();
 
         DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(clonedFeedDefinition.getFeedName(), clonedFeedDefinition.getDataFeedID(),
-                clonedFeedDefinition.getFeedType().getType());
+                clonedFeedDefinition.getFeedType().getType(), false);
         infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), dataSourceDescriptor, clonedFeedDefinition.getFeedName(), requiresConfig));
 
         return infos;

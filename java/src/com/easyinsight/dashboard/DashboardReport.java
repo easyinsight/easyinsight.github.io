@@ -85,7 +85,7 @@ public class DashboardReport extends DashboardElement {
     public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
         AnalysisDefinition replacement = reportReplacementMap.get(report.getId());
         report = new InsightDescriptor(replacement.getAnalysisID(), replacement.getTitle(), replacement.getDataFeedID(), replacement.getReportType(),
-                replacement.getUrlKey(), Roles.SUBSCRIBER);
+                replacement.getUrlKey(), Roles.SUBSCRIBER, false);
     }
 
     public static DashboardElement loadReport(long elementID, EIConnection conn) throws SQLException {
@@ -97,7 +97,7 @@ public class DashboardReport extends DashboardElement {
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             dashboardReport = new DashboardReport();
-            dashboardReport.setReport(new InsightDescriptor(rs.getLong(4), rs.getString(1), rs.getLong(2), rs.getInt(3), rs.getString(5), Roles.SUBSCRIBER));
+            dashboardReport.setReport(new InsightDescriptor(rs.getLong(4), rs.getString(1), rs.getLong(2), rs.getInt(3), rs.getString(5), Roles.SUBSCRIBER, false));
             dashboardReport.setLabelPlacement(rs.getInt(6));
             dashboardReport.setShowLabel(rs.getBoolean(7));
             dashboardReport.loadElement(elementID, conn);

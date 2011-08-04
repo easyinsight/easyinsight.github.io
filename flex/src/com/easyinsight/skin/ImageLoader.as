@@ -7,6 +7,8 @@ import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.utils.ByteArray;
 
+import mx.rpc.events.FaultEvent;
+
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
@@ -17,11 +19,19 @@ public class ImageLoader extends EventDispatcher {
     public function ImageLoader() {
     }
 
-    public function load(imageID:int):void {
+    public function load(imageID:int, endpoint:String = null):void {
         prefService = new RemoteObject();
+        if (endpoint != null) {
+            prefService.endpoint = endpoint;
+        }
         prefService.destination = "preferencesService";
         prefService.getImage.addEventListener(ResultEvent.RESULT, onBytes);
+        prefService.getImage.addEventListener(FaultEvent.FAULT, onFault);
         prefService.getImage.send(imageID);
+    }
+
+    private function onFault(event:FaultEvent):void {
+        trace("Fault = " + event.fault.faultString);
     }
 
     private function onBytes(event:ResultEvent):void {

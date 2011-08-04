@@ -315,7 +315,7 @@ public class SolutionService {
                 String authorName = rs.getString(5);
                 String description = rs.getString(6);
                 boolean recommended = rs.getBoolean(7);
-                EIDescriptor descriptor = new InsightDescriptor(reportID, null, dataSourceID, 0, null, Roles.NONE);
+                EIDescriptor descriptor = new InsightDescriptor(reportID, null, dataSourceID, 0, null, Roles.NONE, false);
                 PreparedStatement ratingStmt = conn.prepareStatement("SELECT count(exchange_report_install_id) from " +
                     "exchange_report_install where report_id = ?");
                 ratingStmt.setLong(1, reportID);
@@ -340,7 +340,7 @@ public class SolutionService {
                     String authorName = dashboardRS.getString(5);
                     String description = dashboardRS.getString(6);
                     boolean recommended = dashboardRS.getBoolean(7);
-                    EIDescriptor descriptor = new DashboardDescriptor(null, dashboardID, dashboardURLKey, 0, Roles.NONE, null);
+                    EIDescriptor descriptor = new DashboardDescriptor(null, dashboardID, dashboardURLKey, 0, Roles.NONE, null, false);
                     blah = determineDataSourceForDashboard(dashboardID, conn);
                     PreparedStatement ratingStmt = conn.prepareStatement("SELECT count(exchange_dashboard_install_id) FROM EXCHANGE_DASHBOARD_INSTALL WHERE DASHBOARD_ID = ?");
                     ratingStmt.setLong(1, dashboardID);
@@ -508,7 +508,7 @@ public class SolutionService {
 
             dashboardStorage.saveDashboard(copiedDashboard, conn);
 
-            DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(copiedDashboard.getName(), copiedDashboard.getId(), copiedDashboard.getUrlKey(), 0, Roles.NONE, null);
+            DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(copiedDashboard.getName(), copiedDashboard.getId(), copiedDashboard.getUrlKey(), 0, Roles.NONE, null, false);
 
             session.flush();
 
@@ -571,7 +571,7 @@ public class SolutionService {
 
             AnalysisDefinition copiedBaseReport = reportReplacementMap.get(reportID);
             InsightDescriptor insightDescriptor = new InsightDescriptor(copiedBaseReport.getAnalysisID(), copiedBaseReport.getTitle(),
-                    copiedBaseReport.getDataFeedID(), copiedBaseReport.getReportType(), copiedBaseReport.getUrlKey(), Roles.OWNER);
+                    copiedBaseReport.getDataFeedID(), copiedBaseReport.getReportType(), copiedBaseReport.getUrlKey(), Roles.OWNER, false);
 
             conn.commit();
             session.close();
@@ -687,7 +687,7 @@ public class SolutionService {
                 ResultSet ratingRS = getReportRatingStmt.executeQuery();
                 ratingRS.next();
                 int installs = ratingRS.getInt(1);
-                InsightDescriptor insightDescriptor = new InsightDescriptor(analysisID, title, dataSourceID, reportType, urlKey, Roles.NONE);
+                InsightDescriptor insightDescriptor = new InsightDescriptor(analysisID, title, dataSourceID, reportType, urlKey, Roles.NONE, false);
                 ExchangeItem item = new ExchangeItem(title, analysisID,
                         installs, created, description, authorName, insightDescriptor, connectionID, connectionName, recommended);
                 reports.add(item);
@@ -721,7 +721,7 @@ public class SolutionService {
                 ratingRS.next();
 
                 int installs = ratingRS.getInt(1);
-                DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey, 0, Roles.NONE, null);
+                DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey, 0, Roles.NONE, null, false);
                 ExchangeItem item = new ExchangeItem(dashboardName, dashboardID, installs,
                         createdDate, description, authorName, dashboardDescriptor, connectionID, connectionName, recommended);
                 reports.add(item);

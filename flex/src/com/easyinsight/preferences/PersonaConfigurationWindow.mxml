@@ -4,6 +4,9 @@
     <mx:Script><![CDATA[
         import com.easyinsight.account.Account;
         import com.easyinsight.framework.User;
+        import com.easyinsight.solutions.AddFeedToSolutionWindow;
+        import com.easyinsight.solutions.FeedSelectionEvent;
+        import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
         import mx.collections.HierarchicalData;
@@ -28,10 +31,12 @@
             if (_persona != null) {
                 personaName = _persona.name;
                 uiConfig = UIConfiguration.fromUISettings(_persona.uiSettings);
+                dlsList = _persona.dataSourceDLS;
             }
         }
 
         private function setupNodes():void {
+            addEventListener(DLSEvent.DLS_DELETE, removeDataSource);
             var hierarchicalData:HierarchicalData = new HierarchicalData();
             uiVisibility = uiConfig.getRoots();
             hierarchicalData.source = uiVisibility;
@@ -44,6 +49,7 @@
         private function save():void {
             if (_persona == null) {
                 _persona = new Persona();
+                _persona.dataSourceDLS = dlsList;
                 newPersona = true;
             }
             var map:Object = new Object();
@@ -89,6 +95,33 @@
             }
             PopUpManager.removePopUp(this);
         }
+
+        private function addDataSource():void {
+            var window:AddFeedToSolutionWindow = new AddFeedToSolutionWindow();
+            window.addEventListener(FeedSelectionEvent.FEED_SELECTED, onDataSource, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        [Bindable]
+        private var dlsList:ArrayCollection = new ArrayCollection();
+
+        private function onDataSource(event:FeedSelectionEvent):void {
+            var dls:DataSourceDLS = new DataSourceDLS();
+            dls.dataSourceID = event.feedDescriptor.id;
+            dls.dataSourceName = event.feedDescriptor.name;
+            dls.filters = new ArrayCollection();
+            dlsList.addItem(dls);
+            var window:DLSConfigWindow = new DLSConfigWindow();
+            window.dls = dls;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function removeDataSource(event:DLSEvent):void {
+            dlsList.removeItemAt(dlsList.getItemIndex(event.dls));
+        }
+
         ]]></mx:Script>
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
         <mx:method name="savePersona" result="saved()"/>
@@ -99,15 +132,36 @@
                 <mx:TextInput id="personaNameInput" text="{personaName}"/>
             </mx:FormItem>
         </mx:Form>
-        <mx:Box borderThickness="1" borderStyle="solid">
-            <mx:AdvancedDataGrid id="grid" width="400" height="300" selectable="false" headerHeight="0">
-                <mx:columns>
-                    <mx:AdvancedDataGridColumn headerText="" dataField="label"/>
-                    <mx:AdvancedDataGridColumn headerText="" dataField="label" itemRenderer="com.easyinsight.preferences.PersonaConfigCheckbox"
-                            sortable="false" width="50"/>
-                </mx:columns>
-            </mx:AdvancedDataGrid>
-        </mx:Box>
+        <mx:TabNavigator id="tabNavigator" width="400" height="300">
+            <mx:Box borderThickness="1" borderStyle="solid" label="UI Config">
+                <mx:AdvancedDataGrid id="grid" width="100%" height="100%" selectable="false" headerHeight="0">
+                    <mx:columns>
+                        <mx:AdvancedDataGridColumn headerText="" dataField="label"/>
+                        <mx:AdvancedDataGridColumn headerText="" dataField="label" itemRenderer="com.easyinsight.preferences.PersonaConfigCheckbox"
+                                sortable="false" width="50"/>
+                    </mx:columns>
+                </mx:AdvancedDataGrid>
+            </mx:Box>
+            <mx:VBox borderThickness="1" borderStyle="solid" label="DLS">
+                <mx:Button label="Add Data Source..." click="addDataSource()"/>
+                <mx:DataGrid id="dataSourceGrid" width="100%" height="100%" selectable="false" headerHeight="0" dataProvider="{dlsList}"
+                        rowHeight="28">
+                    <mx:columns>
+                        <util:EIDataGridColumn headerText="" dataField="display"/>
+                        <util:EIDataGridColumn headerText="" itemRenderer="com.easyinsight.preferences.DLSControls" width="100" sortable="false"/>
+                    </mx:columns>
+                </mx:DataGrid>
+            </mx:VBox>
+            <!--<mx:VBox borderThickness="1" borderStyle="solid" label="DLS">
+                <mx:Button label="Add Data Source..." click="addDataSource()"/>
+                <mx:DataGrid id="dataSourceGrid" width="400" height="300" selectable="false" headerHeight="0" dataProvider="{dlsList}">
+                    <mx:columns>
+                        <util:EIDataGridColumn headerText="" dataField="display"/>
+                        <util:EIDataGridColumn headerText="" itemRenderer="com.easyinsight.preferences.DLSControls" width="100" sortable="false"/>
+                    </mx:columns>
+                </mx:DataGrid>
+            </mx:VBox> -->
+        </mx:TabNavigator>
         <mx:HBox width="100%" horizontalAlign="center">
             <util:SaveButton label="Save" click="save()"/>
             <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

@@ -1,5 +1,6 @@
 package com.easyinsight.preferences;
 
+import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
@@ -13,8 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -266,6 +266,41 @@ public class PreferencesService {
                 persona.setUiSettings(uiSettings);
                 personas.add(persona);
                 visibilitySettingsStmt.close();
+                PreparedStatement dlsStmt = conn.prepareStatement("SELECT DLS_ID, DATA_SOURCE_ID, FEED_NAME FROM DLS, data_feed WHERE PERSONA_ID = ? AND " +
+                        "DATA_FEED.DATA_FEED_ID = dls.data_source_id");
+                PreparedStatement getFilterStmt = conn.prepareStatement("SELECT FILTER_ID FROM dls_to_filter where dls_id = ?");
+                dlsStmt.setLong(1, personaID);
+                List<DataSourceDLS> dlsList = new ArrayList<DataSourceDLS>();
+                ResultSet dlsRS = dlsStmt.executeQuery();
+                while (dlsRS.next()) {
+                    DataSourceDLS dls = new DataSourceDLS();
+                    long dlsID = dlsRS.getLong(1);
+                    long dataSourceID = dlsRS.getLong(2);
+                    dls.setDataSourceID(dataSourceID);
+                    dls.setDataSourceName(dlsRS.getString(3));
+                    dls.setDataSourceDLSID(dlsID);
+                    getFilterStmt.setLong(1, dlsID);
+                    List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+                    ResultSet filterRS = getFilterStmt.executeQuery();
+                    while (filterRS.next()) {
+                        long filterID = filterRS.getLong(1);
+                        Session session = Database.instance().createSession(conn);
+                        try {
+                            List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
+                            if (results.size() > 0) {
+                                FilterDefinition filter = (FilterDefinition) results.get(0);
+                                filter.getField().afterLoad();
+                                filter.afterLoad();
+                                filters.add(filter);
+                            }
+                        } finally {
+                            session.close();
+                        }
+                    }
+                    dls.setFilters(filters);
+                    dlsList.add(dls);
+                }
+                persona.setDataSourceDLS(dlsList);
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -273,6 +308,124 @@ public class PreferencesService {
             Database.closeConnection(conn);
         }
         return personas;
+    }
+
+    public List<UserDLS> getUserDLS(long userID, long personaID) {
+        List<UserDLS> dls = new ArrayList<UserDLS>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER_DLS_ID, DLS_ID FROM USER_DLS WHERE USER_ID = ?");
+            PreparedStatement queryUserFilterStmt = conn.prepareStatement("SELECT FILTER_ID, ORIGINAL_FILTER_ID FROM user_dls_to_filter where user_dls_id = ?");
+            queryStmt.setLong(1, userID);
+            ResultSet rs = queryStmt.executeQuery();
+            Map<Long, UserDLS> map = new HashMap<Long, UserDLS>();
+            while (rs.next()) {
+                long userDLSID = rs.getLong(1);
+                long dlsID = rs.getLong(2);
+                queryUserFilterStmt.setLong(1, userDLSID);
+                ResultSet uFilterRS = queryUserFilterStmt.executeQuery();
+                UserDLS userDLS = new UserDLS();
+                userDLS.setDlsID(dlsID);
+                List<UserDLSFilter> userDLSFilterList = new ArrayList<UserDLSFilter>();
+                userDLS.setUserDLSFilterList(userDLSFilterList);
+                dls.add(userDLS);
+                map.put(dlsID, userDLS);
+                while (uFilterRS.next()) {
+                    long filterID = uFilterRS.getLong(1);
+                    long originalFilterID = uFilterRS.getLong(2);
+                    UserDLSFilter userDLSFilter = new UserDLSFilter();
+                    userDLSFilter.setOriginalFilterID(originalFilterID);
+                    FilterDefinition filter;
+                    Session session = Database.instance().createSession(conn);
+                    try {
+                        List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
+                        if (results.size() > 0) {
+                            filter = (FilterDefinition) results.get(0);
+                            filter.getField().afterLoad();
+                            filter.afterLoad();
+                        } else {
+                            throw new RuntimeException("Could not find filter " + originalFilterID);
+                        }
+                    } finally {
+                        session.close();
+                    }
+                    userDLSFilter.setFilterDefinition(filter);
+                    userDLSFilterList.add(userDLSFilter);
+                }
+            }
+            List<DataSourceDLS> dataSourceDLSList = getDataSourceDLS(personaID, conn);
+            for (DataSourceDLS dataSourceDLS : dataSourceDLSList) {
+                UserDLS userDLS = map.get(dataSourceDLS.getDataSourceDLSID());
+                if (userDLS == null) {
+                    userDLS = new UserDLS();
+                    dls.add(userDLS);
+                }
+                userDLS.setDataSourceName(dataSourceDLS.getDataSourceName());
+                userDLS.setDataSourceID(dataSourceDLS.getDataSourceID());
+                userDLS.setDlsID(dataSourceDLS.getDataSourceDLSID());
+                List<UserDLSFilter> userDLSFilterList = userDLS.getUserDLSFilterList();
+                for (FilterDefinition filterDefinition : dataSourceDLS.getFilters()) {
+                    boolean matched = false;
+                    for (UserDLSFilter userDLSFilter : userDLSFilterList) {
+                        if (userDLSFilter.getOriginalFilterID() == filterDefinition.getFilterID()) {
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        FilterDefinition clonedFilter = filterDefinition.clone();
+                        UserDLSFilter userDLSFilter = new UserDLSFilter();
+                        userDLSFilter.setOriginalFilterID(filterDefinition.getFilterID());
+                        userDLSFilter.setFilterDefinition(clonedFilter);
+                        userDLSFilterList.add(userDLSFilter);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return dls;
+    }
+
+    private List<DataSourceDLS> getDataSourceDLS(long personaID, EIConnection conn) throws SQLException {
+        List<DataSourceDLS> dlsList = new ArrayList<DataSourceDLS>();
+        PreparedStatement dlsStmt = conn.prepareStatement("SELECT DLS_ID, DATA_SOURCE_ID, FEED_NAME FROM DLS, data_feed WHERE PERSONA_ID = ? AND " +
+                "DATA_FEED.DATA_FEED_ID = dls.data_source_id");
+        PreparedStatement getFilterStmt = conn.prepareStatement("SELECT FILTER_ID FROM dls_to_filter where dls_id = ?");
+        dlsStmt.setLong(1, personaID);
+        ResultSet dlsRS = dlsStmt.executeQuery();
+        while (dlsRS.next()) {
+            DataSourceDLS dls = new DataSourceDLS();
+            long dlsID = dlsRS.getLong(1);
+            long dataSourceID = dlsRS.getLong(2);
+            dls.setDataSourceDLSID(dlsID);
+            dls.setDataSourceID(dataSourceID);
+            dls.setDataSourceName(dlsRS.getString(3));
+            getFilterStmt.setLong(1, dlsID);
+            List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+            ResultSet filterRS = getFilterStmt.executeQuery();
+            while (filterRS.next()) {
+                long filterID = filterRS.getLong(1);
+                Session session = Database.instance().createSession(conn);
+                try {
+                    List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
+                    if (results.size() > 0) {
+                        FilterDefinition filter = (FilterDefinition) results.get(0);
+                        filter.getField().afterLoad();
+                        filter.afterLoad();
+                        filters.add(filter);
+                    }
+                } finally {
+                    session.close();
+                }
+            }
+            dls.setFilters(filters);
+            dlsList.add(dls);
+        }
+        return dlsList;
     }
 
     public long savePersona(Persona persona) {
@@ -325,6 +478,68 @@ public class PreferencesService {
             updateUserStmt.setLong(1, persona.getPersonaID());
             updateUserStmt.setLong(2, SecurityUtil.getUserID());
             updateUserStmt.executeUpdate();
+        }
+        /*PreparedStatement dlsClearStmt = conn.prepareStatement("DELETE FROM DLS WHERE PERSONA_ID = ?");
+        dlsClearStmt.setLong(1, persona.getPersonaID());
+        dlsClearStmt.executeUpdate();*/
+        PreparedStatement getDlsStmt = conn.prepareStatement("SELECT DLS_ID FROM DLS WHERE PERSONA_ID = ?");
+        getDlsStmt.setLong(1, persona.getPersonaID());
+        ResultSet existingDLSRS = getDlsStmt.executeQuery();
+        Set<Long> existingDLIDs = new HashSet<Long>();
+        while (existingDLSRS.next()) {
+            existingDLIDs.add(existingDLSRS.getLong(1));
+        }
+        for (DataSourceDLS dataSourceDLS : persona.getDataSourceDLS()) {
+            existingDLIDs.remove(dataSourceDLS.getDataSourceDLSID());
+        }
+        PreparedStatement deleteDLSStmt = conn.prepareStatement("DELETE FROM DLS WHERE DLS_ID = ?");
+        for (Long dlsID : existingDLIDs) {
+            deleteDLSStmt.setLong(1, dlsID);
+            deleteDLSStmt.executeUpdate();
+        }
+        PreparedStatement dlsAddStmt = conn.prepareStatement("INSERT INTO DLS (DATA_SOURCE_ID, PERSONA_ID) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement getExistingFilterStmt = conn.prepareStatement("SELECT FILTER_ID FROM dls_to_filter WHERE DLS_ID = ?");
+        PreparedStatement deleteFilterStmt = conn.prepareStatement("DELETE FROM DLS_TO_FILTER WHERE filter_id = ?");
+        PreparedStatement saveFiltersStmt = conn.prepareStatement("INSERT INTO dls_to_filter (dls_id, filter_id) VALUES (?, ?)");
+        for (DataSourceDLS dls : persona.getDataSourceDLS()) {
+            long dlsID;
+            if (dls.getDataSourceDLSID() == 0) {
+                dlsAddStmt.setLong(1, dls.getDataSourceID());
+                dlsAddStmt.setLong(2, persona.getPersonaID());
+                dlsAddStmt.execute();
+                dlsID = Database.instance().getAutoGenKey(dlsAddStmt);
+            } else {
+                dlsID = dls.getDataSourceDLSID();
+            }
+            getExistingFilterStmt.setLong(1, dlsID);
+            Set<Long> existingFilterIDs = new HashSet<Long>();
+            ResultSet filterRS = getExistingFilterStmt.executeQuery();
+            while (filterRS.next()) {
+                existingFilterIDs.add(filterRS.getLong(1));
+            }
+            for (FilterDefinition filterDefinition : dls.getFilters()) {
+                existingFilterIDs.remove(filterDefinition.getFilterID());
+            }
+            for (Long filterID : existingFilterIDs) {
+                deleteFilterStmt.setLong(1, filterID);
+                deleteFilterStmt.executeUpdate();
+            }
+            for (FilterDefinition filterDefinition : dls.getFilters()) {
+                Session session = Database.instance().createSession(conn);
+                try {
+                    boolean newFilter = filterDefinition.getFilterID() == 0;
+                    filterDefinition.beforeSave(session);
+                    session.saveOrUpdate(filterDefinition);
+                    session.flush();
+                    if (newFilter) {
+                        saveFiltersStmt.setLong(1, dlsID);
+                        saveFiltersStmt.setLong(2, filterDefinition.getFilterID());
+                        saveFiltersStmt.execute();
+                    }
+                } finally {
+                    session.close();
+                }
+            }
         }
         return persona.getPersonaID();
     }

@@ -23,12 +23,17 @@ public class EIDescriptor {
     public var icon:Class;
     public var urlKey:String;
     public var role:int;
+    public var accountVisible:Boolean;
     
     public function EIDescriptor() {
     }
 
     public function getType():int {
         return 0;
+    }
+
+    public function get accountVisibleDisplay():String {
+        return accountVisible ? "Yes" : "No";
     }
 }
 }

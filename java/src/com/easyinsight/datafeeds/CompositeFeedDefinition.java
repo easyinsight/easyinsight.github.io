@@ -82,7 +82,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         return connections;
     }
 
-    public boolean customJoinsAllowed() {
+    public boolean customJoinsAllowed(EIConnection conn) {
         return true;
     }
 

@@ -14,6 +14,8 @@ public class GaugeDefinition extends AnalysisDefinition {
     public var gaugeType:int = CIRCULAR_GAUGE;
     public var gaugeDefinitionID:int;
     public var maxValue:int;
+    public var alertPoint1:int;
+    public var alertPoint2:int;
 
     public function GaugeDefinition() {
         super();

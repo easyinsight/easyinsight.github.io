@@ -214,7 +214,7 @@ public class AnalysisStorage {
         RolePrioritySet<InsightDescriptor> descriptors = new RolePrioritySet<InsightDescriptor>();
         PreparedStatement ownerStmt = conn.prepareStatement("SELECT user.first_name, user.name from user, user_to_analysis where " +
                 "user.user_id = user_to_analysis.user_id and user_to_analysis.analysis_id = ? and user_to_analysis.relationship_type = ?");
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ANALYSIS.create_date FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ANALYSIS.create_date, analysis.account_visible FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
                 "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? AND temporary_report = ?");
         queryStmt.setLong(1, userID);
         queryStmt.setBoolean(2, false);
@@ -233,10 +233,10 @@ public class AnalysisStorage {
                 name = "";
             }
 
-            descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), new Date(rs.getTimestamp(6).getTime()), name, Roles.OWNER));
+            descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), new Date(rs.getTimestamp(6).getTime()), name, Roles.OWNER, rs.getBoolean(7)));
         }
         queryStmt.close();
-        PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, create_date FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
+        PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, create_date, account_visible FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
                 "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = user.user_id and user.account_id = ? and analysis.account_visible = ? and temporary_report = ?");
         queryAccountStmt.setLong(1, accountID);
         queryAccountStmt.setBoolean(2, true);
@@ -254,10 +254,10 @@ public class AnalysisStorage {
             } else {
                 name = "";
             }
-            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), new Date(accountRS.getTimestamp(6).getTime()), name, Roles.SHARER));
+            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), new Date(accountRS.getTimestamp(6).getTime()), name, Roles.SHARER, accountRS.getBoolean(7)));
         }
         queryAccountStmt.close();
-        PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, group_to_user_join.binding_type, create_date FROM ANALYSIS, group_to_user_join," +
+        PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, group_to_user_join.binding_type, create_date, account_visible FROM ANALYSIS, group_to_user_join," +
                 "group_to_insight WHERE " +
                 "analysis.analysis_id = group_to_insight.insight_id and group_to_insight.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and analysis.temporary_report = ?");
         userGroupStmt.setLong(1, userID);
@@ -275,7 +275,7 @@ public class AnalysisStorage {
             } else {
                 name = "";
             }
-            descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5), new Date(groupRS.getTimestamp(7).getTime()), name, groupRS.getInt(6)));
+            descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5), new Date(groupRS.getTimestamp(7).getTime()), name, groupRS.getInt(6), groupRS.getBoolean(8)));
         }
         userGroupStmt.close();
         ownerStmt.close();
@@ -284,13 +284,13 @@ public class AnalysisStorage {
 
     public RolePrioritySet<InsightDescriptor> getReportsForGroup(long groupID, EIConnection conn) throws SQLException {
         RolePrioritySet<InsightDescriptor> descriptors = new RolePrioritySet<InsightDescriptor>();
-        PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, create_date FROM ANALYSIS, " +
+        PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, create_date, account_visible FROM ANALYSIS, " +
                 "group_to_insight WHERE " +
                 "analysis.analysis_id = group_to_insight.insight_id and group_to_insight.group_id = ?");
         userGroupStmt.setLong(1, groupID);
         ResultSet groupRS = userGroupStmt.executeQuery();
         while (groupRS.next()) {
-            descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5), Roles.SUBSCRIBER));
+            descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5), new Date(groupRS.getTimestamp(6).getTime()), "", Roles.SUBSCRIBER, groupRS.getBoolean(7)));
         }
         userGroupStmt.close();
         return descriptors;
@@ -298,7 +298,7 @@ public class AnalysisStorage {
 
     public List<InsightDescriptor> getInsightDescriptorsForDataSource(long userID, long accountID, long dataSourceID, EIConnection conn) throws SQLException {
         Collection<InsightDescriptor> descriptors = new HashSet<InsightDescriptor>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ACCOUNT_VISIBLE FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
                 "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? AND temporary_report = ? AND " +
                 "analysis.data_feed_id = ?");
         queryStmt.setLong(1, userID);
@@ -306,10 +306,10 @@ public class AnalysisStorage {
         queryStmt.setLong(3, dataSourceID);
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
-            descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), Roles.OWNER));
+            descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), Roles.OWNER, rs.getBoolean(6)));
         }
         queryStmt.close();
-        PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
+        PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ACCOUNT_VISIBLE FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
                 "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = user.user_id and user.account_id = ? and analysis.account_visible = ? and temporary_report = ? AND " +
                 "analysis.data_feed_id = ?");
         queryAccountStmt.setLong(1, accountID);
@@ -318,7 +318,7 @@ public class AnalysisStorage {
         queryAccountStmt.setLong(4, dataSourceID);
         ResultSet accountRS = queryAccountStmt.executeQuery();
         while (accountRS.next()) {
-            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.SHARER));
+            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.SHARER, accountRS.getBoolean(6)));
         }
         queryAccountStmt.close();
         /*PreparedStatement queryVizStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +

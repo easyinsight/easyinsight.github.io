@@ -37,6 +37,7 @@ public class ApplicationSkinTO {
     public var myDataNewKPITree:Boolean = false;
     public var myDataNewDashboard:Boolean = true;
     public var myDataLookupTable:Boolean = false;
+    public var myDataAccountVisible:Boolean = false;
 
     public function ApplicationSkinTO() {
     }

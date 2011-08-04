@@ -330,6 +330,11 @@
             sizeColumn.width = 110;
             sizeColumn.headerText = "Size";
             sizeColumn.itemRenderer = new ClassFactory(SizeRenderer);
+            var accountVisibleColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+            accountVisibleColumn.dataField = "accountVisibleDisplay";
+            accountVisibleColumn.width = 130;
+            accountVisibleColumn.headerText = "Account Visible";
+            //accountVisibleColumn.itemRenderer = new ClassFactory(SizeRenderer);
             var ownerNameColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
             ownerNameColumn.dataField = "author";
             ownerNameColumn.width = 140;
@@ -358,6 +363,7 @@
             if (ApplicationSkin.instance().myDataCreationDate) columns.push(creationDateColumn);
             if (ApplicationSkin.instance().myDataSize) columns.push(sizeColumn);
             if (ApplicationSkin.instance().myDataLastTime) columns.push(lastDataColumn);
+            if (ApplicationSkin.instance().myDataAccountVisible) columns.push(accountVisibleColumn);
             columns.push(controlsColumn);
             uploadGrid.columns = columns;
         }

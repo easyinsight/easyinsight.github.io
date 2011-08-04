@@ -8,6 +8,8 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserTransferObject;
         import com.easyinsight.preferences.Persona;
+        import com.easyinsight.preferences.UserDLS;
+        import com.easyinsight.preferences.UserDLSConfig;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.binding.utils.BindingUtils;
@@ -86,10 +88,16 @@
         private function initHandlers():void {
             validators = [ emailValidator, userNameValidator, fullNameValidator ];
             dashboardService.getDashboards.send();
-            if (User.getInstance().getAccountType() >= Account.PRO) {
-                showPersonaOption = true;
-                preferencesService.getPersonas.send();
-            }
+            //if (User.getInstance().getAccountType() >= Account.PRO) {
+            showPersonaOption = true;
+            preferencesService.getPersonas.send();
+            preferencesService.getUserDLS.send(userID, personaID);
+            //}
+        }
+
+        private function onPersonaChange(event:Event):void {
+            var personaID:int = Persona(personaComboBox.selectedItem).personaID;
+            preferencesService.getUserDLS.send(userID, personaID);
         }
 
         private function save():void {
@@ -113,10 +121,10 @@
                 user.accountAdmin = accountAdminCheckbox.selected;
                 if (userID == 0) {
                     ProgressAlert.alert(this, "Adding user to account...", null, creationService.addUserToAccount);
-                    creationService.addUserToAccount.send(user);
+                    creationService.addUserToAccount.send(user, dlsList);
                 } else {
                     ProgressAlert.alert(this, "Updating user...", null, creationService.updateUser);
-                    creationService.updateUser.send(user);
+                    creationService.updateUser.send(user, dlsList);
                 }
             }
         }
@@ -146,6 +154,17 @@
             availableViews = views;
         }
 
+        private var dlsList:ArrayCollection;
+
+        private function gotUserDLS():void {
+            dlsList = preferencesService.getUserDLS.lastResult as ArrayCollection;
+            for each (var userDLS:UserDLS in dlsList) {
+                var config:UserDLSConfig = new UserDLSConfig();
+                config.userDLS = userDLS;
+                dlsVBox.addChild(config);
+            }
+        }
+
         [Bindable]
         private var viewID:int;
 
@@ -158,34 +177,40 @@
     </mx:RemoteObject>
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
         <mx:method name="getPersonas" result="gotPersonas()"/>
+        <mx:method name="getUserDLS" result="gotUserDLS()"/>
     </mx:RemoteObject>
-	<mx:Form>
-		<mx:FormItem label="User ID:" direction="horizontal">
-			<mx:TextInput id="userNameInput" text="{userName}" width="400"/>
-		</mx:FormItem>
-        <mx:FormItem label="First Name:" direction="horizontal">
-			<mx:TextInput id="firstNameInput" text="{firstName}" width="400"/>
-		</mx:FormItem>
-		<mx:FormItem label="Last Name:" direction="horizontal">
-			<mx:TextInput id="fullNameInput" text="{fullName}" width="400"/>
-		</mx:FormItem>
-		<mx:FormItem label="Email Address:" direction="horizontal">
-			<mx:TextInput id="emailInput" text="{email}" width="400"/>
-		</mx:FormItem>
-        <mx:FormItem label="Account Administrator:">
-            <mx:CheckBox id="accountAdminCheckbox" selected="{accountAdmin}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Send Newsletter to User:">
-            <mx:CheckBox id="newsletterCheckbox" selected="{newsletterSelected}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Persona:" visible="{showPersonaOption}">
-            <util:PersonaItemComboBox dataProvider="{personas}" labelField="name" id="personaComboBox" selectedProperty="personaID"
-                    selectedValue="{personaID}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Fixed View:">
-            <util:SmartComboBox dataProvider="{availableViews}" labelField="name" id="singleViewComboBox" selectedProperty="id" selectedValue="{viewID}" enabled="{!accountAdmin}"/>
-        </mx:FormItem>
-    </mx:Form>
+    <mx:TabNavigator>
+        <mx:Form label="Base Info">
+            <mx:FormItem label="User ID:" direction="horizontal">
+                <mx:TextInput id="userNameInput" text="{userName}" width="400"/>
+            </mx:FormItem>
+            <mx:FormItem label="First Name:" direction="horizontal">
+                <mx:TextInput id="firstNameInput" text="{firstName}" width="400"/>
+            </mx:FormItem>
+            <mx:FormItem label="Last Name:" direction="horizontal">
+                <mx:TextInput id="fullNameInput" text="{fullName}" width="400"/>
+            </mx:FormItem>
+            <mx:FormItem label="Email Address:" direction="horizontal">
+                <mx:TextInput id="emailInput" text="{email}" width="400"/>
+            </mx:FormItem>
+            <mx:FormItem label="Account Administrator:">
+                <mx:CheckBox id="accountAdminCheckbox" selected="{accountAdmin}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Send Newsletter to User:">
+                <mx:CheckBox id="newsletterCheckbox" selected="{newsletterSelected}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Persona:" visible="{showPersonaOption}">
+                <util:PersonaItemComboBox dataProvider="{personas}" labelField="name" id="personaComboBox" selectedProperty="personaID"
+                        selectedValue="{personaID}" change="onPersonaChange(event)"/>
+            </mx:FormItem>
+            <mx:FormItem label="Fixed View:">
+                <util:SmartComboBox dataProvider="{availableViews}" labelField="name" id="singleViewComboBox" selectedProperty="id" selectedValue="{viewID}" enabled="{!accountAdmin}"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:VBox id="dlsVBox" label="DLS">
+
+        </mx:VBox>
+    </mx:TabNavigator>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="{createLabel}" click="save()"/>
         <util:CancelButton label="Cancel" click="cancel()"/>

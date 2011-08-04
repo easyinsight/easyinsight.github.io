@@ -2,8 +2,6 @@ package com.easyinsight.skin {
 import flash.events.Event;
 import flash.events.EventDispatcher;
 
-import mx.controls.Alert;
-
 public class ApplicationSkin extends EventDispatcher {
 
     private var _coreAppBackgroundImage:Object;
@@ -29,6 +27,7 @@ public class ApplicationSkin extends EventDispatcher {
     private var _myDataNewKPITree:Boolean = false;
     private var _myDataNewDashboard:Boolean = true;
     private var _myDataLookupTable:Boolean = false;
+    private var _myDataAccountVisible:Boolean = false;
 
     public function ApplicationSkin() {
         super();
@@ -83,6 +82,7 @@ public class ApplicationSkin extends EventDispatcher {
         myDataNewKPITree = appSkin.myDataNewKPITree;
         myDataNewDashboard = appSkin.myDataNewDashboard;
         myDataLookupTable = appSkin.myDataLookupTable;
+        myDataAccountVisible = appSkin.myDataAccountVisible;
     }
 
     [Bindable(event="reportBackgroundChanged")]
@@ -304,6 +304,18 @@ public class ApplicationSkin extends EventDispatcher {
         if (_myDataLookupTable == value) return;
         _myDataLookupTable = value;
         dispatchEvent(new Event("myDataLookupTableChanged"));
+    }
+
+
+    [Bindable(event="myDataAccountVisibleChanged")]
+    public function get myDataAccountVisible():Boolean {
+        return _myDataAccountVisible;
+    }
+
+    public function set myDataAccountVisible(value:Boolean):void {
+        if (_myDataAccountVisible == value) return;
+        _myDataAccountVisible = value;
+        dispatchEvent(new Event("myDataAccountVisibleChanged"));
     }
 }
 }

@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSCombinedVerticalListDefinition;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -12,7 +13,10 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.StandardReportPipeline;
+import org.hibernate.Session;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.*;
 
 
@@ -43,8 +47,44 @@ public class DataService {
             Feed feed = feedRegistry.getFeed(feedID, conn);
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setUtcOffset(utfOffset);
+            PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
+                    "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
+                    "user_dls.user_id = ?");
+            dlsStmt.setLong(1, feedID);
+            dlsStmt.setLong(2, SecurityUtil.getUserID());
+            List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+            ResultSet dlsRS = dlsStmt.executeQuery();
+            while (dlsRS.next()) {
+                long filterID = dlsRS.getLong(1);
+                Session session = Database.instance().createSession(conn);
+                try {
+                    List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
+                    if (results.size() > 0) {
+                        FilterDefinition filter = (FilterDefinition) results.get(0);
+                        filter.getField().afterLoad();
+                        filter.afterLoad();
+                        filters.add(filter);
+                    }
+                } finally {
+                    session.close();
+                }
+            }
             timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed, insightRequestMetadata);
-            return feed.getMetadata(analysisItem, insightRequestMetadata, conn);
+            AnalysisItemResultMetadata metadata = feed.getMetadata(analysisItem, insightRequestMetadata, conn);
+            if (metadata instanceof AnalysisDimensionResultMetadata) {
+                AnalysisDimensionResultMetadata dMetadata = (AnalysisDimensionResultMetadata) metadata;
+                for (FilterDefinition filter : filters) {
+                    MaterializedFilterDefinition mFilter = filter.materialize(insightRequestMetadata);
+                    Iterator<Value> valueIter = dMetadata.getValues().iterator();
+                    while (valueIter.hasNext()) {
+                        Value value = valueIter.next();
+                        if (!mFilter.allows(value)) {
+                            valueIter.remove();
+                        }
+                    }
+                }
+            }
+            return metadata;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -82,7 +122,7 @@ public class DataService {
             feedMetadata.setDataSourceInfo(feed.getDataSourceInfo());
             feedMetadata.getDataSourceInfo().setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
-            feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed());
+            feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
             List<LookupTable> lookupTables = new ArrayList<LookupTable>();
             for (AnalysisItem field : feedItems) {
                 if (field.getLookupTableID() != null && field.getLookupTableID() > 0) {
@@ -165,7 +205,6 @@ public class DataService {
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters) {
         System.out.println("request for " + reportID);
-        long beginTime = System.currentTimeMillis();
         SecurityUtil.authorizeInsight(reportID);
 
         EIConnection conn = Database.instance().getConnection();
@@ -183,6 +222,45 @@ public class DataService {
             }
             if (drillThroughFilters != null) {
                 analysisDefinition.applyFilters(drillThroughFilters);
+            }
+
+            PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
+                    "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
+                    "user_dls.user_id = ?");
+            dlsStmt.setLong(1, analysisDefinition.getDataFeedID());
+            dlsStmt.setLong(2, SecurityUtil.getUserID());
+            List<FilterDefinition> dlsFilters = new ArrayList<FilterDefinition>();
+            ResultSet dlsRS = dlsStmt.executeQuery();
+            while (dlsRS.next()) {
+                long filterID = dlsRS.getLong(1);
+                Session session = Database.instance().createSession(conn);
+                try {
+                    List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
+                    if (results.size() > 0) {
+                        FilterDefinition filter = (FilterDefinition) results.get(0);
+                        filter.getField().afterLoad();
+                        filter.afterLoad();
+                        dlsFilters.add(filter);
+                    }
+                } finally {
+                    session.close();
+                }
+            }
+
+            analysisDefinition.getFilterDefinitions().addAll(dlsFilters);
+
+            for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                if (filter instanceof AnalysisItemFilterDefinition) {
+                    AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
+                    Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
+                    Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);
+                    for (Map.Entry<String, AnalysisItem> entry : structureCopy.entrySet()) {
+                        if (entry.getValue().equals(filter.getField())) {
+                            structure.put(entry.getKey(), analysisItemFilterDefinition.getTargetItem());
+                        }
+                    }
+                    analysisDefinition.populateFromReportStructure(structure);
+                }
             }
 
             long startTime = System.currentTimeMillis();
@@ -220,18 +298,11 @@ public class DataService {
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
             timeshift(validQueryItems, filters, feed, insightRequestMetadata);
-            long dsStartTime = System.currentTimeMillis();
             DataSet dataSet = getDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
-            if (System.currentTimeMillis() - dsStartTime > 1000) {
-                //System.out.println((System.currentTimeMillis() - dsStartTime) / 1000 + " seconds to retrieve data");
-            }
-            startTime = System.currentTimeMillis();
+
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
             DataResults listDataResults = pipeline.toList(dataSet);
-            if (System.currentTimeMillis() - startTime > 1000) {
-                //System.out.println((System.currentTimeMillis() - startTime) / 1000 + " seconds to pipeline data");
-            }
             results = listDataResults.toEmbeddedResults();
             results.setDefinition(analysisDefinition);
 
@@ -242,7 +313,7 @@ public class DataService {
             DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
             dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
             results.setDataSourceInfo(dataSourceInfo);
-            BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
+            //BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             conn.commit();
             //System.out.println("Took " + (System.currentTimeMillis() - beginTime) / 1000 + " seconds to retrieve " + reportID);
             return results;
@@ -357,6 +428,31 @@ public class DataService {
             insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
             DataResults results;
 
+            PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
+                    "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
+                    "user_dls.user_id = ?");
+            dlsStmt.setLong(1, analysisDefinition.getDataFeedID());
+            dlsStmt.setLong(2, SecurityUtil.getUserID());
+            List<FilterDefinition> dlsFilters = new ArrayList<FilterDefinition>();
+            ResultSet dlsRS = dlsStmt.executeQuery();
+            while (dlsRS.next()) {
+                long filterID = dlsRS.getLong(1);
+                Session session = Database.instance().createSession(conn);
+                try {
+                    List dlsResults = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
+                    if (dlsResults.size() > 0) {
+                        FilterDefinition filter = (FilterDefinition) dlsResults.get(0);
+                        filter.getField().afterLoad();
+                        filter.afterLoad();
+                        dlsFilters.add(filter);
+                    }
+                } finally {
+                    session.close();
+                }
+            }
+
+            analysisDefinition.getFilterDefinitions().addAll(dlsFilters);
+
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
             if (analysisDefinition.getAddedItems() != null) {
                 allFields.addAll(analysisDefinition.getAddedItems());
@@ -451,7 +547,20 @@ public class DataService {
             }
             insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
             DataResults results;
-            
+
+            for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                if (filter instanceof AnalysisItemFilterDefinition) {
+                    AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
+                    Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
+                    Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);
+                    for (Map.Entry<String, AnalysisItem> entry : structureCopy.entrySet()) {
+                        if (entry.getValue().equals(filter.getField())) {
+                            structure.put(entry.getKey(), analysisItemFilterDefinition.getTargetItem());
+                        }
+                    }
+                    analysisDefinition.populateFromReportStructure(structure);
+                }
+            }
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
             if (analysisDefinition.getAddedItems() != null) {
                 allFields.addAll(analysisDefinition.getAddedItems());

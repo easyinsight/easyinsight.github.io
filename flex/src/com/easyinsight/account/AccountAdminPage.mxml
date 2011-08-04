@@ -1,6 +1,12 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%" height="100%" creationComplete="onCreationComplete()"
         styleName="basePageVBox">
+    <mx:states>
+        <mx:State name="trialAccount">
+            <mx:RemoveChild target="{upgradeButton}"/>
+            <mx:RemoveChild target="{invoicesButton}"/>
+        </mx:State>
+    </mx:states>
     <mx:Box width="100%" styleName="bannerBackground">
         <mx:Label text="Account Administration" styleName="bannerText"/>
     </mx:Box>
@@ -13,11 +19,10 @@
                 <account:AccountState accountInfo="{accountInfo}"/>
                 <account:AccountTrialDate accountInfo="{accountInfo}"/>
             </mx:Form>
-            <mx:Button label="Upgrade Account..." click="upgrade()" styleName="grayButton" fontSize="14" width="220"/>
-            <mx:Button label="View Invoices..." click="invoices()" styleName="grayButton" fontSize="14" width="220"/>
-            <mx:Button label="Billing Configuration..." click="navigateToURL(new URLRequest('billing/billing.jsp'), '_self');" styleName="grayButton" fontSize="14" width="220"/>
-            <mx:Button label="Cancel Account..." click="cancelPaidAccount()"
-                styleName="grayButton" fontSize="14" width="220"/>
+            <mx:Button label="Upgrade Account..." click="upgrade()" styleName="grayButton" fontSize="14" width="220" id="upgradeButton"/>
+            <mx:Button label="View Invoices..." click="invoices()" styleName="grayButton" fontSize="14" width="220" id="invoicesButton"/>
+            <mx:Button label="Set Up Billing..." click="navigateToURL(new URLRequest('billing/billing.jsp'), '_self');" styleName="grayButton" fontSize="14" width="220"/>
+            <mx:Button label="Cancel Account..." click="cancelPaidAccount()" styleName="grayButton" fontSize="14" width="220"/>
         </mx:VBox>
         <mx:VRule strokeColor="#333333"/>
          <mx:VBox horizontalAlign="center" width="33%">
@@ -91,6 +96,9 @@
         private function onCreationComplete():void {
             showUpgrade = User.getInstance().getAccountType() != Account.ENTERPRISE;
             showSSO = User.getInstance().getAccountType() >= Account.ENTERPRISE;
+            if (User.getInstance().accountState == Account.TRIAL) {
+                currentState = "trialAccount";
+            }
         }
 
         private function cancelPaidAccount():void {

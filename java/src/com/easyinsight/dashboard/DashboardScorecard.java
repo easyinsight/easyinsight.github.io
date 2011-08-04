@@ -81,7 +81,7 @@ public class DashboardScorecard extends DashboardElement {
     @Override
     public void updateScorecardIDs(Map<Long, Scorecard> scorecardReplacementMap) {
         Scorecard replacement = scorecardReplacementMap.get(scorecard.getId());
-        scorecard = new ScorecardDescriptor(replacement.getName(), replacement.getScorecardID(), replacement.getUrlKey(), replacement.getDataSourceID());
+        scorecard = new ScorecardDescriptor(replacement.getName(), replacement.getScorecardID(), replacement.getUrlKey(), replacement.getDataSourceID(), false);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class DashboardScorecard extends DashboardElement {
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             dashboardReport = new DashboardScorecard();
-            dashboardReport.setScorecard(new ScorecardDescriptor(rs.getString(1), rs.getLong(3), rs.getString(4), rs.getLong(2)));
+            dashboardReport.setScorecard(new ScorecardDescriptor(rs.getString(1), rs.getLong(3), rs.getString(4), rs.getLong(2), false));
             dashboardReport.setLabelPlacement(rs.getInt(5));
             dashboardReport.setShowLabel(rs.getBoolean(6));
             dashboardReport.loadElement(elementID, conn);

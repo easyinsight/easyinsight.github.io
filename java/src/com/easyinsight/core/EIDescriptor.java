@@ -25,10 +25,19 @@ public abstract class EIDescriptor {
     private String urlKey;
     private String author;
     private Date creationDate;
+    private boolean accountVisible;
     private long id;
     private int role = Roles.SUBSCRIBER;
 
     public abstract int getType();
+
+    public boolean isAccountVisible() {
+        return accountVisible;
+    }
+
+    public void setAccountVisible(boolean accountVisible) {
+        this.accountVisible = accountVisible;
+    }
 
     public String getAuthor() {
         return author;
@@ -73,15 +82,17 @@ public abstract class EIDescriptor {
     public EIDescriptor() {
     }
 
-    public EIDescriptor(String name, long id) {
+    public EIDescriptor(String name, long id, boolean accountVisible) {
         this.name = name;
         this.id = id;
+        this.accountVisible = accountVisible;
     }
 
-    protected EIDescriptor(String name, long id, String urlKey) {
+    protected EIDescriptor(String name, long id, String urlKey, boolean accountVisible) {
         this.name = name;
         this.id = id;
         this.urlKey = urlKey;
+        this.accountVisible = accountVisible;
     }
 
     @Override

@@ -21,15 +21,15 @@ public class InsightDescriptor extends EIDescriptor {
     public InsightDescriptor() {
     }
 
-    public InsightDescriptor(long id, String name, long dataFeedID, int reportType, String urlKey, int role) {
-        super(name, id, urlKey);
+    public InsightDescriptor(long id, String name, long dataFeedID, int reportType, String urlKey, int role, boolean accountVisible) {
+        super(name, id, urlKey, accountVisible);
         this.dataFeedID = dataFeedID;
         this.reportType = reportType;
         setRole(role);
     }
 
-    public InsightDescriptor(long id, String name, long dataFeedID, int reportType, String urlKey, Date creationDate, String ownerName, int role) {
-        super(name, id, urlKey);
+    public InsightDescriptor(long id, String name, long dataFeedID, int reportType, String urlKey, Date creationDate, String ownerName, int role, boolean accountVisible) {
+        super(name, id, urlKey, accountVisible);
         this.dataFeedID = dataFeedID;
         this.reportType = reportType;
         setCreationDate(creationDate);

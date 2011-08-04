@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                   xmlns:filtering="com.easyinsight.filtering.*" creationComplete="onCreation()" width="500" height="400">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemNode;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.FeedMetadata;
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        public var dls:DataSourceDLS;
+
+        [Bindable]
+        private var dataSourceID:int;
+
+        [Bindable]
+        private var wrappers:ArrayCollection;
+
+        [Bindable]
+        private var existingFilters:ArrayCollection;
+
+        private function onCreation():void {
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
+            ProgressAlert.alert(this, "Retrieving fields...", null, dataService.getFeedMetadata);
+            dataService.getFeedMetadata.send(dataSourceID);
+        }
+
+        private var commandProcessor:CommandProcessor;
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            dataSourceID = dls.dataSourceID;
+            existingFilters = dls.filters;
+        }
+
+        private function gotMetadata():void {
+            var feedMetadata:FeedMetadata = dataService.getFeedMetadata.lastResult as FeedMetadata;
+            wrappers = new ArrayCollection();
+            for each (var listItem:AnalysisItem in feedMetadata.fields) {
+                var analysisNode:AnalysisItemNode = new AnalysisItemNode();
+                analysisNode.analysisItem = listItem;
+                var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisNode);
+                wrappers.addItem(wrapper);
+            }
+        }
+
+        private function save():void {
+            dls.filters = transformContainer.getFilterDefinitions();
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="dataService" destination="data">
+        <mx:method name="getFeedMetadata" result="gotMetadata()"/>
+    </mx:RemoteObject>
+    <mx:Button label="Add New Filter..." click="transformContainer.addNewFilter()"/>
+    <filtering:TransformContainer existingFilters="{existingFilters}" id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
+                                          paddingRight="10" label="Filters"
+                                          width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".9"
+                                          feedID="{dataSourceID}"
+                                          analysisItems="{wrappers}" minHeight="40"/>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton click="PopUpManager.removePopUp(this)" label="Cancel"/>
+    </mx:HBox>
+</util:EISlimWindow>

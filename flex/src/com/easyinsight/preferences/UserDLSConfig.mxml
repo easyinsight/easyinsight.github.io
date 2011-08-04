@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*" horizontalAlign="center">
+    <mx:Script><![CDATA[
+        import com.easyinsight.filtering.FilterDefinition;
+
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var dataSourceName:String;
+
+        [Bindable]
+        private var dataSourceID:int;
+
+        [Bindable]
+        private var existingFilters:ArrayCollection;
+
+        private var _userDLS:UserDLS;
+
+        private var filterMap:Dictionary;
+
+        public function set userDLS(value:UserDLS):void {
+            _userDLS = value;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            var filters:ArrayCollection = new ArrayCollection();
+            for each (var userFilter:UserDLSFilter in _userDLS.userDLSFilterList) {
+                //filterMap[userFilter.filterDefinition.field.qualifiedName()] = userFilter.filterDefinition;
+                filters.addItem(userFilter.filterDefinition);
+            }
+            dataSourceName = _userDLS.dataSourceName;
+            dataSourceID = _userDLS.dataSourceID;
+            existingFilters = filters;
+        }
+
+        public function save():void {
+
+        }
+        ]]></mx:Script>
+    <mx:Label text="{dataSourceName}"/>
+    <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid"
+                                              borderThickness="1"
+                                              existingFilters="{existingFilters}"
+                                              width="550" height="100" paddingLeft="10"
+                                              paddingTop="10" paddingBottom="10"
+                                              paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
+                                              backgroundColor="#FFFFFF" reportView="true"/>
+</mx:VBox>

@@ -20,7 +20,7 @@ public class GoalTreeDescriptor extends EIDescriptor {
     }
 
     public GoalTreeDescriptor(long id, String name, int role, String iconName, String urlKey, long dataSourceID) {
-        super(name, id, urlKey);
+        super(name, id, urlKey, false);
         setRole(role);
         this.iconName = iconName;
         this.dataSourceID = dataSourceID;

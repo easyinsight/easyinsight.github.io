@@ -23,7 +23,7 @@ public class MaterializedFlatDateFilter extends MaterializedFilterDefinition {
 
     @Override
     public boolean allows(Value value) {
-        /*if (value.type() == Value.DATE) {
+        if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
             Calendar cal = Calendar.getInstance();
             cal.setTime(dateValue.getDate());
@@ -34,8 +34,22 @@ public class MaterializedFlatDateFilter extends MaterializedFilterDefinition {
                 int month = cal.get(Calendar.MONTH);
                 return month == this.value;
             }
+        } else if (value.type() == Value.STRING) {
+            Value originalValue = value.getOriginalValue();
+            if (originalValue.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) originalValue;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(dateValue.getDate());
+                if (type == AnalysisDateDimension.YEAR_LEVEL) {
+                    int year = cal.get(Calendar.YEAR);
+                    return year == this.value;
+                } else if (type == AnalysisDateDimension.MONTH_LEVEL) {
+                    int month = cal.get(Calendar.MONTH);
+                    return month == this.value;
+                }
+            }
         }
-        return false;*/
-        return true;
+        return false;
+        //return true;
     }
 }

@@ -18,8 +18,8 @@ public class AccountMemberInvitation {
             "Your login information is the following:\r\n\r\n"+
             "User Name: {2}\r\n" +
             "Password: {3}\r\n\r\n" +
-            "You can access Easy Insight at http://www.easy-insight.com/app/#page=home\r\n" +
-            "Once there and logged in, you can change your password through Account - Change my Password.";
+            "You can access Easy Insight at http://www.easy-insight.com/app/\r\n" +
+            "Once you log in, you'll be prompted to change your password.";
 
     private static String newProAccountText =
             "A new professional account for your organization has been created on Easy Insight.\r\nYou can access the application at\r\n\r\n" +

@@ -24,6 +24,9 @@ public class AggregationFactory {
                 case AggregationTypes.PERCENT_OF_TOTAL:
                     aggregationState = new PercentOfTotalAggregationState();
                     break;
+                default:
+                    aggregationState = new ReAggregationState(analysisMeasure);
+                    break;
             }
         }
         this.skip = skip;

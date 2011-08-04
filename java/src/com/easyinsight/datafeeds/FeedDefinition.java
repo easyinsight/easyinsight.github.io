@@ -57,7 +57,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private long parentSourceID;
     private Date lastRefreshStart;
 
-    public boolean customJoinsAllowed() {
+    public boolean customJoinsAllowed(EIConnection conn) throws SQLException {
         return false;
     }
 

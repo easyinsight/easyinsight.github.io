@@ -69,7 +69,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         return basecampCache;
     }
 
-    public boolean customJoinsAllowed() {
+    public boolean customJoinsAllowed(EIConnection conn) {
         return false;
     }
 

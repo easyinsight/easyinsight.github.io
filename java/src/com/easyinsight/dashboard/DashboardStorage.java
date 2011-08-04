@@ -41,13 +41,13 @@ public class DashboardStorage {
 
     public RolePrioritySet<DashboardDescriptor> getDashboardForGroup(long groupID, EIConnection conn) throws SQLException {
         RolePrioritySet<DashboardDescriptor> descriptors = new RolePrioritySet<DashboardDescriptor>();
-        PreparedStatement userGroupStmt = conn.prepareStatement("select DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id FROM dashboard, " +
+        PreparedStatement userGroupStmt = conn.prepareStatement("select DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id, dashboard.account_visible FROM dashboard, " +
                 "group_to_dashboard WHERE " +
                 "dashboard.dashboard_id = group_to_dashboard.dashboard_id and group_to_dashboard.group_id = ?");
         userGroupStmt.setLong(1, groupID);
         ResultSet groupRS = userGroupStmt.executeQuery();
         while (groupRS.next()) {
-            descriptors.add(new DashboardDescriptor(groupRS.getString(2), groupRS.getLong(1), groupRS.getString(3), groupRS.getLong(4), Roles.SUBSCRIBER, null));
+            descriptors.add(new DashboardDescriptor(groupRS.getString(2), groupRS.getLong(1), groupRS.getString(3), groupRS.getLong(4), Roles.SUBSCRIBER, null, groupRS.getBoolean(5)));
         }
         userGroupStmt.close();
         return descriptors;
@@ -55,7 +55,7 @@ public class DashboardStorage {
 
     public RolePrioritySet<DashboardDescriptor> getDashboards(long userID, long accountID, EIConnection conn) throws SQLException {
         RolePrioritySet<DashboardDescriptor> dashboards = new RolePrioritySet<DashboardDescriptor>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id from " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id, dashboard.account_visible from " +
                 "dashboard, user_to_dashboard, user where user.account_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
                 "dashboard.temporary_dashboard = ? and dashboard.account_visible = ? and user_to_dashboard.user_id = user.user_id");
         PreparedStatement ownerStmt = conn.prepareStatement("SELECT user.first_name, user.name from user, user_to_dashboard where " +
@@ -75,10 +75,10 @@ public class DashboardStorage {
             } else {
                 name = "";
             }
-            dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.OWNER, name));
+            dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.OWNER, name, rs.getBoolean(5)));
         }
         queryStmt.close();
-        PreparedStatement ueryAccountStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id from " +
+        PreparedStatement ueryAccountStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id, dashboard.account_visible from " +
                 "dashboard, user_to_dashboard where user_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
                 "dashboard.temporary_dashboard = ?");
         ueryAccountStmt.setLong(1, userID);
@@ -95,11 +95,11 @@ public class DashboardStorage {
             } else {
                 name = "";
             }
-            dashboards.add(new DashboardDescriptor(accountRS.getString(2), accountRS.getLong(1), accountRS.getString(3), accountRS.getLong(4), Roles.SHARER, name));
+            dashboards.add(new DashboardDescriptor(accountRS.getString(2), accountRS.getLong(1), accountRS.getString(3), accountRS.getLong(4), Roles.SHARER, name, accountRS.getBoolean(5)));
         }
         ueryAccountStmt.close();
         ownerStmt.close();
-        PreparedStatement dashboardGroupStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.data_source_id, dashboard.URL_KEY, group_to_user_join.binding_type, dashboard.creation_date FROM dashboard, group_to_user_join," +
+        PreparedStatement dashboardGroupStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.data_source_id, dashboard.URL_KEY, group_to_user_join.binding_type, dashboard.creation_date, dashboard.account_visible FROM dashboard, group_to_user_join," +
                 "group_to_dashboard WHERE " +
                 "dashboard.dashboard_id = group_to_dashboard.dashboard_id and group_to_dashboard.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and dashboard.temporary_dashboard = ?");
         dashboardGroupStmt.setLong(1, userID);
@@ -117,7 +117,7 @@ public class DashboardStorage {
             } else {
                 name = "";
             }
-            dashboards.add(new DashboardDescriptor(dashboardRS.getString(2), dashboardRS.getLong(1),  dashboardRS.getString(4), dashboardRS.getLong(3), Roles.SUBSCRIBER, name));
+            dashboards.add(new DashboardDescriptor(dashboardRS.getString(2), dashboardRS.getLong(1),  dashboardRS.getString(4), dashboardRS.getLong(3), Roles.SUBSCRIBER, name, dashboardRS.getBoolean(7)));
         }
         return dashboards;
     }

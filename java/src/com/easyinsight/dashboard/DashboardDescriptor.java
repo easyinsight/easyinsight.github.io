@@ -14,8 +14,8 @@ public class DashboardDescriptor extends EIDescriptor {
     public DashboardDescriptor() {
     }
 
-    public DashboardDescriptor(String name, long id, String urlKey, long dataSourceID, int role, String ownerName) {
-        super(name, id, urlKey);
+    public DashboardDescriptor(String name, long id, String urlKey, long dataSourceID, int role, String ownerName, boolean accountVisible) {
+        super(name, id, urlKey, accountVisible);
         this.dataSourceID = dataSourceID;
         setRole(role);
         setAuthor(ownerName);

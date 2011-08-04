@@ -361,18 +361,20 @@ public class CompositeFeed extends Feed {
                     }
                 }
                 sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
-                for (CompositeFeedConnection myConn : myConnections) {
-                    FilterDefinition filter = filterMap.get(myConn);
-                    if (filter == null) {
-                        QueryStateNode targetNode;
-                        if (sourceNode.feedID == myConn.getSourceFeedID()) {
-                            targetNode = queryNodeMap.get(myConn.getTargetFeedID());
-                        } else {
-                            targetNode = queryNodeMap.get(myConn.getSourceFeedID());
+                if (insightRequestMetadata.isOptimized()) {
+                    for (CompositeFeedConnection myConn : myConnections) {
+                        FilterDefinition filter = filterMap.get(myConn);
+                        if (filter == null) {
+                            QueryStateNode targetNode;
+                            if (sourceNode.feedID == myConn.getSourceFeedID()) {
+                                targetNode = queryNodeMap.get(myConn.getTargetFeedID());
+                            } else {
+                                targetNode = queryNodeMap.get(myConn.getSourceFeedID());
+                            }
+                            //System.out.println("defining filter between " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
+                            FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, myConn);
+                            filterMap.put(myConn, joinFilter);
                         }
-                        //System.out.println("defining filter between " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
-                        FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, myConn);
-                        filterMap.put(myConn, joinFilter);
                     }
                 }
             }
@@ -399,7 +401,10 @@ public class CompositeFeed extends Feed {
                     sourceQueryData = targetQueryData;
                     targetQueryData = swapData;
                 }
-                FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, last.connection);
+                FilterDefinition joinFilter = null;
+                if (insightRequestMetadata.isOptimized()) {
+                    joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, last.connection);
+                }
                 if (!swapped) {
                     if (targetQueryData.dataSet == null) {
                         if (insightRequestMetadata.isOptimized()) {

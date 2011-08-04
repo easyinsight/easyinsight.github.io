@@ -232,6 +232,8 @@ public class TransformContainer extends HBox
             filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.NAMED_REF);
         } else if (filterDefinition.getType() == FilterDefinition.FLAT_DATE) {
             filter = new FlatDateFilter(_feedID,  filterDefinition.field, _reportID,  _dashboardID);
+        } else if (filterDefinition.getType() == FilterDefinition.ANALYSIS_ITEM) {
+            filter = new AnalysisItemFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
         } else {
             Alert.show("unknown filter type = " + filterDefinition.getType());
         }
@@ -299,6 +301,13 @@ public class TransformContainer extends HBox
         } else if (event.filterType == NewFilterEvent.NAMED_REF_FILTER) {
             var namedRefFilter:NamedFilterReference = new NamedFilterReference();
             addFilterDefinition(namedRefFilter);
+        } else if (event.filterType == NewFilterEvent.FIELD_CHOICE_FILTER) {
+            var analysisFilter:AnalysisItemFilterDefinition = new AnalysisItemFilterDefinition();
+            analysisFilter.field = event.analysisItem;
+            analysisFilter.targetItem = event.analysisItem;
+            analysisFilter.availableItems = new ArrayCollection();
+            analysisFilter.availableItems.addItem(event.analysisItem);
+            addFilterDefinition(analysisFilter);
         }
     }
 

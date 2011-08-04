@@ -489,9 +489,11 @@
         }
 
         private function allDone(event:Event):void {
-            toMain();
-            var o:Object = URLUtil.stringToObject(currentFragment, "&");
-            parseFragmentObject(o, currentFragment);
+            if (User.getInstance().fixedDashboardID != 0) {
+                toMain();
+                var o:Object = URLUtil.stringToObject(currentFragment, "&");
+                parseFragmentObject(o, currentFragment);
+            }
         }
 
         public function set dividerColor(value:uint):void {

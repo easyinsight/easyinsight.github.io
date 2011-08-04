@@ -1,6 +1,9 @@
 package com.easyinsight.users;
 
+import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.groups.Group;
+import com.easyinsight.preferences.UserDLS;
+import com.easyinsight.preferences.UserDLSFilter;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.security.Roles;
@@ -13,6 +16,7 @@ import com.easyinsight.groups.GroupStorage;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
+import java.sql.Statement;
 import java.util.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -105,11 +109,12 @@ public class UserAccountAdminService {
         return accountInfo;
     }
 
-    public void updateUser(UserTransferObject userTransferObject) {
+    public void updateUser(UserTransferObject userTransferObject, List<UserDLS> userDLSList) {
         long accountID = SecurityUtil.getAccountID();
-        Session session = Database.instance().createSession();
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
         try {
-            session.beginTransaction();
+            conn.setAutoCommit(false);
             List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
             Account account = (Account) results.get(0);
             User user = null;
@@ -128,13 +133,38 @@ public class UserAccountAdminService {
             }
             user.update(userTransferObject);
             session.update(user);
-            session.getTransaction().commit();
+            session.flush();
+            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM USER_DLS WHERE USER_ID = ?");
+            clearStmt.setLong(1, userTransferObject.getUserID());
+            clearStmt.executeUpdate();
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_DLS (DLS_ID, USER_ID) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement insertFilterStmt = conn.prepareStatement("INSERT INTO USER_DLS_TO_FILTER (FILTER_ID, ORIGINAL_FILTER_ID, USER_DLS_ID) VALUES (?, ?, ?)");
+            for (UserDLS userDLS : userDLSList) {
+                insertStmt.setLong(1, userDLS.getDlsID());
+                insertStmt.setLong(2, userTransferObject.getUserID());
+                insertStmt.execute();
+                long userDLSID = Database.instance().getAutoGenKey(insertStmt);
+                for (UserDLSFilter userDLSFilter : userDLS.getUserDLSFilterList()) {
+                    FilterDefinition filterDefinition = userDLSFilter.getFilterDefinition();
+                    filterDefinition.beforeSave(session);
+                    session.saveOrUpdate(filterDefinition);
+                    session.flush();
+                    insertFilterStmt.setLong(1, filterDefinition.getFilterID());
+                    insertFilterStmt.setLong(2, userDLSFilter.getOriginalFilterID());
+                    insertFilterStmt.setLong(3, userDLSID);
+                    insertFilterStmt.execute();
+                }
+            }
+
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
             session.close();
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 
@@ -288,7 +318,7 @@ public class UserAccountAdminService {
         }
     }
 
-    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject) {
+    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList) {
         SecurityUtil.authorizeAccountAdmin();
         long accountID = SecurityUtil.getAccountID();
         UserCreationResponse userCreationResponse;
@@ -296,11 +326,12 @@ public class UserAccountAdminService {
         if (message != null) {
             userCreationResponse = new UserCreationResponse(message);
         } else {
-            Session session = Database.instance().createSession();
+            EIConnection conn = Database.instance().getConnection();
+            Session session = Database.instance().createSession(conn);
             Account account;
             User user = null;
             try {
-                session.beginTransaction();
+                conn.setAutoCommit(false);
                 List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
                 account = (Account) results.get(0);
                 int maxUsers = account.getMaxUsers();
@@ -321,7 +352,26 @@ public class UserAccountAdminService {
                     account.addUser(user);
                     user.setAccount(account);
                     session.update(account);
-                    session.getTransaction().commit();
+                    session.flush();
+                    PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_DLS (DLS_ID, USER_ID) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    PreparedStatement insertFilterStmt = conn.prepareStatement("INSERT INTO USER_DLS_TO_FILTER (FILTER_ID, ORIGINAL_FILTER_ID, USER_DLS_ID) VALUES (?, ?, ?)");
+                    for (UserDLS userDLS : userDLSList) {
+                        insertStmt.setLong(1, userDLS.getDlsID());
+                        insertStmt.setLong(2, user.getUserID());
+                        insertStmt.execute();
+                        long userDLSID = Database.instance().getAutoGenKey(insertStmt);
+                        for (UserDLSFilter userDLSFilter : userDLS.getUserDLSFilterList()) {
+                            FilterDefinition filterDefinition = userDLSFilter.getFilterDefinition();
+                            filterDefinition.beforeSave(session);
+                            session.saveOrUpdate(filterDefinition);
+                            session.flush();
+                            insertFilterStmt.setLong(1, filterDefinition.getFilterID());
+                            insertFilterStmt.setLong(2, userDLSFilter.getOriginalFilterID());
+                            insertFilterStmt.setLong(3, userDLSID);
+                            insertFilterStmt.execute();
+                        }
+                    }
+                    conn.commit();
                     new Thread(new Runnable() {
                         public void run() {
                             new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password);
@@ -331,10 +381,12 @@ public class UserAccountAdminService {
                 }
             } catch (Exception e) {
                 LogClass.error(e);
-                session.getTransaction().rollback();
+                conn.rollback();
                 throw new RuntimeException(e);
             } finally {
                 session.close();
+                conn.setAutoCommit(true);
+                Database.closeConnection(conn);
             }
             if (user != null && account.getAccountType() != Account.PERSONAL) {
                 try {

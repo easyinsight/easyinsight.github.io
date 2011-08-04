@@ -81,7 +81,7 @@ public class AdminService {
                 String reportName = reportRS.getString(5);
                 String urlKey = reportRS.getString(6);
                 Date actionDate = new Date(reportRS.getTimestamp(7).getTime());
-                actions.add(new ActionReportLog(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey, Roles.OWNER), actionType, actionDate));
+                actions.add(new ActionReportLog(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey, Roles.OWNER, false), actionType, actionDate));
             }
             PreparedStatement queryScorecardStmt = conn.prepareStatement("SELECT action_scorecard_log.scorecard_id, action_log.action_type, scorecard.data_source_id," +
                     "scorecard.scorecard_name, scorecard.url_key, action_log.action_date from scorecard, action_log, action_scorecard_log where action_log.action_log_id = action_scorecard_log.action_log_id and " +
@@ -95,7 +95,7 @@ public class AdminService {
                 String reportName = scorecardRS.getString(4);
                 String urlKey = scorecardRS.getString(5);
                 Date actionDate = new Date(scorecardRS.getTimestamp(6).getTime());
-                actions.add(new ActionScorecardLog(new ScorecardDescriptor(reportName, scorecardID, urlKey, dataSourceID), actionType, actionDate));
+                actions.add(new ActionScorecardLog(new ScorecardDescriptor(reportName, scorecardID, urlKey, dataSourceID, false), actionType, actionDate));
             }
             PreparedStatement queryDashboardStmt = conn.prepareStatement("SELECT action_dashboard_log.dashboard_id, action_log.action_type, dashboard.data_source_id," +
                     "dashboard.dashboard_name, dashboard.url_key, action_log.action_date from dashboard, action_log, action_dashboard_log where action_log.action_log_id = action_dashboard_log.action_log_id and " +
@@ -109,7 +109,7 @@ public class AdminService {
                 String dashboardName = dashboardRS.getString(4);
                 String urlKey = dashboardRS.getString(5);
                 Date actionDate = new Date(dashboardRS.getTimestamp(6).getTime());
-                actions.add(new ActionDashboardLog(new DashboardDescriptor(dashboardName, dashboardID, urlKey, dataSourceID, Roles.OWNER, null), actionType, actionDate));
+                actions.add(new ActionDashboardLog(new DashboardDescriptor(dashboardName, dashboardID, urlKey, dataSourceID, Roles.OWNER, null, false), actionType, actionDate));
             }
             List<ActionLog> actionList = new ArrayList<ActionLog>(actions);
             Collections.sort(actionList, new Comparator<ActionLog>() {

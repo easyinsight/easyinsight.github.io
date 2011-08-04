@@ -41,6 +41,7 @@ public class ApplicationSkin {
     private boolean myDataNewKPITree;
     private boolean myDataNewDashboard;
     private boolean myDataLookupTable;
+    private boolean myDataAccountVisible;
     private long id;
 
     public long getId() {
@@ -80,6 +81,7 @@ public class ApplicationSkin {
         properties.add(new ReportBooleanProperty("myDataKPITree", myDataNewKPITree));
         properties.add(new ReportBooleanProperty("myDataDashboard", myDataNewDashboard));
         properties.add(new ReportBooleanProperty("myDataLookupTable", myDataLookupTable));
+        properties.add(new ReportBooleanProperty("myDataAccountVisible", myDataAccountVisible));
         settings.setSkinID(id);
         settings.setProperties(properties);
         return settings;
@@ -116,6 +118,7 @@ public class ApplicationSkin {
         myDataNewKPITree = findBooleanProperty(properties, "myDataKPITree", false);
         myDataNewDashboard = findBooleanProperty(properties, "myDataDashboard", true);
         myDataLookupTable = findBooleanProperty(properties, "myDataLookupTable", false);
+        myDataAccountVisible = findBooleanProperty(properties, "myDataAccountVisible", false);
     }
 
     public ImageDescriptor getCoreAppBackgroundImage() {
@@ -332,6 +335,14 @@ public class ApplicationSkin {
 
     public void setMyDataNewScorecard(boolean myDataNewScorecard) {
         this.myDataNewScorecard = myDataNewScorecard;
+    }
+
+    public boolean isMyDataAccountVisible() {
+        return myDataAccountVisible;
+    }
+
+    public void setMyDataAccountVisible(boolean myDataAccountVisible) {
+        this.myDataAccountVisible = myDataAccountVisible;
     }
 
     public boolean isMyDataNewKPITree() {

@@ -3,10 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Value;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -15,17 +12,18 @@ import java.util.HashSet;
  */
 public class AnalysisDimensionResultMetadata extends AnalysisItemResultMetadata {
 
-    private Set<Value> values = new HashSet<Value>();
+    private Collection<Value> values = new HashSet<Value>();
 
     public void addValue(AnalysisItem analysisItem, Value value, InsightRequestMetadata insightRequestMetadata) {
         values.add(value);
     }
 
     public List<Value> getValues() {
-        return new ArrayList<Value>(values);
+        values = new ArrayList<Value>(values);
+        return (List<Value>) values;
     }
 
     public void setValues(List<Value> values) {
-        this.values = new HashSet<Value>(values);
+        this.values = values;
     }
 }

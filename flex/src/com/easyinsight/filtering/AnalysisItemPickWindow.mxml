@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var fields:ArrayCollection;
+
+        private function addField():void {
+            dispatchEvent(new FieldFilterEvent(FieldFilterEvent.ADD_FIELD, fieldBox.selectedItem as AnalysisItem));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:ComboBox dataProvider="{fields}" id="fieldBox" labelField="display"/>
+    <mx:HBox>
+        <util:SaveButton label="Add This Field" click="addField()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

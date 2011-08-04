@@ -33,13 +33,13 @@ public class ScorecardInternalService {
 
     public RolePrioritySet<ScorecardDescriptor> getScorecardsForGroup(long groupID, EIConnection conn) throws SQLException {
         RolePrioritySet<ScorecardDescriptor> descriptors = new RolePrioritySet<ScorecardDescriptor>();
-        PreparedStatement userGroupStmt = conn.prepareStatement("select SCORECARD.scorecard_id, scorecard.scorecard_name, scorecard.url_key, scorecard.data_source_id FROM scorecard, " +
+        PreparedStatement userGroupStmt = conn.prepareStatement("select SCORECARD.scorecard_id, scorecard.scorecard_name, scorecard.url_key, scorecard.data_source_id, scorecard.account_visible FROM scorecard, " +
                 "group_to_scorecard WHERE " +
                 "scorecard.scorecard_id = group_to_scorecard.scorecard_id and group_to_scorecard.group_id = ?");
         userGroupStmt.setLong(1, groupID);
         ResultSet groupRS = userGroupStmt.executeQuery();
         while (groupRS.next()) {
-            descriptors.add(new ScorecardDescriptor(groupRS.getString(2), groupRS.getLong(1), groupRS.getString(3), groupRS.getLong(4)));
+            descriptors.add(new ScorecardDescriptor(groupRS.getString(2), groupRS.getLong(1), groupRS.getString(3), groupRS.getLong(4), groupRS.getBoolean(5)));
         }
         userGroupStmt.close();
         return descriptors;

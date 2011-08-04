@@ -1,4 +1,5 @@
 package com.easyinsight.framework {
+
 import com.easyinsight.administration.feed.GoogleAnalyticsDataSource;
 import com.easyinsight.administration.feed.GoogleFeedDefinition;
 import com.easyinsight.administration.feed.PersistableStringValue;
@@ -128,7 +129,6 @@ public class TORegistry {
 
         var dm:DragManager;
         var pm:PopUpManager;
-        
 
         var analysisStep:AnalysisStep;
         var analysisLat:AnalysisLatitude;

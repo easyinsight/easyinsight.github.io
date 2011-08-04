@@ -66,7 +66,7 @@ public class AnalysisService {
             List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
             for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
                 FeedDefinition source = new FeedStorage().getFeedDefinitionData(node.getDataFeedID());
-                dataSources.add(new DataSourceDescriptor(source.getFeedName(), source.getDataFeedID(), source.getDataSourceType()));
+                dataSources.add(new DataSourceDescriptor(source.getFeedName(), source.getDataFeedID(), source.getDataSourceType(), false));
             }
             List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
             for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
@@ -533,7 +533,7 @@ public class AnalysisService {
                         long analysisID = rs.getLong(1);
                         SecurityUtil.authorizeInsight(analysisID);
                         insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(2),
-                                rs.getLong(3), rs.getInt(4), urlKey, Roles.NONE));
+                                rs.getLong(3), rs.getInt(4), urlKey, Roles.NONE, false));
                     } else {
                         insightResponse = new InsightResponse(InsightResponse.REJECTED, null);
                     }
@@ -566,7 +566,7 @@ public class AnalysisService {
                     ResultSet rs = queryStmt.executeQuery();
                     rs.next();
                     insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(1),
-                            rs.getLong(2), rs.getInt(3), rs.getString(4), Roles.NONE));
+                            rs.getLong(2), rs.getInt(3), rs.getString(4), Roles.NONE, false));
                 } finally {
                     Database.closeConnection(conn);
                 }
