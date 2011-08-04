@@ -17,7 +17,6 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
-        import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.ChartDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
@@ -36,8 +35,10 @@
         import mx.charts.chartClasses.Series;
         import mx.charts.events.ChartItemEvent;
         import mx.collections.ArrayCollection;
+        import mx.controls.ComboBox;
         import mx.formatters.Formatter;
         import mx.graphics.BitmapFill;
+        import mx.graphics.SolidColor;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -189,6 +190,10 @@
             return null;
         }
 
+        private function onMeasureChange(event:Event):void {
+
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             chartDef = analysisDefinition as ChartDefinition;
 
@@ -270,7 +275,7 @@
                 var fills:Array;
                 if (getMeasures().length == 1) {
                     if (useChartColor()) {
-                        fills = [getChartColor()];
+                        fills = [new SolidColor(getChartColor())];
                     } else {
                         fills = FillProvider.getColors(getColorScheme(), bgFills, getAngle());
                     }
@@ -303,6 +308,9 @@
         }
         ]]></mx:Script>
     <mx:Canvas width="100%" height="100%" backgroundAlpha="1" backgroundColor="#FFFFFF">
+        <!--
+
+        -->
         <mx:HBox width="100%" height="100%" id="canvas"/>
         <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
                       mouseEnabled="false">
