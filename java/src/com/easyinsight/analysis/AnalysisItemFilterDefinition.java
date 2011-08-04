@@ -7,7 +7,9 @@ import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -28,6 +30,19 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
             joinColumns = @JoinColumn(name = "filter_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "analysis_item_id", nullable = false))
     private List<AnalysisItem> availableItems;
+
+    @Override
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        super.updateIDs(replacementMap);
+        if (targetItem != null) {
+            targetItem = replacementMap.get(targetItem.getAnalysisItemID());
+        }
+        List<AnalysisItem> replaceAvailableItems = new ArrayList<AnalysisItem>();
+        for (AnalysisItem availableItem : availableItems) {
+            replaceAvailableItems.add(replacementMap.get(availableItem.getAnalysisItemID()));
+        }
+        this.availableItems = replaceAvailableItems;
+    }
 
     public List<AnalysisItem> getAvailableItems() {
         return availableItems;
@@ -92,5 +107,15 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
             items.add(validItem);
         }
         setAvailableItems(items);
+    }
+
+    @Override
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
+        List<AnalysisItem> analysisItems = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria);
+        if (getEverything) {
+            analysisItems.addAll(availableItems);
+            analysisItems.add(targetItem);
+        }
+        return analysisItems;
     }
 }
