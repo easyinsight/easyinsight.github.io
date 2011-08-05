@@ -301,7 +301,7 @@
         protected var underline:Boolean;
 
         [Bindable]
-        protected var precision:int;
+        protected var precision:int = 2;
 
         [Bindable]
         protected var minPrecision:int;
