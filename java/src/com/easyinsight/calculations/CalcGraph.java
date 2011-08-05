@@ -29,6 +29,8 @@ public class CalcGraph {
                 derivedItems.add(item);
             } else if (rowLevel && item.hasType(AnalysisItemTypes.DERIVED_DATE)) {
                 derivedItems.add(item);
+            } else if (!rowLevel && item.hasType(AnalysisItemTypes.REAGGREGATE_MEASURE)) {
+                derivedItems.add(item);
             }
         }
         List<IComponent> components = new ArrayList<IComponent>();
@@ -62,6 +64,8 @@ public class CalcGraph {
                     components.add(new DerivedGroupingComponent((DerivedAnalysisDimension) calcNode));
                 } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DATE)) {
                     components.add(new DerivedDateComponent((DerivedAnalysisDateDimension) calcNode));
+                } else if (calcNode.hasType(AnalysisItemTypes.REAGGREGATE_MEASURE)) {
+                    components.add(new ReaggregateComponent((ReaggregateAnalysisMeasure) calcNode));
                 }
             }
         }

@@ -14,8 +14,8 @@
             super.analysisItem = val;
             if (val is ReaggregateAnalysisMeasure) {
                 var measure:ReaggregateAnalysisMeasure = val as ReaggregateAnalysisMeasure;
-                aggregateDimension = measure.aggregationItem as AnalysisDimension;
-                wrappedMeasure = measure.wrappedMeasure as AnalysisMeasure;
+                aggregateDimension = measure.aggregationItem.display;
+                wrappedMeasure = measure.wrappedMeasure.display;
                 var measureString:String;
                 switch (measure.aggregation) {
                     case AggregationTypes.SUM:
@@ -65,10 +65,10 @@
         }
 
         [Bindable]
-        private var aggregateDimension:AnalysisItem;
+        private var aggregateDimension:String;
 
         [Bindable]
-        private var wrappedMeasure:AnalysisItem;
+        private var wrappedMeasure:String;
         ]]></mx:Script>
     <mx:FormItem label="Wrapped Aggregation: ">
         <mx:ComboBox dataProvider="{measureObjects}" id="complexWrappedAggregations" selectedItem="{aggregationString}"/>

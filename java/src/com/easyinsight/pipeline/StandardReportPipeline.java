@@ -94,9 +94,9 @@ public class StandardReportPipeline extends Pipeline {
 
         components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, false));
 
-        for (AnalysisItem reaggregate : items(AnalysisItemTypes.REAGGREGATE_MEASURE, allNeededAnalysisItems)) {
+        /*for (AnalysisItem reaggregate : items(AnalysisItemTypes.REAGGREGATE_MEASURE, allNeededAnalysisItems)) {
             components.add(new ReaggregateComponent((ReaggregateAnalysisMeasure) reaggregate));
-        }
+        }*/
 
         // need another cleanup component here...
         components.add(new CleanupComponent(0));

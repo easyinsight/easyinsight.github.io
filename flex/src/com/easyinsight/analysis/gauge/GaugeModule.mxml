@@ -24,6 +24,7 @@
         import com.easyinsight.filtering.FilterRawData;
 
         import mx.collections.ArrayCollection;
+        import mx.formatters.Formatter;
         import mx.formatters.NumberFormatter;
 
         [Bindable]
@@ -46,8 +47,10 @@
                 maxValue = gaugeDefinition.maxValue;
                 value = Math.min(maxValue, Number(row[gaugeDefinition.measure.qualifiedName()]));
                 gauge.alertRatios = [ gaugeDefinition.alertPoint1, gaugeDefinition.alertPoint2 ];
+                gauge.alertColors = [ gaugeDefinition.color1, gaugeDefinition.color2,  gaugeDefinition.color3 ];
                 gauge.width = Math.min(box.width, box.height);
                 gauge.diameter = Math.min(box.width, box.height);
+                numFormatter = gaugeDefinition.measure.getFormatter();
                 gauge.invalidateSize();
                 gauge.invalidateDisplayList();
                 /*gauge.value = value;
@@ -67,7 +70,7 @@
         }
 
         [Bindable]
-        private var numFormatter:NumberFormatter = new NumberFormatter();
+        private var numFormatter:Formatter;
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
             if (event is GaugeTypeEvent) {

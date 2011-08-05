@@ -18,6 +18,7 @@ import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartDefinition;
 import com.easyinsight.analysis.form.FormReport;
+import com.easyinsight.analysis.gauge.GaugeDefinition;
 import com.easyinsight.analysis.heatmap.HeatMapDefinition;
 import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.analysis.maps.MapDefinition;
@@ -121,6 +122,13 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Summary Row Text Color", "summaryRowTextColor", ListDefinition(report).summaryRowTextColor, report));
             items.addItem(new ColorReportFormItem("Summary Row Background Color", "summaryRowBackgroundColor", ListDefinition(report).summaryRowBackgroundColor, report));
             items.addItem(new CheckBoxReportFormItem("Show Rollover Icon", "rolloverIcon", ListDefinition(report).rolloverIcon, report, null, true));
+        }
+        if (report is GaugeDefinition) {
+            items.addItem(new NumericReportFormItem("Alert Point 1", "alertPoint1", GaugeDefinition(report).alertPoint1, report, 0, 1000000000));
+            items.addItem(new NumericReportFormItem("Alert Point 2", "alertPoint2", GaugeDefinition(report).alertPoint2, report, 0, 1000000000));
+            items.addItem(new ColorReportFormItem("Color 1", "color1", GaugeDefinition(report).color1, report));
+            items.addItem(new ColorReportFormItem("Color 2", "color2", GaugeDefinition(report).color2, report));
+            items.addItem(new ColorReportFormItem("Color 3", "color3", GaugeDefinition(report).color3, report));
         }
         if (report is TreeDefinition) {
             items.addItem(new ColorReportFormItem("Text Color", "textColor", TreeDefinition(report).textColor, report));

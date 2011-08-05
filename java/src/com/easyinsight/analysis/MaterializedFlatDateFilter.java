@@ -50,6 +50,5 @@ public class MaterializedFlatDateFilter extends MaterializedFilterDefinition {
             }
         }
         return false;
-        //return true;
     }
 }

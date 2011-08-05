@@ -274,6 +274,10 @@ import mx.styles.StyleManager;
         private var _alertColors:Array = [0xFF0000, 0xFFFF00, 0x00BB11];
         private var _alertAlphas:Array = [.8, .8, .98];
 
+        public function set alertColors(value:Array):void {
+            _alertColors = value;
+        }
+
         public function set alertRatios(value:Array):void {
             _alertRatios = value;
         }

@@ -50,7 +50,7 @@
             <mx:RadioButton label="Create a Filter on a Field" groupName="typeGroup" value="fieldFilter"/>
             <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
             <mx:RadioButton label="Create a Field Choice Filter" groupName="typeGroup" value="fieldChoiceFilter"/>
-            <!--<mx:RadioButton label="Create a Named Reference Filter" groupName="typeGroup" value="namedRef"/>-->
+            <mx:RadioButton label="Create a Named Reference Filter" groupName="typeGroup" value="namedRef"/>
         </mx:HBox>
         <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
             <mx:VBox>

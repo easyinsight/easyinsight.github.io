@@ -14,8 +14,11 @@ public class GaugeDefinition extends AnalysisDefinition {
     public var gaugeType:int = CIRCULAR_GAUGE;
     public var gaugeDefinitionID:int;
     public var maxValue:int;
-    public var alertPoint1:int;
-    public var alertPoint2:int;
+    public var alertPoint1:Number = 0;
+    public var alertPoint2:Number = 0;
+    public var color1:uint = 0xFF0000;
+    public var color2:uint = 0xFFFF00;
+    public var color3:uint = 0x00BB11;
 
     public function GaugeDefinition() {
         super();

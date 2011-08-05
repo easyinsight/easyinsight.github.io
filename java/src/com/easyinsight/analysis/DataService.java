@@ -217,6 +217,8 @@ public class DataService {
                 return null;
             }
 
+            insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
+
             if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
             }
@@ -546,6 +548,7 @@ public class DataService {
                 insightRequestMetadata = new InsightRequestMetadata();
             }
             insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
+            insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
             DataResults results;
 
             for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
