@@ -208,6 +208,8 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                     String statusChangedOn = queryField(currDeal, "status-changed-on/text()");
                     if (statusChangedOn != null) {
                         row.addValue(STATUS_CHANGED_ON, new DateValue(deadlineFormat.parse(statusChangedOn)));
+                    } else {
+                        row.addValue(STATUS_CHANGED_ON, new DateValue(deadlineFormat.parse(createdAt)));
                     }
                     dealCount++;
                 }
