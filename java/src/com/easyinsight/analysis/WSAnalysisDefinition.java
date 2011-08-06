@@ -317,6 +317,13 @@ public abstract class WSAnalysisDefinition implements Serializable {
         if (filterDefinitions != null) {
             for (FilterDefinition filter : filterDefinitions) {
                 if (filter.isEnabled()) {
+                    if (filter instanceof FilterValueDefinition) {
+                        FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
+                        if (filterValueDefinition.isAllOption() && filterValueDefinition.getFilteredValues().size() == 1 &&
+                                "All".equals(filterValueDefinition.getFilteredValues().get(0).toString())) {
+                            continue;
+                        }
+                    }
                     filters.add(filter);
                 }
             }

@@ -100,7 +100,9 @@
 
         private function save():void {
             var previousDefinition:FilterDefinition = _filterDefinition;
-            _filterDefinition = filterDetailEditor.makeUpdates();
+            if (filterDetailEditor != null) {
+                _filterDefinition = filterDetailEditor.makeUpdates();
+            }
             /*if (currentState == "editorState") {
                 _filterDefinition.field = editor.save(_feedID);
             }*/

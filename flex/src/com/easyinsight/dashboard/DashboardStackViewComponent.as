@@ -116,7 +116,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         }
         headerbar.percentWidth = 100;
         headerbar.percentHeight = 100;
-        headerbar.setStyle("horizontalAlign", "center");
+        headerbar.setStyle("horizontalAlign", dashboardStack.headerBackground != null ? "right" : "center");
         headerbar.setStyle("verticalAlign", "bottom");
         headerbar.setStyle("paddingBottom", 5);
         headerBackgroundImage.addChild(headerbar);
@@ -171,6 +171,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             transformContainer.reportView = true;
             transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+            /*<mx:Button icon="@Embed(source='../../../assets/funnel.png')"
+                           toolTip="{excludeFilterDataTooltip}" click="transformContainer.addNewFilter()" label="New Filter"/>*/
+
             addChild(transformContainer);
         }
         addChild(viewStack);
