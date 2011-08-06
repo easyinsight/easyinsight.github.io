@@ -256,7 +256,7 @@
                     <mx:Text text="You'll be billed $75/month on your next&#13;monthly bill." fontSize="18"/>
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Upgrade me!" fontSize="18" styleName="grayButton" click="upgrade(Account.PRO)"/>
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="grayButton" click="upgrade(Account.PLUS)"/>
                         <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
                     </mx:HBox>
                 </mx:VBox>
