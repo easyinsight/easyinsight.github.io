@@ -207,6 +207,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.HIGHRISE_COMPANY_NOTES);
         feedTypes.add(FeedType.HIGHRISE_CASE_NOTES);
         feedTypes.add(FeedType.HIGHRISE_DEAL_NOTES);
+        feedTypes.add(FeedType.HIGHRISE_CASE_JOIN);
         return feedTypes;
     }
 
@@ -315,7 +316,13 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_COMPANY_NOTES, HighRiseCompanySource.COMPANY_ID,
                         HighRiseCompanyNotesSource.NOTE_COMPANY_ID),
                 new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_CASE_NOTES, HighRiseCaseSource.CASE_ID,
-                        HighRiseCaseNotesSource.NOTE_CASE_ID)));
+                        HighRiseCaseNotesSource.NOTE_CASE_ID),
+                new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CASES, HighRiseCaseJoinSource.CASE_ID,
+                        HighRiseCaseSource.CASE_ID),
+                new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_COMPANY, HighRiseCaseJoinSource.COMPANY_ID,
+                        HighRiseCompanySource.COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CONTACTS, HighRiseCaseJoinSource.CONTACT_ID,
+                        HighRiseContactSource.CONTACT_ID)));
         return connections;
     }
 
@@ -462,12 +469,12 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getVersion() {
-        return 4;
+        return 5;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList(new HighRiseComposite1To2(this), new HighRiseComposite2To3(this), new HighRiseComposite3To4(this));
+        return Arrays.asList(new HighRiseComposite1To2(this), new HighRiseComposite2To3(this), new HighRiseComposite3To4(this), new HighRiseComposite4To5(this));
     }
 
     public void decorateLinks(List<AnalysisItem> analysisItems) {
