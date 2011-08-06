@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" paddingBottom="20"
                     paddingLeft="20"
-                    paddingRight="20" paddingTop="20" backgroundColor="#000000" headerHeight="0" creationComplete="setup()">
+                    paddingRight="20" paddingTop="20" backgroundColor="#FFFFFF" headerHeight="0" creationComplete="setup()">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.UpgradeAccountResponse;
         import com.easyinsight.framework.User;
@@ -38,7 +38,7 @@
                 if (User.getInstance().accountState == Account.TRIAL) {
                     windowIndex = 6;
                 } else {
-                    windowIndex = 5;
+                    windowIndex = 9;
                 }
             }
         }
@@ -83,6 +83,7 @@
     </mx:RemoteObject>
     <mx:VBox verticalGap="20">
         <mx:ViewStack selectedIndex="{windowIndex}" width="900">
+            <!-- 0 -->
             <mx:VBox width="100%" verticalGap="20">
                 <mx:HBox width="100%" horizontalAlign="center" paddingLeft="2" paddingRight="2" horizontalGap="15">
                     <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
@@ -98,7 +99,7 @@
                         <mx:HRule width="100%"/>
                         <mx:Text text="Looking to upload a lot of custom&#13;data? This option gives you the&#13;power of full SaaS BI. Flexible pricing&#13;scales with your storage needs."
                                 fontSize="14"/>
-                        <mx:Button label="Upgrade!" click="toPro()" styleName="blueButton"
+                        <mx:Button label="Upgrade!" click="toPro()" styleName="grayButton"
                                    fontSize="16"/>
                     </mx:VBox>
                     <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
@@ -114,7 +115,7 @@
                         <mx:HRule width="100%"/>
                         <mx:Text text="Have a large organization with the&#13;need to report and analyze data&#13;from other SaaS applications such as&#13;Basecamp and Highrise?"
                                 fontSize="14"/>
-                        <mx:Button label="Upgrade!" click="toPlus()" styleName="blueButton"
+                        <mx:Button label="Upgrade!" click="toPlus()" styleName="grayButton"
                                    fontSize="16"/>
                     </mx:VBox>
                     <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
@@ -130,7 +131,7 @@
                         <mx:HRule width="100%"/>
                         <mx:Text text="Quickly get a small organization&#13;started with reports and analysis on&#13;other SaaS applications such as&#13;Basecamp and Google Analytics."
                                 fontSize="14"/>
-                        <mx:Button label="Upgrade!" click="toBasic()" styleName="blueButton"
+                        <mx:Button label="Upgrade!" click="toBasic()" styleName="grayButton"
                                    fontSize="16"/>
                     </mx:VBox>
                 </mx:HBox>
@@ -138,6 +139,7 @@
                     <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="16"/>
                 </mx:HBox>
             </mx:VBox>
+            <!-- 1 -->
             <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
                 <mx:VBox backgroundColor="#FFFFFF" borderStyle="solid" dropShadowEnabled="true" cornerRadius="8"
                         borderThickness="5" borderColor="#AAAAAA" paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10" enabled="{basicEnabled}">
@@ -146,11 +148,12 @@
                     <mx:Text text="After thirty days, you'll need to pay&#13;$25/month for the account." fontSize="18"/>
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.BASIC)"/>
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="grayButton" click="upgrade(Account.BASIC)"/>
                         <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
                     </mx:HBox>
                 </mx:VBox>
             </mx:Box>
+            <!-- 2 -->
             <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
                 <mx:VBox backgroundColor="#FFFFFF" borderStyle="solid" dropShadowEnabled="true" cornerRadius="8"
                         borderThickness="5" borderColor="#AAAAAA" paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10">
@@ -158,11 +161,12 @@
                     <mx:Text text="You'll be billed $200/month on your next&#13;monthly bill." fontSize="18"/>                    
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.PRO)"/>
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="grayButton" click="upgrade(Account.PRO)"/>
                         <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
                     </mx:HBox>
                 </mx:VBox>
             </mx:Box>
+            <!-- 3 -->
             <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
                 <mx:VBox backgroundColor="#FFFFFF" borderStyle="solid" dropShadowEnabled="true" cornerRadius="8"
                         borderThickness="5" borderColor="#AAAAAA" paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10">
@@ -171,11 +175,12 @@
                     <mx:Text text="At the end of the trial period, you'll need&#13;to pay $200/month for the account." fontSize="18"/>
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.PRO)"/>
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="grayButton" click="upgrade(Account.PRO)"/>
                         <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
                     </mx:HBox>
                 </mx:VBox>
             </mx:Box>
+            <!-- 4 -->
             <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
                 <mx:VBox backgroundColor="#FFFFFF" borderStyle="solid" dropShadowEnabled="true" cornerRadius="8"
                         borderThickness="5" borderColor="#AAAAAA" paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10">
@@ -184,11 +189,12 @@
                     <mx:Text text="After thirty days, you'll need to pay&#13;$200/month for the account." fontSize="18"/>
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.PRO)"/>
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="grayButton" click="upgrade(Account.PRO)"/>
                         <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
                     </mx:HBox>
                 </mx:VBox>
             </mx:Box>
+            <!-- 5 -->
             <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
                 <mx:VBox backgroundColor="#FFFFFF" borderStyle="solid" dropShadowEnabled="true" cornerRadius="8"
                         borderThickness="5" borderColor="#AAAAAA" paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10">
@@ -196,10 +202,11 @@
                     <mx:Text text="Your account is now upgraded." fontSize="18"/>
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Done" fontSize="18" styleName="blueButton" click="PopUpManager.removePopUp(this)"/>                        
+                        <mx:Button label="Done" fontSize="18" styleName="grayButton" click="PopUpManager.removePopUp(this)"/>                        
                     </mx:HBox>
                 </mx:VBox>
             </mx:Box>
+            <!-- 6 -->
             <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
                 <mx:VBox backgroundColor="#FFFFFF" borderStyle="solid" dropShadowEnabled="true" cornerRadius="8"
                         borderThickness="5" borderColor="#AAAAAA" paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10">
@@ -208,11 +215,12 @@
                     <mx:Text text="At the end of the trial period, you'll need&#13;to pay $75/month for the account." fontSize="18"/>
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.PLUS)"/>
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="grayButton" click="upgrade(Account.PLUS)"/>
                         <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
                     </mx:HBox>
                 </mx:VBox>
             </mx:Box>
+            <!-- 7 -->
             <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
                 <mx:VBox backgroundColor="#FFFFFF" borderStyle="solid" dropShadowEnabled="true" cornerRadius="8"
                         borderThickness="5" borderColor="#AAAAAA" paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10">
@@ -221,11 +229,12 @@
                     <mx:Text text="After thirty days, you'll need to pay&#13;$75/month for the account." fontSize="18"/>
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.PLUS)"/>
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="grayButton" click="upgrade(Account.PLUS)"/>
                         <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
                     </mx:HBox>
                 </mx:VBox>
             </mx:Box>
+            <!-- 8 -->
             <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
                 <mx:VBox backgroundColor="#FFFFFF" borderStyle="solid" dropShadowEnabled="true" cornerRadius="8"
                         borderThickness="5" borderColor="#AAAAAA" paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10" enabled="{basicEnabled}">
@@ -234,7 +243,20 @@
                     <mx:Text text="After thirty days, you'll need to pay&#13;$75/month for the account." fontSize="18"/>
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.PLUS)"/>
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="grayButton" click="upgrade(Account.PLUS)"/>
+                        <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:Box>
+            <!-- 9 -->
+            <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
+                <mx:VBox backgroundColor="#FFFFFF" borderStyle="solid" dropShadowEnabled="true" cornerRadius="8"
+                        borderThickness="5" borderColor="#AAAAAA" paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10">
+                    <mx:Text text="Just to confirm, you'll be upgrading your&#13;account to the Plus level." fontSize="18"/>
+                    <mx:Text text="You'll be billed $75/month on your next&#13;monthly bill." fontSize="18"/>
+                    <mx:Spacer height="20"/>
+                    <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="grayButton" click="upgrade(Account.PRO)"/>
                         <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
                     </mx:HBox>
                 </mx:VBox>
