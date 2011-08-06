@@ -3,6 +3,7 @@ package com.easyinsight.calculations;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
@@ -54,16 +55,19 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
             Value result2 = node2.getResult();
             if (result.type() == Value.STRING || result2.type() == Value.STRING) {
                 result = new StringValue(minusQuotes(result) + minusQuotes(result2));
-            } else if(!(node2.getResult() instanceof EmptyValue) && node1.getResult().toDouble() != null && node2.getResult().toDouble() != null)
+            } else if (node1.getResult().type() == Value.DATE && node2.getResult().type() == Value.NUMBER ||
+                    node1.getResult().type() == Value.NUMBER && node2.getResult().type() == Value.DATE ||
+                    node1.getResult().type() == Value.DATE && node2.getResult().type() == Value.DATE) {
+                result = new DateValue(new Date((long) (node1.getResult().toDouble() + node2.getResult().toDouble())));
+            } else if (!(node2.getResult() instanceof EmptyValue) && node1.getResult().toDouble() != null && node2.getResult().toDouble() != null) {
                 result = new NumericValue(result.toDouble() + node2.getResult().toDouble());
-            else {
+            } else {
                 if (emptyAsZero) {
                     result = new NumericValue(result.toDouble() + node2.getResult().toDouble());
                 } else {
                     result = new EmptyValue();
                 }
             }
-
         }
     }
 
@@ -159,7 +163,11 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
             }
         }
         else {
-            result = new NumericValue(node1.getResult().toDouble() / node2.getResult().toDouble());
+            if (node2.getResult().toDouble() == 0) {
+                result = new EmptyValue();
+            } else {
+                result = new NumericValue(node1.getResult().toDouble() / node2.getResult().toDouble());
+            }
         }
     }
 
