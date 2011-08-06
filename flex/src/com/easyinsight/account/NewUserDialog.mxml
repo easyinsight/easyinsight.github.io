@@ -15,6 +15,7 @@
         import mx.binding.utils.BindingUtils;
 
         import mx.collections.ArrayCollection;
+        import mx.containers.VBox;
         import mx.controls.Alert;
         import mx.validators.Validator;
         import mx.managers.PopUpManager;
@@ -90,6 +91,7 @@
             dashboardService.getDashboards.send();
             //if (User.getInstance().getAccountType() >= Account.PRO) {
             showPersonaOption = true;
+            ProgressAlert.alert(this, "Retrieving details...", null, preferencesService.getPersonas, preferencesService.getUserDLS);
             preferencesService.getPersonas.send();
             preferencesService.getUserDLS.send(userID, personaID);
             //}
@@ -97,6 +99,7 @@
 
         private function onPersonaChange(event:Event):void {
             var personaID:int = Persona(personaComboBox.selectedItem).personaID;
+            ProgressAlert.alert(this, "Retrieving information...", null, preferencesService.getUserDLS);
             preferencesService.getUserDLS.send(userID, personaID);
         }
 
@@ -158,12 +161,28 @@
 
         private function gotUserDLS():void {
             dlsList = preferencesService.getUserDLS.lastResult as ArrayCollection;
-            for each (var userDLS:UserDLS in dlsList) {
-                var config:UserDLSConfig = new UserDLSConfig();
-                config.userDLS = userDLS;
-                dlsVBox.addChild(config);
+            if (dlsList.length > 0) {
+                if (dlsVBox != null) {
+                    dlsVBox.removeAllChildren();
+                } else {
+                    dlsVBox = new VBox();
+                    dlsVBox.label = "DLS";
+                    tabNavigator.addChild(dlsVBox);
+                }
+                for each (var userDLS:UserDLS in dlsList) {
+                    var config:UserDLSConfig = new UserDLSConfig();
+                    config.userDLS = userDLS;
+                    dlsVBox.addChild(config);
+                }
+            } else {
+                if (dlsVBox != null) {
+                    tabNavigator.removeChild(dlsVBox);
+                    dlsVBox = null;
+                }
             }
         }
+
+        private var dlsVBox:VBox;
 
         [Bindable]
         private var viewID:int;
@@ -179,7 +198,7 @@
         <mx:method name="getPersonas" result="gotPersonas()"/>
         <mx:method name="getUserDLS" result="gotUserDLS()"/>
     </mx:RemoteObject>
-    <mx:TabNavigator>
+    <mx:TabNavigator id="tabNavigator">
         <mx:Form label="Base Info">
             <mx:FormItem label="User ID:" direction="horizontal">
                 <mx:TextInput id="userNameInput" text="{userName}" width="400"/>
@@ -207,9 +226,6 @@
                 <util:SmartComboBox dataProvider="{availableViews}" labelField="name" id="singleViewComboBox" selectedProperty="id" selectedValue="{viewID}" enabled="{!accountAdmin}"/>
             </mx:FormItem>
         </mx:Form>
-        <mx:VBox id="dlsVBox" label="DLS">
-
-        </mx:VBox>
     </mx:TabNavigator>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="{createLabel}" click="save()"/>
