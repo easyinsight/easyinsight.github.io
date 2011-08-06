@@ -617,7 +617,7 @@ public class ExportService {
             }
             insertStmt.setBinaryStream(2, bis, bytes.length);
             String anonID = RandomTextGenerator.generateText(20);
-            insertStmt.setString(3, analysisDefinition.getName() == null ? "export" : analysisDefinition.getName());
+            insertStmt.setString(3, (analysisDefinition.getName() == null || "".equals(analysisDefinition.getName())) ? "export" : analysisDefinition.getName());
             insertStmt.setString(4, anonID);
             insertStmt.execute();
             long id = Database.instance().getAutoGenKey(insertStmt);
