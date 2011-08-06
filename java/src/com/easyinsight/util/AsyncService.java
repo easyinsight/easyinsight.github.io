@@ -1,5 +1,7 @@
 package com.easyinsight.util;
 
+import com.easyinsight.logging.LogClass;
+
 /**
  * User: jamesboe
  * Date: 1/3/11
@@ -7,6 +9,11 @@ package com.easyinsight.util;
  */
 public class AsyncService {
     public CallData getCallData(String callID) {
-        return ServiceUtil.instance().getCallData(callID);
+        try {
+            return ServiceUtil.instance().getCallData(callID);
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 }
