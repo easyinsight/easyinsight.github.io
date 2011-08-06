@@ -91,7 +91,6 @@
             items.addItem(new CheckBoxReportFormItem("Account Visible on My Data Tree", "myDataAccountVisible", skin.myDataAccountVisible, skin));
             items.addItem(new CheckBoxReportFormItem("Combine Data Source", "myDataCombine", skin.myDataCombine, skin));
             items.addItem(new CheckBoxReportFormItem("Create Scorecard", "myDataNewScorecard", skin.myDataNewScorecard, skin));
-            items.addItem(new CheckBoxReportFormItem("Create KPI Tree", "myDataNewKPITree", skin.myDataNewKPITree, skin));
             items.addItem(new CheckBoxReportFormItem("Create Dashboard", "myDataNewDashboard", skin.myDataNewDashboard, skin));
             items.addItem(new CheckBoxReportFormItem("Create Lookup Table", "myDataLookupTable", skin.myDataLookupTable, skin));
 
