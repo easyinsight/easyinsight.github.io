@@ -61,19 +61,26 @@ public class CompositeFeedDefinition extends FeedDefinition {
     }
 
     public void beforeSave(EIConnection conn) throws Exception {
+        Map<Long, FeedDefinition> childMap = new HashMap<Long, FeedDefinition>();
         for (AnalysisItem analysisItem : getFields()) {
             Key key = analysisItem.getKey();
             if (key.toBaseKey().indexed()) {
                 DerivedKey derivedKey = (DerivedKey) key;
-                FeedDefinition child = new FeedStorage().getFeedDefinitionData(derivedKey.getFeedID(), conn);
+                FeedDefinition child = childMap.get(derivedKey.getFeedID());
+                if (child == null) {
+                    child = new FeedStorage().getFeedDefinitionData(derivedKey.getFeedID(), conn);
+                    childMap.put(derivedKey.getFeedID(), child);
+                }
                 for (AnalysisItem item : child.getFields()) {
                     if (item.getKey().getKeyID() == derivedKey.getParentKey().getKeyID()) {
                         NamedKey namedKey = (NamedKey) item.getKey().toBaseKey();
                         namedKey.setIndexed(true);
                     }
                 }
-                new FeedStorage().updateDataFeedConfiguration(child, conn);
             }
+        }
+        for (FeedDefinition dataSource : childMap.values()) {
+            new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
         }
         populateFields(conn);    
     }
