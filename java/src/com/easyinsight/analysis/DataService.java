@@ -226,30 +226,33 @@ public class DataService {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
 
-            PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
-                    "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
-                    "user_dls.user_id = ?");
-            dlsStmt.setLong(1, analysisDefinition.getDataFeedID());
-            dlsStmt.setLong(2, SecurityUtil.getUserID());
-            List<FilterDefinition> dlsFilters = new ArrayList<FilterDefinition>();
-            ResultSet dlsRS = dlsStmt.executeQuery();
-            while (dlsRS.next()) {
-                long filterID = dlsRS.getLong(1);
-                Session session = Database.instance().createSession(conn);
-                try {
-                    List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
-                    if (results.size() > 0) {
-                        FilterDefinition filter = (FilterDefinition) results.get(0);
-                        filter.getField().afterLoad();
-                        filter.afterLoad();
-                        dlsFilters.add(filter);
+            if (SecurityUtil.getUserID(false) != 0) {
+                PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
+                        "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
+                        "user_dls.user_id = ?");
+                dlsStmt.setLong(1, analysisDefinition.getDataFeedID());
+                dlsStmt.setLong(2, SecurityUtil.getUserID());
+                List<FilterDefinition> dlsFilters = new ArrayList<FilterDefinition>();
+                ResultSet dlsRS = dlsStmt.executeQuery();
+                while (dlsRS.next()) {
+                    long filterID = dlsRS.getLong(1);
+                    Session session = Database.instance().createSession(conn);
+                    try {
+                        List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
+                        if (results.size() > 0) {
+                            FilterDefinition filter = (FilterDefinition) results.get(0);
+                            filter.getField().afterLoad();
+                            filter.afterLoad();
+                            dlsFilters.add(filter);
+                        }
+                    } finally {
+                        session.close();
                     }
-                } finally {
-                    session.close();
                 }
+                analysisDefinition.getFilterDefinitions().addAll(dlsFilters);
             }
 
-            analysisDefinition.getFilterDefinitions().addAll(dlsFilters);
+
 
             for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                 if (filter instanceof AnalysisItemFilterDefinition) {
