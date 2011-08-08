@@ -1,5 +1,6 @@
 package com.easyinsight.preferences;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ public class Persona {
     private String name;
     private long personaID;
     private UISettings uiSettings;
-    private List<DataSourceDLS> dataSourceDLS;
+    private List<DataSourceDLS> dataSourceDLS = new ArrayList<DataSourceDLS>();
 
     public List<DataSourceDLS> getDataSourceDLS() {
         return dataSourceDLS;

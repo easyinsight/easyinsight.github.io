@@ -489,7 +489,7 @@
         }
 
         private function allDone(event:Event):void {
-            if (User.getInstance().fixedDashboardID != 0) {
+            if (User.getInstance().fixedDashboardID == 0) {
                 toMain();
                 var o:Object = URLUtil.stringToObject(currentFragment, "&");
                 parseFragmentObject(o, currentFragment);

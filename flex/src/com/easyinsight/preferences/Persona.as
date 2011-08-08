@@ -10,7 +10,7 @@ public class Persona {
     public var name:String;
     public var uiSettings:UISettings;
     public var personaID:int;
-    public var dataSourceDLS:ArrayCollection;
+    public var dataSourceDLS:ArrayCollection = new ArrayCollection();
 
     public function Persona() {
     }
