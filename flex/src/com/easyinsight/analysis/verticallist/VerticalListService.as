@@ -39,7 +39,10 @@ public class VerticalListService extends ListDataService implements IReportDataS
         dataRemoteSource.getVerticalDataResults.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
     }
 
+    private var report:AnalysisDefinition;
+
     override public function retrieveData(definition:AnalysisDefinition, refreshAllSources:Boolean):void {
+        this.report = definition;
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.utcOffset = new Date().getTimezoneOffset();
@@ -51,7 +54,7 @@ public class VerticalListService extends ListDataService implements IReportDataS
         var results:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < verticalResults.map.length; i++) {
             var dataResults:ListDataResults = verticalResults.map.getItemAt(i) as ListDataResults;
-            results.addItem(translate(dataResults).data);
+            results.addItem(translate(dataResults, report).data);
         }
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, results, ListDataResults(verticalResults.map.getItemAt(0)).dataSourceInfo,
                 new Object(), new ArrayCollection(), null, false, 0, 0));

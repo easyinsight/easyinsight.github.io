@@ -36,7 +36,7 @@ public class EmbeddedTimelineDataService extends EventDispatcher implements IEmb
 
 
             for each (var listData:ListDataResults in results.listDatas) {
-                dataSets.addItem(new ListDataService().translate(listData));
+                dataSets.addItem(new ListDataService().translate(listData, null));
             }
             results.additionalProperties.seriesValues = results.seriesValues;
         }
