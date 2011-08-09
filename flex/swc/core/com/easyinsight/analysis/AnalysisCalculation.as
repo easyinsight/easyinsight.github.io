@@ -8,7 +8,7 @@ package com.easyinsight.analysis
         public var applyBeforeAggregation:Boolean;
         public var recalculateSummary:Boolean;
 		
-		public function AnalysisCalculation(aggregation:int=11)
+		public function AnalysisCalculation(aggregation:int=1)
 		{
 			super(aggregation);
 		}
