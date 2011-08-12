@@ -53,11 +53,6 @@
         [Bindable]
         private var createLabel:String = "Create User";
 
-        override protected function createChildren():void {
-            super.createChildren();
-            BindingUtils.bindProperty(this, "accountAdmin", accountAdminCheckbox, "selected");
-        }
-
         public function set user(userTransferObject:UserTransferObject):void {
             this.userID = userTransferObject.userID;
             this.userName = userTransferObject.userName;
@@ -87,6 +82,7 @@
         }
 
         private function initHandlers():void {
+            BindingUtils.bindProperty(accountAdminCheckbox, "selected", this, "accountAdmin");
             validators = [ emailValidator, userNameValidator, fullNameValidator ];
             dashboardService.getDashboards.send();
             //if (User.getInstance().getAccountType() >= Account.PRO) {
