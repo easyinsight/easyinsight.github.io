@@ -1,4 +1,5 @@
 package com.easyinsight.dashboard {
+import com.easyinsight.datasources.DataSourceInfo;
 import com.easyinsight.skin.ImageDescriptor;
 
 import mx.collections.ArrayCollection;
@@ -29,6 +30,7 @@ public class Dashboard {
     public var filterBackgroundAlpha:Number = 0;
     public var headerStyle:int;
     public var recommendedExchange:Boolean;
+    public var dataSourceInfo:DataSourceInfo;
 
     public function Dashboard() {
     }

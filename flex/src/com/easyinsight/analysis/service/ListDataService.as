@@ -15,7 +15,6 @@ import com.easyinsight.framework.InvalidFieldsEvent;
 
 import flash.events.EventDispatcher;
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;

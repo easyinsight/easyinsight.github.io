@@ -3,6 +3,7 @@ package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedConsumer;
@@ -44,12 +45,21 @@ public class Dashboard implements Cloneable {
     private double filterBackgroundAlpha;
     private int headerStyle;
     private boolean recommendedExchange;
+    private DataSourceInfo dataSourceInfo;
 
     public Dashboard clone() throws CloneNotSupportedException {
         Dashboard dashboard = (Dashboard) super.clone();
         dashboard.setId(0);
         dashboard.setRootElement(rootElement.clone());
         return dashboard;
+    }
+
+    public DataSourceInfo getDataSourceInfo() {
+        return dataSourceInfo;
+    }
+
+    public void setDataSourceInfo(DataSourceInfo dataSourceInfo) {
+        this.dataSourceInfo = dataSourceInfo;
     }
 
     public boolean isRecommendedExchange() {

@@ -32,8 +32,8 @@
         private var fieldPanels:ArrayCollection;
 
         private function next(event:KPITutorialEvent):void {
-            if ((viewStack.getChildren().length - 2) < (panelIndex + 1)) {
-                createPanel(panelIndex + 1);
+            if ((viewStack.getChildren().length) <= (panelIndex + 1)) {
+                createPanel(panelIndex - 1);
             }
             panelIndex++;
         }

@@ -127,6 +127,7 @@
             if (grid.backgroundColor != 0) {
                 dashboardCanvas.setStyle("backgroundColor", grid.backgroundColor);
             }
+            dataSource = dashboard.dataSourceInfo;
             dashboardName = dashboard.name;
             description = dashboard.description;
             dataSourceID = dashboard.dataSourceID;

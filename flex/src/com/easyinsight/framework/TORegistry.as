@@ -32,6 +32,7 @@ import com.easyinsight.analysis.NumericValue;
 import com.easyinsight.analysis.ReaggregateAnalysisMeasure;
 import com.easyinsight.analysis.ServerError;
 import com.easyinsight.analysis.SixSigmaMeasure;
+import com.easyinsight.analysis.StorageLimitFault;
 import com.easyinsight.analysis.StringValue;
 import com.easyinsight.analysis.URLLink;
 import com.easyinsight.analysis.charts.bubble.BubbleChartDefinition;
@@ -205,6 +206,7 @@ public class TORegistry {
         var node:CompositeFeedNode;
         var wf:WholeFoodsDataSource;
         var fault:DataSourceConnectivityReportFault;
+        var slf:StorageLimitFault;
         var serverError:ServerError;
         var analysisItemFault:AnalysisItemFault;
         var metadata:AnalysisTagsResultMetadata;

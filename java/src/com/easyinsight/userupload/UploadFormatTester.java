@@ -47,16 +47,14 @@ public class UploadFormatTester {
         } catch (OldExcelFormatException oefe) {
             throw new InvalidFormatException("It looks like you tried to upload an Excel format earlier than 1997. Easy Insight does not support these older formats.");
         } catch (OfficeXmlFileException oxfe) {
-            /*try {
+            try {
                 ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                XSSFWorkbook wb = new XSSFWorkbook(bais);
-                XSSFSheet sheet = wb.getSheetAt(0);
-                sheet.getTopRow();
+                XSSFWorkbook xb = new XSSFWorkbook(bais);
+                xb.getSheetAt(0).getRow(0).getLastCellNum();
                 uploadFormat = new XSSFExcelUploadFormat();
             } catch (IOException e) {
                 uploadFormat = null;
-            }*/
-            throw new InvalidFormatException("It looks like you tried to upload an .xlsx file. We're working on supporting this format, but for the time being, please save the file as 1997-2008 format and try again.");
+            }
         } catch (Exception e) {
             uploadFormat = null;
         }

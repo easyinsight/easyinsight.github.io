@@ -189,7 +189,8 @@ public class DataStorage {
             throw new RuntimeException("Unknown account type");
         }
         if (size > allowed) {
-            throw new StorageLimitException("Storage boundary for this account has been reached.");
+            long mb = allowed / 1000000L;
+            throw new ReportException(new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + " mb. You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier."));
         }
         spaceAllowed.close();
         queryStmt.close();

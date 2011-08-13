@@ -1,11 +1,12 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.RolePrioritySet;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedConsumer;
+import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.security.Roles;
 import org.hibernate.Session;
@@ -296,6 +297,9 @@ public class DashboardStorage {
         }
         getUserStmt.close();
         dashboard.setAdministrators(admins);
+        Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
+        dashboard.setDataSourceInfo(feed.getDataSourceInfo());
+        dashboard.getDataSourceInfo().setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
         return dashboard;
     }
 
