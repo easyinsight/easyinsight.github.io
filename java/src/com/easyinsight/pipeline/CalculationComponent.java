@@ -1,10 +1,15 @@
 package com.easyinsight.pipeline;
 
-import com.easyinsight.analysis.AnalysisCalculation;
-import com.easyinsight.analysis.DataResults;
-import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.*;
+import com.easyinsight.calculations.*;
+import com.easyinsight.calculations.generated.CalculationsLexer;
+import com.easyinsight.calculations.generated.CalculationsParser;
+import com.easyinsight.core.Key;
+import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonTokenStream;
 
 /**
  * User: jamesboe
@@ -24,9 +29,52 @@ public class CalculationComponent implements IComponent {
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        for (IRow row : dataSet.getRows()) {
-            Value value = analysisCalculation.calculate(row, pipelineData.getAllItems());
-            row.addValue(analysisCalculation.createAggregateKey(), value);
+        if (dataSet.getRows().size() == 0) {
+            return dataSet;
+        }
+        CalculationTreeNode calculationTreeNode;
+        ICalculationTreeVisitor visitor;
+        CalculationsParser.expr_return ret;
+        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(analysisCalculation.getCalculationString()));
+        CommonTokenStream tokes = new CommonTokenStream();
+        tokes.setTokenSource(lexer);
+        Resolver r = new Resolver();
+
+        for (Key key : dataSet.getRow(0).getKeys()) {
+            r.addKey(key);
+        }
+        CalculationsParser parser = new CalculationsParser(tokes);
+        parser.setTreeAdaptor(new NodeFactory());
+        try {
+            ret = parser.expr();
+            calculationTreeNode = (CalculationTreeNode) ret.getTree();
+            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
+                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
+                    calculationTreeNode.deleteChild(i);
+                    break;
+                }
+            }
+            visitor = new ResolverVisitor(pipelineData.getAllItems(), new FunctionFactory());
+            calculationTreeNode.accept(visitor);
+            for (IRow row : dataSet.getRows()) {
+                ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, analysisCalculation);
+                calculationTreeNode.accept(rowVisitor);
+                Value result = rowVisitor.getResult();
+                if (result.type() == Value.EMPTY) {
+
+                } else if (result.type() == Value.NUMBER) {
+
+                } else {
+                    result = new NumericValue(result.toDouble());
+                }
+                row.addValue(analysisCalculation.createAggregateKey(), result);
+            }
+        } catch (FunctionException fe) {
+            throw new ReportException(new AnalysisItemFault(fe.getMessage(), analysisCalculation));
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage() + " in calculating " + analysisCalculation.getCalculationString(), e);
         }
         pipelineData.getReportItems().add(analysisCalculation);
         return dataSet;
