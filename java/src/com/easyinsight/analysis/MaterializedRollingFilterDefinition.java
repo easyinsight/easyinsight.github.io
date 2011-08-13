@@ -65,6 +65,9 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         int intervalType = rollingFilterDefinition.getCustomIntervalType();
         Calendar cal = Calendar.getInstance();
             cal.setTime(now);
+        if (!(rollingFilterDefinition.getField() instanceof AnalysisDateDimension)) {
+            throw new RuntimeException("Report attempted to run a rolling filter on field " + rollingFilterDefinition.getField().toDisplay() + " - " + rollingFilterDefinition.getField().getAnalysisItemID());
+        }
         if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
             int time = insightRequestMetadata.getUtcOffset() / 60;
             String string;
