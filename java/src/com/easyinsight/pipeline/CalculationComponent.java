@@ -11,6 +11,11 @@ import com.easyinsight.dataset.DataSet;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * User: jamesboe
  * Date: Nov 23, 2009
@@ -54,7 +59,25 @@ public class CalculationComponent implements IComponent {
                     break;
                 }
             }
-            visitor = new ResolverVisitor(pipelineData.getAllItems(), new FunctionFactory());
+            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+            for (AnalysisItem analysisItem : pipelineData.getAllItems()) {
+                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    keyMap.put(analysisItem.getKey().toKeyString(), items);
+                }
+                items.add(analysisItem);
+            }
+            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+            for (AnalysisItem analysisItem : pipelineData.getAllItems()) {
+                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    displayMap.put(analysisItem.toDisplay(), items);
+                }
+                items.add(analysisItem);
+            }
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
             calculationTreeNode.accept(visitor);
             for (IRow row : dataSet.getRows()) {
                 ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, analysisCalculation);

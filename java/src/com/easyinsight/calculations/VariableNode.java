@@ -2,10 +2,10 @@ package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.*;
 import org.antlr.runtime.Token;
-import com.easyinsight.core.Key;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class VariableNode extends CalculationTreeNode {
 
@@ -21,15 +21,18 @@ public class VariableNode extends CalculationTreeNode {
         return analysisItem.createAggregateKey();
     }
     
-    public void resolveVariableKey(Collection<AnalysisItem> allItems) {
+    public void resolveVariableKey(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems) {
         String s = getText().trim();
         if(s.startsWith("[") && s.endsWith("]"))
             s = s.substring(1, s.length() - 1);
         variableKey = new NamedKeySpecification(s);
-        for (AnalysisItem item : allItems) {
-            if ((item.getKey().toKeyString().equals(s)) ||
-                    item.getDisplayName() != null && item.getDisplayName().equals(s)) {
-                analysisItem = item;
+        List<AnalysisItem> analysisItems = keyItems.get(s);
+        if (analysisItems != null) {
+            analysisItem = analysisItems.get(0);
+        } else {
+            analysisItems = displayItems.get(s);
+            if (analysisItems != null) {
+                analysisItem = analysisItems.get(0);
             }
         }
         if (analysisItem == null) {
@@ -37,29 +40,28 @@ public class VariableNode extends CalculationTreeNode {
         }
     }
 
-    public void resolveVariableKey(Collection<AnalysisItem> allItems, int aggregationType) {
+    public void resolveVariableKey(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems, int aggregationType) {
         String s = getText().trim();
         if(s.startsWith("[") && s.endsWith("]"))
             s = s.substring(1, s.length() - 1);
         variableKey = new AggregateKeySpecification(s, aggregationType);
-        for (AnalysisItem item : allItems) {
-            if (item.getKey().toKeyString().equals(s)) {
-                if (item.getType() == AnalysisItemTypes.MEASURE) {
-                    AnalysisMeasure analysisMeasure = (AnalysisMeasure) item;
-                    if (analysisMeasure.getAggregation() == aggregationType) {
-                        analysisItem = item;
-                        break;
-                    } else {
-                        AnalysisMeasure clonedMeasure;
-                        try {
-                            clonedMeasure = (AnalysisMeasure) analysisMeasure.clone();
-                        } catch (CloneNotSupportedException e) {
-                            throw new RuntimeException(e);
-                        }
-                        clonedMeasure.setAggregation(aggregationType);
-                        analysisItem = clonedMeasure;
-                        break;
+        List<AnalysisItem> analysisItems = keyItems.get(s);
+        for (AnalysisItem item : analysisItems) {
+            if (item.getType() == AnalysisItemTypes.MEASURE) {
+                AnalysisMeasure analysisMeasure = (AnalysisMeasure) item;
+                if (analysisMeasure.getAggregation() == aggregationType) {
+                    analysisItem = item;
+                    break;
+                } else {
+                    AnalysisMeasure clonedMeasure;
+                    try {
+                        clonedMeasure = (AnalysisMeasure) analysisMeasure.clone();
+                    } catch (CloneNotSupportedException e) {
+                        throw new RuntimeException(e);
                     }
+                    clonedMeasure.setAggregation(aggregationType);
+                    analysisItem = clonedMeasure;
+                    break;
                 }
             }
         }

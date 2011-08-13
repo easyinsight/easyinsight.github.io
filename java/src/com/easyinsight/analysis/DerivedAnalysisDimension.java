@@ -13,10 +13,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -49,8 +46,28 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
         parser.setTreeAdaptor(new NodeFactory());
         try {
             ret = parser.startExpr();
+            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+            if (allItems != null) {
+                for (AnalysisItem analysisItem : allItems) {
+                    List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                    if (items == null) {
+                        items = new ArrayList<AnalysisItem>(1);
+                        keyMap.put(analysisItem.getKey().toKeyString(), items);
+                    }
+                    items.add(analysisItem);
+                }
+                for (AnalysisItem analysisItem : allItems) {
+                    List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+                    if (items == null) {
+                        items = new ArrayList<AnalysisItem>(1);
+                        displayMap.put(analysisItem.toDisplay(), items);
+                    }
+                    items.add(analysisItem);
+                }
+            }
             tree = (CalculationTreeNode) ret.getTree();
-            visitor = new ResolverVisitor(allItems, new FunctionFactory());
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
             tree.accept(visitor);
         } catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
@@ -83,43 +100,6 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
         }
 
         return analysisItemList;
-    }
-
-    public Value calculate(IRow row, Collection<AnalysisItem> analysisItems) {
-        CalculationTreeNode calculationTreeNode;
-        ICalculationTreeVisitor visitor;
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(derivationCode));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        Resolver r = new Resolver();
-        for (Key key : row.getKeys()) {
-            r.addKey(key);
-        }
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        try {
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
-                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                    calculationTreeNode.deleteChild(i);
-                    break;
-                }
-            }
-            visitor = new ResolverVisitor(analysisItems, new FunctionFactory());
-            calculationTreeNode.accept(visitor);
-
-            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, this);
-            calculationTreeNode.accept(rowVisitor);
-            return new StringValue(rowVisitor.getResult().toString());
-        } catch (FunctionException fe) {
-            throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
-        } catch (ReportException re) {
-            throw re;
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage() + " in calculating " + derivationCode, e);
-        }
     }
 
     public List<AnalysisItem> getDerivedItems() {

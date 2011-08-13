@@ -82,7 +82,28 @@ public class AnalysisCalculation extends AnalysisMeasure {
         try {
             ret = parser.startExpr();
             tree = (CalculationTreeNode) ret.getTree();
-            visitor = new ResolverVisitor(allItems, new FunctionFactory());
+            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+            if (allItems != null) {
+                for (AnalysisItem analysisItem : allItems) {
+                    List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                    if (items == null) {
+                        items = new ArrayList<AnalysisItem>(1);
+                        keyMap.put(analysisItem.getKey().toKeyString(), items);
+                    }
+                    items.add(analysisItem);
+                }
+
+                for (AnalysisItem analysisItem : allItems) {
+                    List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+                    if (items == null) {
+                        items = new ArrayList<AnalysisItem>(1);
+                        displayMap.put(analysisItem.toDisplay(), items);
+                    }
+                    items.add(analysisItem);
+                }
+            }
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
             tree.accept(visitor);
         }  catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
@@ -138,49 +159,6 @@ public class AnalysisCalculation extends AnalysisMeasure {
             throw new RuntimeException(e);
         }
         return calculationTreeNode;
-    }
-
-    public Value calculate(IRow row, Collection<AnalysisItem> analysisItems) {
-        CalculationTreeNode calculationTreeNode;
-        ICalculationTreeVisitor visitor;
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        Resolver r = new Resolver();
-        for (Key key : row.getKeys()) {
-            r.addKey(key);
-        }
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        try {
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
-                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                    calculationTreeNode.deleteChild(i);
-                    break;
-                }
-            }
-            visitor = new ResolverVisitor(analysisItems, new FunctionFactory());
-            calculationTreeNode.accept(visitor);
-            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, this);
-            calculationTreeNode.accept(rowVisitor);
-            Value result = rowVisitor.getResult();
-            if (result.type() == Value.EMPTY) {
-                return result;
-            } else if (result.type() == Value.NUMBER) {
-                return result;
-            } else {
-                return new NumericValue(result.toDouble());
-            }
-        } catch (FunctionException fe) {
-            throw new ReportException(new AnalysisItemFault(fe.getMessage(), this));
-        } catch (ReportException re) {
-            throw re;
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage() + " in calculating " + calculationString, e);
-        }
     }
 
     public List<AnalysisItem> getDerivedItems() {
