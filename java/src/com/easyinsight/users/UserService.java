@@ -660,13 +660,13 @@ public class UserService {
             session.save(account);
             user.setAccount(account);
             session.update(user);
-            if (account.getAccountType() != Account.PERSONAL) {
-                Group group = new Group();
-                group.setName(account.getName());
-                group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
-                account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
-                session.update(account);
-            }            
+
+            Group group = new Group();
+            group.setName(account.getName());
+            group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
+            account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
+            session.update(account);
+
             String activationKey = RandomTextGenerator.generateText(20);
             if (sourceURL == null) {
                 sourceURL = "https://www.easy-insight.com/app";
@@ -725,6 +725,8 @@ public class UserService {
         }
         user.setPassword(password);
         user.setHashType("SHA-256");
+        user.setUserKey(RandomTextGenerator.generateText(20));
+        user.setUserSecretKey(RandomTextGenerator.generateText(20));
         return user;
     }
 
@@ -1159,6 +1161,12 @@ public class UserService {
         if (encryptedPassword.equals(actualPassword)) {
             if (user.getPersonaID() != null) {
                 user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
+            }
+            if (user.getUserKey() == null) {
+                user.setUserKey(RandomTextGenerator.generateText(20));
+            }
+            if (user.getUserSecretKey() == null) {
+                user.setUserSecretKey(RandomTextGenerator.generateText(20));
             }
             userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                  user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
