@@ -546,6 +546,7 @@ public class DataService {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         try {
+            System.out.println("Retrieving " + analysisDefinition.getDataFeedID());
             Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
             if (insightRequestMetadata == null) {
                 insightRequestMetadata = new InsightRequestMetadata();
@@ -555,6 +556,9 @@ public class DataService {
             DataResults results;
 
             for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                if (filter.getField() != null) {
+                    System.out.println("filter " + filter.getClass().getName() + " has field " + filter.getField().toDisplay());
+                }
                 if (filter instanceof AnalysisItemFilterDefinition) {
                     AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
                     Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
@@ -589,6 +593,11 @@ public class DataService {
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
             timeshift(validQueryItems, filters, feed, insightRequestMetadata);
+            for (FilterDefinition filter : filters) {
+                if (filter.getField() != null) {
+                    System.out.println("right before query, filter " + filter.getClass().getName() + " has field " + filter.getField().toDisplay());
+                }
+            }
             DataSet dataSet = getDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
