@@ -164,12 +164,8 @@ public class AnalysisDateDimension extends AnalysisDimension {
         }
         Value resultValue;
         if (tempDate != null) {
-            //System.out.println("came in as " + tempDate);
-
-            //calendar.setTime(tempDate);
             if (timezoneShift) {
                 int time = insightRequestMetadata.getUtcOffset() / 60;
-                //System.out.println("offset = " + insightRequestMetadata.getUtcOffset() + " and time = " + time);
                 String string;
                 if (time > 0) {
                     string = "GMT-"+Math.abs(time);
@@ -179,7 +175,9 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     string = "GMT";
                 }
                 TimeZone timeZone = TimeZone.getTimeZone(string);
-                //System.out.println("using " + timeZone.getID() + " against start date of " + tempDate);
+                if (calendar == null) {
+                    calendar = Calendar.getInstance();
+                }
                 calendar.setTimeZone(timeZone);
             }
             calendar.setTimeInMillis(tempDate.getTime());
