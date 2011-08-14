@@ -71,7 +71,9 @@
         private function gotCallData():void {
             var callData:CallData = asyncService.getCallData.lastResult as CallData;
             if (callData == null) {
-                return;
+                timer.stop();
+                Alert.show("Something went wrong in trying to retrieve data. Please run again.");
+                PopUpManager.removePopUp(this);
             }
             if (callData.status == CallData.DONE) {
                 timer.stop();
@@ -90,7 +92,7 @@
                     PopUpManager.addPopUp(window, this, true);
                     PopUpUtil.centerPopUp(window);
                 } else {
-                    Alert.show("Something went wrong in trying to retrive data. Please double check your configuration information.");
+                    Alert.show("Something went wrong in trying to retrieve data. Please double check your configuration information.");
                     PopUpManager.removePopUp(this);
                 }
             } else if (callData.status == CallData.RUNNING) {
