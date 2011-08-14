@@ -99,7 +99,7 @@ public class DashboardStorage {
             dashboards.add(new DashboardDescriptor(accountRS.getString(2), accountRS.getLong(1), accountRS.getString(3), accountRS.getLong(4), Roles.SHARER, name, accountRS.getBoolean(5)));
         }
         ueryAccountStmt.close();
-        ownerStmt.close();
+
         PreparedStatement dashboardGroupStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.data_source_id, dashboard.URL_KEY, group_to_user_join.binding_type, dashboard.creation_date, dashboard.account_visible FROM dashboard, group_to_user_join," +
                 "group_to_dashboard WHERE " +
                 "dashboard.dashboard_id = group_to_dashboard.dashboard_id and group_to_dashboard.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and dashboard.temporary_dashboard = ?");
@@ -120,6 +120,8 @@ public class DashboardStorage {
             }
             dashboards.add(new DashboardDescriptor(dashboardRS.getString(2), dashboardRS.getLong(1),  dashboardRS.getString(4), dashboardRS.getLong(3), Roles.SUBSCRIBER, name, dashboardRS.getBoolean(7)));
         }
+        ownerStmt.close();
+        dashboardGroupStmt.close();
         return dashboards;
     }
 
