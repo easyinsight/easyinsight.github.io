@@ -26,6 +26,15 @@ public class DashboardStack extends DashboardElement {
     private int effectDuration;
     private int effectType;
     private int stackControl;
+    private boolean consolidateHeaderElements;
+
+    public boolean isConsolidateHeaderElements() {
+        return consolidateHeaderElements;
+    }
+
+    public void setConsolidateHeaderElements(boolean consolidateHeaderElements) {
+        this.consolidateHeaderElements = consolidateHeaderElements;
+    }
 
     public int getStackControl() {
         return stackControl;
@@ -86,14 +95,15 @@ public class DashboardStack extends DashboardElement {
     @Override
     public long save(EIConnection conn) throws SQLException {
         long id = super.save(conn);
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_STACK (DASHBOARD_ELEMENT_ID, STACK_SIZE, EFFECT, EFFECT_DURATION, STACK_CONTROL) " +
-                "VALUES (?, ?, ?, ?, ?)",
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_STACK (DASHBOARD_ELEMENT_ID, STACK_SIZE, EFFECT, EFFECT_DURATION, STACK_CONTROL, CONSOLIDATE_HEADER_ELEMENTS) " +
+                "VALUES (?, ?, ?, ?, ?, ?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, getElementID());
         insertStmt.setInt(2, count);
         insertStmt.setInt(3, effectType);
         insertStmt.setInt(4, effectDuration);
         insertStmt.setInt(5, stackControl);
+        insertStmt.setBoolean(6, consolidateHeaderElements);
         insertStmt.execute();
         long gridID = Database.instance().getAutoGenKey(insertStmt);
         for (DashboardStackItem gridItem : gridItems) {
@@ -105,7 +115,7 @@ public class DashboardStack extends DashboardElement {
 
     public static DashboardElement loadGrid(long elementID, EIConnection conn) throws SQLException {
         DashboardStack dashboardGrid = null;
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_STACK_ID, STACK_SIZE, EFFECT, EFFECT_DURATION, STACK_CONTROL FROM DASHBOARD_STACK WHERE DASHBOARD_ELEMENT_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_STACK_ID, STACK_SIZE, EFFECT, EFFECT_DURATION, STACK_CONTROL, CONSOLIDATE_HEADER_ELEMENTS FROM DASHBOARD_STACK WHERE DASHBOARD_ELEMENT_ID = ?");
         queryStmt.setLong(1, elementID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -115,6 +125,7 @@ public class DashboardStack extends DashboardElement {
             dashboardGrid.setEffectType(rs.getInt(3));
             dashboardGrid.setEffectDuration(rs.getInt(4));
             dashboardGrid.setStackControl(rs.getInt(5));
+            dashboardGrid.setConsolidateHeaderElements(rs.getBoolean(6));
             dashboardGrid.loadElement(elementID, conn);
             PreparedStatement gridItemStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, DASHBOARD_ELEMENT.element_type, " +
                     "ITEM_POSITION FROM DASHBOARD_STACK_ITEM, DASHBOARD_ELEMENT WHERE DASHBOARD_STACK_ID = ? AND DASHBOARD_STACK_ITEM.dashboard_element_id = dashboard_element.dashboard_element_id");

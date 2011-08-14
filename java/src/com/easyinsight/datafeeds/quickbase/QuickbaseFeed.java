@@ -79,20 +79,25 @@ public class QuickbaseFeed extends Feed {
                 try {
                     runQuery(analysisItems, filters, insightRequestMetadata, conn, dataSet, quickbaseCompositeSource, sessionTicket);
                 } catch (ReportException e) {
-                    Session session = Database.instance().createSession(conn);
-                    try {
-                        Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
-                        if (account.getExternalLogin() == null || !(account.getExternalLogin() instanceof QuickbaseExternalLogin)) {
-                            throw e;
-                        } else {
-                            QuickbaseExternalLogin quickbaseExternalLogin = (QuickbaseExternalLogin) account.getExternalLogin();
-                            if (quickbaseExternalLogin.getSessionTicket() != null) {
-                                sessionTicket = quickbaseExternalLogin.getSessionTicket();
-                                runQuery(analysisItems, filters, insightRequestMetadata, conn, dataSet, quickbaseCompositeSource, sessionTicket);
+                    if (quickbaseCompositeSource.isPreserveCredentials()) {
+                        quickbaseCompositeSource.exchangeTokens(conn, null, null);
+                        runQuery(analysisItems, filters, insightRequestMetadata, conn, dataSet, quickbaseCompositeSource, sessionTicket);
+                    } else {
+                        Session session = Database.instance().createSession(conn);
+                        try {
+                            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+                            if (account.getExternalLogin() == null || !(account.getExternalLogin() instanceof QuickbaseExternalLogin)) {
+                                throw e;
+                            } else {
+                                QuickbaseExternalLogin quickbaseExternalLogin = (QuickbaseExternalLogin) account.getExternalLogin();
+                                if (quickbaseExternalLogin.getSessionTicket() != null) {
+                                    sessionTicket = quickbaseExternalLogin.getSessionTicket();
+                                    runQuery(analysisItems, filters, insightRequestMetadata, conn, dataSet, quickbaseCompositeSource, sessionTicket);
+                                }
                             }
+                        } finally {
+                            session.close();
                         }
-                    } finally {
-                        session.close();
                     }
                 }
             }

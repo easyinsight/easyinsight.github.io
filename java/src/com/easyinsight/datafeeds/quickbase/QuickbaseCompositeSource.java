@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.quickbase;
 
+import com.easyinsight.PasswordStorage;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.CompositeFeedConnection;
@@ -20,10 +21,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -42,6 +40,25 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
 
     private String qbUserName;
     private String qbPassword;
+
+    private boolean supportIndex;
+    private boolean preserveCredentials;
+
+    public boolean isPreserveCredentials() {
+        return preserveCredentials;
+    }
+
+    public void setPreserveCredentials(boolean preserveCredentials) {
+        this.preserveCredentials = preserveCredentials;
+    }
+
+    public boolean isSupportIndex() {
+        return supportIndex;
+    }
+
+    public void setSupportIndex(boolean supportIndex) {
+        this.supportIndex = supportIndex;
+    }
 
     public String getQbUserName() {
         return qbUserName;
@@ -68,8 +85,10 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
             if ("0".equals(errorCode)) {
                 sessionTicket = doc.query("/qdbapi/ticket/text()").get(0).getValue();
             }
-            qbUserName = null;
-            qbPassword = null;
+            if (!preserveCredentials) {
+                qbUserName = null;
+                qbPassword = null;
+            }
         }
     }
 
@@ -80,18 +99,27 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO QUICKBASE_COMPOSITE_SOURCE (DATA_SOURCE_ID, APPLICATION_TOKEN," +
-                "SESSION_TICKET, HOST_NAME) VALUES (?, ?, ?, ?)");
+                "SESSION_TICKET, HOST_NAME, qb_username, qb_password, support_index, preserve_credentials) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, applicationToken);
         insertStmt.setString(3, sessionTicket);
         insertStmt.setString(4, host);
+        if (preserveCredentials) {
+            insertStmt.setString(5, qbUserName);
+            insertStmt.setString(6, qbPassword != null ? PasswordStorage.encryptString(qbPassword) : null);
+        } else {
+            insertStmt.setNull(5, Types.VARCHAR);
+            insertStmt.setNull(6, Types.VARCHAR);
+        }
+        insertStmt.setBoolean(7, supportIndex);
+        insertStmt.setBoolean(8, preserveCredentials);
         insertStmt.execute();
     }
 
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT APPLICATION_TOKEN, SESSION_TICKET, HOST_NAME FROM " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT APPLICATION_TOKEN, SESSION_TICKET, HOST_NAME, qb_username, qb_password, support_index, preserve_credentials FROM " +
                 "QUICKBASE_COMPOSITE_SOURCE where data_source_id = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
@@ -99,6 +127,15 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         applicationToken = rs.getString(1);
         sessionTicket = rs.getString(2);
         host = rs.getString(3);
+        supportIndex = rs.getBoolean(6);
+        preserveCredentials = rs.getBoolean(7);
+        if (preserveCredentials) {
+            qbUserName = rs.getString(4);
+            String encryptedQBPassword = rs.getString(5);
+            if (!rs.wasNull()) {
+                qbPassword = PasswordStorage.decryptString(encryptedQBPassword);
+            }
+        }
     }
 
     @Override
@@ -154,7 +191,11 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getDataSourceType() {
-        return DataSourceInfo.COMPOSITE_PULL;
+        if (supportIndex) {
+            return DataSourceInfo.COMPOSITE_PULL;
+        } else {
+            return DataSourceInfo.LIVE;
+        }
     }
 
     @Override

@@ -52,7 +52,7 @@ public class ConstantCalculationTest extends TestCase {
         try {
             ret = parser.expr();
             CalculationTreeNode c = (CalculationTreeNode) ret.getTree();
-            visitor = new ResolverVisitor(null, new FunctionFactory());
+            //visitor = new ResolverVisitor(null, new FunctionFactory());
             c.accept(visitor);
             visitor = new EvaluationVisitor();
             c.accept(visitor);

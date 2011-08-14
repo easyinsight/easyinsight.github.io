@@ -1,6 +1,7 @@
 package com.easyinsight.dashboard {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.filtering.TransformContainer;
+import com.easyinsight.filtering.TransformContainer;
 import com.easyinsight.filtering.TransformsUpdatedEvent;
 import com.easyinsight.skin.BackgroundImage;
 import com.easyinsight.skin.ImageLoadEvent;
@@ -17,6 +18,7 @@ import mx.containers.VBox;
 import mx.containers.ViewStack;
 import mx.controls.Alert;
 import mx.controls.Button;
+import mx.core.Container;
 import mx.core.UIComponent;
 import mx.effects.Effect;
 
@@ -57,6 +59,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         }
         IDashboardViewComponent(newComp).initialRetrieve();
         viewStack.selectedIndex = targetIndex;
+        if (consolidatedFilterViewStack != null) {
+            consolidatedFilterViewStack.selectedIndex = targetIndex;
+        }
     }
 
     private var leftEffect:Effect;
@@ -64,6 +69,137 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     protected override function createChildren():void {
         super.createChildren();
+        buildEffects();
+        if (dashboardStack.consolidateHeaderElements) {
+            var headerHBox:HBox = new HBox();
+            headerHBox.setStyle("verticalAlign", "middle");
+            headerHBox.percentWidth = 100;
+            var myFiltersBox:HBox = new HBox();
+            consolidatedFilterViewStack = new ViewStack();
+            consolidatedFilterViewStack.resizeToContent = true;
+            consolidatedFilterViewStack.percentWidth = 100;
+            var buttonsBox:HBox = new HBox();
+            headerHBox.addChild(myFiltersBox);
+            headerHBox.addChild(consolidatedFilterViewStack);
+            headerHBox.addChild(buttonsBox);
+            addChild(headerHBox);
+        } else {
+            var headerArea:Box = new Box();
+            var defaultButtonsBox:Container = styleHeaderArea(headerArea);
+            addChild(headerArea);
+        }
+        viewStack = new ViewStack();
+        viewStack.percentHeight = 100;
+        viewStack.percentWidth = 100;
+        viewChildren = new ArrayCollection();
+        createStackChildren(dashboardStack.consolidateHeaderElements ? buttonsBox : defaultButtonsBox);
+        var transformContainer:TransformContainer = createTransformContainer();
+        if (transformContainer != null) {
+            if (dashboardStack.consolidateHeaderElements) {
+                myFiltersBox.addChild(transformContainer);
+            } else {
+                if (_consolidateHeader) {
+                    _consolidateHeader.addChild(transformContainer);
+                } else {
+                    addChild(transformContainer);
+                }
+            }
+        }
+        addChild(viewStack);
+    }
+
+    private function styleHeaderArea(headerArea:Box):Container {
+        headerArea.setStyle("backgroundColor", dashboardStack.headerBackgroundColor);
+        headerArea.setStyle("backgroundAlpha", dashboardStack.headerBackgroundAlpha);
+        headerArea.setStyle("horizontalAlign", "center");
+        headerArea.percentWidth = 100;
+        var headerBackgroundImage:BackgroundImage = new BackgroundImage();
+        headerBackgroundImage.applyCenterScreenLogic = false;
+        headerBackgroundImage.useBindings = false;
+        var headerbar:HBox = new HBox();
+        if (dashboardStack.headerBackground != null) {
+            var headerBarLoader:ImageLoader = new ImageLoader();
+            headerBarLoader.addEventListener(ImageLoadEvent.IMAGE_LOADED, function(event:ImageLoadEvent):void {
+                headerBackgroundImage.width = event.bitmap.width;
+                headerBackgroundImage.height = event.bitmap.height;
+                headerBackgroundImage.backgroundImageSource = event.bitmap;
+            });
+            headerBarLoader.load(dashboardStack.headerBackground.id);
+        }
+        headerbar.percentWidth = 100;
+        headerbar.percentHeight = 100;
+        headerbar.setStyle("horizontalAlign", dashboardStack.headerBackground != null ? "right" : "center");
+        headerbar.setStyle("verticalAlign", "bottom");
+        headerbar.setStyle("paddingBottom", 5);
+        headerBackgroundImage.addChild(headerbar);
+        headerArea.addChild(headerBackgroundImage);
+        return headerbar;
+    }
+
+    private function createStackChildren(headerbar:Container):void {
+        for (var i:int = 0; i < dashboardStack.gridItems.length; i++) {
+            var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
+            var report:DashboardElement = stackItem.dashboardElement;
+            var topButton:Button = new Button();
+            topButton.styleName = "grayButton";
+            topButton.data = i;
+            topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
+            if (report is DashboardReport) {
+                topButton.label = DashboardReport(report).report.name;
+                if (DashboardReport(report).report.reportType == AnalysisDefinition.HEATMAP) {
+                    leftEffect = null;
+                    rightEffect = null;
+                }
+            } else {
+                if (report.label != null && report.label != "") {
+                    topButton.label = report.label;
+                } else {
+                    topButton.label = String(i);
+                }
+            }
+            if (dashboardStack.gridItems.length > 1) {
+                headerbar.addChild(topButton);
+            }
+            var comp:UIComponent = DashboardElementFactory.createViewUIComponent(report, dashboardEditorMetadata);
+            if (dashboardStack.consolidateHeaderElements) {
+                var filterContainer:Container = new HBox();
+                filterContainer.percentWidth = 100;
+                consolidatedFilterViewStack.addChild(filterContainer);
+                if (dashboardStack.consolidateHeaderElements) {
+                    DashboardStackViewComponent(comp).consolidateHeader = filterContainer;
+                }
+            }
+            viewChildren.addItem(comp);
+            viewStack.addChild(comp);
+        }
+    }
+
+    private var consolidatedFilterViewStack:ViewStack;
+
+    private function createTransformContainer():TransformContainer {
+        if (dashboardStack.filters.length > 0) {
+            transformContainer = new TransformContainer();
+            transformContainer.setStyle("borderStyle", dashboardStack.filterBorderStyle);
+            transformContainer.setStyle("borderColor", dashboardStack.filterBorderColor);
+            transformContainer.setStyle("backgroundColor", dashboardStack.filterBackgroundColor);
+            transformContainer.setStyle("backgroundAlpha", dashboardStack.filterBackgroundAlpha);
+            transformContainer.filterEditable = false;
+            transformContainer.existingFilters = dashboardStack.filters;
+            updateAdditionalFilters(dashboardStack.filters);
+            transformContainer.percentWidth = 100;
+            transformContainer.setStyle("paddingLeft", 10);
+            transformContainer.setStyle("paddingRight", 10);
+            transformContainer.setStyle("paddingTop", 10);
+            transformContainer.setStyle("paddingBottom", 10);
+            transformContainer.reportView = true;
+            transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
+            transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+            //addHeaderArea(transformContainer);
+        }
+        return transformContainer;
+    }
+
+    private function buildEffects():void {
         if (dashboardStack.effectType == DashboardStack.SLIDE) {
             leftEffect = new Slide();
             leftEffect.duration = dashboardStack.effectDuration;
@@ -96,87 +232,20 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             rightEffect.duration = dashboardStack.effectDuration;
             FlipPapervision3D(rightEffect).direction = "right";
         }
-        var headerArea:Box = new Box();
-        headerArea.setStyle("backgroundColor", dashboardStack.headerBackgroundColor);
-        headerArea.setStyle("backgroundAlpha", dashboardStack.headerBackgroundAlpha);
-        headerArea.setStyle("horizontalAlign", "center");
-        headerArea.percentWidth = 100;
-        var headerBackgroundImage:BackgroundImage = new BackgroundImage();
-        headerBackgroundImage.applyCenterScreenLogic = false;
-        headerBackgroundImage.useBindings = false;
-        var headerbar:HBox = new HBox();
-        if (dashboardStack.headerBackground != null) {
-            var headerBarLoader:ImageLoader = new ImageLoader();
-            headerBarLoader.addEventListener(ImageLoadEvent.IMAGE_LOADED, function(event:ImageLoadEvent):void {
-                headerBackgroundImage.width = event.bitmap.width;
-                headerBackgroundImage.height = event.bitmap.height;
-                headerBackgroundImage.backgroundImageSource = event.bitmap;
-            });
-            headerBarLoader.load(dashboardStack.headerBackground.id);
-        }
-        headerbar.percentWidth = 100;
-        headerbar.percentHeight = 100;
-        headerbar.setStyle("horizontalAlign", dashboardStack.headerBackground != null ? "right" : "center");
-        headerbar.setStyle("verticalAlign", "bottom");
-        headerbar.setStyle("paddingBottom", 5);
-        headerBackgroundImage.addChild(headerbar);
-        headerArea.addChild(headerBackgroundImage);
-        viewStack = new ViewStack();
-        viewStack.percentHeight = 100;
-        viewStack.percentWidth = 100;
-        //viewStack.creationPolicy = "all";
-        viewChildren = new ArrayCollection();
-        for (var i:int = 0; i < dashboardStack.gridItems.length; i++) {
-            var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
-            var report:DashboardElement = stackItem.dashboardElement;
-            var topButton:Button = new Button();
-            topButton.styleName = "grayButton";
-            topButton.data = i;
-            topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
-            if (report is DashboardReport) {
-                topButton.label = DashboardReport(report).report.name;
-                if (DashboardReport(report).report.reportType == AnalysisDefinition.HEATMAP) {
-                    leftEffect = null;
-                    rightEffect = null;
-                }
-            } else {
-                if (report.label != null && report.label != "") {
-                    topButton.label = report.label;
-                } else {
-                    topButton.label = String(i);
-                }
-            }
-            if (dashboardStack.gridItems.length > 1) {
-                headerbar.addChild(topButton);
-            }
-            var comp:UIComponent = DashboardElementFactory.createViewUIComponent(report, dashboardEditorMetadata);
-            viewChildren.addItem(comp);
-            viewStack.addChild(comp);
-        }
-        addChild(headerArea);
-        if (dashboardStack.filters.length > 0) {
-            transformContainer = new TransformContainer();
-            transformContainer.setStyle("borderStyle", dashboardStack.filterBorderStyle);
-            transformContainer.setStyle("borderColor", dashboardStack.filterBorderColor);
-            transformContainer.setStyle("backgroundColor", dashboardStack.filterBackgroundColor);
-            transformContainer.setStyle("backgroundAlpha", dashboardStack.filterBackgroundAlpha);
-            transformContainer.filterEditable = false;
-            transformContainer.existingFilters = dashboardStack.filters;
-            updateAdditionalFilters(dashboardStack.filters);
-            transformContainer.percentWidth = 100;
-            transformContainer.setStyle("paddingLeft", 10);
-            transformContainer.setStyle("paddingRight", 10);
-            transformContainer.setStyle("paddingTop", 10);
-            transformContainer.setStyle("paddingBottom", 10);
-            transformContainer.reportView = true;
-            transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
-            transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-            /*<mx:Button icon="@Embed(source='../../../assets/funnel.png')"
-                           toolTip="{excludeFilterDataTooltip}" click="transformContainer.addNewFilter()" label="New Filter"/>*/
+    }
 
-            addChild(transformContainer);
+    private var _consolidateHeader:Container = null;
+
+    public function set consolidateHeader(value:Container):void {
+        _consolidateHeader = value;
+    }
+
+    private function addHeaderArea(component:UIComponent):void {
+        if (!_consolidateHeader) {
+            addChild(component);
+        } else {
+            _consolidateHeader.addChild(component)
         }
-        addChild(viewStack);
     }
 
     private var transformContainer:TransformContainer;

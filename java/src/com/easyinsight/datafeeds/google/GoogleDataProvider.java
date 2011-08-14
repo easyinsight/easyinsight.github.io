@@ -308,7 +308,8 @@ public class GoogleDataProvider {
         }
     }
 
-    public EIDescriptor createDataSource(String sessionTicket, String applicationToken, List<String> appNames, String host, boolean accountVisible) {
+    public EIDescriptor createDataSource(String sessionTicket, String applicationToken, List<String> appNames, String host, boolean accountVisible,
+                                         String userName, String password, boolean supportIndex, boolean saveCredentials) {
         SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -319,15 +320,17 @@ public class GoogleDataProvider {
             Nodes databases = doc.query("/qdbapi/databases/dbinfo");
             List<Connection> connections = new ArrayList<Connection>();
             QuickbaseCompositeSource quickbaseCompositeSource = new QuickbaseCompositeSource();
+            quickbaseCompositeSource.setAccountVisible(accountVisible);
             quickbaseCompositeSource.setHost(host);
             quickbaseCompositeSource.setSessionTicket(sessionTicket);
             quickbaseCompositeSource.setApplicationToken(applicationToken);
-            if (appNames.size() == 1) {
-                quickbaseCompositeSource.setFeedName(appNames.get(0));
-            } else {
-                quickbaseCompositeSource.setFeedName("Quickbase");
+            quickbaseCompositeSource.setFeedName(appNames.get(0));
+            quickbaseCompositeSource.setPreserveCredentials(saveCredentials);
+            quickbaseCompositeSource.setSupportIndex(supportIndex);
+            if (saveCredentials) {
+                quickbaseCompositeSource.setQbUserName(userName);
+                quickbaseCompositeSource.setQbPassword(password);
             }
-
 
             UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
             quickbaseCompositeSource.setUploadPolicy(uploadPolicy);

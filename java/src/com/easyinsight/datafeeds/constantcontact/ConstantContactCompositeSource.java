@@ -35,9 +35,18 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
     private String tokenSecret;
     private String pin;
     private String ccUserName;
+    private boolean briefMode;
 
     public ConstantContactCompositeSource() {
         setFeedName("Constant Contact");
+    }
+
+    public boolean isBriefMode() {
+        return briefMode;
+    }
+
+    public void setBriefMode(boolean briefMode) {
+        this.briefMode = briefMode;
     }
 
     public String getCcUserName() {
@@ -108,24 +117,26 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM CONSTANT_CONTACT WHERE DATA_SOURCE_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO CONSTANT_CONTACT (TOKEN_KEY, TOKEN_SECRET_KEY, DATA_SOURCE_ID, USERNAME) VALUES (?, ?, ?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO CONSTANT_CONTACT (TOKEN_KEY, TOKEN_SECRET_KEY, DATA_SOURCE_ID, USERNAME, BRIEF_MODE) VALUES (?, ?, ?, ?, ?)");
         insertStmt.setString(1, tokenKey);
         insertStmt.setString(2, tokenSecret);
         insertStmt.setLong(3, getDataFeedID());
         insertStmt.setString(4, ccUserName);
+        insertStmt.setBoolean(5, briefMode);
         insertStmt.execute();
     }
 
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT TOKEN_KEY, TOKEN_SECRET_KEY, USERNAME FROM CONSTANT_CONTACT WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT TOKEN_KEY, TOKEN_SECRET_KEY, USERNAME, BRIEF_MODE FROM CONSTANT_CONTACT WHERE DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             tokenKey = rs.getString(1);
             tokenSecret = rs.getString(2);
             ccUserName = rs.getString(3);
+            briefMode = rs.getBoolean(4);
         }
     }
 

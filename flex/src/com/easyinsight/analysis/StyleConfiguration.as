@@ -68,6 +68,9 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Header Background Color", "headerBackgroundColor",  dashboardElement.headerBackgroundColor, dashboardElement));
             items.addItem(new NumericReportFormItem("Header Background Alpha", "headerBackgroundAlpha",  dashboardElement.headerBackgroundAlpha, dashboardElement, 0, 1));
         }
+        if (dashboardElement is DashboardStack) {
+            items.addItem(new CheckBoxReportFormItem("Consolidate Header Elements", "consolidateHeaderElements", DashboardStack(dashboardElement).consolidateHeaderElements, dashboardElement));
+        }
         if (dashboardElement is DashboardGrid) {
             items.addItem(new NumericReportFormItem("Width", "width", DashboardGrid(dashboardElement).width, dashboardElement, 0, 2000));
             items.addItem(new ColorReportFormItem("Background Color", "backgroundColor",  DashboardGrid(dashboardElement).backgroundColor, dashboardElement));

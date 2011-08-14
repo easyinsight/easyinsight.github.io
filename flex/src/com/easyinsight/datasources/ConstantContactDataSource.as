@@ -9,6 +9,7 @@ public class ConstantContactDataSource extends CompositeServerDataSource {
     public var ccUserName:String;
     public var tokenKey:String;
     public var tokenSecret:String;
+    public var briefMode:Boolean;
 
     public function ConstantContactDataSource() {
         super();

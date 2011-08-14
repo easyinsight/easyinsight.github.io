@@ -20,6 +20,7 @@ public class DashboardStack extends DashboardElement {
     public var effectType:int;
     public var effectDuration:int = 1000;
     public var stackControl:int;
+    public var consolidateHeaderElements:Boolean;
 
     public function DashboardStack() {
         super();

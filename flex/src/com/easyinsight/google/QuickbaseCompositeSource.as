@@ -19,6 +19,9 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     public var qbUserName:String;
     public var qbPassword:String;
 
+    public var supportIndex:Boolean;
+    public var preserveCredentials:Boolean;
+
     public var applicationToken:String;
     public var sessionTicket:String;
     public var host:String;

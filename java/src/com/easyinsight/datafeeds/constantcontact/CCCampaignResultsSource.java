@@ -117,7 +117,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                     }
 
                     try {
-                        String eventsURL = "https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns/" + id + "/events/";
+                        String eventsURL = "https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns/" + id + "/events?pageSize=200";
                         Document eventsDoc = query(eventsURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
                         Nodes eventNodes = eventsDoc.query("/service/workspace/collection");
                         for (int j = 0; j < eventNodes.size(); j++) {
