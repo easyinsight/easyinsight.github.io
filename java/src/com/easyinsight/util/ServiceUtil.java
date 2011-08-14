@@ -59,6 +59,9 @@ public class ServiceUtil {
 
     public CallData getCallData(String callDataID) {
         CallData callData = callDataMap.get(SecurityUtil.getUserID()).get(callDataID);
+        if (callData == null) {
+            return null;
+        }
         if (callData.getStatus() == DONE || callData.getStatus() == FAILED) {
             callDataMap.get(SecurityUtil.getUserID()).remove(callDataID);
         }

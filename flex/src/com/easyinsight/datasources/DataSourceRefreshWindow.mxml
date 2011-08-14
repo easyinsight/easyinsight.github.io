@@ -70,6 +70,9 @@
 
         private function gotCallData():void {
             var callData:CallData = asyncService.getCallData.lastResult as CallData;
+            if (callData == null) {
+                return;
+            }
             if (callData.status == CallData.DONE) {
                 timer.stop();
                 var newDate:Date = callData.result as Date;
