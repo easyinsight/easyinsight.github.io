@@ -88,7 +88,7 @@
         <mx:method name="getOAuthURL" result="gotURL()"/>
     </mx:RemoteObject>
     <mx:TextArea text="Easy Insight can report against two levels of contact info from your Constant Contact data, brief and full. Brief data will only pull over a few fields such as email address and user name, but will also take a fraction of the time required by full to synchronize."
-            width="500"/>
+            width="500" height="50" editable="false" borderStyle="none" selectable="false"/>
     <mx:RadioButtonGroup id="modeGroup" selectedValue="brief"/>
     <mx:HBox>
         <mx:RadioButton label="Brief Contact Data" value="brief" selected="true" groupName="modeGroup"/>

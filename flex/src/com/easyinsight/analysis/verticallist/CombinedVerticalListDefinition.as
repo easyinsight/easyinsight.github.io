@@ -16,14 +16,14 @@ import mx.collections.ArrayCollection;
 public class CombinedVerticalListDefinition extends AnalysisDefinition {
 
     public var reports:ArrayCollection = new ArrayCollection();
-    public var combinedVerticalListID:int;
+    public var combinedVerticalListDefinitionID:int;
 
     public function CombinedVerticalListDefinition() {
     }
 
     override public function fromSave(savedDef:AnalysisDefinition):void {
         super.fromSave(savedDef);
-        this.combinedVerticalListID = CombinedVerticalListDefinition(savedDef).combinedVerticalListID;
+        this.combinedVerticalListDefinitionID = CombinedVerticalListDefinition(savedDef).combinedVerticalListDefinitionID;
     }
 
     override public function get type():int {
