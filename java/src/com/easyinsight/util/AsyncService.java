@@ -9,11 +9,8 @@ import com.easyinsight.logging.LogClass;
  */
 public class AsyncService {
     public CallData getCallData(String callID) {
-        try {
+
             return ServiceUtil.instance().getCallData(callID);
-        } catch (Throwable e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
+
     }
 }
