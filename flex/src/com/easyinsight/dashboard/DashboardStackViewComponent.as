@@ -165,7 +165,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                 var filterContainer:Container = new HBox();
                 filterContainer.percentWidth = 100;
                 consolidatedFilterViewStack.addChild(filterContainer);
-                if (dashboardStack.consolidateHeaderElements) {
+                if (dashboardStack.consolidateHeaderElements && comp is DashboardStackViewComponent) {
                     DashboardStackViewComponent(comp).consolidateHeader = filterContainer;
                 }
             }
