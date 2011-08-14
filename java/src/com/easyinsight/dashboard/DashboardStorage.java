@@ -108,7 +108,6 @@ public class DashboardStorage {
         ResultSet dashboardRS = dashboardGroupStmt.executeQuery();
         while (dashboardRS.next()) {
             ownerStmt.setLong(1, dashboardRS.getLong(1));
-            ownerStmt.setInt(2, Roles.OWNER);
             ResultSet ownerRS = ownerStmt.executeQuery();
             String name;
             if (ownerRS.next()) {
