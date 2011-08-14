@@ -1,7 +1,10 @@
 <?xml version="1.0" ?>
 <analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
-                                   xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*">
+                                   xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
+                                   xmlns:formatter="com.easyinsight.analysis.formatter.*">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.formatter.FormattingConfiguration;
+
         [Bindable]
         private var aggregationString:String;
 
@@ -35,6 +38,10 @@
                         break;
                 }
                 aggregationString = measureString;
+                formattingConfiguration = measure.formattingConfiguration;
+                precision = measure.precision;
+                minPrecision = measure.minPrecision;
+                underline = measure.underline;
             }
         }
 
@@ -62,6 +69,10 @@
                     break;
             }
             measure.aggregation = complexAggregationType;
+            measure.formattingConfiguration = formattingSetup.formattingConfiguration;
+            measure.precision = precisionInput.value;
+            measure.underline = underlineCheckbox.selected;
+            measure.minPrecision = minPrecisionInput.value;
         }
 
         [Bindable]
@@ -69,6 +80,18 @@
 
         [Bindable]
         private var wrappedMeasure:String;
+
+        [Bindable]
+        private var formattingConfiguration:FormattingConfiguration;
+
+        [Bindable]
+        private var underline:Boolean;
+
+        [Bindable]
+        private var precision:int;
+
+        [Bindable]
+        private var minPrecision:int;
         ]]></mx:Script>
     <mx:FormItem label="Wrapped Aggregation: ">
         <mx:ComboBox dataProvider="{measureObjects}" id="complexWrappedAggregations" selectedItem="{aggregationString}"/>
@@ -80,5 +103,17 @@
     <mx:FormItem label="Grouping: ">
         <util:SmartComboBox dataProvider="{dimensionFields}" id="dimensionKeyComboBox" labelField="display"
                 selectedValue="{aggregateDimension}" selectedProperty="display"/>
+    </mx:FormItem>
+    <mx:FormItem label="Formatting: ">
+        <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Underline:">
+        <mx:CheckBox id="underlineCheckbox" selected="{underline}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Floating Point Precision:">
+        <mx:NumericStepper id="precisionInput" value="{precision}" minimum="0" maximum="50"/>
+    </mx:FormItem>
+    <mx:FormItem label="Minimum Precision:">
+        <mx:NumericStepper id="minPrecisionInput" value="{minPrecision}" minimum="0" maximum="50"/>
     </mx:FormItem>
 </analysis:AnalysisItemDetailEditor>

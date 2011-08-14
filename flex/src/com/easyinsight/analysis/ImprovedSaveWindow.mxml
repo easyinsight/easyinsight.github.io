@@ -359,5 +359,5 @@
             </mx:ViewStack>
         </mx:Box>
     </mx:Canvas>
-    <mx:StringValidator id="reportNameValidator" source="{reportNameInput}" property="text" minLength="3" maxLength="100"/> 
+    <mx:StringValidator id="reportNameValidator" source="{reportNameInput}" property="text" minLength="2" maxLength="100"/>
 </util:EITitleWindow>
