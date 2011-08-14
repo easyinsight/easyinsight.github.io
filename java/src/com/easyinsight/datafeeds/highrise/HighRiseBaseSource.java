@@ -127,6 +127,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                     }
                 } else {
                     if (badCredentialsOnError) {
+                        System.out.println("Failure = " + statusLine);
                         throw new ReportException(new DataSourceConnectivityReportFault("Invalid Highrise authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Highrise page.", parentDefinition));
                     } else {
                         throw e;
