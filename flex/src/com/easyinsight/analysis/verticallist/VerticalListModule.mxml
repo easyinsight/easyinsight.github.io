@@ -16,6 +16,8 @@
         import com.easyinsight.analysis.Value;
 
         import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
 
         [Bindable]
@@ -29,9 +31,10 @@
             var vert:VerticalListDefinition = analysisDefinition as VerticalListDefinition;
             var dColl:ArrayCollection = new ArrayCollection();
             var columns:ArrayCollection = new ArrayCollection();
-            var labelColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+            var labelColumn:SortableAdvancedDataGridColumn = new SortableAdvancedDataGridColumn(0, 0);
             labelColumn.sortable = false;
             labelColumn.width = 130;
+            labelColumn.itemRenderer = new ClassFactory(VerticalListRowHeaderRenderer);
             var labelHeaderFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
             labelHeaderFactory.properties = { headerText: "" };
             labelColumn.headerRenderer = labelHeaderFactory;
@@ -42,6 +45,7 @@
                 var obj:Object = new Object();
                 obj["Label"] = measure.display;
                 obj["baseMeasure"] = measure;
+                var atLeastOneValue:Boolean = false;
                 for each (var row:Object in dataSet) {
                     var columnValue:String;
                     var val:Value;
@@ -54,10 +58,14 @@
                     if (val != null && val.type() == Value.EMPTY) {
                         continue;
                     }
+                    var measureValue:Value = row[measure.qualifiedName()];
+                    if (measureValue.toNumber() != 0) {
+                        atLeastOneValue = true;
+                    }
                     obj[columnValue] = row[measure.qualifiedName()];
                     obj[columnValue + "measure"] = measure;
                     if (firstRow) {
-                        var dataColumn:SortableAdvancedDataGridColumn = new SortableAdvancedDataGridColumn(0, val == null ? 0 : val.toSortValue().toNumber());
+                        var dataColumn:SortableAdvancedDataGridColumn = new SortableAdvancedDataGridColumn(1, val == null ? 0 : val.toSortValue().toNumber());
                         dataColumn.width = 73;
                         dataColumn.headerText = columnValue;
                         dataColumn.dataField = columnValue;
@@ -74,13 +82,19 @@
                 if (firstRow) {
                     firstRow = false;
                 }
-                dColl.addItem(obj);
+                if (atLeastOneValue) {
+                    dColl.addItem(obj);
+                }
             }
             if (columns.length == 1) {
                 currentState = "noData";
             } else {
                 currentState = "";
             }
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("reportIndex"), new SortField("sortValue") ];
+            columns.sort = sort;
+            columns.refresh();
             dataGrid.columns = columns.toArray();
             dataGrid.rowCount = dColl.length + 1;
             dataGrid.dataProvider = dColl;
