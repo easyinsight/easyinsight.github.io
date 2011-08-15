@@ -239,15 +239,17 @@
                 if (dataAnalysis != null) {
                     fullScreenPage.cleanup();
                     removeListeners(dataAnalysis);
-                    coreVBox.removeChild(dataAnalysis);
+                    if (dataAnalysis.parent == coreVBox) {
+                        coreVBox.removeChild(dataAnalysis);
+                    }
                 } else {
-                    if (headerBar != null) {
+                    if (headerBar != null && headerBar.parent == coreVBox) {
                         coreVBox.removeChild(headerBar);
                     }
-                    if (highBar != null) {
+                    if (highBar != null && highBar.parent == coreVBox) {
                         coreVBox.removeChild(highBar);
                     }
-                    if (coreSpace != null) {
+                    if (coreSpace != null && coreSpace.parent == coreVBox) {
                         coreVBox.removeChild(coreSpace);
                     }
                 }
@@ -293,7 +295,9 @@
                     }
                     if (dataAnalysis != null) {
                         fullScreenPage.cleanup();
-                        coreVBox.removeChild(dataAnalysis);
+                        if (dataAnalysis.parent == coreVBox) {
+                            coreVBox.removeChild(dataAnalysis);
+                        }
                         dataAnalysis = null;
                         fullScreenPage = null;
                         coreVBox.addChild(headerBar);
