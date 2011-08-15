@@ -491,8 +491,10 @@
         private function allDone(event:Event):void {
             if (User.getInstance().fixedDashboardID == 0) {
                 toMain();
-                var o:Object = URLUtil.stringToObject(currentFragment, "&");
-                parseFragmentObject(o, currentFragment);
+                if (currentFragment != null) {
+                    var o:Object = URLUtil.stringToObject(currentFragment, "&");
+                    parseFragmentObject(o, currentFragment);
+                }
             }
         }
 
