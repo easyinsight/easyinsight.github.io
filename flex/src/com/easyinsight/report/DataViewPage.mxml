@@ -42,16 +42,16 @@
         }
 
         [Bindable]
-        protected var previousReportAvailable:Boolean;
+        public var previousReportAvailable:Boolean;
 
         [Bindable]
-        protected var nextReportAvailable:Boolean;
+        public var nextReportAvailable:Boolean;
 
         [Bindable]
-        protected var previousReportLabel:String;
+        public var previousReportLabel:String;
 
         [Bindable]
-        protected var nextReportLabel:String;
+        public var nextReportLabel:String;
 
         protected var _originID:int;
 
@@ -86,7 +86,7 @@
 
         private var targetItem:ExchangeItem;
 
-        protected function toPreviousReport():void {
+        public function toPreviousReport():void {
             targetItem = _reportList.getItemAt(_reportIndex - 1) as ExchangeItem;
             solutionService.determineDataSourceForEntity.send(targetItem.descriptor);
         }
@@ -120,7 +120,7 @@
             solutionService.installEntity.send(targetItem.descriptor, event.dataSource.id);
         }
 
-        protected function toNextReport():void {
+        public function toNextReport():void {
             targetItem = _reportList.getItemAt(_reportIndex + 1) as ExchangeItem;
             solutionService.determineDataSourceForEntity.send(targetItem.descriptor);
         }
