@@ -495,6 +495,9 @@
                     var o:Object = URLUtil.stringToObject(currentFragment, "&");
                     parseFragmentObject(o, currentFragment);
                 }
+            } else {
+                coreVBox = masterCanvas;
+                internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: User.getInstance().fixedDashboardID, fixedID: true})))
             }
         }
 
