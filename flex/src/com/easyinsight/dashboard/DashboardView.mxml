@@ -1,13 +1,22 @@
 <?xml version="1.0"?>
 <report:DataViewPage xmlns:mx="http://www.adobe.com/2006/mxml"
                      xmlns:filtering="com.easyinsight.filtering.*" xmlns:util="com.easyinsight.util.*"
-                     xmlns:datasources="com.easyinsight.datasources.*"
+                     xmlns:dashboard="com.easyinsight.dashboard.*"
                      applyCenterScreenLogic="false" creationComplete="onCreation()"
                      implements="com.easyinsight.listing.IPerspective" xmlns:report="com.easyinsight.report.*">
+    <report:states>
+        <mx:State name="defaultHeader">
+            <mx:AddChild relativeTo="{topTarget}">
+                <dashboard:DashboardHeader id="topDisplay" dataSource="{dataSource}" viewFactory="{viewFactory}"/>
+            </mx:AddChild>
+        </mx:State>
+    </report:states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.framework.User;
+
+        import mx.controls.Button;
 
         import mx.events.FlexEvent;
 
@@ -31,21 +40,10 @@
         import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.TextArea;
         import mx.core.UIComponent;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
-        import mx.states.RemoveChild;
-        import mx.states.State;
         import mx.utils.URLUtil;
-
-        [Bindable]
-        [Embed(source="../../../../assets/document_out.png")]
-        private var closeIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/table.png")]
-        private var exportIcon:Class;
 
         private var _fixedID:Boolean = false;
 
@@ -62,9 +60,7 @@
         [Bindable]
         private var filterDefinitions:ArrayCollection;
 
-        [Bindable]
-        [Embed(source="../../../../assets/banner4.jpg")]
-        public var backImage:Class;
+
 
         private function onCreation():void {
             commandProcessor = new CommandProcessor();
@@ -80,6 +76,9 @@
             var contextMenu:ContextMenu = new ContextMenu();
             contextMenu.customItems = [ logoutItem ];
             this.contextMenu = contextMenu;
+            if (!_fixedID) {
+                currentState = "defaultHeader";
+            }
             dashboardService.getDashboard.send(_dashboardID);
         }
 
@@ -95,21 +94,7 @@
 
         private var rootView:IDashboardViewComponent;
 
-        [Bindable]
-        [Embed(source="../../../../assets/plasma_tv.png")]
-        private var fullScreenIcon:Class;
-        [Bindable]
-        [Embed(source="../../../../assets/edit.png")]
-        private var reportEditorIcon:Class;
-        [Bindable]
-        [Embed(source="../../../../assets/funnel.png")]
-        private var filterIcon:Class;
-        [Bindable]
-        [Embed(source="../../../../assets/bookmark_blue.png")]
-        private var bookmarkIcon:Class;
-        [Bindable]
-        [Embed(source="../../../../assets/refresh.png")]
-        private var refreshIcon:Class;
+
 
         public function set dashboardID(value:int):void {
             _dashboardID = value;
@@ -158,71 +143,19 @@
             dashboardCanvas.addChild(rootView as UIComponent);
             UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.VIEW, _dashboardID));
             generateState();
-            if (_fixedID) {
+            /*if (_fixedID) {
                 primary.removeChild(topDisplay);
-            }
+            }*/
         }
 
         override protected function generateState():void {
             super.generateState();
-            var ops:Array = [];
-            var textAreas:Array = [];
-            var remainingSections:Array = [];
-            if (description == null || description.length == 0) {
-                var removeDescription:RemoveChild = new RemoveChild();
-                removeDescription.target = descriptionBox;
-                ops.push(removeDescription);
-                var removeRule1:RemoveChild = new RemoveChild();
-                removeRule1.target = rule1;
-                ops.push(removeRule1);
-            } else {
-                textAreas.push(descriptionArea);
-                remainingSections.push(descriptionBox);
-            }
-            if (exchangeItem == null) {
-                var removeExchange:RemoveChild = new RemoveChild();
-                removeExchange.target = exchangeBox;
-                ops.push(removeExchange);
-            } else {
-                textAreas.push(exchangeArea);
-                remainingSections.push(exchangeBox);
-            }
-
-            if (exchangeItem != null) {
-                var removeData:RemoveChild = new RemoveChild();
-                removeData.target = dataSourceDisplay;
-                ops.push(removeData);
-            } else {
-                textAreas.push(dataSourceDisplay.sourceLabel);
-                remainingSections.push(dataSourceDisplay);
-            }
-            if (ops.length > 0) {
-                var len:int = Math.max(2, textAreas.length);
-                for each (var area:TextArea in textAreas) {
-                    area.width = 780 / len;
-                }
-                for each (var comp:UIComponent in remainingSections) {
-                    comp.width = 830 / len;
-                }
-                var state:State = new State();
-                var name:String = "report" + stateIndex++;
-                state.name = name;
-                state.overrides = ops;
-                var states:Array = [];
-                states.push(state);
-                if (lastState != null) {
-                    states.push(lastState);
-                }
-                this.states = states;
-                lastState = state;
-                currentState = name;
-            } else {
-                currentState = "";
+            if (topDisplay != null && currentState == "defaultHeader") {
+                topDisplay.generateState(description, exchangeItem, this);
             }
         }
 
-        private var stateIndex:int;
-        private var lastState:State;
+
 
         private function transformsUpdated(event:Event):void {
             rootView.refresh(transformContainer.getFilterDefinitions());
@@ -239,12 +172,12 @@
 
         private var dashboard:Dashboard;
 
-        private function close():void {
+        public function close():void {
 
             dispatchEvent(new AnalysisCloseEvent());
         }
 
-        private function toFullScreen():void {
+        public function toFullScreen():void {
             currentState = "fullScreen";
             stage.addEventListener(KeyboardEvent.KEY_DOWN, onKey);
         }
@@ -265,25 +198,25 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        private function saveReport(event:Event):void {
+        public function saveReport(event:Event):void {
             dashboardService.keepDashboard.send(dashboard.id, exchangeItem.id);
         }
 
         [Bindable]
         private var filterIndex:int = 0;
 
-        private function refreshData():void {
+        public function refreshData():void {
             rootView.retrieveData();
         }
 
         [Bindable]
         private var viewFactory:IRetrievable;
 
-        private function toggleFilters():void {
+        public function toggleFilters():void {
             filterIndex = filterIndex == 0 ? 1 : 0;
         }
 
-        private function exportDashboard():void {
+        public function exportDashboard(exportButton:Button):void {
             var window:DashboardExportWindow = new DashboardExportWindow();
             window.dashboard = dashboard;
             PopUpManager.addPopUp(window, this, true);
@@ -314,7 +247,8 @@
     <mx:VBox width="100%" height="100%" verticalGap="0"
              horizontalAlign="center"
              direction="vertical" id="primary" paddingLeft="{dashboardPaddingLeft}" paddingRight="{dashboardPaddingRight}">
-        <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay"
+        <mx:Box id="topTarget" width="100%" horizontalAlign="center"/>
+            <!--<mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay"
                  backgroundColor="#FFFFFF">
                 <mx:VBox width="1000" id="highBox" paddingLeft="10" paddingRight="10">
                     <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
@@ -356,7 +290,7 @@
                     </mx:HBox>
                 </mx:VBox>
             <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
-        </mx:VBox>
+        </mx:VBox>-->
         <mx:VBox width="100%" height="100%" paddingLeft="0" paddingRight="0" horizontalAlign="center" verticalGap="0">
             <mx:ViewStack width="{dashboardWidth}" resizeToContent="true" creationPolicy="all"
                           selectedIndex="{filterIndex}">
