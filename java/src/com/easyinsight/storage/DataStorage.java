@@ -118,7 +118,7 @@ public class DataStorage {
         dataStorage.systemUpdate = systemUpdate;
         Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
         for (AnalysisItem analysisItem : feedDefinition.getFields()) {
-            if (analysisItem.isDerived()) {
+            if (analysisItem.isDerived() || !analysisItem.isConcrete()) {
                 continue;
             }
             Key key = analysisItem.getKey();
