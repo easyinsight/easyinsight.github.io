@@ -214,9 +214,18 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                         String tagString = tagBuilder.substring(0, tagBuilder.length() - 1);
                         row.addValue(TAGS, tagString);
                     }
-                    contactDataNodes = companyNode.query("contact-data");
+                    contactDataNodes = companyNode.query("subject_datas/subject_data");
                     if (contactDataNodes.size() > 0) {
-                        Node contactDataNode = contactDataNodes.get(0);
+                        for (int j = 0; j < contactDataNodes.size(); j++) {
+                            Node contactDataNode = contactDataNodes.get(j);
+                            String subjectFieldID = queryField(contactDataNode, "subject_field_id/text()");
+                            String value = queryField(contactDataNode, "value/text()");
+                            Key key = keys.get(subjectFieldID);
+                            if (key != null) {
+                                row.addValue(key, value);
+                            }
+                        }
+                        /*Node contactDataNode = contactDataNodes.get(0);
                         for (int j = 0; j < contactDataNode.getChildCount(); j++) {
                             Node testNode = contactDataNode.getChild(j);
                             String subjectFieldID = queryField(testNode, "subject-field-id/text()");
@@ -228,7 +237,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                                 }
 
                             }
-                        }
+                        }*/
                     }
                     contactCount++;
                 }

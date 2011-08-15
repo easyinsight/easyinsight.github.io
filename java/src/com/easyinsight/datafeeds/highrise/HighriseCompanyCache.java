@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.ReportException;
+import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedDefinition;
 import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
@@ -83,17 +84,13 @@ public class HighriseCompanyCache extends HighRiseBaseSource {
 
                     }
                     Map<String, String> customFields = new HashMap<String, String>();
-                    contactDataNodes = companyNode.query("contact-data");
+                    contactDataNodes = companyNode.query("subject_datas/subject_data");
                     if (contactDataNodes.size() > 0) {
-                        Node contactDataNode = contactDataNodes.get(0);
-                        for (int j = 0; j < contactDataNode.getChildCount(); j++) {
-                            Node testNode = contactDataNode.getChild(j);
-                            String subjectFieldID = queryField(testNode, "subject-field-id/text()");
-                            if (subjectFieldID != null) {
-                                String value = queryField(testNode, "value/text()");
-                                customFields.put(subjectFieldID, value);
-
-                            }
+                        for (int j = 0; j < contactDataNodes.size(); j++) {
+                            Node contactDataNode = contactDataNodes.get(j);
+                            String subjectFieldID = queryField(contactDataNode, "subject_field_id/text()");
+                            String value = queryField(contactDataNode, "value/text()");
+                            customFields.put(subjectFieldID, value);
                         }
                     }
 
