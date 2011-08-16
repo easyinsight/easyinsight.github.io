@@ -180,6 +180,9 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 }
                 calendar.setTimeZone(timeZone);
             }
+            if (calendar == null) {
+                calendar = Calendar.getInstance();
+            }
             calendar.setTimeInMillis(tempDate.getTime());
             if (dateLevel <= WEEK_LEVEL || dateLevel == QUARTER_OF_YEAR_LEVEL) {
                 switch (dateLevel) {
