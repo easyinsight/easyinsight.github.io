@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer" verticalScrollPolicy="off" width="100%">
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer" verticalScrollPolicy="off" width="100%"
+        height="100%">
     <mx:states>
         <mx:State name="noData">
             <mx:RemoveChild target="{dataGrid}"/>
@@ -21,6 +22,12 @@
 
         [Bindable]
         private var dataColl:ArrayCollection;
+
+        override protected function measure():void {
+            super.measure();
+            box.width = this.width;
+            box.height = this.height;
+        }
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
 
@@ -110,6 +117,7 @@
             dataGrid.columns = columns.toArray();
             dataGrid.rowCount = dColl.length + 1;
             dataGrid.dataProvider = dColl;
+            invalidateSize();
         }
 
         public function updateExportMetadata():void {
@@ -122,7 +130,7 @@
             return true;
         }
         ]]></mx:Script>
-    <mx:Box width="100%" horizontalAlign="center" id="box">
+    <mx:Box horizontalAlign="center" id="box" verticalScrollPolicy="auto">
         <mx:AdvancedDataGrid id="dataGrid" headerColors="{[0x333333, 0x333333]}" fontSize="10" verticalScrollPolicy="off" variableRowHeight="true" horizontalGridLines="false" horizontalGridLineColor="#DDDDDD" verticalGridLines="false"
                 alternatingItemColors="{[0xFFFFFF, 0xFFFFFF]}" backgroundColor="#FFFFFF" borderStyle="none" selectionMode="none">
         </mx:AdvancedDataGrid>
