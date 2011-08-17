@@ -9,6 +9,7 @@
         import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.InsightResponse;
         import com.easyinsight.analysis.PopupMenuFactory;
+        import com.easyinsight.framework.BasicInfo;
 
         import com.easyinsight.framework.Constants;
         import com.easyinsight.framework.LoginEvent;
@@ -95,7 +96,9 @@
         }
 
         private function gotBuildPath():void {
-            Constants.instance().buildPath = userService.getBuildPath.lastResult as String;
+            var basicInfo:BasicInfo = userService.getBuildPath.lastResult as BasicInfo;
+            Constants.instance().buildPath = basicInfo.version;
+            Constants.instance().prefix = basicInfo.prefix;
             userService.isSessionLoggedIn.send();
         }
 
@@ -164,7 +167,7 @@
         <framework:LoginComponent loginEvent2="stackIndex = 2"/>
         <dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
                                       dataSourceID="{dataSourceID}" reportType="{reportType}"
-                                      prefix="https://www.easy-insight.com" showToolbar="{showToolbar}"
+                                      showToolbar="{showToolbar}"
                                         showFilters="{showFilters}" />
     </mx:ViewStack>
 </mx:Application>

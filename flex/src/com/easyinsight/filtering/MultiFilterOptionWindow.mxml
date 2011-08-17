@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var availableItems:ArrayCollection;
+
+        private var _filterDefinition:FilterDefinition;
+
+        public function set filterDefinition(value:FilterDefinition):void {
+            _filterDefinition = value;
+        }
+
+        public function get filterDefinition():FilterDefinition {
+            return _filterDefinition;
+        }
+
+        protected function createAvailableItems():ArrayCollection {
+            return null;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            availableItems = createAvailableItems();
+            invalidateSize();
+        }
+
+        override protected function measure():void {
+            super.measure();
+            solutionGrid.height = Math.min(300, (availableItems.length / 2) * 32);
+        }
+
+        protected function saveFilter(availableItems:ArrayCollection):void {
+
+        }
+
+        private function save():void {
+            saveFilter(availableItems);
+            dispatchEvent(new Event("updated"));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.filtering.FilterCheckbox" dataProvider="{availableItems}" id="solutionGrid"
+            columnWidth="150" rowHeight="30" verticalScrollPolicy="on" columnCount="2"/>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

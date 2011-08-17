@@ -117,7 +117,6 @@ public class ReportEventProcessor extends EITitleWindow {
         var controller:IEmbeddedReportController = new controllerClass();
         viewFactory = controller.createEmbeddedView();
         viewFactory.reportID = reportID;
-        viewFactory.prefix = "";
         viewFactory.dataSourceID = dataSourceID;
         viewFactory.drillthroughFilters = reportFilters;
         reportCanvas.reportBox.addChild(viewFactory);

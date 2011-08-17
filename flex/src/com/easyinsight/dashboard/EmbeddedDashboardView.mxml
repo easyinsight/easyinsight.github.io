@@ -56,8 +56,6 @@
         [Bindable]
         private var _dataSourceID:int;
 
-        private var _prefix:String = "";
-
         [Bindable]
         private var dataViewFactory:EmbeddedViewFactory;
 
@@ -73,11 +71,6 @@
             if (_filterDefinitions == value) return;
             _filterDefinitions = value;
             dispatchEvent(new Event("filterDefinitionsChanged"));
-        }
-
-        public function set prefix(val:String):void {
-            _prefix = val;
-            invalidateProperties();
         }
 
         private var _urlKey:String;

@@ -40,7 +40,8 @@ public class EIGlobalTimer {
     }
 
     private function onResult(event:ResultEvent):void {
-        var newVersion:String = userService.getBuildPath.lastResult as String;
+        var basicInfo:BasicInfo = userService.getBuildPath.lastResult as BasicInfo;
+        var newVersion:String = basicInfo.version;
         if (version != null && newVersion != version) {
             version = newVersion;
             var window:NewVersionWindow = new NewVersionWindow();

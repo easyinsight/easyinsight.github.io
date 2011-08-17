@@ -1,7 +1,7 @@
 package com.easyinsight.kpi {
 
+import com.easyinsight.framework.Constants;
 import com.easyinsight.scorecard.KPIRenderer;
-import com.easyinsight.util.PrefixManager;
 
 import mx.controls.Image;
 import mx.controls.listClasses.IListItemRenderer;
@@ -24,7 +24,7 @@ public class KPIIconRenderer extends KPIRenderer implements IListItemRenderer {
     override public function set data(val:Object):void {
         super.data = val;
         if (this.kpi.iconImage != null) {
-            image.load(PrefixManager.prefix + "/app/assets/icons/32x32/" + this.kpi.iconImage);
+            image.load(Constants.instance().prefix + "/app/assets/icons/32x32/" + this.kpi.iconImage);
         } else {
             image.source = null;
         }

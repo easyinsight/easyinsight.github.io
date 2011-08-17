@@ -84,12 +84,6 @@
             window.y = exportButton.y + exportButton.height + 10;
         }
 
-        private var _prefix:String = "";
-
-        public function set prefix(value:String):void {
-            _prefix = value;
-        }
-
         private function onCreation():void {
             // initializeTransformContainer();
             commandProcessor = new CommandProcessor();
@@ -387,7 +381,6 @@
             try {
 
                 viewFactory.reportID = _reportID;
-                viewFactory.prefix = _prefix;
                 viewFactory.dataSourceID = _dataSourceID;
                 BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
                 viewFactory.drillthroughFilters = _parameterFilters;

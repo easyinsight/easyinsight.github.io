@@ -234,6 +234,8 @@ public class TransformContainer extends HBox
             filter = new FlatDateFilter(_feedID,  filterDefinition.field, _reportID,  _dashboardID);
         } else if (filterDefinition.getType() == FilterDefinition.ANALYSIS_ITEM) {
             filter = new AnalysisItemFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
+        } else if (filterDefinition.getType() == FilterDefinition.MULTI_FLAT_DATE) {
+            filter = new MultiFlatDateFilter(_feedID,  filterDefinition.field, _reportID, _dashboardID);
         } else {
             Alert.show("unknown filter type = " + filterDefinition.getType());
         }

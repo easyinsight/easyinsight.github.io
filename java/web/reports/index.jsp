@@ -69,7 +69,7 @@
     } catch (SecurityException e) {
         response.sendRedirect("login.jsp?error=true");
     }
-    String versionDir = new com.easyinsight.users.UserService().getBuildPath();
+    String versionDir = new com.easyinsight.users.UserService().getBuildPath().getVersion();
 
 %>
 <head>

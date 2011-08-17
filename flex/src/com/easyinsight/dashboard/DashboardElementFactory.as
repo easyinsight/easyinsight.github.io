@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.dashboard {
-import com.easyinsight.dashboard.DashboardScorecardEditorComponent;
+import com.easyinsight.analysis.AnalysisDefinition;
 
 import mx.core.UIComponent;
 
@@ -43,10 +43,31 @@ public class DashboardElementFactory {
 
     public static function createViewUIComponent(element:DashboardElement, dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
         if (element is DashboardGrid) {
-            var gridComp:DashboardGridViewComponent = new DashboardGridViewComponent();
-            gridComp.dashboardGrid = element as DashboardGrid;
-            gridComp.dashboardEditorMetadata = dashboardEditorMetadata;
-            return gridComp;
+            var dashboardGrid:DashboardGrid = element as DashboardGrid;
+            var optimizable:Boolean = true;
+            for each (var gridItem:DashboardGridItem in dashboardGrid.gridItems) {
+                var item:DashboardElement = gridItem.dashboardElement;
+                if (!(item is DashboardReport)) {
+                    optimizable = false;
+                    break;
+                }
+                var report:DashboardReport = item as DashboardReport;
+                if (report.report.reportType != AnalysisDefinition.GAUGE) {
+                    optimizable = false;
+                    break;
+                }
+            }
+            if (optimizable) {
+                var optimizedGridComp:DashboardOptimizedGridViewComponent = new DashboardOptimizedGridViewComponent();
+                optimizedGridComp.dashboardGrid = element as DashboardGrid;
+                optimizedGridComp.dashboardEditorMetadata = dashboardEditorMetadata;
+                return optimizedGridComp;
+            } else {
+                var gridComp:DashboardGridViewComponent = new DashboardGridViewComponent();
+                gridComp.dashboardGrid = element as DashboardGrid;
+                gridComp.dashboardEditorMetadata = dashboardEditorMetadata;
+                return gridComp;
+            }
         } else if (element is DashboardStack) {
             var stackComp:DashboardStackViewComponent = new DashboardStackViewComponent();
             stackComp.dashboardStack = element as DashboardStack;

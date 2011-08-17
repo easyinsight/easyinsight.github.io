@@ -6,6 +6,7 @@ public class Constants extends EventDispatcher {
 
     private var _userName:String;
     private var _buildPath:String;
+    private var _prefix:String;
 
     private static var _instance:Constants;
 
@@ -26,6 +27,15 @@ public class Constants extends EventDispatcher {
 
     public function set buildPath(value:String):void {
         _buildPath = value;
+    }
+
+
+    public function get prefix():String {
+        return _prefix;
+    }
+
+    public function set prefix(value:String):void {
+        _prefix = value;
     }
 
     [Bindable(event="userNameChanged")]

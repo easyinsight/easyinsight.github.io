@@ -47,7 +47,7 @@ var requiredRevision = 0;
 </head>
 
 <%
-    String versionDir = new com.easyinsight.users.UserService().getBuildPath();
+    String versionDir = new com.easyinsight.users.UserService().getBuildPath().getVersion();
     boolean isSubdomain = request.getParameterMap().containsKey("subdomain");
     String subdomain = request.getParameter("subdomain");
 %>

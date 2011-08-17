@@ -85,6 +85,8 @@
         <mapping class="com.easyinsight.analysis.NullFilter"/>
         <mapping class="com.easyinsight.analysis.OrFilter"/>
         <mapping class="com.easyinsight.analysis.AnalysisItemFilterDefinition"/>
+        <mapping class="com.easyinsight.analysis.MultiFlatDateFilter"/>
+        <mapping class="com.easyinsight.analysis.DateLevelWrapper"/>
         <mapping class="com.easyinsight.analysis.OrderedFilterDefinition"/>
         <mapping class="com.easyinsight.analysis.NamedFilterReference"/>
         <mapping class="com.easyinsight.analysis.Link"/>

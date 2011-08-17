@@ -93,8 +93,6 @@
         [Bindable]
         private var _reportName:String;
 
-        private var _prefix:String = "";
-
         private var _titleFunction:Function;
         private var _titleFunctionCaller:Object;
 
@@ -157,11 +155,6 @@
             invalidateProperties();
         }
 
-        public function set prefix(val:String):void {
-            _prefix = val;
-            invalidateProperties();
-        }
-
         public function set reportType(val:int):void {
             _reportType = val;
             invalidateProperties();
@@ -221,7 +214,6 @@
                 var controllerClass:Class = EmbeddedControllerLookup.controllerForType(_reportType);
                 var controller:IEmbeddedReportController = new controllerClass();
                 dataViewFactory = controller.createEmbeddedView();
-                dataViewFactory.prefix = _prefix;
                 dataViewFactory.reportID = _analysisID;
                 dataViewFactory.dataSourceID = _dataSourceID;
                 coreVBox.addChild(dataViewFactory);

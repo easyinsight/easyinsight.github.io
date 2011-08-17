@@ -3,7 +3,7 @@
 
 <head>
     <%
-    String versionDir = new com.easyinsight.users.UserService().getBuildPath();
+    String versionDir = new com.easyinsight.users.UserService().getBuildPath().getVersion();
     String width = request.getParameter("width");
     String height = request.getParameter("height");
     String dashboardID = request.getParameter("id");

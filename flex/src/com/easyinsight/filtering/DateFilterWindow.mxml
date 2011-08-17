@@ -30,6 +30,12 @@
             PopUpManager.removePopUp(this);
         }
 
+        private function addMultiFlatValue():void {
+            var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item, 0, 0);
+            dispatchEvent(new FilterCreationEvent(filter));
+            PopUpManager.removePopUp(this);
+        }
+
         private var _item:AnalysisItem;
         private var _feedID:int;
 
@@ -85,48 +91,62 @@
             <mx:Box>
                 <mx:Button label="Show Me More Types of Filters" click="stackIndex = 1"/>
             </mx:Box>
-            <mx:HBox>
-                <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addLastValue()" mouseChildren="false"
-                        buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
-                        id="patternValueBox"
-                        rollOver="patternValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                        rollOut="patternValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                    <mx:Label text="Newest Date" fontSize="14"/>
-                    <mx:TextArea text="Restrict this field to the most recent date"
-                            borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                            textAlign="center"/>
-                </mx:VBox>
-                <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addFirstValue()" mouseChildren="false"
-                        buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
-                        id="firstValueBox"
-                        rollOver="firstValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                        rollOut="firstValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                    <mx:Label text="Oldest Date" fontSize="14"/>
-                    <mx:TextArea text="Restrict this field to the oldest date"
-                            borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                            textAlign="center"/>
-                </mx:VBox>
-                <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addNullValue()" mouseChildren="false"
-                        buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
-                        id="nullValueBox"
-                        rollOver="nullValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                        rollOut="nullValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                    <mx:Label text="No Date" fontSize="14"/>
-                    <mx:TextArea text="Restrict this field to values where this date is not set"
-                            borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                            textAlign="center"/>
-                </mx:VBox>
-                <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addFlatValue()" mouseChildren="false"
-                        buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
-                        id="flatValueBox"
-                        rollOver="flatValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                        rollOut="flatValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                    <mx:Label text="Single Value" fontSize="14"/>
-                    <mx:TextArea text="Restrict this field to a single month or year"
-                            borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                            textAlign="center"/>
-                </mx:VBox>
-            </mx:HBox>
+            <mx:VBox>
+                <mx:HBox>
+                    <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addLastValue()" mouseChildren="false"
+                            buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                            id="patternValueBox"
+                            rollOver="patternValueBox.setStyle('backgroundColor', 0xDDDDDD)"
+                            rollOut="patternValueBox.setStyle('backgroundColor', 0xFFFFFF)">
+                        <mx:Label text="Newest Date" fontSize="14"/>
+                        <mx:TextArea text="Restrict this field to the most recent date"
+                                borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
+                                textAlign="center"/>
+                    </mx:VBox>
+                    <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addFirstValue()" mouseChildren="false"
+                            buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                            id="firstValueBox"
+                            rollOver="firstValueBox.setStyle('backgroundColor', 0xDDDDDD)"
+                            rollOut="firstValueBox.setStyle('backgroundColor', 0xFFFFFF)">
+                        <mx:Label text="Oldest Date" fontSize="14"/>
+                        <mx:TextArea text="Restrict this field to the oldest date"
+                                borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
+                                textAlign="center"/>
+                    </mx:VBox>
+                    <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addNullValue()" mouseChildren="false"
+                            buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                            id="nullValueBox"
+                            rollOver="nullValueBox.setStyle('backgroundColor', 0xDDDDDD)"
+                            rollOut="nullValueBox.setStyle('backgroundColor', 0xFFFFFF)">
+                        <mx:Label text="No Date" fontSize="14"/>
+                        <mx:TextArea text="Restrict this field to values where this date is not set"
+                                borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
+                                textAlign="center"/>
+                    </mx:VBox>
+                </mx:HBox>
+                <mx:HBox width="100%" horizontalAlign="center">
+                    <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addFlatValue()" mouseChildren="false"
+                            buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                            id="flatValueBox"
+                            rollOver="flatValueBox.setStyle('backgroundColor', 0xDDDDDD)"
+                            rollOut="flatValueBox.setStyle('backgroundColor', 0xFFFFFF)">
+                        <mx:Label text="Single Value" fontSize="14"/>
+                        <mx:TextArea text="Restrict this field to a single month or year"
+                                borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
+                                textAlign="center"/>
+                    </mx:VBox>
+                    <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addMultiFlatValue()" mouseChildren="false"
+                            buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                            id="multiFlatValueBox"
+                            rollOver="multiFlatValueBox.setStyle('backgroundColor', 0xDDDDDD)"
+                            rollOut="multiFlatValueBox.setStyle('backgroundColor', 0xFFFFFF)">
+                        <mx:Label text="Multiple Flat Value" fontSize="14"/>
+                        <mx:TextArea text="Restrict this field to one or more months"
+                                borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
+                                textAlign="center"/>
+                    </mx:VBox>
+                </mx:HBox>
+            </mx:VBox>
         </mx:ViewStack>
         <mx:LinkButton label="Cancel" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
     </mx:VBox>

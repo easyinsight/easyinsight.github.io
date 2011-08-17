@@ -21,6 +21,7 @@ import flash.events.EventDispatcher;
         public static const NAMED_REF:int = 11;
         public static const FLAT_DATE:int = 12;
         public static const ANALYSIS_ITEM:int = 13;
+        public static const MULTI_FLAT_DATE:int = 14;
 
 		public var field:AnalysisItem;
 		public var applyBeforeAggregation:Boolean = true;

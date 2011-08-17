@@ -1,25 +1,13 @@
 <?xml version="1.0" ?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:framework="com.easyinsight.framework.*"
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
                 creationComplete="handleFlashVars()" xmlns:dashboard="com.easyinsight.dashboard.*"
                 paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
                 bottom="0" paddingBottom="0" backgroundColor="#FFFFFF">
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.analysis.AnalysisCalculation;
-        import com.easyinsight.analysis.AnalysisDateDimension;
-        import com.easyinsight.analysis.AnalysisDimension;
-        import com.easyinsight.analysis.AnalysisHierarchyItem;
-        import com.easyinsight.analysis.AnalysisLatitude;
-        import com.easyinsight.analysis.AnalysisList;
-        import com.easyinsight.analysis.AnalysisLongitude;
-        import com.easyinsight.analysis.AnalysisMeasure;
-        import com.easyinsight.analysis.AnalysisRangeDimension;
-        import com.easyinsight.analysis.AnalysisStep;
-        import com.easyinsight.analysis.ComplexAnalysisMeasure;
         import com.easyinsight.analysis.DefaultMenuFactory;
-        import com.easyinsight.analysis.DerivedAnalysisDimension;
         import com.easyinsight.analysis.PopupMenuFactory;
-        import com.easyinsight.analysis.SixSigmaMeasure;
+        import com.easyinsight.framework.BasicInfo;
         import com.easyinsight.framework.Constants;
         import com.easyinsight.framework.TORegistry;
         import com.easyinsight.framework.User;
@@ -74,7 +62,9 @@
         }
 
         private function gotBuildPath():void {
-            Constants.instance().buildPath = userService.getBuildPath.lastResult as String;
+            var basicInfo:BasicInfo = userService.getBuildPath.lastResult as BasicInfo;
+            Constants.instance().buildPath = basicInfo.version;
+            Constants.instance().prefix = basicInfo.prefix;
             userService.seleniumCheck.send(userName, password);
         }
 
@@ -127,6 +117,6 @@
         <mx:Box/>
         <dashboard:SeleniumReport id="panel" urlKey="{urlKey}" reportName="{reportName}" seleniumID="{requestID}"
                                       dataSourceID="{dataSourceID}" reportType="{reportType}"
-                                      prefix="https://www.easy-insight.com" reportWidth="{reportWidth}" reportHeight="{reportHeight}"/>
+                                      reportWidth="{reportWidth}" reportHeight="{reportHeight}"/>
     </mx:ViewStack>
 </mx:Application>

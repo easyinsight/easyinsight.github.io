@@ -177,6 +177,53 @@ public class DataService {
         return dataSet;
     }
 
+    public Map<String, EmbeddedDataResults> getOptimizedResults(List<Integer> reportIDs, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            //List<WSAnalysisDefinition> reports = new ArrayList<WSAnalysisDefinition>();
+            Map<String, WSAnalysisDefinition> reports = new HashMap<String, WSAnalysisDefinition>();
+            WSListDefinition pseudoReport = new WSListDefinition();
+            pseudoReport.setColumns(new ArrayList<AnalysisItem>());
+            pseudoReport.setAddedItems(new ArrayList<AnalysisItem>());
+            pseudoReport.setDataFeedID(dataSourceID);
+            for (Integer reportID : reportIDs) {
+                WSGaugeDefinition report = (WSGaugeDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
+                reports.put(report.getMeasure().qualifiedName(), report);
+                pseudoReport.getAddedItems().addAll(report.getAddedItems());
+                pseudoReport.getColumns().add(report.getMeasure());
+            }
+            EmbeddedDataResults results = (EmbeddedDataResults) getEmbeddedResultsForReport(pseudoReport, dataSourceID, customFilters, insightRequestMetadata, null, conn);
+            ListRow row = results.getRows()[0];
+            Map<String, EmbeddedDataResults> map = new HashMap<String, EmbeddedDataResults>();
+            for (int i = 0; i < results.getHeaders().length; i++) {
+                EmbeddedDataResults childResults = new EmbeddedDataResults();
+                childResults.setDataSourceInfo(results.getDataSourceInfo());
+                AnalysisItem header = results.getHeaders()[i];
+                childResults.setDefinition(reports.get(header.qualifiedName()));
+                Value value = row.getValues()[i];
+                childResults.setHeaders(new AnalysisItem[] { header });
+                ListRow childRow = new ListRow();
+                childRow.setValues(new Value[] { value });
+                childResults.setRows(new ListRow[] { childRow });
+                map.put(String.valueOf(reportIDs.get(i)), childResults);
+            }
+            return map;
+        } catch (ReportException re) {
+            LogClass.error(re);
+            EmbeddedDataResults results = new EmbeddedDataResults();
+            results.setReportFault(re.getReportFault());
+            return null;
+        } catch (Exception e) {
+            LogClass.error(e);
+            EmbeddedDataResults results = new EmbeddedDataResults();
+            results.setReportFault(new ServerError(e.getMessage()));
+            return null;
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
     public EmbeddedVerticalResults getEmbeddedVerticalDataResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
         try {
             long startTime = System.currentTimeMillis();
@@ -202,22 +249,10 @@ public class DataService {
         }
     }
 
-    public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
-                                              InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters) {
-        System.out.println("request for " + reportID);
-        SecurityUtil.authorizeInsight(reportID);
-
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            Feed feed = feedRegistry.getFeed(dataSourceID, conn);
-
-            WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
-            if (analysisDefinition == null) {
-                return null;
-            }
-
-            insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
+    private EmbeddedResults getEmbeddedResultsForReport(WSAnalysisDefinition analysisDefinition, long dataSourceID, List<FilterDefinition> customFilters,
+                                              InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters, EIConnection conn) throws Exception {
+        Feed feed = feedRegistry.getFeed(dataSourceID, conn);
+        insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
 
             if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
@@ -318,6 +353,25 @@ public class DataService {
             DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
             dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
             results.setDataSourceInfo(dataSourceInfo);
+        return results;
+    }
+
+    public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
+                                              InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters) {
+        System.out.println("request for " + reportID);
+        SecurityUtil.authorizeInsight(reportID);
+
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+
+
+            WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            if (analysisDefinition == null) {
+                return null;
+            }
+            EmbeddedResults results = getEmbeddedResultsForReport(analysisDefinition, dataSourceID, customFilters, insightRequestMetadata, drillThroughFilters, conn);
+
             //BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             conn.commit();
             //System.out.println("Took " + (System.currentTimeMillis() - beginTime) / 1000 + " seconds to retrieve " + reportID);

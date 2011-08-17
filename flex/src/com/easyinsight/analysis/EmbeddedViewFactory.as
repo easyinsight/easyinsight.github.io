@@ -45,7 +45,7 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
 
     private var _loadingDisplay:LoadingModuleDisplay;
 
-    private var _prefix:String = "";
+    private var _prefix:String = Constants.instance().prefix;
 
     private var moduleInfo:IModuleInfo;
 
@@ -66,10 +66,6 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
 
     public function get reportRendererModule():String {
         return _reportRendererModule;
-    }
-
-    public function set prefix(val:String):void {
-        _prefix = val;
     }
 
     public function set reportDataService(val:Class):void {

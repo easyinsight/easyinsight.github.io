@@ -11,6 +11,7 @@
         import com.easyinsight.account.Account;
         import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.PopupMenuFactory;
+        import com.easyinsight.framework.BasicInfo;
         import com.easyinsight.framework.ConnectionGoEvent;
         import com.easyinsight.framework.EIGlobalTimer;
         import com.easyinsight.framework.FragmentParser;
@@ -101,7 +102,9 @@
         private var globalTimer:EIGlobalTimer;
 
         private function gotBuildPath():void {
-            Constants.instance().buildPath = userService.getBuildPath.lastResult as String;
+            var basicInfo:BasicInfo = userService.getBuildPath.lastResult as BasicInfo;
+            Constants.instance().buildPath = basicInfo.version;
+            Constants.instance().prefix = basicInfo.prefix;
             userService.isSessionLoggedIn.send();
         }
 
@@ -180,28 +183,15 @@
                     page = fragment;
                 }
                 if (page != null) {
-                    /*if (currentState == "Analysis") {
-                     dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                     dataAnalysis = null;
-                     }*/
                     switch (page) {
-                        case "kpis":
-                            navigation(new NavigationEvent("Scorecards"));
-                            break;
                         case "exchange":
                             navigation(new NavigationEvent("Exchange"));
-                            break;
-                        case "groups":
-                            navigation(new NavigationEvent("Groups"));
                             break;
                         case "scheduling":
                             navigation(new NavigationEvent("Scheduling"));
                             break;
                         case "help":
                             navigation(new NavigationEvent("Help"));
-                            break;
-                        case "apis":
-                            navigation(new NavigationEvent("Developers"));
                             break;
                         case "home":
                         case "intro":

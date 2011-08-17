@@ -17,7 +17,7 @@
         String width = request.getParameter("width");
         String height = request.getParameter("height");
         String seleniumID = request.getParameter("seleniumID");
-        String versionDir = new com.easyinsight.users.UserService().getBuildPath();
+        String versionDir = new com.easyinsight.users.UserService().getBuildPath().getVersion();
     %>
   <object width="<%= width %>" height="<%= height %>" codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
       <param name="movie" value="/app/<%=versionDir%>/SeleniumReportView.swf" />

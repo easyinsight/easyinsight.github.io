@@ -47,6 +47,7 @@
 
             if (_urlKey != null) {
                 analysisService.openAnalysisIfPossible.send(_urlKey);
+            } else {
             }
         }
 
@@ -61,8 +62,6 @@
         private var _dataSourceID:int;
         [Bindable]
         private var _reportName:String;
-
-        private var _prefix:String = "";
 
         private var _titleFunction:Function;
         private var _titleFunctionCaller:Object;
@@ -101,11 +100,6 @@
             if (_dataSourceID == value) return;
             _dataSourceID = value;
             dispatchEvent(new Event("dataSourceIDChanged"));
-            invalidateProperties();
-        }
-
-        public function set prefix(val:String):void {
-            _prefix = val;
             invalidateProperties();
         }
 
@@ -199,7 +193,6 @@
                 var controllerClass:Class = EmbeddedControllerLookup.controllerForType(_reportType);
                 var controller:IEmbeddedReportController = new controllerClass();
                 dataViewFactory = controller.createEmbeddedView();
-                dataViewFactory.prefix = _prefix;
                 dataViewFactory.reportID = _analysisID;
                 dataViewFactory.dataSourceID = _dataSourceID;
                 coreVBox.addChild(dataViewFactory);

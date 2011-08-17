@@ -1,6 +1,7 @@
 package com.easyinsight.users;
 
 import com.easyinsight.analysis.ReportTypeOptions;
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -42,12 +43,19 @@ import flex.messaging.FlexContext;
  */
 public class UserService {
 
-    public String getBuildPath() {
+    public BasicInfo getBuildPath() {
         try {
             URL url = getClass().getClassLoader().getResource("version.properties");
             Properties properties = new Properties();
             properties.load(new FileInputStream(new File(url.getFile())));
-            return (String) properties.get("ei.version");
+            BasicInfo basicInfo = new BasicInfo();
+            basicInfo.setVersion((String) properties.get("ei.version"));
+            if (ConfigLoader.instance().isProduction()) {
+                basicInfo.setPrefix("https://www.easy-insight.com");
+            } else {
+                basicInfo.setPrefix("");
+            }
+            return basicInfo;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -77,7 +85,7 @@ public class UserService {
                 nukeTimedState.executeUpdate();
                 PreparedStatement addTimedState = conn.prepareStatement("INSERT INTO ACCOUNT_TIMED_STATE (ACCOUNT_ID, ACCOUNT_STATE, STATE_CHANGE_TIME) VALUES (?, ?, ?)");
                 Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.DAY_OF_YEAR, 30);
+                cal.add(Calendar.DAY_OF_YEAR, 15);
                 addTimedState.setLong(1, accountID);
                 addTimedState.setInt(2, Account.ACTIVE);
                 addTimedState.setTimestamp(3, new java.sql.Timestamp(cal.getTimeInMillis()));
