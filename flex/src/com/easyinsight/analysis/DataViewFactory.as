@@ -1,8 +1,8 @@
 package com.easyinsight.analysis {
 import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.filtering.FilterRawData;
-import com.easyinsight.framework.Constants;
 import com.easyinsight.framework.DataServiceLoadingEvent;
+import com.easyinsight.framework.ReportModuleLoader;
 
 import com.easyinsight.report.ReportEventProcessor;
 
@@ -11,19 +11,13 @@ import com.easyinsight.report.ReportNavigationEvent;
 import flash.display.DisplayObject;
 import flash.events.Event;
 
-import flash.system.ApplicationDomain;
-
 import mx.binding.utils.BindingUtils;
 import mx.binding.utils.ChangeWatcher;
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.Canvas;
 import mx.containers.VBox;
-import mx.controls.Alert;
 import mx.controls.ProgressBar;
-import mx.events.ModuleEvent;
-import mx.modules.IModuleInfo;
-import mx.modules.ModuleManager;
 
 public class DataViewFactory extends VBox implements IRetrievable {
 
@@ -39,15 +33,11 @@ public class DataViewFactory extends VBox implements IRetrievable {
     private var _lastData:ArrayCollection;
     private var _availableFields:ArrayCollection;
 
-    private var moduleInfo:IModuleInfo;
-
     private var _dataSourceID:int;
 
     private var _controlBar:IReportControlBar;
     private var _reportRenderer:IReportRenderer;
     private var _dataService:IReportDataService;
-
-    private var _loadingDisplay:LoadingModuleDisplay;
 
     private var _reportSelectionEnabled:Boolean = false;
 
@@ -244,7 +234,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _reportRenderer.removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             reportCanvas.removeChild(_reportRenderer as DisplayObject);
         }
-        moduleInfo = null;
     }
 
     private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
@@ -328,22 +317,16 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _dataService.retrieveData(_analysisDefinition, false);
     }
 
+    private var reportModuleLoader:ReportModuleLoader;
+
     private function loadReportRenderer():void {
-        moduleInfo = ModuleManager.getModule("/app/"+Constants.instance().buildPath+"/" + _reportRendererModule);
-        moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler, false, 0, true);
-        moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler, false, 0, true);
-        _loadingDisplay = new LoadingModuleDisplay();
-        _loadingDisplay.moduleInfo = moduleInfo;
-        reportCanvas.addChild(_loadingDisplay);
-        moduleInfo.load(ApplicationDomain.currentDomain);
+        reportModuleLoader = new ReportModuleLoader();
+        reportModuleLoader.addEventListener("moduleLoaded", reportLoadHandler);
+        reportModuleLoader.loadReportRenderer(_reportRendererModule, reportCanvas);
     }
             
-    private function reportLoadHandler(event:ModuleEvent):void {
-        if (moduleInfo != null) {
-            moduleInfo.removeEventListener(ModuleEvent.READY, reportLoadHandler);
-            moduleInfo.removeEventListener(ModuleEvent.ERROR, reportFailureHandler);
-            _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
-        }
+    private function reportLoadHandler(event:Event):void {
+        _reportRenderer = reportModuleLoader.create() as IReportRenderer;
         //moduleInfo = null;
         if (_reportRenderer != null) {
             _reportRenderer.addEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded, false, 0, true);
@@ -364,11 +347,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
                 reportSelectable = false;
             }
             _dataService.preserveValues = _reportRenderer.preserveValues();
-            if (_loadingDisplay != null) {
-                reportCanvas.removeChild(_loadingDisplay);
-                _loadingDisplay.moduleInfo = null;
-                _loadingDisplay = null;
-            }
             reportCanvas.addChild(_reportRenderer as DisplayObject);
             if (pendingRequest) {
                 pendingRequest = false;
@@ -416,12 +394,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     private function onItemAdded(event:ReportRendererEvent):void {
         _controlBar.addItem(event.analysisItem);
-    }
-
-    private function reportFailureHandler(event:ModuleEvent):void {
-        moduleInfo.removeEventListener(ModuleEvent.READY, reportLoadHandler);
-        moduleInfo.removeEventListener(ModuleEvent.ERROR, reportFailureHandler);
-        Alert.show(event.errorText);
     }
 
     public function fromExistingDefinition(existingDefinition:AnalysisDefinition):AnalysisDefinition {

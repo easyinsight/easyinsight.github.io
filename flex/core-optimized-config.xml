@@ -31,6 +31,7 @@
         <services>/blazeds/services-config.xml</services>
         <source-path>
             <path-element>src</path-element>
+            <path-element>production</path-element>
         </source-path>
     </compiler>
     <target-player>10.0.0</target-player>

@@ -6,6 +6,7 @@ import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.framework.Constants;
 import com.easyinsight.framework.DataServiceLoadingEvent;
+import com.easyinsight.framework.ReportModuleLoader;
 import com.easyinsight.report.ReportCanvas;
 import com.easyinsight.report.ReportEventProcessor;
 import com.easyinsight.report.ReportInfo;
@@ -15,18 +16,13 @@ import com.easyinsight.util.EIErrorEvent;
 
 import flash.display.DisplayObject;
 import flash.events.Event;
-import flash.system.ApplicationDomain;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.Canvas;
 import mx.containers.VBox;
-import mx.controls.Alert;
 import mx.controls.ProgressBar;
-import mx.events.ModuleEvent;
-import mx.modules.IModuleInfo;
-import mx.modules.ModuleManager;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
@@ -42,12 +38,6 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
     private var _reportRendererModule:String;
     //private var _newDefinition:Class;
     private var _reportDataService:Class = EmbeddedDataService;
-
-    private var _loadingDisplay:LoadingModuleDisplay;
-
-    private var _prefix:String = Constants.instance().prefix;
-
-    private var moduleInfo:IModuleInfo;
 
     private var _reportRenderer:IReportRenderer;
     private var _dataService:IEmbeddedDataService = new EmbeddedDataService();
@@ -290,7 +280,7 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
         if (event.reportFault != null) {
             event.reportFault.popup(this, onProblem);
         } else {
-            event.additionalProperties.prefix = _prefix;
+            event.additionalProperties.prefix = Constants.instance().prefix;
             try {
                 _report = event.analysisDefinition;
                 _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, new Object(), event.additionalProperties);
@@ -304,13 +294,9 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
     }
 
     private function loadReportRenderer():void {
-        moduleInfo = ModuleManager.getModule(_prefix + "/app/"+Constants.instance().buildPath+"/" + _reportRendererModule);
-        moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
-        moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
-        _loadingDisplay = new LoadingModuleDisplay();
-        _loadingDisplay.moduleInfo = moduleInfo;
-        reportCanvas.addChild(_loadingDisplay);
-        moduleInfo.load(ApplicationDomain.currentDomain);
+        reportModuleLoader = new ReportModuleLoader();
+        reportModuleLoader.addEventListener("moduleLoaded", reportLoadHandler);
+        reportModuleLoader.loadReportRenderer(_reportRendererModule, reportCanvas);
     }
 
     private var _stackTrace:String;
@@ -352,8 +338,10 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
         dispatchEvent(new Event("loadingChanged"));
     }
 
-    private function reportLoadHandler(event:ModuleEvent):void {
-        _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
+    private var reportModuleLoader:ReportModuleLoader;
+
+    private function reportLoadHandler(event:Event):void {
+        _reportRenderer = reportModuleLoader.create() as IReportRenderer;
         _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender, false, 0, true);
         _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown, false, 0, true);
         _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup, false, 0, true);
@@ -361,11 +349,6 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
         _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
         _reportRenderer.addEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, onItemChange, false, 0, true);
         _dataService.preserveValues = _reportRenderer.preserveValues();
-        if (_loadingDisplay != null) {
-            reportCanvas.removeChild(_loadingDisplay);
-            _loadingDisplay.moduleInfo = null;
-            _loadingDisplay = null;
-        }
         reportCanvas.reportBox.addChild(_reportRenderer as DisplayObject);
         if (pendingRequest) {
             pendingRequest = false;
@@ -407,12 +390,6 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
 
     private function forceRender(event:ReportRendererEvent):void {
         retrieveData(false);
-    }
-
-    private function reportFailureHandler(event:ModuleEvent):void {
-        if (event.errorText != "SWF is not a loadable module") {
-            Alert.show(event.errorText);
-        }
     }
     }
 }
