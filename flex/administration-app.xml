@@ -1,7 +1,7 @@
 <flex-config xmlns="http://www.adobe.com/2006/flex-config">
     <target-player>10.0.0</target-player>
     <compiler>
-        <debug>false</debug>
+        <debug>true</debug>
         <!--
         <external-library-path>
             <path-element>libs/astra-flex.swc</path-element>
@@ -38,7 +38,8 @@
        <!-- <services>C:\apache-tomcat-6.0.14\webapps\app\WEB-INF\flex\services-config.xml</services> -->
         <services>/blazeds/services-config.xml</services>
         <source-path>
-         <path-element>/src</path-element>
+         <path-element>src</path-element>
+            <path-element>production</path-element>
       </source-path>
     </compiler>
     <file-specs>
