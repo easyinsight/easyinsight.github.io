@@ -1,12 +1,10 @@
 package com.easyinsight.analysis.charts {
-import com.easyinsight.analysis.PopupMenuFactory;
 
 import flash.events.ContextMenuEvent;
 import mx.charts.LegendItem;
 public class EILegendItem extends LegendItem{
     public function EILegendItem() {
         super();
-        PopupMenuFactory.menuFactory.createStandardMenu(onDrilldown, onRollup, this);
 		invalidateDisplayList();
     }
 
