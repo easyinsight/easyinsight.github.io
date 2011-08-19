@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="true" type="Flex" version="4">
   <component name="Flex.Build.Configuration">
-    <option name="APPLICATION_ENTRY_POINT" value="flex/src/AirTest.mxml" />
-    <option name="VERSION" value="2" />
-    <option name="SERVER_TECHNOLOGY" value="BlazeDS" />
-    <option name="PATH_TO_SERVICES_CONFIG_XML" value="flex\blazeds\services-config.xml" />
+    <option name="MAIN_CLASS" value="AirTest" />
+    <option name="TARGET_PLAYER_VERSION" value="10.0.0" />
+    <option name="PATH_TO_SERVICES_CONFIG_XML" value="flex/blazeds/services-config.xml" />
     <option name="CONTEXT_ROOT" value="app" />
+    <option name="VERSION" value="3" />
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/../../apache-tomcat-6.0.14/webapps/app/easyui-debug" />
@@ -13,7 +13,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="flex3" jdkType="Flex SDK Type" />
+    <orderEntry type="jdk" jdkName="flex35 AIR" jdkType="AIR SDK Type" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
       <library name="flex libs">

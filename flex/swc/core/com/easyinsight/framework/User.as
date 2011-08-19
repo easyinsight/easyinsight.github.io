@@ -45,6 +45,7 @@ public class User extends EventDispatcher
     public var newsletterEnabled:Boolean;
     public var reportTypeOptions:ReportTypeOptions;
     public var fixedDashboardID:int;
+    public var subdomainEnabled:Boolean;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -122,6 +123,7 @@ public class User extends EventDispatcher
         _user.guestUser = response.guestUser;
         _user.reportTypeOptions = response.reportTypeOptions;
         _user.fixedDashboardID = response.fixedDashboardID;
+        _user.subdomainEnabled = response.subdomainEnabled;
         if (response.uiSettings != null) {
             _user.uiConfiguration = UIConfiguration.fromUISettings(response.uiSettings);
         }

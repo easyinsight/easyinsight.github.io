@@ -1,5 +1,5 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-        creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyedSignon); focusManager.setFocus(userName)"
+        creationComplete="creationComplete()"
         width="100%" height="100%" backgroundColor="#EEEEEE" horizontalAlign="center" verticalAlign="middle">
     <mx:Metadata>
         [Event(name="loginEvent2", type="com.easyinsight.framework.LoginEvent")]
@@ -50,12 +50,23 @@
         import com.easyinsight.util.CookieUtil;
 
         import mx.controls.Alert;
+        import mx.core.Application;
         import mx.messaging.config.ServerConfig;
         import mx.rpc.AsyncResponder;
         import mx.rpc.AsyncToken;
         import mx.rpc.events.FaultEvent;
         import mx.rpc.events.ResultEvent;
         import mx.validators.Validator;
+
+        private function creationComplete():void {
+          addEventListener(KeyboardEvent.KEY_UP, keyedSignon);
+          focusManager.setFocus(userName);
+            if(Application.application.parameters.subdomain == null) {
+                loginImage = embeddedLoginImage;
+            } else {
+                authService.getLoginImage.send(Application.application.parameters.subdomain)
+            }
+        }
 
         private function passwordResetEnter(event:KeyboardEvent):void {
             if (event.keyCode == Keyboard.ENTER) {
@@ -80,6 +91,11 @@
         [Bindable]
         private var _additionalInfo:String;
 
+        [Embed(source='../../../../assets/logo2.PNG')]
+        private var embeddedLoginImage:Class;
+
+        [Bindable]
+        private var loginImage:Object;
 
         [Bindable]
         private var resetResult:String;
@@ -214,7 +230,27 @@
 
         [Bindable]
         private var stackIndex:int;
-                ]]>
+
+        private function gotLoginImage():void {
+            var byteArray:ByteArray = authService.getLoginImage.lastResult as ByteArray;
+            if(byteArray == null) {
+                loginImage = embeddedLoginImage;
+            } else {
+                var loader:Loader = new Loader();
+                loader.contentLoaderInfo.addEventListener(Event.COMPLETE, loginImageComplete);
+                loader.loadBytes(byteArray);
+            }
+        }
+
+        private function loginImageComplete(event:Event):void {
+            var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
+            var bitmap:Bitmap = Bitmap(loaderContent.loader.content);
+            loaderContent.loader.removeEventListener(Event.COMPLETE, loginImageComplete);
+            loginImage = bitmap;
+        }
+
+
+        ]]>
 	</mx:Script>
     <mx:VBox id="coreBox" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" cornerRadius="10"
             borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
@@ -222,7 +258,7 @@
             <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true">
                 <mx:VBox paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
                     <mx:Box width="100%" horizontalAlign="center" paddingBottom="10">
-                        <mx:Image source="@Embed(source='../../../../assets/logo2.PNG')"/>
+                        <mx:Image source="{loginImage}"/>
                     </mx:Box>
                     <mx:ViewStack resizeToContent="true" selectedIndex="{failureIndex}" width="100%">
                         <mx:Box/>
@@ -270,5 +306,6 @@
         <mx:method name="authenticate" result="handleAuthentication()"
                    fault="failureMessage = event.fault.faultString"/>
         <mx:method name="remindPassword" result="reset()" fault="emailFailure = event.fault.faultString"/>
+        <mx:method name="getLoginImage" result="gotLoginImage()" />
     </mx:RemoteObject>
 </mx:VBox>

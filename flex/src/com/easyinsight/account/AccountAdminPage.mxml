@@ -31,6 +31,7 @@
              <mx:Button label="Edit Account Skin..." click="editAccountStyling()" styleName="grayButton" fontSize="14" width="220"/>
              <mx:Button label="Edit My Skin..." click="editUserStyling()" styleName="grayButton" fontSize="14" width="220"/>
              <mx:Button label="SSO Configuration..." click="ssoConfig()" styleName="grayButton" fontSize="14" width="220" visible="{showSSO}"/>
+             <mx:Button label="Edit Login Page..." click="loginPageConfig()" styleName="grayButton" fontSize="14" width="220" visible="{showLoginPageConfig}" />
         </mx:VBox>
         <mx:VRule strokeColor="#333333"/>
         <mx:VBox horizontalAlign="center" width="33%">
@@ -54,6 +55,9 @@
 
         [Bindable]
         private var showSSO:Boolean;
+
+        [Bindable]
+        private var showLoginPageConfig:Boolean;
 
         [Bindable]
         private var showUpgrade:Boolean;
@@ -96,6 +100,7 @@
         private function onCreationComplete():void {
             showUpgrade = User.getInstance().getAccountType() != Account.ENTERPRISE;
             showSSO = User.getInstance().getAccountType() >= Account.ENTERPRISE;
+            showLoginPageConfig = User.getInstance().subdomainEnabled
             if (User.getInstance().accountState == Account.TRIAL) {
                 currentState = "trialAccount";
             }
@@ -118,5 +123,13 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
+        private function loginPageConfig():void {
+            var window:WhiteLabelConfigWindow = new WhiteLabelConfigWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+
         ]]></mx:Script>
 </mx:VBox>

@@ -779,7 +779,7 @@ public class UserService {
                     user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                     user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                     userInfo.settings, account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions());
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
             response.setScenario(existing.getScenario());
             return response;
         }
@@ -813,7 +813,7 @@ public class UserService {
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                             ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
                             user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions());
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
                 } else {
                     userServiceResponse = null;
                 }
@@ -860,7 +860,7 @@ public class UserService {
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                             ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
                             user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions());
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
                     String sessionCookie = RandomTextGenerator.generateText(30);
                     userServiceResponse.setSessionCookie(sessionCookie);
                     user.setLastLoginDate(new Date());
@@ -960,7 +960,7 @@ public class UserService {
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
                                 account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions());
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
 
 
                 } else {
@@ -1053,7 +1053,7 @@ public class UserService {
                     user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                     ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
                     user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions());
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
             user.setLastLoginDate(new Date());
             session.update(user);
             conn.commit();
@@ -1184,7 +1184,7 @@ public class UserService {
                     user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                     ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
                     user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions());
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
             user.setLastLoginDate(new Date());
             session.update(user);
         } else if (account.getExternalLogin() != null) {
@@ -1202,7 +1202,7 @@ public class UserService {
                         user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                         ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
                         user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions());
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
                 user.setLastLoginDate(new Date());
                 session.update(user);
             } else {
@@ -1261,7 +1261,7 @@ public class UserService {
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                                 ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions());
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
                         userServiceResponse.setScenario(scenario);
                         user.setLastLoginDate(new Date());
                         session.update(user);
@@ -1308,6 +1308,28 @@ public class UserService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public byte[] getLoginImage(String subdomain) {
+        byte[] bytes = null;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM ACCOUNT LEFT JOIN USER_IMAGE ON ACCOUNT.login_image = USER_IMAGE.user_image_id where account.subdomain = ?");
+            queryStmt.setString(1, subdomain);
+            ResultSet rs = queryStmt.executeQuery();
+            if(rs.next())
+                bytes = rs.getBytes(1);
+            conn.commit();
+            return bytes;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }

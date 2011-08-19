@@ -45,6 +45,7 @@ public class UserServiceResponse {
     private boolean newsletterEnabled;
     private long fixedDashboardID;
     private ReportTypeOptions reportTypeOptions;
+    private boolean subdomainEnabled;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -58,7 +59,8 @@ public class UserServiceResponse {
                                boolean firstLogin, Date lastLoginDate, String accountName,
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
-                               String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions) {
+                               String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
+                               boolean subdomainEnabled) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -92,6 +94,7 @@ public class UserServiceResponse {
         }
         this.fixedDashboardID = fixedDashboardID;
         this.reportTypeOptions = reportTypeOptions;
+        this.subdomainEnabled = subdomainEnabled;
     }
 
     public ReportTypeOptions getReportTypeOptions() {
@@ -359,5 +362,13 @@ public class UserServiceResponse {
 
     public void setNewsletterEnabled(boolean newsletterEnabled) {
         this.newsletterEnabled = newsletterEnabled;
+    }
+
+    public boolean isSubdomainEnabled() {
+        return subdomainEnabled;
+    }
+
+    public void setSubdomainEnabled(boolean subdomainEnabled) {
+        this.subdomainEnabled = subdomainEnabled;
     }
 }

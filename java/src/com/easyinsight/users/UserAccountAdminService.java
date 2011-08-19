@@ -2,6 +2,7 @@ package com.easyinsight.users;
 
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.groups.Group;
+import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.preferences.UserDLS;
 import com.easyinsight.preferences.UserDLSFilter;
 import com.easyinsight.security.SecurityUtil;
@@ -16,11 +17,9 @@ import com.easyinsight.groups.GroupStorage;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Date;
 
 /**
  * User: James Boe
@@ -776,6 +775,54 @@ public class UserAccountAdminService {
             throw new RuntimeException(e);
         } finally {
             session.close();
+        }
+    }
+
+    public ImageDescriptor getWhiteLabelImage() {
+        long accountId;
+        accountId = SecurityUtil.getAccountID();
+        EIConnection conn = Database.instance().getConnection();
+        ImageDescriptor desc = null;
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement stmt = conn.prepareStatement("select image_name, user_image_id from account left join user_image on account.login_image = user_image.user_image_id where account_id = ?");
+            stmt.setLong(1, accountId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                desc = new ImageDescriptor();
+                desc.setName(rs.getString(1));
+                desc.setId(rs.getLong(2));
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return desc;
+    }
+
+    public void saveWhiteLabelImage(ImageDescriptor imageDescriptor) {
+        long accountId = SecurityUtil.getAccountID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement stmt = conn.prepareStatement("update account set login_image = ? where account_id = ?");
+            if(imageDescriptor != null)
+                stmt.setLong(1, imageDescriptor.getId());
+            else
+                stmt.setNull(1, Types.BIGINT);
+            stmt.setLong(2, accountId);
+            stmt.executeUpdate();
+            stmt.close();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 }

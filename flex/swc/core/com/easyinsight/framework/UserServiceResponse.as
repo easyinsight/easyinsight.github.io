@@ -42,6 +42,7 @@ public class UserServiceResponse
     public var newsletterEnabled:Boolean;
     public var fixedDashboardID:int;
     public var reportTypeOptions:ReportTypeOptions;
+    public var subdomainEnabled:Boolean;
 
     public function UserServiceResponse()
         {

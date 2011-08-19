@@ -147,6 +147,12 @@ public class Account {
     @Column(name="snappcloud_id")
     private String snappCloudId;
 
+    @Column(name="subdomain")
+    private String subdomain;
+
+    @Column(name="subdomain_enabled")
+    private Boolean subdomainEnabled;
+
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
@@ -525,5 +531,21 @@ public class Account {
 
     public void setSnappCloudId(String snappCloudId) {
         this.snappCloudId = snappCloudId;
+    }
+
+    public Boolean isSubdomainEnabled() {
+        return subdomainEnabled;
+    }
+
+    public void setSubdomainEnabled(Boolean subdomainEnabled) {
+        this.subdomainEnabled = subdomainEnabled;
+    }
+
+    public String getSubdomain() {
+        return subdomain;
+    }
+
+    public void setSubdomain(String subdomain) {
+        this.subdomain = subdomain;
     }
 }

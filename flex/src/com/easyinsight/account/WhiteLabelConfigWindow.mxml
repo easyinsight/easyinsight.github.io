@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                   xmlns:skin="com.easyinsight.skin.*" creationComplete="onCreationComplete()">
+    <skin:ImageBox id="loginImageBox" imageDescriptor="{image}" />
+    <mx:HBox>
+        <util:SaveButton label="Save" click="accountAdminService.saveWhiteLabelImage.send(loginImageBox.imageDescriptor)" />
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+    <mx:Script><![CDATA[
+        import com.easyinsight.skin.ImageDescriptor;
+
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var image:ImageDescriptor;
+
+        private function onCreationComplete():void {
+            accountAdminService.getWhiteLabelImage.send()
+        }
+
+        private function onImageRetrieval():void {
+            image = accountAdminService.getWhiteLabelImage.lastResult as ImageDescriptor;
+        }
+
+        ]]></mx:Script>
+    <mx:RemoteObject id="accountAdminService" destination="accountAdmin">
+        <mx:method name="getWhiteLabelImage" result="onImageRetrieval()"></mx:method>
+        <mx:method name="saveWhiteLabelImage" result="PopUpManager.removePopUp(this)"></mx:method>
+    </mx:RemoteObject>
+</util:EISlimWindow>
