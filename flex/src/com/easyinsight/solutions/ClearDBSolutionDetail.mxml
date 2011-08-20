@@ -58,7 +58,7 @@
                            id="installButton"/>
             </mx:Box>
             <mx:HRule width="100%" strokeColor="#333333"/>
-            <mx:Image source="../assets/highrise/ContactHeatMapSmall.png"/>
+            <mx:Image source="../assets/SimpleDashboard.jpg"/>
             <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"
                          height="120"
                          text="Take advantage of Easy Insight to extend your ClearDB reporting capabilities to the next level of visibility and analysis. Easily apply custom filters to your Quickbase data. View data as lists, charte, trees, maps, or any of the other rich forms of visualization offered by Easy Insight. Share the reports with your coworkers or embed them into iGoogle or another dashboard."

@@ -513,6 +513,9 @@ public class AnalysisDefinition implements Cloneable {
         if (analysisDefinition.getJoinOverrides() != null) {
             for (JoinOverride joinOverride : analysisDefinition.getJoinOverrides()) {
                 joinOverride.updateIDs(replacementMap);
+                if (target != null) {
+                    joinOverride.setDataSourceID(target.getDataFeedID());
+                }
             }
         }
         analysisDefinition.getAnalysisDefinitionState().updateIDs(replacementMap);

@@ -45,6 +45,13 @@ public class FederatedDataSource extends FeedDefinition {
     }
 
     @Override
+    public boolean customJoinsAllowed(EIConnection conn) throws SQLException {
+        FederationSource source1 = sources.get(0);
+        FeedDefinition child = new FeedStorage().getFeedDefinitionData(source1.getDataSourceID(), conn);
+        return child.customJoinsAllowed(conn);
+    }
+
+    @Override
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEDERATED_DATA_SOURCE WHERE data_source_id = ?");

@@ -350,6 +350,7 @@ public class GoogleDataProvider {
                             continue;
                         }
                         quickbaseDatabaseSource.setVisible(false);
+                        quickbaseDatabaseSource.setIndexEnabled(supportIndex);
                         map.put(quickbaseDatabaseSource.getDatabaseID(), quickbaseDatabaseSource);
                         quickbaseDatabaseSource.setParentSourceID(quickbaseCompositeSource.getDataFeedID());
                         UploadPolicy childPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
@@ -396,7 +397,7 @@ public class GoogleDataProvider {
                         continue;
                     }
                     compositeFeedConnectionList.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceKey, targetKey, source.getFeedName(),
-                            target.getFeedName()));
+                            target.getFeedName(), false));
                 }
             }
             quickbaseCompositeSource.setConnections(compositeFeedConnectionList);

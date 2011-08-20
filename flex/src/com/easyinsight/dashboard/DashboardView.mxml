@@ -158,7 +158,7 @@
 
 
         private function transformsUpdated(event:Event):void {
-            rootView.refresh(transformContainer.getFilterDefinitions());
+            rootView.refresh();
         }
 
         [Bindable]

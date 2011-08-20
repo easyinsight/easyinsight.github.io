@@ -10,7 +10,7 @@ package com.easyinsight.filtering {
 [RemoteClass(alias="com.easyinsight.analysis.NamedFilterReference")]
 public class NamedFilterReference extends FilterDefinition {
 
-    public var referenceName:String;
+    public var referenceName:String = "";
 
     public function NamedFilterReference() {
     }

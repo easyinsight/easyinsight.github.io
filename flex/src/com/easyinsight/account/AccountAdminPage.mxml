@@ -100,7 +100,7 @@
         private function onCreationComplete():void {
             showUpgrade = User.getInstance().getAccountType() != Account.ENTERPRISE;
             showSSO = User.getInstance().getAccountType() >= Account.ENTERPRISE;
-            showLoginPageConfig = User.getInstance().subdomainEnabled
+            showLoginPageConfig = User.getInstance().subdomainEnabled;
             if (User.getInstance().accountState == Account.TRIAL) {
                 currentState = "trialAccount";
             }

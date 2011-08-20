@@ -151,11 +151,33 @@ public class Account {
     private String subdomain;
 
     @Column(name="subdomain_enabled")
-    private Boolean subdomainEnabled;
+    private boolean subdomainEnabled;
+
+    @Column(name="ilog_enabled")
+    private boolean ilogEnabled;
+
+    @Column(name="heat_map_Enabled")
+    private boolean heatMapEnabled;
 
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public boolean isIlogEnabled() {
+        return ilogEnabled;
+    }
+
+    public void setIlogEnabled(boolean ilogEnabled) {
+        this.ilogEnabled = ilogEnabled;
+    }
+
+    public boolean isHeatMapEnabled() {
+        return heatMapEnabled;
+    }
+
+    public void setHeatMapEnabled(boolean heatMapEnabled) {
+        this.heatMapEnabled = heatMapEnabled;
+    }
 
     public int getFirstDayOfWeek() {
         return firstDayOfWeek;
@@ -533,11 +555,11 @@ public class Account {
         this.snappCloudId = snappCloudId;
     }
 
-    public Boolean isSubdomainEnabled() {
+    public boolean isSubdomainEnabled() {
         return subdomainEnabled;
     }
 
-    public void setSubdomainEnabled(Boolean subdomainEnabled) {
+    public void setSubdomainEnabled(boolean subdomainEnabled) {
         this.subdomainEnabled = subdomainEnabled;
     }
 

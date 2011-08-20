@@ -65,7 +65,7 @@
             </mx:Box>
             <mx:HRule width="100%" strokeColor="#333333"/>
             <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10" horizontalGap="50">
-                <mx:Image source="../assets/googleanalytics/GoogleAnalyticsHeatMap.jpg" height="150"/>
+                <mx:Image source="../assets/SimpleDashboard.jpg" height="150"/>
                 <mx:Image source="../assets/googleanalytics/LineChartSmall.jpg" height="150"/>
             </mx:HBox>
             <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"

@@ -20,7 +20,7 @@ import java.util.List;
 @PrimaryKeyJoinColumn(name="filter_id")
 public class NamedFilterReference extends FilterDefinition {
     @Column(name="filter_name")
-    private String referenceName;
+    private String referenceName = "";
 
     @Transient
     private FilterDefinition filter;

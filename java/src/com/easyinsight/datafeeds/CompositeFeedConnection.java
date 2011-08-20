@@ -35,6 +35,7 @@ public class CompositeFeedConnection implements Serializable {
     private boolean targetOuterJoin;
     private String sourceFeedName;
     private String targetFeedName;
+    private boolean stripUnmatchedRows;
 
     public CompositeFeedConnection() {
     }
@@ -44,7 +45,7 @@ public class CompositeFeedConnection implements Serializable {
         this.targetFeedID = targetFeedID;
     }
 
-    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, Key sourceJoin, Key targetJoin, String sourceName, String targetName) {
+    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, Key sourceJoin, Key targetJoin, String sourceName, String targetName, boolean stripUnmatchedRows) {
         this.sourceFeedID = sourceFeedID;
         this.targetFeedID = targetFeedID;
         this.sourceJoin = sourceJoin;
@@ -53,9 +54,10 @@ public class CompositeFeedConnection implements Serializable {
         targetJoins = Arrays.asList(targetJoin);
         this.sourceFeedName = sourceName;
         this.targetFeedName = targetName;
+        this.stripUnmatchedRows = stripUnmatchedRows;
     }
 
-    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, AnalysisItem sourceItem, AnalysisItem targetItem, String sourceName, String targetName) {
+    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, AnalysisItem sourceItem, AnalysisItem targetItem, String sourceName, String targetName, boolean stripUnmatchedRows) {
         this.sourceFeedID = sourceFeedID;
         this.targetFeedID = targetFeedID;
         this.sourceItem = sourceItem;
@@ -64,6 +66,15 @@ public class CompositeFeedConnection implements Serializable {
         targetItems = Arrays.asList(targetItem);
         this.sourceFeedName = sourceName;
         this.targetFeedName = targetName;
+        this.stripUnmatchedRows = stripUnmatchedRows;
+    }
+
+    public boolean isStripUnmatchedRows() {
+        return stripUnmatchedRows;
+    }
+
+    public void setStripUnmatchedRows(boolean stripUnmatchedRows) {
+        this.stripUnmatchedRows = stripUnmatchedRows;
     }
 
     public List<AnalysisItem> getSourceItems() {
@@ -183,22 +194,24 @@ public class CompositeFeedConnection implements Serializable {
     public void store(Connection conn, long feedID) throws SQLException {
         if (sourceItem != null && targetItem != null) {
             PreparedStatement connInsertStmt = conn.prepareStatement("INSERT INTO COMPOSITE_CONNECTION (" +
-                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, source_item_id, target_item_id, COMPOSITE_FEED_ID) VALUES (?, ?, ?, ?, ?)");
+                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, source_item_id, target_item_id, COMPOSITE_FEED_ID, strip_unmatched_rows) VALUES (?, ?, ?, ?, ?, ?)");
             connInsertStmt.setLong(1, sourceFeedID);
             connInsertStmt.setLong(2, targetFeedID);
             connInsertStmt.setLong(3, sourceItem.getAnalysisItemID());
             connInsertStmt.setLong(4, targetItem.getAnalysisItemID());
             connInsertStmt.setLong(5, feedID);
+            connInsertStmt.setBoolean(6, stripUnmatchedRows);
             connInsertStmt.execute();
             connInsertStmt.close();
         } else {
             PreparedStatement connInsertStmt = conn.prepareStatement("INSERT INTO COMPOSITE_CONNECTION (" +
-                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, SOURCE_JOIN, TARGET_JOIN, COMPOSITE_FEED_ID) VALUES (?, ?, ?, ?, ?)");
+                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, SOURCE_JOIN, TARGET_JOIN, COMPOSITE_FEED_ID, strip_unmatched_rows) VALUES (?, ?, ?, ?, ?, ?)");
             connInsertStmt.setLong(1, sourceFeedID);
             connInsertStmt.setLong(2, targetFeedID);
             connInsertStmt.setLong(3, sourceJoin.getKeyID());
             connInsertStmt.setLong(4, targetJoin.getKeyID());
             connInsertStmt.setLong(5, feedID);
+            connInsertStmt.setBoolean(6, stripUnmatchedRows);
             connInsertStmt.execute();
             connInsertStmt.close();
         }
@@ -298,7 +311,9 @@ public class CompositeFeedConnection implements Serializable {
             IRow row = sourceIter.next();
             Value joinDimensionValue = row.getValue(myJoinDimension);
             if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
-                unjoinedRows.add(row);
+                if (!stripUnmatchedRows) {
+                    unjoinedRows.add(row);
+                }
             } else {
                 List<IRow> rows = index.get(joinDimensionValue);
                 if (rows == null){
@@ -315,7 +330,9 @@ public class CompositeFeedConnection implements Serializable {
             IRow row = targetIter.next();
             Value joinDimensionValue = row.getValue(fromJoinDimension);
             if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
-                unjoinedRows.add(row);
+                if (!("Contact".equals(sourceName) && "Deals".equals(targetName))) {
+                    unjoinedRows.add(row);
+                }
             } else {
                 indexCopy.remove(joinDimensionValue);
                 List<IRow> sourceRows = index.get(joinDimensionValue);

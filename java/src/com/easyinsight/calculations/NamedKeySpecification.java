@@ -5,6 +5,7 @@ import com.easyinsight.analysis.AnalysisItemTypes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -19,11 +20,13 @@ public class NamedKeySpecification implements KeySpecification {
     }
 
     @Nullable
-    public AnalysisItem findAnalysisItem(List<AnalysisItem> currentItems) {
-        for (AnalysisItem item : currentItems) {
-            if ((item.getKey().toKeyString().equals(key) || (item.getDisplayName() != null && item.getDisplayName().equals(key)))) {
-                return item;
-            }
+    public AnalysisItem findAnalysisItem(Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap) {
+        List<AnalysisItem> analysisItems = keyMap.get(key);
+        if (analysisItems == null) {
+            analysisItems = displayMap.get(key);
+        }
+        if (analysisItems != null) {
+            return analysisItems.get(0);
         }
         return null;
     }

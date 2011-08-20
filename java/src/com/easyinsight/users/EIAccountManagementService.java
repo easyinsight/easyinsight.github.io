@@ -1,11 +1,8 @@
 package com.easyinsight.users;
 
-import com.easyinsight.analysis.ReportTypeOptions;
 import com.easyinsight.database.EIConnection;
 
 import com.easyinsight.email.SendGridEmail;
-import com.easyinsight.preferences.ApplicationSkinSettings;
-import com.easyinsight.preferences.UISettingRetrieval;
 
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.PasswordService;
@@ -53,14 +50,18 @@ public class EIAccountManagementService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCOUNT.ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_STATE = ? AND " +
-                    "account.creation_date < ?");
+
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.USER_ID FROM USER, ACCOUNT WHERE USER.OPT_IN_EMAIL = ? AND " +
+                    "USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND USER.ACCOUNT_ADMIN = ? AND ACCOUNT_STATE = ? AND ACCOUNT.CREATION_DATE < ?");
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_STATE = ?");
-            queryStmt.setLong(1, Account.DELINQUENT);
+            queryStmt.setBoolean(1, true);
+            queryStmt.setBoolean(2, true);
+            queryStmt.setLong(3, Account.DELINQUENT);
             Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.YEAR, 2010);
-            cal.set(Calendar.DAY_OF_YEAR, 364);
-            queryStmt.setTimestamp(2, new Timestamp(cal.getTimeInMillis()));
+            cal.set(Calendar.YEAR, 2011);
+            cal.set(Calendar.MONTH, Calendar.MAY);
+            cal.set(Calendar.DAY_OF_YEAR, 30);
+            queryStmt.setTimestamp(4, new Timestamp(cal.getTimeInMillis()));
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long accountID = rs.getLong(1);
@@ -75,6 +76,46 @@ public class EIAccountManagementService {
             throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void comeBackEmail(String htmlText) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        SendGridEmail sendGridEmail = new SendGridEmail();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT EMAIL, USER.USER_ID FROM USER, ACCOUNT WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND " +
+                    "ACCOUNT.account_state = ?");
+            queryStmt.setInt(1, Account.REACTIVATION_POSSIBLE);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                String email = rs.getString(1);
+                long userID = rs.getLong(2);
+                PreparedStatement queryUnsubscribeStmt = conn.prepareStatement("SELECT unsubscribe_key from user_unsubscribe_key WHERE USER_ID = ?");
+                PreparedStatement insertKeyStmt = conn.prepareStatement("INSERT INTO USER_UNSUBSCRIBE_KEY (USER_ID, UNSUBSCRIBE_KEY) VALUES (?, ?)");
+                queryUnsubscribeStmt.setLong(1, SecurityUtil.getUserID());
+                ResultSet unsubscribeRS = queryUnsubscribeStmt.executeQuery();
+                String unsubscribeKey;
+                if (unsubscribeRS.next()) {
+                    unsubscribeKey = unsubscribeRS.getString(1);
+                } else {
+                    unsubscribeKey = RandomTextGenerator.generateText(12);
+                    insertKeyStmt.setLong(1, SecurityUtil.getUserID());
+                    insertKeyStmt.setString(2, unsubscribeKey);
+                    insertKeyStmt.execute();
+                }
+                String emailBody = htmlText.replace("{0}", "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
+                try {
+                    sendGridEmail.sendEmail(userID, email, "ComeBack", "Take another try with Easy Insight with a renewed 15 day free trial!", emailBody, conn);
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
             Database.closeConnection(conn);
         }
     }
@@ -190,18 +231,7 @@ public class EIAccountManagementService {
                     if (account.getAccountType() != Account.ADMINISTRATOR) {
                         throw new SecurityException();
                     }
-                    if (user.getPersonaID() != null) {
-                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
-                    }
-                    userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                            user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
-                            (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
-                            user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(), !account.isUpgraded(),
-                            !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
-                            account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()),
-                            account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
+                    userServiceResponse = UserServiceResponse.createResponse(user, session, conn);
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
                 }

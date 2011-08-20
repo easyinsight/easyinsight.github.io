@@ -5,6 +5,7 @@
         import com.easyinsight.analysis.AnalysisItemTypes;
 
         import com.easyinsight.analysis.DerivedKey;
+        import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -14,7 +15,16 @@
         import mx.managers.PopUpManager;
 
         [Bindable]
-        public var dataSources:ArrayCollection;
+        private var _dataSources:ArrayCollection;
+
+        public function set dataSources(value:ArrayCollection):void {
+            if (value != null) {
+                _dataSources = new ArrayCollection(value.toArray());
+                _dataSources.sort = new Sort();
+                _dataSources.sort.fields = [ new SortField("name")];
+                _dataSources.refresh();
+            }
+        }
 
         [Bindable]
         private var index:int;
@@ -37,13 +47,65 @@
 
         public var metadataFields:ArrayCollection;
 
+        public static const USE_SPECIFIED_FIELDS:int = 1;
+        public static const MULTIPLE_FEEDS:int = 2;
+        public static const SINGLE_FEED:int = 3;
+
+        public var dataSourceID:int;
+
+        private var _mode:int = MULTIPLE_FEEDS;
+
+        public function set mode(value:int):void {
+            _mode = value;
+        }
+
         private function chooseSources():void {
             if (sourceDataBox.selectedItem.id == targetDataBox.selectedItem.id) {
                 Alert.show("You can't connect a data source to itself.");
             } else {
-                ProgressAlert.alert(this, "Retrieving metadata...", null, feedService.getMultipleFeeds);
-                feedService.getMultipleFeeds.send(sourceDataBox.selectedItem.id, targetDataBox.selectedItem.id);
+                if (_mode == MULTIPLE_FEEDS) {
+                    ProgressAlert.alert(this, "Retrieving metadata...", null, feedService.getMultipleFeeds);
+                    feedService.getMultipleFeeds.send(sourceDataBox.selectedItem.id, targetDataBox.selectedItem.id);
+                } else {
+                    sourceFeedName = sourceDataBox.selectedItem.name;
+                    targetFeedName = targetDataBox.selectedItem.name;
+                    sourceID = sourceDataBox.selectedItem.id;
+                    targetID = targetDataBox.selectedItem.id;
+                    if (_mode == USE_SPECIFIED_FIELDS) {
+                        populateFields1();
+                        index = 1;
+                    } else {
+                        ProgressAlert.alert(this, "Retrieving metadata...", null, dataService.getFeedMetadata);
+                        dataService.getFeedMetadata.send(dataSourceID);
+                    }
+                }
             }
+        }
+
+        private function gotFeed():void {
+            var feed:FeedMetadata = dataService.getFeedMetadata.lastResult as FeedMetadata;
+            sourceFields = new ArrayCollection();
+            targetFields = new ArrayCollection();
+            for each (var field:AnalysisItem in feed.fields) {
+                if (field.key is DerivedKey) {
+                    var dKey:DerivedKey = field.key as DerivedKey;
+                    if (dKey.feedID == sourceID) {
+                        sourceFields.addItem(field);
+                    } else if (dKey.feedID == targetID) {
+                        targetFields.addItem(field);
+                    }
+                }
+            }
+
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("display", false) ];
+
+            sourceFields.sort = sort;
+            sourceFields.refresh();
+
+            targetFields.sort = sort;
+            targetFields.refresh();
+            index = 1;
         }
 
         private function populateFields1():void {
@@ -124,20 +186,21 @@
             dispatchEvent(new JoinSelectionEvent(connects));
             PopUpManager.removePopUp(this);
         }
-
-
         ]]></mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="getMultipleFeeds" result="gotFeeds()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="data" id="dataService">
+        <mx:method name="getFeedMetadata" result="gotFeed()"/>
     </mx:RemoteObject>
     <mx:ViewStack selectedIndex="{index}">
         <mx:VBox>
             <mx:Label text="Which data sources do you want to join?"/>
             <mx:HBox verticalAlign="middle">
                 <mx:Label text="I want to connect "/>
-                <mx:ComboBox id="sourceDataBox" dataProvider="{dataSources}" labelField="name"/>
+                <mx:ComboBox id="sourceDataBox" dataProvider="{_dataSources}" labelField="name" selectedIndex="0"/>
                 <mx:Label text="to"/>
-                <mx:ComboBox id="targetDataBox" dataProvider="{dataSources}" labelField="name"/>
+                <mx:ComboBox id="targetDataBox" dataProvider="{_dataSources}" labelField="name" selectedIndex="1"/>
             </mx:HBox>
             <mx:HBox width="100%" horizontalAlign="center">
                 <util:SaveButton label="Join These Data Sources" click="chooseSources()"/>

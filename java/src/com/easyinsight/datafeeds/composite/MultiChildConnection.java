@@ -43,7 +43,7 @@ public class MultiChildConnection extends ChildConnection {
             Key sourceKey = sourceDef.getField(sourceKeyString);
             Key targetKey = targetDef.getField(targetKeyString);
             CompositeFeedConnection conn = new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
-                    sourceKey, targetKey, sourceDef.getFeedName(), targetDef.getFeedName());
+                    sourceKey, targetKey, sourceDef.getFeedName(), targetDef.getFeedName(), false);
             conn.setSourceOuterJoin(sourceOuterJoin);
             List<Key> sourceKeyList = new ArrayList<Key>();
             List<String> removeKeyStrings = removeSourceKeys.get(i);

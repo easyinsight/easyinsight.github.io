@@ -1,9 +1,14 @@
 package com.easyinsight.users;
 
 import com.easyinsight.analysis.ReportTypeOptions;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.preferences.ApplicationSkin;
+import com.easyinsight.preferences.ApplicationSkinSettings;
+import com.easyinsight.preferences.UISettingRetrieval;
 import com.easyinsight.preferences.UISettings;
+import org.hibernate.Session;
 
+import java.sql.SQLException;
 import java.util.Date;
 
 /**
@@ -47,12 +52,40 @@ public class UserServiceResponse {
     private ReportTypeOptions reportTypeOptions;
     private boolean subdomainEnabled;
 
+    public static UserServiceResponse createResponseWithUISettings(User user, ApplicationSkin applicationSkin) {
+        return createResponse(user, applicationSkin);
+    }
+
+    public static UserServiceResponse createResponse(User user, Session session, EIConnection conn) throws SQLException {
+        return createResponse(user, ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), conn);
+    }
+
+    public static UserServiceResponse createResponse(User user, ApplicationSkin applicationSkin, EIConnection conn) throws SQLException {
+        Account account = user.getAccount();
+        if (user.getPersonaID() != null) {
+            user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
+        }
+        return createResponse(user, applicationSkin);
+    }
+
+    private static UserServiceResponse createResponse(User user, ApplicationSkin applicationSkin)  {
+        Account account = user.getAccount();
+        return new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                            user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
+                                (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
+                                user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
+                                user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
+                                account.getCurrencySymbol(), applicationSkin, account.getFirstDayOfWeek(),
+                                user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
+    }
+
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
         this.failureMessage = failureMessage;
     }
 
-    public UserServiceResponse(boolean successful, long userID, long accountID, String name, int accountType,
+    private UserServiceResponse(boolean successful, long userID, long accountID, String name, int accountType,
                                long spaceAllowed, String email, String userName, boolean accountAdmin,
                                boolean billingInformationGiven, int accountState,
                                UISettings uiSettings, String firstName, boolean freeUpgradePossible,

@@ -28,37 +28,40 @@
             addEventListener(ConnectionDeleteEvent.CONNECTION_DELETE, onConnectionDelete);
             ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
             analysisService.determineOverrides.send(dataSourceID, fields);
-            if (startJoins == null || startJoins.length == 0) {
+            /*if (startJoins == null || startJoins.length == 0) {
 
             } else {
                 connections = new ArrayCollection();
                 for each (var startJoin:JoinOverride in startJoins) {
                     connections.addItem(startJoin.toConnection());
                 }
-            }
+            }*/
         }
+
+        [Bindable]
+        private var configurableDataSources:ArrayCollection;
 
         private function gotOverrides():void {
             var results:ReportJoins = analysisService.determineOverrides.lastResult as ReportJoins;
-            dataSources = results.dataSources;
-            if (startJoins == null || startJoins.length == 0) {
-                var joins:ArrayCollection = results.joinOverrides;
-                connections = new ArrayCollection();
-                for each (var join:JoinOverride in joins) {
-                    connections.addItem(join.toConnection());
-                }
-            } else {
-                for each (var existingConn:CompositeFeedConnection in connections) {
-                    for each (var ds:DataSourceDescriptor in dataSources) {
-                        if (existingConn.sourceFeedID == ds.id) {
-                            existingConn.sourceFeedName = ds.name;
-                        }
-                        if (existingConn.targetFeedID == ds.id) {
-                            existingConn.targetFeedName = ds.name;
-                        }
+            configurableDataSources = results.configurableDataSources;
+            if (startJoins != null && startJoins.length) {
+                for each (var joinOverride:JoinOverride in startJoins) {
+                    if (joinOverride.dataSourceID == 0) {
+                        joinOverride.dataSourceID = DataSourceDescriptor(configurableDataSources.getItemAt(0)).id;
                     }
+                    var joins:ArrayCollection = customConnectionMap[String(joinOverride.dataSourceID)] as ArrayCollection;
+                    if (joins == null) {
+                        joins = new ArrayCollection();
+                        customConnectionMap[String(joinOverride.dataSourceID)] = joins;
+                    }
+                    joins.addItem(joinOverride);
                 }
             }
+
+            joinMap = results.joinOverrideMap;
+            dataSourceMap = results.dataSourceMap;
+            selectedDataSource = configurableDataSources.getItemAt(0) as DataSourceDescriptor;
+            populateJoins(selectedDataSource);
         }
 
         private function onConnectionDelete(event:ConnectionDeleteEvent):void {
@@ -73,19 +76,31 @@
         }
 
         private function revert():void {
+            startJoins = new ArrayCollection();
+            customConnectionMap = new Object();
             ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
             analysisService.determineOverrides.send(dataSourceID, fields);
         }
 
+        private var customConnectionMap:Object = new Object();
+
         private function save():void {
             var joins:ArrayCollection = new ArrayCollection();
+            var saveJoins:ArrayCollection = new ArrayCollection();
             for each (var connection:CompositeFeedConnection in connections) {
-                var join:JoinOverride = new JoinOverride();
-                join.sourceItem = connection.sourceItem;
-                join.targetItem = connection.targetItem;
-                join.sourceName = connection.sourceFeedName;
-                join.targetName = connection.targetFeedName;
-                joins.addItem(join);
+                var saveJoin:JoinOverride = new JoinOverride();
+                saveJoin.sourceItem = connection.sourceItem;
+                saveJoin.targetItem = connection.targetItem;
+                saveJoin.sourceName = connection.sourceFeedName;
+                saveJoin.targetName = connection.targetFeedName;
+                saveJoin.dataSourceID = selectedDataSource.id;
+                saveJoins.addItem(saveJoin);
+            }
+            customConnectionMap[String(selectedDataSource.id)] = saveJoins;
+            for each (var coll:ArrayCollection in customConnectionMap) {
+                for each (var join:JoinOverride in coll) {
+                    joins.addItem(join);
+                }
             }
             dispatchEvent(new JoinOverrideEvent(JoinOverrideEvent.JOIN_OVERRIDE_SET, joins));
             PopUpManager.removePopUp(this);
@@ -93,16 +108,73 @@
 
         private function addConnection():void {
             var window:DSPickJoinWindow = new DSPickJoinWindow();
+            if (selectedDataSource.id == DataSourceDescriptor(configurableDataSources.getItemAt(0)).id) {
+                window.metadataFields = fields;
+                window.mode = DSPickJoinWindow.USE_SPECIFIED_FIELDS;
+            } else {
+                window.dataSourceID = selectedDataSource.id;
+                window.mode = DSPickJoinWindow.SINGLE_FEED;
+            }
             window.dataSources = dataSources;
-            window.metadataFields = fields;
             window.addEventListener(JoinSelectionEvent.JOIN_SELECTION, joinsSelected, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+        }
+
+        private var dataSourceMap:Object;
+
+        private var joinMap:Object;
+
+        private var selectedDataSource:DataSourceDescriptor;
+
+        private function populateJoins(dataSource:DataSourceDescriptor):void {
+            if (connections != null) {
+                var saveJoins:ArrayCollection = new ArrayCollection();
+                for each (var connection:CompositeFeedConnection in connections) {
+                    var saveJoin:JoinOverride = new JoinOverride();
+                    saveJoin.sourceItem = connection.sourceItem;
+                    saveJoin.targetItem = connection.targetItem;
+                    saveJoin.sourceName = connection.sourceFeedName;
+                    saveJoin.targetName = connection.targetFeedName;
+                    saveJoin.dataSourceID = selectedDataSource.id;
+                    saveJoins.addItem(saveJoin);
+                }
+                customConnectionMap[String(selectedDataSource.id)] = saveJoins;
+            }
+            dataSources = dataSourceMap[String(dataSource.id)] as ArrayCollection;
+            connections = new ArrayCollection();
+            if (startJoins == null || startJoins.length == 0) {
+                var joins:ArrayCollection = joinMap[String(dataSource.id)];
+                for each (var join:JoinOverride in joins) {
+                    connections.addItem(join.toConnection());
+                }
+            } else {
+                var customJoins:ArrayCollection = customConnectionMap[String(dataSource.id)] as ArrayCollection;
+                for each (var customJoin:JoinOverride in customJoins) {
+                    var customConnection:CompositeFeedConnection = customJoin.toConnection();
+                    for each (var ds:DataSourceDescriptor in dataSources) {
+                        if (customConnection.sourceFeedID == ds.id) {
+                            customConnection.sourceFeedName = ds.name;
+                        }
+                        if (customConnection.targetFeedID == ds.id) {
+                            customConnection.targetFeedName = ds.name;
+                        }
+                    }
+                    connections.addItem(customConnection);
+                }
+            }
+        }
+
+        private function onDataSourceChange():void {
+            var dataSource:DataSourceDescriptor = dataSourceBox.selectedItem as DataSourceDescriptor;
+            populateJoins(dataSource);
+            selectedDataSource = dataSource;
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="determineOverrides" result="gotOverrides()"/>
     </mx:RemoteObject>
+    <mx:ComboBox dataProvider="{configurableDataSources}" labelField="name" id="dataSourceBox" change="onDataSourceChange()"/>
     <mx:Button label="Add Join..." click="addConnection()" styleName="grayButton"/>
     <mx:DataGrid dataProvider="{connections}" width="600" rowHeight="28" dragMoveEnabled="true" dragEnabled="true" dropEnabled="true">
         <mx:columns>

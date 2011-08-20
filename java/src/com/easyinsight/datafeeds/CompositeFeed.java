@@ -138,16 +138,16 @@ public class CompositeFeed extends Feed {
                 }
             }*/
             //if (dataSet == null) {
-                dataSet = getDataSet(analysisItems, filters, insightRequestMetadata, conn);
-                /*if (resultCache != null) {
-                    DataSet copySet = new DataSet();
-                    for (IRow row : dataSet.getRows()) {
-                        IRow copyRow = copySet.createRow();
-                        copyRow.addValues(row);
-                    }
-                    System.out.println("saving set with rows " + copySet.getRows().size() + " on " + getFeedID());
-                    resultCache.put(new CacheKey(analysisItems, filters), copySet);
-                }*/
+            dataSet = getDataSet(analysisItems, filters, insightRequestMetadata, conn);
+            /*if (resultCache != null) {
+                DataSet copySet = new DataSet();
+                for (IRow row : dataSet.getRows()) {
+                    IRow copyRow = copySet.createRow();
+                    copyRow.addValues(row);
+                }
+                System.out.println("saving set with rows " + copySet.getRows().size() + " on " + getFeedID());
+                resultCache.put(new CacheKey(analysisItems, filters), copySet);
+            }*/
             //}
             return dataSet;
         } catch (ReportException re) {
@@ -170,12 +170,16 @@ public class CompositeFeed extends Feed {
 
         if (insightRequestMetadata.getJoinOverrides() != null && insightRequestMetadata.getJoinOverrides().size() > 0) {
             connections = new ArrayList<CompositeFeedConnection>();
-            for (JoinOverride joinOverride : insightRequestMetadata.getJoinOverrides()) {
-                connections.add(new CompositeFeedConnection(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID(),
-                        ((DerivedKey) joinOverride.getTargetItem().getKey()).getFeedID(), joinOverride.getSourceItem(),
-                        joinOverride.getTargetItem(), joinOverride.getSourceName(), joinOverride.getTargetName()));
+            Iterator<JoinOverride> iter = insightRequestMetadata.getJoinOverrides().iterator();
+            while (iter.hasNext()) {
+                JoinOverride joinOverride = iter.next();
+                if (joinOverride.getDataSourceID() == getFeedID()) {
+                    connections.add(new CompositeFeedConnection(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID(),
+                            ((DerivedKey) joinOverride.getTargetItem().getKey()).getFeedID(), joinOverride.getSourceItem(),
+                            joinOverride.getTargetItem(), joinOverride.getSourceName(), joinOverride.getTargetName(), false));
+                    //iter.remove();
+                }
             }
-            insightRequestMetadata.setJoinOverrides(null);
         } else {
             connections = this.connections;
         }
@@ -251,6 +255,7 @@ public class CompositeFeed extends Feed {
             for (Edge edge : neededEdges) {
                 QueryStateNode precedingNode = graph.getEdgeSource(edge);
                 QueryStateNode followingNode = graph.getEdgeTarget(edge);
+                System.out.println("identified edge from " + precedingNode.dataSourceName + " to " + followingNode.dataSourceName);
                 neededNodes.put(precedingNode.feedID, precedingNode);
                 neededNodes.put(followingNode.feedID, followingNode);
             }
@@ -276,6 +281,7 @@ public class CompositeFeed extends Feed {
                 }
                 QueryStateNode exists = neededNodes.get(targetNode.feedID);
                 if (exists != null) {
+                    System.out.println("edge between " + queryStateNode.dataSourceName + " and " + targetNode.dataSourceName);
                     if (queryStateIsSource) {
                         for (Key join : localEdge.connection.getSourceJoins()) {
                             queryStateNode.addKey(join);
@@ -330,6 +336,7 @@ public class CompositeFeed extends Feed {
                     firstVertex = source;
                 }
                 QueryStateNode target = queryNodeMap.get(connection.getTargetFeedID());
+                System.out.println("** adding edge of " + source.dataSourceName + " to " + target.dataSourceName);
                 reducedGraph.addEdge(source, target, edge);
             }
         }
@@ -339,7 +346,6 @@ public class CompositeFeed extends Feed {
         DataSet dataSet = null;
 
         List<String> auditStrings = new ArrayList<String>();
-        ClosestFirstIterator<QueryStateNode, Edge> iter = new ClosestFirstIterator<QueryStateNode, Edge>(reducedGraph, firstVertex);
 
 
         Map<Long, QueryData> map = new HashMap<Long, QueryData>();
@@ -347,47 +353,41 @@ public class CompositeFeed extends Feed {
         for (QueryStateNode queryStateNode : neededNodes.values()) {
             map.put(queryStateNode.feedID, queryStateNode.queryData);
         }
-        while (iter.hasNext()) {
-            QueryStateNode sourceNode = iter.next();
-            QueryData sourceQueryData = map.get(sourceNode.feedID);
-            if (sourceQueryData.dataSet == null) {
-                Collection<CompositeFeedConnection> myConnections = conns.get(sourceNode.feedID);
-                for (CompositeFeedConnection myConn : myConnections) {
-                    FilterDefinition filter = filterMap.get(myConn);
-                    if (filter != null) {
-                        if (insightRequestMetadata.isOptimized()) {
-                            sourceNode.addFilter(filter);
-                        }
-                    }
-                }
-                sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
-                if (insightRequestMetadata.isOptimized()) {
+
+        if (insightRequestMetadata.isTraverseAllJoins()) {
+            Set<Edge> edges = reducedGraph.edgeSet();
+            for (Edge last : edges) {
+                QueryStateNode sourceNode = reducedGraph.getEdgeSource(last);
+                QueryData sourceQueryData = map.get(sourceNode.feedID);
+                QueryStateNode targetNode = reducedGraph.getEdgeTarget(last);
+                if (sourceQueryData.dataSet == null) {
+                    Collection<CompositeFeedConnection> myConnections = conns.get(sourceNode.feedID);
                     for (CompositeFeedConnection myConn : myConnections) {
                         FilterDefinition filter = filterMap.get(myConn);
-                        if (filter == null) {
-                            QueryStateNode targetNode;
-                            if (sourceNode.feedID == myConn.getSourceFeedID()) {
-                                targetNode = queryNodeMap.get(myConn.getTargetFeedID());
-                            } else {
-                                targetNode = queryNodeMap.get(myConn.getSourceFeedID());
+                        if (filter != null) {
+                            if (insightRequestMetadata.isOptimized()) {
+                                sourceNode.addFilter(filter);
                             }
-                            //System.out.println("defining filter between " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
-                            FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, myConn);
-                            filterMap.put(myConn, joinFilter);
+                        }
+                    }
+                    sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
+                    if (insightRequestMetadata.isOptimized()) {
+                        for (CompositeFeedConnection myConn : myConnections) {
+                            FilterDefinition filter = filterMap.get(myConn);
+                            if (filter == null) {
+                                QueryStateNode joinTargetNode;
+                                if (sourceNode.feedID == myConn.getSourceFeedID()) {
+                                    joinTargetNode = queryNodeMap.get(myConn.getTargetFeedID());
+                                } else {
+                                    joinTargetNode = queryNodeMap.get(myConn.getSourceFeedID());
+                                }
+                                //System.out.println("defining filter between " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
+                                FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, joinTargetNode, myConn);
+                                filterMap.put(myConn, joinFilter);
+                            }
                         }
                     }
                 }
-            }
-            Edge last = iter.getSpanningTreeEdge(sourceNode);
-            if (last != null) {
-
-                QueryStateNode targetNode;
-                if (reducedGraph.getEdgeSource(last) == sourceNode) {
-                    targetNode = reducedGraph.getEdgeTarget(last);
-                } else {
-                    targetNode = reducedGraph.getEdgeSource(last);
-                }
-
                 //System.out.println("joining " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
 
                 QueryData targetQueryData = map.get(targetNode.feedID);
@@ -421,6 +421,7 @@ public class CompositeFeed extends Feed {
                     }
                 }
 
+                System.out.println("joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName);
                 MergeAudit mergeAudit = last.connection.merge(sourceQueryData.dataSet, targetQueryData.dataSet,
                         sourceQueryData.neededItems, targetQueryData.neededItems,
                         sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID);
@@ -433,7 +434,98 @@ public class CompositeFeed extends Feed {
                     map.put(id, sourceQueryData);
                 }
             }
+        } else {
 
+            ClosestFirstIterator<QueryStateNode, Edge> iter = new ClosestFirstIterator<QueryStateNode, Edge>(reducedGraph, firstVertex);
+            while (iter.hasNext()) {
+                QueryStateNode sourceNode = iter.next();
+                QueryData sourceQueryData = map.get(sourceNode.feedID);
+                if (sourceQueryData.dataSet == null) {
+                    Collection<CompositeFeedConnection> myConnections = conns.get(sourceNode.feedID);
+                    for (CompositeFeedConnection myConn : myConnections) {
+                        FilterDefinition filter = filterMap.get(myConn);
+                        if (filter != null) {
+                            if (insightRequestMetadata.isOptimized()) {
+                                sourceNode.addFilter(filter);
+                            }
+                        }
+                    }
+                    sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
+                    if (insightRequestMetadata.isOptimized()) {
+                        for (CompositeFeedConnection myConn : myConnections) {
+                            FilterDefinition filter = filterMap.get(myConn);
+                            if (filter == null) {
+                                QueryStateNode targetNode;
+                                if (sourceNode.feedID == myConn.getSourceFeedID()) {
+                                    targetNode = queryNodeMap.get(myConn.getTargetFeedID());
+                                } else {
+                                    targetNode = queryNodeMap.get(myConn.getSourceFeedID());
+                                }
+                                //System.out.println("defining filter between " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
+                                FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, myConn);
+                                filterMap.put(myConn, joinFilter);
+                            }
+                        }
+                    }
+                }
+                Edge last = iter.getSpanningTreeEdge(sourceNode);
+                if (last != null) {
+
+                    QueryStateNode targetNode;
+                    if (reducedGraph.getEdgeSource(last) == sourceNode) {
+                        targetNode = reducedGraph.getEdgeTarget(last);
+                    } else {
+                        targetNode = reducedGraph.getEdgeSource(last);
+                    }
+
+                    //System.out.println("joining " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
+
+                    QueryData targetQueryData = map.get(targetNode.feedID);
+                    boolean swapped = false;
+                    if (last.connection.getSourceFeedID() != sourceNode.feedID) {
+                        swapped = true;
+                        QueryStateNode swap = sourceNode;
+                        sourceNode = targetNode;
+                        targetNode = swap;
+                        QueryData swapData = sourceQueryData;
+                        sourceQueryData = targetQueryData;
+                        targetQueryData = swapData;
+                    }
+                    FilterDefinition joinFilter = null;
+                    if (insightRequestMetadata.isOptimized()) {
+                        joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, last.connection);
+                    }
+                    if (!swapped) {
+                        if (targetQueryData.dataSet == null) {
+                            if (insightRequestMetadata.isOptimized()) {
+                                targetNode.addFilter(joinFilter);
+                            }
+                            targetQueryData.dataSet = targetNode.produceDataSet(insightRequestMetadata);
+                        }
+                    } else {
+                        if (sourceQueryData.dataSet == null) {
+                            if (insightRequestMetadata.isOptimized()) {
+                                sourceNode.addFilter(joinFilter);
+                            }
+                            sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
+                        }
+                    }
+
+                    System.out.println("joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName);
+                    MergeAudit mergeAudit = last.connection.merge(sourceQueryData.dataSet, targetQueryData.dataSet,
+                            sourceQueryData.neededItems, targetQueryData.neededItems,
+                            sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID);
+                    dataSet = mergeAudit.getDataSet();
+                    auditStrings.addAll(mergeAudit.getMergeStrings());
+                    sourceQueryData.dataSet = dataSet;
+                    sourceQueryData.neededItems.addAll(targetQueryData.neededItems);
+                    sourceQueryData.ids.addAll(targetQueryData.ids);
+                    for (Long id : sourceQueryData.ids) {
+                        map.put(id, sourceQueryData);
+                    }
+                }
+
+            }
         }
         dataSet.setAudits(auditStrings);
         if (!insightRequestMetadata.isOptimized()) {

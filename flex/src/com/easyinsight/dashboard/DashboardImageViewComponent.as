@@ -52,13 +52,13 @@ public class DashboardImageViewComponent extends Box implements IDashboardViewCo
         loaderContent.loader.removeEventListener(Event.COMPLETE, onComplete);
     }
 
-    public function refresh(filters:ArrayCollection):void {
+    public function refresh():void {
     }
 
     public function retrieveData(refreshAllSources:Boolean = false):void {
     }
 
-    public function updateAdditionalFilters(filters:ArrayCollection):void {
+    public function updateAdditionalFilters(filters:Object):void {
     }
 
     public function activeStatus(status:Boolean):void {

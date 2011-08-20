@@ -48,7 +48,7 @@ public class DashboardScorecardViewComponent extends Canvas implements IDashboar
         }
     }
 
-    public function refresh(filters:ArrayCollection):void {
+    public function refresh():void {
         scorecardRenderer.refreshValues();
     }
 
@@ -56,7 +56,7 @@ public class DashboardScorecardViewComponent extends Canvas implements IDashboar
         scorecardRenderer.refreshValues();
     }
 
-    public function updateAdditionalFilters(filters:ArrayCollection):void {
+    public function updateAdditionalFilters(filters:Object):void {
     }
 
     public function activeStatus(status:Boolean):void {

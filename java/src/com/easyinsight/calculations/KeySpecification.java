@@ -4,6 +4,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -13,5 +14,5 @@ import java.util.List;
 public interface KeySpecification {
 
     @Nullable
-    public AnalysisItem findAnalysisItem(List<AnalysisItem> allItems) throws CloneNotSupportedException;
+    public AnalysisItem findAnalysisItem(Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap) throws CloneNotSupportedException;
 }

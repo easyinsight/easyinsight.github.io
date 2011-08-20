@@ -75,6 +75,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             headerHBox.setStyle("verticalAlign", "middle");
             headerHBox.percentWidth = 100;
             var myFiltersBox:HBox = new HBox();
+            myFiltersBox.percentWidth = 100;
             consolidatedFilterViewStack = new ViewStack();
             consolidatedFilterViewStack.resizeToContent = true;
             consolidatedFilterViewStack.percentWidth = 100;
@@ -185,7 +186,8 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             transformContainer.setStyle("backgroundAlpha", dashboardStack.filterBackgroundAlpha);
             transformContainer.filterEditable = false;
             transformContainer.existingFilters = dashboardStack.filters;
-            updateAdditionalFilters(dashboardStack.filters);
+            filterMap[elementID] = dashboardStack.filters;
+            updateAdditionalFilters(filterMap);
             transformContainer.percentWidth = 100;
             transformContainer.setStyle("paddingLeft", 10);
             transformContainer.setStyle("paddingRight", 10);
@@ -250,19 +252,32 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     private var transformContainer:TransformContainer;
 
+    private var filterMap:Object = new Object();
+
+    public var elementID:String;
+
     private function transformsUpdated(event:Event):void {
-        updateAdditionalFilters(transformContainer.getFilterDefinitions());
-        refresh(transformContainer.getFilterDefinitions());
+        filterMap[elementID] = transformContainer.getFilterDefinitions();
+        updateAdditionalFilters(filterMap);
+        refresh();
     }
 
-    public function updateAdditionalFilters(filters:ArrayCollection):void {
+    public function updateAdditionalFilters(filterMap:Object):void {
+        if (filterMap != null) {
+            for (var id:String in filterMap) {
+                var filters:Object = filterMap[id];
+                if (filters != null) {
+                    this.filterMap[id] = filters;
+                }
+            }
+        }
         for each (var comp:IDashboardViewComponent in viewChildren) {
-            comp.updateAdditionalFilters(filters);
+            comp.updateAdditionalFilters(this.filterMap);
         }
     }
 
-    public function refresh(filters:ArrayCollection):void {
-        IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).refresh(filters);
+    public function refresh():void {
+        IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).refresh();
     }
 
     public function retrieveData(refreshAllSources:Boolean = false):void {

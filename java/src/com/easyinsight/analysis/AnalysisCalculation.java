@@ -1,17 +1,11 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.Value;
-import com.easyinsight.core.NumericValue;
-import com.easyinsight.core.Key;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.logging.LogClass;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Column;
+import javax.persistence.*;
 
 import com.easyinsight.pipeline.CleanupComponent;
 import org.antlr.runtime.ANTLRStringStream;
@@ -69,54 +63,65 @@ public class AnalysisCalculation extends AnalysisMeasure {
         return super.getType() | AnalysisItemTypes.CALCULATION;
     }
 
+    @Transient
+    private transient CalculationTreeNode tree;
+
+    @Transient
+    private transient Set<KeySpecification> specs;
+
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
-        CalculationTreeNode tree;
-        ICalculationTreeVisitor visitor;
-        CalculationsParser.startExpr_return ret;
-
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        try {
-            ret = parser.startExpr();
-            tree = (CalculationTreeNode) ret.getTree();
-            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            if (allItems != null) {
-                for (AnalysisItem analysisItem : allItems) {
-                    List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                    if (items == null) {
-                        items = new ArrayList<AnalysisItem>(1);
-                        keyMap.put(analysisItem.getKey().toKeyString(), items);
-                    }
-                    items.add(analysisItem);
+        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+        if (allItems != null) {
+            for (AnalysisItem analysisItem : allItems) {
+                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    keyMap.put(analysisItem.getKey().toKeyString(), items);
                 }
-
-                for (AnalysisItem analysisItem : allItems) {
-                    List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                    if (items == null) {
-                        items = new ArrayList<AnalysisItem>(1);
-                        displayMap.put(analysisItem.toDisplay(), items);
-                    }
-                    items.add(analysisItem);
-                }
+                items.add(analysisItem);
             }
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
-            tree.accept(visitor);
-        }  catch (FunctionException fe) {
-            throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
-        } catch (ReportException re) {
-            throw re;
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage() + " in calculating " + calculationString, e);
+
+            for (AnalysisItem analysisItem : allItems) {
+                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    displayMap.put(analysisItem.toDisplay(), items);
+                }
+                items.add(analysisItem);
+            }
+        }
+        if (tree == null) {
+            ICalculationTreeVisitor visitor;
+            CalculationsParser.startExpr_return ret;
+
+            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
+            CommonTokenStream tokes = new CommonTokenStream();
+            tokes.setTokenSource(lexer);
+            CalculationsParser parser = new CalculationsParser(tokes);
+            parser.setTreeAdaptor(new NodeFactory());
+
+            try {
+                ret = parser.startExpr();
+                tree = (CalculationTreeNode) ret.getTree();
+
+                visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+                tree.accept(visitor);
+            }  catch (FunctionException fe) {
+                throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
+            } catch (ReportException re) {
+                throw re;
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage() + " in calculating " + calculationString, e);
+            }
+
+            VariableListVisitor variableVisitor = new VariableListVisitor();
+            tree.accept(variableVisitor);
+
+            specs = variableVisitor.getVariableList();
         }
 
-        VariableListVisitor variableVisitor = new VariableListVisitor();
-        tree.accept(variableVisitor);
 
-        Set<KeySpecification> specs = variableVisitor.getVariableList();
 
         List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
 
@@ -129,7 +134,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
         for (KeySpecification spec : specs) {
             AnalysisItem analysisItem;
             try {
-                analysisItem = spec.findAnalysisItem(allItems);
+                analysisItem = spec.findAnalysisItem(keyMap, displayMap);
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e);
             }

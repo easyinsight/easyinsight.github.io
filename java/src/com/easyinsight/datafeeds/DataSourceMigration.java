@@ -51,7 +51,7 @@ public abstract class DataSourceMigration {
         Key sourceKey = sourceDef.getField(childConnection.getSourceKey());
         Key targetKey = targetDef.getField(childConnection.getTargetKey());
         CompositeFeedConnection connection = new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
-                sourceKey, targetKey, null, null);
+                sourceKey, targetKey, null, null, false);
         compositeServerDataSource.getConnections().add(connection);
     }
 

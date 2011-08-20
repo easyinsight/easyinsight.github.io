@@ -38,6 +38,15 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
     private static final String REQUEST_2 = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt><options>num-1000.skp-{3}</options></qdbapi>";
 
     private String databaseID;
+    private boolean indexEnabled;
+
+    public boolean isIndexEnabled() {
+        return indexEnabled;
+    }
+
+    public void setIndexEnabled(boolean indexEnabled) {
+        this.indexEnabled = indexEnabled;
+    }
 
     @Override
     public int getDataSourceType() {
@@ -55,22 +64,24 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM QUICKBASE_DATA_SOURCE where data_source_id = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO QUICKBASE_DATA_SOURCE (DATA_SOURCE_ID, DATABASE_ID) " +
-                "VALUES (?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO QUICKBASE_DATA_SOURCE (DATA_SOURCE_ID, DATABASE_ID, support_index) " +
+                "VALUES (?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, databaseID);
+        insertStmt.setBoolean(3, indexEnabled);
         insertStmt.execute();
     }
 
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT database_id FROM " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT database_id, support_index FROM " +
                 "QUICKBASE_DATA_SOURCE where data_source_id = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
         rs.next();
         databaseID = rs.getString(1);
+        indexEnabled = rs.getBoolean(2);
         queryStmt.close();
     }
 

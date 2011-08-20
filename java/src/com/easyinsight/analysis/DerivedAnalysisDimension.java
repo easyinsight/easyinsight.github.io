@@ -44,10 +44,11 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
         tokes.setTokenSource(lexer);
         CalculationsParser parser = new CalculationsParser(tokes);
         parser.setTreeAdaptor(new NodeFactory());
+        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
         try {
             ret = parser.startExpr();
-            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+
             if (allItems != null) {
                 for (AnalysisItem analysisItem : allItems) {
                     List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
@@ -90,7 +91,7 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
         for (KeySpecification spec : specs) {
             AnalysisItem analysisItem = null;
             try {
-                analysisItem = spec.findAnalysisItem(allItems);
+                analysisItem = spec.findAnalysisItem(keyMap, displayMap);
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e);
             }

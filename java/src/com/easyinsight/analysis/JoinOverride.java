@@ -28,6 +28,8 @@ public class JoinOverride implements Cloneable, Serializable {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name="target_analysis_item_id")
     private AnalysisItem targetItem;
+    @Column(name="data_source_id")
+    private Long dataSourceID;
 
     public JoinOverride clone() throws CloneNotSupportedException {
         JoinOverride joinOverride = (JoinOverride) super.clone();
@@ -35,7 +37,18 @@ public class JoinOverride implements Cloneable, Serializable {
         return joinOverride;
     }
 
+    public Long getDataSourceID() {
+        return dataSourceID;
+    }
+
+    public void setDataSourceID(Long dataSourceID) {
+        this.dataSourceID = dataSourceID;
+    }
+
     public void reportSave(Session session) {
+        if (dataSourceID == 0) {
+            dataSourceID = null;
+        }
         sourceItem.reportSave(session);
         targetItem.reportSave(session);
     }

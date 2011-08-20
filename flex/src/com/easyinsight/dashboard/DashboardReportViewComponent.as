@@ -3,6 +3,7 @@ import com.easyinsight.analysis.EmbeddedControllerLookup;
 import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IEmbeddedReportController;
 import com.easyinsight.analysis.PopupMenuFactory;
+import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.report.ReportSetupEvent;
 
 import mx.collections.ArrayCollection;
@@ -48,35 +49,52 @@ public class DashboardReportViewComponent extends Canvas implements IDashboardVi
         viewFactory.contextMenu = PopupMenuFactory.reportFactory.createReportContextMenu(dashboardReport.report, viewFactory, this);
     }
 
-    private var additionalFilters:ArrayCollection;
+    private var filterMap:Object = new Object();
 
-    public function updateAdditionalFilters(filters:ArrayCollection):void {
-        additionalFilters = filters;
+    public function updateAdditionalFilters(filterMap:Object):void {
+        if (filterMap != null) {
+            for (var id:String in filterMap) {
+                var filters:Object = filterMap[id];
+                if (filters != null) {
+                    this.filterMap[id] = filters;
+                }
+            }
+        }
     }
 
     private var setup:Boolean;
 
     private var queued:Boolean;
 
+    private function createAdditionalFilters(filterMap:Object):ArrayCollection {
+        var filterColl:ArrayCollection = new ArrayCollection();
+        for (var id:String in filterMap) {
+            var filters:Object = filterMap[id];
+            if (filters != null) {
+                var filterList:ArrayCollection = filters as ArrayCollection;
+                for each (var filter:FilterDefinition in filterList) {
+                    filterColl.addItem(filter);
+                }
+            }
+        }
+        return filterColl;
+    }
+
     private function onReportSetup(event:ReportSetupEvent):void {
         viewFactory.filterDefinitions = event.reportInfo.report.filterDefinitions;
-        viewFactory.additionalFilterDefinitions = additionalFilters;
+        viewFactory.additionalFilterDefinitions = createAdditionalFilters(filterMap);
         setup = true;
         if (queued) {
             queued = false;
             retrievedDataOnce = true;
             viewFactory.retrieveData();
         }
-        /*if (_activeStatus) {
-            Alert.show("active status = " + _activeStatus);
-            viewFactory.retrieveData();
-        }*/
     }
 
-    public function refresh(filters:ArrayCollection):void {
+    public function refresh():void {
         if (setup) {
             retrievedDataOnce = true;
-            viewFactory.additionalFilterDefinitions = additionalFilters;
+            viewFactory.additionalFilterDefinitions = createAdditionalFilters(filterMap);
             viewFactory.retrieveData();
         } else {
             queued = true;
@@ -86,7 +104,7 @@ public class DashboardReportViewComponent extends Canvas implements IDashboardVi
     public function retrieveData(refreshAllSources:Boolean = false):void {
         if (setup) {
             retrievedDataOnce = true;
-            viewFactory.additionalFilterDefinitions = additionalFilters;
+            viewFactory.additionalFilterDefinitions = createAdditionalFilters(filterMap);
             viewFactory.retrieveData();
         } else {
             queued = true;
@@ -99,7 +117,7 @@ public class DashboardReportViewComponent extends Canvas implements IDashboardVi
         if (!retrievedDataOnce) {
             if (setup) {
                 retrievedDataOnce = true;
-                viewFactory.additionalFilterDefinitions = additionalFilters;
+                viewFactory.additionalFilterDefinitions = createAdditionalFilters(filterMap);
                 viewFactory.retrieveData();
             } else {
                 queued = true;

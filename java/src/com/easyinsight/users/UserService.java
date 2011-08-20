@@ -1,6 +1,5 @@
 package com.easyinsight.users;
 
-import com.easyinsight.analysis.ReportTypeOptions;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -772,14 +771,7 @@ public class UserService {
         } else {
             UserInfo userInfo = retrieveUser();
             User user = userInfo.user;
-            Account account = user.getAccount();
-            UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                                account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
-                    user.isAccountAdmin(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
-                    user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                    userInfo.settings, account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
+            UserServiceResponse response = UserServiceResponse.createResponseWithUISettings(user, userInfo.settings);
             response.setScenario(existing.getScenario());
             return response;
         }
@@ -801,19 +793,7 @@ public class UserService {
                 List results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
                 if (results.size() > 0) {
                     User user = (User) results.get(0);
-                    Account account = user.getAccount();
-                    if (user.getPersonaID() != null) {
-                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
-                    }
-                    userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                         user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
-                            (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
-                            user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                            !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                            ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                            user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
+                    userServiceResponse = UserServiceResponse.createResponse(user, session, conn);
                 } else {
                     userServiceResponse = null;
                 }
@@ -848,19 +828,7 @@ public class UserService {
                 List results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
                 if (results.size() > 0) {
                     User user = (User) results.get(0);
-                    Account account = user.getAccount();
-                    if (user.getPersonaID() != null) {
-                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
-                    }
-                    userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                         user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
-                            (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
-                            user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                            !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), 
-                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                            ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                            user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
+                    userServiceResponse = UserServiceResponse.createResponse(user, session, conn);
                     String sessionCookie = RandomTextGenerator.generateText(30);
                     userServiceResponse.setSessionCookie(sessionCookie);
                     user.setLastLoginDate(new Date());
@@ -946,23 +914,7 @@ public class UserService {
                 User user = (User) results.get(0);
                 String actualPassword = user.getPassword();
                 if (PasswordService.getInstance().encrypt(encryptedPassword, user.getHashSalt(), user.getHashType()).equals(actualPassword)) {
-                    List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
-                    Account account = (Account) accountResults.get(0);
-
-
-                        if (user.getPersonaID() != null) {
-                            user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
-                        }
-                        userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                            user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
-                                (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
-                                user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                                user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
-                                account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                                user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
-
-
+                    userServiceResponse = UserServiceResponse.createResponse(user, session, conn);
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Invalid username or password, please try again.");
                 }
@@ -1042,18 +994,7 @@ public class UserService {
             conn.setAutoCommit(false);
             Scenario scenario = (Scenario) session.createQuery("from Scenario where scenarioKey = ?").setString(0, scenarioKey).list().get(0);
             User user = (User) session.createQuery("from User where userID = ?").setLong(0, scenario.getUserID()).list().get(0);
-            List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
-            Account account = (Account) accountResults.get(0);
-            user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
-            userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
-                    (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
-                    user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                    !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                    ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                    user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
+            userServiceResponse = UserServiceResponse.createResponse(user, session, conn);
             user.setLastLoginDate(new Date());
             session.update(user);
             conn.commit();
@@ -1167,42 +1108,20 @@ public class UserService {
         List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
         Account account = (Account) accountResults.get(0);
         if (encryptedPassword.equals(actualPassword)) {
-            if (user.getPersonaID() != null) {
-                user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
-            }
             if (user.getUserKey() == null) {
                 user.setUserKey(RandomTextGenerator.generateText(20));
             }
             if (user.getUserSecretKey() == null) {
                 user.setUserSecretKey(RandomTextGenerator.generateText(20));
             }
-            userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
-                    (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
-                    user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                    !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                    ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                    user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
+            userServiceResponse = UserServiceResponse.createResponse(user, session, conn);
             user.setLastLoginDate(new Date());
             session.update(user);
         } else if (account.getExternalLogin() != null) {
             String result = account.getExternalLogin().login(userName, password);
             if (result == null) {
                 session.update(account.getExternalLogin());
-                if (user.getPersonaID() != null) {
-                    user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
-                }
-                userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                     user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
-                        (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
-                        user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                        !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                        user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                        ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                        user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
+                userServiceResponse = UserServiceResponse.createResponse(user, session, conn);
                 user.setLastLoginDate(new Date());
                 session.update(user);
             } else {
@@ -1231,55 +1150,6 @@ public class UserService {
         } finally {
             session.close();
         }
-    }
-
-    public UserServiceResponse guestLogin(String userName, String scenarioKey) {
-        UserServiceResponse userServiceResponse = null;
-        EIConnection conn = Database.instance().getConnection();
-        Session session = Database.instance().createSession(conn);
-        List results;
-        try {
-            conn.setAutoCommit(false);
-            @SuppressWarnings({"unchecked"}) List<Scenario> scenarios = session.createQuery("from Scenario where scenarioKey = ?").setString(0, scenarioKey).list();
-            if (scenarios.size() > 0) {
-                Scenario scenario = scenarios.get(0);
-                results = session.createQuery("from User where userName = ?").setString(0, userName).list();
-                if (results.size() > 0) {
-                    User user = (User) results.get(0);
-                    if (user.isGuestUser()) {
-                        List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
-                        Account account = (Account) accountResults.get(0);
-
-                        if (user.getPersonaID() != null) {
-                            user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
-                        }
-                        userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
-                                (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
-                                user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                                !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), 
-                                user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                                ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                                user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
-                        userServiceResponse.setScenario(scenario);
-                        user.setLastLoginDate(new Date());
-                        session.update(user);
-                    }
-                }
-                session.flush();
-                conn.commit();
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            conn.setAutoCommit(true);
-            session.close();
-            Database.closeConnection(conn);
-        }
-        return userServiceResponse;
     }
 
     public List<SuggestedUser> suggestUsers(long dataSourceID) {

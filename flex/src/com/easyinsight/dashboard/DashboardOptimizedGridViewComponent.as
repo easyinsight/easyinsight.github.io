@@ -236,19 +236,32 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
 
     private var queued:Boolean;
 
-    private var additionalFilters:ArrayCollection;
+    private var filterMap:Object = new Object();
 
-    public function updateAdditionalFilters(filters:ArrayCollection):void {
-        additionalFilters = filters;
+    public function updateAdditionalFilters(filterMap:Object):void {
+        for (var id:String in filterMap) {
+            var filters:ArrayCollection = filterMap[id];
+            if (filters != null) {
+                this.filterMap[id] = filters;
+            }
+        }
+    }
+
+    private function createAdditionalFilters(filterMap:Object):ArrayCollection {
+        var filterColl:ArrayCollection = new ArrayCollection();
+        for (var id:String in filterMap) {
+            var filters:ArrayCollection = filterMap[id];
+            if (filters != null) {
+                for each (var filter:FilterDefinition in filters) {
+                    filterColl.addItem(filter);
+                }
+            }
+        }
+        return filterColl;
     }
 
     private function retrieveReportData():void {
-        var filters:ArrayCollection = new ArrayCollection();
-        if (additionalFilters != null) {
-            for each (var filter:FilterDefinition in additionalFilters) {
-                filters.addItem(filter);
-            }
-        }
+        var filters:ArrayCollection = createAdditionalFilters(filterMap);
         service.retrieveReportData(reportIDs, dataSourceID, filters);
     }
 
@@ -256,8 +269,7 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
 
     private var dataSourceID:int;
 
-    public function refresh(filters:ArrayCollection):void {
-        Alert.show("retrieving data, setup = " + setup);
+    public function refresh():void {
         if (setup) {
             retrievedDataOnce = true;
             retrieveReportData();

@@ -53,9 +53,9 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
         return null;
     }
 
-    public function refresh(filters:ArrayCollection):void {
+    public function refresh():void {
         for each (var comp:IDashboardViewComponent in viewChildren) {
-            comp.refresh(filters);
+            comp.refresh();
         }
     }
 
@@ -65,7 +65,7 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
         }
     }
 
-    public function updateAdditionalFilters(filters:ArrayCollection):void {
+    public function updateAdditionalFilters(filters:Object):void {
         for each (var comp:IDashboardViewComponent in viewChildren) {
             comp.updateAdditionalFilters(filters);
         }

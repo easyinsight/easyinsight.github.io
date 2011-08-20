@@ -6,6 +6,7 @@ import com.easyinsight.analysis.AnalysisMeasure;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -22,9 +23,13 @@ public class AggregateKeySpecification implements KeySpecification {
     }
 
     @Nullable
-    public AnalysisItem findAnalysisItem(List<AnalysisItem> allItems) throws CloneNotSupportedException {
-        for (AnalysisItem item : allItems) {
-            if (item.getKey().toKeyString().equals(key)) {
+    public AnalysisItem findAnalysisItem(Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap) throws CloneNotSupportedException {
+        List<AnalysisItem> analysisItems = keyMap.get(key);
+        if (analysisItems == null) {
+            analysisItems = displayMap.get(key);
+        }
+        if (analysisItems != null) {
+            for (AnalysisItem item : analysisItems) {
                 if (item.getType() == AnalysisItemTypes.MEASURE) {
                     AnalysisMeasure analysisMeasure = (AnalysisMeasure) item;
                     if (analysisMeasure.getAggregation() == aggregationType) {
@@ -34,7 +39,7 @@ public class AggregateKeySpecification implements KeySpecification {
                         clonedMeasure.setAggregation(aggregationType);
                         return clonedMeasure;
                     }
-                }                
+                }
             }
         }
         return null;

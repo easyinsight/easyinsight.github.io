@@ -11,6 +11,9 @@ import com.easyinsight.analysis.AnalysisDefinition;
 import mx.core.UIComponent;
 
 public class DashboardElementFactory {
+
+    private static var counter:int = 0;
+
     public function DashboardElementFactory() {
     }
 
@@ -72,6 +75,7 @@ public class DashboardElementFactory {
             var stackComp:DashboardStackViewComponent = new DashboardStackViewComponent();
             stackComp.dashboardStack = element as DashboardStack;
             stackComp.dashboardEditorMetadata = dashboardEditorMetadata;
+            stackComp.elementID = String(counter++);
             return stackComp;
         } else if (element is DashboardImage) {
             var imageComp:DashboardImageViewComponent = new DashboardImageViewComponent();

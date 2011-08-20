@@ -12,8 +12,9 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.easyinsight.analysis.ReportJoins")]
 public class ReportJoins {
 
-    public var joinOverrides:ArrayCollection;
-    public var dataSources:ArrayCollection;
+    public var joinOverrideMap:Object;
+    public var dataSourceMap:Object;
+    public var configurableDataSources:ArrayCollection;
 
     public function ReportJoins() {
     }
