@@ -8,6 +8,7 @@ import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
@@ -61,31 +62,84 @@ public class AnalysisService {
     public ReportJoins determineOverrides(long dataSourceID, List<AnalysisItem> items) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         ReportJoins reportJoins = new ReportJoins();
+        EIConnection conn = Database.instance().getConnection();
         try {
-            CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) new FeedStorage().getFeedDefinitionData(dataSourceID);
-            List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
-            for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
-                FeedDefinition source = new FeedStorage().getFeedDefinitionData(node.getDataFeedID());
-                dataSources.add(new DataSourceDescriptor(source.getFeedName(), source.getDataFeedID(), source.getDataSourceType(), false));
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            if (dataSource instanceof CompositeFeedDefinition) {
+                CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) dataSource;
+                Map<String, List<JoinOverride>> map = new HashMap<String, List<JoinOverride>>();
+                Map<String, List<DataSourceDescriptor>> dataSourceMap = new HashMap<String, List<DataSourceDescriptor>>();
+                List<DataSourceDescriptor> configurableDataSources = new ArrayList<DataSourceDescriptor>();
+                populateMap(map, dataSourceMap, configurableDataSources, compositeFeedDefinition, items, conn);
+                reportJoins.setJoinOverrideMap(map);
+                reportJoins.setDataSourceMap(dataSourceMap);
+                reportJoins.setConfigurableDataSources(configurableDataSources);
+            } else if (dataSource instanceof FederatedDataSource) {
+                FederatedDataSource federatedDataSource = (FederatedDataSource) dataSource;
+                Map<String, List<JoinOverride>> map = new HashMap<String, List<JoinOverride>>();
+                Map<String, List<DataSourceDescriptor>> dataSourceMap = new HashMap<String, List<DataSourceDescriptor>>();
+                List<DataSourceDescriptor> configurableDataSources = new ArrayList<DataSourceDescriptor>();
+                CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) new FeedStorage().getFeedDefinitionData(federatedDataSource.getSources().get(0).getDataSourceID(), conn);
+                List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
+                for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
+                    JoinOverride joinOverride = new JoinOverride();
+                    FeedDefinition source = new FeedStorage().getFeedDefinitionData(connection.getSourceFeedID());
+                    FeedDefinition target = new FeedStorage().getFeedDefinitionData(connection.getTargetFeedID());
+                    joinOverride.setSourceItem(findSourceItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
+                    joinOverride.setTargetItem(findTargetItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
+                    joinOverride.setSourceName(source.getFeedName());
+                    joinOverride.setTargetName(target.getFeedName());
+                    joinOverrides.add(joinOverride);
+                }
+                List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
+                for (CompositeFeedNode child : compositeFeedDefinition.getCompositeFeedNodes()) {
+                    FeedDefinition childDataSource = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
+                    dataSources.add(new DataSourceDescriptor(childDataSource.getFeedName(), childDataSource.getDataFeedID(), childDataSource.getFeedType().getType(), false));
+                }
+                dataSourceMap.put(String.valueOf(dataSourceID), dataSources);
+                map.put(String.valueOf(dataSourceID), joinOverrides);
+                configurableDataSources.add(new DataSourceDescriptor(dataSource.getFeedName(), dataSource.getDataFeedID(),
+                        dataSource.getFeedType().getType(), false));
+                reportJoins.setJoinOverrideMap(map);
+                reportJoins.setDataSourceMap(dataSourceMap);
+                reportJoins.setConfigurableDataSources(configurableDataSources);
             }
-            List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
-            for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
-                JoinOverride joinOverride = new JoinOverride();
-                FeedDefinition source = new FeedStorage().getFeedDefinitionData(connection.getSourceFeedID());
-                FeedDefinition target = new FeedStorage().getFeedDefinitionData(connection.getTargetFeedID());
-                joinOverride.setSourceItem(findSourceItem(connection, items));
-                joinOverride.setTargetItem(findTargetItem(connection, items));
-                joinOverride.setSourceName(source.getFeedName());
-                joinOverride.setTargetName(target.getFeedName());
-                joinOverrides.add(joinOverride);
-            }
-            reportJoins.setJoinOverrides(joinOverrides);
-            reportJoins.setDataSources(dataSources);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
         return reportJoins;
+    }
+
+    private void populateMap(Map<String, List<JoinOverride>> map, Map<String, List<DataSourceDescriptor>> dataSourceMap, List<DataSourceDescriptor> configurableDataSources,
+                             CompositeFeedDefinition compositeFeedDefinition, List<AnalysisItem> items, EIConnection conn) throws SQLException {
+        List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
+
+        configurableDataSources.add(new DataSourceDescriptor(compositeFeedDefinition.getFeedName(), compositeFeedDefinition.getDataFeedID(), compositeFeedDefinition.getFeedType().getType(),
+                false));
+        for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
+            JoinOverride joinOverride = new JoinOverride();
+            FeedDefinition source = new FeedStorage().getFeedDefinitionData(connection.getSourceFeedID());
+            FeedDefinition target = new FeedStorage().getFeedDefinitionData(connection.getTargetFeedID());
+            joinOverride.setSourceItem(findSourceItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
+            joinOverride.setTargetItem(findTargetItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
+            joinOverride.setSourceName(source.getFeedName());
+            joinOverride.setTargetName(target.getFeedName());
+            joinOverrides.add(joinOverride);
+        }
+
+        map.put(String.valueOf(compositeFeedDefinition.getDataFeedID()), joinOverrides);
+        List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
+        for (CompositeFeedNode child : compositeFeedDefinition.getCompositeFeedNodes()) {
+            FeedDefinition childDataSource = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
+            dataSources.add(new DataSourceDescriptor(childDataSource.getFeedName(), childDataSource.getDataFeedID(), childDataSource.getFeedType().getType(), false));
+            if (childDataSource instanceof CompositeFeedDefinition) {
+                populateMap(map, dataSourceMap, configurableDataSources, (CompositeFeedDefinition) childDataSource, null, conn);
+            }
+        }
+        dataSourceMap.put(String.valueOf(compositeFeedDefinition.getDataFeedID()), dataSources);
     }
 
     private AnalysisItem findSourceItem(CompositeFeedConnection connection, List<AnalysisItem> items) {
@@ -316,11 +370,12 @@ public class AnalysisService {
             tokes.setTokenSource(lexer);
             CalculationsParser parser = new CalculationsParser(tokes);
             parser.setTreeAdaptor(new NodeFactory());
+            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
             try {
                 ret = parser.startExpr();
                 tree = (CalculationTreeNode) ret.getTree();
-                Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-                Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+
                 if (allItems != null) {
                     for (AnalysisItem analysisItem : allItems) {
                         List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
@@ -352,7 +407,7 @@ public class AnalysisService {
 
             for (KeySpecification spec : specs) {
                 try {
-                    spec.findAnalysisItem(allItems);
+                    spec.findAnalysisItem(keyMap, displayMap);
                 } catch (CloneNotSupportedException e) {
                     throw new RuntimeException(e);
                 }
