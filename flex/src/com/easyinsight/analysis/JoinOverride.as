@@ -16,6 +16,7 @@ public class JoinOverride {
     public var targetItem:AnalysisItem;
     public var sourceName:String;
     public var targetName:String;
+    public var dataSourceID:int;
 
     public function JoinOverride() {
     }
@@ -33,7 +34,8 @@ public class JoinOverride {
 
     public function matches(join:JoinOverride):Boolean {
         return sourceItem.matches(join.sourceItem) &&
-                targetItem.matches(join.targetItem);
+                targetItem.matches(join.targetItem) &&
+                dataSourceID == join.dataSourceID;
     }
 
     public function updateFromSaved(join:JoinOverride):void {
