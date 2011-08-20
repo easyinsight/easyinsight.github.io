@@ -7,11 +7,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Arrays;
 
-import com.easyinsight.analysis.ReportTypeOptions;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.preferences.ApplicationSkinSettings;
-import com.easyinsight.preferences.UISettingRetrieval;
 import com.easyinsight.users.UserService;
 import com.easyinsight.users.UserServiceResponse;
 import com.easyinsight.users.User;
@@ -105,17 +102,7 @@ public class SecurityUtil {
                 if(!Arrays.asList(Account.TRIAL, Account.ACTIVE).contains(account.getAccountState())) {
                     return new UserServiceResponse(false, "This account is not active. Please log in to re-activate your account.");
                 }
-                if (user.getPersonaID() != null) {
-                    user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
-                }
-                userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
-                        account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
-                        user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                        user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
-                        account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()),
-                        account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
+                userServiceResponse = UserServiceResponse.createResponse(user, session, conn);
             } else {
                 throw new SecurityException();
             }
