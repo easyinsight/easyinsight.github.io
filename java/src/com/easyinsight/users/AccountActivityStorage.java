@@ -56,7 +56,7 @@ public class AccountActivityStorage {
     }
 
     public void generateWelcomeBackEmailSchedules(long userID, Connection conn) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("INSERT INTO user_sales_email_schedule (user_id, target_number, send_date) VALUES (?, ?, ?)");
+        /*PreparedStatement stmt = conn.prepareStatement("INSERT INTO user_sales_email_schedule (user_id, target_number, send_date) VALUES (?, ?, ?)");
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 1);
         stmt.setLong(1, userID);
@@ -71,7 +71,7 @@ public class AccountActivityStorage {
             stmt.setTimestamp(3, new Timestamp(cal.getTime().getTime()));
             stmt.execute();
         }
-        stmt.close();
+        stmt.close();*/
     }
 
     public void executeSalesEmails(EIConnection conn) throws SQLException, UnsupportedEncodingException {
