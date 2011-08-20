@@ -4,6 +4,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.database.migration.MigrateJoinOverrides;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DatabaseManager;
@@ -38,13 +39,17 @@ public class MigrationManager {
         }
     }
 
+    private void migrateJoins() {
+        new MigrateJoinOverrides().migrate();
+    }
+
     public void migrate() {
         if (obtainLock()) {
-            /*try {
-                migrateStorage();
+            try {
+                migrateJoins();
             } catch (Exception e) {
                 LogClass.error(e);
-            }*/
+            }
             try {
                 EIConnection conn = Database.instance().getConnection();
                 try {

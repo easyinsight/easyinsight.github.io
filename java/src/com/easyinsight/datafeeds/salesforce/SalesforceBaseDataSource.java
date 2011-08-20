@@ -261,7 +261,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                 System.out.println("Connecting " + connection.source + " to " + connection.target);
                 if (sourceItem != null && targetItem != null) {
                     connections.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceItem, targetItem,
-                        source.getFeedName(), target.getFeedName()));
+                        source.getFeedName(), target.getFeedName(), false));
                 }
             }
         }
