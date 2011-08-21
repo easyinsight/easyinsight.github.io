@@ -253,6 +253,8 @@ public class DataService {
                                               InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters, EIConnection conn) throws Exception {
         Feed feed = feedRegistry.getFeed(dataSourceID, conn);
         insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
+        insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
+            insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
 
             if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
@@ -400,6 +402,8 @@ public class DataService {
                 insightRequestMetadata = new InsightRequestMetadata();
             }
             insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
+            insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
+            insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID(), conn);
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
             if (analysisDefinition.getAddedItems() != null) {
@@ -447,6 +451,8 @@ public class DataService {
             insightRequestMetadata = new InsightRequestMetadata();
         }
         insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
+        insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
+            insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
         Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
         if (analysisDefinition.getAddedItems() != null) {
@@ -485,6 +491,8 @@ public class DataService {
                 insightRequestMetadata = new InsightRequestMetadata();
             }
             insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
+            insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
+            insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
             DataResults results;
 
             PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
