@@ -606,6 +606,7 @@ public class DataService {
             }
             insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
+            insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
             DataResults results;
 
             for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {

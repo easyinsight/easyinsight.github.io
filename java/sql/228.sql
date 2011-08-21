@@ -35,3 +35,8 @@ alter table composite_connection add left_join tinyint(4) not null default 0;
 alter table composite_connection add right_join tinyint(4) not null default 0;
 alter table join_override add left_join tinyint(4) not null default 0;
 alter table join_override add right_join tinyint(4) not null default 0;
+
+alter table composite_connection add left_join_on_original tinyint(4) not null default 0;
+alter table composite_connection add right_join_on_original tinyint(4) not null default 0;
+alter table join_override add left_join_on_original tinyint(4) not null default 0;
+alter table join_override add right_join_on_original tinyint(4) not null default 0;

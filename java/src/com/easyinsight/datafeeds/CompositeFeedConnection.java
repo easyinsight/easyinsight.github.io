@@ -33,6 +33,8 @@ public class CompositeFeedConnection implements Serializable {
     private List<AnalysisItem> targetItems = new ArrayList<AnalysisItem>();
     private boolean sourceOuterJoin;
     private boolean targetOuterJoin;
+    private boolean sourceJoinOnOriginal;
+    private boolean targetJoinOnOriginal;
     private String sourceFeedName;
     private String targetFeedName;
 
@@ -44,7 +46,8 @@ public class CompositeFeedConnection implements Serializable {
         this.targetFeedID = targetFeedID;
     }
 
-    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, Key sourceJoin, Key targetJoin, String sourceName, String targetName, boolean sourceOuterJoin, boolean targetOuterJoin) {
+    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, Key sourceJoin, Key targetJoin, String sourceName, String targetName,
+                                   boolean sourceOuterJoin, boolean targetOuterJoin, boolean sourceJoinOnOriginal, boolean targetJoinOnOriginal) {
         this.sourceFeedID = sourceFeedID;
         this.targetFeedID = targetFeedID;
         this.sourceJoin = sourceJoin;
@@ -55,9 +58,12 @@ public class CompositeFeedConnection implements Serializable {
         this.targetFeedName = targetName;
         this.sourceOuterJoin = sourceOuterJoin;
         this.targetOuterJoin = targetOuterJoin;
+        this.sourceJoinOnOriginal = sourceJoinOnOriginal;
+        this.targetJoinOnOriginal = targetJoinOnOriginal;
     }
 
-    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, AnalysisItem sourceItem, AnalysisItem targetItem, String sourceName, String targetName, boolean sourceOuterJoin, boolean targetOuterJoin) {
+    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, AnalysisItem sourceItem, AnalysisItem targetItem, String sourceName, String targetName,
+                                   boolean sourceOuterJoin, boolean targetOuterJoin, boolean sourceJoinOnOriginal, boolean targetJoinOnOriginal) {
         this.sourceFeedID = sourceFeedID;
         this.targetFeedID = targetFeedID;
         this.sourceItem = sourceItem;
@@ -68,6 +74,24 @@ public class CompositeFeedConnection implements Serializable {
         this.targetFeedName = targetName;
         this.sourceOuterJoin = sourceOuterJoin;
         this.targetOuterJoin = targetOuterJoin;
+        this.sourceJoinOnOriginal = sourceJoinOnOriginal;
+        this.targetJoinOnOriginal = targetJoinOnOriginal;
+    }
+
+    public boolean isSourceJoinOnOriginal() {
+        return sourceJoinOnOriginal;
+    }
+
+    public void setSourceJoinOnOriginal(boolean sourceJoinOnOriginal) {
+        this.sourceJoinOnOriginal = sourceJoinOnOriginal;
+    }
+
+    public boolean isTargetJoinOnOriginal() {
+        return targetJoinOnOriginal;
+    }
+
+    public void setTargetJoinOnOriginal(boolean targetJoinOnOriginal) {
+        this.targetJoinOnOriginal = targetJoinOnOriginal;
     }
 
     public List<AnalysisItem> getSourceItems() {
@@ -187,7 +211,8 @@ public class CompositeFeedConnection implements Serializable {
     public void store(Connection conn, long feedID) throws SQLException {
         if (sourceItem != null && targetItem != null) {
             PreparedStatement connInsertStmt = conn.prepareStatement("INSERT INTO COMPOSITE_CONNECTION (" +
-                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, source_item_id, target_item_id, COMPOSITE_FEED_ID, left_join, right_join) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, source_item_id, target_item_id, COMPOSITE_FEED_ID, left_join, right_join, left_join_on_original, right_join_on_original) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             connInsertStmt.setLong(1, sourceFeedID);
             connInsertStmt.setLong(2, targetFeedID);
             connInsertStmt.setLong(3, sourceItem.getAnalysisItemID());
@@ -195,11 +220,14 @@ public class CompositeFeedConnection implements Serializable {
             connInsertStmt.setLong(5, feedID);
             connInsertStmt.setBoolean(6, sourceOuterJoin);
             connInsertStmt.setBoolean(7, targetOuterJoin);
+            connInsertStmt.setBoolean(8, sourceJoinOnOriginal);
+            connInsertStmt.setBoolean(9, targetJoinOnOriginal);
             connInsertStmt.execute();
             connInsertStmt.close();
         } else {
             PreparedStatement connInsertStmt = conn.prepareStatement("INSERT INTO COMPOSITE_CONNECTION (" +
-                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, SOURCE_JOIN, TARGET_JOIN, COMPOSITE_FEED_ID, left_join, right_join) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, SOURCE_JOIN, TARGET_JOIN, COMPOSITE_FEED_ID, left_join, right_join, left_join_on_original, right_join_on_original) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             connInsertStmt.setLong(1, sourceFeedID);
             connInsertStmt.setLong(2, targetFeedID);
             connInsertStmt.setLong(3, sourceJoin.getKeyID());
@@ -207,6 +235,8 @@ public class CompositeFeedConnection implements Serializable {
             connInsertStmt.setLong(5, feedID);
             connInsertStmt.setBoolean(6, sourceOuterJoin);
             connInsertStmt.setBoolean(7, targetOuterJoin);
+            connInsertStmt.setBoolean(8, sourceJoinOnOriginal);
+            connInsertStmt.setBoolean(9, targetJoinOnOriginal);
             connInsertStmt.execute();
             connInsertStmt.close();
         }

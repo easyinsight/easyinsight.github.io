@@ -244,6 +244,7 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Number of Columns", "columnCount", FormReport(report).columnCount, report, 1, 3));
         }
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
+        items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];
         items.sort = sort;

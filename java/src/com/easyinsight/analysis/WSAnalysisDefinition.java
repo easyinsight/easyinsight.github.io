@@ -79,6 +79,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean accountVisible;
     private List<JoinOverride> joinOverrides;
     private boolean optimized;
+    private boolean fullJoins;
 
     private String fontName = "Tahoma";
     private int fontSize = 12;
@@ -479,6 +480,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         fixedWidth = (int) findNumberProperty(properties, "fixedWidth", 0);
         backgroundAlpha =  findNumberProperty(properties, "backgroundAlpha", 1);
         optimized =  findBooleanProperty(properties, "optimized", false);
+        fullJoins =  findBooleanProperty(properties, "fullJoins", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -488,7 +490,16 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportNumericProperty("fixedWidth", fixedWidth));
         properties.add(new ReportNumericProperty("backgroundAlpha", backgroundAlpha));
         properties.add(new ReportBooleanProperty("optimized", optimized));
+        properties.add(new ReportBooleanProperty("fullJoins", fullJoins));
         return properties;
+    }
+
+    public boolean isFullJoins() {
+        return fullJoins;
+    }
+
+    public void setFullJoins(boolean fullJoins) {
+        this.fullJoins = fullJoins;
     }
 
     protected String findStringProperty(List<ReportProperty> properties, String property, String defaultValue) {

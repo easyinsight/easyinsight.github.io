@@ -3,6 +3,7 @@
         creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.feedassembly.CompositeFeedConnection;
+        import com.easyinsight.feedassembly.ConnectionControls;
         import com.easyinsight.feedassembly.ConnectionDeleteEvent;
         import com.easyinsight.feedassembly.DSPickJoinWindow;
         import com.easyinsight.feedassembly.JoinSelectionEvent;
@@ -25,6 +26,8 @@
         public var startJoins:ArrayCollection;
 
         private function onCreation():void {
+            controlsFactory = new ClassFactory(ConnectionControls);
+            ClassFactory(controlsFactory).properties = { fields: fields };
             addEventListener(ConnectionDeleteEvent.CONNECTION_DELETE, onConnectionDelete);
             ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
             analysisService.determineOverrides.send(dataSourceID, fields);
@@ -94,6 +97,10 @@
                 saveJoin.sourceName = connection.sourceFeedName;
                 saveJoin.targetName = connection.targetFeedName;
                 saveJoin.dataSourceID = selectedDataSource.id;
+                saveJoin.sourceOuterJoin = connection.sourceOuterJoin;
+                saveJoin.targetOuterJoin = connection.targetOuterJoin;
+                saveJoin.sourceJoinOriginal = connection.sourceJoinOnOriginal;
+                saveJoin.targetJoinOriginal = connection.targetJoinOnOriginal;
                 saveJoins.addItem(saveJoin);
             }
             customConnectionMap[String(selectedDataSource.id)] = saveJoins;
@@ -165,6 +172,9 @@
             }
         }
 
+        [Bindable]
+        private var controlsFactory:IFactory;
+
         private function onDataSourceChange():void {
             var dataSource:DataSourceDescriptor = dataSourceBox.selectedItem as DataSourceDescriptor;
             populateJoins(dataSource);
@@ -182,7 +192,7 @@
             <util:EIDataGridColumn dataField="sourceDisplay" headerText="Source Field"/>
             <util:EIDataGridColumn dataField="targetDisplay" headerText="Target Field"/>
             <util:EIDataGridColumn dataField="targetFeedName" headerText="Target Data Source"/>
-            <util:EIDataGridColumn headerText="" dataField="name" width="50" sortable="false" itemRenderer="com.easyinsight.feedassembly.ConnectionControls"/>
+            <util:EIDataGridColumn headerText="" dataField="name" width="100" sortable="false" itemRenderer="{controlsFactory}"/>
         </mx:columns>
     </mx:DataGrid>
     <mx:HBox width="100%" horizontalAlign="center">

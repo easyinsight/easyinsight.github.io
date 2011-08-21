@@ -7,26 +7,53 @@
  */
 package com.easyinsight.feedassembly {
 
+import com.easyinsight.util.PopUpUtil;
+
 import flash.events.MouseEvent;
+
+import mx.collections.ArrayCollection;
 
 import mx.containers.HBox;
 import mx.controls.Button;
+import mx.managers.PopUpManager;
 
 public class ConnectionControls extends HBox {
 
     [Embed(source="../../../../assets/navigate_cross.png")]
     private var deleteIcon:Class;
 
+    [Embed(source="../../../../assets/pencil.png")]
+    private var editIcon:Class;
+
     private var deleteButton:Button;
+    private var editButton:Button;
 
     private var connection:CompositeFeedConnection;
 
     public function ConnectionControls() {
+        editButton = new Button();
+        editButton.setStyle("icon", editIcon);
+        editButton.toolTip = "Edit this connection...";
+        editButton.addEventListener(MouseEvent.CLICK, onEdit);
         deleteButton = new Button();
         deleteButton.setStyle("icon", deleteIcon);
-        deleteButton.toolTip = "Remove this data source";
+        deleteButton.toolTip = "Remove this connection";
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         setStyle("horizontalAlign", "center");
+    }
+
+    private function onEdit(event:MouseEvent):void {
+        var window:DSEditJoinWindow = new DSEditJoinWindow();
+        window.metadataFields = _fields;
+        window.existingConnection = connection;
+        PopUpManager.addPopUp(window,  this, true);
+        PopUpUtil.centerPopUp(window);
+    }
+
+    private var _fields:ArrayCollection;
+
+    public function set fields(value:ArrayCollection):void {
+        _fields = value;
     }
 
     private function onDelete(event:MouseEvent):void {
@@ -35,6 +62,7 @@ public class ConnectionControls extends HBox {
 
     override protected function createChildren():void {
         super.createChildren();
+        addChild(editButton);
         addChild(deleteButton);
     }
 

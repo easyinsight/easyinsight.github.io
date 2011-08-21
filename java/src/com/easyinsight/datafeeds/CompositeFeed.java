@@ -177,7 +177,7 @@ public class CompositeFeed extends Feed {
                     connections.add(new CompositeFeedConnection(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID(),
                             ((DerivedKey) joinOverride.getTargetItem().getKey()).getFeedID(), joinOverride.getSourceItem(),
                             joinOverride.getTargetItem(), joinOverride.getSourceName(), joinOverride.getTargetName(), joinOverride.isSourceOuterJoin(),
-                            joinOverride.isTargetOuterJoin()));
+                            joinOverride.isTargetOuterJoin(), joinOverride.isSourceJoinOriginal(), joinOverride.isTargetJoinOriginal()));
                     //iter.remove();
                 }
             }
@@ -282,7 +282,7 @@ public class CompositeFeed extends Feed {
                 }
                 QueryStateNode exists = neededNodes.get(targetNode.feedID);
                 if (exists != null) {
-                    System.out.println("edge between " + queryStateNode.dataSourceName + " and " + targetNode.dataSourceName);
+                    //System.out.println("edge between " + queryStateNode.dataSourceName + " and " + targetNode.dataSourceName);
                     if (queryStateIsSource) {
                         for (Key join : localEdge.connection.getSourceJoins()) {
                             queryStateNode.addKey(join);
@@ -337,7 +337,7 @@ public class CompositeFeed extends Feed {
                     firstVertex = source;
                 }
                 QueryStateNode target = queryNodeMap.get(connection.getTargetFeedID());
-                System.out.println("** adding edge of " + source.dataSourceName + " to " + target.dataSourceName);
+                //System.out.println("** adding edge of " + source.dataSourceName + " to " + target.dataSourceName);
                 reducedGraph.addEdge(source, target, edge);
             }
         }
@@ -422,10 +422,17 @@ public class CompositeFeed extends Feed {
                     }
                 }
 
-                System.out.println("joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName);
-                MergeAudit mergeAudit = last.connection.merge(sourceQueryData.dataSet, targetQueryData.dataSet,
+                //System.out.println("joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName);
+                MergeAudit mergeAudit;
+                if (last.connection.isTargetJoinOnOriginal()) {
+                    mergeAudit = last.connection.merge(sourceQueryData.dataSet, targetNode.originalDataSet,
                         sourceQueryData.neededItems, targetQueryData.neededItems,
                         sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID);
+                } else {
+                    mergeAudit = last.connection.merge(sourceQueryData.dataSet, targetQueryData.dataSet,
+                        sourceQueryData.neededItems, targetQueryData.neededItems,
+                        sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID);
+                }
                 dataSet = mergeAudit.getDataSet();
                 auditStrings.addAll(mergeAudit.getMergeStrings());
                 sourceQueryData.dataSet = dataSet;
@@ -631,6 +638,7 @@ public class CompositeFeed extends Feed {
         private Collection<AnalysisItem> joinItems = new HashSet<AnalysisItem>();
         private String dataSourceName;
         private EIConnection conn;
+        private DataSet originalDataSet;
 
         private QueryStateNode(long feedID, EIConnection conn) {
             this.feedID = feedID;
@@ -697,7 +705,8 @@ public class CompositeFeed extends Feed {
             /*WSListDefinition analysisDefinition = new WSListDefinition();
             analysisDefinition.setColumns(new ArrayList<AnalysisItem>(queryData.neededItems));*/
             pipeline.setup(queryData.neededItems);
-            return pipeline.toDataSet(dataSet);
+            originalDataSet = pipeline.toDataSet(dataSet);
+            return originalDataSet;
         }
 
         public void addFilter(FilterDefinition filterDefinition) {

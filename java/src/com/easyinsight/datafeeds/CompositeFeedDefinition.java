@@ -131,7 +131,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
             queryStmt.close();
             PreparedStatement queryConnStmt = conn.prepareStatement("SELECT SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID," +
-                    "SOURCE_JOIN, TARGET_JOIN, SOURCE_ITEM_ID, TARGET_ITEM_ID, left_join, right_join FROM COMPOSITE_CONNECTION WHERE COMPOSITE_FEED_ID = ?");
+                    "SOURCE_JOIN, TARGET_JOIN, SOURCE_ITEM_ID, TARGET_ITEM_ID, left_join, right_join, left_join_on_original, right_join_on_original FROM COMPOSITE_CONNECTION WHERE COMPOSITE_FEED_ID = ?");
             PreparedStatement nameStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
             queryConnStmt.setLong(1, compositeFeedID);
             List<CompositeFeedConnection> edges = new ArrayList<CompositeFeedConnection>();
@@ -156,14 +156,18 @@ public class CompositeFeedDefinition extends FeedDefinition {
                     AnalysisItem targetItem = getItem(conn, connectionRS.getLong(6));
                     boolean sourceJoin = connectionRS.getBoolean(7);
                     boolean targetJoin = connectionRS.getBoolean(8);
+                    boolean sourceJoinOnOriginal = connectionRS.getBoolean(9);
+                    boolean targetJoinOnOriginal = connectionRS.getBoolean(10);
 
-                    edges.add(new CompositeFeedConnection(sourceID, targetID, sourceItem, targetItem, sourceName, targetName, sourceJoin, targetJoin));
+                    edges.add(new CompositeFeedConnection(sourceID, targetID, sourceItem, targetItem, sourceName, targetName, sourceJoin, targetJoin, sourceJoinOnOriginal, targetJoinOnOriginal));
                 } else {
                     Key sourceKey = getKey(conn, sourceKeyID);
                     Key targetKey = getKey(conn, connectionRS.getLong(4));
                     boolean sourceJoin = connectionRS.getBoolean(7);
                     boolean targetJoin = connectionRS.getBoolean(8);
-                    edges.add(new CompositeFeedConnection(sourceID, targetID, sourceKey, targetKey, sourceName, targetName, sourceJoin, targetJoin));
+                    boolean sourceJoinOnOriginal = connectionRS.getBoolean(9);
+                    boolean targetJoinOnOriginal = connectionRS.getBoolean(10);
+                    edges.add(new CompositeFeedConnection(sourceID, targetID, sourceKey, targetKey, sourceName, targetName, sourceJoin, targetJoin, sourceJoinOnOriginal, targetJoinOnOriginal));
                 }
 
             }

@@ -17,6 +17,10 @@ public class JoinOverride {
     public var sourceName:String;
     public var targetName:String;
     public var dataSourceID:int;
+    public var sourceOuterJoin:Boolean;
+    public var targetOuterJoin:Boolean;
+    public var sourceJoinOriginal:Boolean;
+    public var targetJoinOriginal:Boolean;
 
     public function JoinOverride() {
     }
@@ -29,6 +33,10 @@ public class JoinOverride {
         connection.targetFeedName = targetName;
         connection.sourceItem = sourceItem;
         connection.targetItem = targetItem;
+        connection.sourceOuterJoin = sourceOuterJoin;
+        connection.targetOuterJoin = targetOuterJoin;
+        connection.sourceJoinOnOriginal = sourceJoinOriginal;
+        connection.targetJoinOnOriginal = targetJoinOriginal;
         return connection;
     }
 

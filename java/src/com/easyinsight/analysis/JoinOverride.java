@@ -32,8 +32,28 @@ public class JoinOverride implements Cloneable, Serializable {
     private boolean sourceOuterJoin;
     @Column(name="right_join")
     private boolean targetOuterJoin;
+    @Column(name="left_join_on_original")
+    private boolean sourceJoinOriginal;
+    @Column(name="right_join_on_original")
+    private boolean targetJoinOriginal;
     @Column(name="data_source_id")
     private Long dataSourceID;
+
+    public boolean isSourceJoinOriginal() {
+        return sourceJoinOriginal;
+    }
+
+    public void setSourceJoinOriginal(boolean sourceJoinOriginal) {
+        this.sourceJoinOriginal = sourceJoinOriginal;
+    }
+
+    public boolean isTargetJoinOriginal() {
+        return targetJoinOriginal;
+    }
+
+    public void setTargetJoinOriginal(boolean targetJoinOriginal) {
+        this.targetJoinOriginal = targetJoinOriginal;
+    }
 
     public boolean isSourceOuterJoin() {
         return sourceOuterJoin;

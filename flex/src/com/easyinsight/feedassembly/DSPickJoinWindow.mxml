@@ -173,9 +173,6 @@
             index = 1;
         }
 
-        [Bindable]
-        private var matchRow:Boolean = false;
-
         private function join():void {
             var connects:ArrayCollection = new ArrayCollection();
             var connect:CompositeFeedConnection = new CompositeFeedConnection();
@@ -185,8 +182,10 @@
             connect.targetItem = targetBox.selectedItem as AnalysisItem;
             connect.sourceFeedName = sourceFeedName;
             connect.targetFeedName = targetFeedName;
-            /*connect.sourceOuterJoin = leftJoinCheckbox.selected;
-            connect.targetOuterJoin = rightJoinCheckbox.selected;*/
+            connect.sourceOuterJoin = leftJoinCheckbox.selected;
+            connect.targetOuterJoin = rightJoinCheckbox.selected;
+            connect.sourceJoinOnOriginal = leftMatchCheckbox.selected;
+            connect.targetJoinOnOriginal = rightMatchCheckbox.selected;
             connects.addItem(connect);
             dispatchEvent(new JoinSelectionEvent(connects));
             PopUpManager.removePopUp(this);
@@ -212,7 +211,7 @@
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
         </mx:VBox>
-        <mx:VBox>
+        <mx:VBox horizontalAlign="center">
             <mx:HBox>
                 <mx:VBox>
                     <mx:Label text="{sourceFeedName}"/>
@@ -223,8 +222,11 @@
                     <util:SmartComboBox id="targetBox" dataProvider="{targetFields}" labelField="display"/>
                 </mx:VBox>
             </mx:HBox>
-            <!--<mx:CheckBox label="Only Keep Matching Rows From Source" id="leftJoinCheckbox" selected="{matchRow}"/>
-            <mx:CheckBox label="Only Keep Matching Rows From Target" id="rightJoinCheckbox" selected="{matchRow}"/>-->
+            <mx:Label text="Warning: The following settings are only for advanced users. We recommend defaults." fontWeight="bold"/>
+            <mx:CheckBox label="Only Keep Matching Rows From Source" id="leftJoinCheckbox"/>
+            <mx:CheckBox label="Only Keep Matching Rows From Target" id="rightJoinCheckbox"/>
+            <mx:CheckBox label="Match Source Against Original Data" id="leftMatchCheckbox"/>
+            <mx:CheckBox label="Match Target Against Original Data" id="rightMatchCheckbox"/>
             <mx:HBox width="100%" horizontalAlign="center">
                 <util:SaveButton label="Use These Fields" click="join()"/>
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

@@ -78,7 +78,7 @@ public class FeedService {
                 throw new RuntimeException();
             }
             CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(source.getId(), target.getId(), sourceKey, targetKey, sourceObj.getFeedName(),
-                    targetObj.getFeedName(), false, false);
+                    targetObj.getFeedName(), false, false, false, false);
             CompositeFeedDefinition dataSource = createCompositeFeed(Arrays.asList(sourceNode, targetNode), Arrays.asList(compositeFeedConnection), dataSourceName, conn);
             conn.commit();
             return new DataSourceDescriptor(dataSource.getFeedName(), dataSource.getDataFeedID(), dataSource.getFeedType().getType(), false);

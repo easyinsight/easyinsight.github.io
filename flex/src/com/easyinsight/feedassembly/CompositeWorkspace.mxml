@@ -484,7 +484,7 @@
                         <util:EIDataGridColumn dataField="sourceDisplay" headerText="Source Field"/>
                         <util:EIDataGridColumn dataField="targetDisplay" headerText="Target Field"/>
                         <util:EIDataGridColumn dataField="targetFeedName" headerText="Data Source"/>
-                        <util:EIDataGridColumn headerText="" dataField="name" width="50" sortable="false" itemRenderer="com.easyinsight.feedassembly.ConnectionControls"/>
+                        <util:EIDataGridColumn headerText="" dataField="name" width="100" sortable="false" itemRenderer="com.easyinsight.feedassembly.ConnectionControls"/>
                     </mx:columns>
                 </mx:DataGrid>
             </mx:VBox>

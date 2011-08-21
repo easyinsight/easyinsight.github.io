@@ -17,6 +17,8 @@ import com.easyinsight.analysis.Key;
 		public var targetFeedName:String;
         public var sourceOuterJoin:Boolean;
         public var targetOuterJoin:Boolean;
+        public var sourceJoinOnOriginal:Boolean;
+        public var targetJoinOnOriginal:Boolean;
 
 		public function CompositeFeedConnection()
 			{

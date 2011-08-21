@@ -78,6 +78,7 @@ import mx.collections.ArrayCollection;
         public var joinOverrides:ArrayCollection;
         public var recommendedExchange:Boolean;
         public var optimized:Boolean;
+        public var fullJoins:Boolean;
 
 		public function AnalysisDefinition()
 		{

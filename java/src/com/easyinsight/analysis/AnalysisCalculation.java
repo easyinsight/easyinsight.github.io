@@ -63,11 +63,11 @@ public class AnalysisCalculation extends AnalysisMeasure {
         return super.getType() | AnalysisItemTypes.CALCULATION;
     }
 
-    @Transient
+    /*@Transient
     private transient CalculationTreeNode tree;
 
     @Transient
-    private transient Set<KeySpecification> specs;
+    private transient Set<KeySpecification> specs;*/
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
@@ -91,7 +91,9 @@ public class AnalysisCalculation extends AnalysisMeasure {
                 items.add(analysisItem);
             }
         }
-        if (tree == null) {
+        CalculationTreeNode tree;
+        Set<KeySpecification> specs;
+
             ICalculationTreeVisitor visitor;
             CalculationsParser.startExpr_return ret;
 
@@ -119,7 +121,6 @@ public class AnalysisCalculation extends AnalysisMeasure {
             tree.accept(variableVisitor);
 
             specs = variableVisitor.getVariableList();
-        }
 
 
 

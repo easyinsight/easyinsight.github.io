@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+
+        import com.easyinsight.analysis.DerivedKey;
+        import com.easyinsight.analysis.FeedMetadata;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var _dataSources:ArrayCollection;
+
+        private var _existingConnection:CompositeFeedConnection;
+
+        public function set existingConnection(value:CompositeFeedConnection):void {
+            _existingConnection = value;
+            sourceFeedName = _existingConnection.sourceFeedName;
+            targetFeedName = _existingConnection.targetFeedName;
+            sourceFieldName = _existingConnection.sourceItem.display;
+            targetFieldName = _existingConnection.targetItem.display;
+            leftJoin = _existingConnection.sourceOuterJoin;
+            rightJoin = _existingConnection.targetOuterJoin;
+            leftOriginal = _existingConnection.sourceJoinOnOriginal;
+            rightOriginal = _existingConnection.targetJoinOnOriginal;
+        }
+
+        [Bindable]
+        private var index:int;
+
+        [Bindable]
+        private var sourceFeedName:String;
+
+        [Bindable]
+        private var targetFeedName:String;
+
+        [Bindable]
+        private var sourceFields:ArrayCollection;
+
+        [Bindable]
+        private var targetFields:ArrayCollection;
+
+        private var sourceID:int;
+
+        private var targetID:int;
+
+        public var metadataFields:ArrayCollection;
+
+        private function onCreation():void {
+        }
+
+        [Bindable]
+        private var leftJoin:Boolean = false;
+
+        [Bindable]
+        private var rightJoin:Boolean = false;
+
+        [Bindable]
+        private var leftOriginal:Boolean = false;
+
+        [Bindable]
+        private var rightOriginal:Boolean = false;
+
+        [Bindable]
+        private var sourceFieldName:String;
+
+        [Bindable]
+        private var targetFieldName:String;
+
+        private function join():void {
+            _existingConnection.sourceOuterJoin = leftJoinCheckbox.selected;
+            _existingConnection.targetOuterJoin = rightJoinCheckbox.selected;
+            _existingConnection.sourceJoinOnOriginal = leftMatchCheckbox.selected;
+            _existingConnection.targetJoinOnOriginal = rightMatchCheckbox.selected;
+            dispatchEvent(new JoinEditEvent(_existingConnection));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <mx:VBox>
+            <mx:Label text="{sourceFeedName}"/>
+            <mx:Label text="{sourceFieldName}"/>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Label text="{targetFeedName}"/>
+            <mx:Label text="{targetFieldName}"/>
+        </mx:VBox>
+    </mx:HBox>
+    <mx:CheckBox label="Only Keep Matching Rows From Source" id="leftJoinCheckbox" selected="{leftJoin}"/>
+    <mx:CheckBox label="Only Keep Matching Rows From Target" id="rightJoinCheckbox" selected="{rightJoin}"/>
+    <mx:CheckBox label="Match Source Against Original Data" id="leftMatchCheckbox" selected="{leftOriginal}"/>
+            <mx:CheckBox label="Match Target Against Original Data" id="rightMatchCheckbox" selected="{rightOriginal}"/>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Use These Fields" click="join()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>
