@@ -16,7 +16,8 @@ public class ChildConnection {
     private String sourceKey;
     private String targetKey;
     private Key fixedKey;
-    private boolean stripUnmatchedRows;
+    private boolean leftJoin;
+    private boolean rightJoin;
 
     public ChildConnection(FeedType sourceFeedType, FeedType targetFeedType, String sourceKey, String targetKey) {
         this.sourceFeedType = sourceFeedType;
@@ -68,10 +69,10 @@ public class ChildConnection {
             Key sourceKey = sourceDef.getField(getSourceKey());
             Key targetKey = targetDef.getField(getTargetKey());
             return new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
-                        sourceKey, targetKey, sourceDef.getFeedName(), targetDef.getFeedName(), stripUnmatchedRows);
+                        sourceKey, targetKey, sourceDef.getFeedName(), targetDef.getFeedName(), leftJoin, rightJoin);
         } else {
             return new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
-                    fixedKey, fixedKey, sourceDef.getFeedName(), targetDef.getFeedName(), stripUnmatchedRows);
+                    fixedKey, fixedKey, sourceDef.getFeedName(), targetDef.getFeedName(), leftJoin, rightJoin);
         }
     }
 }

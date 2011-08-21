@@ -138,6 +138,9 @@
             dashboardEditorMetadata.dataSourceID = dataSourceID;
             rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
             UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
+                var filterMap:Object = new Object();
+                filterMap["master"] = dashboard.filters;
+                rootView.updateAdditionalFilters(filterMap);
                 rootView.retrieveData();
             });
             dashboardCanvas.addChild(rootView as UIComponent);
@@ -158,6 +161,9 @@
 
 
         private function transformsUpdated(event:Event):void {
+            var filterMap:Object = new Object();
+            filterMap["master"] = dashboard.filters;
+            rootView.updateAdditionalFilters(filterMap);
             rootView.refresh();
         }
 

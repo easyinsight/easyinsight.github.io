@@ -15,7 +15,8 @@ import com.easyinsight.analysis.Key;
         public var targetItem:AnalysisItem;
         public var sourceFeedName:String;
 		public var targetFeedName:String;
-        public var stripUnmatchedRows:Boolean;
+        public var sourceOuterJoin:Boolean;
+        public var targetOuterJoin:Boolean;
 
 		public function CompositeFeedConnection()
 			{

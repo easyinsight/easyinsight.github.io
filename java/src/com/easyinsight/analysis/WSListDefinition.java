@@ -184,7 +184,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
     }
 
     public List<AnalysisItem> getLimitFields() {
-        if (listLimitsMetadata != null && listLimitsMetadata.getAnalysisItem() != null) {
+        if (listLimitsMetadata != null && listLimitsMetadata.getAnalysisItem() != null && listLimitsMetadata.isLimitEnabled()) {
             return Arrays.asList(listLimitsMetadata.getAnalysisItem());
         } else {
             return super.getLimitFields();

@@ -116,9 +116,6 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
                 gridItem.setStyle("paddingRight", dashboardGrid.paddingRight);
                 gridItem.setStyle("paddingTop", dashboardGrid.paddingTop);
                 gridItem.setStyle("paddingBottom", dashboardGrid.paddingBottom);
-                gridItem.setStyle("borderStyle", "solid");
-                gridItem.setStyle("borderThickness", 1);
-                gridItem.setStyle("borderColor", 0);
                 gridItem.percentWidth = 100;
                 gridItem.percentHeight = 100;
                 var child:UIComponent = moduleInfo.factory.create() as UIComponent;

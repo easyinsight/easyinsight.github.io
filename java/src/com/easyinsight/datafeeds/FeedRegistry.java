@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 
@@ -47,6 +48,36 @@ public class FeedRegistry {
         catch(CacheException ce) {
             LogClass.error(ce);
         }
+    }
+
+    public Feed getFeed(long identifier) {
+        Feed feed = null;
+        if(cache != null)
+            feed = (Feed) cache.get(identifier);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            if (feed == null || !isLatestVersion(feed, identifier, conn)) {
+                LogClass.debug("Cache miss for feed id: " + identifier);
+                FeedDefinition feedDefinition;
+                feedDefinition = feedStorage.getFeedDefinitionData(identifier, conn);
+                feed = feedDefinition.createFeed();
+                feed.setVersion(getLatestVersion(identifier, conn));
+                try {
+                    if(cache != null)
+                        cache.put(identifier, feed);
+                }
+                catch(CacheException e) {
+                    LogClass.error(e);
+                }
+            }
+            else
+                LogClass.debug("Cache hit for feed id: " + identifier);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return feed;
     }
 
     public Feed getFeed(long identifier, EIConnection conn) {

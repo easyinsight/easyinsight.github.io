@@ -28,8 +28,28 @@ public class JoinOverride implements Cloneable, Serializable {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name="target_analysis_item_id")
     private AnalysisItem targetItem;
+    @Column(name="left_join")
+    private boolean sourceOuterJoin;
+    @Column(name="right_join")
+    private boolean targetOuterJoin;
     @Column(name="data_source_id")
     private Long dataSourceID;
+
+    public boolean isSourceOuterJoin() {
+        return sourceOuterJoin;
+    }
+
+    public void setSourceOuterJoin(boolean sourceOuterJoin) {
+        this.sourceOuterJoin = sourceOuterJoin;
+    }
+
+    public boolean isTargetOuterJoin() {
+        return targetOuterJoin;
+    }
+
+    public void setTargetOuterJoin(boolean targetOuterJoin) {
+        this.targetOuterJoin = targetOuterJoin;
+    }
 
     public JoinOverride clone() throws CloneNotSupportedException {
         JoinOverride joinOverride = (JoinOverride) super.clone();

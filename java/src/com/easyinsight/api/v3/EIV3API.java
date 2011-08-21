@@ -83,7 +83,7 @@ public abstract class EIV3API implements IEIV3API {
                 Key sourceKey = findKey(connection.getSourceDataSourceField(), sourceFeed);
                 Key targetKey = findKey(connection.getTargetDataSourceField(), targetFeed);
                 compositeConnections.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(),
-                        sourceKey, targetKey, sourceFeed.getFeedName(), targetFeed.getFeedName(), false));
+                        sourceKey, targetKey, sourceFeed.getFeedName(), targetFeed.getFeedName(), false, false));
             }
             compositeFeedDefinition.setCompositeFeedNodes(new ArrayList<CompositeFeedNode>(compositeNodes.values()));
             compositeFeedDefinition.setConnections(compositeConnections);

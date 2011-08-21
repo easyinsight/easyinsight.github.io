@@ -93,7 +93,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 Key sourceKey = sourceDef.getField(childConnection.getSourceKey());
                 Key targetKey = targetDef.getField(childConnection.getTargetKey());
                 CompositeFeedConnection connection = new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
-                        sourceKey, targetKey, sourceDef.getFeedName(), targetDef.getFeedName(), false);
+                        sourceKey, targetKey, sourceDef.getFeedName(), targetDef.getFeedName(), false, false);
                 connections.add(connection);
             }
             setConnections(connections);

@@ -173,6 +173,9 @@
             index = 1;
         }
 
+        [Bindable]
+        private var matchRow:Boolean = false;
+
         private function join():void {
             var connects:ArrayCollection = new ArrayCollection();
             var connect:CompositeFeedConnection = new CompositeFeedConnection();
@@ -182,6 +185,8 @@
             connect.targetItem = targetBox.selectedItem as AnalysisItem;
             connect.sourceFeedName = sourceFeedName;
             connect.targetFeedName = targetFeedName;
+            /*connect.sourceOuterJoin = leftJoinCheckbox.selected;
+            connect.targetOuterJoin = rightJoinCheckbox.selected;*/
             connects.addItem(connect);
             dispatchEvent(new JoinSelectionEvent(connects));
             PopUpManager.removePopUp(this);
@@ -193,7 +198,7 @@
     <mx:RemoteObject destination="data" id="dataService">
         <mx:method name="getFeedMetadata" result="gotFeed()"/>
     </mx:RemoteObject>
-    <mx:ViewStack selectedIndex="{index}">
+    <mx:ViewStack selectedIndex="{index}" resizeToContent="true">
         <mx:VBox>
             <mx:Label text="Which data sources do you want to join?"/>
             <mx:HBox verticalAlign="middle">
@@ -218,6 +223,8 @@
                     <util:SmartComboBox id="targetBox" dataProvider="{targetFields}" labelField="display"/>
                 </mx:VBox>
             </mx:HBox>
+            <!--<mx:CheckBox label="Only Keep Matching Rows From Source" id="leftJoinCheckbox" selected="{matchRow}"/>
+            <mx:CheckBox label="Only Keep Matching Rows From Target" id="rightJoinCheckbox" selected="{matchRow}"/>-->
             <mx:HBox width="100%" horizontalAlign="center">
                 <util:SaveButton label="Use These Fields" click="join()"/>
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

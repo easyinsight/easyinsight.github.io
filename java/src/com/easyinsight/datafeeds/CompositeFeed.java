@@ -176,7 +176,8 @@ public class CompositeFeed extends Feed {
                 if (joinOverride.getDataSourceID() == getFeedID()) {
                     connections.add(new CompositeFeedConnection(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID(),
                             ((DerivedKey) joinOverride.getTargetItem().getKey()).getFeedID(), joinOverride.getSourceItem(),
-                            joinOverride.getTargetItem(), joinOverride.getSourceName(), joinOverride.getTargetName(), false));
+                            joinOverride.getTargetItem(), joinOverride.getSourceName(), joinOverride.getTargetName(), joinOverride.isSourceOuterJoin(),
+                            joinOverride.isTargetOuterJoin()));
                     //iter.remove();
                 }
             }
