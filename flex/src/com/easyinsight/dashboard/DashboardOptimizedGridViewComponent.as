@@ -27,7 +27,9 @@ import mx.containers.Canvas;
 import mx.containers.Grid;
 import mx.containers.GridItem;
 import mx.containers.GridRow;
+import mx.containers.VBox;
 import mx.controls.Alert;
+import mx.controls.Label;
 import mx.controls.ProgressBar;
 import mx.core.UIComponent;
 import mx.events.ModuleEvent;
@@ -118,6 +120,8 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
                 gridItem.setStyle("paddingBottom", dashboardGrid.paddingBottom);
                 gridItem.percentWidth = 100;
                 gridItem.percentHeight = 100;
+                var vbox:VBox = new VBox();
+                vbox.setStyle("horizontalAlign", "center");
                 var child:UIComponent = moduleInfo.factory.create() as UIComponent;
                 var _reportRenderer:IReportRenderer = child as IReportRenderer;
                 var dashboardReport:DashboardReport = DashboardReport(e.dashboardElement);
@@ -128,6 +132,12 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
                 _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
                 _reportRenderer.addEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, onItemChange, false, 0, true);
                 _dataService.preserveValues = _reportRenderer.preserveValues();*/
+                var reportLabel:Label = new Label();
+                reportLabel.setStyle("fontSize", 14);
+                reportLabel.setStyle("fontWeight", "bold");
+                vbox.addChild(reportLabel);
+                reportLabel.text = dashboardReport.report.name;
+                vbox.addChild(child);
                 viewChildren.addItem(child);
                 gridItem.addChild(child);
                 gridRow.addChild(gridItem);
