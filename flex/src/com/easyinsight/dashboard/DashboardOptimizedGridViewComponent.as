@@ -121,6 +121,8 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
                 gridItem.percentWidth = 100;
                 gridItem.percentHeight = 100;
                 var vbox:VBox = new VBox();
+                vbox.percentHeight = 100;
+                vbox.percentWidth = 100;
                 vbox.setStyle("horizontalAlign", "center");
                 var child:UIComponent = moduleInfo.factory.create() as UIComponent;
                 var _reportRenderer:IReportRenderer = child as IReportRenderer;
@@ -139,7 +141,7 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
                 reportLabel.text = dashboardReport.report.name;
                 vbox.addChild(child);
                 viewChildren.addItem(child);
-                gridItem.addChild(child);
+                gridItem.addChild(vbox);
                 gridRow.addChild(gridItem);
             }
         }
