@@ -17,6 +17,7 @@
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.core.UIComponent;
+        import mx.events.FlexEvent;
 
         [Bindable]
         [Embed(source="../../../../assets/funnel.png")]
@@ -108,6 +109,12 @@
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = _dataSourceID;
             rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
+            UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
+                var filterMap:Object = new Object();
+                filterMap["master"] = dashboard.filters;
+                rootView.updateAdditionalFilters(filterMap);
+                rootView.retrieveData();
+            });
             dashboardCanvas.addChild(rootView as UIComponent);
         }
 
