@@ -75,7 +75,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             headerHBox.setStyle("verticalAlign", "middle");
             headerHBox.percentWidth = 100;
             var myFiltersBox:HBox = new HBox();
-            myFiltersBox.percentWidth = 100;
+            //myFiltersBox.percentWidth = 100;
             consolidatedFilterViewStack = new ViewStack();
             consolidatedFilterViewStack.resizeToContent = true;
             consolidatedFilterViewStack.percentWidth = 100;
