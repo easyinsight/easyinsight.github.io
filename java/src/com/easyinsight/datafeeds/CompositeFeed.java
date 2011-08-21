@@ -256,7 +256,7 @@ public class CompositeFeed extends Feed {
             for (Edge edge : neededEdges) {
                 QueryStateNode precedingNode = graph.getEdgeSource(edge);
                 QueryStateNode followingNode = graph.getEdgeTarget(edge);
-                System.out.println("identified edge from " + precedingNode.dataSourceName + " to " + followingNode.dataSourceName);
+                //System.out.println("identified edge from " + precedingNode.dataSourceName + " to " + followingNode.dataSourceName);
                 neededNodes.put(precedingNode.feedID, precedingNode);
                 neededNodes.put(followingNode.feedID, followingNode);
             }
