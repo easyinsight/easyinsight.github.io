@@ -28,7 +28,12 @@ import mx.formatters.NumberFormatter;
 		}
 		
 		override public function getFormatter():Formatter {
-            var format:int = User.getInstance().dateFormat;
+            var format:int;
+            if (User.getInstance() == null) {
+                format = 1;
+            } else {
+                format = User.getInstance().dateFormat;
+            }
             var formatter:Formatter;
             if (outputDateFormat != null && outputDateFormat != "") {
                 var outputFormatter:DateFormatter = new DateFormatter();

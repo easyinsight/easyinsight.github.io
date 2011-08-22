@@ -37,7 +37,7 @@ import mx.formatters.CurrencyFormatter;
 				case CURRENCY:
 					var currencyFormatter:CurrencyFormatter = new EICurrencyFormatter();
 					currencyFormatter.precision = precision;
-                    currencyFormatter.currencySymbol = User.getInstance().currencySymbol;
+                    currencyFormatter.currencySymbol = User.getInstance() == null ? "$" : User.getInstance().currencySymbol;
 					formatter = currencyFormatter;
 					break;
 				case PERCENTAGE:
