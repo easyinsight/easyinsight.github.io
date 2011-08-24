@@ -42,8 +42,20 @@ public class FilterDefinition implements Serializable, Cloneable {
     private boolean templateFilter;
     @Column(name="toggle_enabled")
     private boolean toggleEnabled;
+    @Column(name="minimum_role")
+    private int minimumRole;
+    /*@Column(name="show_if_owner")
+    private boolean showIfOwner;*/
 
     public FilterDefinition() {
+    }
+
+    public int getMinimumRole() {
+        return minimumRole;
+    }
+
+    public void setMinimumRole(int minimumRole) {
+        this.minimumRole = minimumRole;
     }
 
     public boolean isToggleEnabled() {
