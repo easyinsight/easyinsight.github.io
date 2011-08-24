@@ -33,7 +33,7 @@ import flash.events.EventDispatcher;
     public var filterName:String;
     public var templateFilter:Boolean;
     public var toggleEnabled:Boolean;
-    public var minimumRole:int;
+    public var minimumRole:int = 4;
 		
 		public function FilterDefinition()
 			{

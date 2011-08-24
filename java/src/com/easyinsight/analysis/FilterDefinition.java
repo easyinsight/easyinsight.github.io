@@ -43,7 +43,7 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name="toggle_enabled")
     private boolean toggleEnabled;
     @Column(name="minimum_role")
-    private int minimumRole;
+    private int minimumRole = 4;
     /*@Column(name="show_if_owner")
     private boolean showIfOwner;*/
 
