@@ -327,17 +327,6 @@ public class GroupService {
         }
     }
 
-    public void addGoalTreeToGroup(long goalTreeID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
-        SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
-        try {
-            groupStorage.addGoalTreeToGroup(goalTreeID, groupID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
     public void addFeedToGroup(long feedID, long groupID) {
         SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         SecurityUtil.authorizeFeed(feedID, Roles.SHARER);
