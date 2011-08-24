@@ -155,10 +155,4 @@
         </properties>
     </destination>
 
-    <destination id="goalService">
-        <properties>
-            <source>com.easyinsight.goals.GoalService</source>
-        </properties>
-    </destination>
-
 </service>

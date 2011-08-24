@@ -236,6 +236,8 @@ public class TransformContainer extends HBox
             filter = new AnalysisItemFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
         } else if (filterDefinition.getType() == FilterDefinition.MULTI_FLAT_DATE) {
             filter = new MultiFlatDateFilter(_feedID,  filterDefinition.field, _reportID, _dashboardID);
+        } else if (filterDefinition.getType() == FilterDefinition.MONTH_CUTOFF) {
+            filter = new MonthCutoffFilter(_feedID,  filterDefinition.field,  _reportID, _dashboardID);
         } else {
             Alert.show("unknown filter type = " + filterDefinition.getType());
         }
@@ -410,12 +412,18 @@ public class TransformContainer extends HBox
         filter.addEventListener(FilterUpdatedEvent.FILTER_ADDED, filterAdded);
         filter.addEventListener(FilterUpdatedEvent.FILTER_UPDATED, filterUpdated);
         filter.addEventListener(FilterDeletionEvent.DELETED_FILTER, filterDeleted);
-        if (!_reportView || filter.filterDefinition.showOnReportView) {
+        if (!_reportView || (filter.filterDefinition.showOnReportView && (_role != 0 && _role <= filter.filterDefinition.minimumRole))) {
             filterTile.addChild(filter as DisplayObject);
         }
         if (_loadingFromReport) {
             addFilter(filter);
         }
+    }
+
+    private var _role:int;
+
+    public function set role(value:int):void {
+        _role = value;
     }
 
     public function commandFilterAdd2(filter:IFilter, launchWindow:Boolean):void {

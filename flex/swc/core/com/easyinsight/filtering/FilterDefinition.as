@@ -22,6 +22,7 @@ import flash.events.EventDispatcher;
         public static const FLAT_DATE:int = 12;
         public static const ANALYSIS_ITEM:int = 13;
         public static const MULTI_FLAT_DATE:int = 14;
+        public static const MONTH_CUTOFF:int = 15;
 
 		public var field:AnalysisItem;
 		public var applyBeforeAggregation:Boolean = true;
@@ -32,6 +33,7 @@ import flash.events.EventDispatcher;
     public var filterName:String;
     public var templateFilter:Boolean;
     public var toggleEnabled:Boolean;
+    public var minimumRole:int;
 		
 		public function FilterDefinition()
 			{

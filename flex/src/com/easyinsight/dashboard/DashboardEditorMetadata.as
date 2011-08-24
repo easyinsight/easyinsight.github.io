@@ -13,6 +13,7 @@ public class DashboardEditorMetadata {
     public var allFields:ArrayCollection;
     public var dataSourceID:int;
     public var availableFields:ArrayCollection;
+    public var role:int;
 
     public function DashboardEditorMetadata() {
     }

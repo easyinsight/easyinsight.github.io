@@ -1,10 +1,14 @@
 package com.easyinsight.datafeeds;
 
 
+import com.easyinsight.core.Value;
+import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.kpi.KPI;
+import com.easyinsight.security.SecurityUtil;
+import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -162,9 +166,51 @@ public abstract class Feed implements Serializable {
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         WSListDefinition tempList = new WSListDefinition();
-        tempList.setColumns(Arrays.asList(analysisItem));
+        List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
+        columns.add(analysisItem);
         tempList.setDataFeedID(getFeedID());
-        DataSet dataSet = new DataService().listDataSet(tempList, insightRequestMetadata, conn);
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+
+        try {
+            PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
+                        "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
+                        "user_dls.user_id = ?");
+            dlsStmt.setLong(1, feedID);
+            dlsStmt.setLong(2, SecurityUtil.getUserID());
+
+            ResultSet dlsRS = dlsStmt.executeQuery();
+            while (dlsRS.next()) {
+                long filterID = dlsRS.getLong(1);
+                Session session = Database.instance().createSession(conn);
+                try {
+                    List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
+                    if (results.size() > 0) {
+                        FilterDefinition filter = (FilterDefinition) results.get(0);
+                        filter.getField().afterLoad();
+                        filter.afterLoad();
+                        filters.add(filter);
+                        columns.add(filter.getField());
+                    }
+                } finally {
+                    session.close();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        tempList.setColumns(columns);
+        DataSet dataSet = DataService.listDataSet(tempList, insightRequestMetadata, conn);
+        for (FilterDefinition filter : filters) {
+            MaterializedFilterDefinition mFilter = filter.materialize(insightRequestMetadata);
+            Iterator<IRow> rowIter = dataSet.getRows().iterator();
+            while (rowIter.hasNext()) {
+                IRow row = rowIter.next();
+                Value value = row.getValue(filter.getField());
+                if (!mFilter.allows(value)) {
+                    rowIter.remove();
+                }
+            }
+        }
         for (IRow row : dataSet.getRows()) {
             metadata.addValue(analysisItem, row.getValue(analysisItem.createAggregateKey()), insightRequestMetadata);
         }

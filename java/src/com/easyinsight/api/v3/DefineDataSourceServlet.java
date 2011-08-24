@@ -67,7 +67,7 @@ public class DefineDataSourceServlet extends APIServlet {
                 } else if ("latitude".equals(typeString)) {
                     analysisItem = new AnalysisLatitude(new NamedKey(key), true, displayName);
                 } else if ("date".equals(typeString)) {
-                    analysisItem = new AnalysisDateDimension(new NamedKey(key), true, AnalysisDateDimension.DAY_LEVEL);
+                    analysisItem = new AnalysisDateDimension(new NamedKey(key), displayName, AnalysisDateDimension.DAY_LEVEL);
                 } else {
                     return new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>Unrecognized dataType of " + typeString + " passed in with field " + key + ". Valid options are grouping, measure, tags, postal, longitude, latitude, and date.</message>");
                 }

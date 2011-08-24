@@ -31,6 +31,7 @@ public class Dashboard {
     public var headerStyle:int;
     public var recommendedExchange:Boolean;
     public var dataSourceInfo:DataSourceInfo;
+    public var role:int;
 
     public function Dashboard() {
     }

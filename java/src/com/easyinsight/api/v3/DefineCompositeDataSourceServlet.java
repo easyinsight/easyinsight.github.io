@@ -52,7 +52,7 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 throw new ServiceRuntimeException("More than one data source was found by that name.");
             }
 
-            Nodes dataSources = document.query("/defineDataSource/dataSources/dataSource");
+            Nodes dataSources = document.query("/defineCompositeDataSource/dataSources/dataSource");
             Map<String, CompositeFeedNode> compositeNodes = new HashMap<String, CompositeFeedNode>();
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE " +
                     "DATA_FEED.API_KEY = ? OR DATA_FEED.FEED_NAME = ?");
@@ -71,7 +71,7 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 }
             }
 
-            Nodes connectionNodes = document.query("/defineDataSource/connections/connection");
+            Nodes connectionNodes = document.query("/defineCompositeDataSource/connections/connection");
 
             for (int i = 0; i < connectionNodes.size(); i++) {
                 Node connectionNode = connectionNodes.get(i);

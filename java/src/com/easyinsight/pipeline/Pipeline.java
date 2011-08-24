@@ -18,12 +18,25 @@ public abstract class Pipeline {
     private ResultsBridge resultsBridge = new ListResultsBridge();
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
-        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, dataSource, insightRequestMetadata);
+        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, dataSource.getFields(), dataSource);
         components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems());
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
         }
         return this;
+    }
+
+    public Pipeline setup(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allItems) {
+        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allItems, null);
+        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems());
+        if (report.hasCustomResultsBridge()) {
+            resultsBridge = report.getCustomResultsBridge();
+        }
+        return this;
+    }
+
+    public PipelineData getPipelineData() {
+        return pipelineData;
     }
 
     public Pipeline setup(Set<AnalysisItem> analysisItems) {
@@ -34,9 +47,9 @@ public abstract class Pipeline {
 
     protected abstract List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems);
          
-    private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
+    private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allItems, Feed dataSource) {
 
-        List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(dataSource.getFields());
+        List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(allItems);
         if (report.getAddedItems() != null) {
             allFields.addAll(report.getAddedItems());
         }
@@ -65,7 +78,7 @@ public abstract class Pipeline {
         }
         allNeededAnalysisItems.addAll(report.getLimitFields());                
 
-        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource.getProperties(), allRequestedAnalysisItems);
+        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource == null ? new HashMap<String, String>() : dataSource.getProperties(), allRequestedAnalysisItems);
         return allNeededAnalysisItems;
     }
 
@@ -86,10 +99,17 @@ public abstract class Pipeline {
         return dataSet;
     }
 
+    private DataSet resultSet;
+
+    public DataSet getResultSet() {
+        return resultSet;
+    }
+
     public DataResults toList(DataSet dataSet) {
         for (IComponent component : components) {
             dataSet = component.apply(dataSet, pipelineData);
         }
+        resultSet = dataSet;
         DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()));
         for (IComponent component : components) {
             component.decorate(results);

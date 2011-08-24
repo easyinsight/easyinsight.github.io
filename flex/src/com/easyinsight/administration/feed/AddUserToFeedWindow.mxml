@@ -44,7 +44,7 @@
 	<mx:RemoteObject id="shareService" destination="share">
 		<mx:method name="getUserStubs" result="gotUserStubs()"/>			
 	</mx:RemoteObject>
-	<mx:VBox styleName="TitleWindowContents">
+	<mx:VBox>
 		<mx:Label text="Enter the name of the user:"/>
 		<mx:Form width="100%">
 			<mx:FormItem label="User" direction="horizontal">

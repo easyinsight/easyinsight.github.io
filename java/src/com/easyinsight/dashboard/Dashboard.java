@@ -46,6 +46,15 @@ public class Dashboard implements Cloneable {
     private int headerStyle;
     private boolean recommendedExchange;
     private DataSourceInfo dataSourceInfo;
+    private int role;
+
+    public int getRole() {
+        return role;
+    }
+
+    public void setRole(int role) {
+        this.role = role;
+    }
 
     public Dashboard clone() throws CloneNotSupportedException {
         Dashboard dashboard = (Dashboard) super.clone();

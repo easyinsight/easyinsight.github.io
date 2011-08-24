@@ -200,8 +200,10 @@ public class DashboardService {
 
     public Dashboard getDashboard(long dashboardID) {
         try {
-            SecurityUtil.authorizeDashboard(dashboardID);
-            return dashboardStorage.getDashboard(dashboardID);
+            int role = SecurityUtil.authorizeDashboard(dashboardID);
+            Dashboard dashboard = dashboardStorage.getDashboard(dashboardID);
+            dashboard.setRole(role);
+            return dashboard;
         } catch (Exception e) {
             LogClass.error("On retrieving dashboard " + dashboardID, e);
             throw new RuntimeException(e);

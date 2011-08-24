@@ -165,8 +165,8 @@
                     uploadGrid.expandItem(obj, true);
                 }
                 uploadGrid.validateNow();
-                uploadGrid.verticalScrollPosition = scrollPosition;
             }
+            uploadGrid.verticalScrollPosition = scrollPosition;
         }
 
         private function onDelete(event:DeleteDataSourceEvent):void {
@@ -390,6 +390,7 @@
 
         private function gotFeedAnalysisTree():void {
 
+
             preserveOpenState();
             var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
             var myDataTree:MyDataTree = uploadService.getFeedAnalysisTree.lastResult as MyDataTree;
@@ -409,7 +410,17 @@
             uploadGrid.dataProvider = hierarchicalData;
             displayTreeData.sort = sort;
             displayTreeData.refresh();
-            fromLastState();
+            if (myDataTree.dataSourceCount == 1) {
+                for each (var descriptor:EIDescriptor in displayTreeData) {
+                    if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
+                        uploadGrid.expandItem(descriptor, true);
+                        break;
+                    }
+                }
+                uploadGrid.verticalScrollPosition = scrollPosition;
+            } else {
+                fromLastState();
+            }
             loadingIndex = 0;
             showLoading = false;
         }

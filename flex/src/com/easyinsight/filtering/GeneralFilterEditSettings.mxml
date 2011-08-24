@@ -54,6 +54,7 @@
             filterName = _filterDefinition.filterName;
             parameterFilter = _filterDefinition.templateFilter;
             toggle = _filterDefinition.toggleEnabled;
+            role = _filterDefinition.minimumRole;
         }
 
         private function onFilterEdit(event:FilterEditEvent):void {
@@ -111,6 +112,7 @@
             _filterDefinition.filterName = filterNameInput.text;
             _filterDefinition.templateFilter = parameterFilterCheckbox.selected;
             _filterDefinition.toggleEnabled = toggleCheckbox.selected;
+            _filterDefinition.minimumRole = int(roleComboBox.selectedItem.data);
             dispatchEvent(new FilterEditEvent(_filterDefinition, previousDefinition, null, rebuild));
             PopUpManager.removePopUp(this);
         }
@@ -118,6 +120,9 @@
         private function cancel():void {
             PopUpManager.removePopUp(this);
         }
+
+        [Bindable]
+        private var role:int;
 		]]>
 	</mx:Script>
 	<mx:VBox id="coreBox">
@@ -136,6 +141,20 @@
             </mx:FormItem>
             <mx:FormItem label="Hide Toggle:">
                 <mx:CheckBox id="toggleCheckbox" selected="{toggle}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Required Role:">
+                <util:SmartComboBox id="roleComboBox" selectedProperty="data" selectedValue="{role}">
+                    <util:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:Object label="None" data="4"/>
+                                <mx:Object label="Owner" data="1"/>
+                                <mx:Object label="Editor" data="2"/>
+                                <mx:Object label="Viewer" data="3"/>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </util:dataProvider>
+                </util:SmartComboBox>
             </mx:FormItem>
         </mx:Form>
         <mx:Box id="filterDetailBox"/>

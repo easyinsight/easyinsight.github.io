@@ -56,6 +56,9 @@ public class QuickbaseFeed extends Feed {
             DataSet dataSet = new DataSet();
             boolean indexed = true;
             for (AnalysisItem analysisItem : analysisItems) {
+                if ("Wtd Procedures".equals(analysisItem.toDisplay())) {
+                    continue;
+                }
                 if (!analysisItem.getKey().indexed()) {
                     indexed = false;
                 }
@@ -122,9 +125,12 @@ public class QuickbaseFeed extends Feed {
         StringBuilder columnBuilder = new StringBuilder();
         Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
         for (AnalysisItem analysisItem : analysisItems) {
-            String fieldID = analysisItem.getKey().toBaseKey().toKeyString().split("\\.")[1];
-            map.put(fieldID, analysisItem);
-            columnBuilder.append(fieldID).append(".");
+            String[] tokens = analysisItem.getKey().toBaseKey().toKeyString().split("\\.");
+            if (tokens.length > 1) {
+                String fieldID = tokens[1];
+                map.put(fieldID, analysisItem);
+                columnBuilder.append(fieldID).append(".");
+            }
         }
         StringBuilder queryBuilder = new StringBuilder();
         String query = null;

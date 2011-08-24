@@ -13,6 +13,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.StandardReportPipeline;
+import org.apache.jcs.JCS;
 import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
@@ -47,43 +48,8 @@ public class DataService {
             Feed feed = feedRegistry.getFeed(feedID, conn);
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setUtcOffset(utfOffset);
-            PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
-                    "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
-                    "user_dls.user_id = ?");
-            dlsStmt.setLong(1, feedID);
-            dlsStmt.setLong(2, SecurityUtil.getUserID());
-            List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
-            ResultSet dlsRS = dlsStmt.executeQuery();
-            while (dlsRS.next()) {
-                long filterID = dlsRS.getLong(1);
-                Session session = Database.instance().createSession(conn);
-                try {
-                    List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
-                    if (results.size() > 0) {
-                        FilterDefinition filter = (FilterDefinition) results.get(0);
-                        filter.getField().afterLoad();
-                        filter.afterLoad();
-                        filters.add(filter);
-                    }
-                } finally {
-                    session.close();
-                }
-            }
             timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed, insightRequestMetadata);
             AnalysisItemResultMetadata metadata = feed.getMetadata(analysisItem, insightRequestMetadata, conn);
-            if (metadata instanceof AnalysisDimensionResultMetadata) {
-                AnalysisDimensionResultMetadata dMetadata = (AnalysisDimensionResultMetadata) metadata;
-                for (FilterDefinition filter : filters) {
-                    MaterializedFilterDefinition mFilter = filter.materialize(insightRequestMetadata);
-                    Iterator<Value> valueIter = dMetadata.getValues().iterator();
-                    while (valueIter.hasNext()) {
-                        Value value = valueIter.next();
-                        if (!mFilter.allows(value)) {
-                            valueIter.remove();
-                        }
-                    }
-                }
-            }
             return metadata;
         } catch (Exception e) {
             LogClass.error(e);
@@ -231,12 +197,16 @@ public class DataService {
             SecurityUtil.authorizeInsight(reportID);
             WSCombinedVerticalListDefinition analysisDefinition = (WSCombinedVerticalListDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
-            if (customFilters != null) {
+            /*if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
-            }
+            }*/
             List<EmbeddedResults> list = new ArrayList<EmbeddedResults>();
+
             for (WSAnalysisDefinition analysis : analysisDefinition.getReports()) {
-                list.add(getEmbeddedResults(analysis.getAnalysisID(), dataSourceID, analysisDefinition.getFilterDefinitions(), insightRequestMetadata, null));
+                List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+                filters.addAll(customFilters);
+                filters.addAll(analysis.getFilterDefinitions());
+                list.add(getEmbeddedResults(analysis.getAnalysisID(), dataSourceID, filters, insightRequestMetadata, null));
             }
             System.out.println("overall time = " + (System.currentTimeMillis() - startTime) / 1000);
             EmbeddedVerticalResults verticalDataResults = new EmbeddedVerticalResults();
@@ -595,7 +565,10 @@ public class DataService {
         insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
         List<DataResults> list = new ArrayList<DataResults>();
         for (WSAnalysisDefinition analysis : analysisDefinition.getReports()) {
-            analysis.setFilterDefinitions(analysisDefinition.getFilterDefinitions());
+            List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+            filters.addAll(analysisDefinition.getFilterDefinitions());
+            filters.addAll(analysis.getFilterDefinitions());
+            analysis.setFilterDefinitions(filters);
             DataResults dataResults = list(analysis, insightRequestMetadata);
             list.add(dataResults);
         }

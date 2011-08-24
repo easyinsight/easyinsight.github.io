@@ -97,9 +97,15 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         var transformContainer:TransformContainer = createTransformContainer();
         if (transformContainer != null) {
             if (dashboardStack.consolidateHeaderElements) {
+                if (dashboardStack.filters != null && dashboardStack.filters.length > 1) {
+                    myFiltersBox.percentWidth = 100;
+                }
                 myFiltersBox.addChild(transformContainer);
             } else {
                 if (_consolidateHeader) {
+                    if (dashboardStack.filters != null && dashboardStack.filters.length > 1) {
+                        _consolidateHeader.percentWidth = 100;
+                    }
                     _consolidateHeader.addChild(transformContainer);
                 } else {
                     addChild(transformContainer);
@@ -164,7 +170,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             var comp:UIComponent = DashboardElementFactory.createViewUIComponent(report, dashboardEditorMetadata);
             if (dashboardStack.consolidateHeaderElements) {
                 var filterContainer:Container = new HBox();
-                filterContainer.percentWidth = 100;
+                //filterContainer.percentWidth = 100;
                 consolidatedFilterViewStack.addChild(filterContainer);
                 if (dashboardStack.consolidateHeaderElements && comp is DashboardStackViewComponent) {
                     DashboardStackViewComponent(comp).consolidateHeader = filterContainer;
@@ -195,6 +201,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             transformContainer.setStyle("paddingBottom", 10);
             transformContainer.reportView = true;
             transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
+            transformContainer.role = dashboardEditorMetadata.role;
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             //addHeaderArea(transformContainer);
         }
