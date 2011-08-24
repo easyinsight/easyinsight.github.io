@@ -78,7 +78,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO QUICKBASE_DATA_SOURCE (DATA_SOURCE_ID, DATABASE_ID, support_index, weights_id) " +
-                "VALUES (?, ?, ?)");
+                "VALUES (?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, databaseID);
         insertStmt.setBoolean(3, indexEnabled);
