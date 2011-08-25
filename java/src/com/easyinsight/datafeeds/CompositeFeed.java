@@ -558,6 +558,9 @@ public class CompositeFeed extends Feed {
             filterValueDefinition.setField(connection.getTargetItem());
         } else {
             AnalysisItem target = findFieldForKey(targetNode.neededItems, connection.getTargetJoin(), targetNode.feedID);
+            if (target == null) {
+                return null;
+            }
             if (target.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 return null;
             }
