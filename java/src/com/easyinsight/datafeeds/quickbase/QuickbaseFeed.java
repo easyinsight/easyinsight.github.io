@@ -56,7 +56,7 @@ public class QuickbaseFeed extends Feed {
             DataSet dataSet = new DataSet();
             boolean indexed = true;
             for (AnalysisItem analysisItem : analysisItems) {
-                if ("Wtd Procedures".equals(analysisItem.toDisplay())) {
+                if ("Wtd Procedures".equals(analysisItem.toDisplay()) || "Wtd Procedures".equals(analysisItem.getKey().toBaseKey().toKeyString())) {
                     continue;
                 }
                 if (!analysisItem.getKey().indexed()) {
