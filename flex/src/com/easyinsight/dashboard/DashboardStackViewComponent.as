@@ -78,7 +78,6 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             //myFiltersBox.percentWidth = 100;
             consolidatedFilterViewStack = new ViewStack();
             consolidatedFilterViewStack.resizeToContent = true;
-            consolidatedFilterViewStack.percentWidth = 100;
             var buttonsBox:HBox = new HBox();
             headerHBox.addChild(myFiltersBox);
             headerHBox.addChild(consolidatedFilterViewStack);
