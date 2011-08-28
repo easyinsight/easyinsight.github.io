@@ -117,7 +117,7 @@
                         textAlign="center"/>
             </mx:VBox>
         </mx:HBox>
-        <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
+        <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}" creationPolicy="all">
             <mx:Box>
                 <mx:Button label="Show Me More Types of Filters" click="stackIndex = 1"/>
             </mx:Box>
