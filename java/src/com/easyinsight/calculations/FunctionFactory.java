@@ -31,6 +31,8 @@ public class FunctionFactory {
         }
         if (s.equals("ln")) {
             return new NaturalLog();
+        } else if (s.equals("firstvalue")) {
+            return new FirstValueFunction();
         } else if (s.equals("now")) {
             return new Now();
         } else if (s.equals("sin")) {
