@@ -2,6 +2,8 @@ package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.*;
 
+import com.easyinsight.core.DerivedKey;
+import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
@@ -287,11 +289,6 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             connections.add(new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_DEAL, HighRiseCompanySource.COMPANY_ID,
                 HighRiseDealSource.COMPANY_ID));
         }
-        if (joinTasksToContacts) {
-
-        } else {
-
-        }
         connections.addAll(Arrays.asList(
                 new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_CONTACTS, HighRiseCompanySource.COMPANY_ID,
                     HighRiseContactSource.COMPANY_ID),
@@ -568,6 +565,10 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     @Override
     public boolean checkDateTime(String name) {
+        if (HighRiseTaskSource.DUE_AT.equals(name) || HighRiseTaskSource.CREATED_AT.equals(name) ||
+                HighRiseTaskSource.DONE_AT.equals(name)) {
+            return true;
+        }
         return false;
     }
 }

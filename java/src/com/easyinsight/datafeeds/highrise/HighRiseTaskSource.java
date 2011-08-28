@@ -153,7 +153,8 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
             String author = retrieveUserInfo(client, builder, peopleCache, authorID, url, parentDefinition);
             String ownerID = queryField(taskNode, "owner-id/text()");
             String owner = retrieveUserInfo(client, builder, peopleCache, ownerID, url, parentDefinition);
-            Date createdAt = deadlineFormat.parse(queryField(taskNode, "created-at/text()"));
+            String createdAtString = queryField(taskNode, "created-at/text()");
+            Date createdAt = deadlineFormat.parse(createdAtString);
             String doneAtString = queryField(taskNode, "done-at/text()");
             Date doneAt = null;
             if (doneAtString != null) {
@@ -201,7 +202,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         String url = highRiseCompositeSource.getUrl();
 
-        DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
+        DateFormat deadlineFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
 
         DataSet ds = new DataSet();
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);

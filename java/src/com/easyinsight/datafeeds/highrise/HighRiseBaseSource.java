@@ -86,7 +86,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
             try {
                 client.executeMethod(restMethod);
                 if (logRequest) {
-                    System.out.println(restMethod.getResponseBodyAsString());
+                    //System.out.println(restMethod.getResponseBodyAsString());
                 }
                 doc = builder.build(restMethod.getResponseBodyAsStream());
                 String rootValue = doc.getRootElement().getValue();

@@ -81,7 +81,6 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
 
             Key emailKey = parentDefinition.getField(EMAIL_ID).toBaseKey();
 
-            System.out.println("...");
             if (lastRefreshDate == null) {
                 for (HighriseEmail email : cache.getEmails()) {
                     IRow row = ds.createRow();
