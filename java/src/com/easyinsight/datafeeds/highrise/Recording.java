@@ -11,6 +11,8 @@ public class Recording {
     private String body;
     private Date createdAt;
     private Date updatedAt;
+    private String contactID;
+    private String companyID;
     private String subjectID;
     private String id;
     private String author;
@@ -22,6 +24,22 @@ public class Recording {
         this.subjectID = subjectID;
         this.id = id;
         this.author = author;
+    }
+
+    public String getContactID() {
+        return contactID;
+    }
+
+    public void setContactID(String contactID) {
+        this.contactID = contactID;
+    }
+
+    public String getCompanyID() {
+        return companyID;
+    }
+
+    public void setCompanyID(String companyID) {
+        this.companyID = companyID;
     }
 
     public String getBody() {

@@ -35,6 +35,8 @@ public class HighRiseCaseNotesSource extends HighRiseBaseSource {
     public static final String NOTE_UPDATED_AT = "Case Note Updated At";
     public static final String NOTE_AUTHOR = "Case Note Author";
     public static final String COUNT = "Case Note Count";
+    public static final String CONTACT_ID = "Case Note Contact ID";
+    public static final String COMPANY_ID = "Case Note Company ID";
 
     public HighRiseCaseNotesSource() {
         setFeedName("Case Notes");
@@ -42,7 +44,7 @@ public class HighRiseCaseNotesSource extends HighRiseBaseSource {
 
     @NotNull
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(BODY, NOTE_ID, NOTE_CREATED_AT, NOTE_UPDATED_AT, NOTE_AUTHOR, NOTE_CASE_ID, COUNT);
+        return Arrays.asList(BODY, NOTE_ID, NOTE_CREATED_AT, NOTE_UPDATED_AT, NOTE_AUTHOR, NOTE_CASE_ID, COUNT, CONTACT_ID, COMPANY_ID);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -53,6 +55,8 @@ public class HighRiseCaseNotesSource extends HighRiseBaseSource {
         analysisItems.add(noteContactDim);
         analysisItems.add(new AnalysisDimension(keys.get(NOTE_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(NOTE_AUTHOR), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_ID), true));
+        analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(NOTE_CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(NOTE_UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
@@ -120,6 +124,8 @@ public class HighRiseCaseNotesSource extends HighRiseBaseSource {
         row.addValue(BODY, recording.getBody());
         row.addValue(NOTE_ID, recording.getId());
         row.addValue(NOTE_AUTHOR, recording.getAuthor());
+        row.addValue(CONTACT_ID, recording.getContactID());
+        row.addValue(COMPANY_ID, recording.getCompanyID());
         row.addValue(NOTE_CREATED_AT, new DateValue(recording.getCreatedAt()));
         row.addValue(NOTE_UPDATED_AT, new DateValue(recording.getUpdatedAt()));
         row.addValue(NOTE_CASE_ID, recording.getSubjectID());
@@ -128,11 +134,11 @@ public class HighRiseCaseNotesSource extends HighRiseBaseSource {
 
     @Override
     public int getVersion() {
-        return 2;
+        return 3;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList((DataSourceMigration) new HighRiseCaseNotes1To2(this));
+        return Arrays.asList(new HighRiseCaseNotes1To2(this), new HighRiseCaseNotes2To3(this));
     }
 }

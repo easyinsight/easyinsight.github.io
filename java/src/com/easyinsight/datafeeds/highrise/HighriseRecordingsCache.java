@@ -100,10 +100,16 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
                     String collectionType = queryField(recordingNode, "collection-type/text()");
                     String collectionID = queryField(recordingNode, "collection-id/text()");
                     if (collectionType != null) {
+                        recording = new Recording(body, createdAt, updatedAt, collectionID, id, author);
+                        if (companyIDs.contains(subjectID)) {
+                            recording.setCompanyID(subjectID);
+                        } else {
+                            recording.setContactID(subjectID);
+                        }
                         if ("Kase".equals(collectionType) && !"Kase".equals(subjectType)) {
-                            caseNotes.add(new Recording(body, createdAt, updatedAt, collectionID, id, author));
+                            caseNotes.add(recording);
                         } else if ("Deal".equals(collectionType) && !"Deal".equals(subjectType)) {
-                            dealNotes.add(new Recording(body, createdAt, updatedAt, collectionID, id, author));
+                            dealNotes.add(recording);
                         }
                     }
                 } else if ("Email".equals(type)) {
