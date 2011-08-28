@@ -89,6 +89,7 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
                     var results:EmbeddedDataServiceEvent = event.resultsMap[reportID];
                     reportRenderer.renderReport(results.dataSet, results.analysisDefinition, new Object(), results.additionalProperties);
                 }
+                showLoading = false;
             } catch(e:Error) {
                 dispatchEvent(new EIErrorEvent(e));
             }
@@ -101,6 +102,7 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
             reportCanvas.removeChild(_loadingDisplay);
             _loadingDisplay.moduleInfo = null;
             _loadingDisplay = null;
+            showLoading = true;
         }
         grid = new Grid();
         grid.percentWidth = 100;
@@ -158,7 +160,7 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
 
     private var reportCanvas:ReportCanvas;
 
-    private var _showLoading:Boolean;
+    private var _showLoading:Boolean = false;
 
     private var _overlayIndex:int;
 
@@ -271,6 +273,7 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
 
     private function retrieveReportData():void {
         var filters:ArrayCollection = createAdditionalFilters(filterMap);
+        showLoading = true;
         service.retrieveReportData(reportIDs, dataSourceID, filters);
     }
 

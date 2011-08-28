@@ -165,13 +165,14 @@ public class DataService {
                 EmbeddedDataResults childResults = new EmbeddedDataResults();
                 childResults.setDataSourceInfo(results.getDataSourceInfo());
                 AnalysisItem header = results.getHeaders()[i];
-                childResults.setDefinition(reports.get(header.qualifiedName()));
+                WSAnalysisDefinition report = reports.get(header.qualifiedName());
+                childResults.setDefinition(report);
                 Value value = row.getValues()[i];
                 childResults.setHeaders(new AnalysisItem[] { header });
                 ListRow childRow = new ListRow();
                 childRow.setValues(new Value[] { value });
                 childResults.setRows(new ListRow[] { childRow });
-                map.put(String.valueOf(reportIDs.get(i)), childResults);
+                map.put(String.valueOf(report.getAnalysisID()), childResults);
             }
             return map;
         } catch (ReportException re) {

@@ -60,6 +60,7 @@
                         </group>
                         <group label="Text">
                             <function label="bracketvalue" signature="bracketvalue(String)" description="Returns the first bracketed value found in String. For example, bracketvalue(Deal [John]) would produce a value of John."/>
+                            <function label="firstValue" signature="firstValue(String, String)" description="Returns the first non empty value passed into the function."/>
                             <function label="lower" signature="lower(String)" description="Returns a fully lower case version of String."/>
                             <function label="namedbracketdate" signature="namedbracketdate(String, Name, Date Pattern)" description="Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Description, &quot;Target Close&quot;, &quot;MM-dd-YYYY&quot;) will construct a date of &quot;12-15-2010&quot; out of a sample value of [Target Close: 12-15-2010] in the Deal Description field."/>
                             <function label="namedbracketvalue" signature="namedbracketvalue(String, String)" description="Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Name, &quot;Type&quot;) will construct the string &quot;Direct Sales&quot; out of a sample value of [Type: Direct Sales] in the Deal Name field."/>
