@@ -99,7 +99,7 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
             int page = 1;
             DataSet ds = new DataSet();
             do {
-                String request = "/invoices?page=" + page++;
+                String request = page == 1 ? "/invoices" : ("/invoices?page=" + page++);
                 if(lastRefreshDate != null) {
                     request = request + "&updated_since=" + UPDATED_SINCE_FORMAT.format(lastRefreshDate);
                 }
@@ -166,11 +166,10 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
             if(lastRefreshDate == null) {
                 dataStorage.insertData(ds);
             }
-        } catch (ParsingException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            throw new RuntimeException(e);
+        } catch (ReportException re) {
+            // going to ignore on this case...
+            re.printStackTrace();
         } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             throw new RuntimeException(e);
         }
         return null;
