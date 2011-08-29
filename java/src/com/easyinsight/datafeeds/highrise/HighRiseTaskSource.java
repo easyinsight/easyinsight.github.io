@@ -140,6 +140,8 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
         HttpClient client = getHttpClient(apiToken, "");
         Builder builder = new Builder();
         Document companies = runRestRequest("/tasks/"+path+".xml", client, builder, url, true, false, parentDefinition);
+        HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
+        HighriseCompanyCache companyCache = highRiseCompositeSource.getOrCreateCompanyCache(client, null);
         Nodes companyNodes = companies.query("/tasks/task");
         for (int i = 0; i < companyNodes.size(); i++) {
             Node taskNode = companyNodes.get(i);
@@ -188,7 +190,11 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
             if ("Kase".equals(subjectType)) {
                 caseID = subjectID;
             } else if ("Party".equals(subjectType)) {
-                companyID = subjectID;
+                if (companyCache.getCompanyIDs().contains(subjectID)) {
+                    companyID = subjectID;
+                } else {
+
+                }
             } else if ("Deal".equals(subjectType)) {
                 dealID = subjectID;
             }
