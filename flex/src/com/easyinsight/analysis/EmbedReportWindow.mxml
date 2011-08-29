@@ -125,9 +125,6 @@
             <mx:FormItem label="Show Filters:">
                 <mx:CheckBox id="filtersCheckbox" change="showFilters = filtersCheckbox.selected"/>
             </mx:FormItem>
-            <mx:FormItem label="Publicly Visible Embed:">
-                <mx:CheckBox id="publiclyVislbeEmbed"/>
-            </mx:FormItem>
         </mx:Form>
         <mx:Label text="You can paste this HTML into any web page to embed the report into the page." fontSize="14"/>
 		<mx:HBox id="quickBox" verticalAlign="middle">
