@@ -12,6 +12,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.IOException;
 
+import java.net.SocketException;
 import java.util.Map;
 
 /**
@@ -90,7 +91,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
             } catch (IOException e) {
                 System.out.println("IOException " + e.getMessage());
                 retryCount++;
-                if (e.getMessage().contains("503")) {
+                if (e.getMessage().contains("503") || e instanceof SocketException) {
                     try {
                         Thread.sleep(20000);
                     } catch (InterruptedException e1) {
