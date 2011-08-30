@@ -99,7 +99,7 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
             int page = 1;
             DataSet ds = new DataSet();
             do {
-                String request = page == 1 ? "/invoices" : ("/invoices?page=" + page++);
+                String request = "/invoices?page=" + page++;
                 if(lastRefreshDate != null) {
                     request = request + "&updated_since=" + UPDATED_SINCE_FORMAT.format(lastRefreshDate);
                 }
