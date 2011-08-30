@@ -10,6 +10,16 @@ import com.easyinsight.core.Value;
  * Time: 3:18:51 PM
  */
 public class TypeTransformComponent implements IComponent {
+
+    private boolean timeShift = true;
+
+    public TypeTransformComponent() {
+    }
+
+    public TypeTransformComponent(boolean timeShift) {
+        this.timeShift = timeShift;
+    }
+
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         //DataSet targetSet = new DataSet();
         for (IRow row : dataSet.getRows()) {
@@ -17,8 +27,10 @@ public class TypeTransformComponent implements IComponent {
             for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
                 Value value = row.getValue(analysisItem.createAggregateKey());
                 boolean shift = false;
-                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                    shift = ((AnalysisDateDimension) analysisItem).isTimeshift();
+                if (timeShift) {
+                    if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                        shift = ((AnalysisDateDimension) analysisItem).isTimeshift();
+                    }
                 }
                 Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift);
                 row.addValue(analysisItem.createAggregateKey(), transformedValue);

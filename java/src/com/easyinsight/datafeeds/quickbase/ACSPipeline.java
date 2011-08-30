@@ -24,7 +24,7 @@ public class ACSPipeline extends Pipeline {
                 date.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
             }
         }
-        components.add(new TypeTransformComponent());
+        components.add(new TypeTransformComponent(false));
 
         components.add(new NormalizationComponent());
         components.add(new AggregationComponent());
