@@ -97,6 +97,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
             DataSet dataSet = new DataSet();
+            System.out.println("Started retrieving campaign results...");
             Document doc = query("https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
             boolean hasMoreCampaigns;
             do {
@@ -236,8 +237,10 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                         break;
                     }
                 }
+                dataStorage.insertData(dataSet);
+                dataSet = new DataSet();
             } while (hasMoreCampaigns);
-            return dataSet;
+            return null;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -50,6 +50,7 @@ public class CCContactToContactListSource extends ConstantContactBaseSource {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
             DataSet dataSet = new DataSet();
+            System.out.println("Started retrieving contact list members...");
             Document listDoc = query("https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/lists", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
             boolean hasMoreData;
             do {
@@ -97,8 +98,11 @@ public class CCContactToContactListSource extends ConstantContactBaseSource {
                         break;
                     }
                 }
+                dataStorage.insertData(dataSet);
+                dataSet = new DataSet();
             } while (hasMoreData);
-            return dataSet;
+            System.out.println("Finished retrieving contact list members");
+            return null;
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {

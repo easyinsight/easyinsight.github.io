@@ -249,6 +249,8 @@ public class CCContactSource extends ConstantContactBaseSource {
 
         boolean hasMoreData;
 
+        System.out.println("Started retrieving contacts...");
+
         Document doc = query("https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/contacts", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
 
         int size = 0;
@@ -331,6 +333,7 @@ public class CCContactSource extends ConstantContactBaseSource {
             }
         } while (hasMoreData);
         dataStorage.insertData(dataSet);
-        return dataSet;
+        System.out.println("Finished retrieving contacts...");
+        return null;
     }
 }
