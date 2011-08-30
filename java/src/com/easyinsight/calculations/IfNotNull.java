@@ -5,14 +5,15 @@ import com.easyinsight.core.Value;
 
 /**
  * User: jamesboe
- * Date: 8/26/11
- * Time: 12:38 PM
+ * Date: 8/29/11
+ * Time: 4:35 PM
  */
-public class FirstValueFunction extends Function {
+public class IfNotNull extends Function {
     public Value evaluate() {
-        for(Value v : params) {
+        for (int i = 0; i < params.size(); i += 2) {
+            Value v = params.get(i);
             if (v.type() != Value.EMPTY && !"".equals(v.toString().trim())) {
-                return minusQuotes(v);
+                return minusQuotes(params.get(i + 1));
             }
         }
         return EmptyValue.EMPTY_VALUE;

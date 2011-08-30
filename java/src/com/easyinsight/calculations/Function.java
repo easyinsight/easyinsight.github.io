@@ -1,5 +1,6 @@
 package com.easyinsight.calculations;
 
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 
 import java.util.List;
@@ -36,6 +37,23 @@ public abstract class Function implements IFunction {
             }
         }
         throw new FunctionException("Specify string parameters to functions by surrounding the parameter with quotation marks. For example, \"String\" to pass in String.");
+    }
+
+    public Value minusQuotes(Value value) {
+        if (value.type() == Value.STRING) {
+            String string = value.toString();
+            if (string.length() >= 2) {
+                char first = string.charAt(0);
+                char end = string.charAt(string.length() - 1);
+                if (first == '"' && end == '"') {
+                    if (string.length() == 2) {
+                        return EmptyValue.EMPTY_VALUE;
+                    }
+                    return new com.easyinsight.core.StringValue(string.substring(1, string.length() - 1));
+                }
+            }
+        }
+        return value;
     }
 
     public List<Value> getValueSet(int i) {

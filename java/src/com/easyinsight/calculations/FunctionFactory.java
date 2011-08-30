@@ -81,6 +81,12 @@ public class FunctionFactory {
             return new Replace();
         } else if (s.equals("blah")) {
             return new BlahFunction();
+        } else if (s.equals("notnull")) {
+            return new IfNotNull();
+        } else if (s.equals("greaterthan")) {
+            return new GreaterThan();
+        } else if (s.equals("equalto")) {
+            return new EqualTo();
         } else {
             return null;
         }

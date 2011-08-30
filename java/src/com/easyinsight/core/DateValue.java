@@ -68,7 +68,7 @@ public class DateValue extends Value implements Serializable {
             return "";
         }
         if (format == null) {
-            return date.toString();
+            return new SimpleDateFormat("yyyy-MM-dd").format(date);
         } else {
             return new SimpleDateFormat(format).format(date);
         }
@@ -92,7 +92,7 @@ public class DateValue extends Value implements Serializable {
 
     @Nullable
     public Double toDouble() {
-        return null;
+        return (double) date.getTime();
     }
 
     public boolean equals(Object o) {
