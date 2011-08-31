@@ -101,16 +101,6 @@ public class DashboardReportViewComponent extends Canvas implements IDashboardVi
         }
     }
 
-    public function retrieveData(refreshAllSources:Boolean = false):void {
-        if (setup) {
-            retrievedDataOnce = true;
-            viewFactory.additionalFilterDefinitions = createAdditionalFilters(filterMap);
-            viewFactory.retrieveData();
-        } else {
-            queued = true;
-        }
-    }
-
     private var retrievedDataOnce:Boolean;
 
     public function initialRetrieve():void {

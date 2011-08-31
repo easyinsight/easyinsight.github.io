@@ -1,11 +1,13 @@
 package com.easyinsight.dashboard {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.filtering.TransformContainer;
-import com.easyinsight.filtering.TransformContainer;
 import com.easyinsight.filtering.TransformsUpdatedEvent;
+import com.easyinsight.framework.LoginEvent;
+import com.easyinsight.framework.User;
 import com.easyinsight.skin.BackgroundImage;
 import com.easyinsight.skin.ImageLoadEvent;
 import com.easyinsight.skin.ImageLoader;
+import com.easyinsight.util.CookieUtil;
 
 import flash.events.Event;
 
@@ -13,14 +15,15 @@ import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
+import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.core.Container;
 import mx.core.UIComponent;
 import mx.effects.Effect;
+import mx.messaging.config.ServerConfig;
 
 import org.efflex.mx.viewStackEffects.CubePapervision3D;
 import org.efflex.mx.viewStackEffects.Fade;
@@ -59,6 +62,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         }
         IDashboardViewComponent(newComp).initialRetrieve();
         viewStack.selectedIndex = targetIndex;
+        updateAdditionalFilters(filterMap);
         if (consolidatedFilterViewStack != null) {
             consolidatedFilterViewStack.selectedIndex = targetIndex;
         }
@@ -84,7 +88,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             headerHBox.addChild(buttonsBox);
             addChild(headerHBox);
         } else {
-            var headerArea:Box = new Box();
+            var headerArea:Canvas = new Canvas();
             var defaultButtonsBox:Container = styleHeaderArea(headerArea);
             addChild(headerArea);
         }
@@ -114,11 +118,14 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         addChild(viewStack);
     }
 
-    private function styleHeaderArea(headerArea:Box):Container {
+    private function styleHeaderArea(headerArea:Container):Container {
         headerArea.setStyle("backgroundColor", dashboardStack.headerBackgroundColor);
         headerArea.setStyle("backgroundAlpha", dashboardStack.headerBackgroundAlpha);
         headerArea.setStyle("horizontalAlign", "center");
         headerArea.percentWidth = 100;
+        var headerCentering:Box = new Box();
+        headerCentering.percentWidth = 100;
+        headerCentering.setStyle("horizontalAlign", "center");
         var headerBackgroundImage:BackgroundImage = new BackgroundImage();
         headerBackgroundImage.applyCenterScreenLogic = false;
         headerBackgroundImage.useBindings = false;
@@ -138,8 +145,31 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         headerbar.setStyle("verticalAlign", "bottom");
         headerbar.setStyle("paddingBottom", 5);
         headerBackgroundImage.addChild(headerbar);
-        headerArea.addChild(headerBackgroundImage);
+        headerCentering.addChild(headerBackgroundImage);
+        headerArea.addChild(headerCentering);
+        if (dashboardStack.headerBackground != null && dashboardEditorMetadata.fixedID) {
+            logoutButton = new Button();
+            logoutButton.label = "Log Out";
+            logoutButton.styleName = "grayButton";
+            logoutButton.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
+                User.destroy();
+                CookieUtil.deleteCookie("eisession");
+                ServerConfig.getChannelSet("dashboardService").logout();
+                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
+            });
+            headerArea.addChild(logoutButton);
+        }
         return headerbar;
+    }
+
+    private var logoutButton:Button;
+
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        if (logoutButton != null) {
+            logoutButton.y = 10;
+            logoutButton.x = logoutButton.parent.width - 100;
+        }
     }
 
     private function createStackChildren(headerbar:Container):void {
@@ -248,14 +278,6 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         _consolidateHeader = value;
     }
 
-    private function addHeaderArea(component:UIComponent):void {
-        if (!_consolidateHeader) {
-            addChild(component);
-        } else {
-            _consolidateHeader.addChild(component)
-        }
-    }
-
     private var transformContainer:TransformContainer;
 
     private var filterMap:Object = new Object();
@@ -284,10 +306,6 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     public function refresh():void {
         IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).refresh();
-    }
-
-    public function retrieveData(refreshAllSources:Boolean = false):void {
-        IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).retrieveData(refreshAllSources);
     }
 
     public function initialRetrieve():void {

@@ -142,12 +142,13 @@
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = dataSourceID;
             dashboardEditorMetadata.role = dashboard.role;
+            dashboardEditorMetadata.fixedID = _fixedID > 0;
             rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
             UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
                 var filterMap:Object = new Object();
                 filterMap["master"] = dashboard.filters;
                 rootView.updateAdditionalFilters(filterMap);
-                rootView.retrieveData();
+                rootView.initialRetrieve();
             });
             dashboardCanvas.addChild(rootView as UIComponent);
             primary.addChild(dashboardCanvas);
@@ -240,7 +241,7 @@
         private var filterIndex:int = 0;
 
         public function refreshData():void {
-            rootView.retrieveData();
+            rootView.refresh();
         }
 
 

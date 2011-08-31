@@ -1,9 +1,6 @@
 package com.easyinsight.dashboard {
-import com.easyinsight.analysis.IRetrievable;
 
-import mx.collections.ArrayCollection;
-
-public interface IDashboardViewComponent extends IRetrievable {
+public interface IDashboardViewComponent {
     function refresh():void;
     function updateAdditionalFilters(filterMap:Object):void;
     function initialRetrieve():void;

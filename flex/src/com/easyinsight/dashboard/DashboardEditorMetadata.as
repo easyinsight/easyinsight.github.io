@@ -14,6 +14,7 @@ public class DashboardEditorMetadata {
     public var dataSourceID:int;
     public var availableFields:ArrayCollection;
     public var role:int;
+    public var fixedID:Boolean;
 
     public function DashboardEditorMetadata() {
     }
