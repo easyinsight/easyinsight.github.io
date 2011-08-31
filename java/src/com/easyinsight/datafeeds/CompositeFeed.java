@@ -9,7 +9,6 @@ import com.easyinsight.core.DerivedKey;
 
 import com.easyinsight.analysis.*;
 
-import java.io.Serializable;
 import java.util.*;
 
 import com.easyinsight.logging.LogClass;
@@ -98,58 +97,9 @@ public class CompositeFeed extends Feed {
         return metadata;
     }
 
-    private static class CacheKey implements Serializable {
-        private Set<AnalysisItem> analysisItems;
-        private Collection<FilterDefinition> filters;
-
-        private CacheKey(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters) {
-            this.analysisItems = analysisItems;
-            this.filters = filters;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            CacheKey cacheKey = (CacheKey) o;
-
-            if (!analysisItems.equals(cacheKey.analysisItems)) return false;
-            if (!filters.equals(cacheKey.filters)) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = analysisItems.hashCode();
-            result = 31 * result + filters.hashCode();
-            return result;
-        }
-    }
-
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            DataSet dataSet = null;
-            /*if (resultCache != null) {
-                dataSet = (DataSet) resultCache.get(new CacheKey(analysisItems, filters));
-                if (dataSet != null) {
-                    System.out.println("got " + dataSet.getRows().size() + " on " + getFeedID());
-                }
-            }*/
-            //if (dataSet == null) {
-            dataSet = getDataSet(analysisItems, filters, insightRequestMetadata, conn);
-            /*if (resultCache != null) {
-                DataSet copySet = new DataSet();
-                for (IRow row : dataSet.getRows()) {
-                    IRow copyRow = copySet.createRow();
-                    copyRow.addValues(row);
-                }
-                System.out.println("saving set with rows " + copySet.getRows().size() + " on " + getFeedID());
-                resultCache.put(new CacheKey(analysisItems, filters), copySet);
-            }*/
-            //}
-            return dataSet;
+            return getDataSet(analysisItems, filters, insightRequestMetadata, conn);
         } catch (ReportException re) {
             throw re;
         } catch (InvalidFieldsException ife) {
@@ -170,15 +120,12 @@ public class CompositeFeed extends Feed {
 
         if (insightRequestMetadata.getJoinOverrides() != null && insightRequestMetadata.getJoinOverrides().size() > 0) {
             connections = new ArrayList<CompositeFeedConnection>();
-            Iterator<JoinOverride> iter = insightRequestMetadata.getJoinOverrides().iterator();
-            while (iter.hasNext()) {
-                JoinOverride joinOverride = iter.next();
+            for (JoinOverride joinOverride : insightRequestMetadata.getJoinOverrides()) {
                 if (joinOverride.getDataSourceID() == getFeedID()) {
                     connections.add(new CompositeFeedConnection(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID(),
                             ((DerivedKey) joinOverride.getTargetItem().getKey()).getFeedID(), joinOverride.getSourceItem(),
                             joinOverride.getTargetItem(), joinOverride.getSourceName(), joinOverride.getTargetName(), joinOverride.isSourceOuterJoin(),
                             joinOverride.isTargetOuterJoin(), joinOverride.isSourceJoinOriginal(), joinOverride.isTargetJoinOriginal()));
-                    //iter.remove();
                 }
             }
         } else {
@@ -245,21 +192,32 @@ public class CompositeFeed extends Feed {
 
         // determine which keys are matched to which fields as we proceed here
 
-        Iterator<QueryStateNode> neededNodeIter = new HashMap<Long, QueryStateNode>(neededNodes).values().iterator();
-        QueryStateNode firstNode = neededNodeIter.next();
-        while (neededNodeIter.hasNext()) {
-            QueryStateNode nextNode = neededNodeIter.next();
-            List<Edge> neededEdges = DijkstraShortestPath.findPathBetween(graph, firstNode, nextNode);
-            if (neededEdges == null || neededEdges.get(0) == null) {
-                throw new ReportException(new GenericReportFault("We weren't able to find a way to join data across the specified fields. Please adjust the report to try again."));
+        try {
+            Iterator<QueryStateNode> neededNodeIter = new HashMap<Long, QueryStateNode>(neededNodes).values().iterator();
+            QueryStateNode firstNode = neededNodeIter.next();
+            while (neededNodeIter.hasNext()) {
+                QueryStateNode nextNode = neededNodeIter.next();
+                List<Edge> neededEdges = DijkstraShortestPath.findPathBetween(graph, firstNode, nextNode);
+                if (neededEdges == null || neededEdges.get(0) == null) {
+                    throw new ReportException(new GenericReportFault("We weren't able to find a way to join data across the specified fields. Please adjust the report to try again."));
+                }
+                for (Edge edge : neededEdges) {
+                    QueryStateNode precedingNode = graph.getEdgeSource(edge);
+                    QueryStateNode followingNode = graph.getEdgeTarget(edge);
+                    //System.out.println("identified edge from " + precedingNode.dataSourceName + " to " + followingNode.dataSourceName);
+                    neededNodes.put(precedingNode.feedID, precedingNode);
+                    neededNodes.put(followingNode.feedID, followingNode);
+                }
             }
-            for (Edge edge : neededEdges) {
-                QueryStateNode precedingNode = graph.getEdgeSource(edge);
-                QueryStateNode followingNode = graph.getEdgeTarget(edge);
-                //System.out.println("identified edge from " + precedingNode.dataSourceName + " to " + followingNode.dataSourceName);
-                neededNodes.put(precedingNode.feedID, precedingNode);
-                neededNodes.put(followingNode.feedID, followingNode);
+        } catch (ReportException e) {
+            DataSet dataSet = new DataSet();
+            for (QueryStateNode queryStateNode : neededNodes.values()) {
+                DataSet childSet = queryStateNode.produceDataSet(insightRequestMetadata);
+                for (IRow row : childSet.getRows()) {
+                    dataSet.addRow(row);
+                }
             }
+            return dataSet;
         }
 
 
