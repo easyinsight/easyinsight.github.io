@@ -114,7 +114,7 @@
                 var filterMap:Object = new Object();
                 filterMap["master"] = dashboard.filters;
                 rootView.updateAdditionalFilters(filterMap);
-                rootView.retrieveData();
+                rootView.initialRetrieve();
             });
             dashboardCanvas.addChild(rootView as UIComponent);
         }
