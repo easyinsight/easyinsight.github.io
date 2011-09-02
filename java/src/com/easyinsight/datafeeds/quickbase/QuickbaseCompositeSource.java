@@ -77,6 +77,11 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
+    public boolean checkDateTime(String name) {
+        return false;
+    }
+
+    @Override
     public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         if (qbUserName != null && qbPassword != null) {
             String requestBody = MessageFormat.format(AUTHENTICATE_XML, qbUserName, qbPassword);
