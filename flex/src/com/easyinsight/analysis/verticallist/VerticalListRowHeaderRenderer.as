@@ -20,6 +20,7 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
 
     public function VerticalListRowHeaderRenderer() {
         text = new UITextField();
+        text.setStyle("fontName", "Tahoma");
         setStyle("backgroundColor", 0xFFFFFF);
         this.percentWidth = 100;
         //text.setStyle("textAlign", "right");

@@ -26,6 +26,7 @@ public class VerticalListRenderer extends UIComponent implements IListItemRender
 
     public function VerticalListRenderer() {
         text = new UITextField();
+        text.setStyle("fontName", "Tahoma");
     }
 
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
