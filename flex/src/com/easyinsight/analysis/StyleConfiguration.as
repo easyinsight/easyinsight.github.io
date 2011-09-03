@@ -24,6 +24,7 @@ import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.analysis.maps.MapDefinition;
 import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
+import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardElement;
@@ -242,6 +243,14 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", FormReport(report).labelFontSize, report, 8, 48));
             items.addItem(new ComboBoxReportFormItem("Label Placement", "direction", FormReport(report).direction, report,  ["Left", "Top", "Bottom"]));
             items.addItem(new NumericReportFormItem("Number of Columns", "columnCount", FormReport(report).columnCount, report, 1, 3));
+        }
+        if (report is VerticalListDefinition) {
+            items.addItem(new NumericReportFormItem("Header Width", "headerWidth", VerticalListDefinition(report).headerWidth, report, 100, 400));
+            items.addItem(new NumericReportFormItem("Column Width", "columnWidth", VerticalListDefinition(report).columnWidth, report, 100, 400));
+        }
+        if (report is CombinedVerticalListDefinition) {
+            items.addItem(new NumericReportFormItem("Header Width", "headerWidth", CombinedVerticalListDefinition(report).headerWidth, report, 100, 400));
+            items.addItem(new NumericReportFormItem("Column Width", "columnWidth", CombinedVerticalListDefinition(report).columnWidth, report, 100, 400));
         }
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
