@@ -22,11 +22,10 @@ import mx.formatters.Formatter;
 
 public class VerticalListRenderer extends UIComponent implements IListItemRenderer {
 
-    private var text:UITextField;
+    private var text:Label;
 
     public function VerticalListRenderer() {
-        text = new UITextField();
-        text.setStyle("fontFamily", "Verdana");
+        text = new Label();
     }
 
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
@@ -34,9 +33,9 @@ public class VerticalListRenderer extends UIComponent implements IListItemRender
         if (text != null) {
             var metrics:TextLineMetrics = measureText(text.text);
             var textWidth:int = metrics.width;
-            var textX:int = unscaledWidth - textWidth - metrics.x - metrics.x;
+            var textX:int = unscaledWidth - textWidth - metrics.x - metrics.x - 2;
             text.move(textX, 0);
-            text.setActualSize(textWidth + metrics.x + metrics.x, 16);
+            text.setActualSize(textWidth + metrics.x + metrics.x + 2, 16);
         }
         if (showDivider) {
             graphics.beginFill(0x666666, 1);

@@ -10,17 +10,18 @@ import com.easyinsight.analysis.AnalysisMeasure;
 
 import flash.text.TextLineMetrics;
 
+import mx.controls.Label;
+
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
 import mx.core.UITextField;
 
 public class VerticalListRowHeaderRenderer extends UIComponent implements IListItemRenderer {
 
-    private var text:UITextField;
+    private var text:Label;
 
     public function VerticalListRowHeaderRenderer() {
-        text = new UITextField();
-        text.setStyle("fontFamily", "Verdana");
+        text = new Label();
         setStyle("backgroundColor", 0xFFFFFF);
         this.percentWidth = 100;
         //text.setStyle("textAlign", "right");
@@ -33,9 +34,9 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
         if (text != null) {
             var metrics:TextLineMetrics = measureText(text.text);
             var textWidth:int = metrics.width;
-            var textX:int = unscaledWidth - textWidth - metrics.x - metrics.x;
+            var textX:int = unscaledWidth - textWidth - metrics.x - metrics.x - 2;
             text.move(textX, 0);
-            text.setActualSize(textWidth + metrics.x + metrics.x, 16);
+            text.setActualSize(textWidth + metrics.x + metrics.x + 2, 16);
         }
         if (showDivider) {
             graphics.beginFill(0x666666, 1);

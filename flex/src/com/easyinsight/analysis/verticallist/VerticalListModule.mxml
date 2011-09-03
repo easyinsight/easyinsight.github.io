@@ -144,7 +144,7 @@
         ]]></mx:Script>
     <mx:Box horizontalAlign="center" id="box" verticalScrollPolicy="auto">
         <mx:AdvancedDataGrid id="dataGrid" headerColors="{[0x333333, 0x333333]}" fontSize="10" verticalScrollPolicy="off" variableRowHeight="true" horizontalGridLines="false" horizontalGridLineColor="#DDDDDD" verticalGridLines="false"
-                alternatingItemColors="{[0xFFFFFF, 0xFFFFFF]}" backgroundColor="#FFFFFF" borderStyle="none" selectionMode="none" fontFamily="Verdana">
+                alternatingItemColors="{[0xFFFFFF, 0xFFFFFF]}" backgroundColor="#FFFFFF" borderStyle="none" selectionMode="none">
         </mx:AdvancedDataGrid>
     </mx:Box>
 </mx:Module>
