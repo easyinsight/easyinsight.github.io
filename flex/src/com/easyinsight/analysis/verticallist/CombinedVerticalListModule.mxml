@@ -19,6 +19,7 @@
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
+        import mx.formatters.Formatter;
 
         [Bindable]
         private var dataColl:ArrayCollection;
@@ -44,7 +45,7 @@
             var labelHeaderFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
             labelHeaderFactory.properties = { headerText: "" };
             labelColumn.headerRenderer = labelHeaderFactory;
-            labelColumn.width = 130;
+            labelColumn.width = vert.headerWidth;
             labelColumn.dataField = "Label";
             columns.addItem(labelColumn);
             var firstRow:Boolean = true;
@@ -67,7 +68,7 @@
                             break;
                         }
                     }
-
+                    var formatter:Formatter = applyMeasure.getFormatter();
                     var reportData:ArrayCollection = dataSet.getItemAt(i) as ArrayCollection;
                     for each (var row:Object in reportData) {
                         var columnValue:String;
@@ -81,11 +82,19 @@
                         if (val != null && val.type() == Value.EMPTY) {
                             continue;
                         }
+                        var measureValue:Value = row[applyMeasure.qualifiedName()];
+                        var text:String;
+                        if (measureValue != null) {
+                            var num:Number = measureValue.toNumber();
+                            text = formatter.format(num);
+                        } else {
+                            text = "";
+                        }
+                        obj[columnValue] = text;
                         obj[columnValue + "measure"] = applyMeasure;
-                        obj[columnValue] = row[applyMeasure.qualifiedName()];
                         if (firstRow) {
                             var dataColumn:SortableAdvancedDataGridColumn = new SortableAdvancedDataGridColumn(i + 1, val == null ? 0 : val.toSortValue().toNumber());
-                            dataColumn.width = 76;
+                            dataColumn.width = vert.columnWidth;
                             dataColumn.headerText = columnValue.toString();
                             dataColumn.dataField = columnValue.toString();
                             var factory:ClassFactory = new ClassFactory(VerticalListRenderer);

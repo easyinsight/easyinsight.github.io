@@ -7,28 +7,34 @@
  */
 package com.easyinsight.analysis.verticallist {
 import com.easyinsight.analysis.AnalysisMeasure;
-import mx.controls.Label;
+
+import flash.text.TextLineMetrics;
+
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
+import mx.core.UITextField;
 
 public class VerticalListRowHeaderRenderer extends UIComponent implements IListItemRenderer {
 
-    private var text:Label;
+    private var text:UITextField;
 
     public function VerticalListRowHeaderRenderer() {
-        text = new Label();
+        text = new UITextField();
         setStyle("backgroundColor", 0xFFFFFF);
         this.percentWidth = 100;
-        text.setStyle("textAlign", "right");
-        text.percentWidth = 100;
+        //text.setStyle("textAlign", "right");
+        //text.percentWidth = 100;
         this.height = 18;
     }
 
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         if (text != null) {
-            text.move(0, 0);
-            text.setActualSize(unscaledWidth, 12);
+            var metrics:TextLineMetrics = measureText(text.text);
+            var textWidth:int = metrics.width;
+            var textX:int = unscaledWidth - textWidth - metrics.x - metrics.x;
+            text.move(textX, 0);
+            text.setActualSize(textWidth + metrics.x + metrics.x, 16);
         }
         if (showDivider) {
             graphics.beginFill(0x666666, 1);

@@ -17,6 +17,8 @@ public class CombinedVerticalListDefinition extends AnalysisDefinition {
 
     public var reports:ArrayCollection = new ArrayCollection();
     public var combinedVerticalListDefinitionID:int;
+    public var headerWidth:int = 140;
+    public var columnWidth:int = 73;
 
     public function CombinedVerticalListDefinition() {
     }

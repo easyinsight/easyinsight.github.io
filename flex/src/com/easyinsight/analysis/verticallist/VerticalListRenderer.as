@@ -10,28 +10,32 @@ import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.Value;
 
 import flash.display.Shape;
+import flash.text.TextLineMetrics;
 
 import mx.controls.Label;
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
+import mx.core.UITextField;
 import mx.events.FlexEvent;
 
 import mx.formatters.Formatter;
 
 public class VerticalListRenderer extends UIComponent implements IListItemRenderer {
 
-    private var text:Label;
+    private var text:UITextField;
 
     public function VerticalListRenderer() {
-        text = new Label();
-        text.setStyle("textAlign", "right");
+        text = new UITextField();
     }
 
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         if (text != null) {
-            text.move(0, 0);
-            text.setActualSize(unscaledWidth, 12);
+            var metrics:TextLineMetrics = measureText(text.text);
+            var textWidth:int = metrics.width;
+            var textX:int = unscaledWidth - textWidth - metrics.x - metrics.x;
+            text.move(textX, 0);
+            text.setActualSize(textWidth + metrics.x + metrics.x, 16);
         }
         if (showDivider) {
             graphics.beginFill(0x666666, 1);
@@ -61,14 +65,14 @@ public class VerticalListRenderer extends UIComponent implements IListItemRender
         if (measure != null) {
             showDivider = measure.underline;
         }
-        var val:Value = value[_qualifiedName];
-        if (val != null) {
+        text.text = value[_qualifiedName];
+        /*if (val != null) {
             var num:Number = val.toNumber();
             var formatter:Formatter = measure.getFormatter();
             text.text = formatter.format(num);
         } else {
             text.text = "";
-        }
+        }*/
         invalidateDisplayList();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }

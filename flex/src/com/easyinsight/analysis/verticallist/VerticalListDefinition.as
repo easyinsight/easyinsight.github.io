@@ -18,6 +18,8 @@ public class VerticalListDefinition extends AnalysisDefinition {
     public var measures:ArrayCollection;
     public var column:AnalysisItem;
     public var verticalListID:int;
+    public var headerWidth:int = 140;
+    public var columnWidth:int = 73;
 
     public function VerticalListDefinition() {
     }

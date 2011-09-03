@@ -1,8 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisTypes;
-import com.easyinsight.analysis.WSAnalysisDefinition;
+import com.easyinsight.analysis.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +17,25 @@ public class WSCombinedVerticalListDefinition extends WSAnalysisDefinition {
     private List<WSAnalysisDefinition> reports;
 
     private long combinedVerticalListDefinitionID;
+
+    private int headerWidth;
+    private int columnWidth;
+
+    public int getHeaderWidth() {
+        return headerWidth;
+    }
+
+    public void setHeaderWidth(int headerWidth) {
+        this.headerWidth = headerWidth;
+    }
+
+    public int getColumnWidth() {
+        return columnWidth;
+    }
+
+    public void setColumnWidth(int columnWidth) {
+        this.columnWidth = columnWidth;
+    }
 
     public long getCombinedVerticalListDefinitionID() {
         return combinedVerticalListDefinitionID;
@@ -52,5 +69,19 @@ public class WSCombinedVerticalListDefinition extends WSAnalysisDefinition {
 
     public void setReports(List<WSAnalysisDefinition> reports) {
         this.reports = reports;
+    }
+
+     @Override
+    public void populateProperties(List<ReportProperty> properties) {
+        super.populateProperties(properties);
+        headerWidth = (int) findNumberProperty(properties, "headerWidth", 140);
+        columnWidth = (int) findNumberProperty(properties, "columnWidth", 73);
+    }
+
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportNumericProperty("headerWidth", headerWidth));
+        properties.add(new ReportNumericProperty("columnWidth", columnWidth));
+        return properties;
     }
 }

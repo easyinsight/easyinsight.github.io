@@ -16,6 +16,25 @@ public class WSVerticalListDefinition extends WSAnalysisDefinition {
 
     private long verticalListID;
 
+    private int headerWidth;
+    private int columnWidth;
+
+    public int getHeaderWidth() {
+        return headerWidth;
+    }
+
+    public void setHeaderWidth(int headerWidth) {
+        this.headerWidth = headerWidth;
+    }
+
+    public int getColumnWidth() {
+        return columnWidth;
+    }
+
+    public void setColumnWidth(int columnWidth) {
+        this.columnWidth = columnWidth;
+    }
+
     public long getVerticalListID() {
         return verticalListID;
     }
@@ -72,5 +91,19 @@ public class WSVerticalListDefinition extends WSAnalysisDefinition {
 
     public void setColumn(AnalysisItem column) {
         this.column = column;
+    }
+
+    @Override
+    public void populateProperties(List<ReportProperty> properties) {
+        super.populateProperties(properties);
+        headerWidth = (int) findNumberProperty(properties, "headerWidth", 140);
+        columnWidth = (int) findNumberProperty(properties, "columnWidth", 73);
+    }
+
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportNumericProperty("headerWidth", headerWidth));
+        properties.add(new ReportNumericProperty("columnWidth", columnWidth));
+        return properties;
     }
 }
