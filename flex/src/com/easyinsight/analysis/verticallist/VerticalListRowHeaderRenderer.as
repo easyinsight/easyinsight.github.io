@@ -10,17 +10,18 @@ import com.easyinsight.analysis.AnalysisMeasure;
 
 import flash.text.TextLineMetrics;
 
+import mx.controls.Label;
+
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
 import mx.core.UITextField;
 
 public class VerticalListRowHeaderRenderer extends UIComponent implements IListItemRenderer {
 
-    private var text:UITextField;
+    private var text:Label;
 
     public function VerticalListRowHeaderRenderer() {
-        text = new UITextField();
-        text.setStyle("fontFamily", "Tahoma");
+        text = new Label();
         setStyle("backgroundColor", 0xFFFFFF);
         this.percentWidth = 100;
         //text.setStyle("textAlign", "right");

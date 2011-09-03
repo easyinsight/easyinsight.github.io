@@ -22,11 +22,10 @@ import mx.formatters.Formatter;
 
 public class VerticalListRenderer extends UIComponent implements IListItemRenderer {
 
-    private var text:UITextField;
+    private var text:Label;
 
     public function VerticalListRenderer() {
-        text = new UITextField();
-        text.setStyle("fontFamily", "Tahoma");
+        text = new Label();
     }
 
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
