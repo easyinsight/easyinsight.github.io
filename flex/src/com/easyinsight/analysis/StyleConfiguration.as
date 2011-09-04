@@ -71,6 +71,7 @@ public class StyleConfiguration {
         }
         if (dashboardElement is DashboardStack) {
             items.addItem(new CheckBoxReportFormItem("Consolidate Header Elements", "consolidateHeaderElements", DashboardStack(dashboardElement).consolidateHeaderElements, dashboardElement));
+            items.addItem(new ComboBoxReportFormItem("Header Controls", "selectionType", DashboardStack(dashboardElement).selectionType, dashboardElement, ["Buttons", "Combo Box"]));
         }
         if (dashboardElement is DashboardGrid) {
             items.addItem(new NumericReportFormItem("Width", "width", DashboardGrid(dashboardElement).width, dashboardElement, 0, 2000));

@@ -21,6 +21,7 @@ public class DashboardStack extends DashboardElement {
     public var effectDuration:int = 1000;
     public var stackControl:int;
     public var consolidateHeaderElements:Boolean;
+    public var selectionType:String = "Buttons";
 
     public function DashboardStack() {
         super();

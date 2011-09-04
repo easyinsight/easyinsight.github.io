@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.quickbase;
 
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.CompositeFeedConnection;
 import com.easyinsight.datafeeds.FeedType;
@@ -77,7 +78,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public boolean checkDateTime(String name) {
+    public boolean checkDateTime(String name, Key key) {
         return false;
     }
 

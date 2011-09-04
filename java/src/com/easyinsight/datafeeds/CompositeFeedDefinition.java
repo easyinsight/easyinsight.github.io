@@ -50,6 +50,20 @@ public class CompositeFeedDefinition extends FeedDefinition {
         return FeedType.COMPOSITE;
     }
 
+    @Override
+    public boolean checkDateTime(String name, Key key) {
+        if (key instanceof DerivedKey) {
+            DerivedKey derivedKey = (DerivedKey) key;
+            long childDataSourceID = derivedKey.getFeedID();
+            try {
+                return new FeedStorage().getFeedDefinitionData(childDataSourceID).checkDateTime(name, key);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return super.checkDateTime(name, key);
+    }
+
     public AnalysisItem findAnalysisItemByKey(Key key) {
         AnalysisItem item = null;
         for (AnalysisItem field : getFields()) {

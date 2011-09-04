@@ -19,7 +19,9 @@ import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
+import mx.controls.Alert;
 import mx.controls.Button;
+import mx.controls.ComboBox;
 import mx.core.Container;
 import mx.core.UIComponent;
 import mx.effects.Effect;
@@ -47,9 +49,8 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     private var viewChildren:ArrayCollection;
 
-    private function onButtonClick(event:MouseEvent):void {
+    private function onChange(targetIndex:int):void {
         var currentComp:UIComponent = viewStack.selectedChild;
-        var targetIndex:int = event.currentTarget.data as int;
         var newComp:UIComponent = viewStack.getChildAt(targetIndex) as UIComponent;
         if (targetIndex > viewStack.selectedIndex) {
             currentComp.setStyle("hideEffect", leftEffect);
@@ -66,6 +67,16 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         if (consolidatedFilterViewStack != null) {
             consolidatedFilterViewStack.selectedIndex = targetIndex;
         }
+    }
+
+    private function onButtonClick(event:MouseEvent):void {
+        var targetIndex:int = event.currentTarget.data as int;
+        onChange(targetIndex);
+    }
+
+    private function onComboBoxChange(event:Event):void {
+        var targetIndex:int = event.currentTarget.selectedIndex;
+        onChange(targetIndex);
     }
 
     private var leftEffect:Effect;
@@ -176,25 +187,27 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         for (var i:int = 0; i < dashboardStack.gridItems.length; i++) {
             var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
             var report:DashboardElement = stackItem.dashboardElement;
-            var topButton:Button = new Button();
-            topButton.styleName = "grayButton";
-            topButton.data = i;
-            topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
-            if (report is DashboardReport) {
-                topButton.label = DashboardReport(report).report.name;
-                if (DashboardReport(report).report.reportType == AnalysisDefinition.HEATMAP) {
-                    leftEffect = null;
-                    rightEffect = null;
-                }
-            } else {
-                if (report.label != null && report.label != "") {
-                    topButton.label = report.label;
+            if (dashboardStack.selectionType == 'Buttons') {
+                var topButton:Button = new Button();
+                topButton.styleName = "grayButton";
+                topButton.data = i;
+                topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
+                if (report is DashboardReport) {
+                    topButton.label = DashboardReport(report).report.name;
+                    if (DashboardReport(report).report.reportType == AnalysisDefinition.HEATMAP) {
+                        leftEffect = null;
+                        rightEffect = null;
+                    }
                 } else {
-                    topButton.label = String(i);
+                    if (report.label != null && report.label != "") {
+                        topButton.label = report.label;
+                    } else {
+                        topButton.label = String(i);
+                    }
                 }
-            }
-            if (dashboardStack.gridItems.length > 1) {
-                headerbar.addChild(topButton);
+                if (dashboardStack.gridItems.length > 1) {
+                    headerbar.addChild(topButton);
+                }
             }
             var comp:UIComponent = DashboardElementFactory.createViewUIComponent(report, dashboardEditorMetadata);
             if (dashboardStack.consolidateHeaderElements) {
@@ -207,6 +220,26 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             }
             viewChildren.addItem(comp);
             viewStack.addChild(comp);
+        }
+        if (dashboardStack.selectionType == 'Combo Box') {
+            var childComboBox:ComboBox = new ComboBox();
+            childComboBox.labelFunction = comboBoxLabelFunction;
+            childComboBox.dataProvider = dashboardStack.gridItems;
+            childComboBox.addEventListener(Event.CHANGE, onComboBoxChange);
+            headerbar.addChild(childComboBox);
+        }
+    }
+
+    private function comboBoxLabelFunction(object:Object):String {
+        var report:DashboardElement = DashboardStackItem(object).dashboardElement;
+        if (report is DashboardReport) {
+            return DashboardReport(report).report.name;
+        } else {
+            if (report.label != null && report.label != "") {
+                return report.label;
+            } else {
+                return "(Unlabeled)";
+            }
         }
     }
 

@@ -100,6 +100,7 @@ import mx.styles.StyleManager;
 		
 		private var _valueLabel:Label = new Label();
 		private var _minLabel:Label;
+		private var _midLabel:Label;
 		private var _maxLabel:Label;
 		private var _lastPointerRotation:Number = 0;
 		
@@ -386,6 +387,9 @@ import mx.styles.StyleManager;
 			_minLabel = new Label();
 			_minLabel.setStyle("textAlign", "left");
 
+            _midLabel = new Label();
+			_midLabel.setStyle("textAlign", "center");
+
 			_maxLabel = new Label();
 			_maxLabel.setStyle("textAlign", "right");
 
@@ -405,6 +409,7 @@ import mx.styles.StyleManager;
 			addChild(_reflection);
 			addChild(_valueLabel);
 			addChild(_minLabel);
+			addChild(_midLabel);
 			addChild(_maxLabel);
 		}
 		
@@ -469,14 +474,17 @@ import mx.styles.StyleManager;
 				_valueLabel.y = _diameter - _diameter * VALUE_LABEL_Y_OFFSET - fontSize;
 				
 				var radius:Number = _ticks.width / 2;
-				_minLabel.width = _maxLabel.width = _diameter;
-				_minLabel.height = _maxLabel.height = _diameter * 0.1;
+				_minLabel.width = _maxLabel.width = _midLabel.width = _diameter;
+				_minLabel.height = _maxLabel.height = _midLabel.height = _diameter * 0.1;
 				_minLabel.setStyle("fontSize", _diameter * MINMAX_LABEL_SIZE);
+                _midLabel.setStyle("fontSize", _diameter * MINMAX_LABEL_SIZE);
 				_maxLabel.setStyle("fontSize", _diameter * MINMAX_LABEL_SIZE);
 				_minLabel.x = radius + radius * Math.sin(radiansForValue(minValue)) * (SCALE_DIAMETER - TICK_LENGTH_SMALL / 2);
-				_minLabel.y = radius + radius * Math.cos(radiansForValue(minValue)) * (SCALE_DIAMETER - TICK_LENGTH_SMALL / 2);				
+				_minLabel.y = radius + radius * Math.cos(radiansForValue(minValue)) * (SCALE_DIAMETER - TICK_LENGTH_SMALL / 2);
 				_maxLabel.x = radius + radius * Math.sin(radiansForValue(maxValue)) * (SCALE_DIAMETER - TICK_LENGTH_SMALL / 2) - _maxLabel.width;
 				_maxLabel.y = radius + radius * Math.cos(radiansForValue(maxValue)) * (SCALE_DIAMETER - TICK_LENGTH_SMALL / 2);
+                _midLabel.x = radius - (_midLabel.width / 2);
+                _midLabel.y = this.height * TICK_LENGTH_SMALL;
 			}
 		}
 		
@@ -493,6 +501,7 @@ import mx.styles.StyleManager;
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
 			_minLabel.text = minValue.toString();
+            _midLabel.text = String((minValue + maxValue) / 2);
 			_maxLabel.text = maxValue.toString();
 			
 			var fontColor:Number = getStyle("fontColor");
@@ -508,7 +517,8 @@ import mx.styles.StyleManager;
 			
 			_minLabel.setStyle("color", fontColor);
 			_maxLabel.setStyle("color", fontColor);
-			_minLabel.visible = _maxLabel.visible = _showMinMax;
+			_midLabel.setStyle("color", fontColor);
+			_minLabel.visible = _maxLabel.visible = _midLabel.visible = _showMinMax;
 			
 			// Enable origin calculation
 			resetOriginCalculation();

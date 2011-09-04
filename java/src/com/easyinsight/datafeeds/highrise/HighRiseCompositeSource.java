@@ -2,7 +2,6 @@ package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.*;
 
-import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -564,7 +563,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public boolean checkDateTime(String name) {
+    public boolean checkDateTime(String name, Key key) {
         if (HighRiseTaskSource.DUE_AT.equals(name) || HighRiseTaskSource.CREATED_AT.equals(name) ||
                 HighRiseTaskSource.DONE_AT.equals(name)) {
             return true;

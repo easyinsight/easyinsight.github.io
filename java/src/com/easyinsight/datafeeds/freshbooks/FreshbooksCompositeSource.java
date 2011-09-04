@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.freshbooks;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -11,7 +12,6 @@ import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.users.Account;
-import flex.messaging.FlexContext;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
 import oauth.signpost.exception.OAuthCommunicationException;
@@ -230,7 +230,7 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public boolean checkDateTime(String name) {
+    public boolean checkDateTime(String name, Key key) {
         return false;
     }
 }

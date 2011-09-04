@@ -628,7 +628,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return dataSet;
     }
 
-    public boolean checkDateTime(String name) {
+    public boolean checkDateTime(String name, Key key) {
         return true;
     }
 

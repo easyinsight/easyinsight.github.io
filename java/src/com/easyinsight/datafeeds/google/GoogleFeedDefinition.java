@@ -237,7 +237,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     }
 
     @Override
-    public boolean checkDateTime(String name) {
+    public boolean checkDateTime(String name, Key key) {
         for (AnalysisItem field : getFields()) {
             if (field.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension date = (AnalysisDateDimension) field;

@@ -260,7 +260,6 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                 String value = childElement.getValue();
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
                                     Date shiftedDate = new Date(Long.parseLong(value) - (7 * 60 * 60 * 1000));
-                                    System.out.println("Translated " + new Date(Long.parseLong(value)) + " to " + shiftedDate);
                                     row.addValue(analysisItem.createAggregateKey(), shiftedDate);
                                 } else {
                                     row.addValue(analysisItem.createAggregateKey(), value);

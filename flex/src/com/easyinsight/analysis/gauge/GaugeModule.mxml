@@ -1,31 +1,14 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:black="ilog.gauges.controls.black.*"
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
            xmlns:bttc="com.betterthantomorrow.components.*" width="100%"
-           height="100%" implements="com.easyinsight.analysis.IReportRenderer">
-    <!--<mx:states>
-        <mx:State name="Circular">
-            <mx:AddChild relativeTo="{box}">
-                <black:BlackCircularGauge width="100%" height="100%" value="{value}" minimum="0" maximum="{maxValue}" startAngle="210"
-                    endAngle="330" orientation="clockwise" trackMinimum="0" trackMaximum="{maxValue}" fontFamily="Tahoma" animationDuration="2000"
-                        indicatorLabelFunction="formatValue"/>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="Horizontal">
-            <mx:AddChild relativeTo="{box}">
-                <black:BlackSemiCircularGauge width="100%" height="100%" value="{value}" minimum="0" maximum="{maxValue}"
-                                            trackMinimum="0" trackMaximum="{maxValue}" orientation="clockwise" fontFamily="Tahoma"/>
-            </mx:AddChild>
-        </mx:State>
-    </mx:states>-->
+           height="100%" implements="com.easyinsight.analysis.IReportRenderer" resize="onResize()">
 
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
-        import com.easyinsight.filtering.FilterRawData;
 
         import mx.collections.ArrayCollection;
         import mx.formatters.Formatter;
-        import mx.formatters.NumberFormatter;
 
         [Bindable]
         private var value:Number = 0;
@@ -39,25 +22,34 @@
             return gaugeDefinition.measure.getFormatter().format(value);
         }
 
+        private function onResize():void {
+            invalidateDisplayList();
+        }
+
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            if (gauge != null) {
+                var width:int = Math.min(this.width - 20, this.height - 20);
+                if (width != gauge.width) {
+                    gauge.x = 10;
+                    gauge.width = width;
+                }
+            }
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             gaugeDefinition = analysisDefinition as GaugeDefinition;
-            box.setStyle("backgroundAlpha", gaugeDefinition.backgroundAlpha);
+            setStyle("backgroundAlpha", gaugeDefinition.backgroundAlpha);
             if (dataSet.length > 0) {
                 var row:Object = dataSet.getItemAt(0);
                 maxValue = gaugeDefinition.maxValue;
-                value = Math.min(maxValue, Number(row[gaugeDefinition.measure.qualifiedName()]));
+                var reportVal:Number = Number(row[gaugeDefinition.measure.qualifiedName()]);
+                value = Math.min(maxValue, reportVal);
                 gauge.alertRatios = [ gaugeDefinition.alertPoint1, gaugeDefinition.alertPoint2 ];
                 gauge.alertColors = [ gaugeDefinition.color1, gaugeDefinition.color2,  gaugeDefinition.color3 ];
-                gauge.width = Math.min(box.width - box.getStyle("paddingLeft") - box.getStyle("paddingRight"), box.height - box.getStyle("paddingTop") - box.getStyle("paddingBottom"));
-                /*gauge.width = Math.min(box.width, box.height);
-                gauge.diameter = Math.min(box.width, box.height);*/
                 numFormatter = gaugeDefinition.measure.getFormatter();
-                gauge.invalidateSize();
                 gauge.invalidateDisplayList();
                 gauge.visible = true;
-                /*gauge.value = value;
-                 gauge.maximum = maxValue;*/
-                //currentState = "hasData";
             } else {
                 currentState = "";
                 value = 0;
@@ -75,25 +67,12 @@
         private var numFormatter:Formatter;
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
-            if (event is GaugeTypeEvent) {
-                var gaugeEvent:GaugeTypeEvent = event as GaugeTypeEvent;
-
-            }
-        }]]></mx:Script>
-    <mx:Box id="box" width="100%" height="100%" horizontalAlign="center">
-        <bttc:Gauge id="gauge"
-           width="100"
-           verticalCenter="0" horizontalCenter="0"  valueFormatter="{numFormatter}"
-           minValue="1"  maxValue="{maxValue}" value="{value}"
-           bigTicks="9" smallTicks="45" showMinMax="true" showValue="true" fontColor="#FFFFFF" visible="false"/>
-    </mx:Box>
-    <!--<black:BlackCircularGauge width="100%" height="100%"
-        value="20"
-        orientation="clockwise"
-        startAngle="210"
-        endAngle="330"
-        minimum="0"
-        maximum="100"
-        majorTickInterval="10"
-        minorTickInterval="1" />-->    
+        }
+        ]]>
+    </mx:Script>
+    <bttc:Gauge id="gauge"
+       width="100"
+       verticalCenter="0" horizontalCenter="0"  valueFormatter="{numFormatter}"
+       minValue="0"  maxValue="{maxValue}" value="{value}"
+       bigTicks="9" smallTicks="45" showMinMax="true" showValue="true" fontColor="#FFFFFF" visible="false"/>
 </mx:Module>

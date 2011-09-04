@@ -2,18 +2,14 @@ package com.easyinsight.datafeeds.harvest;
 
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
-import com.easyinsight.datafeeds.freshbooks.FreshbooksExpenseSource;
-import com.easyinsight.datafeeds.freshbooks.FreshbooksInvoiceSource;
-import com.easyinsight.datafeeds.freshbooks.FreshbooksPaymentSource;
-import com.easyinsight.datafeeds.freshbooks.FreshbooksTimeEntrySource;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.security.PasswordService;
 import com.easyinsight.users.Account;
 import nu.xom.Builder;
 import nu.xom.Document;
@@ -296,7 +292,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public boolean checkDateTime(String name) {
+    public boolean checkDateTime(String name, Key key) {
         return false;
     }
 }
