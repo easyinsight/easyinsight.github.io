@@ -214,6 +214,9 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 }
             } while (count == 1000);
 
+            TimeZone timeZone = TimeZone.getTimeZone("GMT-7");
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeZone(timeZone);
             for (String provider : providerIDs) {
                 masterCount = 0;
                 String query = ("{'7'.CT.'" + provider + "'}");
@@ -259,8 +262,9 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                 AnalysisItem analysisItem = map.get(fieldID);
                                 String value = childElement.getValue();
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
-                                    System.out.println(fieldID + " = " + new Date(Long.parseLong(value)));
-                                    row.addValue(analysisItem.createAggregateKey(), new Date(Long.parseLong(value)));
+                                    calendar.setTimeInMillis(Long.parseLong(value));
+                                    System.out.println("Translated " + new Date(Long.parseLong(value)) + " to " + calendar.getTime());
+                                    row.addValue(analysisItem.createAggregateKey(), calendar.getTime());
                                 } else {
                                     row.addValue(analysisItem.createAggregateKey(), value);
                                 }
