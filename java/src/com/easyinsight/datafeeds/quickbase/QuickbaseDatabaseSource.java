@@ -156,11 +156,14 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
 
             AnalysisItem wtdProcedures = null;
+            AnalysisItem initEvalsItem = null;
             StringBuilder columnBuilder = new StringBuilder();
             Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
             for (AnalysisItem analysisItem : getFields()) {
                 if ("Wtd Procedures".equals(analysisItem.toDisplay())) {
                     wtdProcedures = analysisItem;
+                } else if ("Init Evals".equals(analysisItem.toDisplay())) {
+                    initEvalsItem = analysisItem;
                 }
                 if (analysisItem.getKey().indexed()) {
                     String fieldID = analysisItem.getKey().toBaseKey().toKeyString().split("\\.")[1];
@@ -252,12 +255,19 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         count++;
                         masterCount++;
                         Elements childElements = record.getChildElements();
+                        double initEvalsPMR = 0;
+                        double initEvalsFD = 0;
                         for (int j = 0; j < childElements.size(); j++) {
                             Element childElement = childElements.get(j);
                             if (childElement.getLocalName().equals("f")) {
                                 String fieldID = childElement.getAttribute("id").getValue();
                                 AnalysisItem analysisItem = map.get(fieldID);
                                 String value = childElement.getValue();
+                                if ("43".equals(fieldID)) {
+                                    initEvalsPMR = Double.parseDouble(value);
+                                } else if ("42".equals(fieldID)) {
+                                    initEvalsFD = Double.parseDouble(value);
+                                }
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
                                     Date shiftedDate = new Date(Long.parseLong(value) - (7 * 60 * 60 * 1000));
                                     row.addValue(analysisItem.createAggregateKey(), shiftedDate);
@@ -266,6 +276,13 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                 }
                             }
                         }
+                        double initEvals;
+                        if (initEvalsPMR > 0) {
+                            initEvals = initEvalsPMR;
+                        } else {
+                            initEvals = initEvalsFD;
+                        }
+                        row.addValue(initEvalsItem.createAggregateKey(), initEvals);
                     }
                     //dataSet = new DataSet();
 
