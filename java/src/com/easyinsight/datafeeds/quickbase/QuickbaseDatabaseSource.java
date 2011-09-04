@@ -259,6 +259,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                 AnalysisItem analysisItem = map.get(fieldID);
                                 String value = childElement.getValue();
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
+                                    System.out.println(fieldID + " = " + new Date(Long.parseLong(value)));
                                     row.addValue(analysisItem.createAggregateKey(), new Date(Long.parseLong(value)));
                                 } else {
                                     row.addValue(analysisItem.createAggregateKey(), value);
