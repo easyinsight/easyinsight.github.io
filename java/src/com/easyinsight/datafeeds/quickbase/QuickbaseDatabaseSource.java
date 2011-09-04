@@ -259,9 +259,9 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                 AnalysisItem analysisItem = map.get(fieldID);
                                 String value = childElement.getValue();
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
-                                    Date shiftedDate = new Date(Long.parseLong(value) - (7 * 60 * 60 * 1000));
-                                    System.out.println("Translated " + new Date(Long.parseLong(value)) + " to " + shiftedDate);
-                                    row.addValue(analysisItem.createAggregateKey(), shiftedDate);
+                                    /*Date shiftedDate = new Date(Long.parseLong(value) - (7 * 60 * 60 * 1000));
+                                    System.out.println("Translated " + new Date(Long.parseLong(value)) + " to " + shiftedDate);*/
+                                    row.addValue(analysisItem.createAggregateKey(), new Date(Long.parseLong(value)));
                                 } else {
                                     row.addValue(analysisItem.createAggregateKey(), value);
                                 }
