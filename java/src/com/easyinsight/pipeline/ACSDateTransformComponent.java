@@ -27,10 +27,10 @@ public class ACSDateTransformComponent implements IComponent {
 
             Value value = row.getValue(analysisItem.createAggregateKey());
             Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), false);
-            if (transformedValue.type() == Value.DATE) {
+            /*if (transformedValue.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) transformedValue;
                 dateValue.setDate(new Date(dateValue.getDate().getTime() - (7 * 1000 * 60 * 60)));
-            }
+            }*/
             row.addValue(analysisItem.createAggregateKey(), transformedValue);
 
         }
