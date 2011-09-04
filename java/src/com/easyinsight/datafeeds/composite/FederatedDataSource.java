@@ -45,6 +45,18 @@ public class FederatedDataSource extends FeedDefinition {
     }
 
     @Override
+    public boolean checkDateTime(String name, Key key) {
+        FederationSource source1 = sources.get(0);
+        FeedDefinition child;
+        try {
+            child = new FeedStorage().getFeedDefinitionData(source1.getDataSourceID());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return child.checkDateTime(name, key);
+    }
+
+    @Override
     public boolean customJoinsAllowed(EIConnection conn) throws SQLException {
         FederationSource source1 = sources.get(0);
         FeedDefinition child = new FeedStorage().getFeedDefinitionData(source1.getDataSourceID(), conn);
