@@ -18,12 +18,12 @@ public class ACSPipeline extends Pipeline {
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems) {
         List<IComponent> components = new ArrayList<IComponent>();
 
-        for (AnalysisItem analysisItem : allNeededAnalysisItems) {
+        /*for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
                 date.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
             }
-        }
+        }*/
         /*for (AnalysisItem analysisItem : items(AnalysisItemTypes.DATE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new ACSDateTransformComponent(analysisItem));
         }*/
