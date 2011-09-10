@@ -297,23 +297,23 @@ public class ExportService {
                     new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
                             "application/excel");
             } else if (format == ReportDelivery.HTML_TABLE) {
+                String html;
                 if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
                     DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
-                    String html = ExportService.argh(analysisDefinition, dataSet, conn, insightRequestMetadata);
-                    String htmlBody = body + html;
-                    new SendGridEmail().sendNoAttachmentEmail(email, subject, htmlBody, true, "reports@easy-insight.com", "Easy Insight");
+                    html = ExportService.argh(analysisDefinition, dataSet, conn, insightRequestMetadata);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST_COMBINED) {
                     List<DataSet> dataSets = DataService.getEmbeddedVerticalDataSets((WSCombinedVerticalListDefinition) analysisDefinition,
                             insightRequestMetadata, conn);
-                    String html = ExportService.argh2(analysisDefinition, dataSets, conn, insightRequestMetadata);
-                    String htmlBody = body + html;
-                    new SendGridEmail().sendNoAttachmentEmail(email, subject, htmlBody, true, "reports@easy-insight.com", "Easy Insight");
+                    html = ExportService.argh2(analysisDefinition, dataSets, conn, insightRequestMetadata);
+                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
+                    DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
+                    html = ExportService.crosstab(analysisDefinition, dataSet, conn, insightRequestMetadata);
                 } else {
                     ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
-                    String html = ExportService.toTable(analysisDefinition, listDataResults, conn, insightRequestMetadata);
-                    String htmlBody = body + html;
-                    new SendGridEmail().sendNoAttachmentEmail(email, subject, htmlBody, true, "reports@easy-insight.com", "Easy Insight");
+                    html = ExportService.toTable(analysisDefinition, listDataResults, conn, insightRequestMetadata);
                 }
+                String htmlBody = body + html;
+                new SendGridEmail().sendNoAttachmentEmail(email, subject, htmlBody, true, "reports@easy-insight.com", "Easy Insight");
             } else if (format == ReportDelivery.PDF) {
                 ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
                 byte[] bytes = new ExportService().toListPDF(analysisDefinition, listDataResults, conn, insightRequestMetadata);
@@ -327,6 +327,44 @@ public class ExportService {
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    private static String crosstab(WSAnalysisDefinition analysisDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+        WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
+        Crosstab crosstab = new Crosstab();
+        crosstab.crosstab(crosstabDefinition, dataSet);
+        CrosstabValue[][] values = crosstab.toTable(crosstabDefinition);
+        StringBuilder sb = new StringBuilder();
+        AnalysisMeasure measure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
+        sb.append("<table>\r\n");
+        for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size()); j++) {
+            if (j < crosstabDefinition.getColumns().size()) {
+                sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
+            } else {
+                sb.append("<tr>");
+            }
+            for (int i = 0; i < (crosstab.getColumnSections().size() + crosstabDefinition.getRows().size()); i++) {
+                CrosstabValue crosstabValue = values[j][i];
+                if (crosstabValue == null) {
+                    sb.append("<td></td>");
+                } else {
+                    if (crosstabValue.getHeader() == null) {
+                        sb.append("<td>");
+                        sb.append(createValue(exportMetadata.dateFormat, measure, crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol));
+                    } else {
+                        sb.append("<td style=\"background: #333333; color: #FFFFFF\">");
+                        sb.append(crosstabValue.getValue());
+                    }
+                    sb.append("</td>");
+                }
+            }
+            sb.append("</tr>\r\n");
+            System.out.println();
+        }
+        sb.append("</table>\r\n");
+
+        return sb.toString();
     }
 
     public byte[] toListPDF(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
@@ -849,10 +887,74 @@ public class ExportService {
 
         if (listDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
             listVerticalList(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
+        } else if (listDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST_COMBINED) {
+            listCombinedList(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
+        } else if (listDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
+            listCrosstab(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
         } else {
             listExcel(listDefinition, workbook, styleMap, sheet, insightRequestMetadata, conn, exportMetadata);
         }
         return workbook;
+    }
+
+    private void listCrosstab(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<String, HSSFCellStyle> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+                                  InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
+        WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) report;
+        DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
+        Crosstab crosstab = new Crosstab();
+        crosstab.crosstab(crosstabDefinition, dataSet);
+        CrosstabValue[][] values = crosstab.toTable(crosstabDefinition);
+        AnalysisMeasure measure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
+
+        for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size()); j++) {
+            HSSFRow row = sheet.createRow(j);
+            for (int i = 0; i < (crosstab.getColumnSections().size() + crosstabDefinition.getRows().size()); i++) {
+                CrosstabValue crosstabValue = values[j][i];
+                if (crosstabValue == null) {
+
+                } else {
+                    HSSFCell cell = row.createCell(i);
+                    if (crosstabValue.getHeader() == null) {
+                        Value value = crosstabValue.getValue();
+                        HSSFCellStyle style = getStyle(styleMap, measure, workbook, exportMetadata.dateFormat, value);
+                        populateCell(row, i, value, style, measure, exportMetadata.cal);
+                    } else {
+                        cell.setCellValue(new HSSFRichTextString(crosstabValue.getValue().toString()));
+                        Font font = workbook.createFont();
+                        font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+                        HSSFCellStyle cellStyle = workbook.createCellStyle();
+                        cellStyle.setFont(font);
+                        cell.setCellStyle(cellStyle);
+                    }
+                }
+            }
+        }
+    }
+
+    private void listCombinedList(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<String, HSSFCellStyle> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+                                  InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
+        WSCombinedVerticalListDefinition verticalList = (WSCombinedVerticalListDefinition) report;
+        List<DataSet> dataSets = DataService.getEmbeddedVerticalDataSets(verticalList, insightRequestMetadata, conn);
+        VListInfo vListInfo = getCombinedVListInfo(verticalList, dataSets);
+        HSSFRow headerRow = sheet.createRow(0);
+        for (int i = 0; i < vListInfo.columns.size(); i++) {
+            SortInfo sortInfo = vListInfo.columns.get(i);
+            HSSFCell cell = headerRow.createCell(i + 1);
+            cell.setCellValue(sortInfo.label);
+        }
+        int j = 1;
+        for (Map<String, Object> map : vListInfo.dColl) {
+            HSSFRow row = sheet.createRow(j++);
+            AnalysisMeasure baseMeasure = (AnalysisMeasure) map.get("baseMeasure");
+            HSSFCell rowHeaderCell = row.createCell(0);
+            rowHeaderCell.setCellValue(baseMeasure.toDisplay());
+            for (int i = 0; i < vListInfo.columns.size(); i++) {
+                SortInfo sortInfo = vListInfo.columns.get(i);
+                Value value = (Value) map.get(sortInfo.label);
+                HSSFCellStyle style = getStyle(styleMap, baseMeasure, workbook, exportMetadata.dateFormat, value);
+                populateCell(row, i + 1, value, style, baseMeasure, exportMetadata.cal);
+            }
+        }
     }
 
     private void listVerticalList(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<String, HSSFCellStyle> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
