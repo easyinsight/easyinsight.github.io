@@ -190,6 +190,17 @@
             dispatchEvent(new JoinSelectionEvent(connects));
             PopUpManager.removePopUp(this);
         }
+
+        [Bindable]
+        private var advancedIndex:int = 0;
+
+        private function toggleAdvanced():void {
+            if (advancedIndex == 1) {
+                advancedIndex = 0;
+            } else {
+                advancedIndex = 1;
+            }
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="getMultipleFeeds" result="gotFeeds()"/>
@@ -222,11 +233,16 @@
                     <util:SmartComboBox id="targetBox" dataProvider="{targetFields}" labelField="display"/>
                 </mx:VBox>
             </mx:HBox>
-            <mx:Label text="Warning: The following settings are only for advanced users. We recommend defaults." fontWeight="bold"/>
-            <mx:CheckBox label="Only Keep Matching Rows From Source" id="leftJoinCheckbox"/>
-            <mx:CheckBox label="Only Keep Matching Rows From Target" id="rightJoinCheckbox"/>
-            <mx:CheckBox label="Match Source Against Original Data" id="leftMatchCheckbox"/>
-            <mx:CheckBox label="Match Target Against Original Data" id="rightMatchCheckbox"/>
+            <mx:LinkButton label="Advanced Options" textDecoration="underline" click="toggleAdvanced()"/>
+            <mx:ViewStack selectedIndex="{advancedIndex}" resizeToContent="true" creationPolicy="all">
+                <mx:Box/>
+                <mx:VBox>
+                    <mx:CheckBox label="Only Keep Matching Rows From Source" id="leftJoinCheckbox"/>
+                    <mx:CheckBox label="Only Keep Matching Rows From Target" id="rightJoinCheckbox"/>
+                    <mx:CheckBox label="Match Source Against Original Data" id="leftMatchCheckbox"/>
+                    <mx:CheckBox label="Match Target Against Original Data" id="rightMatchCheckbox"/>
+                </mx:VBox>
+            </mx:ViewStack>
             <mx:HBox width="100%" horizontalAlign="center">
                 <util:SaveButton label="Use These Fields" click="join()"/>
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

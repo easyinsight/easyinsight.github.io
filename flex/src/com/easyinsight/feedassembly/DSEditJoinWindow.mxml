@@ -82,6 +82,17 @@
             dispatchEvent(new JoinEditEvent(_existingConnection));
             PopUpManager.removePopUp(this);
         }
+
+        [Bindable]
+        private var advancedIndex:int = 0;
+
+        private function toggleAdvanced():void {
+            if (advancedIndex == 1) {
+                advancedIndex = 0;
+            } else {
+                advancedIndex = 1;
+            }
+        }
         ]]></mx:Script>
     <mx:HBox>
         <mx:VBox>
@@ -93,10 +104,17 @@
             <mx:Label text="{targetFieldName}"/>
         </mx:VBox>
     </mx:HBox>
-    <mx:CheckBox label="Only Keep Matching Rows From Source" id="leftJoinCheckbox" selected="{leftJoin}"/>
-    <mx:CheckBox label="Only Keep Matching Rows From Target" id="rightJoinCheckbox" selected="{rightJoin}"/>
-    <mx:CheckBox label="Match Source Against Original Data" id="leftMatchCheckbox" selected="{leftOriginal}"/>
+
+    <mx:LinkButton label="Advanced Options" textDecoration="underline" click="toggleAdvanced()"/>
+    <mx:ViewStack selectedIndex="{advancedIndex}" resizeToContent="true" creationPolicy="all">
+        <mx:Box/>
+        <mx:VBox>
+            <mx:CheckBox label="Only Keep Matching Rows From Source" id="leftJoinCheckbox" selected="{leftJoin}"/>
+            <mx:CheckBox label="Only Keep Matching Rows From Target" id="rightJoinCheckbox" selected="{rightJoin}"/>
+            <mx:CheckBox label="Match Source Against Original Data" id="leftMatchCheckbox" selected="{leftOriginal}"/>
             <mx:CheckBox label="Match Target Against Original Data" id="rightMatchCheckbox" selected="{rightOriginal}"/>
+        </mx:VBox>
+    </mx:ViewStack>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="Use These Fields" click="join()"/>
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
