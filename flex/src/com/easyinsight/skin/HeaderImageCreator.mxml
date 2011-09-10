@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="1050">
+    <mx:Script><![CDATA[
+        import mx.containers.Canvas;
+        import mx.core.UIComponent;
+
+        private var imageSprite:UIComponent;
+
+        private function createImage():void {
+            if (imageSprite != null) {
+                removeChild(imageSprite);
+            }
+            imageSprite = new Canvas();
+            imageSprite.setStyle("backgroundColor", backgroundColorPicker.selectedColor);
+            imageSprite.width = 1000;
+            imageSprite.height = 100;
+            addChild(imageSprite);
+            for (var i:int = 0; i < 100; i++) {
+                var smallChart:Canvas = new Canvas();
+                smallChart.setStyle("backgroundColor", chartColorPicker.selectedColor);
+                smallChart.width = 4;
+                smallChart.x = i * 10 + 5;
+
+                if (i % 16 == 0) {
+                    smallChart.height = 50;
+                } else if (i % 2 == 0) {
+                    smallChart.height = 25;
+                } else {
+                    smallChart.height = 12;
+                }
+                smallChart.y = 100 - smallChart.height;
+                imageSprite.addChild(smallChart);
+            }
+
+
+            /*smallChart.graphics.beginFill(chartColorPicker.selectedColor);
+            smallChart.graphics.drawRect(0, 0, 5, 15);
+            smallChart.graphics.endFill();*/
+
+
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <mx:Label text="Background Color:"/>
+        <mx:ColorPicker id="backgroundColorPicker"/>
+        <mx:Label text="Chart Color:"/>
+        <mx:ColorPicker id="chartColorPicker"/>
+    </mx:HBox>
+    <mx:Button label="Create Image" click="createImage()"/>
+    <!--<mx:UIComponent id="imageSprite" width="1000" height="100"/>-->
+</util:EISlimWindow>

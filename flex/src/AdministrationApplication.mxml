@@ -16,6 +16,7 @@
                         <mx:Button label="Report Test" click="reportTest()"/>
                         <mx:Button label="Global Skin" click="globalSkin()"/>
                         <mx:Button label="Special Offer Update" click="specialOffer()"/>
+                        <mx:Button label="Header Logo" click="headerLogo()"/>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Connections">
                         <solutions:SolutionAdministration width="100%" height="100%"/>
@@ -39,6 +40,7 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
         import com.easyinsight.skin.GlobalSkinWindow;
+        import com.easyinsight.skin.HeaderImageCreator;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
@@ -48,6 +50,12 @@
         import mx.rpc.AsyncToken;
         import mx.rpc.events.FaultEvent;
         import mx.rpc.events.ResultEvent;
+
+        private function headerLogo():void {
+            var window:HeaderImageCreator = new HeaderImageCreator();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
 
         private function updateZipCodes():void {
             var window:UpdateZipsWindow = new UpdateZipsWindow();
