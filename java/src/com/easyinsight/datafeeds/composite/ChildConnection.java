@@ -28,6 +28,18 @@ public class ChildConnection {
         this.targetKey = targetKey;
     }
 
+    public ChildConnection(FeedType sourceFeedType, FeedType targetFeedType, String sourceKey, String targetKey, boolean leftJoin, boolean rightJoin,
+                           boolean leftOriginal, boolean rightOriginal) {
+        this.sourceFeedType = sourceFeedType;
+        this.targetFeedType = targetFeedType;
+        this.sourceKey = sourceKey;
+        this.targetKey = targetKey;
+        this.leftJoin = leftJoin;
+        this.rightJoin = rightJoin;
+        this.leftOriginal = leftOriginal;
+        this.rightOriginal = rightOriginal;
+    }
+
     public ChildConnection(FeedType sourceFeedType, FeedType targetFeedType, Key fixedKey) {
         this.sourceFeedType = sourceFeedType;
         this.targetFeedType = targetFeedType;
