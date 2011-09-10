@@ -133,7 +133,6 @@ public class AccountActivityStorage {
             while (rs.next()) {
                 long accountID = rs.getLong(1);
                 int accountType = rs.getInt(2);
-                // TODO: execute billing
                 updateAccountStmt.setInt(1, accountType);
                 updateAccountStmt.setLong(2, accountID);
                 updateAccountStmt.executeUpdate();
