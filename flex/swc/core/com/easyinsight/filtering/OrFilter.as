@@ -7,7 +7,6 @@
  */
 package com.easyinsight.filtering {
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.OrFilter")]
