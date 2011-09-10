@@ -60,7 +60,7 @@ public class DisplayListAnalysis {
         analysis.createWebService();
         var rootInfo:DisplayInfo = analysis.analyze(displayObject, true);
         System.setClipboard(analysis.toXML(rootInfo));
-        var rows:ArrayCollection = new ArrayCollection();
+        /*var rows:ArrayCollection = new ArrayCollection();
         analysis.createRows(rootInfo, rows);
         var dataRows:Array = [];
         for each (var info:DisplayInfo in rows) {
@@ -69,7 +69,7 @@ public class DisplayListAnalysis {
             rowObj["numberPairs"] = [ newPair("Count", 1), newPair("Size", info.childCount), newPair("Visible Size", info.visibleChildCount) ];
             dataRows.push(rowObj);
         }
-        analysis.webService.replaceRows("EI Display List", dataRows, true);
+        analysis.webService.replaceRows("EI Display List", dataRows, true);*/
     }
 
     private function createRows(displayInfo:DisplayInfo, rows:ArrayCollection):void {
