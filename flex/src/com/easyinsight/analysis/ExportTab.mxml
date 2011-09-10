@@ -152,13 +152,13 @@
     <mx:Button id="emailButton" toolTip="Email Report" click="email()"
                icon="@Embed(source='../../../../assets/mail.png')" labelPlacement="right" label="Email Report" x="268" y="10"/>
     <mx:Button id="scheduleButton" toolTip="Schedule Delivery" click="schedule()"
-               icon="@Embed(source='../../../../assets/calendar.png')" labelPlacement="right" label="Email Scheduling" x="400" y="10"/>
+               icon="@Embed(source='../../../../assets/calendar.png')" labelPlacement="right" label="Email Scheduling" x="388" y="10"/>
     <mx:Button id="imageButton" toolTip="Export PNG Image"
-               icon="@Embed(source='../../../../assets/camera.png')" click="exportPNG()" labelPlacement="right" label="Export to PNG" x="411" y="10"/>
+               icon="@Embed(source='../../../../assets/camera.png')" click="exportPNG()" labelPlacement="right" label="Export to PNG" x="531" y="10"/>
     <mx:Button id="linkButton" toolTip="Link by URL" click="url()"
-               icon="@Embed(source='../../../../assets/link.png')" labelPlacement="right" label="Hyperlink" x="538" y="10"/>
+               icon="@Embed(source='../../../../assets/link.png')" labelPlacement="right" label="Hyperlink" x="657" y="10"/>
     <mx:Button id="embedButton" toolTip="Embed" click="embed()"
-               icon="@Embed(source='../../../../assets/plasma_tv.png')" labelPlacement="right" label="Embed in Website" x="641" y="10"/>
+               icon="@Embed(source='../../../../assets/plasma_tv.png')" labelPlacement="right" label="Embed in Website" x="759" y="10"/>
     <!--<mx:Button id="createFeedButton" toolTip="Create Derived Data Source" click="createFeed()"
                icon="@Embed(source='../../../../assets/data_add.png')"/>-->
 </mx:Canvas>

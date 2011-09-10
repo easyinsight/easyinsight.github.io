@@ -1,7 +1,9 @@
 package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.analysis.definitions.WSCombinedVerticalListDefinition;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.dataset.DataSet;
 import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.security.SecurityUtil;
@@ -317,12 +319,19 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         analysisDefinition.updateMetadata();
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                         insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        DataResults dataResults = DataService.list(analysisDefinition, insightRequestMetadata, conn);
-                        if (dataResults instanceof ListDataResults) {
-                            ListDataResults listDataResults = (ListDataResults) dataResults;
-                            String table = ExportService.toTable(analysisDefinition, listDataResults, conn, insightRequestMetadata);
-                            sendNoAttachEmails(conn, table, activityID, subject, body, htmlEmail, ScheduledActivity.REPORT_DELIVERY);
+                        String table;
+                        if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
+                            DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
+                            table = ExportService.argh(analysisDefinition, dataSet, conn, insightRequestMetadata);
+                        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST_COMBINED) {
+                            List<DataSet> dataSets = DataService.getEmbeddedVerticalDataSets((WSCombinedVerticalListDefinition) analysisDefinition,
+                                    insightRequestMetadata, conn);
+                            table = ExportService.argh2(analysisDefinition, dataSets, conn, insightRequestMetadata);
+                        } else {
+                            ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
+                            table = ExportService.toTable(analysisDefinition, listDataResults, conn, insightRequestMetadata);
                         }
+                        sendNoAttachEmails(conn, table, activityID, subject, body, htmlEmail, ScheduledActivity.REPORT_DELIVERY);
                     } else if (deliveryFormat == ReportDelivery.PNG) {
                         new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn);
                     } else if (deliveryFormat == ReportDelivery.PDF) {

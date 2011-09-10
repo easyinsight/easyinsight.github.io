@@ -289,11 +289,12 @@ public class ExportService {
         if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
+        String name = analysisDefinition.getName() != null ? analysisDefinition.getName() : "report";
         try {
             analysisDefinition.updateMetadata();
             if (format == ReportDelivery.EXCEL) {
                 byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata);
-                    new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, analysisDefinition.getName() + ".xls", false, "reports@easy-insight.com", "Easy Insight",
+                    new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
                             "application/excel");
             } else if (format == ReportDelivery.HTML_TABLE) {
                 if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
@@ -316,7 +317,7 @@ public class ExportService {
             } else if (format == ReportDelivery.PDF) {
                 ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
                 byte[] bytes = new ExportService().toListPDF(analysisDefinition, listDataResults, conn, insightRequestMetadata);
-                new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, analysisDefinition.getName() + ".pdf", false, "reports@easy-insight.com", "Easy Insight",
+                new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, name + ".pdf", false, "reports@easy-insight.com", "Easy Insight",
                         "application/pdf");
             }
 
@@ -586,9 +587,7 @@ public class ExportService {
         return bytes;
     }
 
-    private static String argh2(WSAnalysisDefinition listDefinition, List<DataSet> dataSets, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
-        WSCombinedVerticalListDefinition verticalList = (WSCombinedVerticalListDefinition) listDefinition;
+    private static VListInfo getCombinedVListInfo(WSCombinedVerticalListDefinition verticalList, List<DataSet> dataSets) {
         List<Map<String, Object>> dColl = new ArrayList<Map<String, Object>>();
         Set<SortInfo> columnSet = new HashSet<SortInfo>();
         WSVerticalListDefinition vertReport = (WSVerticalListDefinition) verticalList.getReports().get(0);
@@ -645,13 +644,7 @@ public class ExportService {
                     if (measureValue.toDouble() != 0) {
                         atLeastOneValue = true;
                     }
-                    String text;
-                    if (measureValue.type() == Value.NUMBER) {
-                        text = ExportService.createValue(exportMetadata.dateFormat, applyMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol);
-                    } else {
-                        text = "";
-                    }
-                    map.put(columnValue, text);
+                    map.put(columnValue, measureValue);
                     map.put(columnValue + "measure", applyMeasure);
                 }
             }
@@ -674,31 +667,38 @@ public class ExportService {
                 return 0;
             }
         });
+        return new VListInfo(dColl, columns);
+    }
+
+    private static String vListToTable(VListInfo vListInfo, ExportMetadata exportMetadata) {
         StringBuilder sb = new StringBuilder();
         sb.append("<table>");
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<td></td>");
-        for (SortInfo sortInfo : columns) {
+        for (SortInfo sortInfo : vListInfo.columns) {
             sb.append("<td>");
             sb.append(sortInfo.label);
             sb.append("</td>");
         }
         sb.append("</tr>");
-        for (Map<String, Object> map : dColl) {
+        for (Map<String, Object> map : vListInfo.dColl) {
             sb.append("<tr>");
             AnalysisMeasure baseMeasure = (AnalysisMeasure) map.get("baseMeasure");
             sb.append("<td>");
             sb.append(baseMeasure.toDisplay());
             sb.append("</td>");
-            for (SortInfo sortInfo : columns) {
+            for (SortInfo sortInfo : vListInfo.columns) {
                 String columnName = sortInfo.label;
                 AnalysisMeasure analysisMeasure = (AnalysisMeasure) map.get(columnName + "measure");
                 if (analysisMeasure != null) {
 
                 }
                 sb.append("<td>");
-                Object text = map.get(columnName);
-                if (text == null) {
+                Value measureValue = (Value) map.get(columnName);
+                String text;
+                if (measureValue.type() == Value.NUMBER) {
+                    text = ExportService.createValue(exportMetadata.dateFormat, analysisMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol);
+                } else {
                     text = "";
                 }
                 sb.append(text);
@@ -708,6 +708,13 @@ public class ExportService {
         }
         sb.append("</table>");
         return sb.toString();
+    }
+
+    public static String argh2(WSAnalysisDefinition listDefinition, List<DataSet> dataSets, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+        WSCombinedVerticalListDefinition verticalList = (WSCombinedVerticalListDefinition) listDefinition;
+        VListInfo vListInfo = getCombinedVListInfo(verticalList, dataSets);
+        return vListToTable(vListInfo, exportMetadata);
     }
 
     private static class VListInfo {
@@ -720,7 +727,7 @@ public class ExportService {
         }
     }
 
-    private static VListInfo getVListInfo(WSVerticalListDefinition verticalList, DataSet dataSet, ExportMetadata exportMetadata) {
+    private static VListInfo getVListInfo(WSVerticalListDefinition verticalList, DataSet dataSet) {
         List<Map<String, Object>> dColl = new ArrayList<Map<String, Object>>();
         Set<SortInfo> columnSet = new HashSet<SortInfo>();
         for (AnalysisItem measureItem : verticalList.getMeasures()) {
@@ -781,45 +788,11 @@ public class ExportService {
         return new VListInfo(dColl, columns);
     }
 
-    private static String argh(WSAnalysisDefinition listDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+    public static String argh(WSAnalysisDefinition listDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
         WSVerticalListDefinition verticalList = (WSVerticalListDefinition) listDefinition;
-        VListInfo vListInfo = getVListInfo(verticalList, dataSet, exportMetadata);
-        StringBuilder sb = new StringBuilder();
-        sb.append("<table>");
-        sb.append("<tr>");
-        sb.append("<td></td>");
-        for (SortInfo sortInfo : vListInfo.columns) {
-            sb.append(sortInfo.label);
-        }
-        sb.append("</tr>");
-        for (Map<String, Object> map : vListInfo.dColl) {
-            sb.append("<tr>");
-            AnalysisMeasure baseMeasure = (AnalysisMeasure) map.get("baseMeasure");
-            sb.append("<td>");
-            sb.append(baseMeasure.toDisplay());
-            sb.append("</td>");
-            for (SortInfo sortInfo : vListInfo.columns) {
-                String columnName = sortInfo.label;
-                AnalysisMeasure analysisMeasure = (AnalysisMeasure) map.get(columnName + "measure");
-                if (analysisMeasure != null) {
-
-                }
-                sb.append("<td>");
-                Value measureValue = (Value) map.get(columnName);
-                String text;
-                if (measureValue.type() == Value.NUMBER) {
-                    text = ExportService.createValue(exportMetadata.dateFormat, analysisMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol);
-                } else {
-                    text = "";
-                }
-                sb.append(text);
-                sb.append("</td>");
-            }
-            sb.append("</tr>");
-        }
-        sb.append("</table>");
-        return sb.toString();
+        VListInfo vListInfo = getVListInfo(verticalList, dataSet);
+        return vListToTable(vListInfo, exportMetadata);
     }
 
     private static class SortInfo {
@@ -886,7 +859,7 @@ public class ExportService {
                                   InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         WSVerticalListDefinition verticalList = (WSVerticalListDefinition) report;
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
-        VListInfo vListInfo = getVListInfo(verticalList, dataSet, exportMetadata);
+        VListInfo vListInfo = getVListInfo(verticalList, dataSet);
         HSSFRow headerRow = sheet.createRow(0);
         for (int i = 0; i < vListInfo.columns.size(); i++) {
             SortInfo sortInfo = vListInfo.columns.get(i);
