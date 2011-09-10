@@ -147,13 +147,11 @@ public class Row implements IRow, Serializable {
         }
         for (Key key : dataSetKeys.getKeys()) {
             Value value = getValue(key);
-            if (value != null) {
-                mergedRow.addValue(key, value);
-            }
+            mergedRow.addValue(key, value);
         }
         for (Key key : otherRow.dataSetKeys.getKeys()) {
             Value value = otherRow.getValue(key);
-            if (value != null) {
+            if (value.type() != Value.EMPTY && !"(Empty)".equals(value.toString())) {
                 mergedRow.addValue(key, value);
             }
         }
