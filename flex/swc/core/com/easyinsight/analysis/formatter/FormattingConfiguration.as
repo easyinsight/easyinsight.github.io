@@ -5,8 +5,9 @@ import com.easyinsight.framework.User;
 import mx.formatters.CurrencyFormatter;
 
     import mx.formatters.Formatter;
-	
-	[Bindable]
+import mx.formatters.NumberBaseRoundType;
+
+[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.FormattingConfiguration")]	
 	public class FormattingConfiguration
 	{
@@ -32,6 +33,7 @@ import mx.formatters.CurrencyFormatter;
 					var numberFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();
 					numberFormatter.precision = precision;
                     numberFormatter.minPrecision = minPrecision;
+                    numberFormatter.rounding = NumberBaseRoundType.NEAREST;
 					formatter = numberFormatter;
 					break;
 				case CURRENCY:
@@ -57,6 +59,7 @@ import mx.formatters.CurrencyFormatter;
 				default:
 					var defaultFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();
 					defaultFormatter.precision = precision;
+                    defaultFormatter.rounding = NumberBaseRoundType.NEAREST;
 					formatter = defaultFormatter;
 					break;				
 			}
