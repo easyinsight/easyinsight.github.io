@@ -70,5 +70,13 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
             comp.initialRetrieve();
         }
     }
+
+    public function reportCount():ArrayCollection {
+        var reports:ArrayCollection = new ArrayCollection();
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            reports.addAll(comp.reportCount());
+        }
+        return reports;
+    }
 }
 }

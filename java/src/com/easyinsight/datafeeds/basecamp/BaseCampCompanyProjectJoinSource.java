@@ -10,7 +10,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import nu.xom.Builder;
@@ -41,7 +41,7 @@ public class BaseCampCompanyProjectJoinSource extends BaseCampBaseSource {
         return FeedType.BASECAMP_COMPANY_PROJECT_JOIN;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         String url = source.getUrl();
 

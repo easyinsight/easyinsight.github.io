@@ -8,7 +8,7 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
 import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
@@ -48,7 +48,7 @@ public class MeetupDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         DataSet dataSet = new DataSet();
         try {
             HttpClient httpClient = new HttpClient();
@@ -96,8 +96,8 @@ public class MeetupDataSource extends ServerDataSourceDefinition {
                         getMethod = new GetMethod(nextURL);
                     }
                 }
-                if (dataStorage != null) {
-                    dataStorage.insertData(dataSet);
+                if (IDataStorage != null) {
+                    IDataStorage.insertData(dataSet);
                     dataSet = new DataSet();
                 }
             }
@@ -105,7 +105,7 @@ public class MeetupDataSource extends ServerDataSourceDefinition {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-        if (dataStorage == null) {
+        if (IDataStorage == null) {
             return dataSet;
         } else {
             return null;

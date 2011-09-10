@@ -7,7 +7,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import nu.xom.Builder;
@@ -146,12 +146,12 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             if (lastRefreshDate == null) {
                 return getAllTickets(keys, (ZendeskCompositeSource) parentDefinition);
             } else {
-                getUpdatedTickets(keys, (ZendeskCompositeSource) parentDefinition, lastRefreshDate, dataStorage);
+                getUpdatedTickets(keys, (ZendeskCompositeSource) parentDefinition, lastRefreshDate, IDataStorage);
                 return null;
             }
         } catch (Exception e) {
@@ -180,7 +180,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         return false;
     }
 
-    private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, DataStorage dataStorage) throws Exception {
+    private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, IDataStorage IDataStorage) throws Exception {
 
         HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
         Builder builder = new Builder();
@@ -208,8 +208,10 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 IRow row = dataSet.createRow();
                 Node ticketNode = ticketNodes.get(i);
                 String id = parseTicket(keys, zendeskCompositeSource, httpClient, dateFormat, userCache, row, ticketNode);
-                StringWhere userWhere = new StringWhere(noteKey, id);
-                dataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
+                if (id != null) {
+                    StringWhere userWhere = new StringWhere(noteKey, id);
+                    IDataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
+                }
             }
             page++;
         } while (moreData);
@@ -244,117 +246,127 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     }
 
     private String parseTicket(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, HttpClient httpClient, DateFormat dateFormat, Map<String, String> userCache, IRow row, Node ticketNode) throws ParseException, InterruptedException {
-        row.addValue(keys.get(ASSIGNED_AT), queryDate(ticketNode, "assigned-at/text()"));
-        row.addValue(keys.get(ASSIGNEE), queryUser(ticketNode, "assignee-id/text()", userCache, zendeskCompositeSource, httpClient));
-        row.addValue(keys.get(BASE_SCORE), queryField(ticketNode, "base-score/text()"));
-        row.addValue(keys.get(SCORE), queryField(ticketNode, "score/text()"));
-        row.addValue(keys.get(COUNT), 1);
-        row.addValue(keys.get(CREATED_AT), queryDate(ticketNode, "created-at/text()"));
-        row.addValue(keys.get(DESCRIPTION), queryField(ticketNode, "description/text()"));
-        row.addValue(keys.get(DUE_DATE), queryDate(ticketNode, "due-date/text()"));
-        //row.addValue(keys.get(RESOLUTION_TIME), queryDate(ticketNode, "resolution-time/text()"));
-        row.addValue(keys.get(SOLVED_AT), queryDate(ticketNode, "solved-at/text()"));
-        row.addValue(keys.get(UPDATED_AT), queryDate(ticketNode, "updated-at/text()"));
-        row.addValue(keys.get(GROUP_ID), queryField(ticketNode, "group-id/text()"));
-        row.addValue(keys.get(SUBJECT), queryField(ticketNode, "subject/text()"));
-        row.addValue(keys.get(ORGANIZATION_ID), queryField(ticketNode, "organization-id/text()"));
-        String id = queryField(ticketNode, "nice-id/text()");
-        row.addValue(keys.get(TICKET_ID), id);
-        row.addValue(keys.get(REQUESTER), queryUser(ticketNode, "requester-id/text()", userCache, zendeskCompositeSource, httpClient));
-        row.addValue(keys.get(SUBMITTER), queryUser(ticketNode, "submitter-id/text()", userCache, zendeskCompositeSource, httpClient));
-        String tags = queryField(ticketNode, "current-tags/text()");
-        if (tags != null) {
-            String[] tagElements = tags.split(" ");
-            StringBuilder stringBuilder = new StringBuilder();
-            for (String tag : tagElements) {
-                stringBuilder.append(tag).append(",");
+        try {
+            row.addValue(keys.get(ASSIGNED_AT), queryDate(ticketNode, "assigned-at/text()"));
+            row.addValue(keys.get(ASSIGNEE), queryUser(ticketNode, "assignee-id/text()", userCache, zendeskCompositeSource, httpClient));
+            row.addValue(keys.get(BASE_SCORE), queryField(ticketNode, "base-score/text()"));
+            row.addValue(keys.get(SCORE), queryField(ticketNode, "score/text()"));
+            row.addValue(keys.get(COUNT), 1);
+            row.addValue(keys.get(CREATED_AT), queryDate(ticketNode, "created-at/text()"));
+            row.addValue(keys.get(DESCRIPTION), queryField(ticketNode, "description/text()"));
+            row.addValue(keys.get(DUE_DATE), queryDate(ticketNode, "due-date/text()"));
+            //row.addValue(keys.get(RESOLUTION_TIME), queryDate(ticketNode, "resolution-time/text()"));
+            row.addValue(keys.get(SOLVED_AT), queryDate(ticketNode, "solved-at/text()"));
+            row.addValue(keys.get(UPDATED_AT), queryDate(ticketNode, "updated-at/text()"));
+            row.addValue(keys.get(GROUP_ID), queryField(ticketNode, "group-id/text()"));
+            row.addValue(keys.get(SUBJECT), queryField(ticketNode, "subject/text()"));
+            row.addValue(keys.get(ORGANIZATION_ID), queryField(ticketNode, "organization-id/text()"));
+            String id = queryField(ticketNode, "nice-id/text()");
+            row.addValue(keys.get(TICKET_ID), id);
+            row.addValue(keys.get(REQUESTER), queryUser(ticketNode, "requester-id/text()", userCache, zendeskCompositeSource, httpClient));
+            row.addValue(keys.get(SUBMITTER), queryUser(ticketNode, "submitter-id/text()", userCache, zendeskCompositeSource, httpClient));
+            String tags = queryField(ticketNode, "current-tags/text()");
+            if (tags != null) {
+                String[] tagElements = tags.split(" ");
+                StringBuilder stringBuilder = new StringBuilder();
+                for (String tag : tagElements) {
+                    stringBuilder.append(tag).append(",");
+                }
+                stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+                row.addValue(keys.get(TAGS), stringBuilder.toString());
             }
-            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-            row.addValue(keys.get(TAGS), stringBuilder.toString());
+
+            Nodes customFieldEntries = ticketNode.query("ticket-field-entries/ticket-field-entry");
+            for (int i = 0; i < customFieldEntries.size(); i++) {
+                Node customFieldEntry = customFieldEntries.get(i);
+                String fieldID = queryField(customFieldEntry, "ticket-field-id/text()");
+                String value = queryField(customFieldEntry, "value/text()");
+                Key key = keys.get("zd" + fieldID);
+                row.addValue(key, value);
+            }
+
+            int statusID = Integer.parseInt(queryField(ticketNode, "status-id/text()"));
+
+            if (statusID == 0) {
+                row.addValue(keys.get(STATUS), "New");
+            } else if (statusID == 1) {
+                row.addValue(keys.get(STATUS), "Open");
+            } else if (statusID == 2) {
+                row.addValue(keys.get(STATUS), "Pending");
+            } else if (statusID == 3) {
+                row.addValue(keys.get(STATUS), "Solved");
+            } else if (statusID == 4) {
+                row.addValue(keys.get(STATUS), "Closed");
+            }
+
+            int ticketTypeID = Integer.parseInt(queryField(ticketNode, "ticket-type-id/text()"));
+
+            if (ticketTypeID == 0) {
+                row.addValue(keys.get(TICKET_TYPE), "( No Type Set )");
+            } else if (ticketTypeID == 1) {
+                row.addValue(keys.get(TICKET_TYPE), "Question");
+            } else if (ticketTypeID == 2) {
+                row.addValue(keys.get(TICKET_TYPE), "Incident");
+            } else if (ticketTypeID == 3) {
+                row.addValue(keys.get(TICKET_TYPE), "Problem");
+            } else if (ticketTypeID == 4) {
+                row.addValue(keys.get(TICKET_TYPE), "Task");
+            }
+
+            int priorityID = Integer.parseInt(queryField(ticketNode, "priority-id/text()"));
+
+            if (priorityID == 0) {
+                row.addValue(keys.get(PRIORITY), "( No Priority Set )");
+            } else if (priorityID == 1) {
+                row.addValue(keys.get(PRIORITY), "Low");
+            } else if (priorityID == 2) {
+                row.addValue(keys.get(PRIORITY), "Normal");
+            } else if (priorityID == 3) {
+                row.addValue(keys.get(PRIORITY), "High");
+            } else if (priorityID == 4) {
+                row.addValue(keys.get(PRIORITY), "Urgent");
+            }
+
+            int viaID = Integer.parseInt(queryField(ticketNode, "via-id/text()"));
+
+            if (viaID == 0) {
+                row.addValue(keys.get(VIA), "Web Form");
+            } else if (viaID == 4) {
+                row.addValue(keys.get(VIA), "Mail");
+            } else if (viaID == 5) {
+                row.addValue(keys.get(VIA), "Web Service API");
+            } else if (viaID == 16) {
+                row.addValue(keys.get(VIA), "Get Satisfaction");
+            } else if (viaID == 17) {
+                row.addValue(keys.get(VIA), "Dropbox");
+            } else if (viaID == 19) {
+                row.addValue(keys.get(VIA), "Ticket merge");
+            } else if (viaID == 21) {
+                row.addValue(keys.get(VIA), "Recovered from suspended tickets");
+            } else if (viaID == 23) {
+                row.addValue(keys.get(VIA), "Twitter favorite");
+            } else if (viaID == 24) {
+                row.addValue(keys.get(VIA), "Forum topic");
+            } else if (viaID == 26) {
+                row.addValue(keys.get(VIA), "Twitter direct message");
+            } else if (viaID == 27) {
+                row.addValue(keys.get(VIA), "Closed ticket");
+            } else if (viaID == 29) {
+                row.addValue(keys.get(VIA), "Chat");
+            } else if (viaID == 30) {
+                row.addValue(keys.get(VIA), "Twitter public message");
+            }
+
+            return id;
+        } catch (Exception e) {
+            LogClass.error(e);
         }
+        return null;
+    }
 
-        Nodes customFieldEntries = ticketNode.query("ticket-field-entries/ticket-field-entry");
-        for (int i = 0; i < customFieldEntries.size(); i++) {
-            Node customFieldEntry = customFieldEntries.get(i);
-            String fieldID = queryField(customFieldEntry, "ticket-field-id/text()");
-            String value = queryField(customFieldEntry, "value/text()");
-            Key key = keys.get("zd" + fieldID);
-            row.addValue(key, value);
-        }
-
-        int statusID = Integer.parseInt(queryField(ticketNode, "status-id/text()"));
-
-        if (statusID == 0) {
-            row.addValue(keys.get(STATUS), "New");
-        } else if (statusID == 1) {
-            row.addValue(keys.get(STATUS), "Open");
-        } else if (statusID == 2) {
-            row.addValue(keys.get(STATUS), "Pending");
-        } else if (statusID == 3) {
-            row.addValue(keys.get(STATUS), "Solved");
-        } else if (statusID == 4) {
-            row.addValue(keys.get(STATUS), "Closed");
-        }
-
-        int ticketTypeID = Integer.parseInt(queryField(ticketNode, "ticket-type-id/text()"));
-
-        if (ticketTypeID == 0) {
-            row.addValue(keys.get(TICKET_TYPE), "( No Type Set )");
-        } else if (ticketTypeID == 1) {
-            row.addValue(keys.get(TICKET_TYPE), "Question");
-        } else if (ticketTypeID == 2) {
-            row.addValue(keys.get(TICKET_TYPE), "Incident");
-        } else if (ticketTypeID == 3) {
-            row.addValue(keys.get(TICKET_TYPE), "Problem");
-        } else if (ticketTypeID == 4) {
-            row.addValue(keys.get(TICKET_TYPE), "Task");
-        }
-
-        int priorityID = Integer.parseInt(queryField(ticketNode, "priority-id/text()"));
-
-        if (priorityID == 0) {
-            row.addValue(keys.get(PRIORITY), "( No Priority Set )");
-        } else if (priorityID == 1) {
-            row.addValue(keys.get(PRIORITY), "Low");
-        } else if (priorityID == 2) {
-            row.addValue(keys.get(PRIORITY), "Normal");
-        } else if (priorityID == 3) {
-            row.addValue(keys.get(PRIORITY), "High");
-        } else if (priorityID == 4) {
-            row.addValue(keys.get(PRIORITY), "Urgent");
-        }
-
-        int viaID = Integer.parseInt(queryField(ticketNode, "via-id/text()"));
-
-        if (viaID == 0) {
-            row.addValue(keys.get(VIA), "Web Form");
-        } else if (viaID == 4) {
-            row.addValue(keys.get(VIA), "Mail");
-        } else if (viaID == 5) {
-            row.addValue(keys.get(VIA), "Web Service API");
-        } else if (viaID == 16) {
-            row.addValue(keys.get(VIA), "Get Satisfaction");
-        } else if (viaID == 17) {
-            row.addValue(keys.get(VIA), "Dropbox");
-        } else if (viaID == 19) {
-            row.addValue(keys.get(VIA), "Ticket merge");
-        } else if (viaID == 21) {
-            row.addValue(keys.get(VIA), "Recovered from suspended tickets");
-        } else if (viaID == 23) {
-            row.addValue(keys.get(VIA), "Twitter favorite");
-        } else if (viaID == 24) {
-            row.addValue(keys.get(VIA), "Forum topic");
-        } else if (viaID == 26) {
-            row.addValue(keys.get(VIA), "Twitter direct message");
-        } else if (viaID == 27) {
-            row.addValue(keys.get(VIA), "Closed ticket");
-        } else if (viaID == 29) {
-            row.addValue(keys.get(VIA), "Chat");
-        } else if (viaID == 30) {
-            row.addValue(keys.get(VIA), "Twitter public message");
-        }
-
-        return id;
+    @Override
+    protected String getUpdateKeyName() {
+        return TICKET_ID;
     }
 
     protected Value queryUser(Node node, String target, Map<String, String> userCache, ZendeskCompositeSource zendeskCompositeSource, HttpClient client) throws InterruptedException {

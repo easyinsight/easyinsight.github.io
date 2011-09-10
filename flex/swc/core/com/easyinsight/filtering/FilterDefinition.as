@@ -62,5 +62,13 @@ import flash.events.EventDispatcher;
         public function updateFromReportView(filter:FilterDefinition):void {
             field = filter.field;
         }
-	}
+
+    public function qualifiedName():String {
+        if (field != null) {
+            return field.qualifiedName() + ":" + getType();
+        } else {
+            return filterName + ":" + String(getType());
+        }
+    }
+}
 }

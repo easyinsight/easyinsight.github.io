@@ -191,10 +191,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         if (deliveryInfo.getFormat() == ReportDelivery.EXCEL) {
             WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
             analysisDefinition.updateMetadata();
-
-            DataResults dataResults = DataService.list(analysisDefinition, insightRequestMetadata, conn);
-            ListDataResults listDataResults = (ListDataResults) dataResults;
-            byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, listDataResults, conn, insightRequestMetadata);
+            byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata);
             attachmentInfos.add(new AttachmentInfo(bytes, deliveryInfo.getName() + ".xls", "application/xls"));
         } else if (deliveryInfo.getFormat() == ReportDelivery.HTML_TABLE) {
             if (deliveryInfo.getType() == DeliveryInfo.REPORT) {
@@ -312,13 +309,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         analysisDefinition.updateMetadata();
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                         insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        DataResults dataResults = DataService.list(analysisDefinition, insightRequestMetadata, conn);
-                        if (dataResults instanceof ListDataResults) {
-                            ListDataResults listDataResults = (ListDataResults) dataResults;
-                            byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, listDataResults, conn, insightRequestMetadata);
-                            String reportName = analysisDefinition.getName();
-                            sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
-                        }
+                        byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata);
+                        String reportName = analysisDefinition.getName();
+                        sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
                     } else if (deliveryFormat == ReportDelivery.HTML_TABLE) {
                         WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
                         analysisDefinition.updateMetadata();

@@ -17,7 +17,10 @@ public class DerivedGroupingWindow extends CalculationWindow {
         if (derivedGrouping != null) {
             calcText = derivedGrouping.derivationCode;
             calcName = derivedGrouping.display;
+            wordWrap = derivedGrouping.wordWrap;
+            html = derivedGrouping.html;
         }
+        detailIndex = 3;
         example1 = "namedbracketvalue([Deal Description], \"Channel\")";
         example1Explanation = "";
         example2 = "[First Name] + [Last Name]";
@@ -39,6 +42,8 @@ public class DerivedGroupingWindow extends CalculationWindow {
             derivedGrouping.displayName = nameInput.text;
         }
         derivedGrouping.derivationCode = calculationInput.text;
+        derivedGrouping.html = htmlCheckbox.selected;
+        derivedGrouping.wordWrap = wordWrapCheckbox.selected;
         return derivedGrouping;
     }
 }

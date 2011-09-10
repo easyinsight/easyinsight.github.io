@@ -10,7 +10,7 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.analysis.*;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import com.easyinsight.users.Token;
@@ -89,7 +89,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         return !source.isIncrementalRefresh();
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         String url = source.getUrl();
         DateFormat df = new XmlSchemaDateFormat();
@@ -331,12 +331,12 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     }
                 }
 
-                if (source.isIncrementalRefresh()) {
+                /*if (source.isIncrementalRefresh()) {
                     StringWhere stringWhere = new StringWhere(keys.get(PROJECTID), projectIdToRetrieve);
-                    dataStorage.updateData(ds, Arrays.asList((IWhere) stringWhere));
-                } else {
-                    dataStorage.insertData(ds);
-                }
+                    IDataStorage.updateData(ds, Arrays.asList((IWhere) stringWhere));
+                } else {*/
+                    IDataStorage.insertData(ds);
+                //}
             }
         } catch (ReportException re) {
             throw re;

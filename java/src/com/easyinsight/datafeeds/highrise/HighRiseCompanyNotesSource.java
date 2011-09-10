@@ -9,7 +9,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import com.easyinsight.users.Token;
@@ -43,6 +43,11 @@ public class HighRiseCompanyNotesSource extends HighRiseBaseSource {
         return Arrays.asList(BODY, NOTE_ID, NOTE_CREATED_AT, NOTE_UPDATED_AT, NOTE_AUTHOR, NOTE_COMPANY_ID, COUNT);
     }
 
+    @Override
+    protected String getUpdateKeyName() {
+        return NOTE_ID;
+    }
+
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisText(keys.get(BODY)));
@@ -66,7 +71,7 @@ public class HighRiseCompanyNotesSource extends HighRiseBaseSource {
         return false;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
 
         DataSet ds = new DataSet();
@@ -100,7 +105,7 @@ public class HighRiseCompanyNotesSource extends HighRiseBaseSource {
                     IRow row = ds.createRow();
                     recordingToRow(recording, row);
                     StringWhere userWhere = new StringWhere(noteKey, recording.getId());
-                    dataStorage.updateData(ds, Arrays.asList((IWhere) userWhere));
+                    IDataStorage.updateData(ds, Arrays.asList((IWhere) userWhere));
                     ds = null;
                 }
             }

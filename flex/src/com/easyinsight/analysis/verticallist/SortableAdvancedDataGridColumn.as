@@ -12,9 +12,9 @@ public class SortableAdvancedDataGridColumn extends AdvancedDataGridColumn {
 
     private var _reportIndex:int;
 
-    private var _sortValue:int;
+    private var _sortValue:Object;
 
-    public function SortableAdvancedDataGridColumn(reportIndex:int, sortValue:int) {
+    public function SortableAdvancedDataGridColumn(reportIndex:int, sortValue:Object) {
         _reportIndex = reportIndex;
         _sortValue = sortValue;
     }
@@ -24,7 +24,7 @@ public class SortableAdvancedDataGridColumn extends AdvancedDataGridColumn {
         return _reportIndex;
     }
 
-    public function get sortValue():int {
+    public function get sortValue():Object {
         return _sortValue;
     }
 }

@@ -44,7 +44,7 @@ public class CompositeServerTest extends TestCase {
         listDef.setColumns(Arrays.asList(TestUtil.getItem(sourceID, TestAlphaDataSource.DIM),
                 TestUtil.getItem(sourceID, TestBetaDataSource.DIM),
                 TestUtil.getItem(sourceID, TestGammaDataSource.PROJECT_NAME)));
-        DataSet results = dataService.listDataSet(listDef, new InsightRequestMetadata());
+        DataSet results = dataService.listDataSet(listDef, new InsightRequestMetadata(), null);
         System.out.println("blah");
         /*Solution solution = new Solution();
         solution.setName("Blah");

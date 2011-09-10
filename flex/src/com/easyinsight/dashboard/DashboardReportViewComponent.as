@@ -1,5 +1,7 @@
 package com.easyinsight.dashboard {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.EmbeddedControllerLookup;
+import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IEmbeddedReportController;
 import com.easyinsight.analysis.PopupMenuFactory;
@@ -9,13 +11,14 @@ import com.easyinsight.report.ReportSetupEvent;
 import mx.collections.ArrayCollection;
 import mx.containers.Canvas;
 import mx.containers.VBox;
-import mx.controls.Alert;
 import mx.controls.Label;
 
 public class DashboardReportViewComponent extends Canvas implements IDashboardViewComponent  {
 
     public var dashboardReport:DashboardReport;
     private var viewFactory:EmbeddedViewFactory;
+
+    private var report:AnalysisDefinition;
 
     public function DashboardReportViewComponent() {
         super();
@@ -45,6 +48,7 @@ public class DashboardReportViewComponent extends Canvas implements IDashboardVi
         }
 
         viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onReportSetup);
+        viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, onData);
         viewFactory.setup();
         viewFactory.contextMenu = PopupMenuFactory.reportFactory.createReportContextMenu(dashboardReport.report, viewFactory, this);
     }
@@ -65,6 +69,10 @@ public class DashboardReportViewComponent extends Canvas implements IDashboardVi
     private var setup:Boolean;
 
     private var queued:Boolean;
+
+    private function onData(event:EmbeddedDataServiceEvent):void {
+        this.report = event.analysisDefinition;
+    }
 
     private function createAdditionalFilters(filterMap:Object):ArrayCollection {
         var filterColl:ArrayCollection = new ArrayCollection();
@@ -113,6 +121,12 @@ public class DashboardReportViewComponent extends Canvas implements IDashboardVi
                 queued = true;
             }
         }
+    }
+
+    public function reportCount():ArrayCollection {
+        var reports:ArrayCollection = new ArrayCollection();
+        reports.addItem(report);
+        return reports;
     }
 }
 }

@@ -2,10 +2,10 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.storage.DataStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.userupload.UploadPolicy;
 
 import javax.servlet.http.HttpServletRequest;
@@ -55,7 +55,7 @@ public interface IServerDataSourceDefinition {
      * @param lastRefreshDate
      * @return the data set
      */
-    DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition feedDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException;
+    DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition feedDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException;
 
     /**
      * Retrieves the analysis items for the data source, defining such traits as dimensions, measures, dates, and so on. Use
@@ -84,6 +84,12 @@ public interface IServerDataSourceDefinition {
     Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition);
 
     boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception;
+
+    /*boolean migrations(EIConnection conn, FeedDefinition parentDefinition) throws Exception;
+
+    String tempLoad(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception;
+
+    void applyTempLoad(EIConnection conn, long accountID, FeedDefinition parentDefinition, Date lastRefreshTime, String tempTable) throws Exception;*/
 
     Key getField(String sourceKey);
 

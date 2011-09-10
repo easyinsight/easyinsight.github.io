@@ -79,6 +79,7 @@ public abstract class ConstantContactBaseSource extends ServerDataSourceDefiniti
             string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
             string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
             string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
+            System.out.println(string);
             return builder.build(new ByteArrayInputStream(string.getBytes("UTF-8")));
         } catch (HttpResponseException e) {
             if ("Unauthorized".equals(e.getMessage())) {

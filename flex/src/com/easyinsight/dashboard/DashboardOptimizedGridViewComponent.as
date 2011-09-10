@@ -1,26 +1,20 @@
 package com.easyinsight.dashboard {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.EmbeddedControllerLookup;
-import com.easyinsight.analysis.EmbeddedDataResults;
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
-import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IEmbeddedReportController;
 import com.easyinsight.analysis.IReportRenderer;
 import com.easyinsight.analysis.LoadingModuleDisplay;
-import com.easyinsight.analysis.gauge.GaugeEmbeddedController;
 import com.easyinsight.analysis.service.EmbeddedOptimizedDataService;
-import com.easyinsight.dashboard.DashboardReport;
 import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.framework.Constants;
 import com.easyinsight.report.ReportCanvas;
 import com.easyinsight.util.EIErrorEvent;
 
 import flash.events.Event;
-
 import flash.system.ApplicationDomain;
 
 import mx.binding.utils.BindingUtils;
-
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.Canvas;
@@ -310,6 +304,10 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
                 queued = true;
             }
         }
+    }
+
+    public function reportCount():ArrayCollection {
+        return new ArrayCollection();
     }
 }
 }

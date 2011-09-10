@@ -5,8 +5,10 @@
         <mx:State name="noData">
             <mx:RemoveChild target="{dataGrid}"/>
             <mx:AddChild relativeTo="{box}">
-                <mx:TextArea fontSize="22" text="We didn't find any data for the fields and filters that you specified in the report."
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:TextArea fontSize="22" text="We didn't find any data for the fields and filters that you specified in the report."
                         borderStyle="none" backgroundAlpha="0" width="500" height="65" editable="false" selectable="false" focusEnabled="false"/>
+                </mx:Box>
             </mx:AddChild>
         </mx:State>
     </mx:states>
@@ -45,7 +47,7 @@
             var labelHeaderFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
             labelHeaderFactory.properties = { headerText: "" };
             labelColumn.headerRenderer = labelHeaderFactory;
-            labelColumn.width = vert.headerWidth;
+            //labelColumn.width = vert.headerWidth;
             labelColumn.dataField = "Label";
             columns.addItem(labelColumn);
             var firstRow:Boolean = true;
@@ -53,12 +55,14 @@
                 return;
             }
             var measures:ArrayCollection = VerticalListDefinition(vert.reports.getItemAt(0)).measures;
+            var headerWidth:int = 0;
+            var columnWidths:Object = new Object();
             for each (var measure:AnalysisMeasure in measures) {
 
                 var obj:Object = new Object();
                 obj["Label"] = measure.display;
                 obj["baseMeasure"] = measure;
-
+                var colCount:int = 1;
                 for (var i:int = 0; i < vert.reports.length; i++) {
                     var report:VerticalListDefinition = vert.reports.getItemAt(i) as VerticalListDefinition;
                     var applyMeasure:AnalysisMeasure;
@@ -79,6 +83,8 @@
                             val = row[report.column.qualifiedName()];
                             columnValue = val.toString();
                         }
+                        var metrics:TextLineMetrics = dataGrid.measureText(columnValue);
+                        headerWidth = metrics.width + metrics.x + metrics.x + 5;
                         if (val != null && val.type() == Value.EMPTY) {
                             continue;
                         }
@@ -92,9 +98,10 @@
                         }
                         obj[columnValue] = text;
                         obj[columnValue + "measure"] = applyMeasure;
+                        var columnSize:int = columnWidths[columnValue];
                         if (firstRow) {
                             var dataColumn:SortableAdvancedDataGridColumn = new SortableAdvancedDataGridColumn(i + 1, val == null ? 0 : val.toSortValue().toNumber());
-                            dataColumn.width = vert.columnWidth;
+                            //dataColumn.width = vert.columnWidth;
                             dataColumn.headerText = columnValue.toString();
                             dataColumn.dataField = columnValue.toString();
                             var factory:ClassFactory = new ClassFactory(VerticalListRenderer);
@@ -106,6 +113,13 @@
                             dataColumn.headerRenderer = headerFactory;
                             columns.addItem(dataColumn);
                         }
+                        var valueMetrics:TextLineMetrics = dataGrid.measureText(text);
+                        var valueWidth:int = valueMetrics.width + valueMetrics.x + valueMetrics.x;
+                        columnSize = Math.max(columnSize, valueWidth);
+                        columnSize = Math.max(columnSize, headerWidth);
+                        columnWidths[columnValue] = columnSize;
+                        SortableAdvancedDataGridColumn(columns.getItemAt(colCount)).width = columnSize;
+                        colCount++;
                     }
                 }
 
@@ -123,6 +137,24 @@
             sort.fields = [ new SortField("reportIndex"), new SortField("sortValue") ];
             columns.sort = sort;
             columns.refresh();
+            var reportWidth:int = 1;
+            for each (var col:SortableAdvancedDataGridColumn in columns) {
+                reportWidth += (col.width + 1);
+            }
+            var endWidth:int = 0;
+            if (reportWidth < this.width) {
+                var delta:int = (this.width - reportWidth);
+                delta = Math.min(delta, 300);
+                var perColumnAdd:int = (delta) / columns.length;
+                for each (var colAdd:SortableAdvancedDataGridColumn in columns) {
+                    colAdd.width += perColumnAdd;
+                    endWidth += colAdd.width;
+                }
+            }
+            dataGrid.maxWidth = this.width;
+            if (endWidth > 0) {
+                dataGrid.x = (this.width - endWidth) / 2;
+            }
             dataGrid.columns = columns.toArray();
             dataGrid.rowCount = dColl.length + 1;
             dataGrid.dataProvider = dColl;
@@ -139,9 +171,9 @@
             return true;
         }
         ]]></mx:Script>
-    <mx:Box horizontalAlign="center" id="box" verticalScrollPolicy="auto">
+    <mx:Canvas id="box" verticalScrollPolicy="auto" horizontalScrollPolicy="off" width="100%" height="100%">
         <mx:AdvancedDataGrid id="dataGrid" headerColors="{[0x333333, 0x333333]}" fontSize="10" verticalScrollPolicy="off" variableRowHeight="true" horizontalGridLines="false" horizontalGridLineColor="#DDDDDD" verticalGridLines="false"
-                alternatingItemColors="{[0xFFFFFF, 0xFFFFFF]}" backgroundColor="#FFFFFF" borderStyle="none" selectionMode="none">
+                alternatingItemColors="{[0xFFFFFF, 0xFFFFFF]}" backgroundColor="#FFFFFF" borderStyle="none" selectionMode="none" horizontalScrollPolicy="auto">
         </mx:AdvancedDataGrid>
-    </mx:Box>
+    </mx:Canvas>
 </mx:Module>

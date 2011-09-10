@@ -7,7 +7,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import nu.xom.Builder;
@@ -62,7 +62,7 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
         return analysisItems;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         DataSet ds = new DataSet();
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         if (source.isIncludeTodoComments()) {
@@ -132,7 +132,7 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
                             }
                         }
                     }
-                    dataStorage.insertData(ds);
+                    IDataStorage.insertData(ds);
                     ds = new DataSet();
                 }
             } catch (ReportException re) {

@@ -3,7 +3,6 @@ package com.easyinsight.filtering
 
 	import com.easyinsight.analysis.AnalysisItem;
 
-import com.easyinsight.analysis.AnalysisItemTypes;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -73,8 +72,32 @@ import mx.managers.PopUpManager;
         }
 
         private function onWindowDone(event:Event):void {
+            populateLabel();
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
+
+        private function populateLabel():void {
+            if (_filterDefinition.levels.length == 0) {
+                labelButton.label = analysisItem.display;
+            } else {
+                var firstValue:int = 11;
+                var lastValue:int = 0;
+                for each (var wrapper:DateLevelWrapper in _filterDefinition.levels) {
+                    firstValue = Math.min(wrapper.dateLevel, firstValue);
+                    lastValue = Math.max(wrapper.dateLevel, lastValue);
+                    var firstLabel:String = toMonthLabel(firstValue);
+                    var secondLabel:String = toMonthLabel(lastValue);
+                    if (firstLabel == secondLabel) {
+                        labelButton.label = firstLabel;
+                    } else {
+                        labelButton.label = firstLabel + " to " + secondLabel;
+                    }
+                }
+
+            }
+        }
+
+        private var labelButton:LinkButton;
 
         override protected function createChildren():void {
             super.createChildren();
@@ -86,20 +109,29 @@ import mx.managers.PopUpManager;
                 addChild(checkbox);
             }
 
-            var label:LinkButton = new LinkButton();
-            label.label = analysisItem.display;
-            label.setStyle("textDecoration", "underline");
-            label.addEventListener(MouseEvent.CLICK, onClick);
-            addChild(label);
-
 			if (_filterDefinition == null) {
 				_filterDefinition = new MultiFlatDateFilterDefinition();
 				_filterDefinition.field = analysisItem;
-                if (analysisItem.hasType(AnalysisItemTypes.STEP)) {
-                    _filterDefinition.applyBeforeAggregation = false;
-                }
 			} else {
 			}
+
+            var firstValue:int = 11;
+            var lastValue:int = 0;
+
+            for each (var wrapper:DateLevelWrapper in _filterDefinition.levels) {
+                firstValue = Math.min(wrapper.dateLevel, firstValue);
+                lastValue = Math.max(wrapper.dateLevel, lastValue);
+            }
+
+            this.first = firstValue;
+            this.last = lastValue;
+
+            labelButton = new LinkButton();
+            populateLabel();
+
+            labelButton.setStyle("textDecoration", "underline");
+            labelButton.addEventListener(MouseEvent.CLICK, onClick);
+            addChild(labelButton);
 
             if (_filterEditable) {
                 var editButton:Button = new Button();
@@ -133,6 +165,52 @@ import mx.managers.PopUpManager;
                     dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this));
                 }
             }
+        }
+
+        private var first:int = -1;
+        private var last:int = -1;
+
+        private function toMonthLabel(value:int):String {
+            var label:String;
+            switch (value) {
+                case 0:
+                    label = "Jan";
+                    break;
+                case 1:
+                    label = "Feb";
+                    break;
+                case 2:
+                    label = "Mar";
+                    break;
+                case 3:
+                    label = "Apr";
+                    break;
+                case 4:
+                    label = "May";
+                    break;
+                case 5:
+                    label = "Jun";
+                    break;
+                case 6:
+                    label = "Jul";
+                    break;
+                case 7:
+                    label = "Aug";
+                    break;
+                case 8:
+                    label = "Sep";
+                    break;
+                case 9:
+                    label = "Oct";
+                    break;
+                case 10:
+                    label = "Nov";
+                    break;
+                case 11:
+                    label = "Dec";
+                    break;
+            }
+            return label;
         }
 
         private var newFilter:Boolean = true;
@@ -180,6 +258,17 @@ import mx.managers.PopUpManager;
 
         public function set showLabel(show:Boolean):void {
             _showLabel = show;
+        }
+
+        public function updateState():Boolean {
+            var firstValue:int = 11;
+            var lastValue:int;
+            for each (var wrapper:DateLevelWrapper in _filterDefinition.levels) {
+                firstValue = Math.min(wrapper.dateLevel, firstValue);
+                lastValue = Math.max(wrapper.dateLevel, lastValue);
+            }
+            populateLabel();
+            return (this.first != firstValue || this.last != lastValue);
         }
 	}
 }

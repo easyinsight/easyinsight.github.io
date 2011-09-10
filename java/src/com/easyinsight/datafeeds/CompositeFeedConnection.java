@@ -362,7 +362,9 @@ public class CompositeFeedConnection implements Serializable {
                 indexCopy.remove(joinDimensionValue);
                 List<IRow> sourceRows = index.get(joinDimensionValue);
                 if (sourceRows == null) {
-                    unjoinedRows.add(row);
+                    if (!targetOuterJoin) {
+                        unjoinedRows.add(row);
+                    }
                 } else {
                     for (IRow sourceRow : sourceRows) {
                         sourceRow.merge(row, result);

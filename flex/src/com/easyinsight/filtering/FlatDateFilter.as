@@ -87,26 +87,6 @@ import mx.rpc.events.ResultEvent;
 
         override protected function createChildren():void {
             super.createChildren();
-            dataService = new RemoteObject();
-			dataService.destination = "data";
-			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
-			dataService.getAnalysisItemMetadata.send(_feedID, analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID);
-        }
-
-        private function gotMetadata(event:ResultEvent):void {
-			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
-			var dateMetadata:AnalysisDateDimensionResultMetadata = metadata as AnalysisDateDimensionResultMetadata;
-			this.lowDate = dateMetadata.earliestDate;
-            if (lowDate == null) {
-                lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
-            }
-			this.highDate = dateMetadata.latestDate;
-            if (highDate == null) {
-                highDate = new Date();
-            }
-
-
             if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
                 var checkbox:CheckBox = new CheckBox();
                 checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
@@ -126,6 +106,24 @@ import mx.rpc.events.ResultEvent;
             comboBox = new ComboBox();
             comboBox.addEventListener(Event.CHANGE, onDataChange);
             addChild(comboBox);
+            dataService = new RemoteObject();
+			dataService.destination = "data";
+			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
+            dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
+			dataService.getAnalysisItemMetadata.send(_feedID, analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID);
+        }
+
+        private function gotMetadata(event:ResultEvent):void {
+			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
+			var dateMetadata:AnalysisDateDimensionResultMetadata = metadata as AnalysisDateDimensionResultMetadata;
+			this.lowDate = dateMetadata.earliestDate;
+            if (lowDate == null) {
+                lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
+            }
+			this.highDate = dateMetadata.latestDate;
+            if (highDate == null) {
+                highDate = new Date();
+            }
 
 			if (_filterDefinition == null) {
 				_filterDefinition = new FlatDateFilterDefinition();
@@ -229,5 +227,12 @@ import mx.rpc.events.ResultEvent;
         public function set showLabel(show:Boolean):void {
             _showLabel = show;
         }
-	}
+
+        public function updateState():Boolean {
+            var existingYear:String = String(comboBox.selectedItem);
+            var newYear:String = String(_filterDefinition.value);
+            comboBox.selectedItem = newYear;
+            return existingYear != newYear;
+        }
+    }
 }

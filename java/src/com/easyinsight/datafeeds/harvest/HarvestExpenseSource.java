@@ -6,7 +6,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import nu.xom.*;
@@ -85,7 +85,12 @@ public class HarvestExpenseSource extends HarvestBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
+    protected String getUpdateKeyName() {
+        return ID;
+    }
+
+    @Override
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         HarvestCompositeSource source = (HarvestCompositeSource) parentDefinition;
         HttpClient client = getHttpClient(source.getUsername(), source.getPassword());
         Builder builder = new Builder();
@@ -110,14 +115,14 @@ public class HarvestExpenseSource extends HarvestBaseSource {
                         IRow curRow = ds.createRow();
                         populateRow(keys, entryNodes.get(j), curRow);
                     }
-                    dataStorage.insertData(ds);
+                    IDataStorage.insertData(ds);
                 } else {
                     for(int j = 0;j < entryNodes.size();j++) {
                         DataSet ds = new DataSet();
                         IRow curRow = ds.createRow();
                         populateRow(keys, entryNodes.get(j), curRow);
                         IWhere stringWhere = new StringWhere(keys.get(ID), curRow.getValue(keys.get(ID)).toString());
-                        dataStorage.updateData(ds, Arrays.asList(stringWhere));
+                        IDataStorage.updateData(ds, Arrays.asList(stringWhere));
                     }
                 }
             }

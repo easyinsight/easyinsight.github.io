@@ -537,32 +537,22 @@ public class TransformContainer extends HBox
                 filterMap[key.qualifiedName()] = filter;
                 filter.filterDefinition = filterDefinition;
                 initializeFilter(filter, true);
-            /*} else {
-                if (filter is MultiValueFilter) {
-                    var multiValueFilter:MultiValueFilter = filter as MultiValueFilter;
-                    // update the filtered values
-                    if (!multiValueFilter.inclusive && includeFilter) {
-                        multiValueFilter.toInclusive(uniqueValues);
-                        // gonna change...
-                    } else if (multiValueFilter.inclusive && !includeFilter) {
-                        multiValueFilter.removeValues(uniqueValues);
-                    } else {
-                        // just changing values
-                        multiValueFilter.addValues(uniqueValues);
-                    }
-                    dispatchEvent(new TransformsUpdatedEvent(filterDefinitions));
-                } else if (filter is ComboBoxFilter) {
-
-                } else if (filter is SliderDateFilter) {
-
-                } else if (filter is RollingRangeFilter) {
-
-                } else if (filter is SliderMeasureFilter) {
-
-                }
-            }*/
 
         }
+    }
+
+    public function updateState():Boolean {
+        var changed:Boolean = false;
+        for each (var filter:IFilter in filterTile.getChildren()) {
+            if (filter is ComboBoxFilter) {
+                changed = ComboBoxFilter(filter).updateState() || changed;
+            } else if (filter is FlatDateFilter) {
+                changed = FlatDateFilter(filter).updateState() || changed;
+            } else if (filter is MultiFlatDateFilter) {
+                changed = MultiFlatDateFilter(filter).updateState() || changed;
+            }
+        }
+        return changed;
     }
 }
 }

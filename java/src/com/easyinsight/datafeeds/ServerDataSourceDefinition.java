@@ -4,6 +4,8 @@ import com.easyinsight.analysis.ReportCache;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.scorecard.DataSourceRefreshEvent;
+import com.easyinsight.storage.IDataStorage;
+import com.easyinsight.storage.TempStorage;
 import com.easyinsight.users.User;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
@@ -130,10 +132,10 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         return keyMap;
     }
 
-    protected void addData(DataStorage dataStorage, DataSet dataSet) throws Exception {
+    protected void addData(IDataStorage IDataStorage, DataSet dataSet) throws Exception {
 
         if (dataSet != null) {
-            dataStorage.insertData(dataSet);
+            IDataStorage.insertData(dataSet);
         }
     }
 
@@ -154,6 +156,84 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
+        }
+    }
+
+    public MigrationResult migrations(EIConnection conn, FeedDefinition parentDefinition) throws Exception {
+        boolean changed = false;
+        Map<String, Key> keys = newDataSourceFields(parentDefinition);
+        List<AnalysisItem> fields = createAnalysisItems(keys, conn, parentDefinition);
+        List<AnalysisItem> newFields = new ArrayList<AnalysisItem>();
+        for (AnalysisItem field : fields) {
+            if (field == null) {
+                continue;
+            }
+            if (field.getKey() == null) {
+                continue;
+            }
+            AnalysisItem existingField = findAnalysisItemByKey(field.getKey().toKeyString());
+            if (existingField == null) {
+                newFields.add(field);
+            }
+        }
+        if (newFields.size() > 0) {
+            changed = true;
+            System.out.println("Discovered new fields = " + newFields);
+            for (AnalysisItem newField : newFields) {
+                getFields().add(newField);
+                keys.put(newField.getKey().toKeyString(), newField.getKey());
+            }
+            new DataSourceInternalService().updateFeedDefinition(this, conn, true, false);
+        }
+        return new MigrationResult(changed, keys);
+    }
+
+    public String tempLoad(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, EIConnection conn) throws Exception {
+        TempStorage tempStorage = DataStorage.tempConnection(this, conn);
+        boolean insertTemp = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100;
+        String sql;
+        if (insertTemp) {
+            sql = tempStorage.defineTempInsertTable();
+        } else {
+            sql = tempStorage.defineTempUpdateTable();
+        }
+        tempStorage.createTable(sql);
+        DataSet dataSet = getDataSet(keys, now, parentDefinition, tempStorage, conn, callDataID, lastRefreshTime);
+        if (dataSet != null) {
+            tempStorage.insertData(dataSet);
+        }
+        return tempStorage.getTableName();
+    }
+
+    protected Key getUpdateKey() {
+        return findAnalysisItem(getUpdateKeyName()).getKey();
+    }
+
+    protected String getUpdateKeyName() {
+        return null;
+    }
+
+    public void applyTempLoad(EIConnection conn, long accountID, FeedDefinition parentDefinition, Date lastRefreshTime, String tempTable) throws Exception {
+        DataStorage dataStorage = null;
+        try {
+            dataStorage = DataStorage.writeConnection(this, conn, accountID);
+            boolean insert = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100;
+            if (insert) {
+                dataStorage.truncate();
+                dataStorage.insertFromSelect(tempTable);
+            } else {
+                dataStorage.updateFromTemp(tempTable, getUpdateKey());
+            }
+            dataStorage.commit();
+        } catch (Exception e) {
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            throw e;
+        } finally {
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
         }
     }
 

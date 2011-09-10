@@ -19,7 +19,7 @@ import mx.managers.PopUpManager;
 public class TextCellRenderer extends Text
 	{
 		private var _data:Object;
-		private var _analysisItem:AnalysisText;
+		private var _analysisItem:AnalysisItem;
     private var _report:AnalysisDefinition;
     private var _selectionEnabled:Boolean;
 
@@ -51,11 +51,11 @@ public class TextCellRenderer extends Text
             dispatchEvent(event);
         }
 
-        public function get analysisItem():AnalysisText {
+        public function get analysisItem():AnalysisItem {
             return _analysisItem;
         }
 
-        public function set analysisItem(val:AnalysisText):void {
+        public function set analysisItem(val:AnalysisItem):void {
             _analysisItem = val;
         }
     
@@ -83,10 +83,20 @@ public class TextCellRenderer extends Text
 			} else {
 				text = "";
 			}
-            if (analysisItem.html) {
-                this.htmlText = text;
-            } else {
-                this.text = text;
+            if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                var analysisText:AnalysisText = analysisItem as AnalysisText;
+                if (analysisText.html) {
+                    this.htmlText = text;
+                } else {
+                    this.text = text;
+                }
+            } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
+                var derivedGrouping:DerivedAnalysisDimension = analysisItem as DerivedAnalysisDimension;
+                if (derivedGrouping.html) {
+                    this.htmlText = text;
+                } else {
+                    this.text = text;
+                }
             }
             new StandardContextWindow(analysisItem, passThrough, this, value);
             invalidateProperties();

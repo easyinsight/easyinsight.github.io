@@ -26,22 +26,34 @@ public class VerticalListRenderer extends UIComponent implements IListItemRender
 
     public function VerticalListRenderer() {
         text = new Label();
+        text.setStyle("textAlign", "right");
     }
+
+    private var textChanged:Boolean = false;
+
+    private var dividerChanged:Boolean = false;
 
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
-        if (text != null) {
-            var metrics:TextLineMetrics = measureText(text.text);
-            var textWidth:int = metrics.width;
-            var textX:int = unscaledWidth - textWidth - metrics.x - metrics.x - 2;
-            text.move(textX, 0);
-            text.setActualSize(textWidth + metrics.x + metrics.x + 2, 16);
-        }
-        if (showDivider) {
-            graphics.beginFill(0x666666, 1);
-            graphics.drawRect(0, unscaledHeight - 2, unscaledWidth, 2);
-            graphics.endFill();
-        }
+        //if (dividerChanged) {
+            if (showDivider) {
+                graphics.beginFill(0x666666, 1);
+                graphics.drawRect(0, unscaledHeight - 2, unscaledWidth, 2);
+                graphics.endFill();
+            } else {
+                graphics.clear();
+            }
+        //}
+        //if (textChanged) {
+            if (text != null) {
+                text.setActualSize(this.width, this.height);
+                /*var metrics:TextLineMetrics = measureText(text.text);
+                var textWidth:int = metrics.width;
+                var textX:int = unscaledWidth - textWidth - metrics.x - metrics.x - 2;
+                text.move(textX, 0);
+                text.setActualSize(textWidth + metrics.x + metrics.x + 2, 16);*/
+            }
+        //}
     }
 
     private var _qualifiedName:String;
@@ -63,17 +75,14 @@ public class VerticalListRenderer extends UIComponent implements IListItemRender
         this.value = value;
         var measure:AnalysisMeasure = value[_qualifiedName + "measure"] as AnalysisMeasure;
         if (measure != null) {
+            dividerChanged = showDivider != measure.underline;
             showDivider = measure.underline;
         }
+        textChanged = text.text != value[_qualifiedName];
         text.text = value[_qualifiedName];
-        /*if (val != null) {
-            var num:Number = val.toNumber();
-            var formatter:Formatter = measure.getFormatter();
-            text.text = formatter.format(num);
-        } else {
-            text.text = "";
-        }*/
-        invalidateDisplayList();
+        if (dividerChanged || textChanged) {
+            invalidateDisplayList();
+        }
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 

@@ -27,6 +27,28 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
     @Column(name="derivation_code")
     private String derivationCode;
 
+    @Column(name="word_wrap")
+    private boolean wordWrap;
+
+    @Column(name="html")
+    private boolean html;
+
+    public boolean isWordWrap() {
+        return wordWrap;
+    }
+
+    public void setWordWrap(boolean wordWrap) {
+        this.wordWrap = wordWrap;
+    }
+
+    public boolean isHtml() {
+        return html;
+    }
+
+    public void setHtml(boolean html) {
+        this.html = html;
+    }
+
     public String getDerivationCode() {
         return derivationCode;
     }

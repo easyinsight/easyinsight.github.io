@@ -4,7 +4,6 @@ import flash.display.Bitmap;
 import flash.display.Loader;
 import flash.display.LoaderInfo;
 import flash.events.Event;
-
 import flash.utils.ByteArray;
 
 import mx.collections.ArrayCollection;
@@ -65,6 +64,10 @@ public class DashboardImageViewComponent extends Box implements IDashboardViewCo
     }
 
     public function initialRetrieve():void {
+    }
+
+    public function reportCount():ArrayCollection {
+        return new ArrayCollection();
     }
 }
 }

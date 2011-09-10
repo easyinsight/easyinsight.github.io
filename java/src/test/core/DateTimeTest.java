@@ -1,5 +1,6 @@
 package test.core;
 
+import com.easyinsight.storage.IDataStorage;
 import junit.framework.TestCase;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.storage.DataStorage;
@@ -14,7 +15,6 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.DateValue;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -96,9 +96,9 @@ public class DateTimeTest extends TestCase {
 
         Connection conn = Database.instance().getConnection();
         try {
-            DataStorage dataStorage = DataStorage.writeConnection(feedDefinition, conn);
-            dataStorage.insertData(dataSet);
-            dataStorage.commit();
+            IDataStorage IDataStorage = DataStorage.writeConnection(feedDefinition, conn);
+            IDataStorage.insertData(dataSet);
+            IDataStorage.commit();
         } finally {
             Database.instance().closeConnection(conn);
         }
@@ -186,7 +186,7 @@ public class DateTimeTest extends TestCase {
         dateDimDefinition.setDataFeedID(dataSourceID);
         dateDimDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) lastValueFilter));
         dateDimDefinition.setColumns(Arrays.asList(new AnalysisDimension(TestUtil.createKey("c", dataSourceID), true), measure));
-        DataSet dataSet = dataService.listDataSet(dateDimDefinition, new InsightRequestMetadata());
+        DataSet dataSet = dataService.listDataSet(dateDimDefinition, new InsightRequestMetadata(), null);
         assertEquals(1, dataSet.getRows().size());
         for (IRow irow : dataSet.getRows()) {
             NumericValue numericValue = (NumericValue) irow.getValue(measure.createAggregateKey());
@@ -219,7 +219,7 @@ public class DateTimeTest extends TestCase {
         dateDimDefinition.setColumns(Arrays.asList(new AnalysisDimension(TestUtil.createKey("c", dataSourceID), true),
                 new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL), measure));
         dateDimDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) lastValueFilter));
-        DataSet dataSet = dataService.listDataSet(dateDimDefinition, new InsightRequestMetadata());
+        DataSet dataSet = dataService.listDataSet(dateDimDefinition, new InsightRequestMetadata(), null);
         assertEquals(3, dataSet.getRows().size());
         for (IRow irow : dataSet.getRows()) {
             NumericValue numericValue = (NumericValue) irow.getValue(measure.createAggregateKey());
@@ -268,9 +268,9 @@ public class DateTimeTest extends TestCase {
 
         Connection conn = Database.instance().getConnection();
         try {
-            DataStorage dataStorage = DataStorage.writeConnection(feedDefinition, conn);
-            dataStorage.insertData(dataSet);
-            dataStorage.commit();
+            IDataStorage IDataStorage = DataStorage.writeConnection(feedDefinition, conn);
+            IDataStorage.insertData(dataSet);
+            IDataStorage.commit();
         } finally {
             Database.instance().closeConnection(conn);
         }

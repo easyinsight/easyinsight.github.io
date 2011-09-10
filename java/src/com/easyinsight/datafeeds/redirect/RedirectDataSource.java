@@ -87,7 +87,8 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
 
     @Override
     public Feed createFeedObject(FeedDefinition parent) {
-        return new RedirectFeed(redirectDataSourceID);        
+        return new RedirectFeed(redirectDataSourceID, FeedRegistry.instance().getFeed(redirectDataSourceID).getFields(),
+                FeedRegistry.instance().getFeed(redirectDataSourceID).getFieldHierarchy());
     }
 
     @Override

@@ -9,7 +9,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
 import com.xerox.amazonws.sqs2.MessageQueue;
 import com.xerox.amazonws.sqs2.SQSUtils;
@@ -108,7 +108,7 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callID, Date lastRefreshDate) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callID, Date lastRefreshDate) {
         DataSet dataSet = new DataSet();
         boolean firstRun = !initialized;
         try {
@@ -118,7 +118,7 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
                 ResultSet rs = stmt.executeQuery();
                 rs.next();
                 byte[] file = rs.getBytes(1);
-                dataSet = new WFCSVParse().createData(dataStorage, keys, file);
+                dataSet = new WFCSVParse().createData(IDataStorage, keys, file);
                 startFile = null;
                 initialized = true;
             } else {
@@ -156,7 +156,7 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
         this.startFile = startFile;
     }
 
-    protected boolean clearsData() {
+    protected boolean clearsData(FeedDefinition parentSource) {
         return false;
     }
 

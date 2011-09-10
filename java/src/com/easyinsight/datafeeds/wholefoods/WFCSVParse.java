@@ -5,11 +5,10 @@ import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -20,7 +19,7 @@ import java.util.Map;
  * Time: 7:27:18 PM
  */
 public class WFCSVParse {
-    public DataSet createData(DataStorage dataStorage, Map<String, Key> keyMap, byte[] bytes) throws Exception {
+    public DataSet createData(IDataStorage IDataStorage, Map<String, Key> keyMap, byte[] bytes) throws Exception {
         DataSet dataSet = new DataSet();
         System.out.println(bytes.length);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
@@ -58,16 +57,16 @@ public class WFCSVParse {
             i++;
 
             if (i % 250 == 0) {
-                if (dataStorage != null) {
-                    dataStorage.insertData(dataSet);
+                if (IDataStorage != null) {
+                    IDataStorage.insertData(dataSet);
                     dataSet = new DataSet();
                 } else {
                     break;
                 }
             }
         }
-        if (dataStorage != null) {
-            dataStorage.insertData(dataSet);
+        if (IDataStorage != null) {
+            IDataStorage.insertData(dataSet);
         }
         r.close();
         return dataSet;

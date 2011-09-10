@@ -9,6 +9,8 @@ package com.easyinsight.analysis
 	public class DerivedAnalysisDimension extends AnalysisDimension
 	{
 		public var derivationCode:String;
+        public var wordWrap:Boolean;
+        public var html:Boolean;
 		
 		public function DerivedAnalysisDimension(group:Boolean = true)
 		{

@@ -64,5 +64,9 @@ public class DashboardScorecardViewComponent extends Canvas implements IDashboar
 
     public function initialRetrieve():void {
     }
+
+    public function reportCount():ArrayCollection {
+        return new ArrayCollection();
+    }
 }
 }

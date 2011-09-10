@@ -1,7 +1,5 @@
 package com.easyinsight.datafeeds.composite;
 
-import com.easyinsight.analysis.ReportCache;
-import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.core.Key;
@@ -10,15 +8,11 @@ import com.easyinsight.users.Account;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.userupload.UploadPolicy;
-import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 
-import java.net.InetAddress;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -204,66 +198,44 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return sessionId;
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, EIConnection conn) {
-        try {
-            refreshData(accountID, now, conn, null, callDataID, lastRefreshTime);
-            ReportCache.instance().flushResults(getDataFeedID());
-            return new CredentialsResponse(true, getDataFeedID());
-        } catch (ReportException re) {
-            return new CredentialsResponse(false, re.getReportFault());
-        } catch (Exception e) {
-            LogClass.error(e);
-            return new CredentialsResponse(false, e.getMessage(), getDataFeedID());
-        }
-    }
-
     public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception {
         boolean changed = false;
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO data_source_refresh_audit (account_id, data_source_id, " +
-                    "start_time, server_id) values (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
-            insertStmt.setLong(1, accountID);
-            insertStmt.setLong(2, getDataFeedID());
-            insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-            insertStmt.setString(4, InetAddress.getLocalHost().getHostAddress());
-            insertStmt.execute();
-            long auditID = Database.instance().getAutoGenKey(insertStmt);
-
             List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn);
+            Map<Long, Map<String, Key>> keyMap = new HashMap<Long, Map<String, Key>>();
             for (IServerDataSourceDefinition source : sources) {
-                changed = source.refreshData(accountID, now, conn, this, callDataID, lastRefreshTime) || changed;
+                ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
+                MigrationResult migrationResult = serverDataSourceDefinition.migrations(conn, this);
+                changed = migrationResult.isChanged() || changed;
+                keyMap.put(serverDataSourceDefinition.getDataFeedID(), migrationResult.getKeyMap());
             }
-
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE data_source_refresh_audit set end_time = ? where data_source_refresh_audit_id = ?");
-            updateStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-            updateStmt.setLong(2, auditID);
-            updateStmt.executeUpdate();
+            conn.commit();
+            conn.setAutoCommit(true);
+            Map<Long, String> tempTables = new HashMap<Long, String>();
+            for (IServerDataSourceDefinition source : sources) {
+                ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
+                tempTables.put(serverDataSourceDefinition.getDataFeedID(),
+                        serverDataSourceDefinition.tempLoad(keyMap.get(serverDataSourceDefinition.getDataFeedID()), now,
+                        this, callDataID, lastRefreshTime, conn));
+            }
+            conn.setAutoCommit(false);
+            for (IServerDataSourceDefinition source : sources) {
+                ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
+                String tempTable = tempTables.get(serverDataSourceDefinition.getDataFeedID());
+                serverDataSourceDefinition.applyTempLoad(conn, accountID, this, lastRefreshTime, tempTable);
+            }
             refreshDone();
         } finally {
             DataTypeMutex.mutex().unlock(getFeedType());
         }
-        
-        //notifyOfDataUpdate();
+
         return changed;
     }
 
     protected void refreshDone() {
 
     }
-
-    /*private void notifyOfDataUpdate() {
-        MessageBroker msgBroker = MessageBroker.getMessageBroker(null);
-        String clientID = UUIDUtils.createUUID();
-        AsyncMessage msg = new AsyncMessage();
-        msg.setDestination("dataUpdates");
-        msg.setHeader(AsyncMessage.SUBTOPIC_HEADER_NAME, String.valueOf(getDataFeedID()));
-        msg.setMessageId(clientID);
-        msg.setTimestamp(System.currentTimeMillis());
-        if (msgBroker != null) {
-            msgBroker.routeMessageToService(msg, null);
-        }
-    }*/
 
     public String retrievePassword() {
         return password;

@@ -2,12 +2,14 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.EmailReportWindow;
         import com.easyinsight.analysis.EmbedReportWindow;
         import com.easyinsight.analysis.ExcelCreator;
         import com.easyinsight.analysis.PDFCreator;
         import com.easyinsight.analysis.PNGCreator;
         import com.easyinsight.schedule.ReportDelivery;
         import com.easyinsight.schedule.ReportDeliveryScheduleWindow;
+        import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.PopUpManager;
 
@@ -76,7 +78,7 @@
             PopUpManager.removePopUp(this);
         }
 
-        private function email():void {
+        private function schedule():void {
             exportService.getReportDelivery.send(_report.analysisID, new Date().getTimezoneOffset());
         }
 
@@ -87,6 +89,15 @@
             window.fixedReportName = _reportName;
             window.fixedReportURLKey = _report.urlKey;
             window.activity = delivery;
+            window.x = this.x;
+            window.y = this.y;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function email():void {
+            var window:EmailReportWindow = new EmailReportWindow();
+            window.report = _report;
             window.x = this.x;
             window.y = this.y;
             PopUpManager.addPopUp(window, this, true);
@@ -112,10 +123,10 @@
             </mx:GridRow>
             <mx:GridRow>
                 <mx:GridItem>
-                    <util:SaveButton icon="@Embed(source='../../../../assets/mail.png')" label="Email Scheduling" click="email()" labelPlacement="right" width="250"/>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/calendar.png')" label="Scheduling" click="schedule()" labelPlacement="right" width="250"/>
                 </mx:GridItem>
                 <mx:GridItem>
-                    <util:SaveButton icon="@Embed(source='../../../../assets/link.png')" label="Link by URL" click="url()" labelPlacement="right" width="250"/>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/mail.png')" label="Email" click="email()" labelPlacement="right" width="250"/>
                 </mx:GridItem>
                 <mx:GridItem>
                     <util:SaveButton icon="@Embed(source='../../../../assets/plasma_tv.png')" label="Embed Report into Website" click="embed()" labelPlacement="right" width="250"/>

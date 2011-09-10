@@ -4,11 +4,11 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.analysis.*;
-import com.easyinsight.storage.DataStorage;
 
 import java.util.*;
 import java.sql.Connection;
@@ -51,7 +51,7 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
         return null;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         //HealthInfo healthInfo = new AdminService().getHealthInfo();
         DataSet dataSet = new DataSet();
         /*IRow row = dataSet.createRow();
@@ -106,8 +106,8 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
     public void customLoad(Connection conn) throws SQLException {
     }
 
-    protected void addData(DataStorage dataStorage, DataSet dataSet) throws Exception {
-        dataStorage.insertData(dataSet);
+    protected void addData(IDataStorage IDataStorage, DataSet dataSet) throws Exception {
+        IDataStorage.insertData(dataSet);
     }
 
     public boolean isConfigured() {

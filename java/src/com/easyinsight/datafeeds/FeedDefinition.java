@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.kpi.KPI;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.SuggestedUser;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.analysis.AnalysisItem;
@@ -458,7 +459,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return item;
     }
     
-     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
+     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         throw new UnsupportedOperationException();
     }
 

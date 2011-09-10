@@ -17,19 +17,23 @@ import java.util.Set;
 public class RedirectFeed extends Feed implements Serializable {
 
     private long redirectID;
+    private List<AnalysisItem> fields;
+    private List<FeedNode> fieldHierarchy;
 
-    public RedirectFeed(long redirectID) {
+    public RedirectFeed(long redirectID, List<AnalysisItem> fields, List<FeedNode> fieldHierarchy) {
         this.redirectID = redirectID;
+        this.fields = fields;
+        this.fieldHierarchy = fieldHierarchy;
     }
 
     @Override
     public List<AnalysisItem> getFields() {
-        return FeedRegistry.instance().getFeed(redirectID, null).getFields();
+        return fields;
     }
 
     @Override
     public List<FeedNode> getFieldHierarchy() {
-        return FeedRegistry.instance().getFeed(redirectID, null).getFieldHierarchy();
+        return fieldHierarchy;
     }
 
     @Override

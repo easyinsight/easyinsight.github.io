@@ -306,6 +306,12 @@
 
         [Bindable]
         protected var minPrecision:int;
+
+        [Bindable]
+        protected var html:Boolean;
+
+        [Bindable]
+        protected var wordWrap:Boolean;
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
@@ -419,6 +425,12 @@
                 </mx:FormItem>
             </mx:Form>
             <mx:Form>
+                <mx:FormItem label="Word Wrap">
+                    <mx:CheckBox id="wordWrapCheckbox" selected="{wordWrap}"/>
+                </mx:FormItem>
+                <mx:FormItem label="HTML">
+                    <mx:CheckBox id="htmlCheckbox" selected="{html}"/>
+                </mx:FormItem>
             </mx:Form>
          </mx:ViewStack>
     </mx:HBox>

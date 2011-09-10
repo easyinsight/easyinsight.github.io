@@ -65,7 +65,7 @@ public class HistoryRun {
     public KPIValue blah(WSAnalysisDefinition analysisDefinition, Date endDate,
                          AnalysisMeasure measure, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         insightRequestMetadata.setNow(endDate);
-        DataSet result = new DataService().listDataSet(analysisDefinition, insightRequestMetadata, conn);
+        DataSet result = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
         //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
         KPIValue goalValue;
         if (result.getRows().size() > 0) {

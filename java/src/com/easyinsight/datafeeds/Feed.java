@@ -166,6 +166,7 @@ public abstract class Feed implements Serializable {
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         WSListDefinition tempList = new WSListDefinition();
+        tempList.setFilterDefinitions(new ArrayList<FilterDefinition>());
         List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
         columns.add(analysisItem);
         tempList.setDataFeedID(getFeedID());

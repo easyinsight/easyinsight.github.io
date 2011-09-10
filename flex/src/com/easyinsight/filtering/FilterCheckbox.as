@@ -38,6 +38,7 @@ public class FilterCheckbox extends HBox {
     private function onChange(event:Event):void {
         if (_multiFilterOption != null) {
             _multiFilterOption.selected = checkbox.selected;
+            dispatchEvent(new MultiFilterEvent(_multiFilterOption));
         }
     }
 

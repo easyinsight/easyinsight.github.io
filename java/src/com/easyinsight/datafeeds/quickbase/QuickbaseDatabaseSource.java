@@ -9,7 +9,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.CompositeReportPipeline;
 import com.easyinsight.pipeline.Pipeline;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
 import nu.xom.*;
 import org.apache.http.client.HttpClient;
@@ -130,20 +130,20 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         QuickbaseCompositeSource quickbaseCompositeSource = (QuickbaseCompositeSource) parentDefinition;
         String sessionTicket = quickbaseCompositeSource.getSessionTicket();
         String applicationToken = quickbaseCompositeSource.getApplicationToken();
         String host = quickbaseCompositeSource.getHost();
         String fullPath = "https://" + host + "/db/" + databaseID;
         if (databaseID.equals("beutk2zd6")) {
-            return acsDataLogRetrieval(dataStorage, conn, quickbaseCompositeSource, sessionTicket, applicationToken, fullPath);
+            return acsDataLogRetrieval(IDataStorage, conn, quickbaseCompositeSource, sessionTicket, applicationToken, fullPath);
         } else {
-            return normalRetrieval(dataStorage, conn, quickbaseCompositeSource, sessionTicket, applicationToken, fullPath);
+            return normalRetrieval(IDataStorage, conn, quickbaseCompositeSource, sessionTicket, applicationToken, fullPath);
         }
     }
 
-    private DataSet acsDataLogRetrieval(DataStorage dataStorage, EIConnection conn, QuickbaseCompositeSource quickbaseCompositeSource, String sessionTicket, String applicationToken, String fullPath) {
+    private DataSet acsDataLogRetrieval(IDataStorage IDataStorage, EIConnection conn, QuickbaseCompositeSource quickbaseCompositeSource, String sessionTicket, String applicationToken, String fullPath) {
         try {
             Feed weightsFeed = FeedRegistry.instance().getFeed(weightsID, conn);
             List<AnalysisItem> weightFields = weightsFeed.getFields();
@@ -322,7 +322,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 for (IRow row : dataSet.getRows()) {
                     row.addValue(wtdProcedures.getKey(), row.getValue(cachedWeightedProcedures.createAggregateKey()));
                 }
-                dataStorage.insertData(dataSet);
+                IDataStorage.insertData(dataSet);
                 dataSet = new DataSet();
             }
             return null;
@@ -334,7 +334,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    private DataSet normalRetrieval(DataStorage dataStorage, EIConnection conn, QuickbaseCompositeSource quickbaseCompositeSource, String sessionTicket, String applicationToken, String fullPath) {
+    private DataSet normalRetrieval(IDataStorage IDataStorage, EIConnection conn, QuickbaseCompositeSource quickbaseCompositeSource, String sessionTicket, String applicationToken, String fullPath) {
         HttpPost httpRequest = new HttpPost(fullPath);
         httpRequest.setHeader("Accept", "application/xml");
         httpRequest.setHeader("Content-Type", "application/xml");
@@ -417,7 +417,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             for (AnalysisItem analysisItem : map.values()) {
                 dataSet.getDataSetKeys().replaceKey(analysisItem.createAggregateKey(), analysisItem.getKey());
             }
-            dataStorage.insertData(dataSet);
+            IDataStorage.insertData(dataSet);
             return null;
         } catch (ReportException re) {
             throw re;

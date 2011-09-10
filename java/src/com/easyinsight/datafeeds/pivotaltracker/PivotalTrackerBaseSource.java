@@ -8,9 +8,8 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
@@ -171,7 +170,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         Token tokenObj = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.PIVOTAL_TRACKER_TOKEN, getDataFeedID(), false, conn);
         String token = tokenObj.getTokenValue();
         try {

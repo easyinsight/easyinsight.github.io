@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.InsightRequestMetadata;
+        import com.easyinsight.schedule.ReportDelivery;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
+
+        private var _report:AnalysisDefinition;
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
+
+        private function send():void {
+            var results:Array = Validator.validateAll([ emailValidator ]);
+            if (results.length > 0) {
+                emailInput.setFocus();
+                emailInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            var format:int;
+            switch (typeGroup.selectedValue) {
+                case "html":
+                    format = ReportDelivery.HTML;
+                    break;
+                case "excel":
+                    format = ReportDelivery.EXCEL;
+                    break;
+                case "pdf":
+                    format = ReportDelivery.PDF;
+                    break;
+            }
+            var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+            metadata.utcOffset = new Date().getTimezoneOffset();
+            ProgressAlert.alert(this, "Delivering email...", null, excelService.emailReport);
+            excelService.emailReport.send(_report, format, metadata, emailInput.text, subjectInput.text, messageArea.text);
+        }
+
+        private function emailed():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="exportService" id="excelService">
+        <mx:method name="emailReport" result="emailed()"/>
+    </mx:RemoteObject>
+    <mx:Label text="What format do you want for the report?"/>
+    <mx:RadioButtonGroup id="typeGroup" selectedValue="html"/>
+    <mx:HBox>
+        <mx:RadioButton label="HTML" value="html" groupName="typeGroup"/>
+        <mx:RadioButton label="Excel" value="excel" groupName="typeGroup"/>
+        <!--<mx:RadioButton label="PDF" value="pdf" groupName="typeGroup"/>-->
+    </mx:HBox>
+    <mx:Label text="Who will this email go to?"/>
+    <mx:TextInput id="emailInput" width="400"/>
+    <mx:Label text="What should the subject of the email be?"/>
+    <mx:TextInput id="subjectInput" text="Take a look at this report"  width="400"/>
+    <mx:Label text="Any message to include with the email?"/>
+    <mx:TextArea editable="true" borderStyle="solid" borderThickness="1"  width="400" id="messageArea" height="80"/>
+    <mx:HBox>
+        <util:SaveButton click="send()" label="Send"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+    <mx:EmailValidator id="emailValidator" source="{emailInput}" property="text"/>
+</util:EISlimWindow>

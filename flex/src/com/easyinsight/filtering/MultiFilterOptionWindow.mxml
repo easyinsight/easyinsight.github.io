@@ -1,11 +1,20 @@
 <?xml version="1.0"?>
-<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
         [Bindable]
         private var availableItems:ArrayCollection;
+
+        private function onCreation():void {
+            addEventListener(MultiFilterEvent.MULTI_FILTER, onMultiFilter);
+        }
+
+        protected function onMultiFilter(event:MultiFilterEvent):void {
+
+        }
 
         private var _filterDefinition:FilterDefinition;
 

@@ -27,7 +27,7 @@ import org.apache.jcs.access.exception.CacheException;
  * Date: Nov 8, 2008
  * Time: 4:08:06 PM
  */
-public class DataStorage {
+public class DataStorage implements IDataStorage {
     private Map<Key, KeyMetadata> keys;
     private long feedID;
     private long accountID;
@@ -104,12 +104,33 @@ public class DataStorage {
         return writeConnection(feedDefinition, conn, SecurityUtil.getAccountID(), false);
     }
 
-    public static DataStorage writeConnection(FeedDefinition feedDefinition, Connection conn, boolean systemUpdate) throws SQLException {
+    public static IDataStorage writeConnection(FeedDefinition feedDefinition, Connection conn, boolean systemUpdate) throws SQLException {
         return writeConnection(feedDefinition, conn, 0, systemUpdate);
     }
 
     public static DataStorage writeConnection(FeedDefinition feedDefinition, Connection conn, long accountID) throws SQLException {
         return writeConnection(feedDefinition, conn, accountID, false);
+    }
+
+    public static TempStorage tempConnection(FeedDefinition feedDefinition, Connection conn) {
+        Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
+        for (AnalysisItem analysisItem : feedDefinition.getFields()) {
+            if (analysisItem.isDerived() || !analysisItem.isConcrete()) {
+                continue;
+            }
+            Key key = analysisItem.getKey();
+            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
+            } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+            } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
+            } else {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
+            }
+        }
+        Database database = DatabaseManager.instance().getDatabase(getMetadata(feedDefinition.getDataFeedID(), conn).getDatabase());
+        return new TempStorage(feedDefinition.getDataFeedID(), keyMetadatas, database);
     }
 
     public static DataStorage writeConnection(FeedDefinition feedDefinition, Connection conn, long accountID, boolean systemUpdate) throws SQLException {
@@ -157,14 +178,24 @@ public class DataStorage {
 
     private void validateSpace(Connection conn) throws SQLException, StorageLimitException {
         if (systemUpdate) return;
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT SUM(SIZE) " +
-                "FROM FEED_PERSISTENCE_METADATA, upload_policy_users, user WHERE feed_persistence_metadata.feed_id = upload_policy_users.feed_id and " +
-                "upload_policy_users.role = ? and upload_policy_users.user_id = user.user_id and user.account_id = ?");
-        queryStmt.setInt(1, Roles.OWNER);
-        queryStmt.setLong(2, accountID);
-        ResultSet currentSpaceRS = queryStmt.executeQuery();
-        currentSpaceRS.next();
-        long size = currentSpaceRS.getLong(1);
+        PreparedStatement dsStmt = conn.prepareStatement("SELECT data_feed.data_feed_id, data_feed.parent_source_id FROM data_feed, upload_policy_users, user WHERE " +
+                "data_feed.data_feed_id = upload_policy_users.feed_id and data_feed.visible = ? and upload_policy_users.user_id = user.user_id and " +
+                "user.account_id = ? and upload_policy_users.role = ?");
+        dsStmt.setBoolean(1, true);
+        dsStmt.setLong(2, accountID);
+        dsStmt.setInt(3, Roles.OWNER);
+        ResultSet dsRS = dsStmt.executeQuery();
+        PreparedStatement sizeStmt = conn.prepareStatement("SELECT size FROM feed_persistence_metadata WHERE feed_id = ?");
+        long size = 0;
+        while (dsRS.next()) {
+            sizeStmt.setLong(1, dsRS.getLong(1));
+            ResultSet sizeRS = sizeStmt.executeQuery();
+            if (sizeRS.next()) {
+                size += sizeRS.getLong(1);
+            }
+        }
+        dsStmt.close();
+        sizeStmt.close();
         PreparedStatement spaceAllowed = conn.prepareStatement("SELECT ACCOUNT_TYPE FROM ACCOUNT WHERE account_id = ?");
         spaceAllowed.setLong(1, accountID);
         ResultSet spaceRS = spaceAllowed.executeQuery();
@@ -193,7 +224,6 @@ public class DataStorage {
             throw new ReportException(new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + " mb. You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier."));
         }
         spaceAllowed.close();
-        queryStmt.close();
     }
 
     public int getVersion() {
@@ -300,6 +330,59 @@ public class DataStorage {
         }
         Database.closeConnection(storageConn);
         storageConn = null;
+    }
+
+    public void insertFromSelect(String tempTable) throws SQLException {
+        StringBuilder columnBuilder = new StringBuilder();
+        StringBuilder selectBuilder = new StringBuilder();
+        Iterator<KeyMetadata> keyIter = keys.values().iterator();
+        while (keyIter.hasNext()) {
+            KeyMetadata keyMetadata = keyIter.next();
+            columnBuilder.append(keyMetadata.createInsertClause());
+            selectBuilder.append(keyMetadata.createInsertClause());
+            if (keyIter.hasNext()) {
+                columnBuilder.append(",");
+                selectBuilder.append(",");
+            }
+        }
+        String columns = columnBuilder.toString();
+        String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") SELECT " + selectBuilder.toString() + " FROM " + tempTable;
+        PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
+        insertStmt.execute();
+        insertStmt.close();
+        PreparedStatement dropStmt = storageConn.prepareStatement("DROP TABLE " + tempTable);
+        dropStmt.execute();
+    }
+
+    public void updateFromTemp(String tempTable, Key updateKey) throws SQLException {
+        StringBuilder columnBuilder = new StringBuilder();
+        StringBuilder selectBuilder = new StringBuilder();
+        Iterator<KeyMetadata> keyIter = keys.values().iterator();
+        while (keyIter.hasNext()) {
+            KeyMetadata keyMetadata = keyIter.next();
+            columnBuilder.append(keyMetadata.createInsertClause());
+            selectBuilder.append(keyMetadata.createInsertClause());
+            if (keyIter.hasNext()) {
+                columnBuilder.append(",");
+                selectBuilder.append(",");
+            }
+        }
+        String columns = columnBuilder.toString();
+        String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") SELECT " + selectBuilder.toString() + " FROM " + tempTable + " WHERE update_key_field = ?";
+        PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
+        PreparedStatement getKeysStmt = storageConn.prepareStatement("SELECT DISTINCT UPDATE_KEY_FIELD FROM " + tempTable);
+        ResultSet keyRS = getKeysStmt.executeQuery();
+        String updateSQL = "DELETE FROM " + getTableName() + " WHERE " + updateKey.toSQL() + " = ?";
+        PreparedStatement updateStmt = storageConn.prepareStatement(updateSQL);
+        while (keyRS.next()) {
+            String key = keyRS.getString(1);
+            updateStmt.setString(1, key);
+            updateStmt.executeUpdate();
+            insertStmt.setString(1, key);
+            insertStmt.execute();
+        }
+        PreparedStatement dropStmt = storageConn.prepareStatement("DROP TABLE " + tempTable);
+        dropStmt.execute();
     }
 
 
@@ -627,7 +710,7 @@ public class DataStorage {
             for (FilterDefinition filterDefinition : filters) {
                 KeyMetadata keyMetadata = keys.get(filterDefinition.getField().createAggregateKey(false));
                 if (keyMetadata != null) {
-                    int type = keyMetadata.type;
+                    int type = keyMetadata.getType();
                     i = filterDefinition.populatePreparedStatement(queryStmt, i, type, insightRequestMetadata);
                 } else {
                     LogClass.error(filterDefinition.getField().getAnalysisItemID() + " - " + filterDefinition.getField().toDisplay() + " was not found in the key metadata");
@@ -1007,66 +1090,6 @@ public class DataStorage {
         return "df" + feedID + "v" + version;
     }
 
-    private static class KeyMetadata {
-        private Key key;
-        private int type;
-        private AnalysisItem analysisItem;
-
-        private KeyMetadata(Key key, int type, AnalysisItem analysisItem) {
-            this.key = key;
-            this.type = type;
-            this.analysisItem = analysisItem;
-        }
-
-        public Key getKey() {
-            return key;
-        }
-
-        public void setKey(Key key) {
-            this.key = key;
-        }
-
-        public int getType() {
-            return type;
-        }
-
-        public void setType(int type) {
-            this.type = type;
-        }
-
-        public AnalysisItem getAnalysisItem() {
-            return analysisItem;
-        }
-
-        public void setAnalysisItem(AnalysisItem analysisItem) {
-            this.analysisItem = analysisItem;
-        }
-
-        public String createInsertClause() {
-            if (type == Value.DATE) {
-                return key.toSQL() + ", datedim_" + key.getKeyID() + "_id";
-            } else {
-                return key.toSQL();
-            }
-        }
-
-        public String createUpdateClause() {
-            if (type == Value.DATE) {
-                return key.toSQL() + " = ?, datedim_" + key.getKeyID() + "_id = ?";
-            } else {
-                return key.toSQL() + " = ?";
-            }
-        }
-
-        public String createInsertQuestionMarks() {
-            if (type == Value.DATE) {
-                return "?, ?";
-            } else {
-                return "?";
-            }
-        }
-    }
-
     private static void addOrUpdateMetadata(long dataFeedID, FeedPersistenceMetadata metadata, Connection conn) {
         try {
             if (metadata.getMetadataID() > 0) {
@@ -1189,7 +1212,7 @@ public class DataStorage {
         int position = 1;
         for (FilterDefinition filterDefinition : filters) {
             KeyMetadata keyMetadata = keys.get(filterDefinition.getField().getKey());
-            int type = keyMetadata.type;
+            int type = keyMetadata.getType();
             filterDefinition.populatePreparedStatement(queryStmt, position, type, insightRequestMetadata);
         }
         ResultSet dataRS = queryStmt.executeQuery();

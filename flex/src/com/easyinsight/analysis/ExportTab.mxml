@@ -114,6 +114,13 @@
         }
 
         private function email():void {
+            var window:EmailReportWindow = new EmailReportWindow();
+            window.report = _analysisDefinition;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function schedule():void {
             if (analysisDefinition.analysisID == 0) {
                 Alert.show("You need to save the report first.");
             } else {
@@ -142,8 +149,10 @@
     <mx:Button id="pdfButton" toolTip="Export to PDF"
                icon="@Embed(source='../../../../assets/document_chart.png')" click="exportPDF()"
             labelPlacement="right" label="Export to PDF" x="143" y="10"/>
-    <mx:Button id="emailButton" toolTip="Email Delivery" click="email()"
-               icon="@Embed(source='../../../../assets/mail.png')" labelPlacement="right" label="Email Scheduling" x="268" y="10"/>
+    <mx:Button id="emailButton" toolTip="Email Report" click="email()"
+               icon="@Embed(source='../../../../assets/mail.png')" labelPlacement="right" label="Email Report" x="268" y="10"/>
+    <mx:Button id="scheduleButton" toolTip="Schedule Delivery" click="schedule()"
+               icon="@Embed(source='../../../../assets/calendar.png')" labelPlacement="right" label="Email Scheduling" x="400" y="10"/>
     <mx:Button id="imageButton" toolTip="Export PNG Image"
                icon="@Embed(source='../../../../assets/camera.png')" click="exportPNG()" labelPlacement="right" label="Export to PNG" x="411" y="10"/>
     <mx:Button id="linkButton" toolTip="Link by URL" click="url()"

@@ -1,0 +1,1 @@
+alter table dashboard_stack add selection_type varchar(255) not null default 'Buttons';

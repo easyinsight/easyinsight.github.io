@@ -32,6 +32,7 @@
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.DateValue;
+        import com.easyinsight.analysis.DerivedAnalysisDimension;
         import com.easyinsight.analysis.EmptyValue;
         import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.analysis.ListViewHeaderRenderer;
@@ -333,7 +334,7 @@
                     headerFactory.properties = { eiColor: def.headerTextColor };
                     columnHeaderObject.headerRenderer = headerFactory;
                     var factory:ClassFactory = new ClassFactory(getCellRendererClass(myHeader, myLookupTable));
-                    if (myHeader.hasType(AnalysisItemTypes.TEXT)) {
+                    if (myHeader.hasType(AnalysisItemTypes.TEXT) || (myHeader.hasType(AnalysisItemTypes.DERIVED_GROUPING) && DerivedAnalysisDimension(myHeader).wordWrap)) {
                         variableHeight = true;
                     }
                     if (myLookupTable == null) {
@@ -406,6 +407,10 @@
             if (item.hasType(AnalysisItemTypes.TEXT)) {
                 return TextCellRenderer;
             } else {
+                if (item.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
+                    var d:DerivedAnalysisDimension = item as DerivedAnalysisDimension;
+                    return d.wordWrap ? TextCellRenderer : AnalysisCellRenderer;
+                }
                 return AnalysisCellRenderer;
             }
         }

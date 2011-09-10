@@ -3,17 +3,12 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.analysis.*;
-import com.easyinsight.security.Roles;
-import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.util.RandomTextGenerator;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 /**
  * User: James Boe
@@ -24,7 +19,7 @@ public class FeedCreation {
 
     private FeedStorage feedStorage = new FeedStorage();
 
-    public FeedCreationResult createFeed(FeedDefinition feedDefinition, Connection conn, DataSet dataSet, UploadPolicy uploadPolicy) throws Exception {
+    public FeedCreationResult createFeed(FeedDefinition feedDefinition, Connection conn, @Nullable DataSet dataSet, UploadPolicy uploadPolicy) throws Exception {
         long feedID;
         if (feedDefinition.getDataFeedID() == 0) {
             feedID = feedStorage.addFeedDefinitionData(feedDefinition, conn);

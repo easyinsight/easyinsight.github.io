@@ -12,6 +12,26 @@ public class MultiFlatDateFilterOptionWindow extends MultiFilterOptionWindow {
     public function MultiFlatDateFilterOptionWindow() {
     }
 
+    override protected function onMultiFilter(event:MultiFilterEvent):void {
+        var filter:MultiFlatDateFilterDefinition = filterDefinition as MultiFlatDateFilterDefinition;
+        var firstValue:int = 11;
+        var lastValue:int = 0;
+
+        for each (var wrapper:DateLevelWrapper in filter.levels) {
+            firstValue = Math.min(wrapper.dateLevel, firstValue);
+            lastValue = Math.max(wrapper.dateLevel, lastValue);
+        }
+        var value:int = int(event.multiFilterOption.value);
+        if (value < firstValue) {
+            for (var i:int = value; value < firstValue; value++) {
+
+            }
+        } else if (value > lastValue) {
+
+        } else if (value > firstValue) {
+
+        }
+    }
 
     override protected function createAvailableItems():ArrayCollection {
         var filter:MultiFlatDateFilterDefinition = filterDefinition as MultiFlatDateFilterDefinition;

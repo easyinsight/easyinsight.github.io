@@ -6,7 +6,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import nu.xom.*;
@@ -90,7 +90,12 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
+    protected String getUpdateKeyName() {
+        return ID;
+    }
+
+    @Override
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         HarvestCompositeSource source = (HarvestCompositeSource) parentDefinition;
         HttpClient client = getHttpClient(source.getUsername(), source.getPassword());
         Builder builder = new Builder();
@@ -158,13 +163,13 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
                         row.addValue(keys.get(TAX_2_AMOUNT), Double.parseDouble(tax2Amount));
                     if(lastRefreshDate != null) {
                         IWhere where = new StringWhere(keys.get(ID), row.getValue(keys.get(ID)).toString());
-                        dataStorage.updateData(ds, Arrays.asList(where));
+                        IDataStorage.updateData(ds, Arrays.asList(where));
                     }
                 }
 
             } while(invoiceNodes != null && invoiceNodes.size() > 0);
             if(lastRefreshDate == null) {
-                dataStorage.insertData(ds);
+                IDataStorage.insertData(ds);
             }
         } catch (ReportException re) {
             // going to ignore on this case...

@@ -66,7 +66,7 @@ public class MigrationTest extends TestCase {
         WSListDefinition list = new WSListDefinition();
         list.setColumns(Arrays.asList(TestUtil.getItem(id, "dim1"), TestUtil.getItem(id, "measure1"), TestUtil.getItem(id, "measure2")));
         list.setDataFeedID(id);
-        DataSet dataSet = new DataService().listDataSet(list, new InsightRequestMetadata());
+        DataSet dataSet = new DataService().listDataSet(list, new InsightRequestMetadata(), null);
         assertEquals(2, dataSet.getRows().size());
     }
 }

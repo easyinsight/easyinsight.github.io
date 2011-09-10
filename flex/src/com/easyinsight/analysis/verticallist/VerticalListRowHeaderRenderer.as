@@ -42,6 +42,8 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
             graphics.beginFill(0x666666, 1);
             graphics.drawRect(0, unscaledHeight - 2, unscaledWidth, 2);
             graphics.endFill();
+        } else {
+            graphics.clear();
         }
     }
 

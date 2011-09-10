@@ -245,6 +245,20 @@ public class ComboBoxFilter extends HBox implements IFilter {
         }
     }
 
+    public function updateState():Boolean {
+        var selectedValue:String;
+        var filterObj:Object = _filterDefinition.filteredValues.getItemAt(0);
+        if (filterObj is Value) {
+            selectedValue = String(filterObj.getValue());
+        } else {
+            selectedValue = filterObj as String;
+        }
+        var existingState:String = comboBox.selectedItem as String;
+        comboBox.selectedItem = selectedValue;
+        return existingState != selectedValue;
+
+    }
+
     private function gotMetadata(event:ResultEvent):void {
 
         var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as

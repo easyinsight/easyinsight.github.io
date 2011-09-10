@@ -23,6 +23,10 @@ public class StringWhere implements IWhere {
         this.value = value;
     }
 
+    public String getValue() {
+        return value;
+    }
+
     public String createWhereSQL() {
         return "k" + key.getKeyID() + " = ?";
     }

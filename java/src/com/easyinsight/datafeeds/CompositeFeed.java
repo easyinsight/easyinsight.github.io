@@ -379,7 +379,7 @@ public class CompositeFeed extends Feed {
                         sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
                     }
                 }
-
+                System.out.println("joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName);
                 //System.out.println("joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName);
                 MergeAudit mergeAudit;
                 if (last.connection.isTargetJoinOnOriginal()) {

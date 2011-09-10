@@ -7,7 +7,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import nu.xom.*;
@@ -138,13 +138,13 @@ public class CCContactSource extends ConstantContactBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
             if (lastRefreshDate == null) {
-                cleanRetrieval(parentDefinition, ccSource, dataStorage);
+                cleanRetrieval(parentDefinition, ccSource, IDataStorage);
             } else {
-                incrementalRetrieval(parentDefinition, ccSource, lastRefreshDate, dataStorage);
+                incrementalRetrieval(parentDefinition, ccSource, lastRefreshDate, IDataStorage);
             }
             return null;
         } catch (Exception e) {
@@ -156,12 +156,17 @@ public class CCContactSource extends ConstantContactBaseSource {
         return false;
     }
 
-    private DataSet incrementalRetrieval(FeedDefinition parentDefinition, ConstantContactCompositeSource ccSource, Date lastRefreshDate, DataStorage dataStorage) throws Exception {
+    @Override
+    protected String getUpdateKeyName() {
+        return CONTACT_ID;
+    }
+
+    private DataSet incrementalRetrieval(FeedDefinition parentDefinition, ConstantContactCompositeSource ccSource, Date lastRefreshDate, IDataStorage IDataStorage) throws Exception {
         DataSet dataSet = new DataSet();
         boolean hasMoreData;
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         String refreshString = simpleDateFormat.format(lastRefreshDate);
-        String url = "https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/contacts?listtype=active";
+        String url = "https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/contacts?updatedsince=" + refreshString + "&listtype=active";
         Key contactKey = parentDefinition.getField(CONTACT_ID).toBaseKey();
         Document doc = query(url,
                 ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
@@ -226,7 +231,7 @@ public class CCContactSource extends ConstantContactBaseSource {
                     row.addValue(CONTACT_COUNT, 1);
                 }
                 StringWhere userWhere = new StringWhere(contactKey, id);
-                dataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
+                IDataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
             }
             Nodes links = doc.query("/feed/link");
 
@@ -244,7 +249,7 @@ public class CCContactSource extends ConstantContactBaseSource {
         return dataSet;
     }
 
-    private DataSet cleanRetrieval(FeedDefinition parentDefinition, ConstantContactCompositeSource ccSource, DataStorage dataStorage) throws Exception, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException, ParseException {
+    private DataSet cleanRetrieval(FeedDefinition parentDefinition, ConstantContactCompositeSource ccSource, IDataStorage IDataStorage) throws Exception, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException, ParseException {
         DataSet dataSet = new DataSet();
 
         boolean hasMoreData;
@@ -315,7 +320,7 @@ public class CCContactSource extends ConstantContactBaseSource {
                 }
                 size++;
                 if (size == 250) {
-                    dataStorage.insertData(dataSet);
+                    IDataStorage.insertData(dataSet);
                     dataSet = new DataSet();
                 }
             }
@@ -332,7 +337,7 @@ public class CCContactSource extends ConstantContactBaseSource {
                 }
             }
         } while (hasMoreData);
-        dataStorage.insertData(dataSet);
+        IDataStorage.insertData(dataSet);
         System.out.println("Finished retrieving contacts...");
         return null;
     }
