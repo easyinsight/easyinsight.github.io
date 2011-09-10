@@ -67,6 +67,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         IDashboardViewComponent(newComp).initialRetrieve();
         viewStack.selectedIndex = targetIndex;
         updateAdditionalFilters(filterMap);
+        if (consolidatedFilterViewStack != null) {
+            consolidatedFilterViewStack.selectedIndex = targetIndex;
+        }
     }
 
     private function onButtonClick(event:MouseEvent):void {
@@ -89,10 +92,13 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             var headerHBox:HBox = new HBox();
             headerHBox.setStyle("verticalAlign", "middle");
             headerHBox.percentWidth = 100;
-            myFiltersBox = new HBox();
-            myFiltersBox.percentWidth = 100;
+            var myFiltersBox:HBox = new HBox();
+            //myFiltersBox.percentWidth = 100;
+            consolidatedFilterViewStack = new ViewStack();
+            consolidatedFilterViewStack.percentWidth = 100;
             var buttonsBox:HBox = new HBox();
             headerHBox.addChild(myFiltersBox);
+            headerHBox.addChild(consolidatedFilterViewStack);
             headerHBox.addChild(buttonsBox);
             addChild(headerHBox);
         } else {
@@ -107,16 +113,32 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         createStackChildren(dashboardStack.consolidateHeaderElements ? buttonsBox : defaultButtonsBox);
         var transformContainer:TransformContainer = createTransformContainer();
         if (transformContainer != null) {
-            if (myFiltersBox != null) {
+            if (dashboardStack.consolidateHeaderElements) {
+                if (dashboardStack.filters != null && dashboardStack.filters.length > 1) {
+                    myFiltersBox.percentWidth = 100;
+                }
                 myFiltersBox.addChild(transformContainer);
             } else {
-                addChild(transformContainer);
+                if (_consolidateHeader) {
+                    if (dashboardStack.filters != null && dashboardStack.filters.length > 0) {
+                        _consolidateHeader.percentWidth = 100;
+                    }
+                    _consolidateHeader.addChild(transformContainer);
+                } else {
+                    addChild(transformContainer);
+                }
             }
         }
         addChild(viewStack);
     }
 
-    public var myFiltersBox:Container;
+    private var consolidatedFilterViewStack:ViewStack;
+
+    private var _consolidateHeader:Container = null;
+
+    public function set consolidateHeader(value:Container):void {
+        _consolidateHeader = value;
+    }
 
     private function styleHeaderArea(headerArea:Container):Container {
         headerArea.setStyle("backgroundColor", dashboardStack.headerBackgroundColor);
@@ -232,8 +254,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             }
             if (dashboardStack.consolidateHeaderElements) {
                 var filterContainer:Container = new HBox();
+                consolidatedFilterViewStack.addChild(filterContainer);
                 if (dashboardStack.consolidateHeaderElements && comp is DashboardStackViewComponent) {
-                    DashboardStackViewComponent(comp).myFiltersBox = myFiltersBox;
+                    DashboardStackViewComponent(comp).consolidateHeader = filterContainer;
                 }
             }
             viewChildren.addItem(comp);
