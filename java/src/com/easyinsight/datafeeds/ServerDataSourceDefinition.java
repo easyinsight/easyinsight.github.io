@@ -198,10 +198,12 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             sql = tempStorage.defineTempUpdateTable();
         }
         tempStorage.createTable(sql);
+        System.out.println("Refreshing " + getDataFeedID() + " at " + new Date());
         DataSet dataSet = getDataSet(keys, now, parentDefinition, tempStorage, conn, callDataID, lastRefreshTime);
         if (dataSet != null) {
             tempStorage.insertData(dataSet);
         }
+        System.out.println("Completed refresh of " + getDataFeedID() + " at " + new Date());
         return tempStorage.getTableName();
     }
 

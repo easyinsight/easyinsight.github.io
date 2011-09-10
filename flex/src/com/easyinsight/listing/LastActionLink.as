@@ -31,6 +31,8 @@ public class LastActionLink extends HBox {
         button.addEventListener(MouseEvent.CLICK, onClick);
         button.width = 180;
         button.setStyle("fontSize", 12);
+        horizontalScrollPolicy = "off";
+        verticalScrollPolicy = "off";
     }
 
     private function onClick(event:MouseEvent):void {
