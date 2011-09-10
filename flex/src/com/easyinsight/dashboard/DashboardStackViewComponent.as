@@ -89,7 +89,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             var headerHBox:HBox = new HBox();
             headerHBox.setStyle("verticalAlign", "middle");
             headerHBox.percentWidth = 100;
-            var myFiltersBox:HBox = new HBox();
+            myFiltersBox = new HBox();
             myFiltersBox.percentWidth = 100;
             var buttonsBox:HBox = new HBox();
             headerHBox.addChild(myFiltersBox);
@@ -107,7 +107,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         createStackChildren(dashboardStack.consolidateHeaderElements ? buttonsBox : defaultButtonsBox);
         var transformContainer:TransformContainer = createTransformContainer();
         if (transformContainer != null) {
-            if (dashboardStack.consolidateHeaderElements) {
+            if (myFiltersBox != null) {
                 myFiltersBox.addChild(transformContainer);
             } else {
                 addChild(transformContainer);
@@ -115,6 +115,8 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         }
         addChild(viewStack);
     }
+
+    public var myFiltersBox:Container;
 
     private function styleHeaderArea(headerArea:Container):Container {
         headerArea.setStyle("backgroundColor", dashboardStack.headerBackgroundColor);
@@ -228,14 +230,12 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             if (comp is DashboardStackViewComponent) {
                 DashboardStackViewComponent(comp).stackFilterMap = this.stackFilterMap;
             }
-            /*if (dashboardStack.consolidateHeaderElements) {
+            if (dashboardStack.consolidateHeaderElements) {
                 var filterContainer:Container = new HBox();
-                //filterContainer.percentWidth = 100;
-                consolidatedFilterViewStack.addChild(filterContainer);
                 if (dashboardStack.consolidateHeaderElements && comp is DashboardStackViewComponent) {
-                    DashboardStackViewComponent(comp).consolidateHeader = filterContainer;
+                    DashboardStackViewComponent(comp).myFiltersBox = myFiltersBox;
                 }
-            }*/
+            }
             viewChildren.addItem(comp);
             viewStack.addChild(comp);
         }
