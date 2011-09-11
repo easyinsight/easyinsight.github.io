@@ -53,7 +53,9 @@ public abstract class ScheduledTask implements Runnable {
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            conn.rollback();
+            if (!conn.getAutoCommit()) {
+                conn.rollback();
+            }
             onFailure(session, e.getMessage());
             session.flush();
         } finally {
