@@ -44,8 +44,13 @@ public class EIConnection implements Connection {
         }
     }
 
-    public boolean getAutoCommit() throws SQLException {
-        return conn.getAutoCommit();
+    public boolean getAutoCommit() {
+        try {
+            return conn.getAutoCommit();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            return false;
+        }
     }
 
     public void commit() throws SQLException {

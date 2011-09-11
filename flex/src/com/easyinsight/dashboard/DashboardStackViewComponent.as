@@ -67,8 +67,10 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         IDashboardViewComponent(newComp).initialRetrieve();
         viewStack.selectedIndex = targetIndex;
         updateAdditionalFilters(filterMap);
-        if (consolidatedFilterViewStack != null) {
-            consolidatedFilterViewStack.selectedIndex = targetIndex;
+
+        if (childFilterBox != null) {
+            childFilterBox.removeAllChildren();
+            childFilterBox.addChild(childFilters.getItemAt(targetIndex) as UIComponent);
         }
     }
 
@@ -85,6 +87,8 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     private var leftEffect:Effect;
     private var rightEffect:Effect;
 
+    private var childFilterBox:Box;
+
     protected override function createChildren():void {
         super.createChildren();
         buildEffects();
@@ -94,11 +98,11 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             headerHBox.percentWidth = 100;
             var myFiltersBox:HBox = new HBox();
             //myFiltersBox.percentWidth = 100;
-            consolidatedFilterViewStack = new ViewStack();
-            consolidatedFilterViewStack.percentWidth = 100;
+            childFilterBox = new HBox();
+            childFilterBox.percentWidth = 100;
             var buttonsBox:HBox = new HBox();
             headerHBox.addChild(myFiltersBox);
-            headerHBox.addChild(consolidatedFilterViewStack);
+            headerHBox.addChild(childFilterBox);
             headerHBox.addChild(buttonsBox);
             addChild(headerHBox);
         } else {
@@ -131,8 +135,6 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         }
         addChild(viewStack);
     }
-
-    private var consolidatedFilterViewStack:ViewStack;
 
     private var _consolidateHeader:Container = null;
 
@@ -254,7 +256,10 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             }
             if (dashboardStack.consolidateHeaderElements) {
                 var filterContainer:Container = new HBox();
-                consolidatedFilterViewStack.addChild(filterContainer);
+                childFilters.addItem(filterContainer);
+                if (i == 0) {
+                    childFilterBox.addChild(filterContainer);
+                }
                 if (dashboardStack.consolidateHeaderElements && comp is DashboardStackViewComponent) {
                     DashboardStackViewComponent(comp).consolidateHeader = filterContainer;
                 }
@@ -270,6 +275,8 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             headerbar.addChild(childComboBox);
         }
     }
+
+    private var childFilters:ArrayCollection = new ArrayCollection();
 
     private function comboBoxLabelFunction(object:Object):String {
         var report:DashboardElement = DashboardStackItem(object).dashboardElement;
