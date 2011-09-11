@@ -4,6 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
@@ -39,6 +40,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
     public static final String AUTHOR = "Task Author";
     public static final String CASE_ID = "Task Case ID";
     public static final String COMPANY_ID = "Task Company ID";
+    public static final String CONTACT_ID = "Task Contact ID";
     public static final String DEAL_ID = "Task Deal ID";
     public static final String COUNT = "Task Count";
     public static final String TASK_ID = "Task ID";
@@ -49,7 +51,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
 
     @NotNull
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(BODY, CATEGORY, DUE_AT, DONE_AT, CREATED_AT, COUNT, OWNER, AUTHOR, CASE_ID, COMPANY_ID, TASK_ID, DEAL_ID);
+        return Arrays.asList(BODY, CATEGORY, DUE_AT, DONE_AT, CREATED_AT, COUNT, OWNER, AUTHOR, CASE_ID, COMPANY_ID, TASK_ID, DEAL_ID, CONTACT_ID);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -61,6 +63,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(AUTHOR), true));
         analysisItems.add(new AnalysisDimension(keys.get(CASE_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_ID), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(DUE_AT), true, AnalysisDateDimension.DAY_LEVEL));
@@ -86,8 +89,10 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
         private Date createdAt;
         private Date dueAt;
         private Date doneAt;
+        private String contactID;
 
-        private TaskInfo(String taskID, String category, String body, String owner, String author, String caseID, String companyID, String dealID, Date createdAt, Date dueAt, Date doneAt) {
+        private TaskInfo(String taskID, String category, String body, String owner, String author, String caseID, String companyID, String dealID, Date createdAt, Date dueAt, Date doneAt,
+                         String contactID) {
             this.taskID = taskID;
             this.category = category;
             this.body = body;
@@ -99,6 +104,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
             this.createdAt = createdAt;
             this.dueAt = dueAt;
             this.doneAt = doneAt;
+            this.contactID = contactID;
         }
 
         public void addToDataSet(DataSet dataSet) {
@@ -115,6 +121,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
             row.addValue(CREATED_AT, new DateValue(createdAt));
             row.addValue(DUE_AT, new DateValue(dueAt));
             row.addValue(DONE_AT, new DateValue(doneAt));
+            row.addValue(CONTACT_ID, contactID);
         }
 
         @Override
@@ -186,6 +193,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
             String subjectID = queryField(taskNode, "subject-id/text()");
             String caseID = null;
             String companyID = null;
+            String contactID = null;
             String dealID = null;
             if ("Kase".equals(subjectType)) {
                 caseID = subjectID;
@@ -193,13 +201,13 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
                 if (companyCache.getCompanyIDs().contains(subjectID)) {
                     companyID = subjectID;
                 } else {
-
+                    contactID = subjectID;
                 }
             } else if ("Deal".equals(subjectType)) {
                 dealID = subjectID;
             }
 
-            taskInfos.add(new TaskInfo(id, category, body, owner, author, caseID, companyID, dealID, createdAt, dueAt, doneAt));
+            taskInfos.add(new TaskInfo(id, category, body, owner, author, caseID, companyID, dealID, createdAt, dueAt, doneAt, contactID));
         }
         return taskInfos;
     }
@@ -262,5 +270,15 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
             categoryCache.put(categoryID, "");
             return "";
         }
+    }
+
+    @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new HighRiseTask1To2(this));
     }
 }
