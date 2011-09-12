@@ -127,6 +127,7 @@ import mx.managers.PopUpManager;
             this.last = lastValue;
 
             labelButton = new LinkButton();
+            labelButton.setStyle("fontSize", 14);
             populateLabel();
 
             labelButton.setStyle("textDecoration", "underline");
@@ -139,7 +140,6 @@ import mx.managers.PopUpManager;
                 editButton.setStyle("icon", editIcon);
                 editButton.toolTip = "Edit";
                 addChild(editButton);
-
 
                 var deleteButton:Button = new Button();
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
