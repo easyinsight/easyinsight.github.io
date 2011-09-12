@@ -47,7 +47,7 @@
             var labelHeaderFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
             labelHeaderFactory.properties = { headerText: "" };
             labelColumn.headerRenderer = labelHeaderFactory;
-            //labelColumn.width = vert.headerWidth;
+            labelColumn.width = vert.headerWidth;
             labelColumn.dataField = "Label";
             columns.addItem(labelColumn);
             var firstRow:Boolean = true;
