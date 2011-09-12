@@ -804,7 +804,7 @@ public class DataStorage implements IDataStorage {
                 }
                 selectBuilder.append(columnName);
                 selectBuilder.append(",");
-            } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+            } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && aggregateQuery) {
                 AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
                 if (optimized && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL)) {
                     selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
@@ -816,8 +816,10 @@ public class DataStorage implements IDataStorage {
                     groupByBuilder.append(",");
                 }
             } else {
-                groupByBuilder.append("binary(" + columnName + ")");
-                groupByBuilder.append(",");
+                if (aggregateQuery) {
+                    groupByBuilder.append("binary(" + columnName + ")");
+                    groupByBuilder.append(",");
+                }
                 selectBuilder.append(columnName);
                 selectBuilder.append(",");
             }
