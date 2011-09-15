@@ -24,7 +24,6 @@
         import mx.collections.Sort;
         import mx.collections.SortField;
         import mx.controls.Alert;
-        import mx.events.CollectionEvent;
         import mx.formatters.Formatter;
 
         [Bindable]
@@ -43,7 +42,7 @@
             }
             var vert:VerticalListDefinition = analysisDefinition as VerticalListDefinition;
             var dColl:ArrayCollection = new ArrayCollection();
-            var columns:ArrayCollection = new ArrayCollection();
+            var columns:Array = [];
             var labelColumn:SortableAdvancedDataGridColumn = new SortableAdvancedDataGridColumn(0, 0);
             labelColumn.sortable = false;
             labelColumn.width = vert.headerWidth;
@@ -52,7 +51,10 @@
             labelHeaderFactory.properties = { headerText: "" };
             labelColumn.headerRenderer = labelHeaderFactory;
             labelColumn.dataField = "Label";
-            columns.addItem(labelColumn);
+            columns.push(labelColumn);
+            /*var sort:Sort = new Sort();
+            sort.fields = [ new SortField("reportIndex"), new SortField("sortValue") ];
+            columns.sort = sort;*/
             var firstRow:Boolean = true;
             var headerWidth:int = 0;
             var columnWidths:Object = new Object();
@@ -116,13 +118,13 @@
                         var headerFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
                         headerFactory.properties = { headerText: columnValue };
                         dataColumn.headerRenderer = headerFactory;
-                        columns.addItem(dataColumn);
+                        columns.push(dataColumn);
                     }
                     var valueMetrics:TextLineMetrics = dataGrid.measureText(text);
                     var valueWidth:int = valueMetrics.width + valueMetrics.x + valueMetrics.x;
                     columnSize = Math.max(columnSize, valueWidth);
                     columnWidths[columnValue] = columnSize;
-                    SortableAdvancedDataGridColumn(columns.getItemAt((i++) + 1)).width = columnSize;
+                    SortableAdvancedDataGridColumn(columns[(i++) + 1]).width = columnSize;
                 }
                 if (firstRow) {
                     firstRow = false;
@@ -136,13 +138,8 @@
             } else {
                 currentState = "";
             }
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("reportIndex"), new SortField("sortValue") ];
-            columns.sort = sort;
-            dataColl = dColl;
-            columns.addEventListener(CollectionEvent.COLLECTION_CHANGE, onDone);
-            columns.refresh();
 
+            columns = columns.sortOn(["reportIndex", "sortValue"], [Array.NUMERIC, Array.CASEINSENSITIVE]);
 
             //SortableAdvancedDataGridColumn(columns.getItemAt(0)).width = headerWidth;
             reportWidth = 1;
@@ -165,15 +162,9 @@
             } else {
                 dataGrid.x = 0;
             }
-
-        }
-
-        private function onDone(event:Event):void {
-            var columns:ArrayCollection = event.currentTarget as ArrayCollection;
-            event.currentTarget.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onDone);
-            dataGrid.columns = columns.toArray();
-            dataGrid.rowCount = dataColl.length + 2;
-            dataGrid.dataProvider = dataColl;
+            dataGrid.columns = columns;
+            dataGrid.rowCount = dColl.length + 2;
+            dataGrid.dataProvider = dColl;
             invalidateSize();
         }
 
