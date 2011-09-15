@@ -104,7 +104,6 @@
                                 sortValue = columnValue;
                             }
                         }
-                        Alert.show("sort value = " + sortValue);
                         var dataColumn:SortableAdvancedDataGridColumn = new SortableAdvancedDataGridColumn(1, sortValue);
                         dataColumn.width = columnSize;
                         dataColumn.headerText = columnValue;
