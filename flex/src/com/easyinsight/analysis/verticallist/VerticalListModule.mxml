@@ -104,6 +104,7 @@
                                 sortValue = columnValue;
                             }
                         }
+                        Alert.show("sort value = " + sortValue);
                         var dataColumn:SortableAdvancedDataGridColumn = new SortableAdvancedDataGridColumn(1, sortValue);
                         dataColumn.width = columnSize;
                         dataColumn.headerText = columnValue;
@@ -157,6 +158,8 @@
             dataGrid.maxWidth = this.width;
             if (endWidth > 0) {
                 dataGrid.x = (this.width - endWidth) / 2;
+            } else {
+                dataGrid.x = 0;
             }
             dataGrid.columns = columns.toArray();
             dataGrid.rowCount = dColl.length + 2;
