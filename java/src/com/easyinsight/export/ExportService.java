@@ -1157,6 +1157,9 @@ public class ExportService {
             if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
                 string = string.replaceAll("\\<.*?\\>", "");
             }
+            if (string.length() > 15000) {
+                string = string.substring(0, 15000);
+            }
             HSSFRichTextString richText = new HSSFRichTextString(string);
             cell.setCellValue(richText);
         } else if (value.type() == Value.NUMBER) {

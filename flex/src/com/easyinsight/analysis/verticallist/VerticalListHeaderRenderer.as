@@ -15,6 +15,7 @@ public class VerticalListHeaderRenderer extends Label {
     public function VerticalListHeaderRenderer() {
         setStyle("textAlign", "center");
         setStyle("color", 0xFFFFFF);
+        setStyle("fontSize", 11);
         this.percentWidth = 100;
     }
 

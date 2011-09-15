@@ -12,9 +12,9 @@ public class GreaterThan extends Function {
         Value compare1 = params.get(0);
         Value compare2 = params.get(1);
         if (compare1.toDouble() > compare2.toDouble()) {
-            return params.get(2);
+            return minusQuotes(params.get(2));
         } else {
-            return params.get(3);
+            return minusQuotes(params.get(3));
         }
     }
 

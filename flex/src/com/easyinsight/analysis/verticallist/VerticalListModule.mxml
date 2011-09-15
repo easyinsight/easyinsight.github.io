@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" verticalScrollPolicy="off"
-           implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%">
+           implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%" resize="onResize()">
     <mx:states>
         <mx:State name="noData">
             <mx:RemoveChild target="{dataGrid}"/>
@@ -101,7 +101,7 @@
                             if (vert.column.hasType(AnalysisItemTypes.DATE)) {
                                 sortValue = val.toSortValue().toNumber();
                             } else {
-                                sortValue = val.toSortValue().toString();
+                                sortValue = columnValue;
                             }
                         }
                         var dataColumn:SortableAdvancedDataGridColumn = new SortableAdvancedDataGridColumn(1, sortValue);
@@ -140,7 +140,7 @@
             columns.sort = sort;
             columns.refresh();
             //SortableAdvancedDataGridColumn(columns.getItemAt(0)).width = headerWidth;
-            var reportWidth:int = 1;
+            reportWidth = 1;
             for each (var col:SortableAdvancedDataGridColumn in columns) {
                 reportWidth += (col.width + 1);
             }
@@ -159,9 +159,28 @@
                 dataGrid.x = (this.width - endWidth) / 2;
             }
             dataGrid.columns = columns.toArray();
-            dataGrid.rowCount = dColl.length + 1;
+            dataGrid.rowCount = dColl.length + 2;
             dataGrid.dataProvider = dColl;
             invalidateSize();
+        }
+
+        private var reportWidth:int;
+
+        private function onResize():void {
+            var endWidth:int = 0;
+            if (reportWidth < this.width) {
+                var delta:int = (this.width - reportWidth);
+                delta = Math.min(delta, 300);
+                var perColumnAdd:int = (delta) / dataGrid.columns.length;
+                for each (var colAdd:SortableAdvancedDataGridColumn in dataGrid.columns) {
+                    colAdd.width += perColumnAdd;
+                    endWidth += colAdd.width;
+                }
+            }
+            dataGrid.maxWidth = this.width;
+            if (endWidth > 0) {
+                dataGrid.x = (this.width - endWidth) / 2;
+            }
         }
 
         public function updateExportMetadata():void {

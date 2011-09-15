@@ -244,6 +244,10 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         resultValue = new StringValue("Q" + quarter);
                         break;
                     case MONTH_FLAT:
+                        if (outputDateFormat != null && outputDateFormat.length() > 0) {
+                            resultValue = new StringValue(new SimpleDateFormat(outputDateFormat).format(calendar.getTime()), new NumericValue(calendar.get(Calendar.MONTH)));
+                            break;
+                        }
                         int month = calendar.get(Calendar.MONTH);
                         switch (month) {
                             case Calendar.JANUARY:
