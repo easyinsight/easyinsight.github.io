@@ -138,7 +138,9 @@
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("reportIndex"), new SortField("sortValue") ];
             columns.sort = sort;
-            columns.refresh();
+
+            var done:Boolean = columns.refresh();
+            Alert.show(String(done));
             //SortableAdvancedDataGridColumn(columns.getItemAt(0)).width = headerWidth;
             reportWidth = 1;
             for each (var col:SortableAdvancedDataGridColumn in columns) {
