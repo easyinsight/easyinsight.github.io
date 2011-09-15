@@ -24,6 +24,7 @@
         import mx.collections.Sort;
         import mx.collections.SortField;
         import mx.controls.Alert;
+        import mx.events.CollectionEvent;
         import mx.formatters.Formatter;
 
         [Bindable]
@@ -138,9 +139,11 @@
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("reportIndex"), new SortField("sortValue") ];
             columns.sort = sort;
+            dataColl = dColl;
+            columns.addEventListener(CollectionEvent.COLLECTION_CHANGE, onDone);
+            columns.refresh();
 
-            var done:Boolean = columns.refresh();
-            Alert.show(String(done));
+
             //SortableAdvancedDataGridColumn(columns.getItemAt(0)).width = headerWidth;
             reportWidth = 1;
             for each (var col:SortableAdvancedDataGridColumn in columns) {
@@ -162,9 +165,15 @@
             } else {
                 dataGrid.x = 0;
             }
+
+        }
+
+        private function onDone(event:Event):void {
+            var columns:ArrayCollection = event.currentTarget as ArrayCollection;
+            event.currentTarget.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onDone);
             dataGrid.columns = columns.toArray();
-            dataGrid.rowCount = dColl.length + 2;
-            dataGrid.dataProvider = dColl;
+            dataGrid.rowCount = dataColl.length + 2;
+            dataGrid.dataProvider = dataColl;
             invalidateSize();
         }
 
