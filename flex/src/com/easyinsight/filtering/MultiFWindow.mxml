@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.events.ListEvent;
+        import mx.managers.PopUpManager;
+
+        private var _dateFilter:MultiFlatDateFilterDefinition;
+
+        public function set dateFilter(value:MultiFlatDateFilterDefinition):void {
+            _dateFilter = value;
+        }
+
+        private var start:int;
+        private var end:int;
+
+        [Bindable]
+        private var endMonths:ArrayCollection;
+
+        private function startItem(event:ListEvent):void {
+            start = event.currentTarget.dataProvider.getItemAt(event.rowIndex).data;
+            var endMonths:ArrayCollection = new ArrayCollection();
+            for each (var obj:Object in months) {
+                var month:int = int(obj["data"]);
+                if (month >= start) {
+                    endMonths.addItem(obj);
+                }
+            }
+            this.endMonths = endMonths;
+            index++;
+        }
+
+        private function filterMonths(item:Object):Boolean {
+            return item["data"] >= start;
+        }
+
+        private function endItem(event:ListEvent):void {
+            end = event.currentTarget.dataProvider.getItemAt(event.rowIndex).data;
+            var levels:ArrayCollection = new ArrayCollection();
+            for (var i:int = start; i <= end; i++) {
+                var wrapper:DateLevelWrapper = new DateLevelWrapper();
+                wrapper.dateLevel = i;
+                levels.addItem(wrapper);
+            }
+            _dateFilter.levels = levels;
+            dispatchEvent(new Event("updated"));
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var index:int;
+        ]]></mx:Script>
+    <mx:ArrayCollection id="months">
+        <mx:Object month="January" data="0"/>
+        <mx:Object month="February" data="1"/>
+        <mx:Object month="March" data="2"/>
+        <mx:Object month="April" data="3"/>
+        <mx:Object month="May" data="4"/>
+        <mx:Object month="June" data="5"/>
+        <mx:Object month="July" data="6"/>
+        <mx:Object month="August" data="7"/>
+        <mx:Object month="September" data="8"/>
+        <mx:Object month="October" data="9"/>
+        <mx:Object month="November" data="10"/>
+        <mx:Object month="December" data="11"/>
+    </mx:ArrayCollection>
+    <mx:ViewStack selectedIndex="{index}" resizeToContent="true">
+        <mx:VBox>
+            <mx:Label text="Please click on a start month." fontSize="14"/>
+            <mx:List rowCount="12" labelField="month" id="startList" itemClick="startItem(event)" dataProvider="{months}" width="100%"/>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Label text="Please click on an end month." fontSize="14"/>
+            <mx:List rowCount="12" labelField="month" id="endList" itemClick="endItem(event)" dataProvider="{endMonths}" width="100%"/>
+        </mx:VBox>
+    </mx:ViewStack>
+</util:EISlimWindow>

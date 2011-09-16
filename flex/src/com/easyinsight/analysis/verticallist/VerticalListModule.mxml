@@ -52,6 +52,7 @@
             labelColumn.headerRenderer = labelHeaderFactory;
             labelColumn.dataField = "Label";
             columns.push(labelColumn);
+            var sortCriteria:int;
             /*var sort:Sort = new Sort();
             sort.fields = [ new SortField("reportIndex"), new SortField("sortValue") ];
             columns.sort = sort;*/
@@ -102,8 +103,10 @@
                             sortValue = 0;
                         } else if (val != null) {
                             if (vert.column.hasType(AnalysisItemTypes.DATE)) {
+                                sortCriteria = Array.NUMERIC;
                                 sortValue = val.toSortValue().toNumber();
                             } else {
+                                sortCriteria = Array.CASEINSENSITIVE;
                                 sortValue = columnValue;
                             }
                         }
@@ -139,7 +142,7 @@
                 currentState = "";
             }
 
-            columns = columns.sortOn(["reportIndex", "sortValue"], [Array.NUMERIC, Array.CASEINSENSITIVE]);
+            columns = columns.sortOn(["reportIndex", "sortValue"], [Array.NUMERIC, sortCriteria]);
 
             //SortableAdvancedDataGridColumn(columns.getItemAt(0)).width = headerWidth;
             reportWidth = 1;

@@ -6,11 +6,14 @@ package com.easyinsight.filtering
 
 import flash.events.Event;
 import flash.events.MouseEvent;
+import flash.geom.Point;
+
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 
 import mx.controls.Button;
 import mx.controls.CheckBox;
+import mx.controls.Label;
 
 import mx.controls.LinkButton;
 import mx.managers.PopUpManager;
@@ -56,6 +59,7 @@ import mx.managers.PopUpManager;
             _feedID = feedID;
             _reportID = reportID;
             _dashboardID = dashboardID;
+            setStyle("verticalAlign", "middle");
 		}
 
         private function onChange(event:Event):void {
@@ -65,9 +69,13 @@ import mx.managers.PopUpManager;
         }
 
         private function onClick(event:Event):void {
-            var window:MultiFlatDateFilterOptionWindow = new MultiFlatDateFilterOptionWindow();
-            window.filterDefinition = _filterDefinition;
+            var window:MultiFWindow = new MultiFWindow();
+            window.dateFilter = _filterDefinition;
             window.addEventListener("updated", onWindowDone, false, 0, true);
+            var point:Point = new Point(this.x, this.y);
+            var global:Point = localToGlobal(point);
+            window.x = global.x;
+            window.y = global.y;
             PopUpManager.addPopUp(window, this, true);
         }
 
@@ -78,7 +86,7 @@ import mx.managers.PopUpManager;
 
         private function populateLabel():void {
             if (_filterDefinition.levels.length == 0) {
-                labelButton.label = analysisItem.display;
+                labelButton.label = "(Click to Configure)";
             } else {
                 var firstValue:int = 11;
                 var lastValue:int = 0;
@@ -115,6 +123,14 @@ import mx.managers.PopUpManager;
 			} else {
 			}
 
+            var label:Label = new Label();
+            if (_filterDefinition.filterName != null && _filterDefinition.filterName != "") {
+                label.text = _filterDefinition.filterName + ":";
+            } else {
+                label.text = analysisItem.display + ":";
+            }
+            addChild(label);
+
             var firstValue:int = 11;
             var lastValue:int = 0;
 
@@ -127,7 +143,7 @@ import mx.managers.PopUpManager;
             this.last = lastValue;
 
             labelButton = new LinkButton();
-            labelButton.setStyle("fontSize", 14);
+            labelButton.setStyle("fontSize", 12);
             populateLabel();
 
             labelButton.setStyle("textDecoration", "underline");
