@@ -2,6 +2,7 @@ package com.easyinsight.servlet;
 
 import com.easyinsight.admin.HealthListener;
 import com.easyinsight.analysis.ReportCache;
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.migration.Migrations;
 import com.easyinsight.datafeeds.DataSourceTypeRegistry;
@@ -54,13 +55,17 @@ public class DMSServlet extends HttpServlet {
                 ReportCache.initialize();
                 HtmlResultCache.initialize();
                 new APIManager().start();
-                scheduler = Scheduler.instance();
+                if (ConfigLoader.instance().isTaskRunner()) {
+                    scheduler = Scheduler.instance();
+                }
                 EventDispatcher.instance().start();
                 EventDispatcher.instance().registerListener(AsyncCreatedEvent.ASYNC_CREATED, new AsyncCreatedListener());
                 EventDispatcher.instance().registerListener(AsyncRunningEvent.ASYNC_RUNNING, new AsyncRunningListener());
                 EventDispatcher.instance().registerListener(AsyncCompletedEvent.ASYNC_COMPLETED, new AsyncCompletedListener());
                 EventDispatcher.instance().registerListener(LongKPIRefreshEvent.LONG_KPI_REFRESH_EVENT, LongKPIRefreshListener.instance());
-                scheduler.start();
+                if (ConfigLoader.instance().isTaskRunner()) {
+                    scheduler.start();
+                }
                 healthListener = new HealthListener();
                 Thread thread = new Thread(healthListener);
                 thread.setDaemon(true);
@@ -79,7 +84,9 @@ public class DMSServlet extends HttpServlet {
         DatabaseManager.instance().shutdown();
         EventDispatcher.instance().setRunning(false);
         EventDispatcher.instance().interrupt();
-        scheduler.stop();
+        if (scheduler != null) {
+            scheduler.stop();
+        }
         healthListener.stop();
         super.destroy();
     }

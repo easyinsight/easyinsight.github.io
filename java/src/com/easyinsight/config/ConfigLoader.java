@@ -29,6 +29,16 @@ public class ConfigLoader {
     private String googleUserName;
     private String googlePassword;
 
+    private boolean taskRunner;
+
+    public boolean isTaskRunner() {
+        return taskRunner;
+    }
+
+    public void setTaskRunner(boolean taskRunner) {
+        this.taskRunner = taskRunner;
+    }
+
     public String getGoogleUserName() {
         return googleUserName;
     }
@@ -145,6 +155,8 @@ public class ConfigLoader {
 
             googleUserName = (String) properties.get("google.username");
             googlePassword = (String) properties.get("google.password");
+
+            taskRunner = Boolean.valueOf((String) properties.get("taskrunner"));
 
             production = Boolean.valueOf((String) properties.get("production"));
             
