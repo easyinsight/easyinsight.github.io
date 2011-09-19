@@ -31,6 +31,8 @@ public class DerivedGroupingComponent implements IComponent {
         if (dataSet.getRows().size() == 0) {
             return dataSet;
         }
+        CalculationMetadata calculationMetadata = new CalculationMetadata();
+        calculationMetadata.setReport(pipelineData.getReport());
         CalculationTreeNode calculationTreeNode;
         ICalculationTreeVisitor visitor;
         CalculationsParser.expr_return ret;
@@ -74,7 +76,7 @@ public class DerivedGroupingComponent implements IComponent {
             calculationTreeNode.accept(visitor);
 
             for (IRow row : dataSet.getRows()) {
-                ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, dimension);
+                ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, dimension, calculationMetadata);
                 calculationTreeNode.accept(rowVisitor);
                 Value value = new StringValue(rowVisitor.getResult().toString());
                 row.addValue(dimension.createAggregateKey(), value);

@@ -2,10 +2,13 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
+import com.easyinsight.intention.Intention;
+import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.intention.ReportPropertiesIntention;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ListSummaryComponent;
-import com.easyinsight.pipeline.MinMaxComponent;
 
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -226,5 +229,28 @@ public class WSListDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("summaryRowBackgroundColor", summaryRowBackgroundColor));
         properties.add(new ReportBooleanProperty("rolloverIcon", rolloverIcon));
         return properties;
+    }
+
+    public static final int ADD_SUMMARY_ROW = 1;
+
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
+        List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+        WSListDefinition wsListDefinition = (WSListDefinition) report;
+        if (!wsListDefinition.isSummaryTotal()) {
+            suggestions.add(new IntentionSuggestion("Add a Summary Row",
+                    "This action will add a summary row to the bottom of your report.",
+                    IntentionSuggestion.SCOPE_REPORT, ADD_SUMMARY_ROW));
+        }
+        return suggestions;
+    }
+
+    public List<Intention> createIntentions(List<AnalysisItem> fields, int type) throws SQLException {
+        if (type == ADD_SUMMARY_ROW) {
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
+            reportPropertiesIntention.setSummaryRow(true);
+            return Arrays.asList((Intention) reportPropertiesIntention);
+        } else {
+            throw new RuntimeException("Unrecognized intention type");
+        }
     }
 }

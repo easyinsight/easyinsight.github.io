@@ -18,7 +18,20 @@ public abstract class Pipeline {
     private ResultsBridge resultsBridge = new ListResultsBridge();
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
-        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, dataSource.getFields(), dataSource);
+        List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(dataSource.getFields());
+        if (report.getAddedItems() != null) {
+            allFields.addAll(report.getAddedItems());
+        }
+        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource);
+        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems());
+        if (report.hasCustomResultsBridge()) {
+            resultsBridge = report.getCustomResultsBridge();
+        }
+        return this;
+    }
+
+    public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allFields) {
+        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource);
         components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems());
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
@@ -47,12 +60,12 @@ public abstract class Pipeline {
 
     protected abstract List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems);
          
-    private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allItems, Feed dataSource) {
+    private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allFields, Feed dataSource) {
 
-        List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(allItems);
+        /*List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(allItems);
         if (report.getAddedItems() != null) {
             allFields.addAll(report.getAddedItems());
-        }
+        }*/
 
         Set<AnalysisItem> allRequestedAnalysisItems = report.getAllAnalysisItems();
         allRequestedAnalysisItems.remove(null);

@@ -171,6 +171,14 @@ public class DashboardGrid extends DashboardElement {
     }
 
     @Override
+    public void visit(IDashboardVisitor dashboardVisitor) {
+        dashboardVisitor.accept(this);
+        for (DashboardGridItem gridItem : gridItems) {
+            gridItem.getDashboardElement().visit(dashboardVisitor);
+        }
+    }
+
+    @Override
     public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
         for (DashboardGridItem gridItem : gridItems) {
             gridItem.getDashboardElement().updateReportIDs(reportReplacementMap);

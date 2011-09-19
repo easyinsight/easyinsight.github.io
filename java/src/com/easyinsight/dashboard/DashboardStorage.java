@@ -129,8 +129,8 @@ public class DashboardStorage {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD (DASHBOARD_NAME, URL_KEY, " +
                     "ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE, UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, TEMPORARY_DASHBOARD," +
                     "PUBLIC_VISIBLE, PADDING_LEFT, PADDING_RIGHT, FILTER_BORDER_STYLE, FILTER_BORDER_COLOR, filter_background_color, FILTER_BACKGROUND_ALPHA," +
-                    "recommended_exchange) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    "recommended_exchange, ytd_date, ytd_override) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             insertStmt.setString(1, dashboard.getName());
             insertStmt.setString(2, dashboard.getUrlKey());
             insertStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -149,6 +149,8 @@ public class DashboardStorage {
             insertStmt.setInt(16, dashboard.getFilterBackgroundColor());
             insertStmt.setDouble(17, dashboard.getFilterBackgroundAlpha());
             insertStmt.setBoolean(18, dashboard.isRecommendedExchange());
+            insertStmt.setString(19, dashboard.getYtdMonth());
+            insertStmt.setBoolean(20, dashboard.isOverrideYTD());
             insertStmt.execute();
             dashboard.setId(Database.instance().getAutoGenKey(insertStmt));
             insertStmt.close();
@@ -156,7 +158,7 @@ public class DashboardStorage {
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET DASHBOARD_NAME = ?," +
                     "URL_KEY = ?, ACCOUNT_VISIBLE = ?, UPDATE_DATE = ?, DESCRIPTION = ?, EXCHANGE_VISIBLE = ?, AUTHOR_NAME = ?, TEMPORARY_DASHBOARD = ?," +
                     "PUBLIC_VISIBLE = ?, PADDING_LEFT = ?, PADDING_RIGHT = ?, filter_border_style = ?, filter_border_color = ?, filter_background_color = ?," +
-                    "filter_background_alpha = ?, recommended_exchange = ? WHERE DASHBOARD_ID = ?");
+                    "filter_background_alpha = ?, recommended_exchange = ?, ytd_date = ?, ytd_override = ? WHERE DASHBOARD_ID = ?");
             updateStmt.setString(1, dashboard.getName());
             updateStmt.setString(2, dashboard.getUrlKey());
             updateStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -173,7 +175,9 @@ public class DashboardStorage {
             updateStmt.setInt(14, dashboard.getFilterBackgroundColor());
             updateStmt.setDouble(15, dashboard.getFilterBackgroundAlpha());
             updateStmt.setBoolean(16, dashboard.isRecommendedExchange());
-            updateStmt.setLong(17, dashboard.getId());
+            updateStmt.setString(17, dashboard.getYtdMonth());
+            updateStmt.setBoolean(18, dashboard.isOverrideYTD());
+            updateStmt.setLong(19, dashboard.getId());
             updateStmt.executeUpdate();
             updateStmt.close();
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ?");
@@ -231,7 +235,7 @@ public class DashboardStorage {
         Dashboard dashboard;
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, URL_KEY, ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE," +
                     "UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, temporary_dashboard, public_visible, padding_left, padding_right," +
-                "filter_border_style, filter_border_color, filter_background_color, filter_background_alpha, recommended_exchange FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                "filter_border_style, filter_border_color, filter_background_color, filter_background_alpha, recommended_exchange, ytd_date, ytd_override FROM DASHBOARD WHERE DASHBOARD_ID = ?");
         queryStmt.setLong(1, dashboardID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -255,6 +259,8 @@ public class DashboardStorage {
             dashboard.setFilterBackgroundColor(rs.getInt(16));
             dashboard.setFilterBackgroundAlpha(rs.getDouble(17));
             dashboard.setRecommendedExchange(rs.getBoolean(18));
+            dashboard.setYtdMonth(rs.getString(19));
+            dashboard.setOverrideYTD(rs.getBoolean(20));
             PreparedStatement findElementsStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, ELEMENT_TYPE FROM " +
                     "DASHBOARD_ELEMENT, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ? AND DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID = DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID");
             findElementsStmt.setLong(1, dashboardID);

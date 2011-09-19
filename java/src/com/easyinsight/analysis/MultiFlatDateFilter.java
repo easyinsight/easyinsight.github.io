@@ -22,6 +22,17 @@ public class MultiFlatDateFilter extends FilterDefinition {
             inverseJoinColumns = @JoinColumn(name = "date_level_wrapper_id", nullable = false))
     private Collection<DateLevelWrapper> levels = new ArrayList<DateLevelWrapper>();
 
+    @Column(name="end_date_property")
+    private String endDateProperty;
+
+    public String getEndDateProperty() {
+        return endDateProperty;
+    }
+
+    public void setEndDateProperty(String endDateProperty) {
+        this.endDateProperty = endDateProperty;
+    }
+
     public Collection<DateLevelWrapper> getLevels() {
         return levels;
     }

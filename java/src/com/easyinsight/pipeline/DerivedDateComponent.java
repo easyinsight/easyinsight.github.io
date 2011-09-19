@@ -4,6 +4,7 @@ import com.easyinsight.analysis.DataResults;
 import com.easyinsight.analysis.DerivedAnalysisDateDimension;
 import com.easyinsight.analysis.DerivedAnalysisDimension;
 import com.easyinsight.analysis.IRow;
+import com.easyinsight.calculations.CalculationMetadata;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
 
@@ -21,8 +22,10 @@ public class DerivedDateComponent implements IComponent {
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
+        CalculationMetadata calculationMetadata = new CalculationMetadata();
+        calculationMetadata.setReport(pipelineData.getReport());
         for (IRow row : dataSet.getRows()) {
-            Value value = dimension.calculate(row, pipelineData.getAllItems());
+            Value value = dimension.calculate(row, pipelineData.getAllItems(), calculationMetadata);
             row.addValue(dimension.createAggregateKey(), value);
         }
         pipelineData.getReportItems().add(dimension);

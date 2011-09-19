@@ -8,6 +8,8 @@
 package com.easyinsight.filtering {
 import flash.events.Event;
 
+import mx.binding.utils.BindingUtils;
+
 import mx.containers.HBox;
 
 import mx.controls.CheckBox;
@@ -32,12 +34,12 @@ public class FilterCheckbox extends HBox {
     override public function set data(val:Object):void {
         _multiFilterOption = val as MultiFilterOption;
         checkbox.label = _multiFilterOption.label;
-        checkbox.selected = _multiFilterOption.selected;
+        BindingUtils.bindProperty(checkbox, "selected", _multiFilterOption, "selected");
+        BindingUtils.bindProperty(_multiFilterOption, "selected", checkbox, "selected");
     }
 
     private function onChange(event:Event):void {
         if (_multiFilterOption != null) {
-            _multiFilterOption.selected = checkbox.selected;
             dispatchEvent(new MultiFilterEvent(_multiFilterOption));
         }
     }

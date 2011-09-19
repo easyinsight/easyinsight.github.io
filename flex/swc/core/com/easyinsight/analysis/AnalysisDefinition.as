@@ -79,6 +79,7 @@ import mx.collections.ArrayCollection;
         public var recommendedExchange:Boolean;
         public var optimized:Boolean;
         public var fullJoins:Boolean;
+        public var marmotScript:String;
 
 		public function AnalysisDefinition()
 		{

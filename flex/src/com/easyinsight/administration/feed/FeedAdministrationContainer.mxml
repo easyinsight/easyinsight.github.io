@@ -9,6 +9,8 @@
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.SavePromptWindow;
+        import com.easyinsight.code.MarmotScriptEvent;
+        import com.easyinsight.code.MarmotScriptWindow;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
@@ -178,6 +180,18 @@
             dispatchEvent(new AnalysisChangedEvent());
         }
 
+        private function editCode():void {
+            var window:MarmotScriptWindow = new MarmotScriptWindow();
+            window.script = feedDefinition.marmotScript;
+            window.addEventListener(MarmotScriptEvent.SAVE_SCRIPT, onScript, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onScript(event:MarmotScriptEvent):void {
+            feedDefinition.marmotScript = event.script;
+        }
+
         public function cleanup():void {
         }
 
@@ -198,8 +212,10 @@
                         label="Save Data Source" labelPlacement="right"/>
                 <mx:Button icon="@Embed(source='../../../../../assets/media_play_green.png')" click="toReport()" toolTip="Jump to Report Editor"
                         label="Create a New Report" labelPlacement="right"/>
-                <mx:Button icon="@Embed(source='../../../../../assets/media_play_green.png')" click="clearCaches()" toolTip="Clear Caches"
+                <mx:Button icon="@Embed(source='../../../../../assets/garbage.png')" click="clearCaches()" toolTip="Clear Caches"
                         label="Clear Caches" labelPlacement="right"/>
+                <mx:Button icon="@Embed(source='../../../../../assets/code_edit.png')" click="editCode()" toolTip="Clear Caches"
+                        label="Edit Code" labelPlacement="right"/>
                 <mx:Label fontSize="14" color="#FFFFFF"/>
             </mx:HBox>
             <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
@@ -208,9 +224,6 @@
                     <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration" dataSourceID="{feedID}" disableControls="disableControls()"
                             enableControls="enableControls()"/>
                 </mx:Box>
-                <!--<mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox" visible="{showImpl}">
-
-                </mx:Box>-->
             </mx:TabNavigator>
         </mx:VBox>
     </skin:BackgroundImage>

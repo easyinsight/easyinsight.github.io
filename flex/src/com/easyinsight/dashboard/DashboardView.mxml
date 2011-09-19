@@ -72,7 +72,7 @@
             var contextMenu:ContextMenu = new ContextMenu();
             contextMenu.customItems = [ logoutItem ];
             this.contextMenu = contextMenu;
-            dashboardService.getDashboard.send(_dashboardID);
+            dashboardService.getDashboardView.send(_dashboardID);
         }
 
         private function onNavigation(event:ReportNavigationEvent):void {
@@ -160,7 +160,7 @@
         }
 
         private function gotDashboard():void {
-            dashboard = dashboardService.getDashboard.lastResult as Dashboard;
+            dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
             dataSource = dashboard.dataSourceInfo;
             dashboardName = dashboard.name;
             description = dashboard.description;
@@ -298,7 +298,7 @@
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
-        <mx:method name="getDashboard" result="gotDashboard()"/>
+        <mx:method name="getDashboardView" result="gotDashboard()"/>
         <mx:method name="keepDashboard" result="keptDashboard()"/>
     </mx:RemoteObject>
     <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center" id="loadingBox">

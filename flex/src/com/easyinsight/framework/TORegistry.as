@@ -121,6 +121,10 @@ import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.SolutionInstallInfo;
 
 import com.easyinsight.solutions.SolutionKPIData;
+import com.easyinsight.suggestion.AddFilterIntention;
+import com.easyinsight.suggestion.CustomFieldIntention;
+import com.easyinsight.suggestion.CustomizeJoinIntention;
+import com.easyinsight.suggestion.ReportPropertiesIntention;
 
 import mx.managers.DragManager;
 import mx.managers.PopUpManager;
@@ -253,6 +257,10 @@ public class TORegistry {
         var treeMapDef:TreeMapDefinition;
         var form:FormReport;
         var heatMap:HeatMapDefinition;
+        var jf:CustomizeJoinIntention;
+        var afi:AddFilterIntention;
+        var cfi:CustomFieldIntention;
+        var rpi:ReportPropertiesIntention;
     }
 }
 }

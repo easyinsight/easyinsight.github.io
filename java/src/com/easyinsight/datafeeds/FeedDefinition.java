@@ -2,6 +2,8 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Value;
+import com.easyinsight.intention.Intention;
+import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.SuggestedUser;
@@ -57,6 +59,15 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean visible = true;
     private long parentSourceID;
     private Date lastRefreshStart;
+    private String marmotScript;
+
+    public String getMarmotScript() {
+        return marmotScript;
+    }
+
+    public void setMarmotScript(String marmotScript) {
+        this.marmotScript = marmotScript;
+    }
 
     public boolean customJoinsAllowed(EIConnection conn) throws SQLException {
         return false;
@@ -635,6 +646,14 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public List<SuggestedUser> retrieveUsers(EIConnection conn) throws Exception {
         return new ArrayList<SuggestedUser>();
+    }
+
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
+        return new ArrayList<IntentionSuggestion>();
+    }
+
+    public List<Intention> createIntentions(WSAnalysisDefinition report, List<AnalysisItem> fields, int type) throws SQLException {
+        return new ArrayList<Intention>();
     }
 
 }

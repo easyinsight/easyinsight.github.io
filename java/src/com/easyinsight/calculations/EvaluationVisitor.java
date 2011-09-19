@@ -3,6 +3,7 @@ package com.easyinsight.calculations;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 
+import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.LinkedList;
@@ -22,10 +23,13 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
 
     private boolean emptyAsZero = false;
 
-    public EvaluationVisitor(IRow r, AnalysisItem analysisItem) {
+    private CalculationMetadata calculationMetadata;
+
+    public EvaluationVisitor(@Nullable IRow r, @Nullable AnalysisItem analysisItem, CalculationMetadata calculationMetadata) {
         row = r;
+        this.calculationMetadata = calculationMetadata;
         this.analysisItem = analysisItem;
-        if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+        if (analysisItem != null && analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
             AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
             emptyAsZero = analysisCalculation.getFormattingConfiguration().getFormattingType() != FormattingConfiguration.MILLISECONDS &&
                     analysisCalculation.getFormattingConfiguration().getFormattingType() != FormattingConfiguration.SECONDS;
@@ -45,12 +49,12 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(AddNode node) {
-        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem);
+        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
 
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
         result = node1.getResult();
         if(node.getChildCount() == 2) {
-            EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem);
+            EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
             ((CalculationTreeNode) node.getChild(1)).accept(node2);
             Value result2 = node2.getResult();
             if (result.type() == Value.STRING || result2.type() == Value.STRING) {
@@ -87,7 +91,7 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(SubtractNode node) {
-        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem);
+        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
 
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
         result = node1.getResult();
@@ -97,7 +101,7 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
             return;
         }
         if(node.getChildCount() == 2) {
-            EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem);
+            EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
             ((CalculationTreeNode) node.getChild(1)).accept(node2);
             Value result2 = node2.getResult();
             if (result.type() == Value.NUMBER && result2.type() == Value.NUMBER) {
@@ -132,10 +136,10 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(MultiplyNode node) {
-        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem);
+        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
 
-        EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem);
+        EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
         ((CalculationTreeNode) node.getChild(1)).accept(node2);
         if(node1.getResult() instanceof EmptyValue || node1.getResult().toDouble() == null || node2.getResult() instanceof EmptyValue || node2.getResult().toDouble() == null) {
             if (emptyAsZero) {
@@ -150,10 +154,10 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(DivideNode node) {
-        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem);
+        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
 
-        EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem);
+        EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
         ((CalculationTreeNode) node.getChild(1)).accept(node2);
         if(node1.getResult() instanceof EmptyValue || node1.getResult().toDouble() == null || node2.getResult() instanceof EmptyValue || node2.getResult().toDouble() == null) {
             if (emptyAsZero) {
@@ -172,9 +176,9 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(ExponentNode node) {
-        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem);
+        EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
-        EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem);
+        EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
         ((CalculationTreeNode) node.getChild(1)).accept(node2);
         if(node1.getResult() instanceof EmptyValue || node1.getResult().toDouble() == null || node2.getResult() instanceof EmptyValue || node2.getResult().toDouble() == null) {
             if (emptyAsZero) {
@@ -189,27 +193,38 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(VariableNode node) {
-        result = row.getValue(node.createAggregateKey());
+        if (row == null) {
+            result = new EmptyValue();
+        } else {
+            result = row.getValue(node.createAggregateKey());
+        }
     }
 
     public void visit(FunctionNode node) {
         IFunction f = node.getFunction();
-        List<Value> params = new LinkedList<Value>();
-        for(int i = 1;i < node.getChildCount();i++) {
-            EvaluationVisitor subNode = new EvaluationVisitor(row, analysisItem);
-            ((CalculationTreeNode) node.getChild(i)).accept(subNode);
-            // TODO: Better handling of empty values in functions
-            if(subNode.getResult() instanceof EmptyValue) {
-                result = new EmptyValue();
-                if (!(f instanceof FirstValueFunction) && !(f instanceof IfNotNull) && !(f instanceof GreaterThan)) {
-                    return;
+        f.setCalculationMetadata(calculationMetadata);
+        if (f.onDemand()) {
+            f.setFunctionNode(node);
+            result = f.evaluate();
+        } else {
+            List<Value> params = new LinkedList<Value>();
+            for(int i = 1;i < node.getChildCount();i++) {
+                EvaluationVisitor subNode = new EvaluationVisitor(row, analysisItem, calculationMetadata);
+                ((CalculationTreeNode) node.getChild(i)).accept(subNode);
+                // TODO: Better handling of empty values in functions
+                if(subNode.getResult() instanceof EmptyValue) {
+                    result = new EmptyValue();
+                    if (!(f instanceof FirstValueFunction) && !(f instanceof IfNotNull) && !(f instanceof GreaterThan) && !(f instanceof IsOnly)) {
+                        return;
+                    }
+                    //return;
                 }
-                //return;
+                params.add(subNode.getResult());
             }
-            params.add(subNode.getResult());
+            f.setParameters(params);
+
+            result = f.evaluate();
         }
-        f.setParameters(params);
-        result = f.evaluate(); 
     }
 
     private Value result;
@@ -218,11 +233,9 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         return result;
     }
 
+    @Nullable
     private IRow row;
     private Map<Key, List<Value>> columnSlicedData;
+    @Nullable
     private AnalysisItem analysisItem;
-
-    public void setRow(IRow r) {
-        row = r;
-    }
 }

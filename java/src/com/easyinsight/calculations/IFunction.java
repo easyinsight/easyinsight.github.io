@@ -12,6 +12,9 @@ import java.util.List;
 public interface IFunction {
 
     public Value evaluate();
+    void setFunctionNode(FunctionNode functionNode);
+    boolean onDemand();
     public void setParameters(List<Value> parameters);
     public int getParameterCount();
+    void setCalculationMetadata(CalculationMetadata calculationMetadata);
 }

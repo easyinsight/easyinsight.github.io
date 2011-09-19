@@ -44,9 +44,27 @@ public class Dashboard implements Cloneable {
     private int filterBackgroundColor;
     private double filterBackgroundAlpha;
     private int headerStyle;
+    private String ytdMonth;
+    private boolean overrideYTD;
     private boolean recommendedExchange;
     private DataSourceInfo dataSourceInfo;
     private int role;
+
+    public boolean isOverrideYTD() {
+        return overrideYTD;
+    }
+
+    public void setOverrideYTD(boolean overrideYTD) {
+        this.overrideYTD = overrideYTD;
+    }
+
+    public String getYtdMonth() {
+        return ytdMonth;
+    }
+
+    public void setYtdMonth(String ytdMonth) {
+        this.ytdMonth = ytdMonth;
+    }
 
     public int getRole() {
         return role;
@@ -312,5 +330,9 @@ public class Dashboard implements Cloneable {
 
     public void setFilterBackgroundAlpha(double filterBackgroundAlpha) {
         this.filterBackgroundAlpha = filterBackgroundAlpha;
+    }
+
+    public void visit(IDashboardVisitor dashboardVisitor) {
+        rootElement.visit(dashboardVisitor);
     }
 }

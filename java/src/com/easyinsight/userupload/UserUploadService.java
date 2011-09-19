@@ -612,7 +612,9 @@ public class UserUploadService {
                                 ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault());
                             } catch (Exception e) {
                                 LogClass.error(e);
-                                conn.rollback();
+                                if (!conn.getAutoCommit()) {
+                                    conn.rollback();
+                                }
                                 ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage());
                             } finally {
                                 conn.setAutoCommit(true);

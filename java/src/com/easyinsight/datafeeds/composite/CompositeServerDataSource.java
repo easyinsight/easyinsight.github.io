@@ -1,11 +1,13 @@
 package com.easyinsight.datafeeds.composite;
 
+import com.easyinsight.analysis.*;
+import com.easyinsight.core.DerivedKey;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.users.User;
 import com.easyinsight.users.Account;
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.storage.DataStorage;
@@ -243,5 +245,95 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    protected FilterDefinition excludeFilter(String fieldName, WSAnalysisDefinition report, List<AnalysisItem> fields) {
+        AnalysisItem target = null;
+        for (AnalysisItem field : fields) {
+            if (field.toDisplay().equals(fieldName)) {
+                target = field;
+            }
+        }
+        FilterValueDefinition excludeFilter = new FilterValueDefinition(target, false, Arrays.asList((Object) EmptyValue.EMPTY_VALUE));
+        excludeFilter.setShowOnReportView(false);
+        return excludeFilter;
+    }
+
+    protected List<JoinOverride> fromChildConnections(List<ChildConnection> childConnections, List<AnalysisItem> fields) throws SQLException {
+        List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
+        Map<FeedType, FeedDefinition> feedMap = new HashMap<FeedType, FeedDefinition>();
+        for (CompositeFeedNode child : getCompositeFeedNodes()) {
+            FeedDefinition childDef = new FeedStorage().getFeedDefinitionData(child.getDataFeedID());
+            feedMap.put(childDef.getFeedType(), childDef);
+        }
+        for (ChildConnection childConnection : childConnections) {
+            FeedDefinition sourceDef = feedMap.get(childConnection.getSourceFeedType());
+            FeedDefinition targetDef = feedMap.get(childConnection.getTargetFeedType());
+            CompositeFeedConnection connection = childConnection.createConnection((IServerDataSourceDefinition) sourceDef, (IServerDataSourceDefinition) targetDef);
+            JoinOverride joinOverride = new JoinOverride();
+            joinOverride.setSourceName(sourceDef.getFeedName());
+            joinOverride.setTargetName(targetDef.getFeedName());
+            joinOverride.setDataSourceID(getDataFeedID());
+            joinOverride.setSourceItem(findSourceItem(connection, fields));
+            joinOverride.setTargetItem(findTargetItem(connection, fields));
+            joinOverride.setSourceJoinOriginal(connection.isSourceJoinOnOriginal());
+            joinOverride.setTargetJoinOriginal(connection.isTargetJoinOnOriginal());
+            joinOverride.setSourceOuterJoin(connection.isSourceOuterJoin());
+            joinOverride.setTargetOuterJoin(connection.isTargetOuterJoin());
+            joinOverrides.add(joinOverride);
+        }
+        return joinOverrides;
+    }
+
+    private AnalysisItem findSourceItem(CompositeFeedConnection connection, List<AnalysisItem> items) {
+        AnalysisItem analysisItem = null;
+        for (AnalysisItem item : items) {
+            Key key = item.getKey();
+            if (key instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                if (derivedKey.getFeedID() == connection.getSourceFeedID()) {
+                    if (connection.getSourceJoin() != null) {
+                        if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getSourceJoin().toKeyString())) {
+                            analysisItem = item;
+                            break;
+                        }
+                    } else {
+
+                        if (connection.getSourceItem().getKey().toKeyString().equals(item.getKey().toKeyString())) {
+                            analysisItem = item;
+                            break;
+                        }
+                    }
+                }
+            }
+
+        }
+        return analysisItem;
+    }
+
+    private AnalysisItem findTargetItem(CompositeFeedConnection connection, List<AnalysisItem> items) {
+        AnalysisItem analysisItem = null;
+        for (AnalysisItem item : items) {
+            Key key = item.getKey();
+            if (key instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                if (derivedKey.getFeedID() == connection.getTargetFeedID()) {
+                    if (connection.getTargetJoin() != null) {
+                        if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getTargetJoin().toKeyString())) {
+                            analysisItem = item;
+                            break;
+                        }
+                    } else {
+
+                        if (connection.getTargetItem().getKey().toKeyString().equals(item.getKey().toKeyString())) {
+                            analysisItem = item;
+                            break;
+                        }
+                    }
+                }
+            }
+
+        }
+        return analysisItem;
     }
 }

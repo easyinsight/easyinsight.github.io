@@ -1,11 +1,11 @@
 package com.easyinsight.dashboard {
 import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.EmailReportWindow;
 import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.filtering.TransformContainer;
 import com.easyinsight.filtering.TransformsUpdatedEvent;
 import com.easyinsight.framework.LoginEvent;
 import com.easyinsight.framework.User;
+import com.easyinsight.report.TempReportExportWindow;
 import com.easyinsight.skin.BackgroundImage;
 import com.easyinsight.skin.ImageLoadEvent;
 import com.easyinsight.skin.ImageLoader;
@@ -21,7 +21,6 @@ import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.ComboBox;
 import mx.core.Container;
@@ -196,7 +195,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         var reports:ArrayCollection = reportCount();
         if (reports.length == 1) {
             var report:AnalysisDefinition = reports.getItemAt(0) as AnalysisDefinition;
-            var window:EmailReportWindow = new EmailReportWindow();
+            var window:TempReportExportWindow = new TempReportExportWindow();
             window.report = report;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);

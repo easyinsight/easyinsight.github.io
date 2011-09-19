@@ -9,6 +9,8 @@ import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
+import com.easyinsight.intention.Intention;
+import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
@@ -709,5 +711,34 @@ public class AnalysisService {
             userCapabilities.setAnalysisRole(Roles.NONE);
         }
         return userCapabilities;
+    }
+
+    public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report) {
+        try {
+            List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID());
+            suggestions.addAll(dataSource.suggestIntentions(report));
+            suggestions.addAll(report.suggestIntentions(report));
+            return suggestions;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Intention> getIntentions(WSAnalysisDefinition report, List<AnalysisItem> fields, int scope, int type) {
+        try {
+            if (scope == IntentionSuggestion.SCOPE_DATA_SOURCE) {
+                FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID());
+                return dataSource.createIntentions(report, fields, type);
+            } else if (scope == IntentionSuggestion.SCOPE_REPORT) {
+                return report.createIntentions(fields, type);
+            } else {
+                throw new UnsupportedOperationException();
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 }

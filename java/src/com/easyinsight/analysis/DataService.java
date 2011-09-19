@@ -9,7 +9,6 @@ import com.easyinsight.etl.LookupTable;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
-import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.StandardReportPipeline;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +28,28 @@ import java.util.*;
 public class DataService {
 
     private FeedRegistry feedRegistry = FeedRegistry.instance();
+
+    public FilterDefinition getAvailableFieldsForFilter(long dataSourceID, FilterDefinition filterDefinition) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            Feed feed = feedRegistry.getFeed(dataSourceID, conn);
+            List<FilterDefinition> dlsFilters = addDLSFilters(dataSourceID, conn);
+            if (filterDefinition.getMarmotScript() != null && !"".equals(filterDefinition.getMarmotScript().trim())) {
+                StringTokenizer toker = new StringTokenizer(filterDefinition.getMarmotScript(), "\r\n");
+                while (toker.hasMoreTokens()) {
+                    String line = toker.nextToken();
+                    new ReportCalculation(line).apply(filterDefinition, feed.getFields(), feed, conn, dlsFilters);
+                }
+                new ReportCalculation(filterDefinition.getMarmotScript()).apply(filterDefinition, feed.getFields(), feed, conn, dlsFilters);
+            }
+            return filterDefinition;
+        }  catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID) {
         if (reportID > 0) {
@@ -149,6 +170,51 @@ public class DataService {
         }
     }
 
+    public EmbeddedCrosstabDataResults getEmbeddedCrosstabResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
+        SecurityUtil.authorizeInsight(reportID);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            WSCrosstabDefinition crosstabReport = (WSCrosstabDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
+            ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, crosstabReport, conn, customFilters, null);
+            Crosstab crosstab = new Crosstab();
+            crosstab.crosstab(crosstabReport, reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet()));
+            CrosstabValue[][] values = crosstab.toTable(crosstabReport);
+
+            List<CrosstabMapWrapper> resultData = new ArrayList<CrosstabMapWrapper>();
+            for (int j = 0; j < (crosstab.getRowSections().size() + crosstabReport.getColumns().size()) + 2; j++) {
+                Map<String, CrosstabValue> resultMap = new HashMap<String, CrosstabValue>();
+                for (int i = 0; i < (crosstab.getColumnSections().size() + crosstabReport.getRows().size() + 1); i++) {
+                    CrosstabValue crosstabValue = values[j][i];
+                    if (crosstabValue == null) {
+
+                    } else {
+                        resultMap.put(String.valueOf(i), crosstabValue);
+                    }
+                }
+                CrosstabMapWrapper crosstabMapWrapper = new CrosstabMapWrapper();
+                crosstabMapWrapper.setMap(resultMap);
+                resultData.add(crosstabMapWrapper);
+            }
+            EmbeddedCrosstabDataResults crossTabDataResults = new EmbeddedCrosstabDataResults();
+            crossTabDataResults.setDataSet(resultData);
+            crossTabDataResults.setDefinition(crosstabReport);
+            crossTabDataResults.setColumnCount(crosstab.getColumnSections().size() + crosstabReport.getRows().size() + 1);
+            crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+            return crossTabDataResults;
+        } catch (ReportException re) {
+            EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
+            results.setReportFault(re.getReportFault());
+            return results;
+        } catch (Exception e) {
+            LogClass.error(e);
+            EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
+            results.setReportFault(new ServerError(e.getMessage()));
+            return results;
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public EmbeddedVerticalResults getEmbeddedVerticalDataResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
         try {
             SecurityUtil.authorizeInsight(reportID);
@@ -168,97 +234,35 @@ public class DataService {
             verticalDataResults.setList(list);
             verticalDataResults.setReport(analysisDefinition);
             return verticalDataResults;
+        } catch (ReportException re) {
+            EmbeddedVerticalResults results = new EmbeddedVerticalResults();
+            results.setReportFault(re.getReportFault());
+            return results;
         } catch (Exception e) {
             LogClass.error(e);
-            throw new RuntimeException(e);
+            EmbeddedVerticalResults results = new EmbeddedVerticalResults();
+            results.setReportFault(new ServerError(e.getMessage()));
+            return results;
         }
     }
 
-    private EmbeddedResults getEmbeddedResultsForReport(WSAnalysisDefinition analysisDefinition, long dataSourceID, List<FilterDefinition> customFilters,
+    private EmbeddedResults getEmbeddedResultsForReport(WSAnalysisDefinition analysisDefinition, List<FilterDefinition> customFilters,
                                                         InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters, EIConnection conn) throws Exception {
-        Feed feed = feedRegistry.getFeed(dataSourceID, conn);
-        insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
-        insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
-        insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
-
-        if (customFilters != null) {
-            analysisDefinition.setFilterDefinitions(customFilters);
-        }
-        if (drillThroughFilters != null) {
-            analysisDefinition.applyFilters(drillThroughFilters);
-        }
-
-        addDLSFilters(analysisDefinition, conn);
-
-        for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
-            if (filter instanceof AnalysisItemFilterDefinition) {
-                AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
-                Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
-                Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);
-                for (Map.Entry<String, AnalysisItem> entry : structureCopy.entrySet()) {
-                    if (entry.getValue().equals(filter.getField())) {
-                        structure.put(entry.getKey(), analysisItemFilterDefinition.getTargetItem());
-                    }
-                }
-                analysisDefinition.populateFromReportStructure(structure);
-            }
-        }
-
-        EmbeddedResults results;
-
-        if (insightRequestMetadata.getHierarchyOverrides() != null) {
-            for (AnalysisItemOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
-                hierarchyOverride.apply(analysisDefinition.getAllAnalysisItems());
-            }
-        }
-        insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
-        List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
-        if (analysisDefinition.getAddedItems() != null) {
-            allFields.addAll(analysisDefinition.getAddedItems());
-        }
-        Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields);
-        Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
-        for (AnalysisItem analysisItem : analysisItems) {
-            if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
-                validQueryItems.add(analysisItem);
-            }
-        }
-
-        boolean aggregateQuery = true;
-        Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
-        items.remove(null);
-        for (AnalysisItem analysisItem : items) {
-            if (analysisItem.blocksDBAggregation()) {
-                aggregateQuery = false;
-            }
-        }
-        insightRequestMetadata.setAggregateQuery(aggregateQuery);
-        Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
-        timeshift(validQueryItems, filters, feed);
-        DataSet dataSet = retrieveDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
-
-        Pipeline pipeline = new StandardReportPipeline();
-        pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
-        DataResults listDataResults = pipeline.toList(dataSet);
-        results = listDataResults.toEmbeddedResults();
-        results.setDefinition(analysisDefinition);
-
-
-        if (dataSet.getLastTime() == null) {
-            dataSet.setLastTime(new Date());
-        }
-        DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
-        dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
-        results.setDataSourceInfo(dataSourceInfo);
-        return results;
+        ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
+        DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet());
+        EmbeddedResults embeddedResults = results.toEmbeddedResults();
+        DataSourceInfo dataSourceInfo = reportRetrieval.getFeed().getDataSourceInfo();
+        embeddedResults.setDataSourceInfo(dataSourceInfo);
+        embeddedResults.setDefinition(analysisDefinition);
+        return embeddedResults;
     }
 
-    private static void addDLSFilters(WSAnalysisDefinition analysisDefinition, EIConnection conn) throws SQLException {
+    public static List<FilterDefinition> addDLSFilters(long dataSourceID, EIConnection conn) throws SQLException {
         if (SecurityUtil.getUserID(false) != 0) {
             PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
                     "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
                     "user_dls.user_id = ?");
-            dlsStmt.setLong(1, analysisDefinition.getDataFeedID());
+            dlsStmt.setLong(1, dataSourceID);
             dlsStmt.setLong(2, SecurityUtil.getUserID());
             List<FilterDefinition> dlsFilters = new ArrayList<FilterDefinition>();
             ResultSet dlsRS = dlsStmt.executeQuery();
@@ -277,8 +281,10 @@ public class DataService {
                     session.close();
                 }
             }
-            analysisDefinition.getFilterDefinitions().addAll(dlsFilters);
+            dlsStmt.close();
+            return dlsFilters;
         }
+        return new ArrayList<FilterDefinition>();
     }
 
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
@@ -292,7 +298,7 @@ public class DataService {
             if (analysisDefinition == null) {
                 return null;
             }
-            EmbeddedResults results = getEmbeddedResultsForReport(analysisDefinition, dataSourceID, customFilters, insightRequestMetadata, drillThroughFilters, conn);
+            EmbeddedResults results = getEmbeddedResultsForReport(analysisDefinition, customFilters, insightRequestMetadata, drillThroughFilters, conn);
             conn.commit();
             return results;
         } catch (ReportException re) {
@@ -313,7 +319,7 @@ public class DataService {
     public static DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         ReportRetrieval reportRetrieval;
         try {
-            reportRetrieval = new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn);
+            reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -323,7 +329,7 @@ public class DataService {
     public static DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata,
                                    EIConnection conn) {
         try {
-            ReportRetrieval reportRetrieval = new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn);
+            ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet());
             DataSourceInfo dataSourceInfo = reportRetrieval.getFeed().getDataSourceInfo();
             results.setDataSourceInfo(dataSourceInfo);
@@ -356,28 +362,81 @@ public class DataService {
         }
     }
 
-    public VerticalDataResults getVerticalDataResults(WSCombinedVerticalListDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
-        insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
-        List<DataResults> list = new ArrayList<DataResults>();
-        for (WSAnalysisDefinition analysis : analysisDefinition.getReports()) {
-            List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
-            filters.addAll(analysisDefinition.getFilterDefinitions());
-            filters.addAll(analysis.getFilterDefinitions());
-            analysis.setFilterDefinitions(filters);
-            DataResults dataResults = list(analysis, insightRequestMetadata);
-            list.add(dataResults);
+    public CrossTabDataResults getCrosstabDataResults(WSCrosstabDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+            Crosstab crosstab = new Crosstab();
+            crosstab.crosstab(analysisDefinition, reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet()));
+            CrosstabValue[][] values = crosstab.toTable(analysisDefinition);
+
+            List<CrosstabMapWrapper> resultData = new ArrayList<CrosstabMapWrapper>();
+            for (int j = 0; j < (crosstab.getRowSections().size() + analysisDefinition.getColumns().size()) + 2; j++) {
+                Map<String, CrosstabValue> resultMap = new HashMap<String, CrosstabValue>();
+                for (int i = 0; i < (crosstab.getColumnSections().size() + analysisDefinition.getRows().size() + 1); i++) {
+                    CrosstabValue crosstabValue = values[j][i];
+                    if (crosstabValue == null) {
+
+                    } else {
+                        resultMap.put(String.valueOf(i), crosstabValue);
+                    }
+                }
+                CrosstabMapWrapper crosstabMapWrapper = new CrosstabMapWrapper();
+                crosstabMapWrapper.setMap(resultMap);
+                resultData.add(crosstabMapWrapper);
+            }
+            CrossTabDataResults crossTabDataResults = new CrossTabDataResults();
+            crossTabDataResults.setDataSet(resultData);
+            crossTabDataResults.setColumnCount(crosstab.getColumnSections().size() + analysisDefinition.getRows().size() + 1);
+            crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+            return crossTabDataResults;
+        } catch (ReportException dae) {
+            CrossTabDataResults embeddedDataResults = new CrossTabDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
+        } catch (Throwable e) {
+            LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
+            CrossTabDataResults embeddedDataResults = new CrossTabDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            return embeddedDataResults;
+        } finally {
+            Database.closeConnection(conn);
         }
-        VerticalDataResults verticalDataResults = new VerticalDataResults();
-        verticalDataResults.setMap(list);
-        return verticalDataResults;
+    }
+
+    public VerticalDataResults getVerticalDataResults(WSCombinedVerticalListDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        try {
+            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+            insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
+            List<DataResults> list = new ArrayList<DataResults>();
+            for (WSAnalysisDefinition analysis : analysisDefinition.getReports()) {
+                List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+                filters.addAll(analysisDefinition.getFilterDefinitions());
+                filters.addAll(analysis.getFilterDefinitions());
+                analysis.setFilterDefinitions(filters);
+                DataResults dataResults = list(analysis, insightRequestMetadata);
+                list.add(dataResults);
+            }
+            VerticalDataResults verticalDataResults = new VerticalDataResults();
+            verticalDataResults.setMap(list);
+            return verticalDataResults;
+        } catch (ReportException dae) {
+            VerticalDataResults embeddedDataResults = new VerticalDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
+        } catch (Throwable e) {
+            LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
+            VerticalDataResults embeddedDataResults = new VerticalDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            return embeddedDataResults;
+        }
     }
 
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         try {
-            ReportRetrieval reportRetrieval = new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn);
+            ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet());
             DataSourceInfo dataSourceInfo = reportRetrieval.getFeed().getDataSourceInfo();
             results.setDataSourceInfo(dataSourceInfo);
@@ -403,13 +462,29 @@ public class DataService {
         private EIConnection conn;
         private DataSet dataSet;
         private StandardReportPipeline pipeline;
+        private DataSourceInfo dataSourceInfo;
         private Feed feed;
 
         private ReportRetrieval(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn) throws SQLException {
             this.insightRequestMetadata = insightRequestMetadata;
             this.analysisDefinition = analysisDefinition;
             this.conn = conn;
-            toPipeline();
+
+        }
+
+        private static ReportRetrieval reportEditor(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn) throws SQLException {
+            return new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn).toPipeline();
+        }
+
+        private static ReportRetrieval reportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
+                                                  @Nullable List<FilterDefinition> customFilters, @Nullable List<FilterDefinition> drillThroughFilters) throws SQLException {
+            if (customFilters != null) {
+                analysisDefinition.setFilterDefinitions(customFilters);
+            }
+            if (drillThroughFilters != null) {
+                analysisDefinition.applyFilters(drillThroughFilters);
+            }
+            return new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn).toPipeline();
         }
 
         public StandardReportPipeline getPipeline() {
@@ -424,7 +499,11 @@ public class DataService {
             return feed;
         }
 
-        private void toPipeline() throws SQLException {
+        public DataSourceInfo getDataSourceInfo() {
+            return dataSourceInfo;
+        }
+
+        private ReportRetrieval toPipeline() throws SQLException {
             feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
             if (insightRequestMetadata == null) {
                 insightRequestMetadata = new InsightRequestMetadata();
@@ -433,7 +512,16 @@ public class DataService {
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
             insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
 
-            addDLSFilters(analysisDefinition, conn);
+            /*
+            if (insightRequestMetadata.getHierarchyOverrides() != null) {
+                for (AnalysisItemOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
+                    hierarchyOverride.apply(analysisDefinition.getAllAnalysisItems());
+                }
+            }
+             */
+
+            List<FilterDefinition> dlsFilters = addDLSFilters(analysisDefinition.getDataFeedID(), conn);
+            analysisDefinition.getFilterDefinitions().addAll(dlsFilters);
 
             for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                 if (filter instanceof AnalysisItemFilterDefinition) {
@@ -452,6 +540,18 @@ public class DataService {
             if (analysisDefinition.getAddedItems() != null) {
                 allFields.addAll(analysisDefinition.getAddedItems());
             }
+            if (analysisDefinition.getMarmotScript() != null) {
+                StringTokenizer toker = new StringTokenizer(analysisDefinition.getMarmotScript(), "\r\n");
+                while (toker.hasMoreTokens()) {
+                    String line = toker.nextToken();
+                    new ReportCalculation(line).apply(analysisDefinition, allFields, feed, conn, dlsFilters);
+                }
+            }
+            //new ReportCalculation("replacefields(\"Procedures\", \"*PT/OT*\")").apply(analysisDefinition, allFields);
+            //new ReportCalculation("equals([Group Name], \"Atlantic Orthopedics\", addfield(\"Charges\"))").apply(analysisDefinition, allFields, feed, conn, dlsFilters);
+            /*new ReportCalculation("copyfields(\"2009 Procedures\", \"2009 !0#\", \"9*-PT/OT*\")").apply(analysisDefinition, allFields);
+            new ReportCalculation("copyfields(\"2010 Procedures\", \"2010 !0#\", \"9*-PT/OT*\")").apply(analysisDefinition, allFields);
+            new ReportCalculation("replacecalculation(\"Procedures\", \"9*-*PT/OT*\")").apply(analysisDefinition, allFields);*/
             Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields);
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
             for (AnalysisItem analysisItem : analysisItems) {
@@ -472,12 +572,13 @@ public class DataService {
             timeshift(validQueryItems, filters, feed);
             dataSet = retrieveDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
             pipeline = new StandardReportPipeline();
-            pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
-            DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
+            pipeline.setup(analysisDefinition, feed, insightRequestMetadata, allFields);
+            dataSourceInfo = feed.getDataSourceInfo();
             if (dataSet.getLastTime() == null) {
                 dataSet.setLastTime(new Date());
             }
             dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
+            return this;
         }
     }
 }

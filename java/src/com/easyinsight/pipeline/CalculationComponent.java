@@ -37,6 +37,8 @@ public class CalculationComponent implements IComponent {
         if (dataSet.getRows().size() == 0) {
             return dataSet;
         }
+        CalculationMetadata calculationMetadata = new CalculationMetadata();
+        calculationMetadata.setReport(pipelineData.getReport());
         CalculationTreeNode calculationTreeNode;
         ICalculationTreeVisitor visitor;
         CalculationsParser.expr_return ret;
@@ -80,7 +82,7 @@ public class CalculationComponent implements IComponent {
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
             calculationTreeNode.accept(visitor);
             for (IRow row : dataSet.getRows()) {
-                ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, analysisCalculation);
+                ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, analysisCalculation, calculationMetadata);
                 calculationTreeNode.accept(rowVisitor);
                 Value result = rowVisitor.getResult();
                 if (result.type() == Value.EMPTY) {

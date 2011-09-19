@@ -54,7 +54,6 @@ import java.util.List;
 public class ExportService {
 
     public static final String CURRENCY_STYLE = "currency";
-    public static final String TEXT_STYLE = "currency";
     public static final String GENERIC_STYLE = "generic";
     public static final String PERCENT_STYLE = "percentStyle";
 
@@ -906,9 +905,12 @@ public class ExportService {
         CrosstabValue[][] values = crosstab.toTable(crosstabDefinition);
         AnalysisMeasure measure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
 
-        for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size()); j++) {
+        for (int i = 0; i < (crosstab.getColumnSections().size() + crosstabDefinition.getRows().size()) + 1; i++) {
+            sheet.setColumnWidth(i, 5000);
+        }
+        for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size()) + 2; j++) {
             HSSFRow row = sheet.createRow(j);
-            for (int i = 0; i < (crosstab.getColumnSections().size() + crosstabDefinition.getRows().size()); i++) {
+            for (int i = 0; i < (crosstab.getColumnSections().size() + crosstabDefinition.getRows().size()) + 1; i++) {
                 CrosstabValue crosstabValue = values[j][i];
                 if (crosstabValue == null) {
 

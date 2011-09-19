@@ -235,14 +235,6 @@
             _reportType = value;
         }
 
-        /*override protected function commitProperties():void {
-            super.commitProperties();
-
-            if (retrievedDataOnce) {
-                viewFactory.retrieveData();
-            }
-        }
-*/
         private var retrievedDataOnce:Boolean = false;
 
         [Bindable]

@@ -128,6 +128,7 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);
         analysisDefinition.setDescription(wsAnalysisDefinition.getDescription());
         analysisDefinition.setAuthorName(wsAnalysisDefinition.getAuthorName());
+        analysisDefinition.setMarmotScript(wsAnalysisDefinition.getMarmotScript());
         analysisDefinition.setAccountVisible(wsAnalysisDefinition.isAccountVisible());
         analysisDefinition.setDateCreated(wsAnalysisDefinition.getDateCreated());
         analysisDefinition.setDateUpdated(wsAnalysisDefinition.getDateUpdated());

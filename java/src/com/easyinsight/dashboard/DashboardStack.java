@@ -153,6 +153,12 @@ public class DashboardStack extends DashboardElement {
                 items.add(item);
             }
             gridItemStmt.close();
+            Collections.sort(items, new Comparator<DashboardStackItem>() {
+
+                public int compare(DashboardStackItem dashboardStackItem, DashboardStackItem dashboardStackItem1) {
+                    return ((Integer) dashboardStackItem.getPosition()).compareTo(dashboardStackItem1.getPosition());
+                }
+            });
             dashboardGrid.setGridItems(items);
             List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
             Session session = Database.instance().createSession(conn);
@@ -197,6 +203,14 @@ public class DashboardStack extends DashboardElement {
     public void updateScorecardIDs(Map<Long, Scorecard> scorecardReplacementMap) {
         for (DashboardStackItem gridItem : gridItems) {
             gridItem.getDashboardElement().updateScorecardIDs(scorecardReplacementMap);
+        }
+    }
+
+    @Override
+    public void visit(IDashboardVisitor dashboardVisitor) {
+        dashboardVisitor.accept(this);
+        for (DashboardStackItem gridItem : gridItems) {
+            gridItem.getDashboardElement().visit(dashboardVisitor);
         }
     }
 

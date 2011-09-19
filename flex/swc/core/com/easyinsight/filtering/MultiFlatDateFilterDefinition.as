@@ -14,6 +14,7 @@ import mx.collections.ArrayCollection;
 public class MultiFlatDateFilterDefinition extends FilterDefinition {
 
     public var levels:ArrayCollection = new ArrayCollection();
+    public var endDateProperty:String;
 
     public function MultiFlatDateFilterDefinition() {
     }

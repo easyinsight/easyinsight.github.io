@@ -38,6 +38,9 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "temporary_report")
     private boolean temporaryReport;
 
+    @Column(name = "marmotscript")
+    private String marmotScript;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "analysis_to_filter_join",
             joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
@@ -150,6 +153,14 @@ public class AnalysisDefinition implements Cloneable {
 
     public void setAccountVisible(boolean accountVisible) {
         this.accountVisible = accountVisible;
+    }
+
+    public String getMarmotScript() {
+        return marmotScript;
+    }
+
+    public void setMarmotScript(String marmotScript) {
+        this.marmotScript = marmotScript;
     }
 
     public String getDescription() {
@@ -582,6 +593,7 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setVisibleAtFeedLevel(visibleAtFeedLevel);
         analysisDefinition.setSolutionVisible(solutionVisible);
         analysisDefinition.setAccountVisible(accountVisible);
+        analysisDefinition.setMarmotScript(marmotScript);
         if (joinOverrides != null) {
             List<JoinOverride> joins = new ArrayList<JoinOverride>();
             for (JoinOverride joinOverride : joinOverrides) {

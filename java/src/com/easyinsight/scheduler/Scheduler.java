@@ -88,10 +88,6 @@ public class Scheduler {
         thread.start();
     }
 
-    public List<IGenerator> getGenerators() {
-        return Arrays.asList();
-    }
-
     private void scheduleTasks() {
         boolean locked;
         locked = obtainLock(SCHEDULE_LOCK);

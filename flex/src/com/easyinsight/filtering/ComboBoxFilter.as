@@ -6,6 +6,7 @@ import com.easyinsight.analysis.Value;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
+import flash.utils.Dictionary;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
@@ -263,28 +264,26 @@ public class ComboBoxFilter extends HBox implements IFilter {
 
         var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
                 AnalysisDimensionResultMetadata;
-        var strings:ArrayCollection = new ArrayCollection();
+        var valueObj:Dictionary = new Dictionary();
         if (analysisDimensionResultMetadata != null && analysisDimensionResultMetadata.values != null) {
             for each (var value:Value in analysisDimensionResultMetadata.values) {
                 var string:String = String(value.getValue());
-
-                if (!strings.contains(string)) {
-                    strings.addItem(string);
-                }
+                valueObj[string] = true;
             }
         }
         if (_filterDefinition != null && _filterDefinition.excludeEmpty) {
-            var index:int = strings.getItemIndex("");
-            if (index != -1) {
-                strings.removeItemAt(index);
-            }
+            delete valueObj[""];
         }
-        strings.sort = new Sort();
-        strings.refresh();
+        var strings:Array = [];
+        for (var str:String in valueObj) {
+            strings.push(str);
+        }
+        strings = strings.sort(Array.CASEINSENSITIVE | Array.DESCENDING);
         if (_filterDefinition != null && _filterDefinition.allOption) {
-            strings.addItemAt("All", 0);
+            strings.push("All");
         }
-        comboBox.dataProvider = strings;
+        strings = strings.reverse();
+        comboBox.dataProvider = new ArrayCollection(strings);
         comboBox.rowCount = Math.min(strings.length, 15);
         if (_filterDefinition == null) {
             _filterDefinition = new FilterValueDefinition();
@@ -296,7 +295,7 @@ public class ComboBoxFilter extends HBox implements IFilter {
         }
         var selectedValue:String;
         if (_filterDefinition.filteredValues.length == 0 && strings.length > 0) {
-            _filterDefinition.filteredValues.addItem(strings.getItemAt(0));
+            _filterDefinition.filteredValues.addItem(strings[0]);
         }
         if (_filterDefinition.filteredValues.length > 0) {
             var filterObj:Object = _filterDefinition.filteredValues.getItemAt(0);
@@ -305,9 +304,9 @@ public class ComboBoxFilter extends HBox implements IFilter {
             } else {
                 selectedValue = filterObj as String;
             }
-            var selectedIndex:int = strings.getItemIndex(selectedValue);
+            var selectedIndex:int = strings.indexOf(selectedValue);
             if (selectedIndex == -1) {
-                selectedValue = strings.getItemAt(0) as String;
+                selectedValue = strings[0] as String;
                 var newFilteredValues:ArrayCollection = new ArrayCollection();
                 newFilteredValues.addItem(selectedValue);
                 _filterDefinition.filteredValues = newFilteredValues;

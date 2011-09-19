@@ -87,6 +87,22 @@ public class FunctionFactory {
             return new GreaterThan();
         } else if (s.equals("equalto")) {
             return new EqualTo();
+        } else if (s.equals("replacefields")) {
+            return new ReplaceFields();
+        } else if (s.equals("copyfields")) {
+            return new CopyFields();
+        } else if (s.equals("replacecalculation")) {
+            return new ReplaceCalculation();
+        } else if (s.equals("equals")) {
+            return new IsOnly();
+        } else if (s.equals("addfield")) {
+            return new AddReportField();
+        } else if (s.equals("removefield")) {
+            return new RemoveField();
+        } else if (s.equals("addfieldtofilter")) {
+            return new AddFieldToFilter();
+        } else if (s.equals("removefieldfromfilter")) {
+            return new RemoveFieldFromFilter();
         } else {
             return null;
         }

@@ -34,6 +34,7 @@ import flash.events.EventDispatcher;
     public var templateFilter:Boolean;
     public var toggleEnabled:Boolean;
     public var minimumRole:int = 4;
+    public var marmotScript:String;
 		
 		public function FilterDefinition()
 			{

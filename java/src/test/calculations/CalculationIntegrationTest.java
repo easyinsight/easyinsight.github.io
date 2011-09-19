@@ -58,7 +58,7 @@ public class CalculationIntegrationTest extends TestCase {
             // TODO: apply your visitor here
             // TODO: ((Revenue * Cost Number) / Units) * 12 = should give us 240
 
-            ICalculationTreeVisitor visitor = new EvaluationVisitor(row, null);
+            ICalculationTreeVisitor visitor = new EvaluationVisitor(row, null, null);
             tree.accept(visitor);
             assertEquals(300.0, visitor.getResult().toDouble(), .1);
             //assertEquals(240.0, visitor.getResult().toDouble());
@@ -257,7 +257,7 @@ public class CalculationIntegrationTest extends TestCase {
             // TODO: apply your visitor here
             // TODO: ((Revenue * Cost Number) / Units) * 12 = should give us 240
 
-            ICalculationTreeVisitor visitor = new EvaluationVisitor(row, null);
+            ICalculationTreeVisitor visitor = new EvaluationVisitor(row, null, null);
             tree.accept(visitor);
             assertEquals(1.0, visitor.getResult().toDouble(), .1);
             //assertEquals(240.0, visitor.getResult().toDouble());
@@ -292,7 +292,7 @@ public class CalculationIntegrationTest extends TestCase {
             // TODO: apply your visitor here
             // TODO: ((Revenue * Cost Number) / Units) * 12 = should give us 240
 
-            ICalculationTreeVisitor visitor = new EvaluationVisitor(row, null);
+            ICalculationTreeVisitor visitor = new EvaluationVisitor(row, null, null);
             tree.accept(visitor);
             assertEquals(100000.0, visitor.getResult().toDouble(), .1);
             //assertEquals(240.0, visitor.getResult().toDouble());
@@ -327,7 +327,7 @@ public class CalculationIntegrationTest extends TestCase {
             // TODO: apply your visitor here
             // TODO: ((Revenue * Cost Number) / Units) * 12 = should give us 240
 
-            ICalculationTreeVisitor visitor = new EvaluationVisitor(row, null);
+            ICalculationTreeVisitor visitor = new EvaluationVisitor(row, null, null);
             tree.accept(visitor);
             assertEquals(25.0, visitor.getResult().toDouble(), .1);
             //assertEquals(240.0, visitor.getResult().toDouble());
@@ -362,7 +362,7 @@ public class CalculationIntegrationTest extends TestCase {
             // TODO: apply your visitor here
             // TODO: ((Revenue * Cost Number) / Units) * 12 = should give us 240
 
-            ICalculationTreeVisitor visitor = new EvaluationVisitor(row, null);
+            ICalculationTreeVisitor visitor = new EvaluationVisitor(row, null, null);
             tree.accept(visitor);
             assertEquals(100.0, visitor.getResult().toDouble(), .1);
             //assertEquals(240.0, visitor.getResult().toDouble());

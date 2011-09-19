@@ -1,11 +1,11 @@
 package com.easyinsight.dashboard;
 
-import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisStorage;
-import com.easyinsight.analysis.ReportMetrics;
+import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedConsumer;
+import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -207,6 +207,48 @@ public class DashboardService {
         } catch (Exception e) {
             LogClass.error("On retrieving dashboard " + dashboardID, e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public Dashboard getDashboardView(long dashboardID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            int role = SecurityUtil.authorizeDashboard(dashboardID);
+            Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
+            dashboard.setRole(role);
+            dashboard.visit(new AnalysisItemFilterVisitor(dashboard.getDataSourceID(), conn));
+            return dashboard;
+        } catch (Exception e) {
+            LogClass.error("On retrieving dashboard " + dashboardID, e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    private static class AnalysisItemFilterVisitor implements IDashboardVisitor {
+
+        private Feed feed;
+        private List<FilterDefinition> dlsFilters;
+        private EIConnection conn;
+
+        private AnalysisItemFilterVisitor(long dataSourceID, EIConnection conn) throws SQLException {
+            feed = FeedRegistry.instance().getFeed(dataSourceID, conn);
+            dlsFilters = DataService.addDLSFilters(dataSourceID, conn);
+            this.conn = conn;
+        }
+
+        public void accept(DashboardElement dashboardElement) {
+            if (dashboardElement instanceof DashboardStack) {
+                DashboardStack dashboardStack = (DashboardStack) dashboardElement;
+                if (dashboardStack.getFilters() != null) {
+                    for (FilterDefinition filterDefinition : dashboardStack.getFilters()) {
+                        if (filterDefinition.getMarmotScript() != null && !"".equals(filterDefinition.getMarmotScript().trim())) {
+                            new ReportCalculation(filterDefinition.getMarmotScript()).apply(filterDefinition, feed.getFields(), feed, conn, dlsFilters);
+                        }
+                    }
+                }
+            }
         }
     }
 

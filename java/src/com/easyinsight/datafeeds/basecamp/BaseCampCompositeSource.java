@@ -7,6 +7,9 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.MultiChildConnection;
+import com.easyinsight.intention.AddFilterIntention;
+import com.easyinsight.intention.Intention;
+import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.security.SecurityUtil;
@@ -54,8 +57,27 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         setFeedName("Basecamp");
     }
 
+    @Override
+    public void beforeSave(EIConnection conn) throws Exception {
+        super.beforeSave(conn);
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT BASECAMP.include_inactive, basecamp.include_archived, basecamp.include_comments," +
+                "basecamp.include_todo_comments FROM BASECAMP WHERE DATA_FEED_ID = ?");
+        queryStmt.setLong(1, getDataFeedID());
+        ResultSet rs = queryStmt.executeQuery();
+        if (rs.next()) {
+            boolean includeInactive = rs.getBoolean(1);
+            boolean includeArchived = rs.getBoolean(2);
+            boolean includeComments = rs.getBoolean(3);
+            boolean includeTodoComments = rs.getBoolean(4);
+            if (includeArchived != this.includeArchived || includeInactive != this.includeInactive || includeTodoComments != this.includeTodoComments ||
+                    includeComments != this.includeMilestoneComments) {
+                setLastRefreshStart(null);
+            }
+        }
+    }
+
     public boolean isIncrementalRefresh() {
-        return false;
+        return incrementalRefresh;
     }
 
     public void setIncrementalRefresh(boolean incrementalRefresh) {
@@ -326,6 +348,24 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         return kpis;
     }
 
+    public static final int MILESTONE_FILTER = 1;
+
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
+        List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+        suggestions.add(new IntentionSuggestion("Help Me Set Up a Milestone Report",
+                "This action will configure your report to exclude any results without a matching milestone.",
+                IntentionSuggestion.SCOPE_DATA_SOURCE, BaseCampCompositeSource.MILESTONE_FILTER));
+        return suggestions;
+    }
+
+    public List<Intention> createIntentions(WSAnalysisDefinition report, List<AnalysisItem> fields, int type) throws SQLException {
+        if (type == MILESTONE_FILTER) {
+            return Arrays.asList((Intention) new AddFilterIntention(excludeFilter(BaseCampTodoSource.MILESTONENAME, report, fields)));
+        } else {
+            throw new RuntimeException("Unrecognized intention type");
+        }
+    }
+
     public boolean isLongRefresh() {
         return true;
     }
@@ -375,7 +415,9 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     @Override
     public boolean checkDateTime(String name, Key key) {
         if (BaseCampTimeSource.DATE.equals(name) || BaseCampTodoSource.MILESTONE_COMPLETED_ON.equals(name) ||
-                BaseCampTodoSource.MILESTONE_CREATED_ON.equals(name) || BaseCampTodoSource.DEADLINE.equals(name)) {
+                BaseCampTodoSource.MILESTONE_CREATED_ON.equals(name) || BaseCampTodoSource.DEADLINE.equals(name) ||
+                BaseCampTodoSource.CREATEDDATE.equals(name) || BaseCampTodoSource.COMPLETEDDATE.equals(name) ||
+                BaseCampTodoSource.DUEON.equals(name)) {
             return false;
         }
         return true;

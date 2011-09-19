@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" verticalScrollPolicy="off"
-           implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%" resize="onResize()">
+           implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%">
     <mx:states>
         <mx:State name="noData">
             <mx:RemoveChild target="{dataGrid}"/>
@@ -173,7 +173,7 @@
 
         private var reportWidth:int;
 
-        private function onResize():void {
+        /*private function onResize():void {
             var endWidth:int = 0;
             if (reportWidth < this.width) {
                 var delta:int = (this.width - reportWidth);
@@ -188,7 +188,7 @@
             if (endWidth > 0) {
                 dataGrid.x = (this.width - endWidth) / 2;
             }
-        }
+        }*/
 
         public function updateExportMetadata():void {
         }

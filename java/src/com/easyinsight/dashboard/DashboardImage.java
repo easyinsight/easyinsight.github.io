@@ -59,6 +59,11 @@ public class DashboardImage extends DashboardElement {
     }
 
     @Override
+    public void visit(IDashboardVisitor dashboardVisitor) {
+        dashboardVisitor.accept(this);
+    }
+
+    @Override
     public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
 
     }

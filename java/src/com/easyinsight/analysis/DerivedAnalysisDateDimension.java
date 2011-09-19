@@ -108,7 +108,7 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         return analysisItemList;
     }
 
-    public Value calculate(IRow row, Collection<AnalysisItem> analysisItems) {
+    public Value calculate(IRow row, Collection<AnalysisItem> analysisItems, CalculationMetadata calculationMetadata) {
         CalculationTreeNode calculationTreeNode;
         ICalculationTreeVisitor visitor;
         CalculationsParser.expr_return ret;
@@ -151,7 +151,7 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
             calculationTreeNode.accept(visitor);
 
-            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, this);
+            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, this, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);
             return rowVisitor.getResult();
         } catch (FunctionException fe) {

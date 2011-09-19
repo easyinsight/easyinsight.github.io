@@ -1,7 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.EmptyValue;
-import com.easyinsight.core.Value;
+import com.easyinsight.core.*;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.*;
@@ -65,9 +64,40 @@ public class Crosstab {
         public int compare(Section section, Section section1) {
             for (int i = 0; i < levels; i++) {
                 Value value1 = section.values.get(i);
+                if (value1.getSortValue() != null) {
+                    value1 = value1.getSortValue();
+                }
                 Value value2 = section1.values.get(i);
-                if (!value1.toString().equals(value2.toString())) {
-                    return value1.toString().compareTo(value2.toString());
+                if (value2.getSortValue() != null) {
+                    value2 = value2.getSortValue();
+                }
+                if (value1.type() == Value.EMPTY) {
+                    if (value2.type() == Value.STRING) {
+                        value2 = new StringValue("");
+                    } else if (value2.type() == Value.DATE) {
+                        value2 = new DateValue(new Date(0));
+                    } else if (value2.type() == Value.NUMBER) {
+                        value2 = new NumericValue(-1);
+                    }
+                } else if (value2.type() == Value.EMPTY) {
+                    if (value1.type() == Value.STRING) {
+                        value2 = new StringValue("");
+                    } else if (value1.type() == Value.DATE) {
+                        value2 = new DateValue(new Date(0));
+                    } else if (value1.type() == Value.NUMBER) {
+                        value2 = new NumericValue(-1);
+                    }
+                }
+                if (value1.type() == Value.STRING && value2.type() == Value.STRING) {
+                    if (!value1.toString().equals(value2.toString())) {
+                        return value1.toString().compareTo(value2.toString());
+                    }
+                } else if (value1.type() == Value.DATE && value2.type() == Value.DATE) {
+                    DateValue dateValue1 = (DateValue) value1;
+                    DateValue dateValue2 = (DateValue) value1;
+                    return dateValue1.getDate().compareTo(dateValue2.getDate());
+                } else if (value1.type() == Value.NUMBER && value2.type() == Value.NUMBER) {
+                    return value1.toDouble().compareTo(value2.toDouble());
                 }
             }
             return 0;
@@ -78,19 +108,27 @@ public class Crosstab {
 
         List<Section> columnSections = getColumnSections();
         List<Section> rowSections = getRowSections();
-        CrosstabValue[][] array = new CrosstabValue[rowSections.size() + crosstabDefinition.getColumns().size()][columnSections.size() + crosstabDefinition.getRows().size()];
+        CrosstabValue[][] array = new CrosstabValue[rowSections.size() + crosstabDefinition.getColumns().size() + 2][columnSections.size() + crosstabDefinition.getRows().size() + 1];
+        for (int i = 0; i < crosstabDefinition.getRows().size(); i++) {
+            AnalysisItem row = crosstabDefinition.getRows().get(i);
+            array[1][i] = new CrosstabValue(new StringValue(row.toDisplay()), row, true, false);
+        }
+        for (int i = 0; i < crosstabDefinition.getColumns().size(); i++) {
+            AnalysisItem column = crosstabDefinition.getColumns().get(i);
+            array[0][i + crosstabDefinition.getRows().size()] = new CrosstabValue(new StringValue(column.toDisplay()), column, true, false);
+        }
         for (int i = 0; i < columnSections.size(); i++) {
             Section columnSection = columnSections.get(i);
             for (int j = 0; j < crosstabDefinition.getColumns().size(); j++) {
                 Value headerValue = columnSection.values.get(j);
-                array[j][i + crosstabDefinition.getRows().size()] = new CrosstabValue(headerValue, crosstabDefinition.getColumns().get(j));
+                array[j + 1][i + crosstabDefinition.getRows().size()] = new CrosstabValue(headerValue, crosstabDefinition.getColumns().get(j));
             }
         }
         for (int j = 0; j < rowSections.size(); j++) {
             Section columnSection = rowSections.get(j);
             for (int i = 0; i < crosstabDefinition.getRows().size(); i++) {
                 Value headerValue = columnSection.values.get(i);
-                array[j + crosstabDefinition.getColumns().size()][i] = new CrosstabValue(headerValue, crosstabDefinition.getRows().get(i));
+                array[j + crosstabDefinition.getColumns().size() + 1][i] = new CrosstabValue(headerValue, crosstabDefinition.getRows().get(i));
             }
         }
         for (int i = 0; i < columnSections.size(); i++) {
@@ -101,9 +139,36 @@ public class Crosstab {
                 if (value == null) {
                     value = new EmptyValue();
                 }
-                array[j + crosstabDefinition.getColumns().size()][i + crosstabDefinition.getRows().size()] = new CrosstabValue(value, null);
+                array[j + crosstabDefinition.getColumns().size() + 1][i + crosstabDefinition.getRows().size()] = new CrosstabValue(value, null);
             }
         }
+
+        for (int i = 0; i < columnSections.size(); i++) {
+            double sum = 0;
+            Section columnSection = columnSections.get(i);
+            for (int j = 0; j < rowSections.size(); j++) {
+                Section rowSection = rowSections.get(j);
+                Value value = intersectionMap.get(new Intersection(rowSection, columnSection));
+                if (value != null) {
+                    sum += value.toDouble();
+                }
+            }
+            array[rowSections.size() + crosstabDefinition.getColumns().size() + 1][i + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
+        }
+
+        for (int j = 0; j < rowSections.size(); j++) {
+            Section rowSection = rowSections.get(j);
+            double sum = 0;
+            for (int i = 0; i < columnSections.size(); i++) {
+                Section columnSection = columnSections.get(i);
+                Value value = intersectionMap.get(new Intersection(rowSection, columnSection));
+                if (value != null) {
+                    sum += value.toDouble();
+                }
+            }
+            array[j + 2][columnSections.size() + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
+        }
+
 
         return array;
     }

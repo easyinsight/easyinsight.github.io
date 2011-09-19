@@ -253,4 +253,6 @@ public abstract class DashboardElement implements Cloneable {
 
     public abstract Set<Long> containedScorecards();
     public abstract void updateScorecardIDs(Map<Long, Scorecard> scorecardReplacementMap);
+
+    public abstract void visit(IDashboardVisitor dashboardVisitor);
 }

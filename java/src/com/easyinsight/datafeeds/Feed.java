@@ -35,6 +35,15 @@ public abstract class Feed implements Serializable {
     private boolean exchangeSave;
     private String urlKey;
     private Map<String, String> properties;
+    private String marmotScript;
+
+    public void setMarmotScript(String marmotScript) {
+        this.marmotScript = marmotScript;
+    }
+
+    public String getMarmotScript() {
+        return marmotScript;
+    }
 
     protected FeedDefinition getParentSource(EIConnection conn) throws SQLException {
         return new FeedStorage().getFeedDefinitionData(getDataSource().getParentSourceID());

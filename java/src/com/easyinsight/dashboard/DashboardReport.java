@@ -105,4 +105,8 @@ public class DashboardReport extends DashboardElement {
         queryStmt.close();
         return dashboardReport;
     }
+
+    public void visit(IDashboardVisitor dashboardVisitor) {
+        dashboardVisitor.accept(this);
+    }
 }

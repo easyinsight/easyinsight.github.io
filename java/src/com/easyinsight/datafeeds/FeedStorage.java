@@ -82,8 +82,8 @@ public class FeedStorage {
                 "CREATE_DATE, UPDATE_DATE, DESCRIPTION," +
                 "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, " +
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, INHERIT_ACCOUNT_API_SETTINGS," +
-                "CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE, last_refresh_start) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE, last_refresh_start, marmotscript) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -116,10 +116,11 @@ public class FeedStorage {
         insertDataFeedStmt.setInt(i++, feedDefinition.getVersion());
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isAccountVisible());
         if (feedDefinition.getLastRefreshStart() == null) {
-            insertDataFeedStmt.setNull(i, Types.TIMESTAMP);
+            insertDataFeedStmt.setNull(i++, Types.TIMESTAMP);
         } else {
-            insertDataFeedStmt.setTimestamp(i, new Timestamp(feedDefinition.getLastRefreshStart().getTime()));
+            insertDataFeedStmt.setTimestamp(i++, new Timestamp(feedDefinition.getLastRefreshStart().getTime()));
         }
+        insertDataFeedStmt.setString(i, feedDefinition.getMarmotScript());
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
         feedDefinition.setDataFeedID(feedID);
@@ -223,24 +224,43 @@ public class FeedStorage {
     }
 
     private void saveFields(Connection conn, FeedFolder folder, Set<Long> fields) throws SQLException {
-        PreparedStatement clearJoinsStmt = conn.prepareStatement("DELETE FROM folder_to_analysis_item WHERE folder_id = ?");
+        PreparedStatement getJoinsStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM_ID FROM FOLDER_TO_ANALYSIS_ITEM WHERE FOLDER_ID = ?");
+        getJoinsStmt.setLong(1, folder.getFolderID());
+        Set<Long> ids = new HashSet<Long>();
+        ResultSet rs = getJoinsStmt.executeQuery();
+        while (rs.next()) {
+            ids.add(rs.getLong(1));
+        }
+        getJoinsStmt.close();
+
+        /*PreparedStatement clearJoinsStmt = conn.prepareStatement("DELETE FROM folder_to_analysis_item WHERE folder_id = ?");
         clearJoinsStmt.setLong(1, folder.getFolderID());
         clearJoinsStmt.executeUpdate();
-        clearJoinsStmt.close();
+        clearJoinsStmt.close();*/
         PreparedStatement insertFieldStmt = conn.prepareStatement("INSERT INTO folder_to_analysis_item (folder_id, analysis_item_id) values (?, ?)");
         for (AnalysisItem analysisItem : folder.getChildItems()) {
             boolean okay = fields.contains(analysisItem.getAnalysisItemID());
             if (okay) {
-                insertFieldStmt.setLong(1, folder.getFolderID());
-                insertFieldStmt.setLong(2, analysisItem.getAnalysisItemID());
-                try {
-                    insertFieldStmt.execute();
-                } catch (SQLException e) {
-                    LogClass.error("Analysis item " + analysisItem.toDisplay() + " was not yet saved in folder " + folder.getName());
-                    throw e;
+                if (ids.contains(analysisItem.getAnalysisItemID())) {
+                    ids.remove(analysisItem.getAnalysisItemID());
+                } else {
+                    insertFieldStmt.setLong(1, folder.getFolderID());
+                    insertFieldStmt.setLong(2, analysisItem.getAnalysisItemID());
+                    try {
+                        insertFieldStmt.execute();
+                    } catch (SQLException e) {
+                        LogClass.error("Analysis item " + analysisItem.toDisplay() + " was not yet saved in folder " + folder.getName());
+                        throw e;
+                    }
                 }
             }
         }
+        PreparedStatement clearJoinsStmt = conn.prepareStatement("DELETE FROM folder_to_analysis_item WHERE analysis_item_id = ?");
+        for (Long id : ids) {
+            clearJoinsStmt.setLong(1, id);
+            clearJoinsStmt.executeUpdate();
+        }
+        clearJoinsStmt.close();
         insertFieldStmt.close();
     }
 
@@ -561,7 +581,7 @@ public class FeedStorage {
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, " +
                 "FEED_SIZE = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
                 "API_KEY = ?, unchecked_api_enabled = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ?," +
-                "CREATE_DATE = ?, UPDATE_DATE = ?, ACCOUNT_VISIBLE = ?, LAST_REFRESH_START = ? WHERE DATA_FEED_ID = ?");
+                "CREATE_DATE = ?, UPDATE_DATE = ?, ACCOUNT_VISIBLE = ?, LAST_REFRESH_START = ?, MARMOTSCRIPT = ? WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         int i = 1;
         updateDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -589,6 +609,7 @@ public class FeedStorage {
         } else {
             updateDataFeedStmt.setTimestamp(i++, new Timestamp(feedDefinition.getLastRefreshStart().getTime()));
         }
+        updateDataFeedStmt.setString(i++, feedDefinition.getMarmotScript());
         updateDataFeedStmt.setLong(i, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
@@ -645,7 +666,7 @@ public class FeedStorage {
         PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, CREATE_DATE," +
                 "UPDATE_DATE, FEED_SIZE," +
                 "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, API_KEY, unchecked_api_enabled, " +
-                "VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, LAST_REFRESH_START " +
+                "VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, LAST_REFRESH_START, MARMOTSCRIPT " +
                 "FROM DATA_FEED WHERE " +
                 "DATA_FEED_ID = ?");
         queryFeedStmt.setLong(1, identifier);
@@ -684,10 +705,11 @@ public class FeedStorage {
                 feedDefinition.setParentSourceID(parentSourceID);
             }
             feedDefinition.setAccountVisible(rs.getBoolean(i++));
-            Timestamp lastRefreshTime = rs.getTimestamp(i);
+            Timestamp lastRefreshTime = rs.getTimestamp(i++);
             if (lastRefreshTime != null) {
                 feedDefinition.setLastRefreshStart(new Date(lastRefreshTime.getTime()));
             }
+            feedDefinition.setMarmotScript(rs.getString(i));
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
             feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
             feedDefinition.customLoad(conn);

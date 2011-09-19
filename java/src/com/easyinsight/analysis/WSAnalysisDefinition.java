@@ -3,10 +3,13 @@ package com.easyinsight.analysis;
 import com.easyinsight.database.Database;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
+import com.easyinsight.intention.Intention;
+import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ResultsBridge;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.io.Serializable;
 
@@ -80,10 +83,19 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private List<JoinOverride> joinOverrides;
     private boolean optimized;
     private boolean fullJoins;
+    private String marmotScript;
 
     private String fontName = "Tahoma";
     private int fontSize = 12;
     private double backgroundAlpha = 1;
+
+    public String getMarmotScript() {
+        return marmotScript;
+    }
+
+    public void setMarmotScript(String marmotScript) {
+        this.marmotScript = marmotScript;
+    }
 
     public boolean isOptimized() {
         return optimized;
@@ -556,5 +568,13 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setFontSize(int fontSize) {
         this.fontSize = fontSize;
+    }
+
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
+        return new ArrayList<IntentionSuggestion>();
+    }
+
+    public List<Intention> createIntentions(List<AnalysisItem> fields, int type) throws SQLException {
+        return new ArrayList<Intention>();
     }
 }

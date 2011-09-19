@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.EmailReportWindow;
+        import com.easyinsight.analysis.ExcelCreator;
+
+        import mx.managers.PopUpManager;
+
+        private var _reportType:int;
+        private var _dataSourceID:int;
+        private var _reportName:String;
+        private var _coreView:DisplayObject;
+
+        private var _report:AnalysisDefinition;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            _reportName = _report.name;
+            _reportType = _report.reportType;
+            _dataSourceID = _report.dataFeedID;
+        }
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
+
+        public function set coreView(value:DisplayObject):void {
+            _coreView = value;
+        }
+
+        private function excel():void {
+            new ExcelCreator().exportExcel(_report, this);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function email():void {
+            var window:EmailReportWindow = new EmailReportWindow();
+            window.report = _report;
+            window.x = this.x;
+            window.y = this.y;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:VBox paddingTop="10" paddingLeft="10" paddingBottom="10" paddingRight="10" horizontalAlign="center">
+        <mx:Label text="Click any of the options below to export the report:" fontSize="14"/>
+        <mx:Grid>
+            <mx:GridRow>
+                <mx:GridItem>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/table.png')" label="Export to Excel" click="excel()" labelPlacement="right" width="250"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/mail.png')" label="Email" click="email()" labelPlacement="right" width="250"/>
+                </mx:GridItem>
+            </mx:GridRow>
+        </mx:Grid>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:CancelButton label="Close" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

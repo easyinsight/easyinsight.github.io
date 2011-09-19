@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.DataViewFactory;
+        import com.easyinsight.filtering.TransformContainer;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var suggestions:ArrayCollection;
+
+        private var _report:AnalysisDefinition;
+
+        private var _dataView:DataViewFactory;
+
+        private var _fields:ArrayCollection;
+
+        private var _transformContainer:TransformContainer;
+
+        private var _allFields:ArrayCollection;
+
+        private var _wrappers:ArrayCollection;
+
+        public function set allFields(value:ArrayCollection):void {
+            _allFields = value;
+        }
+
+        public function set wrappers(value:ArrayCollection):void {
+            _wrappers = value;
+        }
+
+        public function set transformContainer(value:TransformContainer):void {
+            _transformContainer = value;
+        }
+
+        public function set fields(value:ArrayCollection):void {
+            _fields = value;
+        }
+
+        public function set dataView(value:DataViewFactory):void {
+            _dataView = value;
+        }
+
+        private function onCreation():void {
+            addEventListener(IntentionEvent.SUGGESTION_CHOICE, onIntentionChoice);
+            ProgressAlert.alert(this, "Determining possible suggestions...", null, analysisService.generatePossibleIntentions);
+            analysisService.generatePossibleIntentions.send(_report);
+        }
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
+
+        private function gotSuggestions():void {
+            var suggestions:ArrayCollection = analysisService.generatePossibleIntentions.lastResult as ArrayCollection;
+            if (suggestions.length == 0) {
+                Alert.show("We didn't come up with any suggestions for your report. If you have any ideas for common report tasks that you'd like to see as suggestions, let us know!");
+                PopUpManager.removePopUp(this);
+            } else {
+                suggestionList.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+                this.suggestions = suggestions;
+                suggestionList.rowCount = suggestions.length;
+            }
+
+        }
+
+        private function onUpdateComplete(event:FlexEvent):void {
+            suggestionList.removeEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+            PopUpUtil.centerPopUp(this);
+        }
+
+        private function onIntentionChoice(event:IntentionEvent):void {
+            analysisService.getIntentions.send(_report, _fields, event.suggestion.scope, event.suggestion.type);
+        }
+
+        private function gotIntentions():void {
+            var intentions:ArrayCollection = analysisService.getIntentions.lastResult as ArrayCollection;
+            var metadata:SuggestionMetadata = new SuggestionMetadata(_report, _transformContainer, _allFields, _wrappers);
+            for each (var intention:Intention in intentions) {
+                intention.apply(metadata);
+            }
+            _dataView.retrieveData();
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="generatePossibleIntentions" result="gotSuggestions()"/>
+        <mx:method name="getIntentions" result="gotIntentions()"/>
+    </mx:RemoteObject>
+    <mx:List dataProvider="{suggestions}" itemRenderer="com.easyinsight.suggestion.IntentionRenderer" selectable="false" variableRowHeight="true"
+            id="suggestionList"/>
+    <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+</util:EISlimWindow>

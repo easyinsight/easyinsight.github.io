@@ -47,6 +47,9 @@ public class StyleConfiguration {
         items.addItem(new NumericReportFormItem("Padding Left", "paddingLeft", dashboard.paddingLeft, dashboard, 0, 100));
         items.addItem(new NumericReportFormItem("Padding Right", "paddingRight", dashboard.paddingRight, dashboard, 0, 100));
         items.addItem(new ComboBoxReportFormItem("Filter Border Style", "filterBorderStyle", dashboard.filterBorderStyle, dashboard, ["solid", "none"]));
+        items.addItem(new ComboBoxReportFormItem("YTD Month", "ytdMonth", dashboard.ytdMonth, dashboard, ["January", "February",
+            "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]));
+        items.addItem(new CheckBoxReportFormItem("YTD Override", "overrideYTD", dashboard.overrideYTD, dashboard));
         items.addItem(new ColorReportFormItem("Filter Border Color", "filterBorderColor",  dashboard.filterBorderColor, dashboard));
         items.addItem(new ColorReportFormItem("Filter Background Color", "filterBackgroundColor",  dashboard.filterBackgroundColor, dashboard));
         items.addItem(new NumericReportFormItem("Filter Background Alpha", "filterBackgroundAlpha",  dashboard.filterBackgroundAlpha, dashboard, 0, 1));

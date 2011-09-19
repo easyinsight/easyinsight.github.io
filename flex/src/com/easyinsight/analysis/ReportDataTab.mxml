@@ -5,10 +5,11 @@
         [Event(name="analysisItemEdit", type="com.easyinsight.analysis.AnalysisItemEditEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
+        import com.easyinsight.code.MarmotScriptEvent;
+        import com.easyinsight.code.MarmotScriptWindow;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.framework.DataService;
         import com.easyinsight.util.PopUpUtil;
-        import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
@@ -24,19 +25,6 @@
         private var _wrappers:ArrayCollection;
 
         private var _dataSourceInfo:DataSourceInfo;
-
-        private var _reportAudit:ArrayCollection;
-
-        [Bindable(event="reportAuditChanged")]
-        public function get reportAudit():ArrayCollection {
-            return _reportAudit;
-        }
-
-        public function set reportAudit(value:ArrayCollection):void {
-            if (_reportAudit == value) return;
-            _reportAudit = value;
-            dispatchEvent(new Event("reportAuditChanged"));
-        }
 
         [Bindable(event="dataSourceInfoChanged")]
         public function get dataSourceInfo():DataSourceInfo {
@@ -212,13 +200,16 @@
             dispatchEvent(new Event("joinsCustomizableChanged"));
         }
 
-        public function explainReport():void {
-            if (reportAudit != null) {
-                var window:ReportExplanationWindow = new ReportExplanationWindow();
-                window.audits = _reportAudit;
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-            }
+        private function customCode():void {
+            var window:MarmotScriptWindow = new MarmotScriptWindow();
+            window.script = analysisDefinition.marmotScript;
+            window.addEventListener(MarmotScriptEvent.SAVE_SCRIPT, onScript, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onScript(event:MarmotScriptEvent):void {
+            analysisDefinition.marmotScript = event.script;
         }
         ]]></mx:Script>
     <mx:Button id="calculationButton" toolTip="Create Calculation"
@@ -232,7 +223,9 @@
                click="createCalculatedDate()" labelPlacement="right" label="New Derived Date" y="10" x="320"/>
     <mx:Button icon="@Embed(source='../../../../assets/cubes_blue_add.png')"
                toolTip="Add Hierarchy..." click="createHierarchy()" id="hierarchyButton" labelPlacement="right" label="New Hierarchy" y="10" x="467"/>
+    <mx:Button icon="@Embed(source='../../../../assets/code_edit.png')"
+               toolTip="Customize Report Code..." click="customCode()" labelPlacement="right" label="Custom Code" y="10" x="595"/>
     <mx:Button icon="@Embed(source='../../../../assets/branchx16.png')"
-               toolTip="Customize Joins..." click="joinControl()" labelPlacement="right" label="Customize Joins" y="10" x="600"
+               toolTip="Customize Joins..." click="joinControl()" labelPlacement="right" label="Customize Joins" y="10" x="720"
             visible="{joinsCustomizable}"/>
 </mx:Canvas>

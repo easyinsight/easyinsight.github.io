@@ -36,6 +36,7 @@ package com.easyinsight.administration.feed
         public var parentSourceID:int;
         public var folders:ArrayCollection = new ArrayCollection();
         public var lastRefreshStart:Date;
+        public var marmotScript:String;
 		
 		public function FeedDefinitionData()
 		{

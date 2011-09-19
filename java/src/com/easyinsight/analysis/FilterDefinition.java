@@ -44,10 +44,21 @@ public class FilterDefinition implements Serializable, Cloneable {
     private boolean toggleEnabled;
     @Column(name="minimum_role")
     private int minimumRole = 4;
+
+    @Column(name="marmotscript")
+    private String marmotScript;
     /*@Column(name="show_if_owner")
     private boolean showIfOwner;*/
 
     public FilterDefinition() {
+    }
+
+    public String getMarmotScript() {
+        return marmotScript;
+    }
+
+    public void setMarmotScript(String marmotScript) {
+        this.marmotScript = marmotScript;
     }
 
     public int getMinimumRole() {

@@ -32,6 +32,8 @@ public class Dashboard {
     public var recommendedExchange:Boolean;
     public var dataSourceInfo:DataSourceInfo;
     public var role:int;
+    public var ytdMonth:String;
+    public var overrideYTD:Boolean;
 
     public function Dashboard() {
     }

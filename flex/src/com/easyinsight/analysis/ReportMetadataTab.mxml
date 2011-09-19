@@ -2,10 +2,13 @@
 <mx:Canvas label="Getting Started" icon="@Embed(source='../../../../assets/bullet_ball_green.png')" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreation()"
          xmlns:datasources="com.easyinsight.datasources.*" width="100%" height="90">
     <mx:Script><![CDATA[
-
         import com.easyinsight.datasources.DataSourceInfo;
+        import com.easyinsight.filtering.TransformContainer;
         import com.easyinsight.framework.User;
+        import com.easyinsight.suggestion.IntentionListWindow;
         import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
 
         import mx.managers.PopUpManager;
 
@@ -45,11 +48,53 @@
             dispatchEvent(new Event("dataSourceInfoChanged"));
         }
 
+        private var _report:AnalysisDefinition;
+
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
+
+        private var _transformContainer:TransformContainer;
+
+
+        public function set transformContainer(value:TransformContainer):void {
+            _transformContainer = value;
+        }
+
         public function cleanup():void {
         }
 
         private function tutorial():void {
             var window:ReportEditorHelp = new ReportEditorHelp();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private var _fields:ArrayCollection;
+
+        public function set fields(value:ArrayCollection):void {
+            _fields = value;
+        }
+
+        private var _availableFields:ArrayCollection;
+
+        public function set availableFields(value:ArrayCollection):void {
+            _availableFields = value;
+        }
+
+        private function suggestions():void {
+            var items:ArrayCollection = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in _fields) {
+                items.addItem(wrapper.analysisItem);
+            }
+            var window:IntentionListWindow = new IntentionListWindow();
+            window.report = _report;
+            window.fields = items;
+            window.allFields = _availableFields;
+            window.wrappers = _fields;
+            window.transformContainer = _transformContainer;
+            window.dataView = _dataView;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -60,6 +105,8 @@
                                          text="You can drag the fields below into the report areas to the right. You can click on the arrow to the left of folders to see more fields. You can also right click on the fields to add to the report or create new filters."/>
     </mx:Box>
     <mx:Button icon="@Embed(source='../../../../assets/report/help.png')"
-                       click="tutorial()" toolTip="Help!" label="Help!" x="542" y="28"/>
-    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}" id="dataSourceDisplay" visible="false" x="650" y="16" dataSourceRefreshed="dataView.forceRetrieve()"/>
+                       click="tutorial()" toolTip="Help!" label="Help!" x="575" y="5"/>
+    <mx:Button icon="@Embed(source='../../../../assets/gear32.png')"
+                       click="suggestions()" toolTip="Help!" label="Suggest Actions" x="542" y="45"/>
+    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}" id="dataSourceDisplay" visible="false" x="700" y="16" dataSourceRefreshed="dataView.forceRetrieve()"/>
 </mx:Canvas>

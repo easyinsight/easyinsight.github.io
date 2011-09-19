@@ -39,7 +39,7 @@
             if (_urlKey != null) {
                 dashboardService.canAccessDashboard.send(_urlKey);
             } else {
-                Alert.show("No analysisID parameter was specified in the report embed HTML code.");
+                Alert.show("No dashboardID parameter was specified in the dashboard embed HTML code.");
             }
             if (!_showControls) {
                 removeChild(buttonBox);
@@ -49,7 +49,7 @@
 
         private function accessInfo():void {
             var id:int = dashboardService.canAccessDashboard.lastResult as int;
-            dashboardService.getDashboard.send(id);
+            dashboardService.getDashboardView.send(id);
         }
 
         [Bindable]
@@ -94,7 +94,7 @@
         private var dashboard:Dashboard;
 
         private function gotDashboard():void {
-            dashboard = dashboardService.getDashboard.lastResult as Dashboard;
+            dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
             var grid:DashboardGrid = dashboard.rootElement as DashboardGrid;
             dashboardCanvas.setStyle("backgroundAlpha", grid.backgroundAlpha);
             if (grid.backgroundColor != 0) {
@@ -173,7 +173,7 @@
         ]]>
     </mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
-        <mx:method name="getDashboard" result="gotDashboard()"/>
+        <mx:method name="getDashboardView" result="gotDashboard()"/>
         <mx:method name="canAccessDashboard" result="accessInfo()"/>
     </mx:RemoteObject>
     <mx:HBox width="100%" id="buttonBox">
