@@ -66,7 +66,7 @@
             } else {
                 suggestionList.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
                 this.suggestions = suggestions;
-                suggestionList.rowCount = suggestions.length;
+                suggestionList.rowCount = suggestions.length + 1;
             }
 
         }
@@ -95,6 +95,6 @@
         <mx:method name="getIntentions" result="gotIntentions()"/>
     </mx:RemoteObject>
     <mx:List dataProvider="{suggestions}" itemRenderer="com.easyinsight.suggestion.IntentionRenderer" selectable="false" variableRowHeight="true"
-            id="suggestionList"/>
+            id="suggestionList" width="700"/>
     <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
 </util:EISlimWindow>
