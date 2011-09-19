@@ -1,10 +1,7 @@
-// $ANTLR 3.1.2 C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g 2010-11-09 21:38:43
- package com.easyinsight.calculations.generated; 
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g 2011-09-19 16:14:47
+package com.easyinsight.calculations.generated;
 
 import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
 
 
 import org.antlr.runtime.tree.*;
@@ -67,7 +64,7 @@ public class CalculationsParser extends Parser {
     }
 
     public String[] getTokenNames() { return CalculationsParser.tokenNames; }
-    public String getGrammarFileName() { return "C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g"; }
+    public String getGrammarFileName() { return "/Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g"; }
 
 
     public static class expr_return extends ParserRuleReturnScope {
@@ -76,7 +73,7 @@ public class CalculationsParser extends Parser {
     };
 
     // $ANTLR start "expr"
-    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:27:1: expr : term ( ( Add | Subtract ) term )* ;
+    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:27:1: expr : term ( ( Add | Subtract ) term )* ;
     public final CalculationsParser.expr_return expr() throws RecognitionException {
         CalculationsParser.expr_return retval = new CalculationsParser.expr_return();
         retval.start = input.LT(1);
@@ -94,8 +91,8 @@ public class CalculationsParser extends Parser {
         Object Subtract3_tree=null;
 
         try {
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:27:6: ( term ( ( Add | Subtract ) term )* )
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:27:8: term ( ( Add | Subtract ) term )*
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:27:6: ( term ( ( Add | Subtract ) term )* )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:27:8: term ( ( Add | Subtract ) term )*
             {
             root_0 = (Object)adaptor.nil();
 
@@ -105,7 +102,7 @@ public class CalculationsParser extends Parser {
             state._fsp--;
 
             adaptor.addChild(root_0, term1.getTree());
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:27:13: ( ( Add | Subtract ) term )*
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:27:13: ( ( Add | Subtract ) term )*
             loop2:
             do {
                 int alt2=2;
@@ -118,9 +115,9 @@ public class CalculationsParser extends Parser {
 
                 switch (alt2) {
             	case 1 :
-            	    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:27:14: ( Add | Subtract ) term
+            	    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:27:14: ( Add | Subtract ) term
             	    {
-            	    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:27:14: ( Add | Subtract )
+            	    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:27:14: ( Add | Subtract )
             	    int alt1=2;
             	    int LA1_0 = input.LA(1);
 
@@ -138,7 +135,7 @@ public class CalculationsParser extends Parser {
             	    }
             	    switch (alt1) {
             	        case 1 :
-            	            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:27:15: Add
+            	            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:27:15: Add
             	            {
             	            Add2=(Token)match(input,Add,FOLLOW_Add_in_expr144); 
             	            Add2_tree = (Object)adaptor.create(Add2);
@@ -148,7 +145,7 @@ public class CalculationsParser extends Parser {
             	            }
             	            break;
             	        case 2 :
-            	            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:27:22: Subtract
+            	            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:27:22: Subtract
             	            {
             	            Subtract3=(Token)match(input,Subtract,FOLLOW_Subtract_in_expr149); 
             	            Subtract3_tree = (Object)adaptor.create(Subtract3);
@@ -202,7 +199,7 @@ public class CalculationsParser extends Parser {
     };
 
     // $ANTLR start "startExpr"
-    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:28:1: startExpr : expr EOF ;
+    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:28:1: startExpr : expr EOF ;
     public final CalculationsParser.startExpr_return startExpr() throws RecognitionException {
         CalculationsParser.startExpr_return retval = new CalculationsParser.startExpr_return();
         retval.start = input.LT(1);
@@ -216,8 +213,8 @@ public class CalculationsParser extends Parser {
         Object EOF6_tree=null;
 
         try {
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:29:2: ( expr EOF )
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:29:4: expr EOF
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:29:2: ( expr EOF )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:29:4: expr EOF
             {
             root_0 = (Object)adaptor.nil();
 
@@ -255,7 +252,7 @@ public class CalculationsParser extends Parser {
     };
 
     // $ANTLR start "term"
-    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:32:1: term : unaryOperator ( ( Multiply | Divide ) unaryOperator )* ;
+    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:32:1: term : unaryOperator ( ( Multiply | Divide ) unaryOperator )* ;
     public final CalculationsParser.term_return term() throws RecognitionException {
         CalculationsParser.term_return retval = new CalculationsParser.term_return();
         retval.start = input.LT(1);
@@ -273,8 +270,8 @@ public class CalculationsParser extends Parser {
         Object Divide9_tree=null;
 
         try {
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:32:6: ( unaryOperator ( ( Multiply | Divide ) unaryOperator )* )
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:32:8: unaryOperator ( ( Multiply | Divide ) unaryOperator )*
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:32:6: ( unaryOperator ( ( Multiply | Divide ) unaryOperator )* )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:32:8: unaryOperator ( ( Multiply | Divide ) unaryOperator )*
             {
             root_0 = (Object)adaptor.nil();
 
@@ -284,7 +281,7 @@ public class CalculationsParser extends Parser {
             state._fsp--;
 
             adaptor.addChild(root_0, unaryOperator7.getTree());
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:32:22: ( ( Multiply | Divide ) unaryOperator )*
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:32:22: ( ( Multiply | Divide ) unaryOperator )*
             loop4:
             do {
                 int alt4=2;
@@ -297,9 +294,9 @@ public class CalculationsParser extends Parser {
 
                 switch (alt4) {
             	case 1 :
-            	    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:32:23: ( Multiply | Divide ) unaryOperator
+            	    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:32:23: ( Multiply | Divide ) unaryOperator
             	    {
-            	    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:32:23: ( Multiply | Divide )
+            	    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:32:23: ( Multiply | Divide )
             	    int alt3=2;
             	    int LA3_0 = input.LA(1);
 
@@ -317,7 +314,7 @@ public class CalculationsParser extends Parser {
             	    }
             	    switch (alt3) {
             	        case 1 :
-            	            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:32:24: Multiply
+            	            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:32:24: Multiply
             	            {
             	            Multiply8=(Token)match(input,Multiply,FOLLOW_Multiply_in_term179); 
             	            Multiply8_tree = (Object)adaptor.create(Multiply8);
@@ -327,7 +324,7 @@ public class CalculationsParser extends Parser {
             	            }
             	            break;
             	        case 2 :
-            	            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:32:36: Divide
+            	            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:32:36: Divide
             	            {
             	            Divide9=(Token)match(input,Divide,FOLLOW_Divide_in_term184); 
             	            Divide9_tree = (Object)adaptor.create(Divide9);
@@ -381,7 +378,7 @@ public class CalculationsParser extends Parser {
     };
 
     // $ANTLR start "unaryOperator"
-    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:34:1: unaryOperator : ( Add | Subtract )? exponent ;
+    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:34:1: unaryOperator : ( Add | Subtract )? exponent ;
     public final CalculationsParser.unaryOperator_return unaryOperator() throws RecognitionException {
         CalculationsParser.unaryOperator_return retval = new CalculationsParser.unaryOperator_return();
         retval.start = input.LT(1);
@@ -397,12 +394,12 @@ public class CalculationsParser extends Parser {
         Object Subtract12_tree=null;
 
         try {
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:35:2: ( ( Add | Subtract )? exponent )
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:35:4: ( Add | Subtract )? exponent
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:35:2: ( ( Add | Subtract )? exponent )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:35:4: ( Add | Subtract )? exponent
             {
             root_0 = (Object)adaptor.nil();
 
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:35:4: ( Add | Subtract )?
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:35:4: ( Add | Subtract )?
             int alt5=3;
             int LA5_0 = input.LA(1);
 
@@ -414,7 +411,7 @@ public class CalculationsParser extends Parser {
             }
             switch (alt5) {
                 case 1 :
-                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:35:5: Add
+                    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:35:5: Add
                     {
                     Add11=(Token)match(input,Add,FOLLOW_Add_in_unaryOperator200); 
                     Add11_tree = (Object)adaptor.create(Add11);
@@ -424,7 +421,7 @@ public class CalculationsParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:35:12: Subtract
+                    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:35:12: Subtract
                     {
                     Subtract12=(Token)match(input,Subtract,FOLLOW_Subtract_in_unaryOperator205); 
                     Subtract12_tree = (Object)adaptor.create(Subtract12);
@@ -469,7 +466,7 @@ public class CalculationsParser extends Parser {
     };
 
     // $ANTLR start "exponent"
-    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:36:1: exponent : factor ( Exp unaryOperator )? ;
+    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:36:1: exponent : factor ( Exp unaryOperator )? ;
     public final CalculationsParser.exponent_return exponent() throws RecognitionException {
         CalculationsParser.exponent_return retval = new CalculationsParser.exponent_return();
         retval.start = input.LT(1);
@@ -485,8 +482,8 @@ public class CalculationsParser extends Parser {
         Object Exp15_tree=null;
 
         try {
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:36:9: ( factor ( Exp unaryOperator )? )
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:36:11: factor ( Exp unaryOperator )?
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:36:9: ( factor ( Exp unaryOperator )? )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:36:11: factor ( Exp unaryOperator )?
             {
             root_0 = (Object)adaptor.nil();
 
@@ -496,7 +493,7 @@ public class CalculationsParser extends Parser {
             state._fsp--;
 
             adaptor.addChild(root_0, factor14.getTree());
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:36:18: ( Exp unaryOperator )?
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:36:18: ( Exp unaryOperator )?
             int alt6=2;
             int LA6_0 = input.LA(1);
 
@@ -505,7 +502,7 @@ public class CalculationsParser extends Parser {
             }
             switch (alt6) {
                 case 1 :
-                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:36:19: Exp unaryOperator
+                    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:36:19: Exp unaryOperator
                     {
                     Exp15=(Token)match(input,Exp,FOLLOW_Exp_in_exponent219); 
                     Exp15_tree = (Object)adaptor.create(Exp15);
@@ -550,7 +547,7 @@ public class CalculationsParser extends Parser {
     };
 
     // $ANTLR start "factor"
-    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:38:1: factor : ( symbol | parenExpr );
+    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:38:1: factor : ( symbol | parenExpr );
     public final CalculationsParser.factor_return factor() throws RecognitionException {
         CalculationsParser.factor_return retval = new CalculationsParser.factor_return();
         retval.start = input.LT(1);
@@ -564,7 +561,7 @@ public class CalculationsParser extends Parser {
 
 
         try {
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:38:8: ( symbol | parenExpr )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:38:8: ( symbol | parenExpr )
             int alt7=2;
             int LA7_0 = input.LA(1);
 
@@ -582,7 +579,7 @@ public class CalculationsParser extends Parser {
             }
             switch (alt7) {
                 case 1 :
-                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:38:10: symbol
+                    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:38:10: symbol
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -596,7 +593,7 @@ public class CalculationsParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:38:19: parenExpr
+                    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:38:19: parenExpr
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -635,7 +632,7 @@ public class CalculationsParser extends Parser {
     };
 
     // $ANTLR start "parenExpr"
-    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:1: parenExpr : OpenParen expr CloseParen -> expr ;
+    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:40:1: parenExpr : OpenParen expr CloseParen -> expr ;
     public final CalculationsParser.parenExpr_return parenExpr() throws RecognitionException {
         CalculationsParser.parenExpr_return retval = new CalculationsParser.parenExpr_return();
         retval.start = input.LT(1);
@@ -653,8 +650,8 @@ public class CalculationsParser extends Parser {
         RewriteRuleTokenStream stream_OpenParen=new RewriteRuleTokenStream(adaptor,"token OpenParen");
         RewriteRuleSubtreeStream stream_expr=new RewriteRuleSubtreeStream(adaptor,"rule expr");
         try {
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:41:2: ( OpenParen expr CloseParen -> expr )
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:41:4: OpenParen expr CloseParen
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:41:2: ( OpenParen expr CloseParen -> expr )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:41:4: OpenParen expr CloseParen
             {
             OpenParen19=(Token)match(input,OpenParen,FOLLOW_OpenParen_in_parenExpr245);  
             stream_OpenParen.add(OpenParen19);
@@ -714,7 +711,7 @@ public class CalculationsParser extends Parser {
     };
 
     // $ANTLR start "symbol"
-    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:42:1: symbol : ( literal | Variable | function );
+    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:42:1: symbol : ( literal | Variable | function );
     public final CalculationsParser.symbol_return symbol() throws RecognitionException {
         CalculationsParser.symbol_return retval = new CalculationsParser.symbol_return();
         retval.start = input.LT(1);
@@ -730,7 +727,7 @@ public class CalculationsParser extends Parser {
         Object Variable23_tree=null;
 
         try {
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:42:8: ( literal | Variable | function )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:42:8: ( literal | Variable | function )
             int alt8=3;
             int LA8_0 = input.LA(1);
 
@@ -761,7 +758,7 @@ public class CalculationsParser extends Parser {
             }
             switch (alt8) {
                 case 1 :
-                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:42:10: literal
+                    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:42:10: literal
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -775,7 +772,7 @@ public class CalculationsParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:42:20: Variable
+                    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:42:20: Variable
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -787,7 +784,7 @@ public class CalculationsParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:42:31: function
+                    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:42:31: function
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -826,7 +823,7 @@ public class CalculationsParser extends Parser {
     };
 
     // $ANTLR start "function"
-    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:43:1: function : Variable OpenParen ( expr ( Comma expr )* )? CloseParen -> ^( FuncEval Variable ( expr ( expr )* )? ) ;
+    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:43:1: function : Variable OpenParen ( expr ( Comma expr )* )? CloseParen -> ^( FuncEval Variable ( expr ( expr )* )? ) ;
     public final CalculationsParser.function_return function() throws RecognitionException {
         CalculationsParser.function_return retval = new CalculationsParser.function_return();
         retval.start = input.LT(1);
@@ -852,8 +849,8 @@ public class CalculationsParser extends Parser {
         RewriteRuleTokenStream stream_Comma=new RewriteRuleTokenStream(adaptor,"token Comma");
         RewriteRuleSubtreeStream stream_expr=new RewriteRuleSubtreeStream(adaptor,"rule expr");
         try {
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:43:9: ( Variable OpenParen ( expr ( Comma expr )* )? CloseParen -> ^( FuncEval Variable ( expr ( expr )* )? ) )
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:43:11: Variable OpenParen ( expr ( Comma expr )* )? CloseParen
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:43:9: ( Variable OpenParen ( expr ( Comma expr )* )? CloseParen -> ^( FuncEval Variable ( expr ( expr )* )? ) )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:43:11: Variable OpenParen ( expr ( Comma expr )* )? CloseParen
             {
             Variable25=(Token)match(input,Variable,FOLLOW_Variable_in_function274);  
             stream_Variable.add(Variable25);
@@ -861,7 +858,7 @@ public class CalculationsParser extends Parser {
             OpenParen26=(Token)match(input,OpenParen,FOLLOW_OpenParen_in_function276);  
             stream_OpenParen.add(OpenParen26);
 
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:43:30: ( expr ( Comma expr )* )?
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:43:30: ( expr ( Comma expr )* )?
             int alt10=2;
             int LA10_0 = input.LA(1);
 
@@ -870,7 +867,7 @@ public class CalculationsParser extends Parser {
             }
             switch (alt10) {
                 case 1 :
-                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:43:31: expr ( Comma expr )*
+                    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:43:31: expr ( Comma expr )*
                     {
                     pushFollow(FOLLOW_expr_in_function279);
                     expr27=expr();
@@ -878,7 +875,7 @@ public class CalculationsParser extends Parser {
                     state._fsp--;
 
                     stream_expr.add(expr27.getTree());
-                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:43:36: ( Comma expr )*
+                    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:43:36: ( Comma expr )*
                     loop9:
                     do {
                         int alt9=2;
@@ -891,7 +888,7 @@ public class CalculationsParser extends Parser {
 
                         switch (alt9) {
                     	case 1 :
-                    	    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:43:37: Comma expr
+                    	    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:43:37: Comma expr
                     	    {
                     	    Comma28=(Token)match(input,Comma,FOLLOW_Comma_in_function282);  
                     	    stream_Comma.add(Comma28);
@@ -935,16 +932,16 @@ public class CalculationsParser extends Parser {
             root_0 = (Object)adaptor.nil();
             // 43:63: -> ^( FuncEval Variable ( expr ( expr )* )? )
             {
-                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:43:66: ^( FuncEval Variable ( expr ( expr )* )? )
+                // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:43:66: ^( FuncEval Variable ( expr ( expr )* )? )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(FuncEval, "FuncEval"), root_1);
 
                 adaptor.addChild(root_1, stream_Variable.nextNode());
-                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:43:86: ( expr ( expr )* )?
+                // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:43:86: ( expr ( expr )* )?
                 if ( stream_expr.hasNext()||stream_expr.hasNext() ) {
                     adaptor.addChild(root_1, stream_expr.nextTree());
-                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:43:92: ( expr )*
+                    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:43:92: ( expr )*
                     while ( stream_expr.hasNext() ) {
                         adaptor.addChild(root_1, stream_expr.nextTree());
 
@@ -987,7 +984,7 @@ public class CalculationsParser extends Parser {
     };
 
     // $ANTLR start "literal"
-    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:47:1: literal : ( Decimal | String );
+    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:47:1: literal : ( Decimal | String );
     public final CalculationsParser.literal_return literal() throws RecognitionException {
         CalculationsParser.literal_return retval = new CalculationsParser.literal_return();
         retval.start = input.LT(1);
@@ -999,8 +996,8 @@ public class CalculationsParser extends Parser {
         Object set31_tree=null;
 
         try {
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:47:9: ( Decimal | String )
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:47:9: ( Decimal | String )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             {
             root_0 = (Object)adaptor.nil();
 

@@ -46,7 +46,7 @@ function:	Variable OpenParen (expr (Comma expr)*)? CloseParen -> ^(FuncEval Vari
 
 literal	:	Decimal | String;
 
-Decimal	:	UInteger (Dot UInteger)? ('E' Integer)?;
+Decimal	:	((UInteger (Dot UInteger)?) | (Dot UInteger)) ('E' Integer)?;
 
 
 Variable:	BracketedVariable | NoBracketsVariable;
@@ -94,5 +94,5 @@ fragment VariableSpecialChars
 	:	'\"' | SpecialChars;	
 	
 fragment SpecialChars
-	:	NoBracketSpecialChars | ':' | '<' | '>' | ',' | '.' | ';' | '/' | '?' | '\'' | '-' | '=' | '+' | '(' | ')' | '!' | '@' | '#' | '$' | '%' | '^' | '&' | '*' | '~' | '`' | '|' | '\\';
+	:	NoBracketSpecialChars | ':' | '<' | '>' | ',' | '.' | ';' | '/' | '?' | '\'' | '-' | '=' | '+' | '(' | ')' | '!' | '@' | '#' | '$' | '%' | '^' | '&' | '*' | '~' | '`' | '|' | '\\' | '{' | '}';
 	
