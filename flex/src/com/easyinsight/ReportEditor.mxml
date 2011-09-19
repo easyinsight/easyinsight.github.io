@@ -12,6 +12,7 @@
         import com.easyinsight.analysis.AddedItemUpdateEvent;
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AnalysisItemCopyEvent;
+        import com.easyinsight.analysis.AnalysisItemEditEvent;
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypeRenderer;
         import com.easyinsight.analysis.AnalysisUtil;
@@ -844,6 +845,10 @@
         [Bindable]
         private var rendererFactory:IFactory;
 
+        private function onItemEdit(event:AnalysisItemEditEvent):void {
+
+        }
+
         public function gotFocus():void {
         }
         ]]>
@@ -884,7 +889,8 @@
                          paddingBottom="0"
                          paddingLeft="0" paddingRight="0" resizeToContent="true" selectedIndex="{selectedTabIndex}">
             <analysis:ReportMetadataTab id="reportMetadataTab" dataSourceInfo="{dataSourceInfo}"
-                                        dataView="{dataView}" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
+                                        dataView="{dataView}" backgroundColor="#FFFFFF" backgroundAlpha=".9" report="{analysisDefinition}"
+                    transformContainer="{transformContainer}" fields="{wrappers}" availableFields="{availableFields}"/>
             <analysis:AboutReportTab id="aboutReportTab" report="{analysisDefinition}"  backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
             <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}"
                                     dataService="{dataService}"
