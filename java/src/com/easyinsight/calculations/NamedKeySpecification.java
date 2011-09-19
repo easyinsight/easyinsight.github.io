@@ -19,6 +19,10 @@ public class NamedKeySpecification implements KeySpecification {
         this.key = key;
     }
 
+    public String getKey() {
+        return key;
+    }
+
     @Nullable
     public AnalysisItem findAnalysisItem(Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap) {
         List<AnalysisItem> analysisItems = keyMap.get(key);

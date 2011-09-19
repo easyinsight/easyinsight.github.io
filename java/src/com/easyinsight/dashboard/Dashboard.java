@@ -49,6 +49,15 @@ public class Dashboard implements Cloneable {
     private boolean recommendedExchange;
     private DataSourceInfo dataSourceInfo;
     private int role;
+    private String marmotScript;
+
+    public String getMarmotScript() {
+        return marmotScript;
+    }
+
+    public void setMarmotScript(String marmotScript) {
+        this.marmotScript = marmotScript;
+    }
 
     public boolean isOverrideYTD() {
         return overrideYTD;

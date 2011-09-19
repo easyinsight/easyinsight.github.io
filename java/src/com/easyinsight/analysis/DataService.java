@@ -29,28 +29,6 @@ public class DataService {
 
     private FeedRegistry feedRegistry = FeedRegistry.instance();
 
-    public FilterDefinition getAvailableFieldsForFilter(long dataSourceID, FilterDefinition filterDefinition) {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            Feed feed = feedRegistry.getFeed(dataSourceID, conn);
-            List<FilterDefinition> dlsFilters = addDLSFilters(dataSourceID, conn);
-            if (filterDefinition.getMarmotScript() != null && !"".equals(filterDefinition.getMarmotScript().trim())) {
-                StringTokenizer toker = new StringTokenizer(filterDefinition.getMarmotScript(), "\r\n");
-                while (toker.hasMoreTokens()) {
-                    String line = toker.nextToken();
-                    new ReportCalculation(line).apply(filterDefinition, feed.getFields(), feed, conn, dlsFilters);
-                }
-                new ReportCalculation(filterDefinition.getMarmotScript()).apply(filterDefinition, feed.getFields(), feed, conn, dlsFilters);
-            }
-            return filterDefinition;
-        }  catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID) {
         if (reportID > 0) {
             SecurityUtil.authorizeInsight(reportID);

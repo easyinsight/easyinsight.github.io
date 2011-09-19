@@ -103,6 +103,8 @@ public class FunctionFactory {
             return new AddFieldToFilter();
         } else if (s.equals("removefieldfromfilter")) {
             return new RemoveFieldFromFilter();
+        } else if (s.equals("removedashboardelement")) {
+            return new RemoveDashboardElement();
         } else {
             return null;
         }

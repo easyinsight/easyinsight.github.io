@@ -94,9 +94,16 @@
         }
 
         private function onPersonaChange(event:Event):void {
-            var personaID:int = Persona(personaComboBox.selectedItem).personaID;
-            ProgressAlert.alert(this, "Retrieving information...", null, preferencesService.getUserDLS);
-            preferencesService.getUserDLS.send(userID, personaID);
+            var obj:Object = personaComboBox.selectedItem;
+            if (obj is Persona) {
+                var personaID:int = Persona(obj).personaID;
+                ProgressAlert.alert(this, "Retrieving information...", null, preferencesService.getUserDLS);
+                preferencesService.getUserDLS.send(userID, personaID);
+            } else {
+                dlsList = new ArrayCollection();
+                tabNavigator.removeChild(dlsVBox);
+                dlsVBox = null;
+            }
         }
 
         private function save():void {

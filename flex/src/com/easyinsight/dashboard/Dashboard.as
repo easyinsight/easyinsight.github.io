@@ -34,6 +34,7 @@ public class Dashboard {
     public var role:int;
     public var ytdMonth:String;
     public var overrideYTD:Boolean;
+    public var marmotScript:String;
 
     public function Dashboard() {
     }

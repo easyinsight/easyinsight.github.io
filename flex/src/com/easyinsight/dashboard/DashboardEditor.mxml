@@ -11,6 +11,8 @@
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.FeedMetadata;
+        import com.easyinsight.code.MarmotScriptEvent;
+        import com.easyinsight.code.MarmotScriptWindow;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.filtering.FilterDefinition;
@@ -261,6 +263,18 @@
         [Bindable]
         private var dashboardViewable:Boolean = false;
 
+        private function editCode():void {
+            var window:MarmotScriptWindow = new MarmotScriptWindow();
+            window.script = _dashboard.marmotScript;
+            window.addEventListener(MarmotScriptEvent.SAVE_SCRIPT, onScript, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onScript(event:MarmotScriptEvent):void {
+            _dashboard.marmotScript = event.script;
+        }
+
         public function gotFocus():void {
         }
 
@@ -291,6 +305,8 @@
                    toolTip="View Dashboard" label="Dashboard View" labelPlacement="right" enabled="{dashboardViewable}"/>
         <mx:Button icon="@Embed(source='../../../../assets/document_edit.png')" click="configureDashboard()"
                    toolTip="Configure Dashboard" label="Configure Dashboard" labelPlacement="right"/>
+        <mx:Button icon="@Embed(source='../../../../assets/code_edit.png')" click="editCode()"
+                   toolTip="Edit Code" label="Edit Code" labelPlacement="right"/>
     </mx:HBox>
     <mx:HBox width="100%" height="100%">
         <mx:VBox height="100%" horizontalAlign="center" width="200" paddingTop="20" paddingBottom="20">

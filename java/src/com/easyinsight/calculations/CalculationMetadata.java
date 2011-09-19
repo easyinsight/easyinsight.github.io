@@ -3,6 +3,7 @@ package com.easyinsight.calculations;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.WSAnalysisDefinition;
+import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.Collection;
@@ -17,6 +18,15 @@ public class CalculationMetadata {
     private Collection<AnalysisItem> dataSourceFields;
     private DataSet dataSet;
     private FilterDefinition filterDefinition;
+    private Dashboard dashboard;
+
+    public Dashboard getDashboard() {
+        return dashboard;
+    }
+
+    public void setDashboard(Dashboard dashboard) {
+        this.dashboard = dashboard;
+    }
 
     public FilterDefinition getFilterDefinition() {
         return filterDefinition;
