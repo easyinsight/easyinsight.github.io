@@ -2,12 +2,15 @@ package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.*;
 
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 
+import com.easyinsight.intention.*;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.security.SecurityUtil;
 
@@ -569,5 +572,150 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             return true;
         }
         return false;
+    }
+
+    public static final int SUGGESTION_DEAL_SETUP = 1;
+    public static final int SUGGESTION_CASE_SETUP = 2;
+    public static final int SUGGESTION_ACTIVITY_SETUP = 3;
+
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
+        // help set up a deal report
+        // help set up a case report
+        // help set up an activity report
+        List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+        suggestions.add(new IntentionSuggestion("Help Me Set Up a Deal Report",
+                "This action will configure your report to connect Deals to both Contacts and Companies. It will also add a filter to exclude any records without a matching deal name.",
+                IntentionSuggestion.SCOPE_DATA_SOURCE, HighRiseCompositeSource.SUGGESTION_DEAL_SETUP));
+        suggestions.add(new IntentionSuggestion("Help Me Set Up a Case Report",
+                "This action will configure your report to connect Cases to both Contacts and Companies. It will also add a filter to exclude any records without a matching case name.",
+                IntentionSuggestion.SCOPE_DATA_SOURCE, HighRiseCompositeSource.SUGGESTION_CASE_SETUP));
+        suggestions.add(new IntentionSuggestion("Help Me Set Up an Activity Report",
+                "This action will add four new custom fields representing the various Activity concepts from Highrise. Notes from your Contacts, Companies, Cases, and Deals, your Emails, and your Tasks will be combined into Activity Body, Activity Type, Activity Author, and Activity Date.",
+                IntentionSuggestion.SCOPE_DATA_SOURCE, HighRiseCompositeSource.SUGGESTION_ACTIVITY_SETUP));
+        return suggestions;
+    }
+
+    public List<Intention> createIntentions(WSAnalysisDefinition report, List<AnalysisItem> fields, int type) throws SQLException {
+        List<Intention> intentions = new ArrayList<Intention>();
+        if (type == SUGGESTION_DEAL_SETUP) {
+            intentions.add(new CustomizeJoinsIntention(fromChildConnections(Arrays.asList(
+                    new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_COMPANY, HighRiseDealSource.COMPANY_ID,
+                            HighRiseCompanySource.COMPANY_ID),
+                    new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_CONTACTS, HighRiseDealSource.CONTACT_ID,
+                            HighRiseContactSource.CONTACT_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_COMPANY, HighRiseContactSource.COMPANY_ID,
+                            HighRiseCompanySource.COMPANY_ID, false, false, false, true),
+                    new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_TASKS, HighRiseCompanySource.COMPANY_ID,
+                            HighRiseTaskSource.COMPANY_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_CONTACTS, HighRiseCaseSource.OWNER,
+                            HighRiseContactSource.CONTACT_ID),
+                    new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CONTACTS, HighRiseTaskSource.OWNER,
+                            HighRiseContactSource.CONTACT_ID),
+                    new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CASES, HighRiseTaskSource.CASE_ID,
+                            HighRiseCaseSource.CASE_ID),
+                    new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_DEAL, HighRiseTaskSource.DEAL_ID,
+                            HighRiseDealSource.DEAL_ID),
+                    new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_COMPANY, HighRiseTaskSource.COMPANY_ID,
+                            HighRiseCompanySource.COMPANY_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_EMAILS, HighRiseContactSource.CONTACT_ID,
+                            HighRiseEmailSource.EMAIL_CONTACT_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_CONTACT_NOTES, HighRiseContactSource.CONTACT_ID,
+                            HighRiseContactNotesSource.NOTE_CONTACT_ID),
+                    new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_DEAL_NOTES, HighRiseDealSource.DEAL_ID,
+                            HighRiseDealNotesSource.NOTE_DEAL_ID),
+                    new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_COMPANY_NOTES, HighRiseCompanySource.COMPANY_ID,
+                            HighRiseCompanyNotesSource.NOTE_COMPANY_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_CASE_NOTES, HighRiseCaseSource.CASE_ID,
+                            HighRiseCaseNotesSource.NOTE_CASE_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CASES, HighRiseCaseJoinSource.CASE_ID,
+                            HighRiseCaseSource.CASE_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_COMPANY, HighRiseCaseJoinSource.COMPANY_ID,
+                            HighRiseCompanySource.COMPANY_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CONTACTS, HighRiseCaseJoinSource.CONTACT_ID,
+                            HighRiseContactSource.CONTACT_ID)), fields)));
+            intentions.add(new AddFilterIntention(excludeFilter(HighRiseDealSource.DEAL_NAME, report, fields)));
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
+            reportPropertiesIntention.setFullJoins(true);
+            intentions.add(reportPropertiesIntention);
+        } else if (type == SUGGESTION_CASE_SETUP) {
+            intentions.add(new CustomizeJoinsIntention(fromChildConnections(Arrays.asList(
+                new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CASES, HighRiseCaseJoinSource.CASE_ID,
+                        HighRiseCaseSource.CASE_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_CASE_NOTES, HighRiseCaseSource.CASE_ID,
+                        HighRiseCaseNotesSource.NOTE_CASE_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_COMPANY, HighRiseCaseJoinSource.COMPANY_ID,
+                        HighRiseCompanySource.COMPANY_ID, false, true, false, true),
+                    new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CONTACTS, HighRiseCaseJoinSource.CONTACT_ID,
+                        HighRiseContactSource.CONTACT_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CASE_NOTES, FeedType.HIGHRISE_CONTACTS, HighRiseCaseNotesSource.CONTACT_ID,
+                        HighRiseContactSource.CONTACT_ID, false, true, false, true),
+                    new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_COMPANY, HighRiseContactSource.COMPANY_ID,
+                        HighRiseCompanySource.COMPANY_ID, false, true, false, true)
+            ), fields)));
+            intentions.add(new AddFilterIntention(excludeFilter(HighRiseCaseSource.CASE_NAME, report, fields)));
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
+            reportPropertiesIntention.setFullJoins(true);
+            intentions.add(reportPropertiesIntention);
+            DerivedAnalysisDimension placeHolder = new DerivedAnalysisDimension();
+            placeHolder.setKey(new NamedKey("Case Note Join Placeholder"));
+            placeHolder.setDerivationCode("firstvalue(\"Placeholder\", [Case Note Body])");
+            intentions.add(new CustomFieldIntention(placeHolder));
+            FilterValueDefinition excludeFilter = new FilterValueDefinition(placeHolder, false, Arrays.asList((Object) EmptyValue.EMPTY_VALUE));
+            excludeFilter.setShowOnReportView(false);
+            intentions.add(new AddFilterIntention(excludeFilter));
+        } else if (type == SUGGESTION_ACTIVITY_SETUP) {
+            intentions.add(new CustomizeJoinsIntention(fromChildConnections(Arrays.asList(
+                    new ChildConnection(FeedType.HIGHRISE_COMPANY_NOTES, FeedType.HIGHRISE_COMPANY, HighRiseCompanyNotesSource.NOTE_COMPANY_ID,
+                            HighRiseCompanySource.COMPANY_ID, false, false, false, true),
+                    new ChildConnection(FeedType.HIGHRISE_CONTACT_NOTES, FeedType.HIGHRISE_CONTACTS, HighRiseContactNotesSource.NOTE_CONTACT_ID,
+                            HighRiseContactSource.CONTACT_ID, false, false, false, true),
+                    new ChildConnection(FeedType.HIGHRISE_CASE_NOTES, FeedType.HIGHRISE_CASES, HighRiseCaseNotesSource.NOTE_CASE_ID,
+                            HighRiseCaseSource.CASE_ID, false, false, false, true),
+                    new ChildConnection(FeedType.HIGHRISE_DEAL_NOTES, FeedType.HIGHRISE_DEAL, HighRiseDealNotesSource.NOTE_DEAL_ID,
+                            HighRiseDealSource.DEAL_ID, false, false, false, true),
+                    new ChildConnection(FeedType.HIGHRISE_CONTACT_NOTES, FeedType.HIGHRISE_TASKS, HighRiseContactNotesSource.NOTE_AUTHOR,
+                            HighRiseTaskSource.TASK_ID),
+                    new ChildConnection(FeedType.HIGHRISE_COMPANY_NOTES, FeedType.HIGHRISE_DEAL, HighRiseCompanyNotesSource.NOTE_AUTHOR,
+                            HighRiseDealSource.DEAL_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CONTACT_NOTES, FeedType.HIGHRISE_DEAL, HighRiseContactNotesSource.NOTE_AUTHOR,
+                            HighRiseDealSource.DEAL_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_DEAL, HighRiseCaseSource.CASE_NAME,
+                            HighRiseDealSource.DEAL_ID),
+                    new ChildConnection(FeedType.HIGHRISE_EMAILS, FeedType.HIGHRISE_CASE_NOTES, HighRiseEmailSource.EMAIL_ID,
+                            HighRiseCaseNotesSource.NOTE_AUTHOR),
+                    new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_COMPANY, HighRiseDealSource.COMPANY_ID,
+                            HighRiseCompanySource.COMPANY_ID, false, false, false, true),
+                    new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_CONTACTS, HighRiseDealSource.CONTACT_ID,
+                            HighRiseContactSource.CONTACT_ID, false, false, false, true),
+                    new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_COMPANY, HighRiseContactSource.COMPANY_ID,
+                            HighRiseCompanySource.COMPANY_ID, false, false, false, true)
+                    ), fields)));
+            DerivedAnalysisDimension activityBody = new DerivedAnalysisDimension();
+            activityBody.setKey(new NamedKey("Activity Body"));
+            activityBody.setHtml(true);
+            activityBody.setWordWrap(true);
+            activityBody.setDerivationCode("notnull([Company Note Body], \"<p><b>\" + [Company Name] + \"</b></p><p>\" + [Company Note Created At] + \"</p><p>Note by \" + [Company Note Author]+\"</p><p>\"+[Company Note Body]+\"</p>\", [Contact Note Body], \"<p><b>\" + [Contact Name] + \"</b></p><p>\" + [Contact Note Created At] + \"</p><p>Note by \" + [Contact Note Author]+\"</p><p>\"+[Contact Note Body]+\"</p>\", [Case Note Body], \"<p><b>\" + [Case Name] + \"</b></p><p>\" + [Case Note Created At] + \"</p><p>Note by \" + [Case Note Author]+\"</p><p>\"+[Case Note Body]+\"</p>\",  [Deal Note Body], \"<p><b>\" + [Deal Name] + \"</b></p><p>\" + [Deal Note Created At] + \"</p><p>Note by \" + [Deal Note Author]+\"</p><p>\"+[Deal Note Body]+\"</p>\", [Task Body], [Task Body], [Email ID], [Email ID])");
+            intentions.add(new CustomFieldIntention(activityBody));
+            DerivedAnalysisDimension activityType = new DerivedAnalysisDimension();
+            activityType.setKey(new NamedKey("Activity Type"));
+            activityType.setDerivationCode("notnull([Case Note Body], \"Case Note\", [Company Note Body], \"Company Note\", [Contact Note Body], \"Contact Note\", [Deal Note Body], \"Deal Note\", [Task Body], \"Task\", [Email ID], \"Email\")");
+            intentions.add(new CustomFieldIntention(activityType));
+            DerivedAnalysisDimension activityAuthor = new DerivedAnalysisDimension();
+            activityAuthor.setKey(new NamedKey("Activity Author"));
+            activityAuthor.setDerivationCode("notnull([Case Note Body], [Case Note Author], [Company Note Body], [Company Note Author], [Contact Note Body], [Contact Note Author], [Deal Note Body], [Deal Note Author], [Task Body], [Task Author], [Email ID], [Email Author])");
+            intentions.add(new CustomFieldIntention(activityAuthor));
+            DerivedAnalysisDateDimension derivedAnalysisDateDimension = new DerivedAnalysisDateDimension();
+            derivedAnalysisDateDimension.setKey(new NamedKey("Activity Date"));
+            derivedAnalysisDateDimension.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
+            derivedAnalysisDateDimension.setGroup(true);
+            derivedAnalysisDateDimension.setDerivationCode("notnull([Case Note Body], [Case Note Updated At], [Company Note Body], [Company Note Updated At], [Contact Note Body], [Contact Note Updated At], [Deal Note Body], [Deal Note Updated At], [Task Body], [Task Created At], [Email ID], [Email Sent At])");
+            intentions.add(new CustomFieldIntention(derivedAnalysisDateDimension));
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
+            reportPropertiesIntention.setFullJoins(true);
+            intentions.add(reportPropertiesIntention);
+        } else {
+            throw new RuntimeException("Unrecognized intention type");
+        }
+        return intentions;
     }
 }
