@@ -130,7 +130,7 @@ public class DashboardStorage {
                     "ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE, UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, TEMPORARY_DASHBOARD," +
                     "PUBLIC_VISIBLE, PADDING_LEFT, PADDING_RIGHT, FILTER_BORDER_STYLE, FILTER_BORDER_COLOR, filter_background_color, FILTER_BACKGROUND_ALPHA," +
                     "recommended_exchange, ytd_date, ytd_override, marmotscript) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             insertStmt.setString(1, dashboard.getName());
             insertStmt.setString(2, dashboard.getUrlKey());
             insertStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -149,7 +149,7 @@ public class DashboardStorage {
             insertStmt.setInt(16, dashboard.getFilterBackgroundColor());
             insertStmt.setDouble(17, dashboard.getFilterBackgroundAlpha());
             insertStmt.setBoolean(18, dashboard.isRecommendedExchange());
-            insertStmt.setString(19, dashboard.getYtdMonth());
+            insertStmt.setString(19, dashboard.getYtdMonth() == null ? "December" : dashboard.getYtdMonth());
             insertStmt.setBoolean(20, dashboard.isOverrideYTD());
             insertStmt.setString(21, dashboard.getMarmotScript());
             insertStmt.execute();
@@ -176,7 +176,7 @@ public class DashboardStorage {
             updateStmt.setInt(14, dashboard.getFilterBackgroundColor());
             updateStmt.setDouble(15, dashboard.getFilterBackgroundAlpha());
             updateStmt.setBoolean(16, dashboard.isRecommendedExchange());
-            updateStmt.setString(17, dashboard.getYtdMonth());
+            updateStmt.setString(17, dashboard.getYtdMonth() == null ? "December" : dashboard.getYtdMonth());
             updateStmt.setBoolean(18, dashboard.isOverrideYTD());
             updateStmt.setString(19, dashboard.getMarmotScript());
             updateStmt.setLong(20, dashboard.getId());
