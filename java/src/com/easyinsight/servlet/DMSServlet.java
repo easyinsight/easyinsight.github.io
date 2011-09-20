@@ -19,10 +19,13 @@ import com.easyinsight.eventing.*;
 import com.easyinsight.scorecard.LongKPIRefreshEvent;
 import com.easyinsight.scorecard.LongKPIRefreshListener;
 import com.easyinsight.util.ServiceUtil;
+import org.apache.jcs.JCS;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * User: James Boe
@@ -80,6 +83,17 @@ public class DMSServlet extends HttpServlet {
 
     public void destroy() {
         LogClass.info("Shutting down...");
+
+        List<String> caches = Arrays.asList("scorecardQueue", "servers", "embeddedReports", "feeds", "feedDefinitions", "apiKeys", "htmlcache");
+        for(String s : caches) {
+            try {
+                JCS cache = JCS.getInstance(s);
+                cache.dispose();
+            } catch(Exception e) {
+                // Do nothing for now, possibly intended behavior
+            }
+        }
+
         Database.instance().shutdown();
         DatabaseManager.instance().shutdown();
         EventDispatcher.instance().setRunning(false);
