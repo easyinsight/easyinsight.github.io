@@ -77,7 +77,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     }
 
     public boolean isIncrementalRefresh() {
-        return incrementalRefresh;
+        return false;
     }
 
     public void setIncrementalRefresh(boolean incrementalRefresh) {
