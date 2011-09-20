@@ -67,15 +67,12 @@
                 for (var i:int = 0; i < vert.reports.length; i++) {
                     var embeddedData:EmbeddedDataWrapper = dataSet.getItemAt(i) as EmbeddedDataWrapper;
                     var report:VerticalListDefinition = embeddedData.report as VerticalListDefinition;
-                    var applyMeasure:AnalysisMeasure = null;
+                    var applyMeasure:AnalysisMeasure;
                     for each (var testMeasure:AnalysisMeasure in report.measures) {
                         if (testMeasure.display == measure.display) {
                             applyMeasure = testMeasure;
                             break;
                         }
-                    }
-                    if (applyMeasure == null) {
-                        continue;
                     }
                     var formatter:Formatter = applyMeasure.getFormatter();
                     var reportData:ArrayCollection = embeddedData.dataSet;
