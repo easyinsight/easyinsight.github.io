@@ -56,7 +56,7 @@ public class EmbeddedVerticalListService extends EmbeddedDataService implements 
         var results:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < verticalResults.list.length; i++) {
             var dataResults:EmbeddedDataResults = verticalResults.list.getItemAt(i) as EmbeddedDataResults;
-            results.addItem(translate(dataResults));
+            results.addItem(new EmbeddedDataWrapper(translate(dataResults), dataResults.definition));
         }
         var listData:EmbeddedDataResults = verticalResults.list.getItemAt(0) as EmbeddedDataResults;
         dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, results, verticalResults.report, listData.dataSourceAccessible,
