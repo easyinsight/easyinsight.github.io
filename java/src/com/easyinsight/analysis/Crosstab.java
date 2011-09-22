@@ -94,7 +94,7 @@ public class Crosstab {
                     }
                 } else if (value1.type() == Value.DATE && value2.type() == Value.DATE) {
                     DateValue dateValue1 = (DateValue) value1;
-                    DateValue dateValue2 = (DateValue) value1;
+                    DateValue dateValue2 = (DateValue) value2;
                     return dateValue1.getDate().compareTo(dateValue2.getDate());
                 } else if (value1.type() == Value.NUMBER && value2.type() == Value.NUMBER) {
                     return value1.toDouble().compareTo(value2.toDouble());
