@@ -6,7 +6,6 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.dashboard {
-import com.easyinsight.analysis.AnalysisDefinition;
 
 import mx.core.UIComponent;
 
@@ -40,13 +39,16 @@ public class DashboardElementFactory {
             var comp:DashboardScorecardEditorComponent = new DashboardScorecardEditorComponent();
             comp.scorecard = element as DashboardScorecard;
             return comp;
+        } else if (element is DashboardTextElement) {
+            var text:DashboardTextEditorComponent = new DashboardTextEditorComponent();
+            text.dashboardText = element as DashboardTextElement;
+            return text;
         }
         return null;
     }
 
     public static function createViewUIComponent(element:DashboardElement, dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
         if (element is DashboardGrid) {
-            var dashboardGrid:DashboardGrid = element as DashboardGrid;
             var gridComp:DashboardGridViewComponent = new DashboardGridViewComponent();
             gridComp.dashboardGrid = element as DashboardGrid;
             gridComp.dashboardEditorMetadata = dashboardEditorMetadata;
@@ -63,12 +65,18 @@ public class DashboardElementFactory {
             return imageComp;
         } else if (element is DashboardReport) {
             var reportComp:DashboardReportViewComponent = new DashboardReportViewComponent();
+            reportComp.elementID = String(counter++);
+            reportComp.dashboardEditorMetadata = dashboardEditorMetadata;
             reportComp.dashboardReport = element as DashboardReport;
             return reportComp;
         } else if (element is DashboardScorecard) {
             var comp:DashboardScorecardViewComponent = new DashboardScorecardViewComponent();
             comp.dashboardScorecard = element as DashboardScorecard;
             return comp;
+        } else if (element is DashboardTextElement) {
+            var text:DashboardTextViewComponent = new DashboardTextViewComponent();
+            text.dashboardText = element as DashboardTextElement;
+            return text;
         }
         return null;
     }

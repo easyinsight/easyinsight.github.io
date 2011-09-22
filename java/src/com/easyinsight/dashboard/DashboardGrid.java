@@ -174,6 +174,9 @@ public class DashboardGrid extends DashboardElement {
     public void visit(IDashboardVisitor dashboardVisitor) {
         dashboardVisitor.accept(this);
         for (DashboardGridItem gridItem : gridItems) {
+            if (gridItem == null || gridItem.getDashboardElement() == null) {
+                continue;
+            }
             gridItem.getDashboardElement().visit(dashboardVisitor);
         }
     }

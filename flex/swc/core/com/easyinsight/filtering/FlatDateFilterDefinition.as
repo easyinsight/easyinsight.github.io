@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.filtering {
+import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisItemTypes;
 
 [Bindable]
@@ -14,6 +15,7 @@ public class FlatDateFilterDefinition extends FilterDefinition {
 
     public var value:int;
     public var dateLevel:int = AnalysisItemTypes.YEAR_LEVEL;
+    public var cachedValues:AnalysisItemResultMetadata;
 
     public function FlatDateFilterDefinition() {
     }

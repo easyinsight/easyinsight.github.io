@@ -25,6 +25,15 @@ public class DataSourceInfo implements Serializable {
     private int type;
     private List<DataSourceInfo> childSources;
     private long originSolution;
+    private boolean scheduled;
+
+    public boolean isScheduled() {
+        return scheduled;
+    }
+
+    public void setScheduled(boolean scheduled) {
+        this.scheduled = scheduled;
+    }
 
     public long getOriginSolution() {
         return originSolution;

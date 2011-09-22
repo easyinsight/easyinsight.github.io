@@ -62,6 +62,7 @@ public class DashboardReport extends DashboardElement {
         insertStmt.setInt(3, labelPlacement);
         insertStmt.setBoolean(4, showLabel);
         insertStmt.execute();
+        insertStmt.close();
         return id;
     }
 

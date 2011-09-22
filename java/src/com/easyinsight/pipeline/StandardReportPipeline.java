@@ -73,10 +73,16 @@ public class StandardReportPipeline extends Pipeline {
             }
         }
 
+        FieldFilterComponent fieldFilterComponent = new FieldFilterComponent();
+        components.add(fieldFilterComponent);
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getFilters() != null) {
                 for (FilterDefinition filterDefinition : analysisItem.getFilters()) {
-                    components.addAll(filterDefinition.createComponents(true, new FieldFilterProcessor(analysisItem), analysisItem, true));
+                    if (filterDefinition.getField() != null) {
+                        fieldFilterComponent.addFilterPair(analysisItem, filterDefinition);
+                    } else {
+                        components.addAll(filterDefinition.createComponents(true, new FieldFilterProcessor(analysisItem), analysisItem, true));
+                    }
                 }
             }
         }

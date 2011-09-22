@@ -39,6 +39,9 @@ public class FilterValueDefinition extends FilterDefinition {
     @Column(name="all_option")
     private boolean allOption;
 
+    @Transient
+    private AnalysisItemResultMetadata cachedValues;
+
     public FilterValueDefinition() {        
     }
 
@@ -46,6 +49,14 @@ public class FilterValueDefinition extends FilterDefinition {
         super(field);
         this.inclusive = inclusive;
         this.filteredValues = filteredValues;
+    }
+
+    public AnalysisItemResultMetadata getCachedValues() {
+        return cachedValues;
+    }
+
+    public void setCachedValues(AnalysisItemResultMetadata cachedValues) {
+        this.cachedValues = cachedValues;
     }
 
     public boolean isExcludeEmpty() {

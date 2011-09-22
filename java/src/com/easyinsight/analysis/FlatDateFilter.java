@@ -1,9 +1,6 @@
 package com.easyinsight.analysis;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -22,12 +19,23 @@ public class FlatDateFilter extends FilterDefinition {
     @Column(name="selected_value")
     private int value;
 
+    @Transient
+    private AnalysisItemResultMetadata cachedValues;
+
     public int getDateLevel() {
         return dateLevel;
     }
 
     public void setDateLevel(int dateLevel) {
         this.dateLevel = dateLevel;
+    }
+
+    public AnalysisItemResultMetadata getCachedValues() {
+        return cachedValues;
+    }
+
+    public void setCachedValues(AnalysisItemResultMetadata cachedValues) {
+        this.cachedValues = cachedValues;
     }
 
     public int getValue() {

@@ -106,16 +106,24 @@ import mx.rpc.events.ResultEvent;
             comboBox = new ComboBox();
             comboBox.addEventListener(Event.CHANGE, onDataChange);
             addChild(comboBox);
-            dataService = new RemoteObject();
-			dataService.destination = "data";
-			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
-			dataService.getAnalysisItemMetadata.send(_feedID, analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID);
+            if (_filterDefinition == null || !_filterDefinition.cachedValues) {
+                dataService = new RemoteObject();
+                dataService.destination = "data";
+                dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
+                dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
+                dataService.getAnalysisItemMetadata.send(_feedID, analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID);
+            } else {
+                processMetadata(_filterDefinition.cachedValues);
+            }
         }
 
         private function gotMetadata(event:ResultEvent):void {
 			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
-			var dateMetadata:AnalysisDateDimensionResultMetadata = metadata as AnalysisDateDimensionResultMetadata;
+			processMetadata(metadata);
+		}
+
+        private function processMetadata(metadata:AnalysisItemResultMetadata):void {
+            var dateMetadata:AnalysisDateDimensionResultMetadata = metadata as AnalysisDateDimensionResultMetadata;
 			this.lowDate = dateMetadata.earliestDate;
             if (lowDate == null) {
                 lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
@@ -129,7 +137,7 @@ import mx.rpc.events.ResultEvent;
 				_filterDefinition = new FlatDateFilterDefinition();
 				_filterDefinition.field = analysisItem;
                 if (analysisItem.hasType(AnalysisItemTypes.STEP)) {
-                    _filterDefinition.applyBeforeAggregation = false;    
+                    _filterDefinition.applyBeforeAggregation = false;
                 }
 			} else {
 			}
@@ -166,7 +174,7 @@ import mx.rpc.events.ResultEvent;
                 }
                 addChild(deleteButton);
             }
-			
+
 
             if (_loadingFromReport) {
                 _loadingFromReport = false;
@@ -176,10 +184,10 @@ import mx.rpc.events.ResultEvent;
                     dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
                     newFilter = false;
                 } else {
-                    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this, event.bubbles));
+                    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this));
                 }
             }
-		}
+        }
 
         private var newFilter:Boolean = true;
 		

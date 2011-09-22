@@ -10,11 +10,8 @@ import flash.utils.Dictionary;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-import mx.collections.Sort;
 import mx.containers.HBox;
 import mx.containers.ViewStack;
-import mx.controls.Alert;
-
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.ComboBox;
@@ -199,10 +196,14 @@ public class ComboBoxFilter extends HBox implements IFilter {
         viewStack.addChild(loadingBox);
         hbox.setStyle("showEffect", showEffect);
         viewStack.addChild(hbox);
-        dataService = new RemoteObject();
-        dataService.destination = "data";
-        dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-        dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID);
+        if (_filterDefinition == null || _filterDefinition.cachedValues == null) {
+            dataService = new RemoteObject();
+            dataService.destination = "data";
+            dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
+            dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID);
+        } else {
+            processMetadata(_filterDefinition.cachedValues as AnalysisDimensionResultMetadata);
+        }
     }
 
     private var newFilter:Boolean = true;
@@ -260,10 +261,7 @@ public class ComboBoxFilter extends HBox implements IFilter {
 
     }
 
-    private function gotMetadata(event:ResultEvent):void {
-
-        var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
-                AnalysisDimensionResultMetadata;
+    private function processMetadata(analysisDimensionResultMetadata:AnalysisDimensionResultMetadata):void {
         var valueObj:Dictionary = new Dictionary();
         if (analysisDimensionResultMetadata != null && analysisDimensionResultMetadata.values != null) {
             for each (var value:Value in analysisDimensionResultMetadata.values) {
@@ -326,13 +324,20 @@ public class ComboBoxFilter extends HBox implements IFilter {
                 dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
                 newFilter = false;
             } else {
-                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this, event.bubbles));
+                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this));
             }
         } else {
 
             loadingFromReport = false;
             newFilter = false;
         }
+    }
+
+    private function gotMetadata(event:ResultEvent):void {
+
+        var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
+                AnalysisDimensionResultMetadata;
+        processMetadata(analysisDimensionResultMetadata);
     }
 
     private function deleteSelf(event:MouseEvent):void {

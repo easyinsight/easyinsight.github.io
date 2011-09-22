@@ -82,8 +82,7 @@ public class DataService {
             feedMetadata.setVersion(feed.getVersion());
             feedMetadata.setExchangeSave(feed.isExchangeSave());
             feedMetadata.setUrlKey(feed.getUrlKey());
-            feedMetadata.setDataSourceInfo(feed.getDataSourceInfo());
-            feedMetadata.getDataSourceInfo().setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
+            feedMetadata.setDataSourceInfo(feed.createSourceInfo(conn));
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
             List<LookupTable> lookupTables = new ArrayList<LookupTable>();
@@ -229,8 +228,7 @@ public class DataService {
         ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
         DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet());
         EmbeddedResults embeddedResults = results.toEmbeddedResults();
-        DataSourceInfo dataSourceInfo = reportRetrieval.getFeed().getDataSourceInfo();
-        embeddedResults.setDataSourceInfo(dataSourceInfo);
+        embeddedResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
         embeddedResults.setDefinition(analysisDefinition);
         return embeddedResults;
     }
@@ -309,8 +307,7 @@ public class DataService {
         try {
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet());
-            DataSourceInfo dataSourceInfo = reportRetrieval.getFeed().getDataSourceInfo();
-            results.setDataSourceInfo(dataSourceInfo);
+            results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             return results;
         } catch (ReportException dae) {
             ListDataResults embeddedDataResults = new ListDataResults();
@@ -416,8 +413,7 @@ public class DataService {
         try {
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet());
-            DataSourceInfo dataSourceInfo = reportRetrieval.getFeed().getDataSourceInfo();
-            results.setDataSourceInfo(dataSourceInfo);
+            results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             return results;
         } catch (ReportException dae) {
             ListDataResults embeddedDataResults = new ListDataResults();
@@ -551,11 +547,10 @@ public class DataService {
             dataSet = retrieveDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
             pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata, allFields);
-            dataSourceInfo = feed.getDataSourceInfo();
+            dataSourceInfo = feed.createSourceInfo(conn);
             if (dataSet.getLastTime() == null) {
                 dataSet.setLastTime(new Date());
             }
-            dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
             return this;
         }
     }

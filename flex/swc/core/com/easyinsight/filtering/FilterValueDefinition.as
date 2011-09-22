@@ -1,6 +1,8 @@
 package com.easyinsight.filtering
 {
-	import mx.collections.ArrayCollection;
+import com.easyinsight.analysis.AnalysisItemResultMetadata;
+
+import mx.collections.ArrayCollection;
 
 [Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.FilterValueDefinition")]
@@ -12,6 +14,7 @@ package com.easyinsight.filtering
         public var autoComplete:Boolean;
     public var excludeEmpty:Boolean;
     public var allOption:Boolean;
+    public var cachedValues:AnalysisItemResultMetadata;
 
 		public function FilterValueDefinition()
 		{

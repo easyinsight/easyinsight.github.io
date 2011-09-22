@@ -308,8 +308,7 @@ public class DashboardStorage {
         getUserStmt.close();
         dashboard.setAdministrators(admins);
         Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
-        dashboard.setDataSourceInfo(feed.getDataSourceInfo());
-        dashboard.getDataSourceInfo().setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
+        dashboard.setDataSourceInfo(feed.createSourceInfo(conn));
         return dashboard;
     }
 
@@ -342,6 +341,8 @@ public class DashboardStorage {
             element = DashboardImage.loadImage(elementID, conn);
         } else if (elementType == DashboardElement.SCORECARD) {
             element = DashboardScorecard.loadReport(elementID, conn);
+        } else if (elementType == DashboardElement.TEXT) {
+            element = DashboardText.loadImage(elementID, conn);
         } else {
             throw new RuntimeException();
         }

@@ -226,12 +226,67 @@ public class DashboardService {
                 }
             }
             dashboard.visit(new AnalysisItemFilterVisitor(feed, dlsFilters, conn));
+            FilterVisitor filterVisitor = new FilterVisitor(dashboard.getDataSourceID(), dashboardID);
+            dashboard.visit(filterVisitor);
+            filterVisitor.done();
             return dashboard;
         } catch (Exception e) {
             LogClass.error("On retrieving dashboard " + dashboardID, e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
+        }
+    }
+
+    private static class FilterVisitor implements IDashboardVisitor {
+
+        private Map<AnalysisItem, List<FilterValueDefinition>> valueFilters = new HashMap<AnalysisItem, List<FilterValueDefinition>>();
+        private Map<AnalysisItem, List<FlatDateFilter>> flatDateFilters = new HashMap<AnalysisItem, List<FlatDateFilter>>();
+
+        private long dataSourceID;
+        private long dashboardID;
+
+        private FilterVisitor(long dataSourceID, long dashboardID) {
+            this.dataSourceID = dataSourceID;
+            this.dashboardID = dashboardID;
+        }
+
+        public void done() {
+            for (Map.Entry<AnalysisItem, List<FilterValueDefinition>> entry : valueFilters.entrySet()) {
+                AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(dataSourceID, entry.getKey(), 0, 0, dashboardID);
+                for (FilterValueDefinition filterDefinition : entry.getValue()) {
+                    filterDefinition.setCachedValues(metadata);
+                }
+            }
+            for (Map.Entry<AnalysisItem, List<FlatDateFilter>> entry : flatDateFilters.entrySet()) {
+                AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(dataSourceID, entry.getKey(), 0, 0, dashboardID);
+                for (FlatDateFilter filterDefinition : entry.getValue()) {
+                    filterDefinition.setCachedValues(metadata);
+                }
+            }
+        }
+
+        public void accept(DashboardElement dashboardElement) {
+            if (dashboardElement instanceof DashboardStack) {
+                DashboardStack dashboardStack = (DashboardStack) dashboardElement;
+                for (FilterDefinition filter : dashboardStack.getFilters()) {
+                    if (filter instanceof FilterValueDefinition) {
+                        List<FilterValueDefinition> filters = valueFilters.get(filter.getField());
+                        if (filters == null) {
+                            filters = new ArrayList<FilterValueDefinition>();
+                            valueFilters.put(filter.getField(), filters);
+                        }
+                        filters.add((FilterValueDefinition) filter);
+                    } else if (filter instanceof FlatDateFilter) {
+                        List<FlatDateFilter> filters = flatDateFilters.get(filter.getField());
+                        if (filters == null) {
+                            filters = new ArrayList<FlatDateFilter>();
+                            flatDateFilters.put(filter.getField(), filters);
+                        }
+                        filters.add((FlatDateFilter) filter);
+                    }
+                }
+            }
         }
     }
 

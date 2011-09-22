@@ -54,5 +54,6 @@ public class DashboardGridItem implements Cloneable {
         insertStmt.setLong(3, dashboardElement.getElementID());
         insertStmt.setLong(4, dashboardGridID);
         insertStmt.execute();
+        insertStmt.close();
     }
 }

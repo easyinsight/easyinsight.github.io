@@ -210,6 +210,9 @@ public class DashboardStack extends DashboardElement {
     public void visit(IDashboardVisitor dashboardVisitor) {
         dashboardVisitor.accept(this);
         for (DashboardStackItem gridItem : gridItems) {
+            if (gridItem == null || gridItem.getDashboardElement() == null) {
+                continue;
+            }
             gridItem.getDashboardElement().visit(dashboardVisitor);
         }
     }
