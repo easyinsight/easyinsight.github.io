@@ -65,8 +65,8 @@ public class DashboardElementFactory {
             return imageComp;
         } else if (element is DashboardReport) {
             var reportComp:DashboardReportViewComponent = new DashboardReportViewComponent();
-            reportComp.elementID = String(counter++);
-            reportComp.dashboardEditorMetadata = dashboardEditorMetadata;
+            //reportComp.elementID = String(counter++);
+            //reportComp.dashboardEditorMetadata = dashboardEditorMetadata;
             reportComp.dashboardReport = element as DashboardReport;
             return reportComp;
         } else if (element is DashboardScorecard) {
