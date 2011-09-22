@@ -259,8 +259,13 @@ public abstract class Feed implements Serializable {
                 }
             }
         }
-        DataSourceInfo dataSourceInfo = new DataSourceInfo();
+        DataSourceInfo dataSourceInfo = getDataSourceInfo();
         dataSourceInfo.setLastDataTime(date);
+        PreparedStatement scheduleStmt = conn.prepareStatement("SELECT SCHEDULED_DATA_SOURCE_REFRESH_ID FROM SCHEDULED_DATA_SOURCE_REFRESH WHERE SCHEDULED_DATA_SOURCE_REFRESH.data_source_id = ?");
+        scheduleStmt.setLong(1, getFeedID());
+        ResultSet scheduleRS = scheduleStmt.executeQuery();
+        dataSourceInfo.setScheduled(scheduleRS.next());
+        scheduleStmt.close();
         return dataSourceInfo;
     }
 }
