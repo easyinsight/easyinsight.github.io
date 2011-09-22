@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.analysis {
-import com.easyinsight.analysis.ListLimitsFormItem;
+
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartDefinition;
 import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartDefinition;
@@ -27,7 +27,6 @@ import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.dashboard.Dashboard;
-import com.easyinsight.dashboard.DashboardElement;
 import com.easyinsight.dashboard.DashboardElement;
 import com.easyinsight.dashboard.DashboardGrid;
 import com.easyinsight.dashboard.DashboardReport;
@@ -255,6 +254,7 @@ public class StyleConfiguration {
         if (report is CombinedVerticalListDefinition) {
             items.addItem(new NumericReportFormItem("Header Width", "headerWidth", CombinedVerticalListDefinition(report).headerWidth, report, 100, 400));
             items.addItem(new NumericReportFormItem("Column Width", "columnWidth", CombinedVerticalListDefinition(report).columnWidth, report, 100, 400));
+            items.addItem(new CheckBoxReportFormItem("Hide Empty Rows", "removeEmptyRows", CombinedVerticalListDefinition(report).removeEmptyRows, report));
         }
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));

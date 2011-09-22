@@ -60,12 +60,12 @@
             this.reportName = String(Application.application.parameters.reportName);
 
             if(Application.application.parameters.showToolbar is String) {
-                this.showToolbar = Boolean(Application.application.parameters.showToolbar == "true");
+                this.showToolbar = Boolean(Application.application.parameters.showToolbar == "1");
             }  else {
                 this.showToolbar = true;
             }
             if(Application.application.parameters.showFilters is String) {
-                this.showFilters = Boolean(Application.application.parameters.showFilters == "true");
+                this.showFilters = Boolean(Application.application.parameters.showFilters == "1");
             } else {
                 this.showFilters = true;
             }

@@ -19,6 +19,7 @@ public class CombinedVerticalListDefinition extends AnalysisDefinition {
     public var combinedVerticalListDefinitionID:int;
     public var headerWidth:int = 140;
     public var columnWidth:int = 73;
+    public var removeEmptyRows:Boolean = false;
 
     public function CombinedVerticalListDefinition() {
     }

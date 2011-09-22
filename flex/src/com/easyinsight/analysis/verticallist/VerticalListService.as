@@ -54,7 +54,7 @@ public class VerticalListService extends ListDataService implements IReportDataS
         var results:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < verticalResults.map.length; i++) {
             var dataResults:ListDataResults = verticalResults.map.getItemAt(i) as ListDataResults;
-            results.addItem(translate(dataResults, report).data);
+            results.addItem(new EmbeddedDataWrapper(translate(dataResults, report).data, CombinedVerticalListDefinition(report).reports.getItemAt(i) as AnalysisDefinition));
         }
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, results, ListDataResults(verticalResults.map.getItemAt(0)).dataSourceInfo,
                 new Object(), new ArrayCollection(), null, false, 0, 0));

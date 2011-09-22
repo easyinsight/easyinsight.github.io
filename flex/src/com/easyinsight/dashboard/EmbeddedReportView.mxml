@@ -238,8 +238,8 @@
                 filterIndex = 0;
                 filterDefinitions = new ArrayCollection();
             }
+            dataViewFactory.filterDefinitions = filterDefinitions;
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-            Alert.show("retrieving data?");
             dataViewFactory.retrieveData();
         }
 

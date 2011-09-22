@@ -81,7 +81,7 @@
                         continue;
                     }
                     var measureValue:Value = row[measure.qualifiedName()];
-                    if (measureValue.toNumber() != 0) {
+                    if (measureValue != null && measureValue.toNumber() != 0) {
                         atLeastOneValue = true;
                     }
                     var text:String;
@@ -123,11 +123,13 @@
                         dataColumn.headerRenderer = headerFactory;
                         columns.push(dataColumn);
                     }
-                    var valueMetrics:TextLineMetrics = dataGrid.measureText(text);
-                    var valueWidth:int = valueMetrics.width + valueMetrics.x + valueMetrics.x;
-                    columnSize = Math.max(columnSize, valueWidth);
-                    columnWidths[columnValue] = columnSize;
-                    SortableAdvancedDataGridColumn(columns[(i++) + 1]).width = columnSize;
+                    if (columns.length > (i + 1)) {
+                        var valueMetrics:TextLineMetrics = dataGrid.measureText(text);
+                        var valueWidth:int = valueMetrics.width + valueMetrics.x + valueMetrics.x;
+                        columnSize = Math.max(columnSize, valueWidth);
+                        columnWidths[columnValue] = columnSize;
+                        SortableAdvancedDataGridColumn(columns[(i++) + 1]).width = columnSize;
+                    }
                 }
                 if (firstRow) {
                     firstRow = false;
@@ -136,39 +138,40 @@
                     dColl.addItem(obj);
                 }
             }
-            if (columns.length <= 1) {
+            if (columns.length <= 1 || dColl.length <= 1) {
                 currentState = "noData";
+                invalidateSize();
             } else {
                 currentState = "";
-            }
+                columns = columns.sortOn(["reportIndex", "sortValue"], [Array.NUMERIC, sortCriteria]);
 
-            columns = columns.sortOn(["reportIndex", "sortValue"], [Array.NUMERIC, sortCriteria]);
-
-            //SortableAdvancedDataGridColumn(columns.getItemAt(0)).width = headerWidth;
-            reportWidth = 1;
-            for each (var col:SortableAdvancedDataGridColumn in columns) {
-                reportWidth += (col.width + 1);
-            }
-            var endWidth:int = 0;
-            if (reportWidth < this.width) {
-                var delta:int = (this.width - reportWidth);
-                delta = Math.min(delta, 300);
-                var perColumnAdd:int = (delta) / columns.length;
-                for each (var colAdd:SortableAdvancedDataGridColumn in columns) {
-                    colAdd.width += perColumnAdd;
-                    endWidth += colAdd.width;
+                //SortableAdvancedDataGridColumn(columns.getItemAt(0)).width = headerWidth;
+                reportWidth = 1;
+                for each (var col:SortableAdvancedDataGridColumn in columns) {
+                    reportWidth += (col.width + 1);
                 }
+                var endWidth:int = 0;
+                if (reportWidth < this.width) {
+                    var delta:int = (this.width - reportWidth);
+                    delta = Math.min(delta, 300);
+                    var perColumnAdd:int = (delta) / columns.length;
+                    for each (var colAdd:SortableAdvancedDataGridColumn in columns) {
+                        colAdd.width += perColumnAdd;
+                        endWidth += colAdd.width;
+                    }
+                }
+                dataGrid.maxWidth = this.width;
+                if (endWidth > 0) {
+                    dataGrid.x = (this.width - endWidth) / 2;
+                } else {
+                    dataGrid.x = 0;
+                }
+                dataGrid.columns = columns;
+                dataGrid.rowCount = dColl.length + 2;
+                dataGrid.dataProvider = dColl;
+                invalidateSize();
             }
-            dataGrid.maxWidth = this.width;
-            if (endWidth > 0) {
-                dataGrid.x = (this.width - endWidth) / 2;
-            } else {
-                dataGrid.x = 0;
-            }
-            dataGrid.columns = columns;
-            dataGrid.rowCount = dColl.length + 2;
-            dataGrid.dataProvider = dColl;
-            invalidateSize();
+
         }
 
         private var reportWidth:int;
