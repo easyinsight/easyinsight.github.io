@@ -22,12 +22,14 @@ public class CopyFields extends Function {
     public Value evaluate() {
         String fieldToReplace = minusQuotes(params.get(0)).toString();
         String copyString = minusQuotes(params.get(1)).toString();
-        copyString = copyString.replaceAll("!", "{").replaceAll("#", "}");
         AnalysisItem template = null;
         for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
             if (analysisItem.toDisplay().toLowerCase().equals(fieldToReplace.toLowerCase())) {
                 template = analysisItem;
             }
+        }
+        if (template == null) {
+            throw new FunctionException("We couldn't find a field by the name of " + fieldToReplace + ".");
         }
         Collection<AnalysisItem> newFields = new ArrayList<AnalysisItem>();
         for (int i = 2; i < params.size(); i++) {
