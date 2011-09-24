@@ -954,7 +954,7 @@
                                                          text="You can drag the fields below into the report areas to the right. You can click on the arrow to the left of folders to see more fields. You can also right click on the fields to add to the report or create new filters."/>
                     </mx:Box>
                     <mx:Button icon="@Embed(source='../../../assets/report/help.png')"
-                                       click="tutorial()" toolTip="Help!" label="Help!" x="575" y="5"/>
+                                       click="tutorial()" toolTip="Help!" label="Help!" x="575" y="28"/>
                     <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}" id="dataSourceDisplay" x="700" y="16" dataSourceRefreshed="dataView.forceRetrieve()"/>
                 </mx:Canvas>
                 <analysis:AboutReportTab id="aboutReportTab" report="{analysisDefinition}"  backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
@@ -968,7 +968,7 @@
                                               icon="@Embed(source='../../../assets/funnel.png')"
                                               width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".9"
                                               feedID="{dataSourceID}"
-                                              analysisItems="{wrappers}" minHeight="75">
+                                              analysisItems="{wrappers}" minHeight="40">
                     <mx:Button icon="@Embed(source='../../../assets/funnel.png')"
                                toolTip="{excludeFilterDataTooltip}" click="transformContainer.addNewFilter()" label="New Filter"/>
                 </filtering:TransformContainer>
