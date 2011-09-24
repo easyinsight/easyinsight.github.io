@@ -1,11 +1,13 @@
 package test.analysis;
 
+import com.easyinsight.analysis.AnalysisItem;
 import junit.framework.TestCase;
 import junit.framework.Assert;
 import com.easyinsight.analysis.URLPattern;
 import com.easyinsight.analysis.Row;
 import com.easyinsight.core.Key;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -24,7 +26,7 @@ public class URLTests extends TestCase {
     public void testCorrectDynamicURL() {
         Row row = new Row(null);
         row.addValue("Feed ID", "1");
-        String url = URLPattern.getURL("http://www.easy-insight.com/app#feedid=[Feed ID]", row, new HashMap<String, String>());
+        String url = URLPattern.getURL("http://www.easy-insight.com/app#feedid=[Feed ID]", row, new HashMap<String, String>(), new ArrayList<AnalysisItem>());
         Assert.assertEquals("http://www.easy-insight.com/app#feedid=1", url);
     }
 
@@ -32,7 +34,7 @@ public class URLTests extends TestCase {
         Row row = new Row(null);
         row.addValue("Location", "biz");
         row.addValue("Feed ID", "2");
-        String url = URLPattern.getURL("http://www.easy-insight.[Location]/app#feedid=[Feed ID]", row, new HashMap<String, String>());
+        String url = URLPattern.getURL("http://www.easy-insight.[Location]/app#feedid=[Feed ID]", row, new HashMap<String, String>(), new ArrayList<AnalysisItem>());
         Assert.assertEquals("http://www.easy-insight.biz/app#feedid=2", url);
     }
 
@@ -40,14 +42,14 @@ public class URLTests extends TestCase {
         Row row = new Row(null);
         row.addValue("Location", "biz");
         row.addValue("Feed ID", "2");
-        String url = URLPattern.getURL("http://www.[easy]-insight.[Location]/app#feedid=[Feed ID]", row, new HashMap<String, String>());
+        String url = URLPattern.getURL("http://www.[easy]-insight.[Location]/app#feedid=[Feed ID]", row, new HashMap<String, String>(), new ArrayList<AnalysisItem>());
         Assert.assertEquals("http://www.[easy]-insight.biz/app#feedid=2", url);
     }
 
     public void testURLOnly() {
         Row row = new Row(null);
         row.addValue("URL", "http://www.easy-insight.com/app");
-        String url = URLPattern.getURL("[URL]", row, new HashMap<String, String>());
+        String url = URLPattern.getURL("[URL]", row, new HashMap<String, String>(), new ArrayList<AnalysisItem>());
         Assert.assertEquals("http://www.easy-insight.com/app", url);
     }
 
