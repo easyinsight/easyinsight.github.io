@@ -6,6 +6,9 @@ import com.easyinsight.core.EmptyValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.intention.DataSourceIntention;
+import com.easyinsight.intention.Intention;
+import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.users.User;
 import com.easyinsight.users.Account;
 import com.easyinsight.dataset.DataSet;
@@ -257,6 +260,41 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         FilterValueDefinition excludeFilter = new FilterValueDefinition(target, false, Arrays.asList((Object) EmptyValue.EMPTY_VALUE));
         excludeFilter.setShowOnReportView(false);
         return excludeFilter;
+    }
+
+    protected AnalysisItem findFieldFromList(String fieldName, List<AnalysisItem> fields) {
+        AnalysisItem target = null;
+        for (AnalysisItem field : fields) {
+            if (field.toDisplay().equals(fieldName)) {
+                target = field;
+            }
+        }
+        return target;
+    }
+
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report, DataSourceInfo dataSourceInfo) {
+        List<IntentionSuggestion> suggestions = super.suggestIntentions(report, dataSourceInfo);
+        Date lastDataTime = dataSourceInfo.getLastDataTime();
+        if (lastDataTime != null) {
+            long time = System.currentTimeMillis() - lastDataTime.getTime();
+            long days = time / (1000 * 60 * 60 * 24);
+            if (days > 2) {
+                suggestions.add(new IntentionSuggestion("Refresh Data",
+                    "Your " + getFeedName() + " data source hasn't been refreshed with new data in " + days + " days.",
+                    IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.OLD_DATA, IntentionSuggestion.WARNING));
+            }
+        }
+        return suggestions;
+    }
+
+    public List<Intention> createIntentions(WSAnalysisDefinition report, List<AnalysisItem> fields, int type) throws SQLException {
+        List<Intention> intentions = new ArrayList<Intention>();
+        if (type == IntentionSuggestion.OLD_DATA) {
+            DataSourceIntention dataSourceIntention = new DataSourceIntention();
+            dataSourceIntention.setRefreshData(true);
+            intentions.add(dataSourceIntention);
+        }
+        return intentions;
     }
 
     protected List<JoinOverride> fromChildConnections(List<ChildConnection> childConnections, List<AnalysisItem> fields) throws SQLException {

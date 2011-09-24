@@ -1,4 +1,5 @@
 package com.easyinsight.analysis.crosstab {
+import com.easyinsight.analysis.AnalysisChangedEvent;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
@@ -133,16 +134,18 @@ public class CrosstabControlBar extends ReportControlBar implements IReportContr
 
     public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {
         if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-            xAxisDefinition.measures = new ArrayCollection([analysisItem]);
+            measureGrouping.addAnalysisItem(analysisItem);
         } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
             if (xAxisDefinition.columns.length == 0) {
-                xAxisDefinition.columns.addItem(analysisItem);
+                columnGrouping.addAnalysisItem(analysisItem);
             } else if (xAxisDefinition.rows.length == 0) {
-                xAxisDefinition.rows.addItem(analysisItem);
+                rowGrouping.addAnalysisItem(analysisItem);
             } else {
-                xAxisDefinition.columns = new ArrayCollection([analysisItem]); 
+                columnGrouping.addAnalysisItem(analysisItem);
             }
         }
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
+        dispatchEvent(new AnalysisChangedEvent(false));
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {

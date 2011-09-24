@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.intention.IntentionSuggestion;
+
 import java.util.*;
 
 /**
@@ -15,6 +17,15 @@ public abstract class DataResults {
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
     private List<String> auditMessages;
     private ReportFault reportFault;
+    private List<IntentionSuggestion> suggestions;
+
+    public List<IntentionSuggestion> getSuggestions() {
+        return suggestions;
+    }
+
+    public void setSuggestions(List<IntentionSuggestion> suggestions) {
+        this.suggestions = suggestions;
+    }
 
     public ReportFault getReportFault() {
         return reportFault;

@@ -574,30 +574,74 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         return false;
     }
 
-    public static final int SUGGESTION_DEAL_SETUP = 1;
-    public static final int SUGGESTION_CASE_SETUP = 2;
-    public static final int SUGGESTION_ACTIVITY_SETUP = 3;
 
-    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
+
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report, DataSourceInfo dataSourceInfo) {
         // help set up a deal report
         // help set up a case report
         // help set up an activity report
-        List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
-        suggestions.add(new IntentionSuggestion("Help Me Set Up a Deal Report",
-                "This action will configure your report to connect Deals to both Contacts and Companies. It will also add a filter to exclude any records without a matching deal name.",
-                IntentionSuggestion.SCOPE_DATA_SOURCE, HighRiseCompositeSource.SUGGESTION_DEAL_SETUP));
-        suggestions.add(new IntentionSuggestion("Help Me Set Up a Case Report",
-                "This action will configure your report to connect Cases to both Contacts and Companies. It will also add a filter to exclude any records without a matching case name.",
-                IntentionSuggestion.SCOPE_DATA_SOURCE, HighRiseCompositeSource.SUGGESTION_CASE_SETUP));
-        suggestions.add(new IntentionSuggestion("Help Me Set Up an Activity Report",
-                "This action will add four new custom fields representing the various Activity concepts from Highrise. Notes from your Contacts, Companies, Cases, and Deals, your Emails, and your Tasks will be combined into Activity Body, Activity Type, Activity Author, and Activity Date.",
-                IntentionSuggestion.SCOPE_DATA_SOURCE, HighRiseCompositeSource.SUGGESTION_ACTIVITY_SETUP));
+        List<IntentionSuggestion> suggestions = super.suggestIntentions(report, dataSourceInfo);
+        if (!report.isFullJoins()) {
+            suggestions.add(new IntentionSuggestion("Help Me Set Up a Deal Report",
+                    "This action will configure your report to connect Deals to both Contacts and Companies. It will also add a filter to exclude any records without a matching deal name.",
+                    IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_DEAL_SETUP, IntentionSuggestion.OTHER));
+            suggestions.add(new IntentionSuggestion("Help Me Set Up a Case Report",
+                    "This action will configure your report to connect Cases to both Contacts and Companies. It will also add a filter to exclude any records without a matching case name.",
+                    IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_CASE_SETUP, IntentionSuggestion.OTHER));
+            suggestions.add(new IntentionSuggestion("Help Me Set Up an Activity Report",
+                    "This action will add four new custom fields representing the various Activity concepts from Highrise. Notes from your Contacts, Companies, Cases, and Deals, your Emails, and your Tasks will be combined into Activity Body, Activity Type, Activity Author, and Activity Date.",
+                    IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_ACTIVITY_SETUP, IntentionSuggestion.OTHER));
+        }
+        Set<AnalysisItem> analysisItems = report.getAllAnalysisItems();
+        for (AnalysisItem analysisItem : analysisItems) {
+            if (analysisItem.toDisplay().equals(HighRiseContactNotesSource.BODY)) {
+                if (!filterOn(HighRiseContactNotesSource.BODY, report)) {
+                    suggestions.add(new IntentionSuggestion("Only Show the Latest Contact Note", "Create a filter to only show the latest associated note for any given contact in the report.", IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_LAST_CONTACT_NOTE, IntentionSuggestion.OTHER));
+                }
+                if (!includeContactNotes) {
+                    suggestions.add(new IntentionSuggestion("Enable Contact Notes", "You're currently not synchronizing contact notes to this data source.", IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_NOTE_CONFIG, IntentionSuggestion.WARNING));
+                }
+            } else if (analysisItem.toDisplay().equals(HighRiseCompanyNotesSource.BODY)) {
+                if (!filterOn(HighRiseCompanyNotesSource.BODY, report)) {
+                    suggestions.add(new IntentionSuggestion("Only Show the Latest Company Note", "Create a filter to only show the latest associated note for any given company in the report.", IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_LAST_COMPANY_NOTE, IntentionSuggestion.OTHER));
+                }
+                if (!includeCompanyNotes) {
+                    suggestions.add(new IntentionSuggestion("Enable Company Notes", "You're currently not synchronizing company notes to this data source.", IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_NOTE_CONFIG, IntentionSuggestion.WARNING));
+                }
+            } else if (analysisItem.toDisplay().equals(HighRiseCaseNotesSource.BODY)) {
+                if (!filterOn(HighRiseCaseNotesSource.BODY, report)) {
+                    suggestions.add(new IntentionSuggestion("Only Show the Latest Case Note", "Create a filter to only show the latest associated note for any given case in the report.", IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_LAST_CASE_NOTE, IntentionSuggestion.OTHER));
+                }
+                if (!includeCaseNotes) {
+                    suggestions.add(new IntentionSuggestion("Enable Case Notes", "You're currently not synchronizing case notes to this data source.", IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_NOTE_CONFIG, IntentionSuggestion.WARNING));
+                }
+            } else if (analysisItem.toDisplay().equals(HighRiseDealNotesSource.BODY)) {
+                if (!filterOn(HighRiseDealNotesSource.BODY, report)) {
+                    suggestions.add(new IntentionSuggestion("Only Show the Latest Deal Note", "Create a filter to only show the latest associated note for any given deal in the report.", IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_LAST_DEAL_NOTE, IntentionSuggestion.OTHER));
+                }
+                if (!includeDealNotes) {
+                    suggestions.add(new IntentionSuggestion("Enable Deal Notes", "You're currently not synchronizing deal notes to this data source.", IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_NOTE_CONFIG, IntentionSuggestion.WARNING));
+                }
+            }
+        }
         return suggestions;
     }
 
+    private boolean filterOn(String body, WSAnalysisDefinition report) {
+        for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
+            if (filterDefinition.getField() != null && filterDefinition.getField().toDisplay().equals(body)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<Intention> createIntentions(WSAnalysisDefinition report, List<AnalysisItem> fields, int type) throws SQLException {
-        List<Intention> intentions = new ArrayList<Intention>();
-        if (type == SUGGESTION_DEAL_SETUP) {
+        List<Intention> intentions = super.createIntentions(report, fields, type);
+        if (!intentions.isEmpty()) {
+            return intentions;
+        }
+        if (type == IntentionSuggestion.SUGGESTION_DEAL_SETUP) {
             intentions.add(new CustomizeJoinsIntention(fromChildConnections(Arrays.asList(
                     new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_COMPANY, HighRiseDealSource.COMPANY_ID,
                             HighRiseCompanySource.COMPANY_ID),
@@ -636,8 +680,12 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             intentions.add(new AddFilterIntention(excludeFilter(HighRiseDealSource.DEAL_NAME, report, fields)));
             ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
             reportPropertiesIntention.setFullJoins(true);
+            Set<AnalysisItem> items = report.getAllAnalysisItems();
+            if (items.isEmpty()) {
+                intentions.add(new AddReportFieldIntention(findFieldFromList(HighRiseDealSource.DEAL_NAME, fields)));
+            }
             intentions.add(reportPropertiesIntention);
-        } else if (type == SUGGESTION_CASE_SETUP) {
+        } else if (type == IntentionSuggestion.SUGGESTION_CASE_SETUP) {
             intentions.add(new CustomizeJoinsIntention(fromChildConnections(Arrays.asList(
                 new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CASES, HighRiseCaseJoinSource.CASE_ID,
                         HighRiseCaseSource.CASE_ID),
@@ -662,8 +710,12 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             intentions.add(new CustomFieldIntention(placeHolder));
             FilterValueDefinition excludeFilter = new FilterValueDefinition(placeHolder, false, Arrays.asList((Object) EmptyValue.EMPTY_VALUE));
             excludeFilter.setShowOnReportView(false);
+            Set<AnalysisItem> items = report.getAllAnalysisItems();
+            if (items.isEmpty()) {
+                intentions.add(new AddReportFieldIntention(findFieldFromList(HighRiseCaseSource.CASE_NAME, fields)));
+            }
             intentions.add(new AddFilterIntention(excludeFilter));
-        } else if (type == SUGGESTION_ACTIVITY_SETUP) {
+        } else if (type == IntentionSuggestion.SUGGESTION_ACTIVITY_SETUP) {
             intentions.add(new CustomizeJoinsIntention(fromChildConnections(Arrays.asList(
                     new ChildConnection(FeedType.HIGHRISE_COMPANY_NOTES, FeedType.HIGHRISE_COMPANY, HighRiseCompanyNotesSource.NOTE_COMPANY_ID,
                             HighRiseCompanySource.COMPANY_ID, false, false, false, true),
@@ -712,7 +764,47 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             intentions.add(new CustomFieldIntention(derivedAnalysisDateDimension));
             ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
             reportPropertiesIntention.setFullJoins(true);
+            Set<AnalysisItem> items = report.getAllAnalysisItems();
+            if (items.isEmpty()) {
+                intentions.add(new AddReportFieldIntention(activityBody));
+            }
             intentions.add(reportPropertiesIntention);
+        } else if (type == IntentionSuggestion.SUGGESTION_LAST_CONTACT_NOTE) {
+            AnalysisItem noteItem = findFieldFromList(HighRiseContactNotesSource.NOTE_UPDATED_AT, fields);
+            LastValueFilter lastValueFilter = new LastValueFilter();
+            lastValueFilter.setField(noteItem);
+            lastValueFilter.setShowOnReportView(false);
+            lastValueFilter.setAbsolute(false);
+            lastValueFilter.setThreshold(1);
+            intentions.add(new AddFilterIntention(lastValueFilter));
+        } else if (type == IntentionSuggestion.SUGGESTION_LAST_COMPANY_NOTE) {
+            AnalysisItem noteItem = findFieldFromList(HighRiseCompanyNotesSource.NOTE_UPDATED_AT, fields);
+            LastValueFilter lastValueFilter = new LastValueFilter();
+            lastValueFilter.setField(noteItem);
+            lastValueFilter.setShowOnReportView(false);
+            lastValueFilter.setAbsolute(false);
+            lastValueFilter.setThreshold(1);
+            intentions.add(new AddFilterIntention(lastValueFilter));
+        } else if (type == IntentionSuggestion.SUGGESTION_LAST_CASE_NOTE) {
+            AnalysisItem noteItem = findFieldFromList(HighRiseCaseNotesSource.NOTE_UPDATED_AT, fields);
+            LastValueFilter lastValueFilter = new LastValueFilter();
+            lastValueFilter.setField(noteItem);
+            lastValueFilter.setShowOnReportView(false);
+            lastValueFilter.setAbsolute(false);
+            lastValueFilter.setThreshold(1);
+            intentions.add(new AddFilterIntention(lastValueFilter));
+        } else if (type == IntentionSuggestion.SUGGESTION_LAST_DEAL_NOTE) {
+            AnalysisItem noteItem = findFieldFromList(HighRiseDealNotesSource.NOTE_UPDATED_AT, fields);
+            LastValueFilter lastValueFilter = new LastValueFilter();
+            lastValueFilter.setField(noteItem);
+            lastValueFilter.setShowOnReportView(false);
+            lastValueFilter.setAbsolute(false);
+            lastValueFilter.setThreshold(1);
+            intentions.add(new AddFilterIntention(lastValueFilter));
+        } else if (type == IntentionSuggestion.SUGGESTION_NOTE_CONFIG) {
+            DataSourceIntention dataSourceIntention = new DataSourceIntention();
+            dataSourceIntention.setAdminData(true);
+            intentions.add(dataSourceIntention);
         } else {
             throw new RuntimeException("Unrecognized intention type");
         }

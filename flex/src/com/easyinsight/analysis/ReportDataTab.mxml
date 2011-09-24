@@ -150,7 +150,7 @@
             analysisDefinition.addedItems.addItem(event.analysisItem);
         }
 
-        private function createHierarchy():void {
+        public function createHierarchy():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             window.editorClass = HierarchyWindow;
             window.analysisItems = wrappers;

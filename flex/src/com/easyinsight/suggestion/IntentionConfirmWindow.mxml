@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private var _suggestion:IntentionSuggestion;
+
+        public function set suggestion(value:IntentionSuggestion):void {
+            _suggestion = value;
+        }
+
+        [Bindable]
+        private var intentionDescription:String;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            intentionDescription = _suggestion.description;
+        }
+
+        private function apply():void {
+            dispatchEvent(new ApplySuggestionEvent(_suggestion));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <util:AutoSizeTextArea text="{intentionDescription}" editable="false" selectable="false"
+            width="300" fontSize="14"/>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Apply" click="apply()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

@@ -19,7 +19,9 @@ public class ReportPropertiesIntention extends Intention {
     }
 
     override public function apply(suggestionMetadata:SuggestionMetadata):void {
-        suggestionMetadata.report.fullJoins = fullJoins;
+        if (fullJoins) {
+            suggestionMetadata.report.fullJoins = true;
+        }
         if (summaryRow) {
             ListDefinition(suggestionMetadata.report).summaryTotal = true;
         }

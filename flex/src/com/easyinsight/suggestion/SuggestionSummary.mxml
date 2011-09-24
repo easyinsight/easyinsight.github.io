@@ -1,0 +1,164 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Metadata>
+        [Event(name="intentionTrigger", type="com.easyinsight.suggestion.IntentionTriggerEvent")]
+    </mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.DataViewFactory;
+        import com.easyinsight.datasources.DataSourceDisplay;
+        import com.easyinsight.filtering.TransformContainer;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _suggestions:ArrayCollection;
+
+        public function set suggestions(value:ArrayCollection):void {
+            _suggestions = value;
+            invalidateProperties();
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (_suggestions != null) {
+                for (var i:int = 0; i < Math.min(3, _suggestions.length); i++) {
+                    var suggestion:IntentionSuggestion = _suggestions.getItemAt(i) as IntentionSuggestion;
+                    if (i == 0) {
+                        text1.label = suggestion.headline;
+                        text1.visible = true;
+                    } else if (i == 1) {
+                        text2.label = suggestion.headline;
+                        text2.visible = true;
+                    } else if (i == 2) {
+                        text3.label = suggestion.headline;
+                        text3.visible = true;
+                    }
+                }
+                if (_suggestions.length == 2) {
+                    text3.visible = false;
+                } else if (_suggestions.length == 1) {
+                    text2.visible = false;
+                    text3.visible = false;
+                }
+            }
+        }
+
+        private function applySuggestion(event:ApplySuggestionEvent):void {
+            var items:ArrayCollection = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in _fields) {
+                items.addItem(wrapper.analysisItem);
+            }
+            var suggestion:IntentionSuggestion = _suggestions.getItemAt(0) as IntentionSuggestion;
+            analysisService.getIntentions.send(_report, items, suggestion.scope, suggestion.type);
+        }
+
+        private function suggest1():void {
+            var confirmWindow:IntentionConfirmWindow = new IntentionConfirmWindow();
+            confirmWindow.suggestion = _suggestions.getItemAt(0) as IntentionSuggestion;
+            confirmWindow.addEventListener(ApplySuggestionEvent.APPLY_SUGGESTION, applySuggestion, false, 0, true);
+            PopUpManager.addPopUp(confirmWindow, this, true);
+            PopUpUtil.centerPopUp(confirmWindow);
+        }
+
+        private function suggest2():void {
+            var confirmWindow:IntentionConfirmWindow = new IntentionConfirmWindow();
+            confirmWindow.suggestion = _suggestions.getItemAt(1) as IntentionSuggestion;
+            confirmWindow.addEventListener(ApplySuggestionEvent.APPLY_SUGGESTION, applySuggestion, false, 0, true);
+            PopUpManager.addPopUp(confirmWindow, this, true);
+            PopUpUtil.centerPopUp(confirmWindow);
+        }
+
+        private function suggest3():void {
+            var confirmWindow:IntentionConfirmWindow = new IntentionConfirmWindow();
+            confirmWindow.suggestion = _suggestions.getItemAt(2) as IntentionSuggestion;
+            confirmWindow.addEventListener(ApplySuggestionEvent.APPLY_SUGGESTION, applySuggestion, false, 0, true);
+            PopUpManager.addPopUp(confirmWindow, this, true);
+            PopUpUtil.centerPopUp(confirmWindow);
+        }
+
+        private var _fields:ArrayCollection;
+
+        public function set fields(value:ArrayCollection):void {
+            _fields = value;
+        }
+
+        private var _availableFields:ArrayCollection;
+
+        public function set availableFields(value:ArrayCollection):void {
+            _availableFields = value;
+        }
+
+        private var _report:AnalysisDefinition;
+
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
+
+        private var _transformContainer:TransformContainer;
+
+
+        public function set transformContainer(value:TransformContainer):void {
+            _transformContainer = value;
+        }
+
+        private var _dataView:DataViewFactory;
+
+        public function set dataView(value:DataViewFactory):void {
+            _dataView = value;
+        }
+
+        private var _dataSourceDisplay:DataSourceDisplay;
+
+        public function set dataSourceDisplay(value:DataSourceDisplay):void {
+            _dataSourceDisplay = value;
+        }
+
+        private function gotIntentions():void {
+            var items:ArrayCollection = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in _fields) {
+                items.addItem(wrapper.analysisItem);
+            }
+            var intentions:ArrayCollection = analysisService.getIntentions.lastResult as ArrayCollection;
+            var metadata:SuggestionMetadata = new SuggestionMetadata(_report, _transformContainer, _availableFields, _fields, _dataSourceDisplay);
+            for each (var intention:Intention in intentions) {
+                intention.addEventListener(IntentionTriggerEvent.INTENTION_TRIGGER, onIntentionEvent);
+                intention.apply(metadata);
+            }
+            _dataView.retrieveData();
+        }
+
+        private function moreSuggestions():void {
+            var items:ArrayCollection = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in _fields) {
+                items.addItem(wrapper.analysisItem);
+            }
+            var window:IntentionListWindow = new IntentionListWindow();
+            window.addEventListener(IntentionTriggerEvent.INTENTION_TRIGGER, onIntentionEvent);
+            window.report = _report;
+            window.fields = items;
+            window.allFields = _availableFields;
+            window.dataSourceDisplay = _dataSourceDisplay;
+            window.wrappers = _fields;
+            window.transformContainer = _transformContainer;
+            window.dataView = _dataView;
+            window.suggestions = _suggestions;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onIntentionEvent(event:IntentionTriggerEvent):void {
+            dispatchEvent(event);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="getIntentions" result="gotIntentions()"/>
+    </mx:RemoteObject>
+    <mx:LinkButton visible="false" textDecoration="underline" maxWidth="280" fontSize="12" id="text1" click="suggest1()"/>
+    <mx:LinkButton visible="false" textDecoration="underline" maxWidth="280" fontSize="12" id="text2" click="suggest2()"/>
+    <mx:LinkButton visible="false" textDecoration="underline" maxWidth="280" fontSize="12" id="text3" click="suggest3()"/>
+    <mx:LinkButton label="More Suggestions" textDecoration="underline" fontSize="12" click="moreSuggestions()"/>
+</mx:VBox>

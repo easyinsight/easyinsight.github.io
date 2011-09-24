@@ -1,0 +1,28 @@
+/**
+ * Created by IntelliJ IDEA.
+ * User: jamesboe
+ * Date: 9/20/11
+ * Time: 2:39 PM
+ * To change this template use File | Settings | File Templates.
+ */
+package com.easyinsight.suggestion {
+
+[Bindable]
+[RemoteClass(alias="com.easyinsight.intention.DataSourceIntention")]
+public class DataSourceIntention extends Intention {
+
+    public var refreshData:Boolean;
+    public var adminData:Boolean;
+
+    public function DataSourceIntention() {
+    }
+
+    override public function apply(suggestionMetadata:SuggestionMetadata):void {
+        if (refreshData) {
+            suggestionMetadata.dataSourceDisplay.refresh();
+        } else if (adminData) {
+            dispatchEvent(new IntentionTriggerEvent(IntentionTriggerEvent.INTENTION_TRIGGER, true));
+        }
+    }
+}
+}

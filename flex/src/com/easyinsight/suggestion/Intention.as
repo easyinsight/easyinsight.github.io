@@ -6,10 +6,11 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.suggestion {
+import flash.events.EventDispatcher;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.intention.Intention")]
-public class Intention {
+public class Intention extends EventDispatcher {
 
     public var description:String;
     public var label:String;

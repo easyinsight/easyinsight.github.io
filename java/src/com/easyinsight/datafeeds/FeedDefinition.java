@@ -648,7 +648,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return new ArrayList<SuggestedUser>();
     }
 
-    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report, DataSourceInfo dataSourceInfo) {
         return new ArrayList<IntentionSuggestion>();
     }
 

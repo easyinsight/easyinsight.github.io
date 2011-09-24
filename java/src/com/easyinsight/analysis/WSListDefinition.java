@@ -231,7 +231,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         return properties;
     }
 
-    public static final int ADD_SUMMARY_ROW = 1;
+
 
     public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
         List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
@@ -239,13 +239,13 @@ public class WSListDefinition extends WSAnalysisDefinition {
         if (!wsListDefinition.isSummaryTotal()) {
             suggestions.add(new IntentionSuggestion("Add a Summary Row",
                     "This action will add a summary row to the bottom of your report.",
-                    IntentionSuggestion.SCOPE_REPORT, ADD_SUMMARY_ROW));
+                    IntentionSuggestion.SCOPE_REPORT, IntentionSuggestion.ADD_SUMMARY_ROW, IntentionSuggestion.OTHER));
         }
         return suggestions;
     }
 
     public List<Intention> createIntentions(List<AnalysisItem> fields, int type) throws SQLException {
-        if (type == ADD_SUMMARY_ROW) {
+        if (type == IntentionSuggestion.ADD_SUMMARY_ROW) {
             ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
             reportPropertiesIntention.setSummaryRow(true);
             return Arrays.asList((Intention) reportPropertiesIntention);

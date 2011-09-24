@@ -1,5 +1,10 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.intention.Intention;
+import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.intention.NewHierarchyIntention;
+
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -166,5 +171,28 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("textColor", textColor));
         properties.add(new ReportNumericProperty("headerTextColor", headerTextColor));
         return properties;
+    }
+
+    @Override
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
+        List<IntentionSuggestion> suggestions = super.suggestIntentions(report);
+        WSTreeDefinition tree = (WSTreeDefinition) report;
+        if (tree.getHierarchy() == null) {
+            suggestions.add(new IntentionSuggestion("Create a Hierarchy",
+                    "This action will create a new hierarchy of fields.",
+                    IntentionSuggestion.SCOPE_REPORT, IntentionSuggestion.NEW_HIERARCHY, IntentionSuggestion.OTHER));
+
+        }
+        return suggestions;
+    }
+
+    public List<Intention> createIntentions(List<AnalysisItem> fields, int type) throws SQLException {
+        List<Intention> intentions = new ArrayList<Intention>();
+        if (type == IntentionSuggestion.NEW_HIERARCHY) {
+            intentions.add(new NewHierarchyIntention());
+        } else {
+            throw new RuntimeException("Unrecognized intention type");
+        }
+        return intentions;
     }
 }

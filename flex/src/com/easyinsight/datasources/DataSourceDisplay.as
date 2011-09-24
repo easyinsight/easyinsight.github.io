@@ -159,12 +159,28 @@ public class DataSourceDisplay extends VBox {
         BindingUtils.bindProperty(viewStack, "selectedIndex", this, "stackIndex");
     }
 
-    private function onClick(event:MouseEvent):void {
+    public function refresh():void {
+        if (dataSource.scheduled) {
+            forceRefresh();
+        } else {
+            var setupWindow:DataSourceRefreshSetupWindow = new DataSourceRefreshSetupWindow();
+            setupWindow.dataSourceInfo = _dataSource;
+            setupWindow.addEventListener("done", forceRefresh, false, 0, true);
+            PopUpManager.addPopUp(setupWindow, this, true);
+            PopUpUtil.centerPopUp(setupWindow);
+        }
+    }
+
+    private function forceRefresh(event:Event = null):void {
         var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
         dsRefreshWindow.dataSourceID = _dataSource.dataSourceID;
         dsRefreshWindow.addEventListener(DataSourceRefreshEvent.DATA_SOURCE_REFRESH, onRefresh, false, 0, true);
         PopUpManager.addPopUp(dsRefreshWindow, this, true);
         PopUpUtil.centerPopUp(dsRefreshWindow);
+    }
+
+    private function onClick(event:MouseEvent):void {
+        refresh();
     }
 
     private function onRefresh(event:DataSourceRefreshEvent):void {

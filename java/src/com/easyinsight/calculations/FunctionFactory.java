@@ -105,6 +105,8 @@ public class FunctionFactory {
             return new RemoveFieldFromFilter();
         } else if (s.equals("removedashboardelement")) {
             return new RemoveDashboardElement();
+        } else if (s.equals("tags")) {
+            return new TagsFunction();
         } else {
             return null;
         }

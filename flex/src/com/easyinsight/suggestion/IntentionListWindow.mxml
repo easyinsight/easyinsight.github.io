@@ -4,6 +4,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.DataViewFactory;
+        import com.easyinsight.datasources.DataSourceDisplay;
         import com.easyinsight.filtering.TransformContainer;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -14,7 +15,7 @@
         import mx.managers.PopUpManager;
 
         [Bindable]
-        private var suggestions:ArrayCollection;
+        public var suggestions:ArrayCollection;
 
         private var _report:AnalysisDefinition;
 
@@ -27,6 +28,12 @@
         private var _allFields:ArrayCollection;
 
         private var _wrappers:ArrayCollection;
+
+        private var _dataSourceDisplay:DataSourceDisplay;
+
+        public function set dataSourceDisplay(value:DataSourceDisplay):void {
+            _dataSourceDisplay = value;
+        }
 
         public function set allFields(value:ArrayCollection):void {
             _allFields = value;
@@ -50,8 +57,7 @@
 
         private function onCreation():void {
             addEventListener(IntentionEvent.SUGGESTION_CHOICE, onIntentionChoice);
-            ProgressAlert.alert(this, "Determining possible suggestions...", null, analysisService.generatePossibleIntentions);
-            analysisService.generatePossibleIntentions.send(_report);
+            suggestionList.rowCount = suggestions.length + 1;
         }
 
         public function set report(value:AnalysisDefinition):void {
@@ -60,14 +66,11 @@
 
         private function gotSuggestions():void {
             var suggestions:ArrayCollection = analysisService.generatePossibleIntentions.lastResult as ArrayCollection;
-            if (suggestions.length == 0) {
-                Alert.show("We didn't come up with any suggestions for your report. If you have any ideas for common report tasks that you'd like to see as suggestions, let us know!");
-                PopUpManager.removePopUp(this);
-            } else {
-                suggestionList.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+
+            /*    suggestionList.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
                 this.suggestions = suggestions;
                 suggestionList.rowCount = suggestions.length + 1;
-            }
+            }*/
 
         }
 
@@ -82,16 +85,22 @@
 
         private function gotIntentions():void {
             var intentions:ArrayCollection = analysisService.getIntentions.lastResult as ArrayCollection;
-            var metadata:SuggestionMetadata = new SuggestionMetadata(_report, _transformContainer, _allFields, _wrappers);
+            var metadata:SuggestionMetadata = new SuggestionMetadata(_report, _transformContainer, _allFields, _wrappers, _dataSourceDisplay);
             for each (var intention:Intention in intentions) {
+                intention.addEventListener(IntentionTriggerEvent.INTENTION_TRIGGER, onIntentionEvent);
                 intention.apply(metadata);
             }
             _dataView.retrieveData();
             PopUpManager.removePopUp(this);
         }
+
+        private function onIntentionEvent(event:IntentionTriggerEvent):void {
+            dispatchEvent(event);
+        }
+
+
         ]]></mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
-        <mx:method name="generatePossibleIntentions" result="gotSuggestions()"/>
         <mx:method name="getIntentions" result="gotIntentions()"/>
     </mx:RemoteObject>
     <mx:List dataProvider="{suggestions}" itemRenderer="com.easyinsight.suggestion.IntentionRenderer" selectable="false" variableRowHeight="true"

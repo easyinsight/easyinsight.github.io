@@ -7,7 +7,9 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.MultiChildConnection;
+import com.easyinsight.datafeeds.highrise.HighRiseDealSource;
 import com.easyinsight.intention.AddFilterIntention;
+import com.easyinsight.intention.AddReportFieldIntention;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.kpi.KPI;
@@ -348,22 +350,28 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         return kpis;
     }
 
-    public static final int MILESTONE_FILTER = 1;
 
-    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
+
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report, DataSourceInfo dataSourceInfo) {
         List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
         suggestions.add(new IntentionSuggestion("Help Me Set Up a Milestone Report",
                 "This action will configure your report to exclude any results without a matching milestone.",
-                IntentionSuggestion.SCOPE_DATA_SOURCE, BaseCampCompositeSource.MILESTONE_FILTER));
+                IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.MILESTONE_FILTER, IntentionSuggestion.OTHER));
         return suggestions;
     }
 
     public List<Intention> createIntentions(WSAnalysisDefinition report, List<AnalysisItem> fields, int type) throws SQLException {
-        if (type == MILESTONE_FILTER) {
-            return Arrays.asList((Intention) new AddFilterIntention(excludeFilter(BaseCampTodoSource.MILESTONENAME, report, fields)));
+        List<Intention> intentions = new ArrayList<Intention>();
+        if (type == IntentionSuggestion.MILESTONE_FILTER) {
+            Set<AnalysisItem> items = report.getAllAnalysisItems();
+            if (items.isEmpty()) {
+                intentions.add(new AddReportFieldIntention(findFieldFromList(BaseCampTodoSource.MILESTONENAME, fields)));
+            }
+            intentions.add(new AddFilterIntention(excludeFilter(BaseCampTodoSource.MILESTONENAME, report, fields)));
         } else {
             throw new RuntimeException("Unrecognized intention type");
         }
+        return intentions;
     }
 
     public boolean isLongRefresh() {

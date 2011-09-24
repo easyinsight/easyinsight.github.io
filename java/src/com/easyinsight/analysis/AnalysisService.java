@@ -713,16 +713,43 @@ public class AnalysisService {
         return userCapabilities;
     }
 
+    public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report, EIConnection conn) throws SQLException {
+        List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+        Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID());
+        DataSourceInfo dataSourceInfo = feed.createSourceInfo(conn);
+        FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID(), conn);
+        suggestions.addAll(dataSource.suggestIntentions(report, dataSourceInfo));
+        suggestions.addAll(report.suggestIntentions(report));
+        Collections.sort(suggestions, new Comparator<IntentionSuggestion>() {
+
+            public int compare(IntentionSuggestion intentionSuggestion, IntentionSuggestion intentionSuggestion1) {
+                return intentionSuggestion.getPriority().compareTo(intentionSuggestion1.getPriority());
+            }
+        });
+        return suggestions;
+    }
+
     public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report) {
+        EIConnection conn = Database.instance().getConnection();
         try {
             List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID());
-            suggestions.addAll(dataSource.suggestIntentions(report));
+            Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID());
+            DataSourceInfo dataSourceInfo = feed.createSourceInfo(conn);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID(), conn);
+            suggestions.addAll(dataSource.suggestIntentions(report, dataSourceInfo));
             suggestions.addAll(report.suggestIntentions(report));
+            Collections.sort(suggestions, new Comparator<IntentionSuggestion>() {
+
+                public int compare(IntentionSuggestion intentionSuggestion, IntentionSuggestion intentionSuggestion1) {
+                    return intentionSuggestion.getPriority().compareTo(intentionSuggestion1.getPriority());
+                }
+            });
             return suggestions;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 

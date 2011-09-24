@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
                       xmlns:analysis="com.easyinsight.analysis.*" xmlns:listing="com.easyinsight.listing.*"
+                      xmlns:suggestion="com.easyinsight.suggestion.*" xmlns:datasources="com.easyinsight.datasources.*"
                       creationComplete="initializeForWorksheet()" width="100%"
                       height="100%"
                       xmlns:filtering="com.easyinsight.filtering.*"
                       doubleClickEnabled="true"
                       implements="com.easyinsight.listing.IPerspective" xmlns:skin="com.easyinsight.skin.*"
                       applyCenterScreenLogic="false">
+    <skin:states>
+        <mx:State name="showSuggestions">
+            <mx:AddChild relativeTo="{headerArea}">
+                <mx:VBox height="100%" verticalAlign="middle">
+                <suggestion:SuggestionSummary width="300" borderStyle="solid" borderThickness="1" borderColor="#666666" cornerRadius="5" horizontalAlign="center"
+                    report="{analysisDefinition}"
+                        transformContainer="{transformContainer}" fields="{wrappers}" availableFields="{availableFields}"
+                        intentionTrigger="onIntentionEvent(event)" dataSourceDisplay="{dataSourceDisplay}" suggestions="{suggestions}" dataView="{dataView}"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+    </skin:states>
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AddedItemUpdateEvent;
@@ -31,6 +44,7 @@
         import com.easyinsight.analysis.ImprovedSaveWindow;
         import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.ReportEditorFieldEvent;
+        import com.easyinsight.analysis.ReportEditorHelp;
         import com.easyinsight.analysis.ReportPreferencesEvent;
         import com.easyinsight.analysis.ReportPropertiesEvent;
         import com.easyinsight.analysis.SavePromptWindow;
@@ -45,6 +59,7 @@
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.suggestion.IntentionTriggerEvent;
         import com.easyinsight.util.ActionDataSourceLog;
         import com.easyinsight.util.ActionReportLog;
         import com.easyinsight.util.ErrorReportView;
@@ -179,11 +194,30 @@
         private function onAnalysisStateChange(event:AnalysisStateChangeEvent):void {
             var controller:IReportController = event.controller;
             loadController(controller);
+            analysisService.generatePossibleIntentions.send(analysisDefinition);
         }
 
         private function onDataReturn(event:DataServiceEvent):void {
             this.dataSourceInfo = event.dataSource;
+            this.suggestions = event.suggestions;
+            if (suggestions != null && suggestions.length > 0) {
+                currentState = "showSuggestions";
+            } else {
+                currentState = "";
+            }
         }
+
+        private function gotIntentions():void {
+            this.suggestions = analysisService.generatePossibleIntentions.lastResult as ArrayCollection;
+            if (suggestions != null && suggestions.length > 0) {
+                currentState = "showSuggestions";
+            } else {
+                currentState = "";
+            }
+        }
+
+        [Bindable]
+        private var suggestions:ArrayCollection;
 
         private function loadController(controller:IReportController, shareDataSourceSettings:Boolean = false):void {
             var dataViewFactory:DataViewFactory = controller.createDataView();
@@ -288,6 +322,16 @@
             }
         }
 
+        private function onIntentionEvent(event:IntentionTriggerEvent):void {
+            if (event.admin) {
+                goAdmin();
+            } else if (event.newField) {
+                dataView.addItem(event.newField);
+            } else if (event.newHierarchy) {
+                reportDataTab.createHierarchy();
+            }
+        }
+
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
             try {
                 dataSourceID = feedMetadata.dataFeedID;
@@ -336,7 +380,12 @@
                     for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {
                         transformContainer.addFilterDefinition(filter);
                     }
-
+                    this.suggestions = feedMetadata.suggestions;
+                    if (suggestions != null && suggestions.length > 0) {
+                        currentState = "showSuggestions";
+                    } else {
+                        currentState = "";
+                    }
 
                 } else {
                     //this.title = analysisDefinition.name;
@@ -664,7 +713,6 @@
             removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
-            reportMetadataTab.cleanup();
             if (dataService != null) {
                 dataService.removeEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
             }
@@ -836,6 +884,12 @@
             editReportProperties(event.startIndex);
         }
 
+        private function tutorial():void {
+            var window:ReportEditorHelp = new ReportEditorHelp();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         [Bindable]
         private var fieldsIndex:int = 0;
 
@@ -855,59 +909,75 @@
     </mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="openAnalysisDefinition" result="gotReport()"/>
+        <mx:method name="generatePossibleIntentions" result="gotIntentions()"/>
     </mx:RemoteObject>
     <analysis:AnalysisItemEventHandler id="fieldEventHandler" dataSourceID="{dataSourceID}" analysisItems="{wrappers}"/>
     <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275" paddingLeft="10" paddingBottom="10"
-            paddingRight="10">
-        <mx:Canvas>
+            paddingRight="10" paddingTop="10">
+        <mx:HBox width="100%" id="headerArea">
+            <mx:VBox width="100%">
+                <mx:Canvas>
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
-                       toolTip="Close" labelPlacement="right" label="Close Editor" x="10" y="10"/>
+                       toolTip="Close" labelPlacement="right" label="Close Editor" x="10"/>
             <mx:VRule strokeColor="#DDDDDD" height="16" x="126" y="13"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
                        toolTip="Save" enabled="{!_previewMode &amp;&amp; !loadingReport}" label="Save"
-                    labelPlacement="right" x="136" y="10"/>
+                    labelPlacement="right" x="136"/>
             <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
                        toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !loadingReport}" label="Save As"
-                    labelPlacement="right" x="212" y="10"/>
-            <mx:VRule strokeColor="#DDDDDD" height="16" x="305" y="13"/>
+                    labelPlacement="right" x="212"/>
+            <mx:VRule strokeColor="#DDDDDD" height="16" x="305" y="3"/>
             <mx:Button id="refreshButton" toolTip="Refresh Data"
                        icon="@Embed(source='../../../assets/refresh.png')"
-                       click="dataView.forceRetrieve()" label="Refresh" labelPlacement="right" x="315" y="10"/>
+                       click="dataView.forceRetrieve()" label="Refresh" labelPlacement="right" x="315"/>
             <analysis:AdHocMode id="adHocButton" modeChange="dataView.forceRetrieve()" labelPlacement="right" label="Ad Hoc Mode"
-                    x="408" y="10"/>
-            <mx:VRule strokeColor="#DDDDDD" height="16" x="531" y="13"/>
+                    x="408"/>
+            <mx:VRule strokeColor="#DDDDDD" height="16" x="531" y="3"/>
             <mx:Button id="dataSourceButton" toolTip="Create a New Report from Data Source"
                        icon="@Embed(source='../../../assets/table.png')" click="newReport()" labelPlacement="right" label="New Report"
-                    x="541" y="10"/>
+                    x="541"/>
             <mx:Button id="reportButton" icon="@Embed(source='../../../assets/media_play_green.png')" click="goReport()"
-                       toolTip="View Report" label="Report View" labelPlacement="right" x="655" y="10"/>
-            <listing:SearchButton x="771" y="10" toolTip="Search..."/>
+                       toolTip="View Report" label="Report View" labelPlacement="right" x="655"/>
+            <listing:SearchButton x="771" toolTip="Search..."/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"
-                       toolTip="Adminster" visible="{admin}" label="Administer Data" labelPlacement="right" x="856" y="10"/>
+                       toolTip="Adminster" visible="{admin}" label="Administer Data" labelPlacement="right" x="856"/>
         </mx:Canvas>
-        <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
-                         paddingBottom="0"
-                         paddingLeft="0" paddingRight="0" resizeToContent="true" selectedIndex="{selectedTabIndex}">
-            <analysis:ReportMetadataTab id="reportMetadataTab" dataSourceInfo="{dataSourceInfo}"
-                                        dataView="{dataView}" backgroundColor="#FFFFFF" backgroundAlpha=".9" report="{analysisDefinition}"
-                    transformContainer="{transformContainer}" fields="{wrappers}" availableFields="{availableFields}"/>
-            <analysis:AboutReportTab id="aboutReportTab" report="{analysisDefinition}"  backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
-            <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}"
-                                    dataService="{dataService}"
-                                    wrappers="{wrappers}" availableFields="{availableFields}"
+
+            <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
+                             paddingBottom="0"
+                             paddingLeft="0" paddingRight="0" resizeToContent="true" selectedIndex="{selectedTabIndex}">
+                <mx:Canvas label="Getting Started" icon="@Embed(source='../../../assets/bullet_ball_green.png')"
+                        width="100%" height="90">
+                    <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center" verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" x="10" y="10">
+                        <mx:TextArea width="500" editable="false" selectable="false" borderStyle="none" backgroundAlpha="0" height="60" fontSize="14"
+                                                         text="You can drag the fields below into the report areas to the right. You can click on the arrow to the left of folders to see more fields. You can also right click on the fields to add to the report or create new filters."/>
+                    </mx:Box>
+                    <mx:Button icon="@Embed(source='../../../assets/report/help.png')"
+                                       click="tutorial()" toolTip="Help!" label="Help!" x="575" y="5"/>
+                    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}" id="dataSourceDisplay" x="700" y="16" dataSourceRefreshed="dataView.forceRetrieve()"/>
+                </mx:Canvas>
+                <analysis:AboutReportTab id="aboutReportTab" report="{analysisDefinition}"  backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
+                <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}"
+                                        dataService="{dataService}" wrappers="{wrappers}" availableFields="{availableFields}"
                                     dataView="{dataView}" analysisItemEdit="sortFields()" joinsCustomizable="{joinsCustomizable}"
-                                    dataSourceID="{dataSourceID}" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
-            <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
-                                          paddingRight="10" label="Filters"
-                                          icon="@Embed(source='../../../assets/funnel.png')"
-                                          width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".9"
-                                          feedID="{dataSourceID}"
-                                          analysisItems="{wrappers}" minHeight="40">
-                <mx:Button icon="@Embed(source='../../../assets/funnel.png')"
-                           toolTip="{excludeFilterDataTooltip}" click="transformContainer.addNewFilter()" label="New Filter"/>
-            </filtering:TransformContainer>
-            <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}" id="exportTab" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
-        </mx:TabNavigator>
+                                    dataSourceID="{dataSourceID}"
+                                        backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
+                <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
+                                              paddingRight="10" label="Filters"
+                                              icon="@Embed(source='../../../assets/funnel.png')"
+                                              width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".9"
+                                              feedID="{dataSourceID}"
+                                              analysisItems="{wrappers}" minHeight="75">
+                    <mx:Button icon="@Embed(source='../../../assets/funnel.png')"
+                               toolTip="{excludeFilterDataTooltip}" click="transformContainer.addNewFilter()" label="New Filter"/>
+                </filtering:TransformContainer>
+                <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}" id="exportTab" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
+            </mx:TabNavigator>
+        </mx:VBox>
+
+
+        </mx:HBox>
 
 
         <mx:HDividedBox id="hbox1" height="100%" width="100%">

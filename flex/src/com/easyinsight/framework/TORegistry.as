@@ -122,8 +122,11 @@ import com.easyinsight.solutions.SolutionInstallInfo;
 
 import com.easyinsight.solutions.SolutionKPIData;
 import com.easyinsight.suggestion.AddFilterIntention;
+import com.easyinsight.suggestion.AddReportFieldIntention;
 import com.easyinsight.suggestion.CustomFieldIntention;
 import com.easyinsight.suggestion.CustomizeJoinIntention;
+import com.easyinsight.suggestion.DataSourceIntention;
+import com.easyinsight.suggestion.NewHierarchyIntention;
 import com.easyinsight.suggestion.ReportPropertiesIntention;
 
 import mx.managers.DragManager;
@@ -261,6 +264,9 @@ public class TORegistry {
         var afi:AddFilterIntention;
         var cfi:CustomFieldIntention;
         var rpi:ReportPropertiesIntention;
+        var dsi:DataSourceIntention;
+        var arfi:AddReportFieldIntention;
+        var nhi:NewHierarchyIntention;
     }
 }
 }

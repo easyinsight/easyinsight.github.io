@@ -17,10 +17,11 @@ public class DataServiceEvent extends Event {
     public var additionalProperties:Object;
     public var reportAudit:ArrayCollection;
     public var reportFault:ReportFault;
+    public var suggestions:ArrayCollection;
 
     public function DataServiceEvent(type:String, dataSet:ArrayCollection, dataSource:DataSourceInfo,
                                      additionalProperties:Object, reportAudit:ArrayCollection, reportFault:ReportFault,
-                                     limitedResults:Boolean = false, limitResults:int = 0, maxResults:int = 0) {
+                                     limitedResults:Boolean = false, limitResults:int = 0, maxResults:int = 0, suggestions:ArrayCollection = null) {
         super(type);
         this.dataSet = dataSet;
         this.dataSource = dataSource;
@@ -30,11 +31,12 @@ public class DataServiceEvent extends Event {
         this.additionalProperties = additionalProperties;
         this.reportAudit = reportAudit;
         this.reportFault = reportFault;
+        this.suggestions = suggestions;
     }
 
     override public function clone():Event {
         return new DataServiceEvent(type, dataSet, dataSource, additionalProperties, reportAudit, reportFault,
-                limitedResults, limitResults, maxResults);
+                limitedResults, limitResults, maxResults, suggestions);
     }
 }
 }

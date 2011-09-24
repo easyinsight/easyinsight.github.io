@@ -91,6 +91,10 @@ public class DataService {
                     lookupTables.add(new FeedService().getLookupTable(field.getLookupTableID(), conn));
                 }
             }
+            WSListDefinition tempList = new WSListDefinition();
+            tempList.setDataFeedID(feedID);
+            tempList.setColumns(new ArrayList<AnalysisItem>());
+            feedMetadata.setSuggestions(new AnalysisService().generatePossibleIntentions(tempList, conn));
             feedMetadata.setLookupTables(lookupTables);
             return feedMetadata;
         } catch (Exception e) {
@@ -363,6 +367,7 @@ public class DataService {
             CrossTabDataResults crossTabDataResults = new CrossTabDataResults();
             crossTabDataResults.setDataSet(resultData);
             crossTabDataResults.setColumnCount(crosstab.getColumnSections().size() + analysisDefinition.getRows().size() + 1);
+            crossTabDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
             crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             return crossTabDataResults;
         } catch (ReportException dae) {
@@ -414,6 +419,7 @@ public class DataService {
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet());
             results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+            results.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
             return results;
         } catch (ReportException dae) {
             ListDataResults embeddedDataResults = new ListDataResults();

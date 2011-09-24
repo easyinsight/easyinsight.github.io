@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.schedule.DailyScheduleType;
+        import com.easyinsight.schedule.DataSourceRefreshActivity;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.managers.PopUpManager;
+
+        private var _dataSourceInfo:DataSourceInfo;
+
+
+        public function set dataSourceInfo(value:DataSourceInfo):void {
+            _dataSourceInfo = value;
+        }
+
+        private function autoRefresh():void {
+            var activity:DataSourceRefreshActivity = new DataSourceRefreshActivity();
+            activity.dataSourceID = _dataSourceInfo.dataSourceID;
+            activity.dataSourceName = _dataSourceInfo.dataSourceName;
+            var schedule:DailyScheduleType = new DailyScheduleType();
+            var morningOrEvening:int = int(Math.random() * 2);
+            if (morningOrEvening == 0) {
+                schedule.hour = int(Math.random() * 6);
+            } else {
+                schedule.hour = int(Math.random() * 6) + 18;
+            }
+            schedule.minute = int(Math.random() * 60);
+            activity.scheduleType = schedule;
+            ProgressAlert.alert(this, "Scheduling future refreshes...", null, exportService.addOrUpdateSchedule);
+            exportService.addOrUpdateSchedule.send(activity, new Date().getTimezoneOffset());
+        }
+
+        private function addedSchedule():void {
+            _dataSourceInfo.scheduled = true;
+            dispatchEvent(new Event('done'));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function nodont():void {
+            dispatchEvent(new Event('done'));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="exportService" destination="exportService">
+        <mx:method name="addOrUpdateSchedule" result="addedSchedule()"/>
+    </mx:RemoteObject>
+    <mx:TextArea borderStyle="none" editable="false" selectable="false" width="400" height="70" fontSize="12"
+                 text="It looks like you don't have automatic nightly refresh set up for your data source. Do you want this data source to automatically refresh on a nightly basis?"/>
+    <mx:HBox>
+        <util:SaveButton label="Automatically Refresh" click="autoRefresh()"/>
+        <util:CancelButton label="No, Don't" click="nodont()"/>
+    </mx:HBox>
+</util:EISlimWindow>

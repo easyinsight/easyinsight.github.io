@@ -42,7 +42,7 @@ public class StandardReportPipeline extends Pipeline {
             }
         }
         
-        for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, items)) {
+        for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, allNeededAnalysisItems)) {
             AnalysisList analysisList = (AnalysisList) tag;
             if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
         }

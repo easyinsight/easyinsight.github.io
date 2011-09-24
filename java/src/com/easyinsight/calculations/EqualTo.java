@@ -8,13 +8,16 @@ import com.easyinsight.core.Value;
  * Time: 7:00 PM
  */
 public class EqualTo extends Function {
+
+
+
     public Value evaluate() {
         Value compare1 = params.get(0);
         Value compare2 = minusQuotes(params.get(1));
         if (compare1.toString().equals(compare2.toString())) {
-            return params.get(2);
+            return minusQuotes(params.get(2));
         } else {
-            return params.get(3);
+            return minusQuotes(params.get(3));
         }
     }
 
