@@ -103,5 +103,6 @@ public class DMSServlet extends HttpServlet {
         }
         healthListener.stop();
         super.destroy();
+        System.exit(0);
     }
 }
