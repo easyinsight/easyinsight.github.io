@@ -5,6 +5,7 @@ import com.easyinsight.calculations.Resolver;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class Link implements Cloneable, Serializable {
         return false;
     }
 
-    public String generateLink(IRow row, Map<String, String> dataSourceProperties) {
+    public String generateLink(IRow row, Map<String, String> dataSourceProperties, Collection<AnalysisItem> fields) {
         throw new UnsupportedOperationException();
     }
 

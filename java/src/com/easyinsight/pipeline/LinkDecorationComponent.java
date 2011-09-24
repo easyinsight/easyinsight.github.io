@@ -20,7 +20,7 @@ public class LinkDecorationComponent implements IComponent {
             for (Link link : analysisItem.getLinks()) {
                 if (link.generatesURL()) {
                     for (IRow row : dataSet.getRows()) {
-                        String url = link.generateLink(row, pipelineData.getDataSourceProperties());
+                        String url = link.generateLink(row, pipelineData.getDataSourceProperties(), pipelineData.getAllItems());
                         Value value = row.getValue(analysisItem.createAggregateKey());
                         Map<String, String> links = value.getLinks();
                         if (links == null) {

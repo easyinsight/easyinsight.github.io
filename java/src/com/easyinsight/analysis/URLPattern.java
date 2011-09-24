@@ -30,11 +30,15 @@ public class URLPattern {
         return results;
     }
 
-    public static String getURL(String pattern, IRow row, Map<String, String> dataSourceProperties) {
+    public static String getURL(String pattern, IRow row, Map<String, String> dataSourceProperties, Collection<AnalysisItem> fields) {
         Map<String, Key> values = new HashMap<String, Key>();
+        Map<String, Key> keyMap = new HashMap<String, Key>();
+        for (AnalysisItem field : fields) {
+            values.put(field.toDisplay(), field.createAggregateKey());
+        }
         for(Key k : row.getKeys()) {
             if (k != null) {
-                values.put(k.toKeyString(), k);
+                keyMap.put(k.toKeyString(), k);
             }
         }
         Matcher m = keyPattern.matcher(pattern);
@@ -48,14 +52,21 @@ public class URLPattern {
         while(m.find()) {
             String t = m.group();
             String s = t.substring(1, t.length() - 1).trim();
-            if(values.get(s) == null) {
-                String dsProp = dataSourceProperties.get(s);
-                if (dsProp == null)
-                    sb.append(t);
-                else
-                    sb.append(dsProp);
+
+            Key key = keyMap.get(s);
+            if(key == null) {
+                key = values.get(s);
+                if (key == null) {
+                    String dsProp = dataSourceProperties.get(s);
+                    if (dsProp == null)
+                        sb.append(t);
+                    else
+                        sb.append(dsProp);
+                }
             }
-            sb.append(row.getValue(values.get(s)).toString());
+            if (key != null) {
+                sb.append(row.getValue(key).toString());
+            }
             if(i < fragments.length)
                 sb.append(fragments[i++]);
         }

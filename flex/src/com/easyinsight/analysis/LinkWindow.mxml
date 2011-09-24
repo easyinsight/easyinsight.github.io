@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                    creationComplete="analysisService.getInsightDescriptors.send()" width="500" height="400">
+                    creationComplete="analysisService.getInsightDescriptors.send()" width="700" height="400">
     <mx:Script><![CDATA[
 
         import mx.collections.ArrayCollection;
@@ -146,14 +146,14 @@
         <mx:VBox width="100%" height="50%" paddingBottom="5" paddingLeft="40" paddingRight="5" paddingTop="5" verticalAlign="middle">
             <mx:HBox width="100%">
                 <mx:Label text="Label: " width="150" fontFamily="Tahoma" fontWeight="bold"/>
-                <mx:TextInput id="labelInput" text="{linkLabel}" width="100%"/>
+                <mx:TextInput id="labelInput" text="{linkLabel}" width="450"/>
             </mx:HBox>
             <mx:ViewStack id="viewStack" resizeToContent="true" creationPolicy="all"
                           selectedIndex="{stackIndex}">
                 <mx:VBox width="100%">
                     <mx:HBox width="100%">
                         <mx:Label text="URL: " width="150" fontFamily="Tahoma" fontWeight="bold"/>
-                        <mx:TextInput id="urlInput" text="{urlText}" width="100%"/>
+                        <mx:TextInput id="urlInput" text="{urlText}" width="450"/>
                     </mx:HBox>
                 </mx:VBox>
                 <mx:VBox>
@@ -169,8 +169,8 @@
                 </mx:VBox>
             </mx:ViewStack>
             <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Button label="Save" click="save()"/>
-                <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+                <util:SaveButton label="Save" click="save()"/>
+                <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
         </mx:VBox>
     </mx:VBox>

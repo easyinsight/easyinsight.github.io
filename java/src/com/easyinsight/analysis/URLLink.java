@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Column;
+import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -47,8 +48,8 @@ public class URLLink extends Link {
         return true;
     }
 
-    public String generateLink(IRow row, Map<String, String> dataSourceProperties) {
-        return URLPattern.getURL(url, row, dataSourceProperties);
+    public String generateLink(IRow row, Map<String, String> dataSourceProperties, Collection<AnalysisItem> fields) {
+        return URLPattern.getURL(url, row, dataSourceProperties, fields);
     }
 
     @Override
