@@ -2,8 +2,8 @@ package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.LinkedList;
