@@ -78,6 +78,8 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                 }
                 analysisItems.add(new AnalysisDimension(key, "Company " + entry.getValue()));
             }
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
