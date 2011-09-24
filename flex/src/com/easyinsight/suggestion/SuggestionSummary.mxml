@@ -51,7 +51,7 @@
             for each (var wrapper:AnalysisItemWrapper in _fields) {
                 items.addItem(wrapper.analysisItem);
             }
-            var suggestion:IntentionSuggestion = _suggestions.getItemAt(0) as IntentionSuggestion;
+            var suggestion:IntentionSuggestion = event.suggestion;
             analysisService.getIntentions.send(_report, items, suggestion.scope, suggestion.type);
         }
 
