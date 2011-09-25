@@ -12,7 +12,7 @@
         <mx:State name="showSuggestions">
             <mx:AddChild relativeTo="{headerArea}">
                 <mx:VBox height="100%" verticalAlign="middle">
-                <suggestion:SuggestionSummary width="300" borderStyle="solid" borderThickness="1" borderColor="#666666" cornerRadius="5" horizontalAlign="center"
+                <suggestion:SuggestionSummary width="250" borderStyle="solid" borderThickness="1" borderColor="#666666" cornerRadius="5" horizontalAlign="center"
                     report="{analysisDefinition}"
                         transformContainer="{transformContainer}" fields="{wrappers}" availableFields="{availableFields}"
                         intentionTrigger="onIntentionEvent(event)" dataSourceDisplay="{dataSourceDisplay}" suggestions="{suggestions}" dataView="{dataView}"/>
@@ -919,28 +919,28 @@
                 <mx:Canvas>
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
                        toolTip="Close" labelPlacement="right" label="Close Editor" x="10"/>
-            <mx:VRule strokeColor="#DDDDDD" height="16" x="126" y="13"/>
+            <!--<mx:VRule strokeColor="#DDDDDD" height="16" x="126" y="3"/>-->
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
                        toolTip="Save" enabled="{!_previewMode &amp;&amp; !loadingReport}" label="Save"
-                    labelPlacement="right" x="136"/>
+                    labelPlacement="right" x="126"/>
             <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
                        toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !loadingReport}" label="Save As"
-                    labelPlacement="right" x="212"/>
-            <mx:VRule strokeColor="#DDDDDD" height="16" x="305" y="3"/>
+                    labelPlacement="right" x="202"/>
+            <!--<mx:VRule strokeColor="#DDDDDD" height="16" x="305" y="3"/>-->
             <mx:Button id="refreshButton" toolTip="Refresh Data"
                        icon="@Embed(source='../../../assets/refresh.png')"
-                       click="dataView.forceRetrieve()" label="Refresh" labelPlacement="right" x="315"/>
+                       click="dataView.forceRetrieve()" label="Refresh" labelPlacement="right" x="295"/>
             <analysis:AdHocMode id="adHocButton" modeChange="dataView.forceRetrieve()" labelPlacement="right" label="Ad Hoc Mode"
-                    x="408"/>
-            <mx:VRule strokeColor="#DDDDDD" height="16" x="531" y="3"/>
+                    x="388"/>
+            <!--<mx:VRule strokeColor="#DDDDDD" height="16" x="531" y="3"/>-->
             <mx:Button id="dataSourceButton" toolTip="Create a New Report from Data Source"
                        icon="@Embed(source='../../../assets/table.png')" click="newReport()" labelPlacement="right" label="New Report"
-                    x="541"/>
+                    x="511"/>
             <mx:Button id="reportButton" icon="@Embed(source='../../../assets/media_play_green.png')" click="goReport()"
-                       toolTip="View Report" label="Report View" labelPlacement="right" x="655"/>
-            <listing:SearchButton x="771" toolTip="Search..."/>
+                       toolTip="View Report" label="Report View" labelPlacement="right" x="625"/>
+            <listing:SearchButton x="741" toolTip="Search..."/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"
-                       toolTip="Adminster" visible="{admin}" label="Administer Data" labelPlacement="right" x="856"/>
+                       toolTip="Adminster" visible="{admin}" label="Administer Data" labelPlacement="right" x="826"/>
         </mx:Canvas>
 
             <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
