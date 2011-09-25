@@ -84,7 +84,7 @@ public class DMSServlet extends HttpServlet {
     public void destroy() {
         LogClass.info("Shutting down...");
 
-        /*List<String> caches = Arrays.asList("scorecardQueue", "servers", "embeddedReports", "feeds", "feedDefinitions", "apiKeys", "htmlcache");
+        List<String> caches = Arrays.asList("scorecardQueue", "servers", "embeddedReports", "feeds", "feedDefinitions", "apiKeys", "htmlcache");
         for(String s : caches) {
             try {
                 JCS cache = JCS.getInstance(s);
@@ -92,7 +92,7 @@ public class DMSServlet extends HttpServlet {
             } catch(Exception e) {
                 // Do nothing for now, possibly intended behavior
             }
-        }*/
+        }
 
         Database.instance().shutdown();
         DatabaseManager.instance().shutdown();
