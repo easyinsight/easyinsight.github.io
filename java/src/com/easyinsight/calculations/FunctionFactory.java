@@ -107,6 +107,8 @@ public class FunctionFactory {
             return new RemoveDashboardElement();
         } else if (s.equals("tags")) {
             return new TagsFunction();
+        } else if (s.equals("firsttag")) {
+            return new FirstTagFunction();
         } else {
             return null;
         }

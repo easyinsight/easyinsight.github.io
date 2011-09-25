@@ -1,17 +1,18 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.core.*;
+import com.easyinsight.core.EmptyValue;
+import com.easyinsight.core.StringValue;
+import com.easyinsight.core.Value;
 
 /**
  * User: jamesboe
  * Date: 9/22/11
  * Time: 2:59 PM
  */
-public class TagsFunction extends Function {
+public class FirstTagFunction extends Function {
     public Value evaluate() {
         Value tagValue = params.get(0);
         Value originalTagValue = tagValue.getOriginalValue();
-        StringBuilder sb = new StringBuilder();
         if (originalTagValue.type() == Value.STRING) {
             StringValue stringValue = (StringValue) originalTagValue;
             String[] tokens = stringValue.getValue().split(",");
@@ -21,15 +22,12 @@ public class TagsFunction extends Function {
                 for (int j = 1; j < params.size(); j++) {
                     String param = minusQuotes(j);
                     if (tag.equals(param)) {
-                        sb.append(param).append(",");
+                        return new StringValue(tag);
                     }
                 }
             }
         }
-        if (sb.length() > 0) {
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        return new StringValue(sb.toString());
+        return new EmptyValue();
     }
 
     public int getParameterCount() {
