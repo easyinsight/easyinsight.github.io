@@ -429,7 +429,14 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.marketplaceVisible = source.marketplaceVisible;
         target.solutionVisible = source.solutionVisible;
         target.publiclyVisible = source.publiclyVisible;
-        target.temporaryReport = source.temporaryReport;        
+        target.temporaryReport = source.temporaryReport;
+        target.fullJoins = source.fullJoins;
+        target.optimized = source.optimized;
+        target.dateUpdated = source.dateUpdated;
+        target.backgroundAlpha = source.backgroundAlpha;
+        target.fontName = source.fontName;
+        target.fontSize = source.fontSize;
+        target.marmotScript = source.marmotScript;
     }
 
     public function createNewDefinition():AnalysisDefinition {
