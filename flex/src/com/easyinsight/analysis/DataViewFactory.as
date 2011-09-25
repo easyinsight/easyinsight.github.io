@@ -437,6 +437,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.fontName = source.fontName;
         target.fontSize = source.fontSize;
         target.marmotScript = source.marmotScript;
+        target.joinOverrides = source.joinOverrides;
     }
 
     public function createNewDefinition():AnalysisDefinition {
