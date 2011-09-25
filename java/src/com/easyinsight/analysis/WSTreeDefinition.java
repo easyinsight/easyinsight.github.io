@@ -71,8 +71,8 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
 
     public Set<AnalysisItem> getAllAnalysisItems() {
         Set<AnalysisItem> columnList = new HashSet<AnalysisItem>();
-        AnalysisHierarchyItem item = (AnalysisHierarchyItem) hierarchy;
         if (hierarchy != null) {
+            AnalysisHierarchyItem item = (AnalysisHierarchyItem) hierarchy;
             for (HierarchyLevel level : item.getHierarchyLevels()) {
                 columnList.add(level.getAnalysisItem());
             }
