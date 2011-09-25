@@ -353,7 +353,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
 
     public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report, DataSourceInfo dataSourceInfo) {
-        List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+        List<IntentionSuggestion> suggestions = super.suggestIntentions(report, dataSourceInfo);
         suggestions.add(new IntentionSuggestion("Help Me Set Up a Milestone Report",
                 "This action will configure your report to exclude any results without a matching milestone.",
                 IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.MILESTONE_FILTER, IntentionSuggestion.OTHER));
