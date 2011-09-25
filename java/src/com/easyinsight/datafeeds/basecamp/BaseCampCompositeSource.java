@@ -361,7 +361,10 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     }
 
     public List<Intention> createIntentions(WSAnalysisDefinition report, List<AnalysisItem> fields, int type) throws SQLException {
-        List<Intention> intentions = new ArrayList<Intention>();
+        List<Intention> intentions = super.createIntentions(report, fields, type);
+        if (!intentions.isEmpty()) {
+            return intentions;
+        }
         if (type == IntentionSuggestion.MILESTONE_FILTER) {
             Set<AnalysisItem> items = report.getAllAnalysisItems();
             if (items.isEmpty()) {
