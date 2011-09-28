@@ -52,9 +52,15 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
 
     public Set<AnalysisItem> getAllAnalysisItems() {
         Set<AnalysisItem> AnalysisItems = new HashSet<AnalysisItem>();
-        AnalysisItems.addAll(columns);
-        AnalysisItems.addAll(rows);
-        AnalysisItems.addAll(measures);
+        if (columns != null) {
+            AnalysisItems.addAll(columns);
+        }
+        if (rows != null) {
+            AnalysisItems.addAll(rows);
+        }
+        if (measures != null) {
+            AnalysisItems.addAll(measures);
+        }
         return AnalysisItems;
     }
 
