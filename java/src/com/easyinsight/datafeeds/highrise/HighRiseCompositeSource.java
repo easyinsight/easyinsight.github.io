@@ -594,6 +594,9 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         }
         Set<AnalysisItem> analysisItems = report.getAllAnalysisItems();
         for (AnalysisItem analysisItem : analysisItems) {
+            if (analysisItem == null) {
+                continue;
+            }
             if (analysisItem.toDisplay().equals(HighRiseContactNotesSource.BODY)) {
                 if (!filterOn(HighRiseContactNotesSource.BODY, report)) {
                     suggestions.add(new IntentionSuggestion("Only Show the Latest Contact Note", "Create a filter to only show the latest associated note for any given contact in the report.", IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_LAST_CONTACT_NOTE, IntentionSuggestion.OTHER));
