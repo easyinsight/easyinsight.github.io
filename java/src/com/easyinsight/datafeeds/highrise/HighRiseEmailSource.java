@@ -30,6 +30,7 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
     public static final String EMAIL_CONTACT_ID = "Email Contact ID";
     public static final String SENT_AT = "Email Sent At";
     public static final String EMAIL_ID = "Email ID";
+    public static final String EMAIL_BODY = "Email Body";
     public static final String EMAIL_COMPANY_ID = "Email Company ID";
     public static final String EMAIL_DEAL_ID = "Email Deal ID";
     public static final String EMAIL_CASE_ID = "Email Case ID";
@@ -46,7 +47,7 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
 
     @NotNull
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(EMAIL_AUTHOR, EMAIL_CONTACT_ID, SENT_AT, COUNT, EMAIL_ID, EMAIL_COMPANY_ID, EMAIL_DEAL_ID, EMAIL_CASE_ID);
+        return Arrays.asList(EMAIL_AUTHOR, EMAIL_CONTACT_ID, SENT_AT, COUNT, EMAIL_ID, EMAIL_COMPANY_ID, EMAIL_DEAL_ID, EMAIL_CASE_ID, EMAIL_BODY);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -55,6 +56,7 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(EMAIL_CONTACT_ID), true));        
         analysisItems.add(new AnalysisDimension(keys.get(EMAIL_CASE_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(EMAIL_COMPANY_ID), true));
+        analysisItems.add(new AnalysisText(keys.get(EMAIL_BODY)));
         analysisItems.add(new AnalysisDimension(keys.get(EMAIL_DEAL_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(EMAIL_ID), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(SENT_AT), true, AnalysisDateDimension.DAY_LEVEL));
@@ -112,6 +114,7 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
     private void recordingToRow(HighriseEmail recording, IRow row) {
         row.addValue(EMAIL_ID, recording.getId());
         row.addValue(EMAIL_AUTHOR, recording.getAuthorName());
+        row.addValue(EMAIL_BODY, recording.getBody());
         row.addValue(SENT_AT, new DateValue(recording.getSentAt()));
         row.addValue(EMAIL_CONTACT_ID, recording.getContactID());
         row.addValue(EMAIL_CASE_ID, recording.getCaseID());
@@ -122,11 +125,11 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
 
     @Override
     public int getVersion() {
-        return 2;
+        return 3;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList((DataSourceMigration) new HighRiseEmail1To2(this));
+        return Arrays.asList(new HighRiseEmail1To2(this), new HighRiseEmail2To3(this));
     }
 }

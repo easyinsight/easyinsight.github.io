@@ -120,7 +120,8 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
                     String id = queryField(recordingNode, "id/text()");
                     String subjectID = queryField(recordingNode, "subject-id/text()");
                     String subjectType = queryField(recordingNode, "subject-type/text()");
-                    HighriseEmail highriseEmail = new HighriseEmail(author, createdAt, id);
+                    String body = queryField(recordingNode, "body/text()");
+                    HighriseEmail highriseEmail = new HighriseEmail(author, createdAt, id, body);
                     if ("Party".equals(subjectType)) {
                         if (companyIDs.contains(subjectID)) {
                             highriseEmail.setCompanyID(subjectID);

@@ -10,16 +10,26 @@ import java.util.Date;
 public class HighriseEmail {
     private String authorName;
     private Date sentAt;
+    private String body;
     private String contactID;
     private String dealID;
     private String caseID;
     private String companyID;
     private String id;
 
-    public HighriseEmail(String authorName, Date sentAt, String id) {
+    public HighriseEmail(String authorName, Date sentAt, String id, String body) {
         this.authorName = authorName;
         this.sentAt = sentAt;
         this.id = id;
+        this.body = body;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public void setContactID(String contactID) {
