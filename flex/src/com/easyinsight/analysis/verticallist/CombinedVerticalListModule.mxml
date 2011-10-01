@@ -51,7 +51,7 @@
             labelColumn.width = vert.headerWidth;
             labelColumn.dataField = "Label";
             columns.addItem(labelColumn);
-            var firstRow:Boolean = true;
+            var firstRows:Object = new Object();
             if (vert == null) {
                 return;
             }
@@ -108,9 +108,9 @@
                         obj[columnValue] = text;
                         obj[columnValue + "measure"] = applyMeasure;
                         var columnSize:int = columnWidths[columnValue];
-                        if (firstRow) {
+                        var firstRow:Boolean = firstRows[columnValue];
+                        if (!firstRow) {
                             var dataColumn:SortableAdvancedDataGridColumn = new SortableAdvancedDataGridColumn(i + 1, val == null ? 0 : val.toSortValue().toNumber());
-                            //dataColumn.width = vert.columnWidth;
                             dataColumn.headerText = columnValue.toString();
                             dataColumn.dataField = columnValue.toString();
                             var factory:ClassFactory = new ClassFactory(VerticalListRenderer);
@@ -121,6 +121,7 @@
                             headerFactory.properties = { headerText: columnValue.toString() };
                             dataColumn.headerRenderer = headerFactory;
                             columns.addItem(dataColumn);
+                            firstRows[columnValue] = true;
                         }
                         if (columns.length > colCount) {
                             var valueMetrics:TextLineMetrics = dataGrid.measureText(text);
@@ -134,9 +135,6 @@
                     }
                 }
 
-                if (firstRow) {
-                    firstRow = false;
-                }
                 if (!vert.removeEmptyRows || atLeastOneValue) {
                     dColl.addItem(obj);
                 }
