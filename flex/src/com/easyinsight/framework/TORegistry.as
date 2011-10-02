@@ -133,6 +133,7 @@ import com.easyinsight.suggestion.ReportPropertiesIntention;
 
 import mx.managers.DragManager;
 import mx.managers.PopUpManager;
+import mx.managers.SystemManager;
 
 public class TORegistry {
     public function TORegistry() {
@@ -142,6 +143,7 @@ public class TORegistry {
 
         var dm:DragManager;
         var pm:PopUpManager;
+        var sm:SystemManager;
 
         var analysisStep:AnalysisStep;
         var analysisLat:AnalysisLatitude;
