@@ -6,7 +6,7 @@
             <mx:RemoveChild target="{legend}"/>
         </mx:State>
     </mx:states>
-    <mx:Style>
+    <!--<mx:Style>
         .axisTitles {
             fontSize: 14;
             fontFamily: "Tahoma";
@@ -17,7 +17,7 @@
             fontFamily: "Tahoma";
             fontSize: 14;
         }
-    </mx:Style>
+    </mx:Style>-->
     <mx:Script><![CDATA[
 
         import com.easyinsight.analysis.AnalysisDateDimension;
@@ -41,6 +41,7 @@
         import mx.charts.events.ChartItemEvent;
         import mx.charts.renderers.CircleItemRenderer;
         import mx.charts.series.AreaSeries;
+        import mx.charts.series.AreaSet;
         import mx.charts.series.items.AreaSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
@@ -125,9 +126,9 @@
             areaChart.dataTipFunction = dataTipFunction;
             areaChart.percentHeight = 100;
             areaChart.percentWidth = 100;
-            areaChart.dataProvider = chartData;
+            //areaChart.dataProvider = chartData;
             areaChart.type = areaChartDef.stackingType;
-            areaChart.selectionMode = "multiple";
+            //areaChart.selectionMode = "multiple";
             var verticalAxis:LinearAxis = new LinearAxis();
             verticalAxis.baseAtZero = areaChartDef.baseAtZero == "true";
             if (!areaChartDef.multiMeasure && areaChartDef.measure != null) {
@@ -224,7 +225,8 @@
                 var uniques:ArrayCollection = new ArrayCollection();
 
                 var seriesData:Object = new Object();
-                areaChartDef.populateData(dataSet, seriesData, uniques);
+                var points:ArrayCollection = areaChartDef.populateData(dataSet, seriesData, uniques);
+                areaChart.dataProvider = points;
                 for (var i:int = 0; i < uniques.length; i++) {
                     var key:String = uniques.getItemAt(i) as String;
                     var uniqueLineSeries:AreaSeries = new AreaSeries();
@@ -238,9 +240,11 @@
                     uniqueLineSeries.setStyle("areaStroke", strokes[i % 3]);
                     uniqueLineSeries.setStyle("areaFill", fills[i % 3]);
                     uniqueLineSeries.displayName = key;
-                    uniqueLineSeries.dataProvider = seriesData[key];
+                    //uniqueLineSeries.dataProvider = seriesData[key];
                     mySeries.push(uniqueLineSeries);
                 }
+                /*areaSet.type = "100%";
+                areaSet.series = mySeries;*/
 
                 areaChart.series = mySeries;
             }

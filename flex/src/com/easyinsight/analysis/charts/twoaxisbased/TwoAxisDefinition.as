@@ -37,15 +37,17 @@ public class TwoAxisDefinition extends ChartDefinition{
         }
     }
 
-    public function populateData(dataSet:ArrayCollection, seriesData:Object, uniques:ArrayCollection):void {
+    public function populateData(dataSet:ArrayCollection, seriesData:Object, uniques:ArrayCollection):ArrayCollection {
         if (!multiMeasure) {
-            populateGroupings(dataSet, seriesData, uniques);
+            return populateGroupings(dataSet, seriesData, uniques);
         } else {
             populateMeasures(dataSet, seriesData, uniques);
+            return null;
         }
     }
 
-    private function populateGroupings(dataSet:ArrayCollection, seriesData:Object, uniques:ArrayCollection):void {
+    private function populateGroupings(dataSet:ArrayCollection, seriesData:Object, uniques:ArrayCollection):ArrayCollection {
+        var masterData:Object = new Object();
         for (var i:int = 0; i < dataSet.length; i++) {
             var object:Object = dataSet.getItemAt(i);
             if (object[xaxis.qualifiedName()] == null ||
@@ -56,6 +58,15 @@ public class TwoAxisDefinition extends ChartDefinition{
             if (dimensionValue == null || dimensionValue == "") {
                 dimensionValue = "[ No Value ]";
             }
+            var xAxis:String = object[xaxis.qualifiedName()].toString();
+            var dataPoint:Object = masterData[xAxis];
+            if (dataPoint == null) {
+                dataPoint = new Object();
+                masterData[xAxis] = dataPoint;
+            }
+            dataPoint[xaxis.qualifiedName()] = object[xaxis.qualifiedName()];
+            dataPoint[dimensionValue] = object[measure.qualifiedName()];
+            dataPoint[yaxis.qualifiedName()] = object[yaxis.qualifiedName()];
             var newSeriesData:ArrayCollection = seriesData[dimensionValue];
             if (newSeriesData == null) {
                 newSeriesData = new ArrayCollection();
@@ -69,6 +80,11 @@ public class TwoAxisDefinition extends ChartDefinition{
                 uniques.addItem(dimensionValue);
             }
         }
+        var points:ArrayCollection = new ArrayCollection();
+        for each (var obj:Object in masterData) {
+            points.addItem(obj);
+        }
+        return points;
     }
 
     private function populateMeasures(dataSet:ArrayCollection, seriesData:Object, uniques:ArrayCollection):void {
