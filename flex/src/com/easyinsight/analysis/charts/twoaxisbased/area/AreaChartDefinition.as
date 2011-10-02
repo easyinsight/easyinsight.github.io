@@ -10,7 +10,7 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSAreaChartDefinition")]
 public class AreaChartDefinition extends TwoAxisDefinition{
 
-    public var stackingType:String = "overlaid";
+    public var stackingType:String = "stacked";
 
 
     public function AreaChartDefinition() {

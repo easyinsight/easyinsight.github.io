@@ -231,14 +231,14 @@
                     var key:String = uniques.getItemAt(i) as String;
                     var uniqueLineSeries:AreaSeries = new AreaSeries();
                     uniqueLineSeries.setStyle("form", areaChartDef.form);
-                    uniqueLineSeries.setStyle("itemRenderer", new ClassFactory(CircleItemRenderer));
+                    //uniqueLineSeries.setStyle("itemRenderer", new ClassFactory(CircleItemRenderer));
                     uniqueLineSeries.xField = areaChartDef.xaxis.qualifiedName();
                     if (key == null || key == "") {
                         key = "[ No Value ]";
                     }
                     uniqueLineSeries.yField = key;
-                    uniqueLineSeries.setStyle("areaStroke", strokes[i % 3]);
-                    uniqueLineSeries.setStyle("areaFill", fills[i % 3]);
+                    uniqueLineSeries.setStyle("areaStroke", strokes[i % 6]);
+                    uniqueLineSeries.setStyle("areaFill", fills[i % 6]);
                     uniqueLineSeries.displayName = key;
                     //uniqueLineSeries.dataProvider = seriesData[key];
                     mySeries.push(uniqueLineSeries);
@@ -269,16 +269,22 @@
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
     <mx:Array id="fills">
-    <mx:SolidColor id="sc1" color="blue" alpha=".3"/>
-    <mx:SolidColor id="sc2" color="red" alpha=".3"/>
-    <mx:SolidColor id="sc3" color="green" alpha=".3"/>
+        <mx:SolidColor color="0xa6bc59" alpha=".9"/>
+        <mx:SolidColor color="0x597197" alpha=".9"/>
+        <mx:SolidColor color="0xd6ab2a" alpha=".9"/>
+        <mx:SolidColor color="0xd86068" alpha=".9"/>
+        <mx:SolidColor color="0x5d9942" alpha=".9"/>
+        <mx:SolidColor color="0x7a4c6c" alpha=".9"/>
     </mx:Array>
 
     <!-- Define custom Strokes. -->
     <mx:Array id="strokes">
-    <mx:Stroke id = "s1" color="blue" weight="2"/>
-    <mx:Stroke id = "s2" color="red" weight="2"/>
-    <mx:Stroke id = "s3" color="green" weight="2"/>
+        <mx:Stroke color="0xa6bc59" weight="2"/>
+        <mx:Stroke color="0x597197" weight="2"/>
+        <mx:Stroke color="0xd6ab2a" weight="2"/>
+        <mx:Stroke color="0xd86068" weight="2"/>
+        <mx:Stroke color="0x5d9942" weight="2"/>
+        <mx:Stroke color="0x7a4c6c" weight="2"/>
     </mx:Array>
     <mx:HBox width="100%" height="100%" id="hbox"/>
 </mx:Module>

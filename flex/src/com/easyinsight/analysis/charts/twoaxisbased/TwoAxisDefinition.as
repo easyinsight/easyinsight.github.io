@@ -41,8 +41,7 @@ public class TwoAxisDefinition extends ChartDefinition{
         if (!multiMeasure) {
             return populateGroupings(dataSet, seriesData, uniques);
         } else {
-            populateMeasures(dataSet, seriesData, uniques);
-            return null;
+            return populateMeasures(dataSet, seriesData, uniques);
         }
     }
 
@@ -87,7 +86,8 @@ public class TwoAxisDefinition extends ChartDefinition{
         return points;
     }
 
-    private function populateMeasures(dataSet:ArrayCollection, seriesData:Object, uniques:ArrayCollection):void {
+    private function populateMeasures(dataSet:ArrayCollection, seriesData:Object, uniques:ArrayCollection):ArrayCollection {
+        var masterData:Object = new Object();
         for each (var nameMeasure:AnalysisMeasure in measures) {
             uniques.addItem(nameMeasure.display);
             seriesData[nameMeasure.display] = new ArrayCollection();
@@ -99,6 +99,15 @@ public class TwoAxisDefinition extends ChartDefinition{
                 continue;
             }
             for each (var measure:AnalysisMeasure in measures) {
+                var xAxis:String = object[xaxis.qualifiedName()].toString();
+                var dataPoint:Object = masterData[xAxis];
+                if (dataPoint == null) {
+                    dataPoint = new Object();
+                    masterData[xAxis] = dataPoint;
+                }
+                dataPoint[xaxis.qualifiedName()] = object[xaxis.qualifiedName()];
+                dataPoint[measure.display] = object[measure.qualifiedName()];
+                //dataPoint[yaxis.qualifiedName()] = object[yaxis.qualifiedName()];
                 var newObject:Object = new Object();
 
                 newObject[xaxis.qualifiedName()] = object[xaxis.qualifiedName()];
@@ -106,6 +115,11 @@ public class TwoAxisDefinition extends ChartDefinition{
                 seriesData[measure.display].addItem(newObject);
             }            
         }
+        var points:ArrayCollection = new ArrayCollection();
+        for each (var obj:Object in masterData) {
+            points.addItem(obj);
+        }
+        return points;
     }
 
 

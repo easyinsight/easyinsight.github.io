@@ -8,6 +8,7 @@
 package com.easyinsight.analysis {
 
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
+import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartDefinition;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartDefinition;
 import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartDefinition;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartDefinition;
@@ -163,16 +164,24 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("High Color", "highColor", MapDefinition(report).highColor, report));
             items.addItem(new ColorReportFormItem("Low Color", "lowColor", MapDefinition(report).lowColor, report));
         }
-        if (report is TwoAxisDefinition) {
+        if (report is LineChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Form", "form", TwoAxisDefinition(report).form,
                 report, ["segment", "step", "reverseStep", "horizontal", "curve"]));
             items.addItem(new ComboBoxReportFormItem("Base Y Axis at Zero", "baseAtZero", TwoAxisDefinition(report).baseAtZero,
                     report, ["true", "false"]));
             items.addItem(new ComboBoxReportFormItem("Interpolate Values", "interpolateValues", TwoAxisDefinition(report).interpolateValues,
                     report, ["true", "false"]));
-        }
-        if (report is LineChartDefinition) {
             items.addItem(new NumericReportFormItem("Stroke Weight", "strokeWeight", LineChartDefinition(report).strokeWeight, report, 1, 10));
+        }
+        if (report is AreaChartDefinition) {
+            items.addItem(new ComboBoxReportFormItem("Form", "form", TwoAxisDefinition(report).form,
+                report, ["segment", "step", "reverseStep", "horizontal", "curve"]));
+            items.addItem(new ComboBoxReportFormItem("Base Y Axis at Zero", "baseAtZero", TwoAxisDefinition(report).baseAtZero,
+                    report, ["true", "false"]));
+            items.addItem(new ComboBoxReportFormItem("Interpolate Values", "interpolateValues", TwoAxisDefinition(report).interpolateValues,
+                    report, ["true", "false"]));
+            items.addItem(new ComboBoxReportFormItem("Stacking Type", "stackingType", AreaChartDefinition(report).stackingType,
+                report, ["overlaid", "stacked", "100%"]));
         }
         if (report is PieChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", PieChartDefinition(report).colorScheme,

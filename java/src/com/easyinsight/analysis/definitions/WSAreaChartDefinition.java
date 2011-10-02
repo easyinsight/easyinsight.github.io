@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class WSAreaChartDefinition extends WSTwoAxisDefinition {
 
-    private String stackingType = "overlaid";
+    private String stackingType = "stacked";
 
     public String getStackingType() {
         return stackingType;
@@ -35,7 +35,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
     @Override
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
-        stackingType = findStringProperty(properties, "stackingType", "overlaid");
+        stackingType = findStringProperty(properties, "stackingType", "stacked");
     }
 
     @Override
