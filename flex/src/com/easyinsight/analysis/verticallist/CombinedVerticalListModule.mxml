@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer" verticalScrollPolicy="off" width="100%"
-        height="100%">
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:verticalllist="com.easyinsight.analysis.verticallist.*"
+           implements="com.easyinsight.analysis.IReportRenderer" verticalScrollPolicy="off" width="100%"
+           height="100%">
     <mx:states>
         <mx:State name="noData">
             <mx:RemoveChild target="{dataGrid}"/>
@@ -58,8 +59,12 @@
             var measures:ArrayCollection = VerticalListDefinition(EmbeddedDataWrapper(dataSet.getItemAt(i)).report).measures;
             var headerWidth:int = 0;
             var columnWidths:Object = new Object();
-            for each (var measure:AnalysisMeasure in measures) {
-
+            var underlines:Array = [];
+            for (var l:int = 0; l < measures.length; l++) {
+                var measure:AnalysisMeasure = measures.getItemAt(l) as AnalysisMeasure;
+                if (measure.underline) {
+                    underlines.push(l);
+                }
                 var obj:Object = new Object();
                 obj["Label"] = measure.display;
                 obj["baseMeasure"] = measure;
@@ -168,6 +173,7 @@
                 }
                 dataGrid.columns = columns.toArray();
                 dataGrid.rowCount = dColl.length + 1;
+                dataGrid.rowsToUnderline = underlines;
                 dataGrid.dataProvider = dColl;
                 invalidateSize();
             }
@@ -184,8 +190,8 @@
         }
         ]]></mx:Script>
     <mx:Canvas id="box" verticalScrollPolicy="auto" horizontalScrollPolicy="off" width="100%" height="100%">
-        <mx:AdvancedDataGrid id="dataGrid" headerColors="{[0x333333, 0x333333]}" fontSize="10" verticalScrollPolicy="off" variableRowHeight="true" horizontalGridLines="false" horizontalGridLineColor="#DDDDDD" verticalGridLines="false"
+        <verticalllist:VerticalDataGrid id="dataGrid" headerColors="{[0x333333, 0x333333]}" fontSize="10" verticalScrollPolicy="off" variableRowHeight="false" horizontalGridLines="false" horizontalGridLineColor="#DDDDDD" verticalGridLines="false"
                 alternatingItemColors="{[0xFFFFFF, 0xFFFFFF]}" backgroundColor="#FFFFFF" borderStyle="none" selectionMode="none" horizontalScrollPolicy="auto">
-        </mx:AdvancedDataGrid>
+        </verticalllist:VerticalDataGrid>
     </mx:Canvas>
 </mx:Module>

@@ -8,69 +8,43 @@
 package com.easyinsight.analysis.verticallist {
 import com.easyinsight.analysis.AnalysisMeasure;
 
-import flash.text.TextLineMetrics;
-
-import mx.controls.Label;
-
 import mx.controls.listClasses.IListItemRenderer;
-import mx.core.UIComponent;
 import mx.core.UITextField;
+import mx.core.UITextFormat;
 
-public class VerticalListRowHeaderRenderer extends UIComponent implements IListItemRenderer {
-
-    private var text:Label;
+public class VerticalListRowHeaderRenderer extends UITextField implements IListItemRenderer {
 
     public function VerticalListRowHeaderRenderer() {
-        text = new Label();
-        setStyle("backgroundColor", 0xFFFFFF);
+        var tf:UITextFormat = new UITextFormat(this.systemManager, "Lucida Grande", 12);
+        tf.align = "right";
+        setTextFormat(tf);
         this.percentWidth = 100;
-        //text.setStyle("textAlign", "right");
-        //text.percentWidth = 100;
-        this.height = 18;
     }
-
-    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
-        super.updateDisplayList(unscaledWidth, unscaledHeight);
-        if (text != null) {
-            var metrics:TextLineMetrics = measureText(text.text);
-            var textWidth:int = metrics.width;
-            var textX:int = unscaledWidth - textWidth - metrics.x - metrics.x - 2;
-            text.move(textX, 0);
-            text.setActualSize(textWidth + metrics.x + metrics.x + 2, 16);
-        }
-        if (showDivider) {
-            graphics.beginFill(0x666666, 1);
-            graphics.drawRect(0, unscaledHeight - 2, unscaledWidth, 2);
-            graphics.endFill();
-        } else {
-            graphics.clear();
-        }
-    }
-
-    override protected function createChildren():void {
-        super.createChildren();
-        addChild(text);
-    }
-
-    private var showDivider:Boolean;
 
     private var value:Object;
 
     public function set data(val:Object):void {
         this.value = val;
-        addChild(text);
         var _analysisMeasure:AnalysisMeasure = val["baseMeasure"] as AnalysisMeasure;
         if (_analysisMeasure == null) {
-            text.text = "";
+            text = "";
         } else {
-            text.text = _analysisMeasure.display;
-            showDivider = _analysisMeasure.underline;
+            text = _analysisMeasure.display;
         }
         invalidateDisplayList();
     }
 
     public function get data():Object {
         return value;
+    }
+
+    public function validateProperties():void {
+    }
+
+    public function validateDisplayList():void {
+    }
+
+    public function validateSize(recursive:Boolean = false):void {
     }
 }
 }
