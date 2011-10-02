@@ -60,6 +60,8 @@ import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
+import com.easyinsight.analysis.verticallist.VerticalListRenderer;
+import com.easyinsight.analysis.verticallist.VerticalListRowHeaderRenderer;
 import com.easyinsight.customupload.CampaignMonitorDataSourceCreation;
 import com.easyinsight.customupload.ConfigureDataSource;
 import com.easyinsight.customupload.CsvFileUploadFormat;
@@ -267,6 +269,8 @@ public class TORegistry {
         var dsi:DataSourceIntention;
         var arfi:AddReportFieldIntention;
         var nhi:NewHierarchyIntention;
+        var vRend:VerticalListRenderer;
+        var vRend2:VerticalListRowHeaderRenderer;
     }
 }
 }
