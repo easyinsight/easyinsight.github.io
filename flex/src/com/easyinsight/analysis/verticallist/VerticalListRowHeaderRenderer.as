@@ -15,7 +15,7 @@ import mx.core.UITextFormat;
 public class VerticalListRowHeaderRenderer extends UITextField implements IListItemRenderer {
 
     public function VerticalListRowHeaderRenderer() {
-        var tf:UITextFormat = new UITextFormat(this.systemManager, "Lucida Grande", 12);
+        var tf:UITextFormat = new UITextFormat(this.systemManager);
         tf.align = "right";
         setTextFormat(tf);
         this.percentWidth = 100;
