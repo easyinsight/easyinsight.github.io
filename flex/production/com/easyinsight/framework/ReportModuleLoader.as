@@ -40,11 +40,11 @@ public class ReportModuleLoader extends EventDispatcher {
     private var moduleName:String;
 
     public function loadReportRenderer(_reportRendererModule:String, container:Container):void {
-        /*if (_reportRendererModule == "ListModule.swf" || _reportRendererModule == "VerticalList.swf" || _reportRendererModule == "CombinedVerticalList.swf") {
+        if (_reportRendererModule == "ListModule.swf" || _reportRendererModule == "VerticalList.swf" || _reportRendererModule == "CombinedVerticalList.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
-        } else {*/
+        } else {
             this.container = container;
             moduleInfo = ModuleManager.getModule(Constants.instance().prefix + "/app/"+Constants.instance().buildPath+"/" + _reportRendererModule);
             moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
@@ -53,7 +53,7 @@ public class ReportModuleLoader extends EventDispatcher {
             _loadingDisplay.moduleInfo = moduleInfo;
             container.addChild(_loadingDisplay);
             moduleInfo.load(ApplicationDomain.currentDomain);
-      //  }
+        }
     }
 
     private function reportLoadHandler(event:ModuleEvent):void {
@@ -70,7 +70,7 @@ public class ReportModuleLoader extends EventDispatcher {
     }
 
     public function create():Object {
-        /*if (inline) {
+        if (inline) {
             if (moduleName == "ListModule.swf") {
                 return new ListModule();
             } else if (moduleName == "VerticalList.swf") {
@@ -78,7 +78,7 @@ public class ReportModuleLoader extends EventDispatcher {
             } else if (moduleName == "CombinedVerticalList.swf") {
                 return new CombinedVerticalListModule();
             }
-        }*/
+        }
         return moduleInfo.factory.create();
     }
 
