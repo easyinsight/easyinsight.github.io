@@ -13,12 +13,12 @@ import mx.controls.listClasses.IListItemRenderer;
 import mx.core.Application;
 import mx.core.UITextField;
 import mx.core.UITextFormat;
+import mx.events.FlexEvent;
 
 public class VerticalListRenderer extends UITextField implements IListItemRenderer {
 
     public function VerticalListRenderer() {
         super();
-        setStyle("textAlign", "right");
         this.percentWidth = 100;
     }
 
@@ -34,6 +34,7 @@ public class VerticalListRenderer extends UITextField implements IListItemRender
         this.value = value;
         var measure:AnalysisMeasure = value[_qualifiedName + "measure"] as AnalysisMeasure;
         this.text = value[_qualifiedName];
+        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 
     public function get data():Object {
