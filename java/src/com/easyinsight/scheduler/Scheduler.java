@@ -35,10 +35,14 @@ public class Scheduler {
     private boolean running = false;
     private Thread thread;
 
-    private static Scheduler instance = new Scheduler();
+    private static Scheduler instance;
 
     public static Scheduler instance() {
         return instance;
+    }
+
+    public static void initialize() {
+        instance = new Scheduler();
     }
 
     // simplest level...

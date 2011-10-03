@@ -59,6 +59,7 @@ public class DMSServlet extends HttpServlet {
                 HtmlResultCache.initialize();
                 new APIManager().start();
                 if (ConfigLoader.instance().isTaskRunner()) {
+                    Scheduler.initialize();
                     scheduler = Scheduler.instance();
                 }
                 EventDispatcher.instance().start();
