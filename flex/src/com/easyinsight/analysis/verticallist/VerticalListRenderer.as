@@ -8,16 +8,16 @@
 package com.easyinsight.analysis.verticallist {
 import com.easyinsight.analysis.AnalysisMeasure;
 import mx.controls.listClasses.IListItemRenderer;
+import mx.core.Application;
 import mx.core.UITextField;
 import mx.core.UITextFormat;
 
 public class VerticalListRenderer extends UITextField implements IListItemRenderer {
 
     public function VerticalListRenderer() {
-        /*var tf:UITextFormat = new UITextFormat(this.systemManager, "Tahoma");
+        var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Lucida Grande", 12, 0);
         tf.align = "right";
-        setTextFormat(tf);*/
-        this.percentHeight = 100;
+        setTextFormat(tf);
         this.percentWidth = 100;
     }
 
