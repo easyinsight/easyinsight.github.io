@@ -4,20 +4,36 @@
     <fx:Script><![CDATA[
         import com.easyinsight.dashboard.Dashboard;
         import com.easyinsight.dashboard.DashboardDescriptor;
+        import com.easyinsight.dashboard.DashboardEditorMetadata;
+        import com.easyinsight.dashboard.IDashboardViewComponent;
+
+        import mx.core.UIComponent;
+
+        import mx.events.FlexEvent;
 
         private var dashboardDescriptor:DashboardDescriptor;
 
         private function onActivate():void {
             dashboardDescriptor = data as DashboardDescriptor;
             dashboardName = dashboardDescriptor.name;
-            trace("retrieving dashboard...");
             dashboardService.getDashboard.send(dashboardDescriptor.id);
         }
 
+        private var rootView:IDashboardViewComponent;
+
         private function gotDashboard():void {
             var dashboard:Dashboard = dashboardService.getDashboard.lastResult as Dashboard;
-            trace("got dashboard");
-            addElement(DashboardMobileFactory.createViewUIComponent(dashboard.rootElement, null));
+            var metadata:DashboardEditorMetadata = new DashboardEditorMetadata();
+            metadata.dataSourceID = dashboard.dataSourceID;
+            metadata.role = dashboard.role;
+            rootView = DashboardMobileFactory.createViewUIComponent(dashboard.rootElement, metadata);
+            UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
+                var filterMap:Object = new Object();
+                filterMap["master"] = dashboard.filters;
+                rootView.updateAdditionalFilters(filterMap);
+                rootView.initialRetrieve();
+            });
+            addElement(rootView as UIComponent);
         }
 
         [Bindable]
@@ -40,4 +56,7 @@
     <s:actionContent>
         <s:BusyIndicator visible="{busy}" id="busyIndicator" symbolColor="#FFFFFF"/>
     </s:actionContent>
+    <!--<s:Scroller id="scroller">
+        <s:Group id="group" width="1000" height="600"/>
+    </s:Scroller>-->
 </s:View>

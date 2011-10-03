@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<util:ComboBoxPopUp xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+                    xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:util="com.easyinsight.util.*">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDateDimensionResultMetadata;
+        import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
+        import com.easyinsight.filtering.FlatDateFilterDefinition;
+        import com.easyinsight.reportviews.FilterInfo;
+
+        import mx.collections.ArrayCollection;
+
+        private var _filterInfo:FilterInfo;
+
+        public function set filterInfo(value:FilterInfo):void {
+            _filterInfo = value;
+        }
+
+        override protected function valueChanged(newValue:Object):void {
+            var value:String = newValue as String;
+            FlatDateFilterDefinition(_filterInfo.filterDefinition).value = int(value);
+            dispatchEvent(new FilterChangeEvent(value));
+        }
+
+        override protected function onWindowCreation():void {
+            dataService.getAnalysisItemMetadata.send(_filterInfo.dataSourceID, _filterInfo.filterDefinition.field, 0, _filterInfo.reportID, _filterInfo.dashboardID);
+        }
+
+        private function gotMetadata():void {
+            var dateMetadata:AnalysisDateDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisDateDimensionResultMetadata;
+			var lowDate:Date = dateMetadata.earliestDate;
+            if (lowDate == null) {
+                lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
+            }
+			var highDate:Date = dateMetadata.latestDate;
+            if (highDate == null) {
+                highDate = new Date();
+            }
+            var dp:ArrayCollection = new ArrayCollection();
+
+            for (var year:int = lowDate.getFullYear(); year <= highDate.getFullYear(); year++) {
+                dp.addItem(String(year));
+            }
+            dataProvider = dp;
+        }
+        ]]></fx:Script>
+    <fx:Declarations>
+        <mx:RemoteObject destination="data" id="dataService" endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
+            <mx:method name="getAnalysisItemMetadata" result="gotMetadata()"/>
+        </mx:RemoteObject>
+    </fx:Declarations>
+</util:ComboBoxPopUp>

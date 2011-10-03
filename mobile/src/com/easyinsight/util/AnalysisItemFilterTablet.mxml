@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<util:TabletFilterRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+          xmlns:util="com.easyinsight.util.*">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.filtering.AnalysisItemFilterDefinition;
+
+        import mx.collections.ArrayCollection;
+
+
+        [Bindable]
+        private var filterName:String;
+
+        [Bindable]
+        private var filterValue:Object;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            filterName = filterInfo.filterDefinition.filterName + ":";
+            filterValue = AnalysisItemFilterDefinition(filterInfo.filterDefinition).targetItem.display;
+            fields = AnalysisItemFilterDefinition(filterInfo.filterDefinition).availableItems;
+        }
+
+        [Bindable]
+        private var fields:ArrayCollection;
+
+        private function onFilterChange(event:FilterChangeEvent):void {
+            AnalysisItemFilterDefinition(filterInfo.filterDefinition).targetItem = event.selectedValue as AnalysisItem;
+            invalidateProperties();
+            dispatchEvent(event);
+        }
+        ]]></fx:Script>
+    <s:Label text="{filterName}"/>
+    <util:EIComboBox selectedValue="{filterValue}" id="dropdownBox" filterChange="onFilterChange(event)" labelField="display" dataProvider="{fields}"
+            selectedProperty="display"/>
+    <!--<s:Button icon="{gearIcon}" click="configure()"/>-->
+</util:TabletFilterRenderer>

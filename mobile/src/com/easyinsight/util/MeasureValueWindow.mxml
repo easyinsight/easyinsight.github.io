@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<s:SkinnablePopUpContainer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+        skinClass="com.easyinsight.skin.PopupSkin" creationComplete="onCreation()">
+    <fx:Script><![CDATA[
+        [Bindable]
+        public var currentNum:String;
+
+        private function onCreation():void {
+            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
+        }
+
+        private function onMouseDown(event:MouseEvent):void {
+            var result:Boolean = hitTestPoint(event.stageX, event.stageY);
+            if (!result) {
+                stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+                this.close();
+            }
+        }
+
+        private function save():void {
+            dispatchEvent(new MeasureFilterEvent(MeasureFilterEvent.MEASURE_FILTER, Number(numInput.text)));
+            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
+            this.close();
+        }
+        ]]></fx:Script>
+    <s:BorderContainer>
+        <s:layout>
+            <s:VerticalLayout horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+        </s:layout>
+        <s:backgroundFill>
+            <s:SolidColor color="#FFFFFF" alpha="1"/>
+        </s:backgroundFill>
+        <s:TextInput id="numInput" text="{currentNum}"/>
+        <s:Button label="Save" click="save()"/>
+    </s:BorderContainer>
+</s:SkinnablePopUpContainer>

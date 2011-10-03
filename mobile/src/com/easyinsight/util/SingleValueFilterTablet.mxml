@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<util:TabletFilterRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+          xmlns:util="com.easyinsight.util.*" xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="retrieveMetadata()">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.filtering.FilterValueDefinition;
+
+        import mx.collections.ArrayCollection;
+
+        import spark.collections.Sort;
+
+        [Bindable]
+        private var filterName:String;
+
+        [Bindable]
+        private var filterValue:String;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            filterName = filterInfo.filterDefinition.field.display + ":";
+            var value:Object = FilterValueDefinition(filterInfo.filterDefinition).filteredValues.getItemAt(0);
+            if (value is String) {
+                filterValue = value as String;
+            } else {
+                var valueWrapper:Value = value as Value;
+                filterValue = valueWrapper.toString();
+            }
+        }
+
+        private function onFilterChange(event:FilterChangeEvent):void {
+            FilterValueDefinition(filterInfo.filterDefinition).filteredValues = new ArrayCollection([ event.selectedValue ]);
+            invalidateProperties();
+            dispatchEvent(event);
+        }
+
+        private function retrieveMetadata():void {
+            dataService.getAnalysisItemMetadata.send(filterInfo.dataSourceID, filterInfo.filterDefinition.field, 0, filterInfo.reportID, filterInfo.dashboardID);
+        }
+
+        private function gotMetadata():void {
+            var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
+                AnalysisDimensionResultMetadata;
+            var strings:ArrayCollection = new ArrayCollection();
+            if (analysisDimensionResultMetadata != null && analysisDimensionResultMetadata.values != null) {
+                for each (var value:Value in analysisDimensionResultMetadata.values) {
+                    var string:String = String(value.getValue());
+
+                    if (!strings.contains(string)) {
+                        strings.addItem(string);
+                    }
+                }
+            }
+            strings.sort = new Sort();
+            strings.refresh();
+            var filterVal:FilterValueDefinition = filterInfo.filterDefinition as FilterValueDefinition;
+            if (filterVal.excludeEmpty) {
+                var index:int = strings.getItemIndex("");
+                if (index != -1) {
+                    strings.removeItemAt(index);
+                }
+            }
+            strings.sort = new Sort();
+            strings.refresh();
+            if (filterVal.allOption) {
+                strings.addItemAt("All", 0);
+            }
+            dropdownBox.dataProvider = strings;
+        }
+        ]]></fx:Script>
+    <fx:Declarations>
+        <mx:RemoteObject destination="data" id="dataService" endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
+            <mx:method name="getAnalysisItemMetadata" result="gotMetadata()"/>
+        </mx:RemoteObject>
+        <util:SingleValueFilterPopUp id="popup" filterInfo="{filterInfo}" filterChange="onFilterChange(event)"/>
+    </fx:Declarations>
+    <s:Label text="{filterName}"/>
+    <util:EIComboBox selectedValue="{filterValue}" id="dropdownBox" filterChange="onFilterChange(event)"/>
+</util:TabletFilterRenderer>

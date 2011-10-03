@@ -24,7 +24,7 @@
         private function onItemClick(event:ItemClickEvent):void {
             var filterDefinition:FilterDefinition = filterList.getItemAt(event.index) as FilterDefinition;
             trace("type = " + filterDefinition.getType());
-            var filterData:FilterInfo = new FilterInfo(filterDefinition, report);
+            var filterData:FilterInfo = new FilterInfo(filterDefinition, report.dataFeedID, report.analysisID, 0);
             if (filterDefinition.getType() == FilterDefinition.VALUE) {
                 navigator.pushView(SingleValueFilterView, filterData);
             } else if (filterDefinition.getType() == FilterDefinition.ROLLING_DATE) {

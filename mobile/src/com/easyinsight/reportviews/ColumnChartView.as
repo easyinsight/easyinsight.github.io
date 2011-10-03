@@ -8,6 +8,8 @@
 package com.easyinsight.reportviews {
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisMeasure;
+import com.easyinsight.analysis.ChartDefinition;
+import com.easyinsight.analysis.SortFunctionFactory;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartDefinition;
 
 import mx.charts.CategoryAxis;
@@ -26,6 +28,8 @@ import mx.charts.series.ColumnSeries;
 import mx.charts.series.items.ColumnSeriesItem;
 
 import mx.collections.ArrayCollection;
+
+import spark.collections.Sort;
 
 public class ColumnChartView extends CartesianChartView {
     public function ColumnChartView() {
@@ -56,7 +60,7 @@ public class ColumnChartView extends CartesianChartView {
     }
 
     override protected function sortData(dataSet:ArrayCollection):void {
-        /*var columnChartDef:ColumnChartDefinition = chartDef as ColumnChartDefinition;
+        var columnChartDef:ColumnChartDefinition = chartDef as ColumnChartDefinition;
         var firstMeasure:AnalysisMeasure = columnChartDef.measures.getItemAt(0) as AnalysisMeasure;
         if (columnChartDef.columnSort != ChartDefinition.SORT_UNSORTED) {
             var sort:Sort = new Sort();
@@ -71,7 +75,7 @@ public class ColumnChartView extends CartesianChartView {
             }
             dataSet.sort = sort;
             dataSet.refresh();
-        }*/
+        }
     }
 
     override protected function formatDataTip(hd:HitData):String {

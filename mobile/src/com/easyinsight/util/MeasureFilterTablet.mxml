@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<util:TabletFilterRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+          xmlns:util="com.easyinsight.util.*">
+    <fx:Script><![CDATA[
+        import com.easyinsight.filtering.FilterRangeDefinition;
+
+        import mx.formatters.Formatter;
+
+
+        [Bindable]
+        private var filterName:String;
+
+        [Bindable]
+        private var filterValue:Object;
+
+        private var lowNumber:Number;
+        private var highNumber:Number;
+
+        [Bindable]
+        private var measure1:String;
+
+        [Bindable]
+        private var measure2:String;
+
+        private var nf:Formatter;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            nf = filterInfo.filterDefinition.field.getFormatter();
+            filterName = filterInfo.filterDefinition.field.display + ":";
+            lowNumber = FilterRangeDefinition(filterInfo.filterDefinition).startValue;
+            FilterRangeDefinition(filterInfo.filterDefinition).currentStartValueDefined = true;
+            FilterRangeDefinition(filterInfo.filterDefinition).currentStartValue = lowNumber;
+            highNumber = FilterRangeDefinition(filterInfo.filterDefinition).endValue;
+            FilterRangeDefinition(filterInfo.filterDefinition).currentEndValueDefined = true;
+            FilterRangeDefinition(filterInfo.filterDefinition).currentEndValue = highNumber;
+            measure1 = nf.format(lowNumber);
+            measure2 = nf.format(highNumber);
+        }
+
+        private function editStartDate():void {
+            var window:MeasureValueWindow = new MeasureValueWindow();
+            window.currentNum = measure1;
+            window.addEventListener(MeasureFilterEvent.MEASURE_FILTER, onLowDateChange, false, 0, true);
+            var point:Point = new Point(date1Label.x, date1Label.y);
+            var global:Point = localToGlobal(point);
+            window.x = global.x;
+            window.y = global.y + 20;
+            window.open(this, true);
+        }
+
+        private function editEndDate():void {
+            var window:MeasureValueWindow = new MeasureValueWindow();
+            window.currentNum = measure2;
+            window.addEventListener(MeasureFilterEvent.MEASURE_FILTER, onHighDateChange, false, 0, true);
+            var point:Point = new Point(date2Label.x, date2Label.y);
+            var global:Point = localToGlobal(point);
+            window.x = global.x;
+            window.y = global.y + 20;
+            window.open(this, true);
+        }
+
+        private function onLowDateChange(event:MeasureFilterEvent):void {
+            lowNumber = event.object as Number;
+            measure1 = nf.format(lowNumber);
+            FilterRangeDefinition(filterInfo.filterDefinition).currentStartValue = lowNumber;
+            dispatchEvent(new FilterChangeEvent(null));
+        }
+
+        private function onHighDateChange(event:MeasureFilterEvent):void {
+            highNumber = event.object as Number;
+            measure2 = nf.format(highNumber);
+            FilterRangeDefinition(filterInfo.filterDefinition).currentEndValue = highNumber;
+            dispatchEvent(new FilterChangeEvent(null));
+        }
+        ]]></fx:Script>
+    <s:Label text="{filterName}"/>
+    <s:Label text="{measure1}" textDecoration="underline" click="editStartDate()" id="date1Label"/>
+    <s:Label text="to"/>
+    <s:Label text="{measure2}" textDecoration="underline" click="editEndDate()" id="date2Label"/>
+</util:TabletFilterRenderer>

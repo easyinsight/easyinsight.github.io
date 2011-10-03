@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<bttc:Gauge xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+            implements="com.easyinsight.reportviews.IReportView"
+            xmlns:bttc="com.betterthantomorrow.components.*" fontColor="#FFFFFF">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.gauge.GaugeDefinition;
+
+        import mx.collections.ArrayCollection;
+
+        public function renderReport(data:ArrayCollection, report:AnalysisDefinition, additionalProperties:Object):void {
+            var gaugeDefinition:GaugeDefinition = report as GaugeDefinition;
+            if (data.length > 0) {
+                var row:Object = data.getItemAt(0);
+                maxValue = gaugeDefinition.maxValue;
+                var reportVal:Number = Number(row[gaugeDefinition.measure.qualifiedName()]);
+                value = Math.min(maxValue, reportVal);
+                this.alertRatios = [ gaugeDefinition.alertPoint1, gaugeDefinition.alertPoint2 ];
+                this.alertColors = [ gaugeDefinition.color1, gaugeDefinition.color2,  gaugeDefinition.color3 ];
+                //gauge.width = Math.min(box.width - box.getStyle("paddingLeft") - box.getStyle("paddingRight"), box.height - box.getStyle("paddingTop") - box.getStyle("paddingBottom"));
+                /*gauge.width = Math.min(box.width, box.height);
+                 gauge.diameter = Math.min(box.width, box.height);*/
+                valueFormatter = gaugeDefinition.measure.getFormatter();
+                invalidateSize();
+                invalidateDisplayList();
+            }
+        }
+
+        public function preserveValues():Boolean {
+            return false;
+        }
+        ]]></fx:Script>
+</bttc:Gauge>

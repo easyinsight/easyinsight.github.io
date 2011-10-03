@@ -4,6 +4,7 @@
     <fx:Script><![CDATA[
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.etl.LookupTableDescriptor;
+        import com.easyinsight.framework.User;
         import com.easyinsight.listing.MyDataTree;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.reportviews.DashboardView;
@@ -11,6 +12,8 @@
         import com.easyinsight.reportviews.ReportView;
         import com.easyinsight.reportviews.ScorecardView;
         import com.easyinsight.scorecard.ScorecardDescriptor;
+        import com.easyinsight.skin.ImageLoadEvent;
+        import com.easyinsight.skin.ImageLoader;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
 
@@ -23,6 +26,7 @@
 
         private function gotTree():void {
             var tree:MyDataTree = uploadService.getFeedAnalysisTree.lastResult as MyDataTree;
+
             var descs:ArrayCollection = tree.objects;
             processData(descs);
             busy = false;
@@ -40,12 +44,11 @@
         }
 
         private function addListeners():void {
-            if (data != null) {
-                var descs:ArrayCollection = data as ArrayCollection;
-                processData(descs);
+            var dataModel:DataModel = data as DataModel;
+            if (dataModel.localList == null) {
+                dataList.dataProvider = dataModel.descriptors;
             } else {
-                busy = true;
-                uploadService.getFeedAnalysisTree.send(false);
+                processData(dataModel.localList);
             }
             removeEventListener(ItemClickEvent.ITEM_CLICK, onItemClick);
             addEventListener(ItemClickEvent.ITEM_CLICK, onItemClick);
@@ -54,13 +57,16 @@
         private function onItemClick(event:ItemClickEvent):void {
             var descriptor:EIDescriptor = dataList.dataProvider.getItemAt(event.index) as EIDescriptor;
             if (descriptor.getType() == EIDescriptor.REPORT) {
-                /*var metadata:ReportMetadata = new ReportMetadata();
+                var metadata:ReportMetadata = new ReportMetadata();
                 metadata.descriptor = InsightDescriptor(descriptor);
-                navigator.pushView(ReportView, metadata);*/
-                navigator.pushView(GaugeTest);
+                navigator.pushView(ReportView, metadata);
+                //navigator.pushView(GaugeTest);
             } else if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
                 var ds:DataSourceDescriptor = descriptor as DataSourceDescriptor;
-                navigator.pushView(SubjectList, ds.children);
+                var childModel:DataModel = new DataModel();
+                childModel.localList = ds.children;
+                childModel.descriptors = DataModel(this.data).descriptors;
+                navigator.pushView(SubjectList, childModel);
             } else if (descriptor.getType() == EIDescriptor.SCORECARD) {
                 var sc:ScorecardDescriptor = descriptor as ScorecardDescriptor;
                 navigator.pushView(ScorecardView, sc);
@@ -102,7 +108,7 @@
         <s:BusyIndicator visible="{busy}" id="busyIndicator" symbolColor="#FFFFFF"/>
     </s:actionContent>
     <s:VGroup width="100%" height="100%">
-        <s:List  labelField="name" width="100%" height="100%"
+        <s:List labelField="name" width="100%" height="100%"
                 itemRenderer="com.easyinsight.baseviews.DescriptorRenderer" id="dataList">
 
         </s:List>

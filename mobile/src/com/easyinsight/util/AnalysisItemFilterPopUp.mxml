@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<util:ComboBoxPopUp xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+                    xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:util="com.easyinsight.util.*">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.filtering.AnalysisItemFilterDefinition;
+        import com.easyinsight.filtering.FilterValueDefinition;
+        import com.easyinsight.reportviews.FilterInfo;
+
+        import mx.collections.ArrayCollection;
+
+        import spark.collections.Sort;
+
+        private var _filterInfo:FilterInfo;
+
+        public function set filterInfo(value:FilterInfo):void {
+            _filterInfo = value;
+        }
+
+        override protected function valueChanged(newValue:Object):void {
+            var value:AnalysisItem = newValue as AnalysisItem;
+            AnalysisItemFilterDefinition(_filterInfo.filterDefinition).targetItem = value;
+            dispatchEvent(new FilterChangeEvent(value));
+        }
+
+        override protected function onWindowCreation():void {
+            labelField = "display";
+            var aFilter:AnalysisItemFilterDefinition = _filterInfo.filterDefinition as AnalysisItemFilterDefinition;
+            dataProvider = aFilter.availableItems;
+        }
+        ]]></fx:Script>
+</util:ComboBoxPopUp>

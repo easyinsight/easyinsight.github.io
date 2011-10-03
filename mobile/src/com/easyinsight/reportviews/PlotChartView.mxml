@@ -32,7 +32,7 @@
             }
         }
 
-        public function renderReport(data:ArrayCollection, report:AnalysisDefinition):void {
+        public function renderReport(data:ArrayCollection, report:AnalysisDefinition, additionalProperties:Object):void {
             var plotChartDef:PlotChartDefinition = report as PlotChartDefinition;
             measure1Name = plotChartDef.xaxisMeasure.display;
             measure2Name = plotChartDef.yaxisMeasure.display;

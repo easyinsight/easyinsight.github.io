@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<s:SkinnablePopUpContainer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+                           xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:util="com.easyinsight.util.*"
+                           creationComplete="onCreation()" skinClass="com.easyinsight.skin.PopupSkin">
+    <fx:Script><![CDATA[
+        import com.easyinsight.filtering.DateLevelWrapper;
+        import com.easyinsight.filtering.MultiFlatDateFilterDefinition;
+
+        import mx.collections.ArrayCollection;
+        import mx.events.ItemClickEvent;
+
+        private var _dateFilter:MultiFlatDateFilterDefinition;
+
+        public function set dateFilter(value:MultiFlatDateFilterDefinition):void {
+            _dateFilter = value;
+        }
+
+        private function onCreation():void {
+            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
+            currentState = "startDate";
+        }
+
+        private function onMouseDown(event:MouseEvent):void {
+            var result:Boolean = hitTestPoint(event.stageX, event.stageY);
+            if (!result) {
+                if (!result) {
+                    stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+                    this.close();
+                }
+            }
+        }
+
+        private var start:int;
+        private var end:int;
+
+        [Bindable]
+        private var endMonths:ArrayCollection;
+
+        private function startItem(event:ItemClickEvent):void {
+            start = event.currentTarget.dataProvider.getItemAt(event.index).data;
+            var endMonths:ArrayCollection = new ArrayCollection();
+            for each (var obj:Object in months) {
+                var month:int = int(obj["data"]);
+                if (month >= start) {
+                    endMonths.addItem(obj);
+                }
+            }
+            this.endMonths = endMonths;
+            currentState = "endDate";
+            trace("moving to end date...");
+        }
+
+        private function filterMonths(item:Object):Boolean {
+            return item["data"] >= start;
+        }
+
+        private function endItem(event:ItemClickEvent):void {
+            end = event.currentTarget.dataProvider.getItemAt(event.index).data;
+            var levels:ArrayCollection = new ArrayCollection();
+            for (var i:int = start; i <= end; i++) {
+                var wrapper:DateLevelWrapper = new DateLevelWrapper();
+                wrapper.dateLevel = i;
+                levels.addItem(wrapper);
+            }
+            _dateFilter.levels = levels;
+            dispatchEvent(new Event("updated"));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+            this.close();
+        }
+        ]]></fx:Script>
+    <fx:Declarations>
+        <s:ArrayCollection id="months">
+            <fx:Object month="January" data="0"/>
+            <fx:Object month="February" data="1"/>
+            <fx:Object month="March" data="2"/>
+            <fx:Object month="April" data="3"/>
+            <fx:Object month="May" data="4"/>
+            <fx:Object month="June" data="5"/>
+            <fx:Object month="July" data="6"/>
+            <fx:Object month="August" data="7"/>
+            <fx:Object month="September" data="8"/>
+            <fx:Object month="October" data="9"/>
+            <fx:Object month="November" data="10"/>
+            <fx:Object month="December" data="11"/>
+        </s:ArrayCollection>
+    </fx:Declarations>
+    <s:states>
+        <s:State name="startDate"/>
+        <s:State name="endDate"/>
+    </s:states>
+    <s:VGroup includeIn="startDate">
+        <s:Label text="Please click on a start month." fontSize="14"/>
+        <util:ItemClickList labelField="month" id="startList" dataProvider="{months}" width="100%" itemClick="startItem(event)"/>
+    </s:VGroup>
+    <s:VGroup includeIn="endDate">
+        <s:Label text="Please click on an end month." fontSize="14"/>
+        <util:ItemClickList labelField="month" id="endList" dataProvider="{months}" width="100%" itemClick="endItem(event)"/>
+    </s:VGroup>
+</s:SkinnablePopUpContainer>

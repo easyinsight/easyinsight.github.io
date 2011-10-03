@@ -6,8 +6,12 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.reportviews {
+import com.easyinsight.dashboard.DashboardEditorMetadata;
 import com.easyinsight.dashboard.DashboardGrid;
 import com.easyinsight.dashboard.DashboardGridItem;
+import com.easyinsight.dashboard.IDashboardViewComponent;
+
+import mx.collections.ArrayCollection;
 
 import mx.core.UIComponent;
 
@@ -15,9 +19,12 @@ import spark.components.HGroup;
 
 import spark.components.VGroup;
 
-public class DashboardGridMobileComponent extends VGroup {
+public class DashboardGridMobileComponent extends VGroup implements IDashboardViewComponent {
 
     public var dashboardGrid:DashboardGrid;
+    public var dashboardEditorMetadata:DashboardEditorMetadata;
+
+    private var viewChildren:ArrayCollection = new ArrayCollection();
 
     public function DashboardGridMobileComponent() {
         super();
@@ -34,7 +41,8 @@ public class DashboardGridMobileComponent extends VGroup {
             addElement(hgroup);
             for (var j:int = 0; j < dashboardGrid.columns; j++) {
                 var e:DashboardGridItem = findItem(i, j);
-                var child:UIComponent = DashboardMobileFactory.createViewUIComponent(e.dashboardElement, null);
+                var child:UIComponent = DashboardMobileFactory.createViewUIComponent(e.dashboardElement, dashboardEditorMetadata) as UIComponent;
+                viewChildren.addItem(child);
                 hgroup.addElement(child);
             }
         }
@@ -46,6 +54,28 @@ public class DashboardGridMobileComponent extends VGroup {
                 return e;
             }
         }
+        return null;
+    }
+
+    public function refresh():void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.refresh();
+        }
+    }
+
+    public function updateAdditionalFilters(filters:Object):void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.updateAdditionalFilters(filters);
+        }
+    }
+
+    public function initialRetrieve():void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.initialRetrieve();
+        }
+    }
+
+    public function reportCount():ArrayCollection {
         return null;
     }
 }

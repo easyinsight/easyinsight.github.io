@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<s:DataGrid xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    implements="com.easyinsight.reportviews.IReportView" selectionMode="none" rowHeight="20" fontSize="10"
+        skinClass="com.easyinsight.reportviews.CustomDataGridSkin" chromeColor="#FFFFFF">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
+        import com.easyinsight.analysis.verticallist.VerticalListDefinition;
+
+        import mx.collections.ArrayCollection;
+        import mx.formatters.Formatter;
+
+        import spark.collections.Sort;
+        import spark.collections.SortField;
+
+        public function renderReport(data:ArrayCollection, vReport:AnalysisDefinition, additionalProperties:Object):void {
+            var vert:CombinedVerticalListDefinition = vReport as CombinedVerticalListDefinition;
+            var dColl:ArrayCollection = new ArrayCollection();
+            var columns:ArrayCollection = new ArrayCollection();
+            var labelColumn:SortableSparkGridColumn = new SortableSparkGridColumn(0, 0);
+            labelColumn.sortable = false;
+            labelColumn.itemRenderer = new ClassFactory(SparkVerticalListRowHeaderRenderer);
+            var labelHeaderFactory:ClassFactory = new ClassFactory(SparkVerticalListHeaderRenderer);
+            //labelHeaderFactory.properties = { headerText: "" };
+            //labelColumn.headerRenderer = labelHeaderFactory;
+            labelColumn.width = 130;
+            labelColumn.dataField = "Label";
+            columns.addItem(labelColumn);
+            var firstRow:Boolean = true;
+            if (vert == null) {
+                return;
+            }
+            var measures:ArrayCollection = VerticalListDefinition(vert.reports.getItemAt(0)).measures;
+            for each (var measure:AnalysisMeasure in measures) {
+
+                var obj:Object = new Object();
+                obj["Label"] = measure.display;
+                obj["baseMeasure"] = measure;
+
+                for (var i:int = 0; i < vert.reports.length; i++) {
+                    var report:VerticalListDefinition = vert.reports.getItemAt(i) as VerticalListDefinition;
+                    var applyMeasure:AnalysisMeasure;
+                    for each (var testMeasure:AnalysisMeasure in report.measures) {
+                        if (testMeasure.display == measure.display) {
+                            applyMeasure = testMeasure;
+                            break;
+                        }
+                    }
+
+                    var formatter:Formatter = applyMeasure.getFormatter();
+
+                    var reportData:ArrayCollection = data.getItemAt(i) as ArrayCollection;
+                    for each (var row:Object in reportData) {
+                        var columnValue:String;
+                        var val:Value;
+                        if (report.column == null) {
+                            columnValue = report.name;
+                        } else {
+                            val = row[report.column.qualifiedName()];
+                            columnValue = val.toString();
+                        }
+                        if (val != null && val.type() == Value.EMPTY) {
+                            continue;
+                        }
+                        var measureValue:Value = row[applyMeasure.qualifiedName()];
+                        var text:String;
+                        if (measureValue != null) {
+                            var num:Number = measureValue.toNumber();
+                            text = formatter.format(num);
+                        } else {
+                            text = "";
+                        }
+                        obj[columnValue] = text;
+                        obj[columnValue + "measure"] = applyMeasure;
+                        if (firstRow) {
+                            var dataColumn:SortableSparkGridColumn = new SortableSparkGridColumn(i + 1, val == null ? 0 : val.toSortValue().toNumber());
+                            dataColumn.width = 76;
+                            dataColumn.headerText = columnValue.toString();
+                            dataColumn.dataField = columnValue.toString();
+                            var factory:ClassFactory = new ClassFactory(SparkVerticalListRenderer);
+                            factory.properties = { qualifiedName: columnValue.toString() };
+                            dataColumn.itemRenderer = factory;
+                            dataColumn.sortable = false;
+                            /*var headerFactory:ClassFactory = new ClassFactory(SparkVerticalListHeaderRenderer);
+                             headerFactory.properties = { headerText: columnValue.toString() };*/
+                            //dataColumn.headerRenderer = headerFactory;
+                            columns.addItem(dataColumn);
+                        }
+                    }
+                }
+
+                if (firstRow) {
+                    firstRow = false;
+                }
+                dColl.addItem(obj);
+            }
+            /*if (columns.length == 1) {
+             currentState = "noData";
+             } else {
+             currentState = "";
+             }*/
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("reportIndex"), new SortField("sortValue") ];
+            columns.sort = sort;
+            columns.refresh();
+            this.columns = columns;
+            //rowCount = dColl.length + 1;
+            dataProvider = dColl;
+            invalidateSize();
+        }
+
+        public function preserveValues():Boolean {
+            return true;
+        }
+        ]]></fx:Script>
+</s:DataGrid>

@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<util:ComboBoxPopUp xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+                    xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:util="com.easyinsight.util.*">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.filtering.FilterValueDefinition;
+        import com.easyinsight.reportviews.FilterInfo;
+
+        import mx.collections.ArrayCollection;
+
+        import spark.collections.Sort;
+
+        private var _filterInfo:FilterInfo;
+
+        public function set filterInfo(value:FilterInfo):void {
+            _filterInfo = value;
+        }
+
+        override protected function valueChanged(newValue:Object):void {
+            var value:String = newValue as String;
+            FilterValueDefinition(_filterInfo.filterDefinition).filteredValues = new ArrayCollection([ value ]);
+            dispatchEvent(new FilterChangeEvent(null));
+        }
+
+        override protected function onWindowCreation():void {
+            var translated:ArrayCollection = new ArrayCollection();
+            for each (var obj:Object in FilterValueDefinition(_filterInfo.filterDefinition).filteredValues) {
+                if (obj is Value) {
+                    var value:Value = obj as Value;
+                    translated.addItem(value.getValue());
+                } else {
+                    translated.addItem(obj);
+                }
+            }
+            FilterValueDefinition(_filterInfo.filterDefinition).filteredValues = translated;
+            dataService.getAnalysisItemMetadata.send(_filterInfo.dataSourceID, _filterInfo.filterDefinition.field, 0, _filterInfo.reportID, _filterInfo.dashboardID);
+        }
+
+        private function gotMetadata():void {
+            var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
+            AnalysisDimensionResultMetadata;
+            var strings:ArrayCollection = new ArrayCollection();
+            if (analysisDimensionResultMetadata != null && analysisDimensionResultMetadata.values != null) {
+                for each (var value:Value in analysisDimensionResultMetadata.values) {
+                    var string:String = String(value.getValue());
+
+                    if (!strings.contains(string)) {
+                        strings.addItem(string);
+                    }
+                }
+            }
+            strings.sort = new Sort();
+            strings.refresh();
+            var filterVal:FilterValueDefinition = _filterInfo.filterDefinition as FilterValueDefinition;
+            if (filterVal.excludeEmpty) {
+                var index:int = strings.getItemIndex("");
+                if (index != -1) {
+                    strings.removeItemAt(index);
+                }
+            }
+            strings.sort = new Sort();
+            strings.refresh();
+            if (filterVal.allOption) {
+                strings.addItemAt("All", 0);
+            }
+            dataProvider = strings;
+        }
+        ]]></fx:Script>
+    <fx:Declarations>
+        <mx:RemoteObject destination="data" id="dataService" endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
+            <mx:method name="getAnalysisItemMetadata" result="gotMetadata()"/>
+        </mx:RemoteObject>
+    </fx:Declarations>
+</util:ComboBoxPopUp>

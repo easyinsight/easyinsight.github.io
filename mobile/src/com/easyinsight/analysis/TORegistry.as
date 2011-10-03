@@ -7,14 +7,20 @@
  */
 package com.easyinsight.analysis {
 import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.filtering.AnalysisItemFilterDefinition;
+import com.easyinsight.filtering.DateLevelWrapper;
 import com.easyinsight.filtering.FilterDateRangeDefinition;
 import com.easyinsight.filtering.FilterPatternDefinition;
 import com.easyinsight.filtering.FilterRangeDefinition;
 import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.filtering.FirstValueFilterDefinition;
+import com.easyinsight.filtering.FlatDateFilterDefinition;
 import com.easyinsight.filtering.LastValueFilterDefinition;
+import com.easyinsight.filtering.MonthCutoffFilterDefinition;
+import com.easyinsight.filtering.MultiFlatDateFilterDefinition;
 import com.easyinsight.filtering.NamedFilterReference;
 import com.easyinsight.filtering.NullValueFilterDefinition;
+import com.easyinsight.filtering.OrFilter;
 import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
 import com.easyinsight.scorecard.ScorecardDescriptor;
 
@@ -28,6 +34,7 @@ public class TORegistry {
         var analysisLat:AnalysisLatitude;
         var analysisLong:AnalysisLongitude;
         var analysisText:AnalysisText;
+        var reagg:ReaggregateAnalysisMeasure;
         var analysisRange:AnalysisRangeDimension;
         var analysisZip:AnalysisZipCode;
         var sigma:SixSigmaMeasure;
@@ -36,6 +43,7 @@ public class TORegistry {
         var hierarchyLevel:HierarchyLevel;
         var calc:AnalysisCalculation;
         var derived:DerivedAnalysisDimension;
+        var derivedDate:DerivedAnalysisDateDimension;
         var urlLink:URLLink;
         var drillthrough:DrillThrough;
         var coordinate:CoordinateValue;
@@ -51,8 +59,15 @@ public class TORegistry {
         var filter7:LastValueFilterDefinition;
         var filter8:NullValueFilterDefinition;
         var filter9:NamedFilterReference;
+        var filter10:AnalysisItemFilterDefinition;
+        var filter11:FlatDateFilterDefinition;
+        var filter12:MultiFlatDateFilterDefinition;
+        var filter13:OrFilter;
+        var filter14:MonthCutoffFilterDefinition;
+        var dateLevelWrapper:DateLevelWrapper;
         var dashboardDesc:DashboardDescriptor;
         var scorecardDesc:ScorecardDescriptor;
+        var join:JoinOverride;
     }
 }
 }

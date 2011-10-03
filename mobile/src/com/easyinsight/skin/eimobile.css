@@ -1,0 +1,15 @@
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace util "com.easyinsight.util.*";
+
+util|FilterContainer {
+    skinClass: ClassReference('com.easyinsight.util.FilterSkin')
+}
+
+s|Button {
+    chromeColor: #333333;
+    color: #FFFFFF;
+    fontWeight: normal;
+    textShadowAlpha: .65;
+    fontSize: 14;
+    textShadowColor: #000000;
+}

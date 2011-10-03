@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<util:TabletFilterRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+          xmlns:util="com.easyinsight.util.*">
+    <fx:Script><![CDATA[
+        import com.easyinsight.filtering.FilterPatternDefinition;
+
+
+        [Bindable]
+        private var filterName:String;
+
+        [Bindable]
+        private var filterValue:Object;
+
+        [Bindable]
+        private var currentValue:String;
+
+        private var pattern:String;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            filterName = filterInfo.filterDefinition.field.display + ":";
+            pattern = FilterPatternDefinition(filterInfo.filterDefinition).pattern;
+            if (pattern == null || pattern == "") {
+                currentValue = "Click to Configure";
+            } else {
+                currentValue = pattern;
+            }
+        }
+
+        private function editStartDate():void {
+            var window:PatternValueWindow = new PatternValueWindow();
+            window.currentNum = pattern;
+            window.addEventListener(MeasureFilterEvent.MEASURE_FILTER, onLowDateChange, false, 0, true);
+            var point:Point = new Point(date1Label.x, date1Label.y);
+            var global:Point = localToGlobal(point);
+            window.x = global.x;
+            window.y = global.y + 20;
+            window.open(this, true);
+        }
+
+        private function onLowDateChange(event:MeasureFilterEvent):void {
+            pattern = event.object as String;
+            if (pattern == null || pattern == "") {
+                currentValue = "Click to Configure";
+            } else {
+                currentValue = pattern;
+            }
+            FilterPatternDefinition(filterInfo.filterDefinition).pattern = pattern;
+            dispatchEvent(new FilterChangeEvent(null));
+        }
+
+        ]]></fx:Script>
+    <s:Label text="{filterName}"/>
+    <s:Label text="{currentValue}" textDecoration="underline" click="editStartDate()" id="date1Label"/>
+</util:TabletFilterRenderer>

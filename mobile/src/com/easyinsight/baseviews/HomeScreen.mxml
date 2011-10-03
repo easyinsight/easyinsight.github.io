@@ -1,11 +1,23 @@
 <?xml version="1.0"?>
 <s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-    title="Home" viewActivate="onActivate()">
+        title="Home" viewActivate="onActivate()">
     <s:layout>
-        <s:VerticalLayout gap="5" horizontalAlign="center" paddingTop="10"/>
+        <s:VerticalLayout gap="0" horizontalAlign="center"/>
     </s:layout>
     <fx:Script><![CDATA[
-        import com.easyinsight.test.SubjectList;
+        import com.easyinsight.dashboard.DashboardDescriptor;
+        import com.easyinsight.etl.LookupTableDescriptor;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.listing.MyDataTree;
+        import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.reportviews.DashboardView;
+        import com.easyinsight.reportviews.ReportMetadata;
+        import com.easyinsight.reportviews.ReportView;
+        import com.easyinsight.skin.ImageLoadEvent;
+        import com.easyinsight.skin.ImageLoader;
+        import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.test.DataModel;
         import com.easyinsight.util.ActionDashboardLog;
         import com.easyinsight.util.ActionDataSourceLog;
         import com.easyinsight.util.ActionLog;
@@ -13,18 +25,34 @@
         import com.easyinsight.util.ActionScorecardLog;
 
         import mx.collections.ArrayCollection;
+        import mx.core.FlexGlobals;
+        import mx.core.UIComponent;
+        import mx.events.EffectEvent;
+        import mx.events.ItemClickEvent;
         import mx.rpc.events.FaultEvent;
 
         [Bindable]
         private var busy:Boolean = false;
 
         private function onActivate():void {
+            if (User.getInstance().applicationSkin.coreAppBackgroundImage != null) {
+                var headerBarLoader:ImageLoader = new ImageLoader();
+                headerBarLoader.addEventListener(ImageLoadEvent.IMAGE_LOADED, function(event:ImageLoadEvent):void {
+                    image.source = event.bitmap;
+                    image.visible = true;
+                });
+                headerBarLoader.load(User.getInstance().applicationSkin.coreAppBackgroundImage.id, "https://www.easy-insight.com/app/messagebroker/amfsecure");
+            }
             busy = true;
+            removeEventListener(ItemClickEvent.ITEM_CLICK, onItemClick);
+            addEventListener(ItemClickEvent.ITEM_CLICK, onItemClick);
             adminService.getRecentActions.send();
+            uploadService.getFeedAnalysisTree.send(false);
         }
 
         private function toMyData():void {
-            navigator.pushView(SubjectList);
+            busy = true;
+
         }
 
         private function blah():void {
@@ -59,6 +87,32 @@
             busy = false;
         }
 
+        private function gotTree():void {
+            var tree:MyDataTree = uploadService.getFeedAnalysisTree.lastResult as MyDataTree;
+            var descs:ArrayCollection = tree.objects;
+            processData(descs);
+            busy = false;
+            var dsd:DataSourceDescriptor;
+        }
+
+        private function processData(descs:ArrayCollection):void {
+            var list:ArrayCollection = new ArrayCollection();
+            for each (var obj:Object in descs) {
+                if (obj is LookupTableDescriptor) {
+                    continue;
+                }
+                list.addItem(obj);
+            }
+            //dataList.dataProvider = list;
+            var dataModel:DataModel = new DataModel();
+            dataModel.descriptors = list;
+            allFields = list;
+            dataList.dataProvider = list;
+            //navigator.pushView(SubjectList, dataModel);
+        }
+
+        private var allFields:ArrayCollection;
+
         [Bindable]
         private var faultMessage:String;
 
@@ -66,22 +120,164 @@
             busy = false;
             faultMessage = event.fault.faultString;
         }
+
+        private function onItemClick(event:ItemClickEvent):void {
+            var descriptor:EIDescriptor = dataList.dataProvider.getItemAt(event.index) as EIDescriptor;
+            if (descriptor.getType() == EIDescriptor.REPORT) {
+                var metadata:ReportMetadata = new ReportMetadata();
+                metadata.descriptor = InsightDescriptor(descriptor);
+                navigator.pushView(ReportView, metadata);
+                //navigator.pushView(GaugeTest);
+            } else if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
+                backButton.visible = true;
+                fadeOut.end();
+                fadeOut.target = dataList;
+                var ds:DataSourceDescriptor = descriptor as DataSourceDescriptor;
+                fadeOut.addEventListener(EffectEvent.EFFECT_END, function(event:EffectEvent):void {
+                    fadeOut.removeEventListener(EffectEvent.EFFECT_END, arguments.callee);
+                    dataList.dataProvider = ds.children;
+                    fadeIn.end();
+                    fadeIn.target = dataList;
+                    fadeIn.play();
+                });
+                fadeOut.play();
+
+                /*var ds:DataSourceDescriptor = descriptor as DataSourceDescriptor;
+                 var childModel:DataModel = new DataModel();
+                 childModel.localList = ds.children;
+                 childModel.descriptors = DataModel(this.data).descriptors;
+                 navigator.pushView(SubjectList, childModel);*/
+            } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                var dash:DashboardDescriptor = descriptor as DashboardDescriptor;
+                navigator.pushView(DashboardView, dash);
+            }
+        }
+
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            trace("app height = " + UIComponent(FlexGlobals.topLevelApplication).height);
+            scroller.height = UIComponent(FlexGlobals.topLevelApplication).height - 185;
+        }
+
+        private function backToList():void {
+            backButton.visible = false;
+            fadeOut.end();
+            fadeOut.target = dataList;
+            fadeOut.addEventListener(EffectEvent.EFFECT_END, function(event:EffectEvent):void {
+                fadeOut.removeEventListener(EffectEvent.EFFECT_END, arguments.callee);
+                dataList.dataProvider = allFields;
+                fadeIn.end();
+                fadeIn.target = dataList;
+                fadeIn.play();
+            });
+            fadeOut.play();
+        }
+
+        [Bindable]
+        private var loginText:String = "You're logged in as James Boe under the Easy Insight account.";
+
+        [Bindable]
+        [Embed(source="../../../../assets/06-magnify.png")]
+        private var searchIcon:Class;
         ]]></fx:Script>
     <fx:Declarations>
-        <s:RemoteObject id="adminService" destination="admin" endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
+        <s:Fade id="fadeOut" alphaFrom="1" alphaTo="0" duration="500"/>
+        <s:Fade id="fadeIn" alphaFrom="0" alphaTo="1" duration="500"/>
+    </fx:Declarations>
+    <fx:Declarations>
+        <s:RemoteObject id="adminService" destination="admin"
+                        endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
             <s:method name="getRecentActions" result="gotRecentActions()" fault="onFault(event)"/>
+        </s:RemoteObject>
+        <s:RemoteObject destination="userUpload" id="uploadService"
+                        endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
+            <s:method name="getFeedAnalysisTree" result="gotTree()" fault="onFault(event)"/>
         </s:RemoteObject>
     </fx:Declarations>
     <s:titleContent>
-        <s:Label text="Easy Insight" color="#FFFFFF"/>
+        <s:HGroup width="100%" horizontalAlign="center">
+            <s:Label text="Easy Insight" color="#FFFFFF" fontSize="16"/>
+        </s:HGroup>
     </s:titleContent>
     <s:actionContent>
         <s:BusyIndicator visible="{busy}" id="busyIndicator" symbolColor="#FFFFFF"/>
     </s:actionContent>
-    <s:Image source="@Embed('../../../../assets/logo.jpg')"/>
-    <s:Button label="My Data" click="toMyData()" width="300"/>
-    <s:Label text="{faultMessage}"/>
-    <s:VGroup id="actionGroup">
+    <s:Group id="baseGroup" width="100%" height="100%" top="0">
+        <s:layout>
+            <s:BasicLayout/>
+        </s:layout>
+        <s:Image id="image" visible="false" percentHeight="100" percentWidth="100" scaleMode="stretch" top="0"/>
+        <s:VGroup width="100%" height="100%" top="0" paddingTop="0">
+            <s:BorderContainer width="100%" height="55" top="0">
+                <s:backgroundFill>
+                    <s:SolidColor color="#333333" alpha="1"/>
+                </s:backgroundFill>
+                <s:layout>
+                    <s:HorizontalLayout paddingLeft="10" paddingRight="10" paddingTop="0" gap="0" verticalAlign="middle"/>
+                </s:layout>
+                <s:Label text="{loginText}" fontSize="16" color="#FFFFFF"/>
+                <s:Spacer width="100%"/>
+                <s:BorderContainer cornerRadius="8" borderAlpha="1" borderColor="#C3C3C3" height="45" width="250">
+                    <s:layout>
+                        <s:BasicLayout/>
+                    </s:layout>
+                    <s:backgroundFill>
+                        <s:SolidColor color="#FFFFFF" alpha="1"/>
+                    </s:backgroundFill>
+                    <s:Image source="{searchIcon}" y="10" x="3"/>
+                    <s:TextInput id="searchInput" x="33" width="205" y="3"/>
+                </s:BorderContainer>
+            </s:BorderContainer>
+            <s:HGroup width="100%" height="100%" horizontalAlign="center" top="0">
+                <s:Spacer width="30"/>
+                <s:BorderContainer cornerRadius="15" borderColor="#FFFFFF" borderAlpha="0" width="350">
+                    <s:layout>
+                        <s:VerticalLayout paddingLeft="10" paddingRight="10" paddingTop="10" gap="0"/>
+                    </s:layout>
+                    <s:backgroundFill>
+                        <s:SolidColor color="#FFFFFF" alpha=".5"/>
+                    </s:backgroundFill>
+                    <s:BorderContainer height="50" width="100%">
+                        <s:backgroundFill>
+                            <s:SolidColor color="#000000" alpha="1"/>
+                        </s:backgroundFill>
+                        <s:HGroup width="100%" horizontalAlign="center" height="100%" verticalAlign="middle">
+                            <s:Label text="Recent Actions" color="#FFFFFF" fontSize="18"/>
+                        </s:HGroup>
+                    </s:BorderContainer>
+                    <s:VGroup id="actionGroup" height="100%" paddingLeft="10" paddingRight="10" paddingTop="10"
+                              paddingBottom="10" horizontalAlign="center">
 
-    </s:VGroup>
+                    </s:VGroup>
+                </s:BorderContainer>
+                <s:Spacer width="30"/>
+                <s:BorderContainer cornerRadius="15" borderColor="#FFFFFF" borderAlpha="0" width="100%">
+                    <s:layout>
+                        <s:VerticalLayout paddingLeft="10" paddingRight="10" paddingTop="10" gap="0"/>
+                    </s:layout>
+                    <s:backgroundFill>
+                        <s:SolidColor color="#FFFFFF" alpha=".5"/>
+                    </s:backgroundFill>
+                    <s:BorderContainer height="50" width="100%">
+                        <s:backgroundFill>
+                            <s:SolidColor color="#000000" alpha="1"/>
+                        </s:backgroundFill>
+                        <s:Button label="Back to List" click="backToList()" x="3" y="2" id="backButton"
+                                  visible="false"/>
+                        <s:HGroup width="100%" horizontalAlign="center" height="100%" verticalAlign="middle">
+                            <s:Label text="My Data" color="#FFFFFF" fontSize="18"/>
+                        </s:HGroup>
+                    </s:BorderContainer>
+                    <s:Scroller id="scroller" width="100%" y="60">
+                        <s:VGroup paddingBottom="10" width="100%">
+                            <s:List labelField="name" width="100%" height="100%"
+                                    itemRenderer="com.easyinsight.baseviews.DescriptorRenderer" id="dataList"/>
+                        </s:VGroup>
+                    </s:Scroller>
+                </s:BorderContainer>
+                <s:Spacer width="30"/>
+            </s:HGroup>
+        </s:VGroup>
+
+    </s:Group>
 </s:View>

@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<util:TabletFilterRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+          xmlns:util="com.easyinsight.util.*">
+    <fx:Script><![CDATA[
+        import com.easyinsight.filtering.DateLevelWrapper;
+        import com.easyinsight.filtering.MultiFlatDateFilterDefinition;
+
+
+        [Bindable]
+        private var filterName:String;
+
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            filterName = filterInfo.filterDefinition.field.display + ":";
+            populateLabel();
+        }
+
+
+        private function toMonthLabel(value:int):String {
+            var label:String;
+            switch (value) {
+                case 0:
+                    label = "Jan";
+                    break;
+                case 1:
+                    label = "Feb";
+                    break;
+                case 2:
+                    label = "Mar";
+                    break;
+                case 3:
+                    label = "Apr";
+                    break;
+                case 4:
+                    label = "May";
+                    break;
+                case 5:
+                    label = "Jun";
+                    break;
+                case 6:
+                    label = "Jul";
+                    break;
+                case 7:
+                    label = "Aug";
+                    break;
+                case 8:
+                    label = "Sep";
+                    break;
+                case 9:
+                    label = "Oct";
+                    break;
+                case 10:
+                    label = "Nov";
+                    break;
+                case 11:
+                    label = "Dec";
+                    break;
+            }
+            return label;
+        }
+
+        private function populateLabel():void {
+            if (MultiFlatDateFilterDefinition(filterInfo.filterDefinition).levels.length == 0) {
+                dateLabel.text = "(Click to Configure)";
+            } else {
+                var firstValue:int = 11;
+                var lastValue:int = 0;
+                for each (var wrapper:DateLevelWrapper in MultiFlatDateFilterDefinition(filterInfo.filterDefinition).levels) {
+                    firstValue = Math.min(wrapper.dateLevel, firstValue);
+                    lastValue = Math.max(wrapper.dateLevel, lastValue);
+                    var firstLabel:String = toMonthLabel(firstValue);
+                    var secondLabel:String = toMonthLabel(lastValue);
+                    if (firstLabel == secondLabel) {
+                        dateLabel.text = firstLabel;
+                    } else {
+                        dateLabel.text = firstLabel + " to " + secondLabel;
+                    }
+                }
+
+            }
+        }
+
+        private function onFilterChange(event:FilterChangeEvent):void {
+            invalidateProperties();
+            dispatchEvent(event);
+        }
+
+        private function onWindowDone(event:Event):void {
+            populateLabel();
+            dispatchEvent(new FilterChangeEvent(null));
+        }
+
+        private function changeDates():void {
+            var window:MultiFMobileWindow = new MultiFMobileWindow();
+            window.dateFilter = filterInfo.filterDefinition as MultiFlatDateFilterDefinition;
+            window.addEventListener("updated", onWindowDone, false, 0, true);
+            var point:Point = new Point(dateLabel.x, dateLabel.y);
+            var global:Point = localToGlobal(point);
+            dateLabel.x = global.x;
+            dateLabel.y = global.y + 20;
+            window.open(this, true);
+        }
+        ]]></fx:Script>
+    <s:Label text="{filterName}"/>
+    <s:Label text="" textDecoration="underline" click="changeDates()" id="dateLabel"/>
+</util:TabletFilterRenderer>

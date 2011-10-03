@@ -7,7 +7,6 @@
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisMeasure;
-
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartDefinition;
 
@@ -77,15 +76,15 @@
             return string;
         }
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition):void {
+        public function renderReport(data:ArrayCollection, report:AnalysisDefinition, additionalProperties:Object):void {
 
-            var lineChartDef:LineChartDefinition = analysisDefinition as LineChartDefinition;
+            var lineChartDef:LineChartDefinition = report as LineChartDefinition;
 
-            if (dataSet.length > 0) {
+            if (data.length > 0) {
 
                 this.def = lineChartDef;
 
-                this.chartData = new ArrayCollection(dataSet.toArray());
+                this.chartData = new ArrayCollection(data.toArray());
 
                 removeElement(lineChart);
 
@@ -182,7 +181,7 @@
                 var uniques:ArrayCollection = new ArrayCollection();
 
                 var seriesData:Object = new Object();
-                lineChartDef.populateData(dataSet, seriesData, uniques);
+                lineChartDef.populateData(data, seriesData, uniques);
                 for (var i:int = 0; i < uniques.length; i++) {
                     var key:String = uniques.getItemAt(i) as String;
                     var uniqueLineSeries:LineSeries = new LineSeries();

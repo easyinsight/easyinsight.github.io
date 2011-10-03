@@ -3,7 +3,6 @@
     xmlns:mx="library://ns.adobe.com/flex/mx" implements="com.easyinsight.reportviews.IReportView">
     <fx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-        import com.google.maps.MapEvent;
 
         import mx.collections.ArrayCollection;
 
@@ -11,7 +10,7 @@
             //onMapReady(event);
         }
 
-        public function renderReport(data:ArrayCollection, report:AnalysisDefinition):void {
+        public function renderReport(data:ArrayCollection, report:AnalysisDefinition, additionalProperties:Object):void {
         }
 
         public function preserveValues():Boolean {

@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<util:FilterContainer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+                      xmlns:util="com.easyinsight.util.*">
+    <fx:Script><![CDATA[
+        import com.easyinsight.reportviews.FilterInfo;
+
+        import mx.binding.utils.BindingUtils;
+
+        import spark.components.CheckBox;
+
+        private var _filterEnabled:Boolean;
+
+        [Bindable(event="filterEnabledChanged")]
+        public function get filterEnabled():Boolean {
+            return _filterEnabled;
+        }
+
+        public function set filterEnabled(value:Boolean):void {
+            if (_filterEnabled == value) return;
+            _filterEnabled = value;
+            dispatchEvent(new Event("filterEnabledChanged"));
+            filterInfo.filterDefinition.enabled = value;
+            if (!_initializing) {
+                dispatchEvent(new FilterChangeEvent(null));
+            }
+        }
+
+        private var _initializing:Boolean = true;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            filterEnabled = filterInfo.filterDefinition.enabled;
+            trace("toggle = " + filterInfo.filterDefinition.toggleEnabled);
+            if (!filterInfo.filterDefinition.toggleEnabled) {
+                var toggleCheckbox:CheckBox = new CheckBox();
+                BindingUtils.bindProperty(toggleCheckbox, "selected", this, "filterEnabled");
+                BindingUtils.bindProperty(this, "filterEnabled", toggleCheckbox, "selected");
+                toggleGroup.addElement(toggleCheckbox);
+            }
+            /*if (filterInfo.filterDefinition.toggleEnabled) {
+                removeElement(checkbox);
+            }*/
+            trace("updated to " + currentState);
+            _initializing = false;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (_initializing) {
+
+            }
+            _initializing = false;
+        }
+
+        private var _filterInfo:FilterInfo;
+
+        [Bindable(event="filterInfoChanged")]
+        public function get filterInfo():FilterInfo {
+            return _filterInfo;
+        }
+
+        public function set filterInfo(value:FilterInfo):void {
+            if (_filterInfo == value) return;
+            _filterInfo = value;
+            dispatchEvent(new Event("filterInfoChanged"));
+        }
+        ]]></fx:Script>
+    <!--<fx:Binding source="filterEnabled" destination="toggleCheckbox.selected" twoWay="true"/>-->
+    <!--<util:toggleContent>
+        <s:CheckBox id="toggleCheckbox" includeIn="showFilter"/>
+    </util:toggleContent>-->
+</util:FilterContainer>

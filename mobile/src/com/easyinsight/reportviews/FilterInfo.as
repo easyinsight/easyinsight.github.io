@@ -6,17 +6,20 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.reportviews {
-import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.filtering.FilterDefinition;
 
 public class FilterInfo {
 
     public var filterDefinition:FilterDefinition;
-    public var report:AnalysisDefinition;
+    public var dataSourceID:int;
+    public var reportID:int;
+    public var dashboardID:int;
 
-    public function FilterInfo(filterDefinition:FilterDefinition, report:AnalysisDefinition) {
+    public function FilterInfo(filterDefinition:FilterDefinition, dataSourceID:int, reportID:int, dashboardID:int) {
         this.filterDefinition = filterDefinition;
-        this.report = report;
+        this.dataSourceID = dataSourceID;
+        this.reportID = reportID;
+        this.dashboardID = dashboardID;
     }
 }
 }

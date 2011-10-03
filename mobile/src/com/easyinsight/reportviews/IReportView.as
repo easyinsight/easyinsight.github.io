@@ -11,7 +11,7 @@ import com.easyinsight.analysis.AnalysisDefinition;
 import mx.collections.ArrayCollection;
 
 public interface IReportView {
-    function renderReport(data:ArrayCollection, report:AnalysisDefinition):void;
+    function renderReport(data:ArrayCollection, report:AnalysisDefinition, additionalProperties:Object):void;
     function preserveValues():Boolean;
 }
 }

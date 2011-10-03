@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:mx="library://ns.adobe.com/flex/mx" viewActivate="onActivate()" actionBarVisible="false">
+    <fx:Script><![CDATA[
+        import com.easyinsight.dashboard.Dashboard;
+        import com.easyinsight.dashboard.DashboardDescriptor;
+        import com.easyinsight.dashboard.DashboardEditorMetadata;
+        import com.easyinsight.dashboard.IDashboardViewComponent;
+
+        import mx.core.UIComponent;
+
+        import mx.events.FlexEvent;
+
+        private var dashboardDescriptor:DashboardDescriptor;
+
+        private function onActivate():void {
+            dashboardDescriptor = data as DashboardDescriptor;
+            dashboardName = dashboardDescriptor.name;
+            dashboardService.getDashboard.send(dashboardDescriptor.id);
+        }
+
+        private var rootView:IDashboardViewComponent;
+
+        private function gotDashboard():void {
+            var dashboard:Dashboard = dashboardService.getDashboard.lastResult as Dashboard;
+            var metadata:DashboardEditorMetadata = new DashboardEditorMetadata();
+            metadata.dataSourceID = dashboard.dataSourceID;
+            metadata.role = dashboard.role;
+            rootView = DashboardMobileFactory.createViewUIComponent(dashboard.rootElement, metadata);
+            UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
+                var filterMap:Object = new Object();
+                filterMap["master"] = dashboard.filters;
+                rootView.updateAdditionalFilters(filterMap);
+                rootView.initialRetrieve();
+            });
+            addElement(rootView as UIComponent);
+        }
+
+        [Bindable]
+        private var busy:Boolean = false;
+
+        [Bindable]
+        private var dashboardName:String;
+        ]]></fx:Script>
+    <fx:Declarations>
+        <mx:RemoteObject id="dashboardService" destination="dashboardService" endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
+            <mx:method name="getDashboard" result="gotDashboard()"/>
+        </mx:RemoteObject>
+    </fx:Declarations>
+    <!--<s:Scroller id="scroller">
+        <s:Group id="group" width="1000" height="600"/>
+    </s:Scroller>-->
+</s:View>

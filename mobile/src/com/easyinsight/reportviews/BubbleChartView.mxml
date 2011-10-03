@@ -6,10 +6,10 @@
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.charts.bubble.BubbleChartDefinition;
 
-        import mx.charts.chartClasses.IAxis;
-        import mx.formatters.Formatter;
         import mx.charts.HitData;
+        import mx.charts.chartClasses.IAxis;
         import mx.collections.ArrayCollection;
+        import mx.formatters.Formatter;
 
         [Bindable]
         private var graphData:ArrayCollection = new ArrayCollection();
@@ -41,9 +41,9 @@
 
         private var bubbleChart:BubbleChartDefinition;
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition):void {
-            var plotChartDef:BubbleChartDefinition = analysisDefinition as BubbleChartDefinition;
-            if (dataSet.length > 0) {
+        public function renderReport(data:ArrayCollection, report:AnalysisDefinition, additionalProperties:Object):void {
+            var plotChartDef:BubbleChartDefinition = report as BubbleChartDefinition;
+            if (data.length > 0) {
                 this.bubbleChart = plotChartDef;
                 setStyle("backgroundAlpha", plotChartDef.backgroundAlpha);
                 measure1 = plotChartDef.xaxisMeasure.qualifiedName();
@@ -57,7 +57,7 @@
                 dimension = plotChartDef.dimension.qualifiedName();
                 dimensionItem = plotChartDef.dimension;
             }
-            graphData = dataSet;
+            graphData = data;
         }
 
         private function dtFunc(hd:HitData):String {

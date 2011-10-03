@@ -8,14 +8,13 @@
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisMeasure;
-
         import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartDefinition;
 
+        import mx.charts.AreaChart;
         import mx.charts.CategoryAxis;
         import mx.charts.DateTimeAxis;
         import mx.charts.HitData;
         import mx.charts.Legend;
-        import mx.charts.AreaChart;
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.renderers.CircleItemRenderer;
@@ -80,11 +79,11 @@
 
         private var areaChartDef:AreaChartDefinition;
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition):void {
+        public function renderReport(data:ArrayCollection, report:AnalysisDefinition, additionalProperties:Object):void {
 
-            areaChartDef = analysisDefinition as AreaChartDefinition;
+            areaChartDef = report as AreaChartDefinition;
 
-            this.chartData = new ArrayCollection(dataSet.toArray());
+            this.chartData = new ArrayCollection(data.toArray());
 
             removeElement(areaChart);
 
@@ -104,7 +103,7 @@
             }
             areaChart.verticalAxis = verticalAxis;
 
-            if (dataSet.length > 0) {
+            if (data.length > 0) {
 
                 this.def = areaChartDef;
                 var xAxisDimension:AnalysisItem = areaChartDef.xaxis;
@@ -179,7 +178,7 @@
                 var uniques:ArrayCollection = new ArrayCollection();
 
                 var seriesData:Object = new Object();
-                areaChartDef.populateData(dataSet, seriesData, uniques);
+                areaChartDef.populateData(data, seriesData, uniques);
                 for (var i:int = 0; i < uniques.length; i++) {
                     var key:String = uniques.getItemAt(i) as String;
                     var uniqueLineSeries:AreaSeries = new AreaSeries();
@@ -202,5 +201,5 @@
             legend.direction = "vertical";
             addElementAt(areaChart, 0);
         }
-    ]]></fx:Script>
+        ]]></fx:Script>
 </s:HGroup>

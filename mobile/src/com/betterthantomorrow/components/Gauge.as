@@ -35,39 +35,29 @@ package com.betterthantomorrow.components {
 	import flash.geom.Point;
 	
 	import mx.charts.chartClasses.GraphicsUtilities;
-	import mx.core.FlexGlobals;
+
 	import mx.core.UIComponent;
 	import mx.effects.Rotate;
 	import mx.effects.easing.Exponential;
 	import mx.events.ResizeEvent;
 	import mx.formatters.Formatter;
-import mx.graphics.BitmapSmoothingQuality;
 import mx.graphics.SolidColorStroke;
-	import mx.styles.CSSStyleDeclaration;
+import mx.graphics.Stroke;
+
+import mx.styles.CSSStyleDeclaration;
+import mx.styles.StyleManager;
 
 import spark.components.Image;
+
 import spark.components.Label;
-import spark.primitives.BitmapImage;
 
 //Face Color
 	[Style(name = "faceColor", type = "Number", format = "Color", inherit = "yes")]
-	
 	[Style(name = "faceShadowColor", type = "Number", format = "Color", inherit = "yes")]
-	
 	[Style(name = "bezelColor", type = "Number", format = "Color", inherit = "yes")]
-	
 	[Style(name = "centerColor", type = "Number", format = "Color", inherit = "yes")]
-	
 	[Style(name = "pointerColor", type = "Number", format = "Color", inherit = "yes")]
-	
 	[Style(name = "ticksColor", type = "Number", format = "Color", inherit = "yes")]
-	
-	[Style(name = "alertAlphas", type = "Array", format = "Color", inherit = "yes")]
-	
-	[Style(name = "alertColors", type = "Array", format = "Color", inherit = "yes")]
-	
-	[Style(name = "alertRatios", type = "Array", format = "Color", inherit = "yes")]
-	
 	[Style(name = "fontColor", type = "Number", format = "Color", inherit = "yes")]
 	
 	public class Gauge extends UIComponent {
@@ -79,46 +69,41 @@ import spark.primitives.BitmapImage;
 		private var _pointerRotator:Rotate = new Rotate();
 		
 		//CHILDREN - You can use your own swf with the same symbol names to re-skin this gauge.
-        [Bindable]
-		[@Embed(source = 'gauge/skins/GaugeSkins_Skin1.swf', symbol = 'face')]
+		[@Embed(source = 'gauge/skins/GaugeSkins_Skin1.swf', symbol = 'face')][Bindable]
 		private var _faceSymbol:Class;
 		private var _face:Image;
 		private var _faceColorChanged:Boolean = true;
-
-        [Bindable]
-		[@Embed(source = 'gauge/skins/GaugeSkins_Skin1.swf', symbol = 'faceShadow')]
+		
+		[@Embed(source = 'gauge/skins/GaugeSkins_Skin1.swf', symbol = 'faceShadow')][Bindable]
 		private var _faceShadowSymbol:Class;
 		private var _faceShadow:Image;
 		private var _faceShadowColorChanged:Boolean = true;
 		
 		private var _alerts:UIComponent;
 		private var _ticks:UIComponent;
-
-        [Bindable]
-		[@Embed(source = 'gauge/skins/GaugeSkins_Skin1.swf', symbol = 'pointer')]
+		
+		[@Embed(source = 'gauge/skins/GaugeSkins_Skin1.swf', symbol = 'pointer')][Bindable]
 		private var _pointerSymbol:Class;
 		private var _pointer:Image;
 		private var _pointerColorChanged:Boolean = true;
-
-        [Bindable]
-		[@Embed(source = 'gauge/skins/GaugeSkins_Skin1.swf', symbol = 'bezel')]
+		
+		[@Embed(source = 'gauge/skins/GaugeSkins_Skin1.swf', symbol = 'bezel')][Bindable]
 		private var _bezelSymbol:Class;
 		private var _bezel:Image;
 		private var _bezelColorChanged:Boolean = false;
-
-        [Bindable]
-		[@Embed(source = 'gauge/skins/GaugeSkins_Skin1.swf', symbol = 'nub')]
+		
+		[@Embed(source = 'gauge/skins/GaugeSkins_Skin1.swf', symbol = 'nub')][Bindable]
 		private var _centerSymbol:Class;
 		private var _center:Image;
 		private var _centerColorChanged:Boolean = true;
 
-        [Bindable]
-		[@Embed(source = 'gauge/skins/GaugeSkins_Skin1.swf', symbol = 'reflection')]
+		[@Embed(source = 'gauge/skins/GaugeSkins_Skin1.swf', symbol = 'reflection')][Bindable]
 		private var _reflectionSymbol:Class;
 		private var _reflection:Image;
 		
 		private var _valueLabel:Label = new Label();
 		private var _minLabel:Label;
+        private var _midLabel:Label;
 		private var _maxLabel:Label;
 		private var _lastPointerRotation:Number = 0;
 		
@@ -128,8 +113,10 @@ import spark.primitives.BitmapImage;
 		[Bindable] private var _smallTicks:int = 45;
 		[Bindable] private var _bigTicks:int = 9;
 		
-		//private var _dropShadowFilter:DropShadowFilter;
+		private var _dropShadowFilter:DropShadowFilter;
 		private var _diameter:Number;
+
+        private var _conditionRenderers:Array;
 		
 		private static const POINTER_WIDTH:Number = 0.07;
 		private static const POINTER_HEIGHT:Number = 1.25;
@@ -139,7 +126,7 @@ import spark.primitives.BitmapImage;
 		private static const REFLECTION_HEIGHT:Number = 0.6;
 		private static const REFLECTION_OFFSET:Number = 0.05;
 		private static const TICK_THICKNESS:Number = 0.006;
-		private static const TICK_LENGTH_SMALL:Number = 0.23;
+		private static const TICK_LENGTH_SMALL:Number = 0.13;
 		private static const TICK_LENGTH_BIG:Number = 0.28;
 		private static const SCALE_DIAMETER:Number = 1/1.12;
 		private static const VALUE_LABEL_SIZE:Number = 0.11;
@@ -286,10 +273,40 @@ import spark.primitives.BitmapImage;
 		public function get diameter():Number {
 			return width;
 		}
-		
-		private static var classConstructed:Boolean = classConstruct();
+
+        private var _alertRatios:Array = [3, 6];
+        private var _alertColors:Array = [0xFF0000, 0xFFFF00, 0x00BB11];
+        private var _alertAlphas:Array = [.8, .8, .98];
+
+        public function set alertColors(value:Array):void {
+            _alertColors = value;
+        }
+
+        public function set alertRatios(value:Array):void {
+            _alertRatios = value;
+        }
+
+        /*
+        [Style(name = "faceColor", type = "Number", format = "Color", inherit = "yes")]
+	[Style(name = "faceShadowColor", type = "Number", format = "Color", inherit = "yes")]
+	[Style(name = "bezelColor", type = "Number", format = "Color", inherit = "yes")]
+	[Style(name = "centerColor", type = "Number", format = "Color", inherit = "yes")]
+	[Style(name = "pointerColor", type = "Number", format = "Color", inherit = "yes")]
+	[Style(name = "ticksColor", type = "Number", format = "Color", inherit = "yes")]
+	[Style(name = "fontColor", type = "Number", format = "Color", inherit = "yes")]
+         */
+
+        private var _faceColor:uint = 0x1C1C1C;
+        private var _faceShadowColor:uint = 0x000000;
+        private var _bezelColor:uint = 0x999999;
+        private var _centerColor:uint = 0x777777;
+        private var _pointerColor:uint = 0xEE3344;
+        private var _ticksColor:uint = 0xECECEC;
+        private var _fontColor:uint = 0xFFFFFF;
+
+        /*private static var classConstructed:Boolean = classConstruct();
 		private static function classConstruct():Boolean {
-			if (!FlexGlobals.topLevelApplication.styleManager.getStyleDeclaration("com.betterthantomorrow.components.Gauge")) {
+			if (!StyleManager.getStyleDeclaration("com.betterthantomorrow.components.Gauge")) {
 				var myStyles:CSSStyleDeclaration = new CSSStyleDeclaration();
 				myStyles.defaultFactory = function():void {
 					this.faceColor = 0x1C1C1C;
@@ -298,16 +315,16 @@ import spark.primitives.BitmapImage;
 					this.centerColor = 0x777777;
 					this.pointerColor = 0xEE3344;
 					this.ticksColor = 0xECECEC;
-					this.alertRatios = [3, 6];
-					this.alertColors = [0xFF0000, 0xFFFF00, 0x00BB11];
-					this.alertAlphas = [.8, .8, .98];
+					//this.alertRatios = [3, 6];
+					//this.alertColors = [0xFF0000, 0xFFFF00, 0x00BB11];
+					//this.alertAlphas = [.8, .8, .98];
 					this.fontColor = 0xFFFFFF;
 					this.fontSize = 18;
 				}
-				FlexGlobals.topLevelApplication.styleManager.setStyleDeclaration("com.betterthantomorrow.components.Gauge", myStyles, true);
+				StyleManager.setStyleDeclaration("com.betterthantomorrow.components.Gauge", myStyles, true);
 			}
 			return true;
-		}
+		}*/
 		
 		override public function styleChanged(styleProp:String):void {
 			super.styleChanged(styleProp);
@@ -345,7 +362,7 @@ import spark.primitives.BitmapImage;
 
 			addEventListener(ResizeEvent.RESIZE, sizeHasChanged);
 
-			//_dropShadowFilter = new DropShadowFilter(2, 45, 0, .3, 2, 2, 1, 1);
+			_dropShadowFilter = new DropShadowFilter(2, 45, 0, .3, 2, 2, 1, 1);
 
 			_alerts = new UIComponent();
 			_ticks = new UIComponent();
@@ -358,20 +375,23 @@ import spark.primitives.BitmapImage;
 
 			_pointer = new Image();
 			_pointer.source = _pointerSymbol;
-			//_pointer.filters = [_dropShadowFilter];
+			_pointer.filters = [_dropShadowFilter];
 
 			_bezel = new Image();
 			_bezel.source = _bezelSymbol;
 
 			_center = new Image();
 			_center.source = _centerSymbol;
-			//_center.filters = [_dropShadowFilter];
+			_center.filters = [_dropShadowFilter];
 
 			_reflection = new Image();
 			_reflection.source = _reflectionSymbol;
 
 			_minLabel = new Label();
 			_minLabel.setStyle("textAlign", "left");
+
+            _midLabel = new Label();
+            _midLabel.setStyle("textAlign", "center");
 
 			_maxLabel = new Label();
 			_maxLabel.setStyle("textAlign", "right");
@@ -442,12 +462,12 @@ import spark.primitives.BitmapImage;
 				_reflection.height = _diameter * REFLECTION_HEIGHT;
 				_reflection.x = _reflection.y = _diameter * REFLECTION_OFFSET;
 				
-				/*_dropShadowFilter.distance = 10;
+				_dropShadowFilter.distance = 10;
 				_dropShadowFilter.blurX = 10;
-				_dropShadowFilter.blurY = 10;*/
+				_dropShadowFilter.blurY = 10;
 				
-				/*_center.filters = [_dropShadowFilter];
-				_pointer.filters = [_dropShadowFilter];*/
+				_center.filters = [_dropShadowFilter];
+				_pointer.filters = [_dropShadowFilter];
 				
 				_valueLabel.width = _diameter;
 				var fontSize:Number = Math.max(_diameter * VALUE_LABEL_SIZE, 10);
@@ -456,14 +476,17 @@ import spark.primitives.BitmapImage;
 				_valueLabel.y = _diameter - _diameter * VALUE_LABEL_Y_OFFSET - fontSize;
 				
 				var radius:Number = _ticks.width / 2;
-				_minLabel.width = _maxLabel.width = _diameter;
-				_minLabel.height = _maxLabel.height = _diameter * 0.1;
+				_minLabel.width = _maxLabel.width = _midLabel.width = _diameter;
+				_minLabel.height = _maxLabel.height = _midLabel.height = _diameter * 0.1;
 				_minLabel.setStyle("fontSize", _diameter * MINMAX_LABEL_SIZE);
+                _midLabel.setStyle("fontSize", _diameter * MINMAX_LABEL_SIZE);
 				_maxLabel.setStyle("fontSize", _diameter * MINMAX_LABEL_SIZE);
 				_minLabel.x = radius + radius * Math.sin(radiansForValue(minValue)) * (SCALE_DIAMETER - TICK_LENGTH_SMALL / 2);
 				_minLabel.y = radius + radius * Math.cos(radiansForValue(minValue)) * (SCALE_DIAMETER - TICK_LENGTH_SMALL / 2);				
 				_maxLabel.x = radius + radius * Math.sin(radiansForValue(maxValue)) * (SCALE_DIAMETER - TICK_LENGTH_SMALL / 2) - _maxLabel.width;
 				_maxLabel.y = radius + radius * Math.cos(radiansForValue(maxValue)) * (SCALE_DIAMETER - TICK_LENGTH_SMALL / 2);
+                _midLabel.x = radius - (_midLabel.width / 2);
+                _midLabel.y = 20;
 			}
 		}
 		
@@ -480,6 +503,7 @@ import spark.primitives.BitmapImage;
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
 			_minLabel.text = minValue.toString();
+            _midLabel.text = String((minValue + maxValue) / 2);
 			_maxLabel.text = maxValue.toString();
 			
 			var fontColor:Number = getStyle("fontColor");
@@ -495,6 +519,7 @@ import spark.primitives.BitmapImage;
 			
 			_minLabel.setStyle("color", fontColor);
 			_maxLabel.setStyle("color", fontColor);
+            _midLabel.setStyle("color", fontColor);
 			_minLabel.visible = _maxLabel.visible = _showMinMax;
 			
 			// Enable origin calculation
@@ -505,23 +530,23 @@ import spark.primitives.BitmapImage;
 			setValueLabel();
 			
 			if (_faceColorChanged) {
-				transformColor(_face, getStyle("faceColor"));
+				transformColor(_face, _faceColor);
 				_faceColorChanged = false;
 			}
 			if (_faceShadowColorChanged) {
-				transformColor(_faceShadow, getStyle("faceShadowColor"));
+				transformColor(_faceShadow, _faceShadowColor);
 				_faceShadowColorChanged = false;
 			}
 			if (_bezelColorChanged) {
-				transformColor(_bezel, getStyle("bezelColor"));
+				transformColor(_bezel, _bezelColor);
 				_bezelColorChanged = false;
 			}
 			if (_centerColorChanged) {
-				transformColor(_center, getStyle("centerColor"));
+				transformColor(_center, _centerColor);
 				_centerColorChanged = false;
 			}
 			if (_pointerColorChanged) {
-				transformColor(_pointer, getStyle("pointerColor"), 0.7);
+				transformColor(_pointer, _pointerColor, 0.7);
 				_pointerColorChanged = false;
 			}
 		}
@@ -567,7 +592,7 @@ import spark.primitives.BitmapImage;
 			_ticks.graphics.clear();
 			if (_diameter > 50) {
 				var radius:Number = (_ticks.width)/2;
-				var tickColor:Number = getStyle("ticksColor"); 
+				var tickColor:Number = _ticksColor;
 				_ticks.graphics.lineStyle(_diameter * TICK_THICKNESS, tickColor, 1, false, LineScaleMode.NONE, CapsStyle.NONE);
 				
 				for(var i:int = 0; i <= _smallTicks; i++) {
@@ -610,11 +635,13 @@ import spark.primitives.BitmapImage;
 		}
 		
 		private function drawAlerts():void {
-			var levels:Array = getStyle("alertRatios").concat();
+			var levels:Array = _alertRatios.concat();
 			levels.unshift(_minValue);
 			levels.push(_maxValue);
-			var colors:Array = getStyle("alertColors");
-			var alphas:Array = getStyle("alertAlphas");
+			var colors:Array = _alertColors;
+			var alphas:Array = _alertAlphas;
+
+            //_conditionRenderers = [ createConditionRenderer(levels[0], colors[0], alphas[0], levels[1], colors[1], alphas[1]), createConditionRenderer() ];
 			
 			if (!(null in [levels, colors, alphas])) {
 				var delta:Number;

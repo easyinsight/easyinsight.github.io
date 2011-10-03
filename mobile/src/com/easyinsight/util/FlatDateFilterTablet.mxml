@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<util:TabletFilterRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+          xmlns:util="com.easyinsight.util.*" xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="retrieveMetadata()">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDateDimensionResultMetadata;
+        import com.easyinsight.filtering.FlatDateFilterDefinition;
+
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var filterName:String;
+
+        [Bindable]
+        private var filterValue:String;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            filterName = filterInfo.filterDefinition.field.display + ":";
+            filterValue = String(FlatDateFilterDefinition(filterInfo.filterDefinition).value);
+        }
+
+        private function onFilterChange(event:FilterChangeEvent):void {
+            FlatDateFilterDefinition(filterInfo.filterDefinition).value = int(event.selectedValue);
+            invalidateProperties();
+            dispatchEvent(event);
+        }
+
+        private function retrieveMetadata():void {
+            dataService.getAnalysisItemMetadata.send(filterInfo.dataSourceID, filterInfo.filterDefinition.field, 0, filterInfo.reportID, filterInfo.dashboardID);
+        }
+
+        private function gotMetadata():void {
+            var dateMetadata:AnalysisDateDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisDateDimensionResultMetadata;
+			var lowDate:Date = dateMetadata.earliestDate;
+            if (lowDate == null) {
+                lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
+            }
+			var highDate:Date = dateMetadata.latestDate;
+            if (highDate == null) {
+                highDate = new Date();
+            }
+            var dp:ArrayCollection = new ArrayCollection();
+
+            for (var year:int = lowDate.getFullYear(); year <= highDate.getFullYear(); year++) {
+                dp.addItem(String(year));
+            }
+            dropdownBox.dataProvider = dp;
+        }
+        ]]></fx:Script>
+    <fx:Declarations>
+        <mx:RemoteObject destination="data" id="dataService" endpoint="https://www.easy-insight.com/app/messagebroker/amfsecure">
+            <mx:method name="getAnalysisItemMetadata" result="gotMetadata()"/>
+        </mx:RemoteObject>
+        <util:SingleValueFilterPopUp id="popup" filterInfo="{filterInfo}" filterChange="onFilterChange(event)"/>
+    </fx:Declarations>
+    <s:Label text="{filterName}"/>
+    <util:EIComboBox selectedValue="{filterValue}" id="dropdownBox" filterChange="onFilterChange(event)"/>
+</util:TabletFilterRenderer>

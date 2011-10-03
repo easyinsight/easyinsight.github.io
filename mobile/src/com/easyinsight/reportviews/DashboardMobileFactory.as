@@ -13,21 +13,26 @@ import com.easyinsight.dashboard.DashboardImage;
 import com.easyinsight.dashboard.DashboardReport;
 import com.easyinsight.dashboard.DashboardScorecard;
 import com.easyinsight.dashboard.DashboardStack;
-
-import mx.core.UIComponent;
+import com.easyinsight.dashboard.IDashboardViewComponent;
 
 public class DashboardMobileFactory {
+
+    private static var counter:int = 0;
+
     public function DashboardMobileFactory() {
     }
 
-    public static function createViewUIComponent(element:DashboardElement, dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
+    public static function createViewUIComponent(element:DashboardElement, dashboardEditorMetadata:DashboardEditorMetadata):IDashboardViewComponent {
         if (element is DashboardGrid) {
             var gComp:DashboardGridMobileComponent = new DashboardGridMobileComponent();
             gComp.dashboardGrid = element as DashboardGrid;
+            gComp.dashboardEditorMetadata = dashboardEditorMetadata;
             return gComp;
         } else if (element is DashboardStack) {
             var sComp:DashboardStackMobileComponent = new DashboardStackMobileComponent();
             sComp.dashboardStack = element as DashboardStack;
+            sComp.elementID = String(counter++);
+            sComp.dashboardEditorMetadata = dashboardEditorMetadata;
             return sComp;
         } else if (element is DashboardImage) {
         } else if (element is DashboardReport) {

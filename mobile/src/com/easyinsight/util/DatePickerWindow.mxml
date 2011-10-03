@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<s:SkinnablePopUpContainer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+        skinClass="com.easyinsight.skin.PopupSkin">
+    <fx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+
+        import mx.formatters.DateFormatter;
+
+        private var _month:String;
+
+
+        private var _day:String;
+
+
+        private var _year:String;
+
+
+        [Bindable(event="monthChanged")]
+        public function get month():String {
+            return _month;
+        }
+
+        public function set month(value:String):void {
+            if (_month == value) return;
+            _month = value;
+            invalidateDate();
+            dispatchEvent(new Event("monthChanged"));
+        }
+
+        [Bindable(event="dayChanged")]
+        public function get day():String {
+            return _day;
+        }
+
+        public function set day(value:String):void {
+            if (_day == value) return;
+            _day = value;
+            invalidateDate();
+            dispatchEvent(new Event("dayChanged"));
+        }
+
+        [Bindable(event="yearChanged")]
+        public function get year():String {
+            return _year;
+        }
+
+        public function set year(value:String):void {
+            if (_year == value) return;
+            _year = value;
+            invalidateDate();
+            dispatchEvent(new Event("yearChanged"));
+        }
+
+        private function invalidateDate():void {
+            if (_initSet) {
+                _date = new Date(int(year), int(month) - 1, int(day));
+                dateText = df.format(_date);
+            }
+        }
+
+        private var df:DateFormatter;
+
+        [Bindable]
+        private var dateText:String;
+
+        private var _date:Date;
+
+        public function set date(value:Date):void {
+            _date = value;
+        }
+
+        private var _initSet:Boolean = false;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            df = new DateFormatter();
+            df.formatString = "MM/DD/YYYY";
+            dateText = df.format(_date);
+            month = String(_date.month + 1);
+            day = String(_date.date);
+            year = String(_date.fullYear);
+            _initSet = true;
+        }
+
+        private function save():void {
+            dispatchEvent(new DateChoiceEvent(DateChoiceEvent.DATE_CHOICE, _date));
+            this.close();
+        }
+
+        private function incrementMonth():void {
+            var newMonth:int = int(month) + 1;
+            if (newMonth == 13) {
+                newMonth = 1;
+            }
+            month = String(newMonth);
+        }
+
+        private function decrementMonth():void {
+            var newMonth:int = int(month) - 1;
+            if (newMonth == 0) {
+                newMonth = 12;
+            }
+            month = String(newMonth);
+        }
+
+        private function incrementDay():void {
+            var newDay:int = int(day) + 1;
+            if (newDay == 32) {
+                newDay = 1;
+            }
+            day = String(newDay);
+        }
+
+        private function decrementDay():void {
+            var newDay:int = int(day) - 1;
+            if (newDay == 0) {
+                newDay = 31;
+            }
+            day = String(newDay);
+        }
+        ]]></fx:Script>
+    <s:BorderContainer>
+        <s:layout>
+            <s:VerticalLayout horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+        </s:layout>
+        <s:backgroundFill>
+            <s:SolidColor color="#FFFFFF" alpha="1"/>
+        </s:backgroundFill>
+        <s:Label text="{dateText}" fontSize="14"/>
+        <s:HGroup>
+        <s:Button width="50" label="+" click="incrementMonth()"/>
+        <s:Button width="50" label="+" click="incrementDay()"/>
+        <s:Button width="100" label="+" click="year = String(int(year) + 1)"/>
+        </s:HGroup>
+        <s:HGroup>
+        <s:Label text="{month}" width="50" textAlign="center" fontSize="14"/>
+        <s:Label text="{day}" width="50" textAlign="center" fontSize="14"/>
+        <s:Label text="{year}" width="100" textAlign="center" fontSize="14"/>
+        </s:HGroup>
+        <s:HGroup>
+        <s:Button width="50" label="-" click="decrementMonth()"/>
+        <s:Button width="50" label="-" click="decrementDay()"/>
+        <s:Button width="100" label="-" click="year = String(int(year) - 1)"/>
+        </s:HGroup>
+        <s:Button label="Save" click="save()"/>
+    </s:BorderContainer>
+</s:SkinnablePopUpContainer>

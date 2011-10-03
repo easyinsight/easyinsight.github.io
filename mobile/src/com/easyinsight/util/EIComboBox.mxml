@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+          xmlns:util="com.easyinsight.util.*">
+    <fx:Metadata>
+        [Event(name="filterChange", type="com.easyinsight.util.FilterChangeEvent")]
+    </fx:Metadata>
+    <fx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+
+        private var _dataProvider:ArrayCollection;
+
+        public function set dataProvider(value:ArrayCollection):void {
+            _dataProvider = value;
+            invalidateProperties();
+        }
+
+        private var _labelFunction:Function;
+
+        public function set labelFunction(value:Function):void {
+            _labelFunction = value;
+            invalidateProperties();
+        }
+
+        private var _labelField:String;
+
+        public function set labelField(value:String):void {
+            _labelField = value;
+            invalidateProperties();
+        }
+
+        private var _selectedValue:Object;
+
+        private var _selectedProperty:String;
+
+
+        public function set selectedValue(value:Object):void {
+            _selectedValue = value;
+            invalidateProperties();
+        }
+
+        public function get selectedValue():Object {
+            return _selectedValue;
+        }
+
+        public function set selectedProperty(value:String):void {
+            _selectedProperty = value;
+            invalidateProperties();
+        }
+
+        [Bindable]
+        private var selectedValueLabel:String;
+
+        [Bindable]
+        private var labelWidth:int;
+
+        private function format(value:Object):String {
+            if (_labelFunction != null) {
+                return _labelFunction.call(this, value);
+            } else if (_labelField != null) {
+                return value[_labelField];
+            } else {
+                return value.toString();
+            }
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (_dataProvider != null && _dataProvider.length > 0) {
+                if (_selectedValue != null) {
+                    if (_selectedProperty != null) {
+                        for each (var value:Object in _dataProvider) {
+                            if (value[_selectedProperty] == _selectedValue) {
+                                selectedValueLabel = format(value);
+                                break;
+                            }
+                        }
+                    } else {
+                        selectedValueLabel = format(_selectedValue);
+                    }
+                } else {
+                    selectedValueLabel = format(_dataProvider.getItemAt(0));
+                }
+                var maxWidth:int = 0;
+                for each (var item:Object in _dataProvider) {
+                    var label:String = format(item);
+                    var metrics:TextLineMetrics = measureText(label);
+                    maxWidth = Math.max(maxWidth, metrics.width + metrics.x + metrics.x);
+                }
+                labelWidth = Math.min(maxWidth, 250);
+            }
+        }
+
+        private function onDrop():void {
+            var comboBoxPopUp:ComboBoxPopUp = new ComboBoxPopUp();
+            comboBoxPopUp.dataProvider = _dataProvider;
+            comboBoxPopUp.labelField = _labelField;
+            comboBoxPopUp.labelFunction = _labelFunction;
+            comboBoxPopUp.addEventListener(FilterChangeEvent.FILTER_CHANGE, onFilterChange, false, 0, true);
+            var point:Point = new Point(dropdownBox.x, dropdownBox.y);
+            var global:Point = localToGlobal(point);
+            comboBoxPopUp.x = global.x;
+            comboBoxPopUp.y = global.y + 20;
+            comboBoxPopUp.open(this, true);
+        }
+
+        private function onFilterChange(event:FilterChangeEvent):void {
+            selectedValue = event.selectedValue;
+            dispatchEvent(event);
+            dispatchEvent(new Event(Event.CHANGE));
+        }
+        ]]></fx:Script>
+    <util:DropdownBox dropdown="onDrop()" id="dropdownBox" selectedValue="{selectedValueLabel}" labelWidth="{labelWidth}"/>
+</s:HGroup>

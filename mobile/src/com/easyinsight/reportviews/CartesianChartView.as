@@ -11,6 +11,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.ChartDefinition;
 import com.easyinsight.analysis.FillProvider;
+import com.easyinsight.analysis.Value;
 
 import mx.charts.CategoryAxis;
 import mx.charts.HitData;
@@ -44,6 +45,8 @@ public class CartesianChartView extends HGroup implements IReportView {
     private var legend:Legend;*/
 
     public function CartesianChartView() {
+        this.percentHeight = 100;
+        this.percentWidth = 100;
     }
 
     protected function assignDimensionAxis(axis:CategoryAxis, chart:ChartBase):void {
@@ -63,7 +66,8 @@ public class CartesianChartView extends HGroup implements IReportView {
     }
 
     private function renderDimensionAxis(item:Object, prevValue:Object, axis:CategoryAxis, categoryItem:Object):String {
-        return dimensionFormatter.format(item);
+        var value:Value = categoryItem[dimensionAxisItem.qualifiedName()];
+        return dimensionFormatter.format(value.getValue());
     }
 
     protected function formatDataTip(hd:HitData):String {
@@ -169,7 +173,7 @@ public class CartesianChartView extends HGroup implements IReportView {
         return true;
     }
 
-    public function renderReport(data:ArrayCollection, report:AnalysisDefinition):void {
+    public function renderReport(data:ArrayCollection, report:AnalysisDefinition, additionalProperties:Object):void {
         chartDef = report as ChartDefinition;
 
         if (data.length > 0) {
@@ -196,6 +200,16 @@ public class CartesianChartView extends HGroup implements IReportView {
                 var series:Series = createSeries(measure, data, dimensionAxisItem.qualifiedName(), i);
                 mySeries.push(series);
             }
+
+            var max:int = 0;
+            for each (var row:Object in data) {
+                var value:Value = row[firstMeasure.qualifiedName()];
+                var num:Number = value.toNumber();
+                max = Math.max(num, max);
+            }
+
+            measureAxis.maximum = max + (max / 20);
+
             var legendItems:Array = styleColumns(mySeries);
             chart.series = mySeries;
 

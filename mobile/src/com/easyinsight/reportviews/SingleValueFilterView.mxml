@@ -3,15 +3,12 @@
         xmlns:mx="library://ns.adobe.com/flex/mx" viewActivate="onActivate()">
     <fx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
-        import com.easyinsight.analysis.AnalysisItemResultMetadata;
+
         import com.easyinsight.analysis.Value;
-        import com.easyinsight.filtering.FilterDefinition;
-        import com.easyinsight.filtering.FilterValueDefinition;
+
         import com.easyinsight.filtering.FilterValueDefinition;
 
         import mx.collections.ArrayCollection;
-        import mx.core.ClassFactory;
-        import mx.events.ItemClickEvent;
 
         import spark.collections.Sort;
 
@@ -41,7 +38,7 @@
             FilterValueDefinition(filterInfo.filterDefinition).filteredValues = translated;
             trace("sending...");
             busy = true;
-            dataService.getAnalysisItemMetadata.send(filterInfo.report.dataFeedID, filterInfo.filterDefinition.field, 0, filterInfo.report.analysisID, 0);
+            dataService.getAnalysisItemMetadata.send(filterInfo.dataSourceID, filterInfo.filterDefinition.field, 0, filterInfo.reportID, filterInfo.dashboardID);
         }
 
         private function gotMetadata():void {

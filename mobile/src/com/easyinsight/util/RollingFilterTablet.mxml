@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<util:TabletFilterRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+          xmlns:util="com.easyinsight.util.*">
+    <fx:Script><![CDATA[
+        import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
+
+        import mx.collections.ArrayCollection;
+
+
+        [Bindable]
+        private var filterName:String;
+
+        [Bindable]
+        private var filterValue:Object;
+
+        [Bindable]
+        private var rangeOptions:ArrayCollection;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            rangeOptions = new ArrayCollection();
+            rangeOptions.addItem({label: "Last Day", value: RollingDateRangeFilterDefinition.DAY});
+            rangeOptions.addItem({label: "Last 7 Days", value: RollingDateRangeFilterDefinition.WEEK});
+            rangeOptions.addItem({label: "Last 30 Days", value: RollingDateRangeFilterDefinition.MONTH});
+            rangeOptions.addItem({label: "Last 90 Days", value: RollingDateRangeFilterDefinition.QUARTER});
+            rangeOptions.addItem({label: "Last 365 Days", value: RollingDateRangeFilterDefinition.YEAR});
+            rangeOptions.addItem({label: "Today", value: RollingDateRangeFilterDefinition.DAY_TO_NOW});
+            rangeOptions.addItem({label: "Week to Date", value: RollingDateRangeFilterDefinition.WEEK_TO_NOW});
+            rangeOptions.addItem({label: "Month to Date", value: RollingDateRangeFilterDefinition.MONTH_TO_NOW});
+            rangeOptions.addItem({label: "Quarter to Date", value: RollingDateRangeFilterDefinition.QUARTER_TO_NOW});
+            rangeOptions.addItem({label: "Year to Date", value: RollingDateRangeFilterDefinition.YEAR_TO_NOW});
+            rangeOptions.addItem({label: "Last Full Day", value: RollingDateRangeFilterDefinition.LAST_FULL_DAY});
+            rangeOptions.addItem({label: "Last Full Week", value: RollingDateRangeFilterDefinition.LAST_FULL_WEEK});
+            rangeOptions.addItem({label: "Last Full Month", value: RollingDateRangeFilterDefinition.LAST_FULL_MONTH});
+            rangeOptions.addItem({label: "Last Day of Data", value: RollingDateRangeFilterDefinition.LAST_DAY});
+            rangeOptions.addItem({label: "Custom", value: RollingDateRangeFilterDefinition.CUSTOM});
+            filterName = filterInfo.filterDefinition.field.display + ":";
+            filterValue = String(RollingDateRangeFilterDefinition(filterInfo.filterDefinition).interval);
+        }
+
+        private function onFilterChange(event:FilterChangeEvent):void {
+            RollingDateRangeFilterDefinition(filterInfo.filterDefinition).interval = event.selectedValue.value;
+            invalidateProperties();
+            dispatchEvent(event);
+        }
+        ]]></fx:Script>
+    <s:Label text="{filterName}"/>
+    <util:EIComboBox selectedValue="{filterValue}" id="dropdownBox" filterChange="onFilterChange(event)" labelField="label" dataProvider="{rangeOptions}"
+            selectedProperty="value" enabled="{filterEnabled}"/>
+</util:TabletFilterRenderer>

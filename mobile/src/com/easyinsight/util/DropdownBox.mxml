@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+        mouseDown="onMouseDown(event)">
+    <fx:Metadata>
+        [Event(name="dropdown", type="com.easyinsight.util.DropdownEvent")]
+    </fx:Metadata>
+    <fx:Script><![CDATA[
+        import mx.graphics.GradientEntry;
+        import mx.graphics.LinearGradient;
+        import mx.graphics.RadialGradient;
+        import mx.graphics.SolidColor;
+        import mx.graphics.SolidColorStroke;
+
+        import spark.primitives.Graphic;
+        import spark.primitives.Line;
+        import spark.primitives.Path;
+        import spark.primitives.Rect;
+
+        private var _selectedValue:Object;
+
+        [Bindable(event="selectedValueChanged")]
+        public function get selectedValue():Object {
+            return _selectedValue;
+        }
+
+        public function set selectedValue(value:Object):void {
+            if (_selectedValue == value) return;
+            _selectedValue = value;
+            dispatchEvent(new Event("selectedValueChanged"));
+        }
+
+        private var _existingGraphic:Graphic;
+
+        private var rect:Rect;
+
+        private function onMouseDown(event:MouseEvent):void {
+            mouseOverRect.width = valueLabel.width + 30;
+            mouseOverRect.height = valueLabel.height + 10;
+            addElement(mouseOverGraphic);
+            stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+        }
+
+        private function onMouseUp(event:MouseEvent):void {
+            removeElement(mouseOverGraphic);
+            stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+            dispatchEvent(new DropdownEvent());
+        }
+
+        private var _labelWidth:int;
+
+        [Bindable(event="labelWidthChanged")]
+        public function get labelWidth():int {
+            return _labelWidth;
+        }
+
+        public function set labelWidth(value:int):void {
+            if (_labelWidth == value) return;
+            _labelWidth = value;
+            labelChanged = true;
+            dispatchEvent(new Event("labelWidthChanged"));
+        }
+
+        private var labelChanged:Boolean = false;
+
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            if (valueLabel != null && _selectedValue != null && labelChanged) {
+                labelChanged = false;
+                if (_existingGraphic != null) {
+                    removeElement(_existingGraphic);
+                }
+                valueLabel.width = labelWidth;
+                var graphic:Graphic = new Graphic();
+                rect = new Rect();
+                rect.width = labelWidth + 35;
+                rect.height = valueLabel.height + 10;
+                rect.radiusX = 8;
+                rect.radiusY = 8;
+                rect.stroke = new SolidColorStroke(0x999999, 1);
+                var gradiantFill:LinearGradient = new LinearGradient();
+                gradiantFill.entries = [ new GradientEntry(0xCCCCCC, 0.00, 0.85), new GradientEntry(0xFFFFFF, 0.50, 0.85)];
+                gradiantFill.rotation = 90;
+                rect.fill = gradiantFill;
+                var line:Line = new Line();
+                var divLineX:int = labelWidth + 15;
+                line.xFrom = divLineX;
+                line.xTo = divLineX;
+                line.yFrom = 2;
+                line.yTo = valueLabel.height + 8;
+                line.stroke = new SolidColorStroke(0x999999, 1);
+                var carat:Path = new Path();
+                var caratHeight:int = 5;
+                var caratStartX:int = divLineX + 5;
+                var centerPoint:int = valueLabel.height / 2 - (caratHeight / 2) + 5;
+                carat.data = "M " + (caratStartX) + " " + centerPoint + " L " + (caratStartX + 10) + " " + centerPoint + " L " + (caratStartX + 5) + " " + (centerPoint + caratHeight) + " L " + (caratStartX) + " " + centerPoint;
+                carat.stroke = new SolidColorStroke(0x333333, 1);
+                carat.fill = new SolidColor(0x333333);
+                graphic.addElement(rect);
+                graphic.addElement(line);
+                graphic.addElement(carat);
+                _existingGraphic = graphic;
+                addElementAt(graphic, 0);
+            }
+        }
+        ]]></fx:Script>
+    <fx:Declarations>
+        <s:Graphic id="mouseOverGraphic">
+            <s:Rect x="0" y="0" id="mouseOverRect">
+                <s:fill>
+                    <s:SolidColor color="#333333" alpha=".5"/>
+                </s:fill>
+            </s:Rect>
+        </s:Graphic>
+    </fx:Declarations>
+    <s:Label text="{selectedValue}" x="10" y="7" id="valueLabel" maxDisplayedLines="1"/>
+</s:Group>
