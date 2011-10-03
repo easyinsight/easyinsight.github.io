@@ -48,9 +48,11 @@ public class VerticalListRenderer extends UITextField implements IListItemRender
     }
 
     public function validateDisplayList():void {
+        validateNow();
     }
 
     public function validateSize(recursive:Boolean = false):void {
+        validateNow();
     }
 }
 }
