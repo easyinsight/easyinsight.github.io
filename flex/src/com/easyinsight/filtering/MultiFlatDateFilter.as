@@ -2,6 +2,7 @@ package com.easyinsight.filtering
 {
 
 	import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.util.PopUpUtil;
 
 
 import flash.events.Event;
@@ -72,11 +73,8 @@ import mx.managers.PopUpManager;
             var window:MultiFWindow = new MultiFWindow();
             window.dateFilter = _filterDefinition;
             window.addEventListener("updated", onWindowDone, false, 0, true);
-            var point:Point = new Point(this.x, this.y);
-            var global:Point = localToGlobal(point);
-            window.x = global.x;
-            window.y = global.y;
             PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onWindowDone(event:Event):void {
