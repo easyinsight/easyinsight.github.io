@@ -8,4 +8,5 @@
             TORegistry.registerTypes();
         }
         ]]></fx:Script>
+    <fx:Style source="com/easyinsight/skin/eimobile.css"/>
 </s:ViewNavigatorApplication>
