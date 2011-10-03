@@ -45,6 +45,7 @@ public class VerticalListRenderer extends UITextField implements IListItemRender
     }
 
     public function validateProperties():void {
+        validateNow();
     }
 
     public function validateDisplayList():void {
