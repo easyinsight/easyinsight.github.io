@@ -14,7 +14,7 @@ import mx.core.UITextFormat;
 public class VerticalListRenderer extends UITextField implements IListItemRenderer {
 
     public function VerticalListRenderer() {
-        var tf:UITextFormat = new UITextFormat(this.systemManager);
+        var tf:UITextFormat = new UITextFormat(this.systemManager, "Tahoma");
         tf.align = "right";
         setTextFormat(tf);
         this.percentWidth = 100;
