@@ -43,6 +43,12 @@ public class VerticalListRenderer extends UIComponent implements IListItemRender
         addChild(text);
     }
 
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        text.width = this.width;
+        text.height = this.height;
+    }
+
     public function set data(value:Object):void {
         this.value = value;
         var measure:AnalysisMeasure = value[_qualifiedName + "measure"] as AnalysisMeasure;
@@ -50,8 +56,6 @@ public class VerticalListRenderer extends UIComponent implements IListItemRender
         text.validateNow();
         var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Lucida Grande", 12);
         tf.align = "right";
-        text.percentWidth = 100;
-        text.percentHeight = 100;
         text.setTextFormat(tf);
         /*var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Lucida Grande", 12);
         tf.align = "right";
