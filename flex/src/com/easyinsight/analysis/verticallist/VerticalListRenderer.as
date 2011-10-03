@@ -37,6 +37,10 @@ public class VerticalListRenderer extends UITextField implements IListItemRender
         this.value = value;
         var measure:AnalysisMeasure = value[_qualifiedName + "measure"] as AnalysisMeasure;
         this.text = value[_qualifiedName];
+        /*var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Lucida Grande", 12);
+        tf.align = "right";
+        setTextFormat(tf);*/
+        invalidateProperties();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 
