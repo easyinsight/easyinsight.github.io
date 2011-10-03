@@ -109,6 +109,8 @@ public class FunctionFactory {
             return new TagsFunction();
         } else if (s.equals("firsttag")) {
             return new FirstTagFunction();
+        } else if (s.equals("originaltags")) {
+            return new OriginalTags();
         } else {
             return null;
         }
