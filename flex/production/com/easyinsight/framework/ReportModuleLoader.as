@@ -39,7 +39,7 @@ public class ReportModuleLoader extends EventDispatcher {
     private var moduleName:String;
 
     public function loadReportRenderer(_reportRendererModule:String, container:Container):void {
-        if (_reportRendererModule == "ListModule.swf" || _reportRendererModule == "VerticalListModule.swf") {
+        if (_reportRendererModule == "ListModule.swf" || _reportRendererModule == "VerticalList.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
