@@ -27,6 +27,7 @@ public class VerticalListRenderer extends UIComponent implements IListItemRender
         setTextFormat(tf);*/
         text = new UITextField();
         this.percentWidth = 100;
+        this.percentHeight = 100;
     }
 
     private var _qualifiedName:String;
@@ -49,6 +50,8 @@ public class VerticalListRenderer extends UIComponent implements IListItemRender
         text.validateNow();
         var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Lucida Grande", 12);
         tf.align = "right";
+        text.percentWidth = 100;
+        text.percentHeight = 100;
         text.setTextFormat(tf);
         /*var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Lucida Grande", 12);
         tf.align = "right";
