@@ -91,7 +91,7 @@ public class VerticalDataGrid extends AdvancedDataGrid {
 
         if (_rowsToUnderline != null) {
             for each (var rowNumber:int in _rowsToUnderline) {
-                var yPosition:int = headerHeight + ((rowHeight + 1) * rowNumber);
+                var yPosition:int = headerHeight + (rowHeight * (rowNumber + 1));
                 g.beginFill(0x666666, 1);
                 g.drawRect(0, yPosition - 2, unscaledWidth, 2);
                 g.endFill();
