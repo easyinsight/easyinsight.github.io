@@ -9,6 +9,7 @@ package com.easyinsight.framework {
 
 import com.easyinsight.analysis.LoadingModuleDisplay;
 import com.easyinsight.analysis.list.ListModule;
+import com.easyinsight.analysis.verticallist.CombinedVerticalListModule;
 import com.easyinsight.analysis.verticallist.VerticalListModule;
 
 import flash.events.Event;
@@ -39,7 +40,7 @@ public class ReportModuleLoader extends EventDispatcher {
     private var moduleName:String;
 
     public function loadReportRenderer(_reportRendererModule:String, container:Container):void {
-        if (_reportRendererModule == "ListModule.swf" || _reportRendererModule == "VerticalList.swf") {
+        if (_reportRendererModule == "ListModule.swf" || _reportRendererModule == "VerticalList.swf" || _reportRendererModule == "CombinedVerticalList.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
@@ -72,8 +73,10 @@ public class ReportModuleLoader extends EventDispatcher {
         if (inline) {
             if (moduleName == "ListModule.swf") {
                 return new ListModule();
-            } else if (moduleName == "VerticalListModule.swf") {
+            } else if (moduleName == "VerticalList.swf") {
                 return new VerticalListModule();
+            } else if (moduleName == "CombinedVerticalList.swf") {
+                return new CombinedVerticalListModule();
             }
         }
         return moduleInfo.factory.create();
