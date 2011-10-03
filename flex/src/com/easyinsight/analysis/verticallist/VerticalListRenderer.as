@@ -14,9 +14,10 @@ import mx.core.Application;
 import mx.core.UITextField;
 import mx.core.UITextFormat;
 
-public class VerticalListRenderer extends Label implements IListItemRenderer {
+public class VerticalListRenderer extends UITextField implements IListItemRenderer {
 
     public function VerticalListRenderer() {
+        super();
         setStyle("textAlign", "right");
         this.percentWidth = 100;
     }
@@ -29,14 +30,23 @@ public class VerticalListRenderer extends Label implements IListItemRenderer {
 
     private var value:Object;
 
-    override public function set data(value:Object):void {
+    public function set data(value:Object):void {
         this.value = value;
         var measure:AnalysisMeasure = value[_qualifiedName + "measure"] as AnalysisMeasure;
         this.text = value[_qualifiedName];
     }
 
-    override public function get data():Object {
+    public function get data():Object {
         return this.value;
+    }
+
+    public function validateProperties():void {
+    }
+
+    public function validateDisplayList():void {
+    }
+
+    public function validateSize(recursive:Boolean = false):void {
     }
 }
 }
