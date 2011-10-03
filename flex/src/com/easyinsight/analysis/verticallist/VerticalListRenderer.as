@@ -54,12 +54,9 @@ public class VerticalListRenderer extends UIComponent implements IListItemRender
         var measure:AnalysisMeasure = value[_qualifiedName + "measure"] as AnalysisMeasure;
         text.text = value[_qualifiedName];
         text.validateNow();
-        var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Lucida Grande", 12);
+        var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Lucida Grande", 10);
         tf.align = "right";
         text.setTextFormat(tf);
-        /*var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Lucida Grande", 12);
-        tf.align = "right";
-        setTextFormat(tf);*/
         invalidateProperties();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
