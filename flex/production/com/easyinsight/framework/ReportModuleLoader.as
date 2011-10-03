@@ -8,6 +8,8 @@
 package com.easyinsight.framework {
 
 import com.easyinsight.analysis.LoadingModuleDisplay;
+import com.easyinsight.analysis.list.ListModule;
+import com.easyinsight.analysis.verticallist.VerticalListModule;
 
 import flash.events.Event;
 
@@ -33,15 +35,24 @@ public class ReportModuleLoader extends EventDispatcher {
     public function ReportModuleLoader() {
     }
 
+    private var inline:Boolean = false;
+    private var moduleName:String;
+
     public function loadReportRenderer(_reportRendererModule:String, container:Container):void {
-        this.container = container;
-        moduleInfo = ModuleManager.getModule(Constants.instance().prefix + "/app/"+Constants.instance().buildPath+"/" + _reportRendererModule);
-        moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
-        moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
-        _loadingDisplay = new LoadingModuleDisplay();
-        _loadingDisplay.moduleInfo = moduleInfo;
-        container.addChild(_loadingDisplay);
-        moduleInfo.load(ApplicationDomain.currentDomain);
+        if (_reportRendererModule == "ListModule.swf" || _reportRendererModule == "VerticalListModule.swf") {
+            inline = true;
+            moduleName = _reportRendererModule;
+            dispatchEvent(new Event("moduleLoaded"));
+        } else {
+            this.container = container;
+            moduleInfo = ModuleManager.getModule(Constants.instance().prefix + "/app/"+Constants.instance().buildPath+"/" + _reportRendererModule);
+            moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
+            moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
+            _loadingDisplay = new LoadingModuleDisplay();
+            _loadingDisplay.moduleInfo = moduleInfo;
+            container.addChild(_loadingDisplay);
+            moduleInfo.load(ApplicationDomain.currentDomain);
+        }
     }
 
     private function reportLoadHandler(event:ModuleEvent):void {
@@ -58,6 +69,13 @@ public class ReportModuleLoader extends EventDispatcher {
     }
 
     public function create():Object {
+        if (inline) {
+            if (moduleName == "ListModule.swf") {
+                return new ListModule();
+            } else if (moduleName == "VerticalListModule.swf") {
+                return new VerticalListModule();
+            }
+        }
         return moduleInfo.factory.create();
     }
 
