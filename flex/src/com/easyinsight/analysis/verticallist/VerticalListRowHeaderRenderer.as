@@ -8,22 +8,22 @@
 package com.easyinsight.analysis.verticallist {
 import com.easyinsight.analysis.AnalysisMeasure;
 
+import mx.controls.Label;
+
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UITextField;
 import mx.core.UITextFormat;
 
-public class VerticalListRowHeaderRenderer extends UITextField implements IListItemRenderer {
+public class VerticalListRowHeaderRenderer extends Label implements IListItemRenderer {
 
     public function VerticalListRowHeaderRenderer() {
-        var tf:UITextFormat = new UITextFormat(this.systemManager, "Tahoma");
-        tf.align = "right";
-        setTextFormat(tf);
+        setStyle("textAlign", "right");
         this.percentWidth = 100;
     }
 
     private var value:Object;
 
-    public function set data(val:Object):void {
+    override public function set data(val:Object):void {
         this.value = val;
         var _analysisMeasure:AnalysisMeasure = val["baseMeasure"] as AnalysisMeasure;
         if (_analysisMeasure == null) {
@@ -34,17 +34,8 @@ public class VerticalListRowHeaderRenderer extends UITextField implements IListI
         invalidateDisplayList();
     }
 
-    public function get data():Object {
+    override public function get data():Object {
         return value;
-    }
-
-    public function validateProperties():void {
-    }
-
-    public function validateDisplayList():void {
-    }
-
-    public function validateSize(recursive:Boolean = false):void {
     }
 }
 }

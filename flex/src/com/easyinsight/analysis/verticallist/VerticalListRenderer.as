@@ -7,16 +7,17 @@
  */
 package com.easyinsight.analysis.verticallist {
 import com.easyinsight.analysis.AnalysisMeasure;
-import mx.controls.listClasses.IListItemRenderer;
-import mx.core.UITextField;
-import mx.core.UITextFormat;
 
-public class VerticalListRenderer extends UITextField implements IListItemRenderer {
+import mx.controls.Label;
+import mx.controls.listClasses.IListItemRenderer;
+
+public class VerticalListRenderer extends Label implements IListItemRenderer {
 
     public function VerticalListRenderer() {
-        var tf:UITextFormat = new UITextFormat(this.systemManager, "Tahoma");
+        /*var tf:UITextFormat = new UITextFormat(this.systemManager, "Tahoma");
         tf.align = "right";
-        setTextFormat(tf);
+        setTextFormat(tf);*/
+        setStyle("textAlign", "right");
         this.percentWidth = 100;
     }
 
@@ -28,23 +29,14 @@ public class VerticalListRenderer extends UITextField implements IListItemRender
 
     private var value:Object;
 
-    public function set data(value:Object):void {
+    override public function set data(value:Object):void {
         this.value = value;
         var measure:AnalysisMeasure = value[_qualifiedName + "measure"] as AnalysisMeasure;
         this.text = value[_qualifiedName];
     }
 
-    public function get data():Object {
+    override public function get data():Object {
         return this.value;
-    }
-
-    public function validateProperties():void {
-    }
-
-    public function validateDisplayList():void {
-    }
-
-    public function validateSize(recursive:Boolean = false):void {
     }
 }
 }
