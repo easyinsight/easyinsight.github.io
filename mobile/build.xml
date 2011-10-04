@@ -7,7 +7,7 @@
     <taskdef resource="ei.tasks" classpath="${flex.sdk.dir}/ant/lib/swfanalysis.jar"/>
 
     <target name="compileFlex">
-        <mxmlc file="src/MobileTest.mxml" output="${deployment.path}/MobileTest.swf"
+        <mxmlc file="src/EIMobile.mxml" output="${deployment.path}/EIMobile.swf"
                static-rsls="true" incremental="false">
             <load-config filename="air-config.xml"/>
         </mxmlc>

@@ -78,6 +78,7 @@
          <path-element>${flexlib}/libs/mobile</path-element>
          <path-element>${flexlib}/libs/air/servicemonitor.swc</path-element>
          <path-element>${flexlib}/locale/{locale}</path-element>
+         <path-element>/lib/flexlayouts-0.7.swc</path-element>
       </library-path>
 
        <context-root>/app</context-root>
