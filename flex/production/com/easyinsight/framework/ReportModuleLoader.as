@@ -40,7 +40,7 @@ public class ReportModuleLoader extends EventDispatcher {
     private var moduleName:String;
 
     public function loadReportRenderer(_reportRendererModule:String, container:Container):void {
-        if (_reportRendererModule == "ListModule.swf" || _reportRendererModule == "VerticalList.swf" || _reportRendererModule == "CombinedVerticalList.swf") {
+        if (_reportRendererModule == "VerticalList.swf" || _reportRendererModule == "CombinedVerticalList.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
@@ -71,9 +71,7 @@ public class ReportModuleLoader extends EventDispatcher {
 
     public function create():Object {
         if (inline) {
-            if (moduleName == "ListModule.swf") {
-                return new ListModule();
-            } else if (moduleName == "VerticalList.swf") {
+            if (moduleName == "VerticalList.swf") {
                 return new VerticalListModule();
             } else if (moduleName == "CombinedVerticalList.swf") {
                 return new CombinedVerticalListModule();
