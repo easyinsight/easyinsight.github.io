@@ -279,9 +279,17 @@ public class DataStorage implements IDataStorage {
         if (existsRS.next()) {
             storageConn.prepareStatement("DROP TABLE " + getTableName()).execute();
         }
-        String sql = defineTableSQL();
-        PreparedStatement createSQL = storageConn.prepareStatement(sql);
-        createSQL.execute();
+        try {
+            String sql = defineTableSQL(false);
+            PreparedStatement createSQL = storageConn.prepareStatement(sql);
+            createSQL.execute();
+        } catch (SQLException e) {
+            if (e.getMessage().contains("Row size too large")) {
+                String sql = defineTableSQL(true);
+                PreparedStatement createSQL = storageConn.prepareStatement(sql);
+                createSQL.execute();
+            }
+        }
     }
 
     public void commit() throws SQLException {
@@ -492,7 +500,7 @@ public class DataStorage implements IDataStorage {
             if (existsRS.next()) {
                 storageConn.prepareStatement("DROP TABLE " + getTableName()).execute();
             }
-            String sql = defineTableSQL();
+            String sql = defineTableSQL(false);
             LogClass.info("Creating new storage table in migration with sql " + sql);
             PreparedStatement createSQL = storageConn.prepareStatement(sql);
             createSQL.execute();
@@ -1024,13 +1032,13 @@ public class DataStorage implements IDataStorage {
         deleteStmt.executeUpdate();
     }
 
-    public String defineTableSQL() {
+    public String defineTableSQL(boolean hugeTable) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("CREATE TABLE ");
         sqlBuilder.append(getTableName());
         sqlBuilder.append("( ");
         for (KeyMetadata keyMetadata : keys.values()) {
-            sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType()));
+            sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType(), hugeTable));
             sqlBuilder.append(",");
         }
         String primaryKey = getTableName() + "_ID";
@@ -1041,7 +1049,7 @@ public class DataStorage implements IDataStorage {
         sqlBuilder.append("),");
         int indexCount = 0;
         for (KeyMetadata keyMetadata : keys.values()) {
-            if (keyMetadata.getType() == Value.STRING) {
+            if (!hugeTable && keyMetadata.getType() == Value.STRING) {
                 sqlBuilder.append("INDEX (");
                 String column = keyMetadata.getKey().toSQL();
                 sqlBuilder.append(column);
@@ -1064,7 +1072,7 @@ public class DataStorage implements IDataStorage {
                 sqlBuilder.append(",");
                 indexCount++;
             }
-            if (indexCount == 60) {
+            if (indexCount >= 60) {
                 break;
             }
         }
@@ -1074,7 +1082,7 @@ public class DataStorage implements IDataStorage {
         return sqlBuilder.toString();
     }
 
-    private String getColumnDefinitionSQL(Key key, int type) {
+    private String getColumnDefinitionSQL(Key key, int type, boolean hugeTable) {
         String column;
         if (type == Value.DATE) {
             column = "k" + key.getKeyID() + " DATETIME, datedim_" + key.getKeyID() + "_id BIGINT(11)";
@@ -1083,7 +1091,11 @@ public class DataStorage implements IDataStorage {
         } else if (type == Value.TEXT) {
             column = "k" + key.getKeyID() + " TEXT";
         } else {
-            column = "k" + key.getKeyID() + " VARCHAR(255)";
+            if (hugeTable) {
+                column = "k" + key.getKeyID() + " TEXT";
+            } else {
+                column = "k" + key.getKeyID() + " VARCHAR(255)";
+            }
         }
         return column;
     }
