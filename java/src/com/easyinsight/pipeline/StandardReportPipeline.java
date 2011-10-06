@@ -41,8 +41,9 @@ public class StandardReportPipeline extends Pipeline {
                 items.addAll(item.getAnalysisItems(allItems, reportItems, false, false, CleanupComponent.AGGREGATE_CALCULATIONS));
             }
         }
-        
-        for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, allNeededAnalysisItems)) {
+
+
+        for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, reportItems)) {
             AnalysisList analysisList = (AnalysisList) tag;
             if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
         }
@@ -116,7 +117,7 @@ public class StandardReportPipeline extends Pipeline {
             }
         }
         components.add(new LimitsComponent());
-        components.addAll(report.createComponents());        
+        components.addAll(report.createComponents());
         components.add(new SortComponent());
         components.add(new DateHackComponent());
         return components;

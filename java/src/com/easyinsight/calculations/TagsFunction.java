@@ -11,6 +11,9 @@ public class TagsFunction extends Function {
     public Value evaluate() {
         Value tagValue = params.get(0);
         Value originalTagValue = tagValue.getOriginalValue();
+        if (tagValue.getOriginalValue() == null) {
+            originalTagValue = tagValue;
+        }
         StringBuilder sb = new StringBuilder();
         if (originalTagValue.type() == Value.STRING) {
             StringValue stringValue = (StringValue) originalTagValue;
