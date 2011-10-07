@@ -70,7 +70,7 @@ public class HighriseCompanyCache extends HighRiseBaseSource {
                     Date createdAt = deadlineFormat.parse(queryField(companyNode, "created-at/text()"));
 
                     Date updatedAt = deadlineFormat.parse(queryField(companyNode, "updated-at/text()"));
-                    String personId = queryField(companyNode, "owner-id/text()");
+                    String personId = queryField(companyNode, "author-id/text()");
                     String responsiblePartyName = highriseCache.getUserName(personId);
 
                     Nodes tagNodes = companyNode.query("tags/tag/name/text()");

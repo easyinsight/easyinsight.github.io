@@ -200,7 +200,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                     Date createdAt = deadlineFormat.parse(queryField(companyNode, "created-at/text()"));
                     row.addValue(CREATED_AT, new DateValue(createdAt));
                     row.addValue(COUNT, new NumericValue(1));
-                    String personId = queryField(companyNode, "owner-id/text()");
+                    String personId = queryField(companyNode, "author-id/text()");
                     String responsiblePartyName = highriseCache.getUserName(personId);
                     row.addValue(OWNER, responsiblePartyName);
 
@@ -225,19 +225,6 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                                 row.addValue(key, value);
                             }
                         }
-                        /*Node contactDataNode = contactDataNodes.get(0);
-                        for (int j = 0; j < contactDataNode.getChildCount(); j++) {
-                            Node testNode = contactDataNode.getChild(j);
-                            String subjectFieldID = queryField(testNode, "subject-field-id/text()");
-                            if (subjectFieldID != null) {
-                                String value = queryField(testNode, "value/text()");
-                                Key key = keys.get(subjectFieldID);
-                                if (key != null) {
-                                    row.addValue(key, value);
-                                }
-
-                            }
-                        }*/
                     }
                     contactCount++;
                 }
