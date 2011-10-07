@@ -38,11 +38,12 @@ public class MaterializedValueFilterDefinition extends MaterializedFilterDefinit
         }
         if (getKey().hasType(AnalysisItemTypes.LISTING)) {
             AnalysisList analysisList = (AnalysisList) getKey();
-            Value start = value.getOriginalValue();
+            /*Value start = value.getOriginalValue();
             if (start == null) {
                 start = value;
-            }
-            Value[] values = analysisList.transformToMultiple(start);
+            }*/
+
+            Value[] values = analysisList.transformToMultiple(value);
             for (Value splitValue : values) {
                 if (this.values.contains(splitValue)) {
                     return true;
