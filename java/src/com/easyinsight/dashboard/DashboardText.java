@@ -77,6 +77,7 @@ public class DashboardText extends DashboardElement {
         if (rs.next()) {
             dashboardReport = new DashboardText();
             dashboardReport.setText(rs.getString(1));
+            dashboardReport.loadElement(elementID, conn);
         }
         return dashboardReport;
     }

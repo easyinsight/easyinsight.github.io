@@ -34,7 +34,7 @@ public abstract class DashboardElement implements Cloneable {
     private long elementID;
     private String label;
     private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
-    private String filterBorderStyle;
+    private String filterBorderStyle = "solid";
     private int filterBorderColor;
     private int filterBackgroundColor;
     private double filterBackgroundAlpha;
