@@ -23,8 +23,8 @@ public class IntentionSuggestion {
     public static final int SUGGESTION_LAST_CONTACT_NOTE = 8;
     public static final int SUGGESTION_LAST_DEAL_NOTE = 9;
     public static final int SUGGESTION_LAST_COMPANY_NOTE = 10;
-    public static final int SUGGESTION_TASK_CONFIG = 11;
     public static final int SUGGESTION_NOTE_CONFIG = 12;
+    public static final int SUGGESTION_TASK_SETUP = 14;
 
     public static final int MILESTONE_FILTER = 5;
 

@@ -298,7 +298,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                     HighRiseTaskSource.COMPANY_ID),
                 new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_CONTACTS, HighRiseCaseSource.OWNER,
                         HighRiseContactSource.CONTACT_ID),
-                new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CONTACTS, HighRiseTaskSource.OWNER,
+                new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CONTACTS, HighRiseTaskSource.CONTACT_ID,
                         HighRiseContactSource.CONTACT_ID),
                 new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CASES, HighRiseTaskSource.CASE_ID,
                         HighRiseCaseSource.CASE_ID),
@@ -591,6 +591,9 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             suggestions.add(new IntentionSuggestion("Help Me Set Up an Activity Report",
                     "This action will add four new custom fields representing the various Activity concepts from Highrise. Notes from your Contacts, Companies, Cases, and Deals, your Emails, and your Tasks will be combined into Activity Body, Activity Type, Activity Author, and Activity Date.",
                     IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_ACTIVITY_SETUP, IntentionSuggestion.OTHER));
+            suggestions.add(new IntentionSuggestion("Help Me Set Up a Task Report",
+                    "This action will filter out any records not related to Tasks and add a couple of new custom fields to help you do additional reporting against Tasks.",
+                    IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_TASK_SETUP, IntentionSuggestion.OTHER));
         }
         Set<AnalysisItem> analysisItems = report.getAllAnalysisItems();
         for (AnalysisItem analysisItem : analysisItems) {
@@ -656,7 +659,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                             HighRiseTaskSource.COMPANY_ID),
                     new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_CONTACTS, HighRiseCaseSource.OWNER,
                             HighRiseContactSource.CONTACT_ID),
-                    new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CONTACTS, HighRiseTaskSource.OWNER,
+                    new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CONTACTS, HighRiseTaskSource.CONTACT_ID,
                             HighRiseContactSource.CONTACT_ID),
                     new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CASES, HighRiseTaskSource.CASE_ID,
                             HighRiseCaseSource.CASE_ID),
@@ -772,6 +775,59 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 intentions.add(new AddReportFieldIntention(activityBody));
             }
             intentions.add(reportPropertiesIntention);
+        } else if (type == IntentionSuggestion.SUGGESTION_TASK_SETUP) {
+            intentions.add(new CustomizeJoinsIntention(fromChildConnections(Arrays.asList(
+                new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_COMPANY, HighRiseDealSource.COMPANY_ID,
+                    HighRiseCompanySource.COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_CONTACTS, HighRiseDealSource.CONTACT_ID,
+                    HighRiseContactSource.CONTACT_ID),
+                new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CONTACTS, HighRiseTaskSource.CONTACT_ID,
+                        HighRiseContactSource.CONTACT_ID, false, false, false, true),
+                new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CASES, HighRiseTaskSource.CASE_ID,
+                        HighRiseCaseSource.CASE_ID),
+                new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_DEAL, HighRiseTaskSource.DEAL_ID,
+                        HighRiseDealSource.DEAL_ID),
+                new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_COMPANY, HighRiseTaskSource.COMPANY_ID,
+                        HighRiseCompanySource.COMPANY_ID, false, false, false, true),
+                new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_COMPANY, HighRiseCompanySource.COMPANY_ID,
+                    HighRiseContactSource.COMPANY_ID, false, false, false, true),
+                new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_EMAILS, HighRiseContactSource.CONTACT_ID,
+                        HighRiseEmailSource.EMAIL_CONTACT_ID),
+                new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_CONTACT_NOTES, HighRiseContactSource.CONTACT_ID,
+                        HighRiseContactNotesSource.NOTE_CONTACT_ID),
+                new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_DEAL_NOTES, HighRiseDealSource.DEAL_ID,
+                        HighRiseDealNotesSource.NOTE_DEAL_ID),
+                new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_COMPANY_NOTES, HighRiseCompanySource.COMPANY_ID,
+                        HighRiseCompanyNotesSource.NOTE_COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_CASE_NOTES, HighRiseCaseSource.CASE_ID,
+                        HighRiseCaseNotesSource.NOTE_CASE_ID),
+                new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CASES, HighRiseCaseJoinSource.CASE_ID,
+                        HighRiseCaseSource.CASE_ID),
+                new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_COMPANY, HighRiseCaseJoinSource.COMPANY_ID,
+                        HighRiseCompanySource.COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CONTACTS, HighRiseCaseJoinSource.CONTACT_ID,
+                        HighRiseContactSource.CONTACT_ID)), fields)));
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
+            reportPropertiesIntention.setFullJoins(true);
+            intentions.add(reportPropertiesIntention);
+            intentions.add(new AddFilterIntention(excludeFilter(HighRiseTaskSource.BODY, report, fields)));
+            DerivedAnalysisDimension taskCompleted = new DerivedAnalysisDimension();
+            taskCompleted.setKey(new NamedKey("Task Completed"));
+            taskCompleted.setDisplayName("Task Completed");
+            taskCompleted.setDerivationCode("greaterthan([Task Done At], 0, \"Completed\", \"Not Completed\")");
+            intentions.add(new CustomFieldIntention(taskCompleted));
+            AnalysisCalculation daysToDue = new AnalysisCalculation();
+            daysToDue.setKey(new NamedKey("Days to Due"));
+            daysToDue.setDisplayName("Days to Due");
+            FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
+            formattingConfiguration.setFormattingType(FormattingConfiguration.MILLISECONDS);
+            daysToDue.setFormattingConfiguration(formattingConfiguration);
+            daysToDue.setCalculationString("[Task Due At] - now()");
+            intentions.add(new CustomFieldIntention(daysToDue));
+            Set<AnalysisItem> items = report.getAllAnalysisItems();
+            if (items.isEmpty()) {
+                intentions.add(new AddReportFieldIntention(findFieldFromList(HighRiseTaskSource.BODY, fields)));
+            }
         } else if (type == IntentionSuggestion.SUGGESTION_LAST_CONTACT_NOTE) {
             AnalysisItem noteItem = findFieldFromList(HighRiseContactNotesSource.NOTE_UPDATED_AT, fields);
             LastValueFilter lastValueFilter = new LastValueFilter();
