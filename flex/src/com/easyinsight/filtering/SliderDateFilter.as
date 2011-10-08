@@ -203,13 +203,11 @@ import mx.rpc.events.ResultEvent;
                 addChild(checkbox);
             }
             //}
-            if (_showLabel) {
-                var label:Label = new Label();
-                label.text = analysisItem.display + ":";
-                addChild(label);
-            } else {
-                toolTip = analysisItem.display;
-            }
+
+            var label:Label = new Label();
+            label.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            addChild(label);
+
             var leftSideStack:ViewStack = new ViewStack();
             BindingUtils.bindProperty(leftSideStack, "selectedIndex", this, "leftIndex");
             leftSideStack.resizeToContent = true;

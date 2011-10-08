@@ -45,8 +45,21 @@ import flash.events.EventDispatcher;
         return field != null && filterDefinition.field != null && field.matches(filterDefinition.field) && getType() == filterDefinition.getType();
     }
 
-    public function get label():String {
-        return field.display;
+    public static function getLabel(filterDefinition:FilterDefinition, field:AnalysisItem):String {
+        if (filterDefinition == null) {
+            if (field == null) {
+                return "";
+            } else {
+                return field.display;
+            }
+        }
+        if (filterDefinition.filterName != null && filterDefinition.filterName != "") {
+            return filterDefinition.filterName;
+        }
+        if (filterDefinition.field != null) {
+            return filterDefinition.field.display;
+        }
+        return "";
     }
 
 		public function getType():int {

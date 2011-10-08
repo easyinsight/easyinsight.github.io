@@ -38,7 +38,6 @@ public class TransformContainer extends HBox
     private var noFilters:Boolean = true;
     // private var dropHereBox:VBox;
     private var _filterEditable:Boolean = true;
-    private var _showLabel:Boolean = true;
     [Bindable]
     private var _analysisItems:ArrayCollection;
 
@@ -113,10 +112,6 @@ public class TransformContainer extends HBox
                 fb.height = fb.viewMetrics.top + fb.viewMetrics.bottom;
             }
         }
-    }
-
-    public function set showLabel(value:Boolean):void {
-        _showLabel = value;
     }
 
     public function set filterEditable(value:Boolean):void {
@@ -233,16 +228,15 @@ public class TransformContainer extends HBox
         } else if (filterDefinition.getType() == FilterDefinition.FLAT_DATE) {
             filter = new FlatDateFilter(_feedID,  filterDefinition.field, _reportID,  _dashboardID);
         } else if (filterDefinition.getType() == FilterDefinition.ANALYSIS_ITEM) {
-            filter = new AnalysisItemFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
+            filter = new AnalysisItemFilter(_feedID, filterDefinition.field);
         } else if (filterDefinition.getType() == FilterDefinition.MULTI_FLAT_DATE) {
-            filter = new MultiFlatDateFilter(_feedID,  filterDefinition.field, _reportID, _dashboardID);
+            filter = new MultiFlatDateFilter(_feedID,  filterDefinition.field);
         } else if (filterDefinition.getType() == FilterDefinition.MONTH_CUTOFF) {
             filter = new MonthCutoffFilter(_feedID,  filterDefinition.field,  _reportID, _dashboardID);
         } else {
             Alert.show("unknown filter type = " + filterDefinition.getType());
         }
         filter.filterEditable = _filterEditable;
-        filter.showLabel = _showLabel;
         filter.filterDefinition = filterDefinition;
         return filter;
     }
@@ -408,7 +402,6 @@ public class TransformContainer extends HBox
         }
         filter.filterEditable = _filterEditable;
         filter.loadingFromReport = _loadingFromReport;
-        filter.showLabel = _showLabel;
         filter.addEventListener(FilterUpdatedEvent.FILTER_ADDED, filterAdded);
         filter.addEventListener(FilterUpdatedEvent.FILTER_UPDATED, filterUpdated);
         filter.addEventListener(FilterDeletionEvent.DELETED_FILTER, filterDeleted);
@@ -469,15 +462,6 @@ public class TransformContainer extends HBox
 
     private function filterDeleted(event:FilterDeletionEvent):void {
         dispatchEvent(new CommandEvent(new FilterDeleteCommand(this, event.getFilter())));
-    }
-
-    public function createSimpleFilter(filterRawData:FilterRawData):FilterDefinition {
-        var key:AnalysisItem = filterRawData.getKeys().getItemAt(0) as AnalysisItem;
-        var filterValueDefinition:FilterValueDefinition = new FilterValueDefinition();
-        filterValueDefinition.field = key;
-        filterValueDefinition.filteredValues = filterRawData.getValues(key);
-        filterValueDefinition.inclusive = true;
-        return filterValueDefinition;
     }
 
     public function processRawFilterData(filterRawData:FilterRawData, includeFilter:Boolean):void {

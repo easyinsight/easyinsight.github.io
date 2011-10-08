@@ -55,7 +55,7 @@
         }
 
         private function addMultiFlatValue():void {
-            var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item, 0, 0);
+            var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item);
             dispatchEvent(new FilterCreationEvent(filter));
             PopUpManager.removePopUp(this);
         }

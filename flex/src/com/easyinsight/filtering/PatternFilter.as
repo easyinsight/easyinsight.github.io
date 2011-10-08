@@ -86,15 +86,11 @@ import mx.controls.Label;
                 _filterDefinition = new FilterPatternDefinition();
                 _filterDefinition.field = _analysisItem;
             }
-            if (_showLabel) {
-                if (labelText == null) {
-                    labelText = new Label();
-                    labelText.text = _filterDefinition.field.display + ":";
-                }
-                addChild(labelText);
-            } else {
-                this.toolTip = _filterDefinition.field.display + ":";
-            }
+
+            labelText = new Label();
+            labelText.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+            addChild(labelText);
+
             var valueLabel:Label = new Label();
             BindingUtils.bindProperty(valueLabel, "text", filterDefinition, "pattern");
             valueLabel.text = _filterDefinition.pattern;
@@ -139,11 +135,5 @@ import mx.controls.Label;
 		public function set filterDefinition(filterDefinition:FilterDefinition):void {
 			_filterDefinition = filterDefinition as FilterPatternDefinition; 	
 		}
-
-        private var _showLabel:Boolean;
-
-        public function set showLabel(show:Boolean):void {
-            _showLabel = show;
-        }
 	}
 }

@@ -187,7 +187,7 @@ public class SliderMeasureFilter extends HBox implements IFilter
             } else {
                 setStyle("verticalAlign", "middle");
                 var initLabel:Label = new Label();
-                initLabel.text = analysisItem.display + ":";
+                initLabel.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
                 addChild(initLabel);
                 var f:Formatter = _filterDefinition.field.getFormatter();
                 if (_filterDefinition.startValueDefined) {
@@ -328,12 +328,6 @@ public class SliderMeasureFilter extends HBox implements IFilter
 
     private function deleteSelf(event:MouseEvent):void {
         dispatchEvent(new FilterDeletionEvent(this));
-    }
-
-    private var _showLabel:Boolean;
-
-    public function set showLabel(show:Boolean):void {
-        _showLabel = show;
     }
 }
 }

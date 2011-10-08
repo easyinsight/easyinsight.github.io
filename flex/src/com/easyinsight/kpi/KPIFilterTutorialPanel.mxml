@@ -5,7 +5,6 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemNode;
-        import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.commands.CommandEvent;
@@ -99,7 +98,6 @@
                                               borderThickness="1" backgroundColor="#ffffff"
                                               backgroundAlpha=".1" feedID="{feedID}"
                                               analysisItems="{allFields}"
-                                              showLabel="true"
                                               paddingBottom="5" paddingLeft="5" paddingRight="5"
                                               paddingTop="5"/>
             </mx:Canvas>

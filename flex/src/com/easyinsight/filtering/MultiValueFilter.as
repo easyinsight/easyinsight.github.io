@@ -96,15 +96,11 @@ import mx.controls.Label;
                 checkbox.addEventListener(Event.CHANGE, onChange);
                 addChild(checkbox);
             //}
-            if (_showLabel) {
-                if (labelText == null) {
-                    labelText = new Label();
-                    labelText.text = _analysisItem.display + ":";
-                }
-                addChild(labelText);
-            } else {
-                this.toolTip = _analysisItem.display + ":";
-            }
+
+            labelText = new Label();
+            labelText.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+            addChild(labelText);
+
             if (editButton == null) {
                 editButton = new Button();
                 editButton.addEventListener(MouseEvent.CLICK, edit);

@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
-         xmlns:filtering="com.easyinsight.filtering.*" xmlns:analysis="com.easyinsight.analysis.*"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+         xmlns:filtering="com.easyinsight.filtering.*"
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%"
          horizontalAlign="center" backgroundColor="#000000" creationComplete="setup()">
     <mx:Script><![CDATA[
@@ -19,7 +19,6 @@
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
-        import mx.controls.Alert;
         import mx.managers.BrowserManager;
         import mx.utils.URLUtil;
 
@@ -313,7 +312,6 @@
                                               borderThickness="1" backgroundColor="#ffffff"
                                               backgroundAlpha=".1" feedID="{feedID}"
                                               analysisItems="{allFields}"
-                                              showLabel="true"
                                               paddingBottom="5" paddingLeft="5" paddingRight="5"
                                               paddingTop="5" updatedTransforms="onFilterChange(event)"/>
                 <!--<analysis:ListDropAreaGrouping id="listArea" unlimited="true" analysisItemUpdate="onFilterChange(event)"

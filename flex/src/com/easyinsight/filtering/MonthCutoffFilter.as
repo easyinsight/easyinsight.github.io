@@ -87,13 +87,9 @@ public class MonthCutoffFilter extends HBox implements IFilter {
             addChild(checkbox);
         }
 
-        if (_showLabel) {
-            var label:Label = new Label();
-            label.text = analysisItem.display + ":";
-            addChild(label);
-        } else {
-            toolTip = analysisItem.display;
-        }
+        var label:Label = new Label();
+        label.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+        addChild(label);
 
         comboBox = new SmartComboBox();
         comboBox.addEventListener(Event.CHANGE, onDataChange);

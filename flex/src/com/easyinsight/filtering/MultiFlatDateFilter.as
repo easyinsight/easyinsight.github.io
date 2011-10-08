@@ -7,7 +7,6 @@ import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
-import flash.geom.Point;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
@@ -32,19 +31,8 @@ import mx.managers.PopUpManager;
         _loadingFromReport = value;
     }
 
-        private var _reportID:int;
-
-    private var _dashboardID:int;
-
         private var _feedID:int;
 
-    public function set reportID(value:int):void {
-        _reportID = value;
-    }
-
-    public function set dashboardID(value:int):void {
-        _dashboardID = value;
-    }
 		
 		[Bindable]
         [Embed(source="../../../../assets/navigate_cross.png")]
@@ -54,12 +42,10 @@ import mx.managers.PopUpManager;
         [Embed(source="../../../../assets/pencil.png")]
         public var editIcon:Class;
 		
-		public function MultiFlatDateFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
+		public function MultiFlatDateFilter(feedID:int, analysisItem:AnalysisItem) {
 			super();
 			this.analysisItem = analysisItem;
             _feedID = feedID;
-            _reportID = reportID;
-            _dashboardID = dashboardID;
             setStyle("verticalAlign", "middle");
 		}
 
@@ -118,15 +104,10 @@ import mx.managers.PopUpManager;
 			if (_filterDefinition == null) {
 				_filterDefinition = new MultiFlatDateFilterDefinition();
 				_filterDefinition.field = analysisItem;
-			} else {
 			}
 
             var label:Label = new Label();
-            if (_filterDefinition.filterName != null && _filterDefinition.filterName != "") {
-                label.text = _filterDefinition.filterName + ":";
-            } else {
-                label.text = analysisItem.display + ":";
-            }
+            label.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
             addChild(label);
 
             var firstValue:int = 11;
@@ -267,12 +248,6 @@ import mx.managers.PopUpManager;
 		public function get filterDefinition():FilterDefinition {
 			return _filterDefinition;
 		}
-
-        private var _showLabel:Boolean;
-
-        public function set showLabel(show:Boolean):void {
-            _showLabel = show;
-        }
 
         public function updateState():Boolean {
             var firstValue:int = 11;

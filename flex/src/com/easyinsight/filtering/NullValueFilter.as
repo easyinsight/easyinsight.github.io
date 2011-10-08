@@ -90,15 +90,11 @@ public class NullValueFilter extends HBox implements IFilter {
                 checkbox.addEventListener(Event.CHANGE, onChange);
                 addChild(checkbox);
             //}
-            if (_showLabel) {
-                if (labelText == null) {
-                    labelText = new Label();
-                    labelText.text = _filterDefinition.field.display + ":";
-                }
-                addChild(labelText);
-            } else {
-                this.toolTip = _filterDefinition.field.display + ":";
-            }
+
+            labelText = new Label();
+            labelText.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+            addChild(labelText);
+
             if (_filterEditable) {
                 if (editButton == null) {
                     editButton = new Button();
@@ -141,11 +137,5 @@ public class NullValueFilter extends HBox implements IFilter {
 		public function set filterDefinition(filterDefinition:FilterDefinition):void {
 			_filterDefinition = filterDefinition as LastValueFilterDefinition;
 		}
-
-        private var _showLabel:Boolean;
-
-        public function set showLabel(show:Boolean):void {
-            _showLabel = show;
-        }
 }
 }

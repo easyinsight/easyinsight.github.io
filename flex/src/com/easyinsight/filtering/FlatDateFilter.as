@@ -75,15 +75,9 @@ import mx.rpc.events.ResultEvent;
         }
 
         private function onDataChange(event:Event):void {
-            var year:int = parseInt(comboBox.selectedItem as String);
-            _filterDefinition.value = year;
+            _filterDefinition.value = parseInt(comboBox.selectedItem as String);
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
-
-        private var lowDate:Date;
-
-        private var highDate:Date;
-
 
         override protected function createChildren():void {
             super.createChildren();
@@ -95,13 +89,9 @@ import mx.rpc.events.ResultEvent;
                 addChild(checkbox);
             }
 
-            if (_showLabel) {
-                var label:Label = new Label();
-                label.text = analysisItem.display + ":";
-                addChild(label);
-            } else {
-                toolTip = analysisItem.display;
-            }
+            var label:Label = new Label();
+            label.text = FilterDefinition.getLabel(_filterDefinition, analysisItem) + ":";
+            addChild(label);
 
             comboBox = new ComboBox();
             comboBox.addEventListener(Event.CHANGE, onDataChange);
@@ -124,11 +114,11 @@ import mx.rpc.events.ResultEvent;
 
         private function processMetadata(metadata:AnalysisItemResultMetadata):void {
             var dateMetadata:AnalysisDateDimensionResultMetadata = metadata as AnalysisDateDimensionResultMetadata;
-			this.lowDate = dateMetadata.earliestDate;
+			var lowDate:Date;
             if (lowDate == null) {
                 lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
             }
-			this.highDate = dateMetadata.latestDate;
+			var highDate:Date = dateMetadata.latestDate;
             if (highDate == null) {
                 highDate = new Date();
             }
@@ -229,12 +219,6 @@ import mx.rpc.events.ResultEvent;
 		public function get filterDefinition():FilterDefinition {
 			return _filterDefinition;
 		}
-
-        private var _showLabel:Boolean;
-
-        public function set showLabel(show:Boolean):void {
-            _showLabel = show;
-        }
 
         public function updateState():Boolean {
             var existingYear:String = String(comboBox.selectedItem);

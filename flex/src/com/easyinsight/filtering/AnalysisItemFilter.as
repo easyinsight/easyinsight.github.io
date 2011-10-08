@@ -27,18 +27,6 @@ public class AnalysisItemFilter extends HBox implements IFilter {
 
     private var _filterEnabled:Boolean;
 
-    private var _reportID:int;
-
-    private var _dashboardID:int;
-
-    public function set reportID(value:int):void {
-        _reportID = value;
-    }
-
-    public function set dashboardID(value:int):void {
-        _dashboardID = value;
-    }
-
     [Bindable(event="filterEnabledChanged")]
     public function get filterEnabled():Boolean {
         return _filterEnabled;
@@ -58,12 +46,10 @@ public class AnalysisItemFilter extends HBox implements IFilter {
     [Embed(source="../../../../assets/pencil.png")]
     public var editIcon:Class;
 
-    public function AnalysisItemFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
+    public function AnalysisItemFilter(feedID:int, analysisItem:AnalysisItem) {
         super();
         this._feedID = feedID;
         this._analysisItem = analysisItem;
-        this.reportID = reportID;
-        this.dashboardID = dashboardID;
         setStyle("verticalAlign", "middle");
     }
 
@@ -93,11 +79,6 @@ public class AnalysisItemFilter extends HBox implements IFilter {
         _analysisItem = event.filterDefinition.field;
         comboBox.dataProvider = _filterDefinition.availableItems;
         comboBox.rowCount = Math.min(_filterDefinition.availableItems.length, 15);
-        /*if (event.filterDefinition != this.filterDefinition || !FilterValueDefinition(event.filterDefinition).singleValue || FilterValueDefinition(event.filterDefinition).autoComplete) {
-            dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
-        } else {
-
-        }*/
     }
 
     private function onChange(event:Event):void {
@@ -117,17 +98,10 @@ public class AnalysisItemFilter extends HBox implements IFilter {
             checkbox.addEventListener(Event.CHANGE, onChange);
             addChild(checkbox);
         }
-        if (_showLabel) {
-            var label:Label = new Label();
-            if (_filterDefinition != null && _filterDefinition.filterName != null && _filterDefinition.filterName != "") {
-                label.text = _filterDefinition.filterName + ":";
-            } else {
-                label.text = _analysisItem.display + ":";
-            }
-            addChild(label);
-        } else {
-            toolTip = _analysisItem.display;
-        }
+
+        var label:Label = new Label();
+        label.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+        addChild(label);
         if (comboBox == null) {
             comboBox = new SmartComboBox();
             comboBox.labelField = "display";
@@ -220,12 +194,6 @@ public class AnalysisItemFilter extends HBox implements IFilter {
 
     public function set filterDefinition(filterDefinition:FilterDefinition):void {
         _filterDefinition = filterDefinition as AnalysisItemFilterDefinition;
-    }
-
-    private var _showLabel:Boolean;
-
-    public function set showLabel(show:Boolean):void {
-        _showLabel = show;
     }
 }
 }

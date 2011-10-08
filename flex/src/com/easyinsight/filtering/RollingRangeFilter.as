@@ -103,10 +103,10 @@ public class RollingRangeFilter extends HBox implements IFilter
     }
 
     private function onChange(event:Event):void {
-            var checkbox:CheckBox = event.currentTarget as CheckBox;
-            rollingFilter.enabled = checkbox.selected;
-            dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, rollingFilter, null, this));
-        }
+        var checkbox:CheckBox = event.currentTarget as CheckBox;
+        rollingFilter.enabled = checkbox.selected;
+        dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, rollingFilter, null, this));
+    }
 
     private function onFilterEdit(event:FilterEditEvent):void {
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
@@ -125,13 +125,11 @@ public class RollingRangeFilter extends HBox implements IFilter
                 checkbox.toolTip = "This filter is an intrinsic part of the data source and cannot be disabled.";
             }
         }
-        if (_showLabel) {
-            var label:Label = new Label();
-            label.text = _analysisItem.display + ":";
-            addChild(label);
-        } else {
-            toolTip = _analysisItem.display;
-        }
+
+        var label:Label = new Label();
+        label.text = FilterDefinition.getLabel(rollingFilter, _analysisItem) + ":";
+        addChild(label);
+
         if (comboBox == null) {
             comboBox = new ComboBox();
             comboBox.rowCount = 16;
@@ -218,12 +216,6 @@ public class RollingRangeFilter extends HBox implements IFilter
 
     private function deleteSelf(event:MouseEvent):void {
         dispatchEvent(new FilterDeletionEvent(this));
-    }
-
-    private var _showLabel:Boolean;
-
-    public function set showLabel(show:Boolean):void {
-        _showLabel = show;
     }
 }
 

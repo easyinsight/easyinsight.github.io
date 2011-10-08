@@ -66,10 +66,6 @@ public class OrFilterCanvas extends HBox implements IFilter {
         orContainer.filterEditable = editable;
     }
 
-    public function set showLabel(show:Boolean):void {
-        orContainer.showLabel = show;
-    }
-
     public function set loadingFromReport(loading:Boolean):void {
         orContainer.loadingFromReport = loading;
     }

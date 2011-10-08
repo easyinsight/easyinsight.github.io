@@ -35,8 +35,6 @@ public class ComboBoxFilter extends HBox implements IFilter {
     private var editButton:Button;
     private var _analysisItems:ArrayCollection;
 
-    private var _credentials:Object;
-
     private var _filterEnabled:Boolean;
 
     private var _reportID:int;
@@ -87,10 +85,6 @@ public class ComboBoxFilter extends HBox implements IFilter {
         _filterEditable = editable;
     }
 
-    public function set credentials(value:Object):void {
-        _credentials = value;
-    }
-
     public function set analysisItems(analysisItems:ArrayCollection):void {
         _analysisItems = analysisItems;
     }
@@ -137,6 +131,7 @@ public class ComboBoxFilter extends HBox implements IFilter {
         var hbox:HBox = new HBox();
         hbox.percentHeight = 100;
         hbox.setStyle("verticalAlign", "middle");
+
         if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
             var checkbox:CheckBox = new CheckBox();
             checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
@@ -144,13 +139,11 @@ public class ComboBoxFilter extends HBox implements IFilter {
             checkbox.addEventListener(Event.CHANGE, onChange);
             addChild(checkbox);
         }
-        if (_showLabel) {
-            var label:Label = new Label();
-            label.text = _analysisItem.display + ":";
-            addChild(label);
-        } else {
-            toolTip = _analysisItem.display;
-        }
+
+        var label:Label = new Label();
+        label.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+        addChild(label);
+
         if (comboBox == null) {
             comboBox = new ComboBox();
             comboBox.maxWidth = 300;
@@ -334,7 +327,6 @@ public class ComboBoxFilter extends HBox implements IFilter {
     }
 
     private function gotMetadata(event:ResultEvent):void {
-
         var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
                 AnalysisDimensionResultMetadata;
         processMetadata(analysisDimensionResultMetadata);
@@ -350,12 +342,6 @@ public class ComboBoxFilter extends HBox implements IFilter {
 
     public function set filterDefinition(filterDefinition:FilterDefinition):void {
         _filterDefinition = filterDefinition as FilterValueDefinition;
-    }
-
-    private var _showLabel:Boolean;
-
-    public function set showLabel(show:Boolean):void {
-        _showLabel = show;
     }
 }
 }

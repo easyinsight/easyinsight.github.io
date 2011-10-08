@@ -145,13 +145,11 @@ public class AutoCompleteFilter extends HBox implements IFilter {
         checkbox.addEventListener(Event.CHANGE, onChange);
         addChild(checkbox);
         //}
-        if (_showLabel) {
-            var label:Label = new Label();
-            label.text = _analysisItem.display + ":";
-            addChild(label);
-        } else {
-            toolTip = _analysisItem.display;
-        }
+
+        var label:Label = new Label();
+        label.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+        addChild(label);
+
         if (textInput == null) {
             textInput = new TextInput();
             textInput.maxWidth = 300;
@@ -306,12 +304,6 @@ public class AutoCompleteFilter extends HBox implements IFilter {
 
     public function set filterDefinition(filterDefinition:FilterDefinition):void {
         _filterDefinition = filterDefinition as FilterValueDefinition;
-    }
-
-    private var _showLabel:Boolean;
-
-    public function set showLabel(show:Boolean):void {
-        _showLabel = show;
     }
 }
 }

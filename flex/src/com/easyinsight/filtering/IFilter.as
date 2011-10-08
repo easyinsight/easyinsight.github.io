@@ -10,7 +10,6 @@ package com.easyinsight.filtering
 		function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void;
 		function set analysisItems(analysisItems:ArrayCollection):void;
         function set filterEditable(editable:Boolean):void;
-        function set showLabel(show:Boolean):void;
         function set loadingFromReport(loading:Boolean):void;
 	}
 }
