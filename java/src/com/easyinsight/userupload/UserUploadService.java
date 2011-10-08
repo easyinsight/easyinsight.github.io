@@ -570,7 +570,7 @@ public class UserUploadService {
     }
 
     public CredentialsResponse refreshData(long feedID) {
-        SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
+        SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
         try {
             CredentialsResponse credentialsResponse;
             final IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
@@ -827,11 +827,15 @@ public class UserUploadService {
                             conn.commit();
                             ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, now);
                         } catch (ReportException re) {
-                            conn.rollback();
+                            if (!conn.getAutoCommit()) {
+                                conn.rollback();
+                            }
                             ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault());
                         } catch (Exception e) {
                             LogClass.error(e);
-                            conn.rollback();
+                            if (!conn.getAutoCommit()) {
+                                conn.rollback();
+                            }
                             ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage());
                         } finally {
                             conn.setAutoCommit(true);

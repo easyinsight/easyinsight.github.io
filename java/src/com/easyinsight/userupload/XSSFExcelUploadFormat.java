@@ -138,7 +138,7 @@ public class XSSFExcelUploadFormat extends UploadFormat {
         clearStmt.executeUpdate();
         PreparedStatement insertFormatStmt = conn.prepareStatement("INSERT INTO EXCEL_UPLOAD_FORMAT (FEED_ID, EXCEL_MODEL) VALUES (?, ?)");
         insertFormatStmt.setLong(1, feedID);
-        insertFormatStmt.setInt(2, FileBasedFeedDefinition.HSSF_MODEL);
+        insertFormatStmt.setInt(2, FileBasedFeedDefinition.XSSF_MODEL);
         insertFormatStmt.execute();
     }
 
