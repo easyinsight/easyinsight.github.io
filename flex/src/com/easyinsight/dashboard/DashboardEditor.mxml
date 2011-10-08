@@ -47,6 +47,7 @@
             controls.addItem(new DashboardControl("Grid", DashboardGrid));
             controls.addItem(new DashboardControl("Stack", DashboardStack));
             controls.addItem(new DashboardControl("Image", DashboardImage));
+            //controls.addItem(new DashboardControl("Text", DashboardTextElement));
             this.availableControls = controls;
             if (_dashboardID == 0) {
                 ProgressAlert.alert(this, "Retrieving reports...", null, feedService.searchForSubscribedFeeds, scorecardService.getScorecardDescriptorsForDataSource);
@@ -347,7 +348,6 @@
                                                       borderThickness="1" backgroundColor="#ffffff"
                                                       backgroundAlpha=".1" feedID="{dataSourceID}"
                                                       analysisItems="{allFields}"
-                                                      showLabel="true"
                                                       paddingBottom="5" paddingLeft="5" paddingRight="5"
                                                       paddingTop="5"/>
                     </mx:Canvas>

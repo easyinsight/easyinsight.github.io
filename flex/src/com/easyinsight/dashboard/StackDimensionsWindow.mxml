@@ -155,7 +155,6 @@
                                                   borderThickness="1" backgroundColor="#ffffff"
                                                   backgroundAlpha=".1" feedID="{dataSourceID}"
                                                   analysisItems="{allFields}"
-                                                  showLabel="true"
                                                   paddingBottom="5" paddingLeft="5" paddingRight="5"
                                                   paddingTop="5">
 
