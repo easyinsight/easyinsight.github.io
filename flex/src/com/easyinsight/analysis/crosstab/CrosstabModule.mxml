@@ -31,20 +31,11 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisMeasure;
-        import com.easyinsight.analysis.Cube;
         import com.easyinsight.analysis.CustomChangeEvent;
-        import com.easyinsight.analysis.crosstab.CrosstabMapWrapper;
-        import com.easyinsight.analysis.crosstab.CrosstabValue;
-        import com.easyinsight.filtering.FilterRawData;
 
         import com.easyinsight.pseudocontext.PseudoContextWindow;
-
-        import flash.text.TextLineMetrics;
-
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
-        import mx.controls.advancedDataGridClasses.AdvancedDataGridRendererProvider;
         import mx.events.ListEvent;
         import mx.formatters.Formatter;
         import mx.managers.PopUpManager;
