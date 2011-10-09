@@ -107,6 +107,8 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                     Node node = nodes.get(i);
                     String idString = node.query("id/text()").get(0).getValue();
                     String id = idString.split("/")[7];
+                    String name = node.query("content/Campaign/Name/text()").get(0).getValue();
+                    System.out.println("campaign name = " + name);
                     String dateString = queryField(node, "content/Campaign/Date/text()");
                     if (dateString != null) {
                         Date date = DATE_FORMAT.parse(dateString);
@@ -118,7 +120,8 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                     }
 
                     try {
-                        String eventsURL = "https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns/" + id + "/events?pageSize=200";
+                        String eventsURL = "https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns/" + id + "/events/?pageSize=200";
+                        System.out.println(eventsURL);
                         Document eventsDoc = query(eventsURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
                         Nodes eventNodes = eventsDoc.query("/service/workspace/collection");
                         for (int j = 0; j < eventNodes.size(); j++) {
@@ -221,7 +224,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                             } while (hasMoreEvents);
                         }
                     } catch (Exception e) {
-                        LogClass.debug(e.getMessage());
+                        LogClass.info(e.getMessage());
                     }
 
                 }
