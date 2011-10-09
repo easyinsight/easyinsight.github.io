@@ -588,12 +588,12 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             suggestions.add(new IntentionSuggestion("Help Me Set Up a Case Report",
                     "This action will configure your report to connect Cases to both Contacts and Companies. It will also add a filter to exclude any records without a matching case name.",
                     IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_CASE_SETUP, IntentionSuggestion.OTHER));
-            suggestions.add(new IntentionSuggestion("Help Me Set Up an Activity Report",
-                    "This action will add four new custom fields representing the various Activity concepts from Highrise. Notes from your Contacts, Companies, Cases, and Deals, your Emails, and your Tasks will be combined into Activity Body, Activity Type, Activity Author, and Activity Date.",
-                    IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_ACTIVITY_SETUP, IntentionSuggestion.OTHER));
             suggestions.add(new IntentionSuggestion("Help Me Set Up a Task Report",
                     "This action will filter out any records not related to Tasks and add a couple of new custom fields to help you do additional reporting against Tasks.",
                     IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_TASK_SETUP, IntentionSuggestion.OTHER));
+            suggestions.add(new IntentionSuggestion("Help Me Set Up an Activity Report",
+                    "This action will add four new custom fields representing the various Activity concepts from Highrise. Notes from your Contacts, Companies, Cases, and Deals, your Emails, and your Tasks will be combined into Activity Body, Activity Type, Activity Author, and Activity Date.",
+                    IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_ACTIVITY_SETUP, IntentionSuggestion.OTHER));
         }
         Set<AnalysisItem> analysisItems = report.getAllAnalysisItems();
         for (AnalysisItem analysisItem : analysisItems) {
