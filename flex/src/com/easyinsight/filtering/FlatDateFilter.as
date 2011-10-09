@@ -90,7 +90,7 @@ import mx.rpc.events.ResultEvent;
             }
 
             var label:Label = new Label();
-            label.text = FilterDefinition.getLabel(_filterDefinition, analysisItem) + ":";
+            label.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
             addChild(label);
 
             comboBox = new ComboBox();
@@ -114,7 +114,7 @@ import mx.rpc.events.ResultEvent;
 
         private function processMetadata(metadata:AnalysisItemResultMetadata):void {
             var dateMetadata:AnalysisDateDimensionResultMetadata = metadata as AnalysisDateDimensionResultMetadata;
-			var lowDate:Date;
+			var lowDate:Date = dateMetadata.earliestDate;
             if (lowDate == null) {
                 lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
             }
