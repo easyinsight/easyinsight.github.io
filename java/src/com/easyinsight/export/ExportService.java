@@ -733,7 +733,7 @@ public class ExportService {
                 sb.append("<td>");
                 Value measureValue = (Value) map.get(columnName);
                 String text;
-                if (measureValue.type() == Value.NUMBER) {
+                if (measureValue != null && measureValue.type() == Value.NUMBER) {
                     text = ExportService.createValue(exportMetadata.dateFormat, analysisMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol);
                 } else {
                     text = "";
