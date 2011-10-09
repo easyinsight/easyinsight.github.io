@@ -127,7 +127,7 @@ public class RollingRangeFilter extends HBox implements IFilter
         }
 
         var label:Label = new Label();
-        label.text = FilterDefinition.getLabel(rollingFilter, _analysisItem) + ":";
+        label.text = FilterDefinition.getLabel(rollingFilter, _analysisItem);
         addChild(label);
 
         if (comboBox == null) {
