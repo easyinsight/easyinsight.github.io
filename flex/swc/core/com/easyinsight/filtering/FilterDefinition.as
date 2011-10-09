@@ -50,14 +50,14 @@ import flash.events.EventDispatcher;
             if (field == null) {
                 return "";
             } else {
-                return field.display;
+                return field.display + ":";
             }
         }
         if (filterDefinition.filterName != null && filterDefinition.filterName != "") {
-            return filterDefinition.filterName;
+            return filterDefinition.filterName + ":";
         }
         if (filterDefinition.field != null) {
-            return filterDefinition.field.display;
+            return filterDefinition.field.display + ":";
         }
         return "";
     }
