@@ -40,7 +40,6 @@
         import mx.collections.Sort;
         import mx.events.FlexEvent;
         import mx.formatters.Formatter;
-        import mx.graphics.BitmapFill;
         import mx.graphics.IFill;
         import mx.managers.PopUpManager;
 
@@ -76,14 +75,8 @@
 
         private var yAxisTitleRendererFactory:ClassFactory;
 
-        private var bgFills:Array;
-
         private var sortable:Boolean = true;
         private var selectable:Boolean = true;
-
-        [Bindable]
-        [Embed(source="../../../../../../../assets/water4.JPG")]
-        private var standardFill:Class;
 
         [Bindable]
         public function get yField():String {
@@ -93,18 +86,6 @@
         public function set yField(val:String):void {
             _yField = val;
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
-        }
-
-        override protected function createChildren():void {
-            super.createChildren();
-            bgFills = [];
-            for (var i:int = 0; i < 15; i++) {
-                var bgFill:BitmapFill = new BitmapFill();
-                bgFill.source = standardFill;
-                bgFill.originX = Math.random() * 60;
-                bgFill.originY = Math.random() * 60;
-                bgFills.push(bgFill);
-            }
         }
 
         private function onClick(event:ChartItemEvent):void {
