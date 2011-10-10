@@ -9,7 +9,9 @@ package com.easyinsight.framework {
 
 import com.easyinsight.analysis.LoadingModuleDisplay;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartModule;
+import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartModule;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartModule;
+import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartModule;
 import com.easyinsight.analysis.crosstab.CrosstabModule;
 import com.easyinsight.analysis.list.ListModule;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListModule;
@@ -86,6 +88,10 @@ public class ReportModuleLoader extends EventDispatcher {
                 return new ListModule();
             } else if (moduleName == "CrosstabModule.swf") {
                 return new CrosstabModule();
+            } else if (moduleName == "StackedColumnChartModule.swf") {
+                return new StackedColumnChartModule();
+            } else if (moduleName == "StackedBarChartModule.swf") {
+                return new StackedBarChartModule();
             }
         }
         return moduleInfo.factory.create();

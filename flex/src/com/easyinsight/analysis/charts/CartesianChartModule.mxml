@@ -62,10 +62,6 @@
         private var sortable:Boolean = true;
         private var selectable:Boolean = true;
 
-        override protected function createChildren():void {
-            super.createChildren();
-        }
-
         private function onClick(event:ChartItemEvent):void {
 
             var window:PseudoContextWindow = new PseudoContextWindow(dimensionAxisItem, passThrough, this, chartDef, event.hitData.item);
