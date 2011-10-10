@@ -17,7 +17,7 @@ public class FillProvider {
     public function FillProvider() {
     }
 
-    public static function getColors(scheme:String, defaults:Array, angle:int = 0):Array {
+    public static function getColors(scheme:String, angle:int = 0):Array {
         var array:Array;
         if (scheme == FillProvider.highContrast) {
             array = FillProvider.createSAPColors();
@@ -26,16 +26,12 @@ public class FillProvider {
         } else if (scheme == FillProvider.radialGradients) {
             array = FillProvider.createRadialGradients();
         } else {
-            if (defaults == null) {
-                array = FillProvider.createLinearGradients(angle);
-            } else {
-                array = defaults;
-            }
+            array = FillProvider.createLinearGradients(angle);
         }
         return array;
     }
 
-    public static function getColor(scheme:String, defaults:Array, index:int, angle:int = 0):IFill {
+    public static function getColor(scheme:String, index:int, angle:int = 0):IFill {
         var array:Array;
         if (scheme == FillProvider.highContrast) {
             array = FillProvider.createSAPColors();
@@ -44,11 +40,7 @@ public class FillProvider {
         } else if (scheme == FillProvider.radialGradients) {
             array = FillProvider.createRadialGradients();
         } else {
-            if (defaults == null) {
-                array = FillProvider.createLinearGradients(angle);
-            } else {
-                array = defaults;
-            }
+            array = FillProvider.createLinearGradients(angle);
         }
         if (array.length == 1) {
             return array[0];
