@@ -45,7 +45,10 @@ public class ReportModuleLoader extends EventDispatcher {
     private var moduleName:String;
 
     public function loadReportRenderer(_reportRendererModule:String, container:Container):void {
-        if (_reportRendererModule == "VerticalList.swf" || _reportRendererModule == "CombinedVerticalList.swf") {
+        if (_reportRendererModule == "VerticalList.swf" || _reportRendererModule == "CombinedVerticalList.swf" ||
+                _reportRendererModule == "CrosstabModule.swf" || _reportRendererModule == "ColumnChartModule.swf" ||
+                _reportRendererModule == "BarChartModule.swf" || _reportRendererModule == "StackedColumnChartModule.swf" ||
+                _reportRendererModule == "StackedBarChartModule.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
