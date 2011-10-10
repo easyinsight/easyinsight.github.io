@@ -8,6 +8,9 @@
 package com.easyinsight.framework {
 
 import com.easyinsight.analysis.LoadingModuleDisplay;
+import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartModule;
+import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartModule;
+import com.easyinsight.analysis.crosstab.CrosstabModule;
 import com.easyinsight.analysis.list.ListModule;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListModule;
 import com.easyinsight.analysis.verticallist.VerticalListModule;
@@ -75,6 +78,14 @@ public class ReportModuleLoader extends EventDispatcher {
                 return new VerticalListModule();
             } else if (moduleName == "CombinedVerticalList.swf") {
                 return new CombinedVerticalListModule();
+            } else if (moduleName == "ColumnChartModule.swf") {
+                return new ColumnChartModule();
+            } else if (moduleName == "BarChartModule.swf") {
+                return new BarChartModule();
+            } else if (moduleName == "ListModule.swf") {
+                return new ListModule();
+            } else if (moduleName == "CrosstabModule.swf") {
+                return new CrosstabModule();
             }
         }
         return moduleInfo.factory.create();

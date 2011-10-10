@@ -7,13 +7,13 @@
             <mx:RemoveChild target="{legend}"/>
         </mx:State>
     </mx:states>
-    <mx:Style>
+    <!--<mx:Style>
         LegendItem {
             fontSize: 12;
             fontFamily: "Lucida Grande";
             fontWeight: normal;
         }
-    </mx:Style>
+    </mx:Style>-->
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
@@ -35,9 +35,9 @@
         import mx.charts.chartClasses.Series;
         import mx.charts.events.ChartItemEvent;
         import mx.collections.ArrayCollection;
-        import mx.controls.ComboBox;
         import mx.formatters.Formatter;
-        import mx.graphics.BitmapFill;
+        import mx.graphics.GradientEntry;
+        import mx.graphics.LinearGradient;
         import mx.graphics.SolidColor;
         import mx.managers.PopUpManager;
 
@@ -59,20 +59,11 @@
         [Bindable]
         private var legend:Legend;
 
-        private var bgFills:Array;
-
         private var sortable:Boolean = true;
         private var selectable:Boolean = true;
 
-        [Bindable]
-        [Embed(source="../../../../../assets/water4.JPG")]
-        private var standardFill:Class;
-
         override protected function createChildren():void {
             super.createChildren();
-            var bgFill:BitmapFill = new BitmapFill();
-            bgFill.source = standardFill;
-            bgFills = [ bgFill ];
         }
 
         private function onClick(event:ChartItemEvent):void {
@@ -171,7 +162,7 @@
 
         private function applyGeneralStyling():void {
             canvas.setStyle("backgroundAlpha", chartDef.backgroundAlpha);
-            chart.setStyle("fontFamily", chartDef.fontName);
+            chart.setStyle("fontFamily", "Lucida Grande");
             chart.setStyle("fontSize", chartDef.fontSize);
 
             /*var style:CSSStyleDeclaration = new CSSStyleDeclaration(".chartAxis");
@@ -252,11 +243,19 @@
             graphData = dataSet;
         }
 
+        protected function useGradientColor():Boolean {
+            return false;
+        }
+
         protected function useChartColor():Boolean {
             return false;
         }
 
         protected function getChartColor():uint {
+            return 0;
+        }
+
+        protected function getGradientColor():uint {
             return 0;
         }
 
@@ -274,13 +273,18 @@
                 var measure:AnalysisMeasure = getMeasures().getItemAt(j) as AnalysisMeasure;
                 var fills:Array;
                 if (getMeasures().length == 1) {
-                    if (useChartColor()) {
+                    if (useGradientColor()) {
+                        var gradient:LinearGradient = new LinearGradient();
+                        gradient.angle = 90;
+                        gradient.entries = [ new GradientEntry(getChartColor(), 0.0), new GradientEntry(getGradientColor(), 0.95)];
+                        fills = [ gradient ];
+                    } else if (useChartColor()) {
                         fills = [new SolidColor(getChartColor())];
                     } else {
-                        fills = FillProvider.getColors(getColorScheme(), bgFills, getAngle());
+                        fills = FillProvider.getColors(getColorScheme(), getAngle());
                     }
                 } else {
-                    fills = [FillProvider.getColor(getColorScheme(), bgFills, j, getAngle())];
+                    fills = [FillProvider.getColor(getColorScheme(), j, getAngle())];
                 }
                 mySeries[j].setStyle("fills", fills);
 

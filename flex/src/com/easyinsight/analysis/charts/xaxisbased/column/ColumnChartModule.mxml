@@ -38,12 +38,20 @@
             return new ColumnChart();
         }
 
+        override protected function useGradientColor():Boolean {
+            return ColumnChartDefinition(chartDef).gradientColor > 0;
+        }
+
         override protected function useChartColor():Boolean {
             return ColumnChartDefinition(chartDef).useChartColor;
         }
 
         override protected function getChartColor():uint {
             return ColumnChartDefinition(chartDef).chartColor;
+        }
+
+        override protected function getGradientColor():uint {
+            return ColumnChartDefinition(chartDef).gradientColor;
         }
 
         override protected function getColorScheme():String {
