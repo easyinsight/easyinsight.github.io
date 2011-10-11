@@ -81,7 +81,11 @@
 
         private var registry:TORegistry;
 
+        [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf",fontName="Lucida Grande", fontStyle="normal")]
+        private var myNormalLucida:Class;
+
         private function startWorkspace():void {
+            Font.registerFont(myNormalLucida);
             Security.allowInsecureDomain("maps.googleapis.com");
             PerspectiveFactoryHolder.factory = new PerspectiveFactory();
             Constants.setup();
