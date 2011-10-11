@@ -7,3 +7,5 @@ alter table analysis add marmotscript text default null;
 alter table data_feed add marmotscript text default null;
 
 alter table filter add marmotscript text default null;
+
+alter table dashboard add marmotscript text default null;
