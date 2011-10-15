@@ -103,7 +103,12 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 dataSources.add(definition);
             }
         }
+        sortSources(dataSources);
         return dataSources;
+    }
+
+    protected void sortSources(List<IServerDataSourceDefinition> children) {
+
     }
 
     public List<CompositeFeedConnection> obtainChildConnections() throws SQLException {

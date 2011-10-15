@@ -73,6 +73,21 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         }
     }
 
+    protected void sortSources(List<IServerDataSourceDefinition> children) {
+        Collections.sort(children, new Comparator<IServerDataSourceDefinition>() {
+
+            public int compare(IServerDataSourceDefinition feedDefinition, IServerDataSourceDefinition feedDefinition1) {
+                if (feedDefinition.getFeedType().getType() == FeedType.HIGHRISE_CONTACTS.getType()) {
+                    return -1;
+                }
+                if (feedDefinition1.getFeedType().getType() == FeedType.HIGHRISE_CONTACTS.getType()) {
+                    return 1;
+                }
+                return 0;
+            }
+        });
+    }
+
     public HighRiseCompositeSource() {
         setFeedName("Highrise");
     }
@@ -145,9 +160,17 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private transient HighriseRecordingsCache highriseRecordingsCache;
     private transient HighriseCompanyCache highriseCompanyCache;
     private transient HighriseCustomFieldsCache customFieldsCache;
+    private transient Map<String, String> contactToCompanyCache;
 
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
+    }
+
+    public Map<String, String> getContactToCompanyCache() {
+        if (contactToCompanyCache == null) {
+            contactToCompanyCache = new HashMap<String, String>();
+        }
+        return contactToCompanyCache;
     }
 
     public HighriseCache getOrCreateCache(HttpClient httpClient) throws HighRiseLoginException, ParsingException {
@@ -523,6 +546,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         highriseCache = null;
         highriseCompanyCache = null;
         highriseRecordingsCache = null;
+        contactToCompanyCache = null;
     }
 
     private boolean isContactLinkable(AnalysisItem analysisItem) {

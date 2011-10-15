@@ -128,6 +128,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
 
         Map<String, String> categoryCache = new HashMap<String, String>();
         try {
+            HighriseCompanyCache highriseCompanyCache = highRiseCompositeSource.getOrCreateCompanyCache(client, lastRefreshDate);
             HighriseCache highriseCache = highRiseCompositeSource.getOrCreateCache(client);
             //do {
             Document userDoc = runRestRequest("/deal_categories.xml", client, builder, url, true, false, parentDefinition);
@@ -200,8 +201,12 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                     row.addValue(COUNT, new NumericValue(1));
 
                     String partyID = queryField(currDeal, "party-id/text()");
-                    row.addValue(COMPANY_ID, partyID);
-                    row.addValue(CONTACT_ID, partyID);
+                    if (highriseCompanyCache.getCompanyIDs().contains(partyID)) {
+                        row.addValue(COMPANY_ID, partyID);
+                    } else {
+                        row.addValue(CONTACT_ID, partyID);
+                        row.addValue(COMPANY_ID, highRiseCompositeSource.getContactToCompanyCache().get(partyID));
+                    }
                     String createdAt = queryField(currDeal, "created-at/text()");
                     row.addValue(CREATED_AT, new DateValue(deadlineFormat.parse(createdAt)));
                     String statusChangedOn = queryField(currDeal, "status-changed-on/text()");

@@ -197,6 +197,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
 
                     String companyID = queryField(companyNode, "company-id/text()");
                     row.addValue(COMPANY_ID, companyID);
+                    highRiseCompositeSource.getContactToCompanyCache().put(id, companyID);
                     Date createdAt = deadlineFormat.parse(queryField(companyNode, "created-at/text()"));
                     row.addValue(CREATED_AT, new DateValue(createdAt));
                     row.addValue(COUNT, new NumericValue(1));
