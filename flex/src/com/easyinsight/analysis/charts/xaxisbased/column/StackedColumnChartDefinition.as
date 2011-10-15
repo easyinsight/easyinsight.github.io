@@ -6,6 +6,7 @@ import com.easyinsight.analysis.CheckBoxReportFormItem;
 import com.easyinsight.analysis.ColorReportFormItem;
 import com.easyinsight.analysis.ComboBoxReportFormItem;
 import com.easyinsight.analysis.FillProvider;
+import com.easyinsight.analysis.Value;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisDefinition;
 import com.easyinsight.analysis.AnalysisDefinition;
@@ -59,7 +60,8 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
         var results:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < dataSet.length; i++) {
             var object:Object = dataSet.getItemAt(i);
-            var xVal:String = object[xaxis.qualifiedName()];
+            var xValVal:Value = object[xaxis.qualifiedName()];
+            var xVal:String = xValVal.toString();
             if (xVal == null ||
                     xVal == "") {
                 xVal = "(No Value)";
@@ -71,11 +73,18 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
                 map[xVal] = newObject;
                 results.addItem(newObject);
             }
-            var dimensionValue:String = object[stackItem.qualifiedName()];
+            var stackVal:Value = object[stackItem.qualifiedName()];
+            var dimensionValue:String = stackVal.toString();
             if (dimensionValue == null || dimensionValue == "") {
                 dimensionValue = "(No Value)";
             }
             newObject[xaxis.qualifiedName()] = xVal;
+            if (stackVal.links != null) {
+                for (var linkKey:String in stackVal.links) {
+                    newObject[dimensionValue + linkKey + "_link"] = stackVal.links[linkKey];
+                }
+            }
+            newObject[stackItem.qualifiedName()] = dimensionValue;
             newObject[dimensionValue] = object[measures.getItemAt(0).qualifiedName()];
             if (!uniques.contains(dimensionValue)) {
                 uniques.addItem(dimensionValue);

@@ -20,7 +20,6 @@
 
 
         import com.easyinsight.filtering.FilterRawData;
-        import com.easyinsight.pseudocontext.PseudoContextWindow;
 
 
         import mx.binding.utils.BindingUtils;
@@ -28,12 +27,10 @@
         import mx.charts.CategoryAxis;
         import mx.charts.ChartItem;
         import mx.charts.ColumnChart;
-        import mx.charts.HitData;
         import mx.charts.Legend;
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
-        import mx.charts.events.ChartItemEvent;
         import mx.charts.series.ColumnSeries;
         import mx.charts.series.ColumnSet;
         import mx.charts.series.items.ColumnSeriesItem;
@@ -42,7 +39,6 @@
         import mx.events.FlexEvent;
         import mx.formatters.Formatter;
         import mx.graphics.IFill;
-        import mx.managers.PopUpManager;
 
         [Bindable]
         private var graphData:ArrayCollection = new ArrayCollection();
@@ -90,29 +86,12 @@
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
         }
 
-        private function onClick(event:ChartItemEvent):void {
-
-            var window:PseudoContextWindow = new PseudoContextWindow(xAxisItem, passThrough, this, columnChartDef, event.hitData.item);
-            PopUpManager.addPopUp(window, this);
-            window.x = event.stageX + 5;
-            window.y = event.stageY + 5;
-        }
-
-        private function passThrough(event:Event):void {
-            dispatchEvent(event);
-        }
-
-        private function formatDataTip(hd:HitData):String {
-            return "Blah";
-        }
-
         private function createChart():void {
             if (columnChart == null) {
 
                 // define the chart itself
 
                 columnChart = new ColumnChart();
-                columnChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
                 columnChart.percentHeight = 100;
                 columnChart.percentWidth = 100;
                 columnChart.showDataTips = true;
@@ -189,6 +168,8 @@
 
         private var columnChartDef:StackedColumnChartDefinition;
 
+        private var stackItem:AnalysisItem;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             columnChartDef = analysisDefinition as StackedColumnChartDefinition;
 
@@ -220,6 +201,8 @@
                     currentState = "hideLegend";
                 }
 
+                stackItem = columnChartDef.stackItem;
+
                 var mySeries:Array = new Array();
 
                 var uniques:ArrayCollection = new ArrayCollection();
@@ -232,6 +215,9 @@
                     var key:String = uniques.getItemAt(i) as String;
 
                     var uniqueLineSeries:ColumnSeries = new ColumnSeries();
+                    var cFactory:ClassFactory = new ClassFactory(ContextMenuBoxItemRenderer);
+                    cFactory.properties = { stackItem: stackItem, seriesField: key};
+                    uniqueLineSeries.setStyle("itemRenderer", cFactory);
                     uniqueLineSeries.setStyle("fill", FillProvider.getColor(columnChartDef.colorScheme, i));
                     //uniqueLineSeries.xField = columnChartDef.xaxis.qualifiedName();
                     if (key == null || key == "") {
@@ -256,6 +242,8 @@
                     xAxisItem = newXAxisItem;
                 }
 
+
+
                 var newYAxisItem:AnalysisItem = columnChartDef.measures.getItemAt(0) as AnalysisItem;
                 if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
                     yAxisItem = newYAxisItem;
@@ -263,22 +251,16 @@
 
                 xAxis.categoryField = newXAxisItem.qualifiedName();
                 var newXField:String = newXAxisItem.qualifiedName();
-                if (newXField != xField) {
-
-                    //columnSeries.xField = xField;
-                }
 
                 var newXAxisTitle:String = newXAxisItem.display;
                 if (newXAxisTitle != xAxisTitle) {
                     xAxisTitle = newXAxisTitle;
                     xAxis.title = xAxisTitle;
-                    //columnSeries.displayName = xAxisTitle;
                 }
 
                 var newYField:String = newYAxisItem.qualifiedName();
                 if (newYField != yField) {
                     yField = newYField;
-                    //columnSeries.yField = yField;
                 }
 
                 var newYAxisTitle:String = newYAxisItem.display;
@@ -287,10 +269,7 @@
                     yAxis.title = yAxisTitle;
                 }
 
-                //columnSeries.setStyle("itemRenderer", new CustomChartRendererFactory(selectedFill, rolloverFill, xAxisItem));
                 columnChart.dataProvider = dataObjs;
-                //columnSeries.dataProvider = dataSet;
-                //xAxis.dataProvider = dataSet;
             } else {
                 if (columnChartDef.measures != null && columnChartDef.measures.length > 0 && columnChartDef.xaxis != null) stackIndex = 2;
                 else stackIndex = 1;

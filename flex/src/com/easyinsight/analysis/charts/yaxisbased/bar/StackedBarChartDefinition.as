@@ -2,6 +2,7 @@ package com.easyinsight.analysis.charts.yaxisbased.bar {
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.ChartDefinition;
+import com.easyinsight.analysis.Value;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.AnalysisDefinition;
 
@@ -56,7 +57,8 @@ public class StackedBarChartDefinition extends YAxisDefinition{
         var results:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < dataSet.length; i++) {
             var object:Object = dataSet.getItemAt(i);
-            var xVal:String = object[yaxis.qualifiedName()];
+            var xValVal:Value = object[yaxis.qualifiedName()];
+            var xVal:String = xValVal.toString();
             if (xVal == null ||
                     xVal == "") {
                 xVal = "(No Value)";
@@ -68,9 +70,15 @@ public class StackedBarChartDefinition extends YAxisDefinition{
                 map[xVal] = newObject;
                 results.addItem(newObject);
             }
-            var dimensionValue:String = object[stackItem.qualifiedName()];
+            var stackVal:Value = object[stackItem.qualifiedName()];
+            var dimensionValue:String = stackVal.toString();
             if (dimensionValue == null || dimensionValue == "") {
                 dimensionValue = "(No Value)";
+            }
+            if (stackVal.links != null) {
+                for (var linkKey:String in stackVal.links) {
+                    newObject[dimensionValue + linkKey + "_link"] = stackVal.links[linkKey];
+                }
             }
             newObject[yaxis.qualifiedName()] = xVal;
             newObject[dimensionValue] = object[measures.getItemAt(0).qualifiedName()];

@@ -17,10 +17,10 @@
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.SortFunctionFactory;
+        import com.easyinsight.analysis.charts.xaxisbased.column.ContextMenuBoxItemRenderer;
 
 
         import com.easyinsight.filtering.FilterRawData;
-        import com.easyinsight.pseudocontext.PseudoContextWindow;
 
 
         import mx.binding.utils.BindingUtils;
@@ -32,7 +32,6 @@
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
-        import mx.charts.events.ChartItemEvent;
         import mx.charts.series.BarSeries;
         import mx.charts.series.BarSet;
         import mx.charts.series.items.BarSeriesItem;
@@ -41,7 +40,6 @@
         import mx.events.FlexEvent;
         import mx.formatters.Formatter;
         import mx.graphics.IFill;
-        import mx.managers.PopUpManager;
 
         [Bindable]
         private var graphData:ArrayCollection = new ArrayCollection();
@@ -88,20 +86,6 @@
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
         }
 
-        private function onClick(event:ChartItemEvent):void {
-            if (event.shiftKey) {
-
-                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, barChartDef, event.hitData.item);
-                PopUpManager.addPopUp(window, this);
-                window.x = event.stageX + 5;
-                window.y = event.stageY + 5;
-            }
-        }
-
-        private function passThrough(event:Event):void {
-            dispatchEvent(event);
-        }
-
         private function createChart():void {
             if (barChart == null) {
 
@@ -110,14 +94,7 @@
                 barChart = new BarChart();
                 barChart.percentHeight = 100;
                 barChart.percentWidth = 100;
-                barChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
-                /*barChart.addEventListener(ChartItemEvent.ITEM_CLICK, drilldown);
-                 barChart.addEventListener(ChartDrilldownEvent.DRILLDOWN, drilldownEvent);
-                 barChart.addEventListener(ChartDrilldownEvent.ROLLUP, drilldownEvent);*/
                 barChart.showDataTips = true;
-                /*if (selectable) {
-                 barChart.selectionMode = "multiple";
-                 }*/
                 barChart.dataProvider = graphData;
 
                 // define the X axis
@@ -209,6 +186,7 @@
                 createChart();
 
                 barChart.setStyle("fontFamily", "Lucida Grande");
+                barChart.setStyle("fontSize", barChartDef.fontSize);
 
                 if (barChartDef.showLegend) {
                     currentState = "";
@@ -228,6 +206,9 @@
                     var key:String = uniques.getItemAt(i) as String;
 
                     var uniqueLineSeries:BarSeries = new BarSeries();
+                    var cFactory:ClassFactory = new ClassFactory(ContextMenuBoxItemRenderer);
+                    cFactory.properties = { stackItem: barChartDef.stackItem, seriesField: key};
+                    uniqueLineSeries.setStyle("itemRenderer", cFactory);
                     uniqueLineSeries.setStyle("fill", FillProvider.getColor(barChartDef.colorScheme, i, 90));
                     if (key == null || key == "") {
                         key = "[ No Value ]";
