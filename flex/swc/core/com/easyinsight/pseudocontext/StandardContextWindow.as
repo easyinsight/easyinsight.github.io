@@ -38,14 +38,22 @@ public class StandardContextWindow {
     private var passthroughFunction:Function;
     private var passthroughObject:InteractiveObject;
     private var data:Object;
+    private var filterDefinitions:ArrayCollection;
+    private var copyText:String;
+
+    private var altKey:String;
 
     public function StandardContextWindow(analysisItem:AnalysisItem, passthroughFunction:Function, passthroughObject:InteractiveObject, data:Object,
-                                          includeDrills:Boolean = true) {
+                                          includeDrills:Boolean = true, filterDefinitions:ArrayCollection = null, copyText:String = null, additionalOptions:Array = null,
+            altKey:String = null) {
         super();
         this.analysisItem = analysisItem;
         this.passthroughFunction = passthroughFunction;
         this.passthroughObject = passthroughObject;
+        this.filterDefinitions = filterDefinitions;
         this.data = data;
+        this.copyText = copyText;
+        this.altKey = altKey;
         items = [];
         if (analysisItem is AnalysisHierarchyItem) {
             var hierarchy:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
@@ -94,6 +102,7 @@ public class StandardContextWindow {
                 items.push(defineDateLink(AnalysisItemTypes.WEEK_LEVEL, "Week of Year"));
             }
         }
+
         var copyItem:ContextMenuItem = new ContextMenuItem("Copy Value");
         copyItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copyValue);
         items.push(copyItem);
@@ -102,11 +111,18 @@ public class StandardContextWindow {
                 composeLink(link);
             }
         }
+        if (additionalOptions != null) {
+            for each (var additionalItem:ContextMenuItem in additionalOptions) {
+                items.push(additionalItem);
+            }
+        }
         var menu:ContextMenu = new ContextMenu();
         menu.hideBuiltInItems();
         menu.customItems = items;
         passthroughObject.contextMenu = menu;
     }
+
+
 
     private function defineDateLink(targetLevel:int, label:String):ContextMenuItem {
         var item:ContextMenuItem = new ContextMenuItem(label);
@@ -123,8 +139,8 @@ public class StandardContextWindow {
             var url:URLLink = link as URLLink;
             var urlContextItem:ContextMenuItem = new ContextMenuItem(url.label);
             urlContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-
-                var url:String = data[link.label + "_link"];
+                var key:String = altKey != null ? altKey : "";
+                var url:String = data[key + link.label + "_link"];
                 navigateToURL(new URLRequest(url), "_blank");
             });
             items.push(urlContextItem);
@@ -141,13 +157,22 @@ public class StandardContextWindow {
     }
 
     private function onDrill(event:DrillThroughEvent):void {
-        var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
-        filterDefinition.field = analysisItem;
-        filterDefinition.singleValue = true;
-        filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
-        filterDefinition.enabled = true;
-        filterDefinition.inclusive = true;
-        var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);
+        var filters:ArrayCollection;
+        if (filterDefinitions == null) {
+            if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
+                filterDefinition.field = analysisItem;
+                filterDefinition.singleValue = true;
+                filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
+                filterDefinition.enabled = true;
+                filterDefinition.inclusive = true;
+                filters = new ArrayCollection([ filterDefinition ]);
+            } else {
+                filters = new ArrayCollection();
+            }
+        } else {
+            filters = filterDefinitions;
+        }
         if (event.drillThrough.miniWindow) {
             onReport(new ReportWindowEvent(event.report.id, 0, 0, filters, event.report.dataFeedID, event.report.reportType));
         } else {
@@ -184,14 +209,19 @@ public class StandardContextWindow {
     }
 
     private function copyValue(event:ContextMenuEvent):void {
-        var field:String = analysisItem.qualifiedName();
-        var formatter:Formatter = analysisItem.getFormatter();
-        var objVal:Object = data[field];
         var text:String;
-        if (objVal == null) {
-            text = "";
+        if (copyText == null) {
+            var field:String = analysisItem.qualifiedName();
+            var formatter:Formatter = analysisItem.getFormatter();
+            var objVal:Object = data[field];
+
+            if (objVal == null) {
+                text = "";
+            } else {
+                text = formatter.format(objVal);
+            }
         } else {
-            text = formatter.format(objVal);
+            text = copyText;
         }
         System.setClipboard(text);
     }

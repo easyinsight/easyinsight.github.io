@@ -3,7 +3,7 @@ package com.easyinsight.filtering {
 [RemoteClass(alias="com.easyinsight.analysis.LastValueFilter")]
 public class LastValueFilterDefinition extends FilterDefinition{
 
-    public var absolute:Boolean = true;
+    public var absolute:Boolean = false;
     public var threshold:int = 1;
 
     public function LastValueFilterDefinition() {
