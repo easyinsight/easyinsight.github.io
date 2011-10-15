@@ -33,12 +33,9 @@
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.CustomChangeEvent;
 
-        import com.easyinsight.pseudocontext.PseudoContextWindow;
         import mx.collections.ArrayCollection;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
-        import mx.events.ListEvent;
         import mx.formatters.Formatter;
-        import mx.managers.PopUpManager;
 
         private var dimension1:AnalysisItem;
 
@@ -83,6 +80,7 @@
                 }
 
                 dataGrid.headerRows = crosstabDefinition.rows.length;
+                dataGrid.rowItems = crosstabDefinition.columns.length + 1;
                 /*dataGrid.lockedColumnCount = crosstabDefinition.rows.length;
                 dataGrid.lockedRowCount = crosstabDefinition.columns.length + 1;*/
                 dataGrid.columns = columns;
@@ -119,15 +117,6 @@
         }
 
         public function updateExportMetadata():void {
-        }
-
-        private function onClick(event:ListEvent):void {
-            var window:PseudoContextWindow = new PseudoContextWindow(dimension1, passThrough, this, crosstabDefinition, event.itemRenderer);
-            PopUpManager.addPopUp(window, this);
-            var point:Point = new Point(event.itemRenderer.x, event.itemRenderer.y);
-            point = localToGlobal(point);
-            window.x = point.x + 5;
-            window.y = point.y + 5;
         }
 
         private function passThrough(event:Event):void {

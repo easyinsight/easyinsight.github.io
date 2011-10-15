@@ -24,12 +24,17 @@ import mx.styles.StyleManager;
 public class CrosstabDataGrid extends AdvancedDataGrid {
 
     private var _headerRows:int = 1;
+    private var _rowItems:int = 1;
 
     public function CrosstabDataGrid() {
     }
 
     public function set headerRows(value:int):void {
         _headerRows = value;
+    }
+
+    public function set rowItems(value:int):void {
+        _rowItems = value;
     }
 
     /*override protected function drawHorizontalLine(s:Sprite, rowIndex:int, color:uint, y:Number):void
@@ -81,7 +86,7 @@ public class CrosstabDataGrid extends AdvancedDataGrid {
     {
         var tot:Number = unscaledHeight - viewMetrics.top - viewMetrics.bottom;
         var hh:Number = 0;
-        var hhh:Number = rowHeight * 2;
+        var hhh:Number = rowHeight * _rowItems;
         /*if(headerVisible)
 
         {*/
