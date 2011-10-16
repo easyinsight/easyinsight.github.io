@@ -14,6 +14,7 @@ import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartModule;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartModule;
 import com.easyinsight.analysis.crosstab.CrosstabModule;
 import com.easyinsight.analysis.list.ListModule;
+import com.easyinsight.analysis.tree.TreeModule;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListModule;
 import com.easyinsight.analysis.verticallist.VerticalListModule;
 
@@ -48,7 +49,8 @@ public class ReportModuleLoader extends EventDispatcher {
         if (_reportRendererModule == "VerticalList.swf" || _reportRendererModule == "CombinedVerticalList.swf" ||
                 _reportRendererModule == "CrosstabModule.swf" || _reportRendererModule == "ColumnChartModule.swf" ||
                 _reportRendererModule == "BarChartModule.swf" || _reportRendererModule == "StackedColumnChartModule.swf" ||
-                _reportRendererModule == "StackedBarChartModule.swf") {
+                _reportRendererModule == "StackedBarChartModule.swf" || _reportRendererModule == "ListModule.swf" ||
+                _reportRendererModule == "TreeModule.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
@@ -89,6 +91,8 @@ public class ReportModuleLoader extends EventDispatcher {
                 return new BarChartModule();
             } else if (moduleName == "ListModule.swf") {
                 return new ListModule();
+            } else if (moduleName == "TreeModule.swf") {
+                return new TreeModule();
             } else if (moduleName == "CrosstabModule.swf") {
                 return new CrosstabModule();
             } else if (moduleName == "StackedColumnChartModule.swf") {

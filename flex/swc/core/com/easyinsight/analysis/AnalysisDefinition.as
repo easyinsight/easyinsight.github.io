@@ -74,7 +74,7 @@ import mx.collections.ArrayCollection;
         public var description:String;
         public var solutionVisible:Boolean;
         public var temporaryReport:Boolean;
-        public var fontName:String = "Lucida Grande";
+        public var fontName:String = "Tahoma";
         public var fontSize:int = 12;
         public var backgroundAlpha:Number = 1;
         public var fixedWidth:int = 0;

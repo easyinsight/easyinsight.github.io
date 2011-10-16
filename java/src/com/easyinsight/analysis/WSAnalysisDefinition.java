@@ -498,7 +498,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     }
 
     public void populateProperties(List<ReportProperty> properties) {
-        fontName = findStringProperty(properties, "fontName", "Lucida Grande");
+        fontName = findStringProperty(properties, "fontName", "Tahoma");
         fontSize = (int) findNumberProperty(properties, "fontSize", 12);
         fixedWidth = (int) findNumberProperty(properties, "fixedWidth", 0);
         backgroundAlpha =  findNumberProperty(properties, "backgroundAlpha", 1);
