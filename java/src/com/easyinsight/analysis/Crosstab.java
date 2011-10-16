@@ -166,7 +166,7 @@ public class Crosstab {
                     sum += value.toDouble();
                 }
             }
-            array[j + 2][columnSections.size() + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
+            array[j + crosstabDefinition.getColumns().size() + 1][columnSections.size() + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
         }
 
 
