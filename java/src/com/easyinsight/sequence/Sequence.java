@@ -1,6 +1,7 @@
 package com.easyinsight.sequence;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.ReplacementMap;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.Database;
 
@@ -47,8 +48,8 @@ public abstract class Sequence implements Cloneable {
         return sequence;
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) throws CloneNotSupportedException {
-        setAnalysisItem(replacementMap.get(analysisItem.getAnalysisItemID()));
+    public void updateIDs(ReplacementMap replacementMap) throws CloneNotSupportedException {
+        setAnalysisItem(replacementMap.getField(analysisItem));
     }
 
     public AnalysisItem getAnalysisItem() {

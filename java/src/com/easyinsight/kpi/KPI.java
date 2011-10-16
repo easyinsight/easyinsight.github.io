@@ -201,10 +201,13 @@ public class KPI implements Cloneable {
                     Key clonedKey = analysisItem.getKey().clone();
                     analysisItem.setKey(clonedKey);
                 }
-                analysisItem.updateIDs(replacementMap);
+            }
+            ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+            for (AnalysisItem analysisItem : replacementMap.values()) {
+                analysisItem.updateIDs(replacements);
             }
             for (FilterDefinition filter : filterDefinitions) {
-                filter.updateIDs(replacementMap);
+                filter.updateIDs(replacements);
             }
             clonedKPI.setFilters(filterDefinitions);
             return clonedKPI;
@@ -213,7 +216,7 @@ public class KPI implements Cloneable {
         }
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(ReplacementMap replacementMap) {
         for (FilterDefinition filter : filters) {
             filter.updateIDs(replacementMap);
         }

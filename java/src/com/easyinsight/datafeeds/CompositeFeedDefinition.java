@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.analysis.ReplacementMap;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.analysis.AnalysisItem;
@@ -62,16 +63,6 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
         }
         return super.checkDateTime(name, key);
-    }
-
-    public AnalysisItem findAnalysisItemByKey(Key key) {
-        AnalysisItem item = null;
-        for (AnalysisItem field : getFields()) {
-            if (field.getKey().toKeyString().equals(key)) {
-                item = field;
-            }
-        }
-        return item;
     }
 
     public void beforeSave(EIConnection conn) throws Exception {
@@ -301,8 +292,10 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 folderMap.put(feed.getDataFeedID(), defineFolder(name));
             }
 
+            ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+
             for (AnalysisItem analysisItem : getFields()) {
-                analysisItem.updateIDs(replacementMap);
+                analysisItem.updateIDs(replacements);
             }
 
             for (AnalysisItem analysisItem : analysisItemVisitor.fields) {
@@ -408,10 +401,10 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 replacementMap.put(analysisItem.getAnalysisItemID(), clonedItem);
             }
 
-            
+            ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
 
             for (Map.Entry<Long, AnalysisItem> replEntry : replacementMap.entrySet()) {
-                replEntry.getValue().updateIDs(replacementMap);
+                replEntry.getValue().updateIDs(replacements);
             }
 
 

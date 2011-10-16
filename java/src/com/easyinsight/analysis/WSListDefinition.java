@@ -30,6 +30,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private int headerTextColor;
     private int summaryRowTextColor;
     private int summaryRowBackgroundColor;
+    private String defaultColumnAlignment;
     private boolean rolloverIcon;
 
     public boolean isRolloverIcon() {

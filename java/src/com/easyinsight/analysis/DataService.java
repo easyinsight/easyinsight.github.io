@@ -1,6 +1,8 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSCombinedVerticalListDefinition;
+import com.easyinsight.analysis.definitions.WSKPIDefinition;
+import com.easyinsight.analysis.definitions.WSTrendDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -85,6 +87,7 @@ public class DataService {
             feedMetadata.setDataSourceInfo(feed.createSourceInfo(conn));
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
+            feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
             List<LookupTable> lookupTables = new ArrayList<LookupTable>();
             for (AnalysisItem field : feedItems) {
                 if (field.getLookupTableID() != null && field.getLookupTableID() > 0) {
@@ -148,6 +151,70 @@ public class DataService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public EmbeddedTrendDataResults getEmbeddedTrendDataResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            WSKPIDefinition analysisDefinition = (WSKPIDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
+            RollingFilterDefinition reportFilter = null;
+            for (FilterDefinition customFilter : customFilters) {
+                if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
+                    reportFilter = (RollingFilterDefinition) customFilter;
+                }
+            }
+            if (reportFilter == null) {
+                for (FilterDefinition customFilter : customFilters) {
+                    if (customFilter instanceof RollingFilterDefinition) {
+                        if (analysisDefinition.getFilterName().equals(customFilter.getField().qualifiedName()) ||
+                                analysisDefinition.getFilterName().equals(customFilter.getField().toDisplay())) {
+                            reportFilter = (RollingFilterDefinition) customFilter;
+                        }
+                    }
+                }
+            }
+            for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+                if (analysisItem.getReportFieldExtension() != null) {
+                    TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
+                    AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
+                    if (dateDimension != null) {
+                        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
+                        rollingFilterDefinition.setField(dateDimension);
+                        rollingFilterDefinition.setInterval(reportFilter.getInterval());
+                        if (reportFilter.getInterval() == MaterializedRollingFilterDefinition.CUSTOM) {
+                            rollingFilterDefinition.setCustomBeforeOrAfter(reportFilter.getCustomBeforeOrAfter());
+                            rollingFilterDefinition.setCustomIntervalAmount(reportFilter.getCustomIntervalAmount());
+                            rollingFilterDefinition.setCustomIntervalType(reportFilter.getCustomIntervalType());
+                        }
+                        analysisItem.getFilters().add(rollingFilterDefinition);
+                    }
+                }
+            }
+            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, null);
+            DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
+            insightRequestMetadata.setNow(cal.getTime());
+            ReportRetrieval reportRetrievalPast = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, null);
+            DataSet pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
+            List<TrendOutcome> trendOutcomes = new Trend().calculateTrends(analysisDefinition, nowSet, pastSet);
+            EmbeddedTrendDataResults trendDataResults = new EmbeddedTrendDataResults();
+            trendDataResults.setTrendOutcomes(trendOutcomes);
+            trendDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+            trendDataResults.setDefinition(analysisDefinition);
+            return trendDataResults;
+        } catch (ReportException dae) {
+            EmbeddedTrendDataResults embeddedDataResults = new EmbeddedTrendDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
+        } catch (Throwable e) {
+            LogClass.error(e.getMessage() + " on running report " + reportID, e);
+            EmbeddedTrendDataResults embeddedDataResults = new EmbeddedTrendDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            return embeddedDataResults;
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
@@ -340,6 +407,120 @@ public class DataService {
             filter.timeshift(dataSource, filters);
         }
     }
+
+    public static TrendDataResults getTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+        RollingFilterDefinition reportFilter = null;
+        for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
+            if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
+                reportFilter = (RollingFilterDefinition) customFilter;
+            }
+        }
+        if (reportFilter == null) {
+            for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
+                if (customFilter instanceof RollingFilterDefinition) {
+                    if (analysisDefinition.getFilterName().equals(customFilter.getField().qualifiedName()) ||
+                            analysisDefinition.getFilterName().equals(customFilter.getField().toDisplay())) {
+                        reportFilter = (RollingFilterDefinition) customFilter;
+                    }
+                }
+            }
+        }
+        for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+            if (analysisItem.getReportFieldExtension() != null) {
+                TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
+                if (trendReportFieldExtension.getDate() != null) {
+                    AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
+                    RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
+                    rollingFilterDefinition.setField(dateDimension);
+                    rollingFilterDefinition.setInterval(reportFilter.getInterval());
+                    if (reportFilter.getInterval() == MaterializedRollingFilterDefinition.CUSTOM) {
+                        rollingFilterDefinition.setCustomBeforeOrAfter(reportFilter.getCustomBeforeOrAfter());
+                        rollingFilterDefinition.setCustomIntervalAmount(reportFilter.getCustomIntervalAmount());
+                        rollingFilterDefinition.setCustomIntervalType(reportFilter.getCustomIntervalType());
+                    }
+                    analysisItem.getFilters().add(rollingFilterDefinition);
+                }
+            }
+        }
+        ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+        DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
+        insightRequestMetadata.setNow(cal.getTime());
+        ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+        DataSet pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
+        List<TrendOutcome> trendOutcomes = new Trend().calculateTrends(analysisDefinition, nowSet, pastSet);
+        TrendDataResults trendDataResults = new TrendDataResults();
+        trendDataResults.setTrendOutcomes(trendOutcomes);
+        trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+        trendDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+        return trendDataResults;
+    }
+
+    public TrendDataResults getTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            RollingFilterDefinition reportFilter = null;
+            for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
+                if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
+                    reportFilter = (RollingFilterDefinition) customFilter;
+                }
+            }
+            if (reportFilter == null) {
+                for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
+                    if (customFilter instanceof RollingFilterDefinition) {
+                        if (analysisDefinition.getFilterName().equals(customFilter.getField().qualifiedName()) ||
+                                analysisDefinition.getFilterName().equals(customFilter.getField().toDisplay())) {
+                            reportFilter = (RollingFilterDefinition) customFilter;
+                        }
+                    }
+                }
+            }
+            for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+                if (analysisItem.getReportFieldExtension() != null) {
+                    TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
+                    if (trendReportFieldExtension.getDate() != null) {
+                        AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
+                        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
+                        rollingFilterDefinition.setField(dateDimension);
+                        rollingFilterDefinition.setInterval(reportFilter.getInterval());
+                        if (reportFilter.getInterval() == MaterializedRollingFilterDefinition.CUSTOM) {
+                            rollingFilterDefinition.setCustomBeforeOrAfter(reportFilter.getCustomBeforeOrAfter());
+                            rollingFilterDefinition.setCustomIntervalAmount(reportFilter.getCustomIntervalAmount());
+                            rollingFilterDefinition.setCustomIntervalType(reportFilter.getCustomIntervalType());
+                        }
+                        analysisItem.getFilters().add(rollingFilterDefinition);
+                    }
+                }
+            }
+            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+            DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
+            insightRequestMetadata.setNow(cal.getTime());
+            ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+            DataSet pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
+            List<TrendOutcome> trendOutcomes = new Trend().calculateTrends(analysisDefinition, nowSet, pastSet);
+            TrendDataResults trendDataResults = new TrendDataResults();
+            trendDataResults.setTrendOutcomes(trendOutcomes);
+            trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+            trendDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+            return trendDataResults;
+        } catch (ReportException dae) {
+            TrendDataResults embeddedDataResults = new TrendDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
+        } catch (Throwable e) {
+            LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
+            TrendDataResults embeddedDataResults = new TrendDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            return embeddedDataResults;
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+
 
     public CrossTabDataResults getCrosstabDataResults(WSCrosstabDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();

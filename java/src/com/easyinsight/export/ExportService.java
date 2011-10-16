@@ -4,6 +4,7 @@ import com.easyinsight.analysis.DataService;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.definitions.WSCombinedVerticalListDefinition;
+import com.easyinsight.analysis.definitions.WSKPIDefinition;
 import com.easyinsight.analysis.definitions.WSVerticalListDefinition;
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
@@ -33,8 +34,10 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import flex.messaging.FlexContext;
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 
 import java.io.*;
 
@@ -56,6 +59,8 @@ public class ExportService {
     public static final String CURRENCY_STYLE = "currency";
     public static final String GENERIC_STYLE = "generic";
     public static final String PERCENT_STYLE = "percentStyle";
+    public static final String CROSSTAB_HEADER_STYLE = "crosstabHeaderStyle";
+    public static final String CROSSTAB_SUMMARY_STYLE = "crosstabSummaryStyle";
 
     public void seleniumDraw(long requestID, byte[] bytes) {
         EIConnection conn = Database.instance().getConnection();
@@ -307,6 +312,10 @@ public class ExportService {
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                     DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
                     html = ExportService.crosstab(analysisDefinition, dataSet, conn, insightRequestMetadata);
+                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
+                    html = ExportService.exportKPIReport(analysisDefinition, conn, insightRequestMetadata);
                 } else {
                     ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
                     html = ExportService.toTable(analysisDefinition, listDataResults, conn, insightRequestMetadata);
@@ -328,7 +337,7 @@ public class ExportService {
         }
     }
 
-    private static String crosstab(WSAnalysisDefinition analysisDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+    public static String crosstab(WSAnalysisDefinition analysisDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
         Crosstab crosstab = new Crosstab();
@@ -825,6 +834,55 @@ public class ExportService {
         return new VListInfo(dColl, columns);
     }
 
+    public static String exportKPIReport(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+        WSKPIDefinition kpiReport = (WSKPIDefinition) listDefinition;
+        TrendDataResults trendDataResults = DataService.getTrendDataResults(kpiReport, insightRequestMetadata, conn);
+        List<TrendOutcome> outcomes = trendDataResults.getTrendOutcomes();
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>");
+        sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
+        int i = 0;
+        if (kpiReport.getGroupings() != null) {
+            for (i = 0; i < kpiReport.getGroupings().size(); i++) {
+                AnalysisItem grouping = kpiReport.getGroupings().get(i);
+                sb.append("<td>");
+                sb.append(grouping.toDisplay());
+                sb.append("</td>");
+            }
+        }
+        sb.append("<td>Name</td>");
+        sb.append("<td>Latest Value</td>");
+        sb.append("<td>Previous Value</td>");
+        sb.append("<td>Percent Change</td>");
+        int j = 1;
+        for (TrendOutcome trendOutcome : outcomes) {
+            sb.append("<tr>");
+            i = 0;
+            if (kpiReport.getGroupings() != null) {
+                for (i = 0; i < kpiReport.getGroupings().size(); i++) {
+                    AnalysisItem grouping = kpiReport.getGroupings().get(i);
+                    Value value = trendOutcome.getDimensions().get(grouping.qualifiedName());
+                    sb.append(value);
+                }
+            }
+            sb.append("<td>").append(trendOutcome.getMeasure().toDisplay()).append("</td>");
+            String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol);
+            sb.append("<td>").append(nowValue).append("</td>");
+            String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol);
+            sb.append("<td>").append(previousValue).append("</td>");
+            sb.append("<td>");
+            if (trendOutcome.getHistorical().toDouble() != 0) {
+                double percentChange = (trendOutcome.getNow().toDouble() - trendOutcome.getHistorical().toDouble()) / trendOutcome.getHistorical().toDouble();
+                sb.append(percentChange).append("%");
+            }
+            sb.append("</td>");
+            sb.append("</tr>");
+        }
+        sb.append("</table>");
+        return sb.toString();
+    }
+
     public static String argh(WSAnalysisDefinition listDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
         WSVerticalListDefinition verticalList = (WSVerticalListDefinition) listDefinition;
@@ -868,7 +926,7 @@ public class ExportService {
     }
 
     private HSSFWorkbook createWorkbookFromList(WSAnalysisDefinition listDefinition, ExportMetadata exportMetadata,
-                                                EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
+                                                EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         HSSFWorkbook workbook = new HSSFWorkbook();
         Map<String, HSSFCellStyle> styleMap = new HashMap<String, HSSFCellStyle>();
         HSSFCellStyle currencyStyle = workbook.createCellStyle();
@@ -881,6 +939,15 @@ public class ExportService {
         percentStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00"));
         styleMap.put(PERCENT_STYLE, percentStyle);
 
+        Font font = workbook.createFont();
+        font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        font.setColor(IndexedColors.WHITE.getIndex());
+        HSSFCellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setFillForegroundColor(IndexedColors.BLACK.getIndex());
+        cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        cellStyle.setFont(font);
+        styleMap.put(CROSSTAB_HEADER_STYLE, cellStyle);
+
         HSSFSheet sheet = workbook.createSheet();
         workbook.setSheetName(0, "Data");
 
@@ -890,10 +957,72 @@ public class ExportService {
             listCombinedList(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
         } else if (listDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
             listCrosstab(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
+        } else if (listDefinition.getReportType() == WSAnalysisDefinition.TREND ||
+                listDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
+                listDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
+            listTrends(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
         } else {
             listExcel(listDefinition, workbook, styleMap, sheet, insightRequestMetadata, conn, exportMetadata);
         }
         return workbook;
+    }
+
+    private void listTrends(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<String, HSSFCellStyle> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+                                  InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+        WSKPIDefinition crosstabDefinition = (WSKPIDefinition) report;
+        TrendDataResults trendDataResults = DataService.getTrendDataResults(crosstabDefinition, insightRequestMetadata, conn);
+        List<TrendOutcome> outcomes = trendDataResults.getTrendOutcomes();
+        HSSFRow headerRow = sheet.createRow(0);
+        int i = 0;
+        if (crosstabDefinition.getGroupings() != null) {
+            for (i = 0; i < crosstabDefinition.getGroupings().size(); i++) {
+                AnalysisItem grouping = crosstabDefinition.getGroupings().get(i);
+                HSSFCell groupingCell = headerRow.createCell(i);
+                groupingCell.setCellValue(new HSSFRichTextString(grouping.toDisplay()));
+                groupingCell.setCellStyle(styleMap.get(CROSSTAB_HEADER_STYLE));
+            }
+        }
+        HSSFCell labelCell = headerRow.createCell(i++);
+        labelCell.setCellValue(new HSSFRichTextString("Name"));
+        labelCell.setCellStyle(styleMap.get(CROSSTAB_HEADER_STYLE));
+        HSSFCell latestValueCell = headerRow.createCell(i++);
+        latestValueCell.setCellValue(new HSSFRichTextString("Latest Value"));
+        latestValueCell.setCellStyle(styleMap.get(CROSSTAB_HEADER_STYLE));
+        HSSFCell previousValueCell = headerRow.createCell(i++);
+        previousValueCell.setCellValue(new HSSFRichTextString("Previous Value"));
+        previousValueCell.setCellStyle(styleMap.get(CROSSTAB_HEADER_STYLE));
+        HSSFCell percentChangeCell = headerRow.createCell(i);
+        percentChangeCell.setCellValue(new HSSFRichTextString("Percent Change"));
+        percentChangeCell.setCellStyle(styleMap.get(CROSSTAB_HEADER_STYLE));
+        for (int h = 0; h <= i; h++) {
+            sheet.setColumnWidth(h, 5000);
+        }
+        int j = 1;
+        for (TrendOutcome trendOutcome : outcomes) {
+            HSSFRow dataRow = sheet.createRow(j++);
+            i = 0;
+            if (crosstabDefinition.getGroupings() != null) {
+                for (i = 0; i < crosstabDefinition.getGroupings().size(); i++) {
+                    AnalysisItem grouping = crosstabDefinition.getGroupings().get(i);
+                    Value value = trendOutcome.getDimensions().get(grouping.qualifiedName());
+                    HSSFCellStyle style = getStyle(styleMap, grouping, workbook, exportMetadata.dateFormat, value);
+                    populateCell(dataRow, i, value, style, grouping, exportMetadata.cal);
+                }
+            }
+            HSSFCell labelDataCell = dataRow.createCell(i++);
+            labelDataCell.setCellValue(new HSSFRichTextString(trendOutcome.getMeasure().toDisplay()));
+            HSSFCellStyle nowMeasureStyle = getStyle(styleMap, trendOutcome.getMeasure(), workbook, exportMetadata.dateFormat, trendOutcome.getNow());
+            populateCell(dataRow, i++, trendOutcome.getNow(), nowMeasureStyle, trendOutcome.getMeasure(), exportMetadata.cal);
+            HSSFCellStyle previousMeasureStyle = getStyle(styleMap, trendOutcome.getMeasure(), workbook, exportMetadata.dateFormat, trendOutcome.getHistorical());
+            populateCell(dataRow, i++, trendOutcome.getHistorical(), previousMeasureStyle, trendOutcome.getMeasure(), exportMetadata.cal);
+            HSSFCell percentChangeDataCell = dataRow.createCell(i);
+            if (trendOutcome.getHistorical().toDouble() != 0) {
+                HSSFCellStyle style = styleMap.get(PERCENT_STYLE);
+                double percentChange = (trendOutcome.getNow().toDouble() - trendOutcome.getHistorical().toDouble()) / trendOutcome.getHistorical().toDouble();
+                percentChangeDataCell.setCellStyle(style);
+                percentChangeDataCell.setCellValue(percentChange);
+            }
+        }
     }
 
     private void listCrosstab(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<String, HSSFCellStyle> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
@@ -922,11 +1051,7 @@ public class ExportService {
                         populateCell(row, i, value, style, measure, exportMetadata.cal);
                     } else {
                         cell.setCellValue(new HSSFRichTextString(crosstabValue.getValue().toString()));
-                        Font font = workbook.createFont();
-                        font.setBoldweight(Font.BOLDWEIGHT_BOLD);
-                        HSSFCellStyle cellStyle = workbook.createCellStyle();
-                        cellStyle.setFont(font);
-                        cell.setCellStyle(cellStyle);
+                        cell.setCellStyle(styleMap.get(CROSSTAB_HEADER_STYLE));
                     }
                 }
             }

@@ -5,7 +5,6 @@ import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Map;
 
 /**
  * User: jamesboe
@@ -104,9 +103,9 @@ public class JoinOverride implements Cloneable, Serializable {
         }
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
-        sourceItem = replacementMap.get(sourceItem.getAnalysisItemID());
-        targetItem = replacementMap.get(targetItem.getAnalysisItemID());
+    public void updateIDs(ReplacementMap replacementMap) {
+        sourceItem = replacementMap.getField(sourceItem);
+        targetItem = replacementMap.getField(targetItem);
     }
 
     public long getJoinOverrideID() {

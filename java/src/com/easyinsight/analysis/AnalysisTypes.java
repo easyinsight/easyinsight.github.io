@@ -20,4 +20,7 @@ public interface AnalysisTypes {
     public static final String FORM = "Form";
     public static final String VERTICAL_LIST = "VerticalList";
     public static final String COMBINED_VERTICAL_LIST = "CombinedVerticalList";
+    public static final String TREND = "Trend";
+    public static final String TREND_GRID = "TrendGrid";
+    public static final String DIAGRAM = "Diagram";
 }

@@ -5,7 +5,6 @@ import com.easyinsight.core.*;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Collection;
-import java.util.Map;
 
 import com.easyinsight.database.Database;
 import org.hibernate.Session;
@@ -125,10 +124,10 @@ public class AnalysisDimension extends AnalysisItem {
     }
 
     @Override
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(ReplacementMap replacementMap) {
         super.updateIDs(replacementMap);
         if (getKeyDimension() != null) {
-            setKeyDimension((AnalysisDimension) replacementMap.get(getKeyDimension().getAnalysisItemID()));
+            setKeyDimension((AnalysisDimension) replacementMap.getField(getKeyDimension()));
         }
     }
 

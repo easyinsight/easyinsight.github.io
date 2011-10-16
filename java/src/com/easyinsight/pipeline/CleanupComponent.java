@@ -1,14 +1,12 @@
 package com.easyinsight.pipeline;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.DataResults;
-import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.analysis.WSAnalysisDefinition;
+import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * User: jamesboe
@@ -32,17 +30,25 @@ public class CleanupComponent implements IComponent {
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 if (filterDefinition.isEnabled() && !filterDefinition.isApplyBeforeAggregation()) {
-                    List<AnalysisItem> items = filterDefinition.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, true, false, cleanupCriteria);
+                    List<AnalysisItem> items = filterDefinition.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, false, cleanupCriteria);
                     allNeededAnalysisItems.addAll(items);
                 }
             }
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
-                List<AnalysisItem> baseItems = item.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, true, false, cleanupCriteria);
+                List<AnalysisItem> baseItems = item.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, false, cleanupCriteria);
                 allNeededAnalysisItems.addAll(baseItems);
                 List<AnalysisItem> linkItems = item.addLinkItems(pipelineData.getAllItems(), allRequestedAnalysisItems);
                 allNeededAnalysisItems.addAll(linkItems);
+            }
+        }
+        if (report.getMarmotScript() != null) {
+            StringTokenizer toker = new StringTokenizer(report.getMarmotScript(), "\r\n");
+            while (toker.hasMoreTokens()) {
+                String line = toker.nextToken();
+                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, pipelineData.getAllItems(), allRequestedAnalysisItems, false, true, AGGREGATE_CALCULATIONS);
+                allNeededAnalysisItems.addAll(items);
             }
         }
         pipelineData.setReportItems(allNeededAnalysisItems);

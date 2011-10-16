@@ -34,6 +34,15 @@ public abstract class Value implements Serializable {
 
     private Value originalValue;
     private Value sortValue;
+    private ValueExtension valueExtension;
+
+    public ValueExtension getValueExtension() {
+        return valueExtension;
+    }
+
+    public void setValueExtension(ValueExtension valueExtension) {
+        this.valueExtension = valueExtension;
+    }
 
     public Value getSortValue() {
         return sortValue;

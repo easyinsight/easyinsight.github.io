@@ -327,6 +327,13 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             List<DataSet> dataSets = DataService.getEmbeddedVerticalDataSets((WSCombinedVerticalListDefinition) analysisDefinition,
                                     insightRequestMetadata, conn);
                             table = ExportService.argh2(analysisDefinition, dataSets, conn, insightRequestMetadata);
+                        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
+                            DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
+                            table = ExportService.crosstab(analysisDefinition, dataSet, conn, insightRequestMetadata);
+                        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
+                                    analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
+                                    analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
+                            table = ExportService.exportKPIReport(analysisDefinition, conn, insightRequestMetadata);
                         } else {
                             ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
                             table = ExportService.toTable(analysisDefinition, listDataResults, conn, insightRequestMetadata);

@@ -87,7 +87,8 @@ public class ListDefinitionState extends AnalysisDefinitionState {
         return listDefinition;
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(ReplacementMap replacementMap) throws CloneNotSupportedException {
+        super.updateIDs(replacementMap);
         if (listLimitsMetadata != null) {
             listLimitsMetadata.updateIDs(replacementMap);
         }

@@ -78,13 +78,13 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     }
 
     @Override
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(ReplacementMap replacementMap) {
         super.updateIDs(replacementMap);
         if (startDateDimension != null) {
-            startDateDimension = (AnalysisDateDimension) replacementMap.get(startDateDimension.getAnalysisItemID());
+            startDateDimension = (AnalysisDateDimension) replacementMap.getField(startDateDimension);
         }
         if (endDateDimension != null) {
-            endDateDimension = (AnalysisDateDimension) replacementMap.get(endDateDimension.getAnalysisItemID());
+            endDateDimension = (AnalysisDateDimension) replacementMap.getField(endDateDimension);
         }
     }
 

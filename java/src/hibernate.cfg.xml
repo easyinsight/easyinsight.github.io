@@ -74,6 +74,9 @@
         <mapping class="com.easyinsight.analysis.FormDefinitionState"/>
         <mapping class="com.easyinsight.analysis.VerticalListDefinitionState"/>
         <mapping class="com.easyinsight.analysis.CombinedVerticalListDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.TrendDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.TrendGridDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.DiagramDefinitionState"/>
         <mapping class="com.easyinsight.analysis.gauge.GaugeDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeDefinitionState"/>
@@ -99,6 +102,12 @@
         <mapping class="com.easyinsight.analysis.ReportBooleanProperty"/>
         <mapping class="com.easyinsight.analysis.ReportImageProperty"/>
         <mapping class="com.easyinsight.analysis.JoinOverride"/>
+        <mapping class="com.easyinsight.analysis.ReportFieldExtension"/>
+        <mapping class="com.easyinsight.analysis.TrendReportFieldExtension"/>
+        <mapping class="com.easyinsight.analysis.DiagramReportFieldExtension"/>
+        <mapping class="com.easyinsight.analysis.TextReportFieldExtension"/>
+        <mapping class="com.easyinsight.analysis.definitions.TrendColumn"/>
+        <mapping class="com.easyinsight.analysis.DiagramLink"/>
 
         <mapping class="com.easyinsight.preferences.ApplicationSkinSettings"/>
 

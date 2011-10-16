@@ -52,9 +52,9 @@ public abstract class Pipeline {
         return pipelineData;
     }
 
-    public Pipeline setup(Set<AnalysisItem> analysisItems) {
-        pipelineData = new PipelineData(null, analysisItems, null, new ArrayList<AnalysisItem>(), new HashMap<String, String>(), analysisItems);
-        components = generatePipelineCommands(analysisItems, analysisItems, new ArrayList<FilterDefinition>(), null, null);
+    public Pipeline setup(Set<AnalysisItem> analysisItems, List<AnalysisItem> allFields) {
+        pipelineData = new PipelineData(null, analysisItems, null, allFields, new HashMap<String, String>(), analysisItems);
+        components = generatePipelineCommands(analysisItems, analysisItems, new ArrayList<FilterDefinition>(), null, allFields);
         return this;
     }
 
@@ -89,7 +89,15 @@ public abstract class Pipeline {
                 }
             }
         }
-        allNeededAnalysisItems.addAll(report.getLimitFields());                
+        allNeededAnalysisItems.addAll(report.getLimitFields());
+        if (report.getMarmotScript() != null) {
+            StringTokenizer toker = new StringTokenizer(report.getMarmotScript(), "\r\n");
+            while (toker.hasMoreTokens()) {
+                String line = toker.nextToken();
+                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+                allNeededAnalysisItems.addAll(items);
+            }
+        }
 
         pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource == null ? new HashMap<String, String>() : dataSource.getProperties(), allRequestedAnalysisItems);
         return allNeededAnalysisItems;

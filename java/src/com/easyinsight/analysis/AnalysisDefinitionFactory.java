@@ -114,6 +114,30 @@ public class AnalysisDefinitionFactory {
             }
             verticalListDefinitionState.setChildReports(reports);
             analysisDefinitionState = verticalListDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TREND)) {
+            WSTrendDefinition wsTrendDefinition = (WSTrendDefinition) wsAnalysisDefinition;
+            TrendDefinitionState trendDefinitionState = new TrendDefinitionState();
+            trendDefinitionState.setTrendReportID(wsTrendDefinition.getTrendReportID());
+            trendDefinitionState.setFilterName(wsTrendDefinition.getFilterName());
+            trendDefinitionState.setDayWindow(String.valueOf(wsTrendDefinition.getDayWindow()));
+            analysisDefinitionState = trendDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TREND_GRID)) {
+            WSTrendGridDefinition wsTrendDefinition = (WSTrendGridDefinition) wsAnalysisDefinition;
+            TrendGridDefinitionState trendDefinitionState = new TrendGridDefinitionState();
+            trendDefinitionState.setTrendReportID(wsTrendDefinition.getTrendReportID());
+            trendDefinitionState.setSortDirection(wsTrendDefinition.isSortAscending());
+            trendDefinitionState.setSortIndex(wsTrendDefinition.getSortIndex());
+            trendDefinitionState.setFilterName(wsTrendDefinition.getFilterName());
+            trendDefinitionState.setDayWindow(String.valueOf(wsTrendDefinition.getDayWindow()));
+            analysisDefinitionState = trendDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.DIAGRAM)) {
+            WSDiagramDefinition wsTrendDefinition = (WSDiagramDefinition) wsAnalysisDefinition;
+            DiagramDefinitionState trendDefinitionState = new DiagramDefinitionState();
+            trendDefinitionState.setDiagramReportID(wsTrendDefinition.getDiagramReportID());
+            trendDefinitionState.setFilterName(wsTrendDefinition.getFilterName());
+            trendDefinitionState.setDayWindow(String.valueOf(wsTrendDefinition.getDayWindow()));
+            trendDefinitionState.setLinks(wsTrendDefinition.getLinks());
+            analysisDefinitionState = trendDefinitionState;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());
         }

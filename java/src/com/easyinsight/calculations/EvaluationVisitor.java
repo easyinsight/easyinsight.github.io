@@ -4,10 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Date;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -205,6 +202,8 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         f.setCalculationMetadata(calculationMetadata);
         if (f.onDemand()) {
             f.setFunctionNode(node);
+            f.setAnalysisItem(analysisItem);
+            f.setRow(row);
             result = f.evaluate();
         } else {
             List<Value> params = new LinkedList<Value>();
@@ -225,6 +224,7 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
 
             result = f.evaluate();
         }
+        f.clearParams();
     }
 
     private Value result;

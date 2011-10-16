@@ -36,13 +36,13 @@ public class SixSigmaMeasure extends AnalysisMeasure {
     private AnalysisMeasure totalOpportunitiesMeasure;
 
     @Override
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(ReplacementMap replacementMap) {
         super.updateIDs(replacementMap);
         if (totalDefectsMeasure != null) {
-            totalDefectsMeasure = (AnalysisMeasure) replacementMap.get(totalDefectsMeasure.getAnalysisItemID());
+            totalDefectsMeasure = (AnalysisMeasure) replacementMap.getField(totalDefectsMeasure);
         }
         if (totalOpportunitiesMeasure != null) {
-            totalOpportunitiesMeasure = (AnalysisMeasure) replacementMap.get(totalOpportunitiesMeasure.getAnalysisItemID());
+            totalOpportunitiesMeasure = (AnalysisMeasure) replacementMap.getField(totalOpportunitiesMeasure);
         }
     }
 

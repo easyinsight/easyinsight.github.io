@@ -75,7 +75,7 @@ public class TimelineDefinitionState extends AnalysisDefinitionState {
     }
 
     @Override
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) throws CloneNotSupportedException {
+    public void updateIDs(ReplacementMap replacementMap) throws CloneNotSupportedException {
         super.updateIDs(replacementMap);
         filter.updateIDs(replacementMap);
     }

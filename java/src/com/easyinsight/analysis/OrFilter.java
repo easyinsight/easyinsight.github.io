@@ -59,7 +59,7 @@ public class OrFilter extends FilterDefinition {
     }
 
     @Override
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(ReplacementMap replacementMap) {
         super.updateIDs(replacementMap);
         for (FilterDefinition filter : filters) {
             filter.updateIDs(replacementMap);

@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: jamesboe
@@ -32,14 +31,14 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
     private List<AnalysisItem> availableItems;
 
     @Override
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(ReplacementMap replacementMap) {
         super.updateIDs(replacementMap);
         if (targetItem != null) {
-            targetItem = replacementMap.get(targetItem.getAnalysisItemID());
+            targetItem = replacementMap.getField(targetItem);
         }
         List<AnalysisItem> replaceAvailableItems = new ArrayList<AnalysisItem>();
         for (AnalysisItem availableItem : availableItems) {
-            replaceAvailableItems.add(replacementMap.get(availableItem.getAnalysisItemID()));
+            replaceAvailableItems.add(replacementMap.getField(availableItem));
         }
         this.availableItems = replaceAvailableItems;
     }

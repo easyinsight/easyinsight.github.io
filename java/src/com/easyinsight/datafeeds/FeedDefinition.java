@@ -328,8 +328,9 @@ public class FeedDefinition implements Cloneable, Serializable {
                 throw new RuntimeException(e);
             }
         }
+        ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
         for (AnalysisItem clone : clones) {
-            clone.updateIDs(replacementMap);
+            clone.updateIDs(replacements);
         }
         List<FeedNode> feedNodes = new ArrayList<FeedNode>();
         for (FeedFolder feedFolder : getFolders()) {
@@ -408,8 +409,9 @@ public class FeedDefinition implements Cloneable, Serializable {
             clonedFields.add(clonedItem);
             replacementMap.put(analysisItem.getAnalysisItemID(), clonedItem);
         }
+        ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
         for (AnalysisItem analysisItem : replacementMap.values()) {
-            analysisItem.updateIDs(replacementMap);
+            analysisItem.updateIDs(replacements);
         }
         feedDefinition.setFields(clonedFields);
         List<Tag> clonedTags = new ArrayList<Tag>();

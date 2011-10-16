@@ -47,10 +47,19 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     @Column(name="marmotscript")
     private String marmotScript;
-    /*@Column(name="show_if_owner")
-    private boolean showIfOwner;*/
+
+    @Column(name="trend_filter")
+    private boolean trendFilter;
 
     public FilterDefinition() {
+    }
+
+    public boolean isTrendFilter() {
+        return trendFilter;
+    }
+
+    public void setTrendFilter(boolean trendFilter) {
+        this.trendFilter = trendFilter;
     }
 
     public String getMarmotScript() {
@@ -186,9 +195,9 @@ public class FilterDefinition implements Serializable, Cloneable {
         return filter;
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(ReplacementMap replacementMap) {
         if (field != null) {
-            setField(replacementMap.get(field.getAnalysisItemID()));
+            setField(replacementMap.getField(field));
         }
     }
 

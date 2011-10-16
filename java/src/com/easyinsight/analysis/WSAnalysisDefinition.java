@@ -57,6 +57,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int STACKED_BAR = 32;
     public static final int VERTICAL_LIST = 33;
     public static final int VERTICAL_LIST_COMBINED = 34;
+    public static final int TREND = 35;
+    public static final int DIAGRAM = 36;
+    public static final int TREND_GRID = 37;
 
     private String name;
     private String authorName;
@@ -381,6 +384,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 columnSet.add(analysisItem);
             }
         }
+        if (getMarmotScript() != null) {
+            StringTokenizer toker = new StringTokenizer(getMarmotScript(), "\r\n");
+            while (toker.hasMoreTokens()) {
+                String line = toker.nextToken();
+                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+                columnSet.addAll(items);
+            }
+        }
         return columnSet;
     }
 
@@ -487,7 +498,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     }
 
     public void populateProperties(List<ReportProperty> properties) {
-        fontName = findStringProperty(properties, "fontName", "Tahoma");
+        fontName = findStringProperty(properties, "fontName", "Lucida Grande");
         fontSize = (int) findNumberProperty(properties, "fontSize", 12);
         fixedWidth = (int) findNumberProperty(properties, "fixedWidth", 0);
         backgroundAlpha =  findNumberProperty(properties, "backgroundAlpha", 1);

@@ -1,5 +1,7 @@
 package com.easyinsight.calculations;
 
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.Value;
 
 import java.util.List;
@@ -17,4 +19,9 @@ public interface IFunction {
     public void setParameters(List<Value> parameters);
     public int getParameterCount();
     void setCalculationMetadata(CalculationMetadata calculationMetadata);
+
+    void setRow(IRow row);
+
+    void setAnalysisItem(AnalysisItem analysisItem);
+    public void clearParams();
 }

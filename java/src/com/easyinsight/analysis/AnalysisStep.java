@@ -45,16 +45,16 @@ public class AnalysisStep extends AnalysisDateDimension {
     }
 
     @Override
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(ReplacementMap replacementMap) {
         super.updateIDs(replacementMap);
         if (startDate != null) {
-            setStartDate((AnalysisDateDimension) replacementMap.get(startDate.getAnalysisItemID()));
+            setStartDate((AnalysisDateDimension) replacementMap.getField(startDate));
         }
         if (endDate != null) {
-            setEndDate((AnalysisDateDimension) replacementMap.get(endDate.getAnalysisItemID()));
+            setEndDate((AnalysisDateDimension) replacementMap.getField(endDate));
         }
         if (correlationDimension != null) {
-            setCorrelationDimension((AnalysisDimension) replacementMap.get(correlationDimension.getAnalysisItemID()));
+            setCorrelationDimension((AnalysisDimension) replacementMap.getField(correlationDimension));
         }
     }
 

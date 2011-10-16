@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.Key;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -40,7 +39,7 @@ public abstract class AnalysisDefinitionState implements Cloneable {
         this.id = id;
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) throws CloneNotSupportedException {
+    public void updateIDs(ReplacementMap replacementMap) throws CloneNotSupportedException {
 
     }
 

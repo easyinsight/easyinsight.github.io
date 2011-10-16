@@ -111,6 +111,8 @@ public class FunctionFactory {
             return new FirstTagFunction();
         } else if (s.equals("originaltags")) {
             return new OriginalTags();
+        } else if (s.equals("colortext")) {
+            return new ColorText();
         } else {
             return null;
         }

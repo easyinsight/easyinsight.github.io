@@ -1,5 +1,7 @@
 package com.easyinsight.calculations;
 
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 
@@ -24,6 +26,13 @@ public abstract class Function implements IFunction {
 
     private FunctionNode functionNode;
 
+    public void clearParams() {
+        if (params != null) {
+            params.clear();
+        }
+        paramMap.clear();
+    }
+
     public void setFunctionNode(FunctionNode functionNode) {
         this.functionNode = functionNode;
     }
@@ -32,10 +41,21 @@ public abstract class Function implements IFunction {
         return false;
     }
 
+    private IRow row;
+    private AnalysisItem analysisItem;
+
+    public void setRow(IRow row) {
+        this.row = row;
+    }
+
+    public void setAnalysisItem(AnalysisItem analysisItem) {
+        this.analysisItem = analysisItem;
+    }
+
     protected Value getParameter(int position) {
         Value value = paramMap.get(position);
         if (value == null) {
-            EvaluationVisitor subNode = new EvaluationVisitor(null, null, calculationMetadata);
+            EvaluationVisitor subNode = new EvaluationVisitor(row, analysisItem, calculationMetadata);
             ((CalculationTreeNode) functionNode.getChild(position + 1)).accept(subNode);
             paramMap.put(position, subNode.getResult());
         }

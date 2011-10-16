@@ -1,5 +1,6 @@
 package com.easyinsight.calculations;
 
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 
 /**
@@ -9,7 +10,12 @@ import com.easyinsight.core.Value;
  */
 public class OriginalTags extends Function {
     public Value evaluate() {
-        return params.get(0).getOriginalValue();
+        Value originalValue = params.get(0).getOriginalValue();
+        if (originalValue == null) {
+            return new EmptyValue();
+        } else {
+            return originalValue;
+        }
     }
 
     public int getParameterCount() {

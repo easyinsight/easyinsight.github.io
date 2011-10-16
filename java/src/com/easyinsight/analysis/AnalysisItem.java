@@ -11,6 +11,7 @@ import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
+import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedNode;
@@ -91,9 +92,12 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             inverseJoinColumns = @JoinColumn(name = "link_id", nullable = false))
     private List<Link> links = new ArrayList<Link>();
 
-    /*@OneToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name="virtual_dimension_id")
-    private VirtualDimension virtualDimension;*/
+    @OneToOne (fetch = FetchType.LAZY)
+    @JoinColumn(name = "report_field_extension_id")
+    private ReportFieldExtension reportFieldExtension;
+
+    @Column(name="marmotscript")
+    private String marmotScript;
 
     @Transient
     private transient String folder;
@@ -112,6 +116,22 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public String getMarmotScript() {
+        return marmotScript;
+    }
+
+    public void setMarmotScript(String marmotScript) {
+        this.marmotScript = marmotScript;
+    }
+
+    public ReportFieldExtension getReportFieldExtension() {
+        return reportFieldExtension;
+    }
+
+    public void setReportFieldExtension(ReportFieldExtension reportFieldExtension) {
+        this.reportFieldExtension = reportFieldExtension;
     }
 
     public String getTooltip() {
@@ -327,6 +347,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
         clonedItem.setFilters(clonedFilters);
         clonedItem.setLinks(clonedLinks);
+        if (reportFieldExtension != null) {
+            clonedItem.setReportFieldExtension(reportFieldExtension.clone());
+        }
         return clonedItem;
     }
 
@@ -363,9 +386,12 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return toDisplay() + " - " + getAnalysisItemID();
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(ReplacementMap replacementMap) {
         for (FilterDefinition filter : getFilters()) {
             filter.updateIDs(replacementMap);
+        }
+        if (reportFieldExtension != null) {
+            reportFieldExtension.updateIDs(replacementMap);
         }
     }
 
@@ -381,6 +407,16 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             LookupTable lookupTable = new FeedService().getLookupTable(getLookupTableID());
             if (lookupTable != null) {
                 items.addAll(lookupTable.getSourceField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
+            }
+        }
+        if (reportFieldExtension != null) {
+            items.addAll(reportFieldExtension.getAnalysisItems(getEverything));
+        }
+        if (getMarmotScript() != null && !"".equals(getMarmotScript().trim())) {
+            StringTokenizer toker = new StringTokenizer(getMarmotScript(), "\r\n");
+            while (toker.hasMoreTokens()) {
+                String line = toker.nextToken();
+                items.addAll(ReportCalculation.getAnalysisItems(line, allItems, insightItems, getEverything, includeFilters, criteria));
             }
         }
         return items;
@@ -465,6 +501,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             setLinks(new ArrayList<Link>(getLinks()));
             loaded = true;
         }
+        if (reportFieldExtension != null) {
+            reportFieldExtension = (ReportFieldExtension) Database.deproxy(reportFieldExtension);
+            reportFieldExtension.afterLoad();
+        }
     }
 
     public String toKeySQL() {
@@ -487,6 +527,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
         for (FilterDefinition filterDefinition : getFilters()) {
             filterDefinition.beforeSave(session);
+        }
+        if (reportFieldExtension != null) {
+            reportFieldExtension.reportSave(session);
+            session.saveOrUpdate(reportFieldExtension);
         }
     }
 

@@ -113,10 +113,10 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         return analysisHierarchyItem;
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(ReplacementMap replacementMap) {
         super.updateIDs(replacementMap);
         for (HierarchyLevel hierarchyLevel : hierarchyLevels) {
-            AnalysisItem replacementItem = replacementMap.get(hierarchyLevel.getAnalysisItem().getAnalysisItemID());
+            AnalysisItem replacementItem = replacementMap.getField(hierarchyLevel.getAnalysisItem());
             hierarchyLevel.setAnalysisItem(replacementItem);
         }
     }

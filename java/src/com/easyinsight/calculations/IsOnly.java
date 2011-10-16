@@ -25,16 +25,18 @@ public class IsOnly extends Function {
             }
         }
         DataSet dataSet = calculationMetadata.getDataSet();
-        Set<Value> values = new HashSet<Value>();
-        for (IRow row : dataSet.getRows()) {
-            values.add(row.getValue(target));
+        if (dataSet != null) {
+            Set<Value> values = new HashSet<Value>();
+            for (IRow row : dataSet.getRows()) {
+                values.add(row.getValue(target));
+            }
+            Value matchValue = minusQuotes(getParameter(1));
+            if (values.size() == 1 && values.contains(matchValue)) {
+                System.out.println("doing it...");
+                return getParameter(2);
+            }
+            System.out.println("no joy");
         }
-        Value matchValue = minusQuotes(getParameter(1));
-        if (values.size() == 1 && values.contains(matchValue)) {
-            System.out.println("doing it...");
-            return getParameter(2);
-        }
-        System.out.println("no joy");
         return new EmptyValue();
     }
 

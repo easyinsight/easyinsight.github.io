@@ -9,13 +9,18 @@ import com.easyinsight.core.Value;
  */
 public class GreaterThan extends Function {
     public Value evaluate() {
-        Value compare1 = params.get(0);
-        Value compare2 = params.get(1);
+        Value compare1 = getParameter(0);
+        Value compare2 = getParameter(1);
         if (compare1.toDouble() > compare2.toDouble()) {
-            return minusQuotes(params.get(2));
+            return minusQuotes(getParameter(2));
         } else {
-            return minusQuotes(params.get(3));
+            return minusQuotes(getParameter(3));
         }
+    }
+
+    @Override
+    public boolean onDemand() {
+        return true;
     }
 
     public int getParameterCount() {

@@ -20,6 +20,7 @@ public class FeedMetadata implements Serializable {
     private long dataFeedID;
     private String dataSourceName;
     private int version;
+    private int dataSourceType;
     private boolean dataSourceAdmin;
     private boolean exchangeSave;
     private String filterExampleMessage;
@@ -29,6 +30,14 @@ public class FeedMetadata implements Serializable {
     private boolean customJoinsAllowed;
     private List<LookupTable> lookupTables;
     private List<IntentionSuggestion> suggestions;
+
+    public int getDataSourceType() {
+        return dataSourceType;
+    }
+
+    public void setDataSourceType(int dataSourceType) {
+        this.dataSourceType = dataSourceType;
+    }
 
     public List<IntentionSuggestion> getSuggestions() {
         return suggestions;

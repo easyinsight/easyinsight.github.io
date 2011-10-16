@@ -40,9 +40,9 @@ public class ListLimitsMetadata extends LimitsMetadata implements Serializable, 
         return (ListLimitsMetadata) super.clone();
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(ReplacementMap replacementMap) {
         if (analysisItem != null) {
-            analysisItem = replacementMap.get(analysisItem.getAnalysisItemID());
+            analysisItem = replacementMap.getField(analysisItem);
         }
     }
 
