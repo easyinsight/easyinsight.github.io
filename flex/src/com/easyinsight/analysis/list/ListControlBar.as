@@ -56,6 +56,7 @@ public class ListControlBar extends ReportControlBar implements IReportControlBa
         findButton.toolTip = "Search Keyword...";
         findButton.addEventListener(MouseEvent.CLICK, startFind);
         addChild(findButton);
+        listViewGrouping.report = listDefinition;
         addDropAreaGrouping(listViewGrouping);
         var columns:ArrayCollection = listDefinition.columns;
         if (columns != null) {

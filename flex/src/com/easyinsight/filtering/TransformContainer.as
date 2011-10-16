@@ -1,5 +1,7 @@
 package com.easyinsight.filtering
 {
+import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.analysis.NamedKey;
 import com.easyinsight.commands.CommandEvent;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
@@ -299,6 +301,20 @@ public class TransformContainer extends HBox
         } else if (event.filterType == NewFilterEvent.NAMED_REF_FILTER) {
             var namedRefFilter:NamedFilterReference = new NamedFilterReference();
             addFilterDefinition(namedRefFilter);
+        } else if (event.filterType == NewFilterEvent.TREND_FILTER) {
+            var tempField:AnalysisDateDimension = new AnalysisDateDimension();
+            tempField.displayName = "Date";
+            var key:NamedKey = new NamedKey();
+            key.name = "Date";
+            tempField.key = key;
+
+            var filter:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
+            filter.intrinsic = true;
+            filter.trendFilter = true;
+            filter.filterName = "Trend Date";
+            filter.interval = RollingDateRangeFilterDefinition.WEEK;
+            filter.field = tempField;
+            addFilterDefinition(filter);
         } else if (event.filterType == NewFilterEvent.FIELD_CHOICE_FILTER) {
             var analysisFilter:AnalysisItemFilterDefinition = new AnalysisItemFilterDefinition();
             analysisFilter.field = event.analysisItem;
@@ -445,6 +461,24 @@ public class TransformContainer extends HBox
 
     public function getFilterDefinitions():ArrayCollection {
         return filterDefinitions;
+    }
+
+    public function removeFilter(filterDefinition:FilterDefinition):void {
+        var tFilter:IFilter;
+        for each (var child:DisplayObject in filterTile.getChildren()) {
+            if (child is IFilter) {
+                var filter:IFilter = child as IFilter;
+                if (filter.filterDefinition == filterDefinition) {
+                    tFilter = filter;
+                    filterTile.removeChild(child);
+                }
+            }
+        }
+        var index:int = filterDefinitions.getItemIndex(tFilter.filterDefinition);
+        filterDefinitions.removeItemAt(index);
+        if (filterDefinitions.length == 0) {
+            noFilters = true;
+        }
     }
 
     public function commandFilterDelete(filter:IFilter):void {

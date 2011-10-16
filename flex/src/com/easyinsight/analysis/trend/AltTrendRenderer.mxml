@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" verticalAlign="middle" paddingLeft="5" paddingRight="5"
+        verticalScrollPolicy="off" horizontalScrollPolicy="off" mouseChildren="false">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.TrendOutcome;
+        import com.easyinsight.analysis.formatter.PercentageNumberFormatter;
+        import com.easyinsight.analysis.list.ListDefinition;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.kpi.KPIOutcome;
+        import com.easyinsight.listing.ReportEditorAnalyzeSource;
+        import com.easyinsight.pseudocontext.StandardContextWindow;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.formatters.Formatter;
+
+        private var _outcome:TrendOutcome;
+
+        [Bindable]
+        private var trendIcon:Class;
+
+        [Bindable]
+        private var currentValue:String;
+
+        [Bindable]
+        private var percentChange:String;
+
+        [Bindable]
+        private var trendLabel:String;
+
+        [Bindable]
+        private var trendColor:uint = 0x000000;
+
+        [Bindable]
+        private var leftValueWidth:int;
+
+        override public function set data(value:Object):void {
+            _outcome = value as TrendOutcome;
+            leftValueWidth = _outcome.leftTextWidth;
+            var now:Number = _outcome.now.getValue() as Number;
+            var previous:Number = _outcome.historical.getValue() as Number;
+            var formatter:PercentageNumberFormatter = new PercentageNumberFormatter();
+            formatter.precision = 2;
+            var change:Number = (now - previous) / previous * 100;
+            percentChange = formatter.format(change);
+            trendColor = getColor(_outcome);
+            trendLabel = value.measure.display;
+
+            var mFormatter:Formatter = _outcome.measure.getFormatter();
+            currentValue = mFormatter.format(_outcome.now.getValue());
+
+            trendIcon = TrendStatusRenderer.iconForKPI(_outcome);
+            var exploreOption:ContextMenuItem = new ContextMenuItem("Analyze the trend...");
+            exploreOption.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, analyzeData);
+            new StandardContextWindow(_outcome.measure, passThrough, this, _outcome, true, _outcome.measure.filters, _outcome.measure.getFormatter().format(_outcome.now), [ exploreOption ]);
+        }
+
+        private function analyzeData(event:ContextMenuEvent):void {
+            var report:ListDefinition = new ListDefinition();
+            report.filterDefinitions = _outcome.measure.filters;
+            report.canSaveDirectly = true;
+            report.dataFeedID = _outcome.dataSourceID;
+            report.columns = new ArrayCollection([ _outcome.measure ]);
+            report.name = _outcome.measure.display;
+            dispatchEvent(new AnalyzeEvent(new ReportEditorAnalyzeSource(report)));
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
+
+        private function getColor(outcome:TrendOutcome):uint {
+            var color:uint;
+            switch (outcome.outcome) {
+                case KPIOutcome.EXCEEDING_GOAL:
+                case KPIOutcome.POSITIVE:
+                    color = 0x00BB00;
+                    break;
+                case KPIOutcome.NEGATIVE:
+                    color = 0xBB0000;
+                    break;
+                case KPIOutcome.NEUTRAL:
+                case KPIOutcome.NO_DATA:
+                default:
+                    trendColor = 0x000000;
+                    break;
+            }
+            return color;
+        }
+        ]]></mx:Script>
+    <mx:Label text="{currentValue}" fontSize="32" color="{trendColor}" width="{leftValueWidth}" textAlign="center"/>
+    <mx:VBox verticalScrollPolicy="off" horizontalScrollPolicy="off">
+        <mx:HBox verticalAlign="middle" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+            <mx:Image source="{trendIcon}"/>
+            <mx:Label text="{percentChange}" fontSize="18" color="{trendColor}" width="80" textAlign="center"/>
+        </mx:HBox>
+        <util:AutoSizeTextArea text="{trendLabel}" fontSize="16" width="160" editable="false" selectable="false" focusEnabled="false"
+                verticalScrollPolicy="off" horizontalScrollPolicy="off" fontFamily="Cabin" backgroundAlpha="0"/>
+    </mx:VBox>
+</mx:HBox>

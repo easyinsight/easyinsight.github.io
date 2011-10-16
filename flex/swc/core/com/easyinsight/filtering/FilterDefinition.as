@@ -35,6 +35,7 @@ import flash.events.EventDispatcher;
     public var toggleEnabled:Boolean;
     public var minimumRole:int = 4;
     public var marmotScript:String;
+    public var trendFilter:Boolean;
 		
 		public function FilterDefinition()
 			{

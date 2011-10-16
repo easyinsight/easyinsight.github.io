@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.TrendOutcome;
+
+        import mx.collections.ArrayCollection;
+        import mx.formatters.Formatter;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition):void {
+            vbox.removeAllChildren();
+            if (dataSet.length > 0) {
+                var trendDef:TrendDefinition = analysisDefinition as TrendDefinition;
+                var trends:ArrayCollection = new ArrayCollection();
+                var width:int = 0;
+                for (var i:int = 0; i < dataSet.length; i++) {
+                    var trendOutcome:TrendOutcome = dataSet.getItemAt(i) as TrendOutcome;
+                    var mFormatter:Formatter = trendOutcome.measure.getFormatter();
+                    var value:String = mFormatter.format(trendOutcome.now.getValue());
+                    width = Math.max(width,  uiComp.measureText(value).width);
+                    trendOutcome.dataSourceID = trendDef.dataFeedID;
+                    trends.addItem(trendOutcome);
+                }
+                for each (var updateOutcome:TrendOutcome in trends) {
+                    updateOutcome.leftTextWidth = width + 10;
+                    var r:AltTrendRenderer = new AltTrendRenderer();
+                    r.data = updateOutcome;
+                    vbox.addChild(r);
+                }
+                /*list.rowCount = trends.length;
+                list.dataProvider = trends;*/
+            }
+        }
+
+        ]]></mx:Script>
+    <mx:Text id="uiComp" fontSize="32" visible="false"/>
+    <mx:VBox id="vbox">
+
+    </mx:VBox>
+    <!--<mx:List id="list" fontSize="14" selectable="false" itemRenderer="com.easyinsight.analysis.trend.AltTrendRenderer" variableRowHeight="true"/>-->
+</mx:Canvas>

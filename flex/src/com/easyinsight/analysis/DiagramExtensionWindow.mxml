@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+         implements="com.easyinsight.analysis.IReportExtensionEditor" label="Diagram">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.diagram.DiagramReportFieldExtension;
+        import com.easyinsight.icons.IconSelectionEvent;
+        import com.easyinsight.icons.IconSelectionWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var dateFields:ArrayCollection;
+
+        private var _analysisItem:AnalysisItem;
+
+        [Bindable]
+        private var iconPath:String;
+
+        public function save(analysisItem:AnalysisItem):void {
+            var ext:DiagramReportFieldExtension = new DiagramReportFieldExtension();
+            ext.date = dateComboBox.selectedItem as AnalysisDateDimension;
+            ext.iconImage = kpiIconPath;
+            ext.highLow = int(highGroup.selectedValue);
+            ext.x = nodeX;
+            ext.y = nodeY;
+            analysisItem.reportFieldExtension = ext;
+        }
+
+        private var nodeX:int;
+        private var nodeY:int;
+
+        public function set analysisItem(analysisItem:AnalysisItem):void {
+            _analysisItem = analysisItem;
+            var ext:DiagramReportFieldExtension = _analysisItem.reportFieldExtension as DiagramReportFieldExtension;
+            if (ext != null) {
+                nodeX = ext.x;
+                nodeY = ext.y;
+                if (ext.date != null) {
+                    selectedValue = DiagramReportFieldExtension(_analysisItem.reportFieldExtension).date.display;
+                }
+                highGood = String(ext.highLow);
+                if (DiagramReportFieldExtension(_analysisItem.reportFieldExtension).iconImage != null) {
+                    iconPath = "/app/assets/icons/32x32/" + DiagramReportFieldExtension(_analysisItem.reportFieldExtension).iconImage;
+                    iconExists = true;
+                    kpiIconPath = DiagramReportFieldExtension(_analysisItem.reportFieldExtension).iconImage;
+                }
+            }
+        }
+
+        private function assignIcon():void {
+            var iconWindow:IconSelectionWindow = IconSelectionWindow(PopUpManager.createPopUp(this, IconSelectionWindow, true));
+            iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, iconSelected, false, 0, true);
+            iconWindow.addEventListener(IconSelectionEvent.ICON_REMOVED, iconRemoved, false, 0, true);
+            PopUpUtil.centerPopUp(iconWindow);
+        }
+
+        [Bindable]
+        private var iconExists:Boolean;
+
+        private var kpiIconPath:String;
+
+        private function iconSelected(event:IconSelectionEvent):void {
+            iconExists = true;
+            kpiIconPath = event.icon.path;
+            iconPath = "/app/assets/icons/32x32/" + event.icon.path;
+        }
+
+        private function iconRemoved(event:IconSelectionEvent):void {
+            iconExists = false;
+            kpiIconPath = null;
+            iconPath = null;
+        }
+
+        public function set analysisItems(analysisItems:ArrayCollection):void {
+            var dateFields:ArrayCollection = new ArrayCollection();
+            for each (var analysisItemWrapper:AnalysisItemWrapper in analysisItems) {
+                if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                    dateFields.addItem(analysisItemWrapper.analysisItem);
+                }
+            }
+            this.dateFields = dateFields;
+        }
+
+
+        [Bindable]
+        private var highGood:String = "0";
+
+        [Bindable]
+        private var selectedValue:String;
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Are high values good?" direction="horizontal">
+            <mx:RadioButtonGroup id="highGroup" selectedValue="{highGood}"/>
+            <mx:RadioButton group="{highGroup}" label="Yes" value="0"/>
+            <mx:RadioButton group="{highGroup}" label="No" value="1"/>
+            <mx:RadioButton group="{highGroup}" label="Neither" value="2"/>
+        </mx:FormItem>
+        <mx:FormItem label="Date:">
+            <util:SmartComboBox dataProvider="{dateFields}" id="dateComboBox" labelField="display" selectedValue="{selectedValue}" selectedProperty="display"/>
+        </mx:FormItem>
+        <mx:FormItem label="Icon:">
+            <mx:Box borderStyle="solid" borderThickness="1" click="assignIcon()" width="40" height="40" horizontalAlign="center" verticalAlign="middle"
+                                toolTip="Click to assign or change icon...">
+                <mx:Image id="iconImage" source="{iconPath}" visible="{iconExists}"/>
+            </mx:Box>
+        </mx:FormItem>
+    </mx:Form>
+
+
+</mx:VBox>

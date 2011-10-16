@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:trend="com.easyinsight.analysis.trend.*"
+           implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%">
+    <mx:states>
+        <mx:State name="notConfigured">
+            <mx:RemoveChild target="{altContent}"/>
+            <mx:AddChild relativeTo="{box}">
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+                    <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center" verticalAlign="middle"
+                            backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                        <mx:TextArea fontSize="22" text="You haven't set up a report yet. You can drag the fields from the left into this canvas or into the drop areas above to get started!"
+                            borderStyle="none" backgroundAlpha="0" width="500" height="95" editable="false" selectable="false" focusEnabled="false"/>
+                    </mx:Box>
+                </mx:Box>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="noData">
+            <mx:RemoveChild target="{altContent}"/>
+            <mx:AddChild relativeTo="{box}">
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+                    <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center" verticalAlign="middle"
+                            backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                        <mx:TextArea fontSize="22" text="We didn't find any data for the fields and filters that you specified in the report."
+                            borderStyle="none" backgroundAlpha="0" width="500" height="65" editable="false" selectable="false" focusEnabled="false"/>
+                    </mx:Box>
+                </mx:Box>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.CustomChangeEvent;
+
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var trends:ArrayCollection;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+            var def:TrendDefinition = analysisDefinition as TrendDefinition;
+            if (dataSet.length > 0) {
+                currentState = "";
+                altContent.renderReport(dataSet, analysisDefinition);
+            } else {
+                if (def.measures.length > 0) {
+                    currentState = "noData";
+                } else {
+                    currentState = "notConfigured";
+                }
+            }
+        }
+
+        public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }
+
+        public function preserveValues():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+
+    <mx:Canvas id="box" verticalScrollPolicy="auto" horizontalScrollPolicy="auto" width="100%" height="100%">
+        <trend:AltTrendContent id="altContent"/>
+    </mx:Canvas>
+</mx:Module>

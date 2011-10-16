@@ -14,6 +14,7 @@ package com.easyinsight.analysis
         public var sortValue:Value;
         public var originalValue:Value;
         public var summary:Boolean;
+        public var valueExtension:ValueExtension;
 
 		public function Value()
 		{

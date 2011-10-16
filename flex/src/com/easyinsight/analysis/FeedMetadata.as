@@ -23,6 +23,7 @@ import mx.collections.ArrayCollection;
         public var customJoinsAllowed:Boolean;
     public var lookupTables:ArrayCollection;
     public var suggestions:ArrayCollection;
+    public var dataSourceType:int;
 		
 		public function FeedMetadata()
 			{

@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<diagrammer:BaseNode xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:diagrammer="com.anotherflexdev.diagrammer.*"
+        editable="false">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.TrendOutcome;
+        import com.easyinsight.analysis.formatter.PercentageNumberFormatter;
+        import com.easyinsight.analysis.list.ListDefinition;
+        import com.easyinsight.analysis.trend.TrendStatusRenderer;
+        import com.easyinsight.framework.Constants;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.listing.ReportEditorAnalyzeSource;
+        import com.easyinsight.pseudocontext.StandardContextWindow;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.events.MoveEvent;
+
+        private var _outcome:TrendOutcome;
+
+        [Bindable]
+        private var outcomeValue:String;
+
+        [Bindable]
+        private var percentChange:String;
+
+        [Bindable]
+        private var trendImage:Class;
+
+        public function get outcome():TrendOutcome {
+            return _outcome;
+        }
+
+        public function set outcome(value:TrendOutcome):void {
+            _outcome = value;
+            this.nodeName = _outcome.measure.display;
+            outcomeValue = _outcome.measure.getFormatter().format(_outcome.now.getValue());
+            var now:Number = _outcome.now.getValue() as Number;
+            var previous:Number = _outcome.historical.getValue() as Number;
+            var formatter:PercentageNumberFormatter = new PercentageNumberFormatter();
+            formatter.precision = 2;
+            var change:Number = (now - previous) / previous * 100;
+            percentChange = formatter.format(change);
+            trendImage = TrendStatusRenderer.iconForKPI(value);
+            var exploreOption:ContextMenuItem = new ContextMenuItem("Analyze the trend...");
+            exploreOption.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, analyzeData);
+            new StandardContextWindow(_outcome.measure, passThrough, this, _outcome, true, _outcome.measure.filters, _outcome.measure.getFormatter().format(_outcome.now), [exploreOption]);
+        }
+
+        private function analyzeData(event:ContextMenuEvent):void {
+            var report:ListDefinition = new ListDefinition();
+            report.filterDefinitions = _outcome.measure.filters;
+            report.canSaveDirectly = true;
+            report.dataFeedID = _outcome.dataSourceID;
+            report.columns = new ArrayCollection([ _outcome.measure ]);
+            report.name = _outcome.measure.display;
+            dispatchEvent(new AnalyzeEvent(new ReportEditorAnalyzeSource(report)));
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            var ext:DiagramReportFieldExtension = DiagramReportFieldExtension(_outcome.measure.reportFieldExtension);
+            if (ext.iconImage != null) {
+                iconImage.load(Constants.instance().prefix + "/app/assets/icons/32x32/" + ext.iconImage);
+            }
+        }
+
+        override protected function handleMove(event:MoveEvent):void {
+            super.handleMove(event);
+            DiagramReportFieldExtension(_outcome.measure.reportFieldExtension).x = this.x;
+            DiagramReportFieldExtension(_outcome.measure.reportFieldExtension).y = this.y;
+        }
+        ]]></mx:Script>
+    <mx:Canvas borderStyle="solid" borderThickness="1" borderColor="0x333333" width="100%" height="45" cornerRadius="5" backgroundColor="0xFFFFFF"
+            horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundAlpha=".8">
+        <mx:Image id="iconImage" y="5"/>
+        <mx:Label text="{outcomeValue}" x="30" width="100%" textAlign="center" fontSize="14"/>
+        <mx:HBox verticalAlign="middle" x="30" y="17" width="100%" horizontalAlign="center">
+            <mx:Label text="{percentChange}"/>
+            <mx:Image source="{trendImage}"/>
+        </mx:HBox>
+    </mx:Canvas>
+    <diagrammer:lblNodeName>
+		<mx:Text y="44" text="{nodeName}" selectable="false" left="1" right="1" textAlign="center"/>
+	</diagrammer:lblNodeName>
+</diagrammer:BaseNode>

@@ -14,6 +14,7 @@ import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartEmbeddedControll
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartEmbeddedController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartEmbeddedController;
 import com.easyinsight.analysis.crosstab.CrosstabEmbeddedController;
+import com.easyinsight.analysis.diagram.DiagramEmbeddedController;
 import com.easyinsight.analysis.form.FormEmbeddedController;
 import com.easyinsight.analysis.gantt.GanttEmbeddedController;
 import com.easyinsight.analysis.gauge.GaugeEmbeddedController;
@@ -22,6 +23,8 @@ import com.easyinsight.analysis.list.ListEmbeddedController;
 import com.easyinsight.analysis.timeline.TimelineEmbeddedController;
 import com.easyinsight.analysis.tree.TreeEmbeddedController;
 import com.easyinsight.analysis.treemap.TreeMapEmbeddedController;
+import com.easyinsight.analysis.trend.TrendEmbeddedController;
+import com.easyinsight.analysis.trend.TrendGridEmbeddedController;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListEmbeddedController;
 import com.easyinsight.analysis.verticallist.VerticalListEmbeddedController;
 
@@ -107,6 +110,15 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.COMBINED_VERTICAL_LIST:
                 controller = CombinedVerticalListEmbeddedController;
+                break;
+            case AnalysisDefinition.TREND:
+                controller = TrendEmbeddedController;
+                break;
+            case AnalysisDefinition.TREND_GRID:
+                controller = TrendGridEmbeddedController;
+                break;
+            case AnalysisDefinition.DIAGRAM:
+                controller = DiagramEmbeddedController;
                 break;
         }
         return controller;

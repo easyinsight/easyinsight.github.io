@@ -10,6 +10,8 @@
 
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.controls.Alert;
+
         import mx.core.Container;
         import mx.core.UIComponent;
         import mx.events.FlexEvent;
@@ -26,6 +28,11 @@
         private var editor:IAnalysisItemEditor;
 
         private var _dataSourceID:int;
+
+        public static const BASE:int = 1;
+        public static const LINKS:int = 2;
+        public static const FILTERS:int = 3;
+        public static const EXTENSION:int = 4;
 
         private function onCreation():void {
             addEventListener(LinkMetadataEvent.LINK_EDITED, onLinkUpdate);
@@ -45,6 +52,8 @@
         private function onCommand(event:CommandEvent):void {
             commandProcessor.addCommand(event.command);
         }
+
+        public var initialWindow:int;
 
         [Bindable]
         private var links:ArrayCollection = new ArrayCollection();
@@ -110,11 +119,42 @@
             tabNavigator.addChildAt(editor as DisplayObject, 0);
             if (_analysisItem != null) {
                 if (_analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                    tabNavigator.removeChild(linksBox);
+                    if (!(_reportType == AnalysisDefinition.TREND || _reportType == AnalysisDefinition.DIAGRAM || _reportType == AnalysisDefinition.TREND_GRID)) {
+                        tabNavigator.removeChild(linksBox);
+                    }
                 } else {
                     tabNavigator.removeChild(filtersBox);
                 }
             }
+            if (_reportType == AnalysisDefinition.TREND || _reportType == AnalysisDefinition.TREND_GRID) {
+                var trendEditor:TrendExtensionWindow = new TrendExtensionWindow();
+                _reportEditor = trendEditor;
+                trendEditor.analysisItem = _analysisItem;
+                trendEditor.analysisItems = _analysisItems;
+                tabNavigator.addChild(trendEditor);
+            } else if (_reportType == AnalysisDefinition.DIAGRAM) {
+                var diagramEditor:DiagramExtensionWindow = new DiagramExtensionWindow();
+                _reportEditor = diagramEditor;
+                diagramEditor.analysisItem = _analysisItem;
+                diagramEditor.analysisItems = _analysisItems;
+                tabNavigator.addChild(diagramEditor);
+            } else if (_reportType == AnalysisDefinition.LIST || _reportType == AnalysisDefinition.TREE) {
+                var textEditor:TextExtensionWindow = new TextExtensionWindow();
+                _reportEditor = textEditor;
+                textEditor.analysisItem = _analysisItem;
+                tabNavigator.addChild(textEditor);
+            }
+            if (initialWindow == EXTENSION) {
+                tabNavigator.selectedChild = _reportEditor as Container;
+            }
+        }
+
+        private var _reportEditor:IReportExtensionEditor;
+
+        private var _reportType:int;
+
+        public function set reportType(value:int):void {
+            _reportType = value;
         }
 
         private var lastTab:int = 0;
@@ -133,10 +173,17 @@
         private function onSaveComplete(event:AnalysisItemSaveEvent):void {
             if (event.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                 event.analysisItem.filters = transformContainer.getFilterDefinitions();
-                event.analysisItem.links = new ArrayCollection();
+                if (_reportType == AnalysisDefinition.TREND || _reportType == AnalysisDefinition.DIAGRAM || _reportType == AnalysisDefinition.TREND_GRID) {
+                    event.analysisItem.links = links;
+                } else {
+                    event.analysisItem.links = new ArrayCollection();
+                }
             } else {
                 event.analysisItem.filters = new ArrayCollection();
                 event.analysisItem.links = links;
+            }
+            if (_reportEditor != null) {
+                _reportEditor.save(event.analysisItem);
             }
             dispatchEvent(new AnalysisItemEditEvent(event.analysisItem, _originalWrapper, true));
             editor.removeEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
@@ -174,7 +221,7 @@
 
         [Bindable]
         private var linkFactory:ClassFactory;
-		]]>
+        ]]>
     </mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" id="primaryBox">
         <mx:TabNavigator creationPolicy="all" width="100%" height="100%" resizeToContent="true" tabWidth="120" id="tabNavigator">

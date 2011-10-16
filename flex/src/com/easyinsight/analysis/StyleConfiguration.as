@@ -25,6 +25,7 @@ import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.analysis.maps.MapDefinition;
 import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
+import com.easyinsight.analysis.trend.TrendDefinition;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.dashboard.Dashboard;
@@ -58,6 +59,8 @@ public class StyleConfiguration {
 
     public static function getDashboardElementItems(dashboardElement:DashboardElement):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
+        items.addItem(new NumericReportFormItem("Preferred Width", "preferredWidth", dashboardElement.preferredWidth, dashboardElement, 0, 2000));
+        items.addItem(new NumericReportFormItem("Preferred Height", "preferredHeight", dashboardElement.preferredHeight, dashboardElement, 0, 2000));
         if (dashboardElement is DashboardGrid || dashboardElement is DashboardStack) {
             items.addItem(new TextReportFormItem("Label", "label", dashboardElement.label, dashboardElement));
             items.addItem(new NumericReportFormItem("Padding Left", "paddingLeft", dashboardElement.paddingLeft, dashboardElement, 0, 100));
@@ -114,7 +117,7 @@ public class StyleConfiguration {
     public static function getFormItems(report:AnalysisDefinition):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
         items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Arial", "Arial Black", "Comic Sans MS",
-                "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
+                "Courier", "Georgia", "Impact", "Lucida Grande", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
         items.addItem(new NumericReportFormItem("Font Size", "fontSize", report.fontSize, report, 8, 48));
         items.addItem(new NumericReportFormItem("Background Alpha", "backgroundAlpha", report.backgroundAlpha, report, 0, 1));
         items.addItem(new NumericReportFormItem("Fixed Report Width", "fixedWidth", report.fixedWidth, report, 0, 5000));
@@ -227,6 +230,7 @@ public class StyleConfiguration {
                     report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
             items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", ColumnChartDefinition(report).useChartColor, report));
             items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", ColumnChartDefinition(report).chartColor, report));
+            items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", ColumnChartDefinition(report).gradientColor, report));
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", ColumnChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                     ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));

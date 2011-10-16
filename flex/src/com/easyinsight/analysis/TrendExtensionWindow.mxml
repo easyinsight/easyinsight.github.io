@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+         implements="com.easyinsight.analysis.IReportExtensionEditor" label="Trend">
+    <mx:Script><![CDATA[
+
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var dateFields:ArrayCollection;
+
+        private var _analysisItem:AnalysisItem;
+
+        public function save(analysisItem:AnalysisItem):void {
+            var ext:TrendReportFieldExtension = new TrendReportFieldExtension();
+            ext.date = dateComboBox.selectedItem as AnalysisDateDimension;
+            ext.highLow = int(highGroup.selectedValue);
+            analysisItem.reportFieldExtension = ext;
+        }
+
+        public function set analysisItem(analysisItem:AnalysisItem):void {
+            _analysisItem = analysisItem;
+            var ext:TrendReportFieldExtension = _analysisItem.reportFieldExtension as TrendReportFieldExtension;
+            if (ext != null) {
+                if (ext.date != null) {
+                    selectedValue = ext.date.display;
+                }
+                highGood = String(ext.highLow);
+            }
+        }
+
+        public function set analysisItems(analysisItems:ArrayCollection):void {
+            var dateFields:ArrayCollection = new ArrayCollection();
+            for each (var analysisItemWrapper:AnalysisItemWrapper in analysisItems) {
+                if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                    dateFields.addItem(analysisItemWrapper.analysisItem);
+                }
+            }
+            rowCount = Math.min(15, dateFields.length);
+            this.dateFields = dateFields;
+        }
+
+        [Bindable]
+        private var rowCount:int;
+
+        [Bindable]
+        private var highGood:String = "0";
+
+        [Bindable]
+        private var selectedValue:String;
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Are high values good?" direction="horizontal">
+            <mx:RadioButtonGroup id="highGroup" selectedValue="{highGood}"/>
+            <mx:RadioButton group="{highGroup}" label="Yes" value="0"/>
+            <mx:RadioButton group="{highGroup}" label="No" value="1"/>
+            <mx:RadioButton group="{highGroup}" label="Neither" value="2"/>
+        </mx:FormItem>
+        <mx:FormItem label="Which date field should the trend compare against?">
+            <util:SmartComboBox dataProvider="{dateFields}" id="dateComboBox" labelField="display" selectedValue="{selectedValue}" selectedProperty="display"
+                    rowCount="{rowCount}"/>
+        </mx:FormItem>
+    </mx:Form>
+
+
+</mx:VBox>

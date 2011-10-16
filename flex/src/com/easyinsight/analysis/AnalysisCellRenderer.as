@@ -9,8 +9,11 @@ import com.easyinsight.pseudocontext.StandardContextWindow;
 import flash.events.Event;
 import flash.events.MouseEvent;
 
+import mx.controls.Alert;
+
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UITextField;
+import mx.core.UITextFormat;
 import mx.events.FlexEvent;
 import mx.formatters.Formatter;
 import mx.managers.CursorManager;
@@ -27,9 +30,9 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 
     public function AnalysisCellRenderer() {
         super();
-        addEventListener(MouseEvent.CLICK, onClick);
         addEventListener(MouseEvent.ROLL_OVER, onRollOver);
         addEventListener(MouseEvent.ROLL_OUT, onRollOut);
+        this.percentWidth = 100;
     }
 
     public function set report(value:AnalysisDefinition):void {
@@ -49,19 +52,6 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
     private function onRollOut(event:MouseEvent):void {
         if (_rolloverIcon && !_selectionEnabled) {
             CursorManager.removeAllCursors();
-        }
-    }
-
-    public function set selectionEnabled(value:Boolean):void {
-        _selectionEnabled = value;
-    }
-
-    private function onClick(event:MouseEvent):void {
-        if (!_selectionEnabled && event.shiftKey) {
-            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report, data);
-            PopUpManager.addPopUp(window, this);
-            window.x = event.stageX + 5;
-            window.y = event.stageY + 5;
         }
     }
 
@@ -94,6 +84,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 
     public function set data(value:Object):void {
         _data = value;
+        var color:uint = 0;
         if (value != null) {
             var field:String = analysisItem.qualifiedName();
             var formatter:Formatter = analysisItem.getFormatter();
@@ -109,7 +100,12 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
                     if (objVal.summary) {
                         setColor(listDefinition.summaryRowTextColor);
                     } else {
-                        setColor(listDefinition.textColor);
+                        if (objVal.valueExtension != null) {
+                            var ext:TextValueExtension = objVal.valueExtension as TextValueExtension;
+                            color = ext.color;
+                        } else {
+                            color = listDefinition.textColor;
+                        }
                     }
                 }
             } else {
@@ -123,6 +119,16 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         } else {
             this.text = "";
         }
+
+        var rext:TextReportFieldExtension = analysisItem.reportFieldExtension as TextReportFieldExtension;
+        var align:String = "left";
+        if (rext != null && rext.align != null) {
+            align = rext.align.toLowerCase();
+        }
+        //var tf:UITextFormat = new UITextFormat(this.systemManager, _report.fontName, _report.fontSize, color);
+        var tf:UITextFormat = new UITextFormat(this.systemManager, "Droid Sans", _report.fontSize, color);
+        tf.align = align;
+        setTextFormat(tf);
         new StandardContextWindow(analysisItem, passThrough, this, value);
         invalidateProperties();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));

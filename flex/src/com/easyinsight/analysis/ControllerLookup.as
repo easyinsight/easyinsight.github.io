@@ -14,6 +14,7 @@ import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartController;
 import com.easyinsight.analysis.crosstab.CrosstabController;
+import com.easyinsight.analysis.diagram.DiagramController;
 import com.easyinsight.analysis.form.FormController;
 import com.easyinsight.analysis.gantt.GanttController;
 import com.easyinsight.analysis.gauge.GaugeController;
@@ -22,6 +23,8 @@ import com.easyinsight.analysis.list.ListController;
 import com.easyinsight.analysis.timeline.TimelineController;
 import com.easyinsight.analysis.tree.TreeController;
 import com.easyinsight.analysis.treemap.TreeMapController;
+import com.easyinsight.analysis.trend.TrendController;
+import com.easyinsight.analysis.trend.TrendGridController;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListController;
 import com.easyinsight.analysis.verticallist.VerticalListController;
 
@@ -107,6 +110,15 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.COMBINED_VERTICAL_LIST:
                 controller = CombinedVerticalListController;
+                break;
+            case AnalysisDefinition.TREND:
+                controller = TrendController;
+                break;
+            case AnalysisDefinition.TREND_GRID:
+                controller = TrendGridController;
+                break;
+            case AnalysisDefinition.DIAGRAM:
+                controller = DiagramController;
                 break;
         }
         return controller;

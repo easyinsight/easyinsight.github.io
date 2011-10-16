@@ -2,21 +2,19 @@ package com.easyinsight.analysis
 {
 
 
-
-
-import com.easyinsight.pseudocontext.PseudoContextWindow;
+import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.pseudocontext.StandardContextWindow;
 
 import flash.events.Event;
-import flash.events.MouseEvent;
 
-import mx.controls.Text;
+import mx.controls.listClasses.IListItemRenderer;
+import mx.core.UITextField;
+import mx.core.UITextFormat;
 import mx.events.FlexEvent;
     import mx.formatters.Formatter;
-import mx.managers.PopUpManager;
 
 
-public class TextCellRenderer extends Text
+public class TextCellRenderer extends UITextField implements IListItemRenderer
 	{
 		private var _data:Object;
 		private var _analysisItem:AnalysisItem;
@@ -25,7 +23,8 @@ public class TextCellRenderer extends Text
 
 		public function TextCellRenderer() {
 			super();
-            addEventListener(MouseEvent.CLICK, onClick);
+            this.multiline = true;
+            this.wordWrap = true;
 		}
 
     public function set selectionEnabled(value:Boolean):void {
@@ -40,12 +39,6 @@ public class TextCellRenderer extends Text
         _report = value;
     }
 
-    private function onClick(event:MouseEvent):void {
-            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report, data);
-            PopUpManager.addPopUp(window, this);
-            window.x = event.stageX + 5;
-            window.y = event.stageY + 5;
-        }
 
         private function passThrough(event:Event):void {
             dispatchEvent(event);
@@ -59,9 +52,10 @@ public class TextCellRenderer extends Text
             _analysisItem = val;
         }
     
-		override public function set data(value:Object):void {
+		public function set data(value:Object):void {
 			_data = value;
             var text:String;
+            var color:uint = 0;
 			if (value != null) {
                 var field:String = analysisItem.qualifiedName();
                 var formatter:Formatter = analysisItem.getFormatter();
@@ -70,6 +64,12 @@ public class TextCellRenderer extends Text
                     if (objVal == null) {
                         text = "";
                     } else {
+                        if (objVal.valueExtension != null) {
+                            var ext:TextValueExtension = objVal.valueExtension as TextValueExtension;
+                            color = ext.color;
+                        } else {
+                            color = _report is ListDefinition ? ListDefinition(_report).textColor : 0;
+                        }
                         text = formatter.format(objVal.getValue());
                     }
                 } else {
@@ -97,14 +97,40 @@ public class TextCellRenderer extends Text
                 } else {
                     this.text = text;
                 }
+            } else {
+                this.text = text;
             }
+            var rext:TextReportFieldExtension = analysisItem.reportFieldExtension as TextReportFieldExtension;
+            var size:int = 12;
+            if (rext != null && rext.size > 0) {
+                size = rext.size;
+            }
+            var align:String = "left";
+            if (rext != null && rext.align != null) {
+                align = rext.align.toLowerCase();
+            }
+            var tf:UITextFormat = new UITextFormat(this.systemManager, "Lucida Grande", size, color);
+            tf.align = align;
+            setTextFormat(tf);
             new StandardContextWindow(analysisItem, passThrough, this, value);
             invalidateProperties();
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
 		}
 
-        override public function get data():Object {
+        public function get data():Object {
             return _data;
         }
-	}
+
+    public function validateProperties():void {
+        validateNow();
+    }
+
+    public function validateSize(recursive:Boolean = false):void {
+        validateNow();
+    }
+
+    public function validateDisplayList():void {
+        validateNow();
+    }
+}
 }

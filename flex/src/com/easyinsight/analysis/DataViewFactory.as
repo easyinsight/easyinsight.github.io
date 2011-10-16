@@ -10,6 +10,7 @@ import com.easyinsight.report.ReportNavigationEvent;
 
 import flash.display.DisplayObject;
 import flash.events.Event;
+import flash.events.EventDispatcher;
 
 import mx.binding.utils.BindingUtils;
 import mx.binding.utils.ChangeWatcher;
@@ -330,6 +331,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         //moduleInfo = null;
         if (_reportRenderer != null) {
             _reportRenderer.addEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded, false, 0, true);
+            _reportRenderer.addEventListener(ReportRendererEvent.REMOVE_ITEM, onItemRemoved, false, 0, true);
             _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender, false, 0, true);
             _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer, false, 0, true);
             _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown, false, 0, true);
@@ -394,6 +396,10 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     private function onItemAdded(event:ReportRendererEvent):void {
         _controlBar.addItem(event.analysisItem);
+    }
+
+    private function onItemRemoved(event:ReportRendererEvent):void {
+        EventDispatcher(_controlBar).dispatchEvent(event);
     }
 
     public function fromExistingDefinition(existingDefinition:AnalysisDefinition):AnalysisDefinition {

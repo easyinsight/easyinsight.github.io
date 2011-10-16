@@ -50,6 +50,7 @@
         import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.datasources.DataSourceInfo;
+        import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.InvalidFieldsEvent;
         import com.easyinsight.framework.PerspectiveInfo;
@@ -239,6 +240,14 @@
             } else {
                 analysisDefinition = dataViewFactory.fromExistingDefinition(analysisDefinition);
                 dataViewFactory.analysisDefinition = analysisDefinition;
+            }
+            var toRemove:ArrayCollection = analysisDefinition.cleanupReport(transformContainer.getFilterDefinitions());
+            for each (var toRemoveFilter:FilterDefinition in toRemove) {
+                transformContainer.removeFilter(toRemoveFilter);
+            }
+            var newFilters:ArrayCollection = analysisDefinition.newFilters(transformContainer.getFilterDefinitions());
+            for each (var filterDefinition:FilterDefinition in newFilters) {
+                transformContainer.addFilterDefinition(filterDefinition);
             }
             dataView = dataViewFactory;
             dataView.dataSourceID = dataSourceID;

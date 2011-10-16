@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+         implements="com.easyinsight.analysis.IReportExtensionEditor" label="Text">
+    <mx:Script><![CDATA[
+
+        import mx.collections.ArrayCollection;
+
+        private var _analysisItem:AnalysisItem;
+
+        public function save(analysisItem:AnalysisItem):void {
+            var ext:TextReportFieldExtension = new TextReportFieldExtension();
+            //ext.size = parseInt(fontSizeInput.text);
+            //ext.fixedWidth = parseInt(fixedWidthInput.text);
+            ext.align = alignComboBox.selectedItem as String;
+            ext.wordWrap = wordWrapCheckbox.selected;
+            analysisItem.reportFieldExtension = ext;
+        }
+
+        public function set analysisItem(analysisItem:AnalysisItem):void {
+            _analysisItem = analysisItem;
+            var ext:TextReportFieldExtension = _analysisItem.reportFieldExtension as TextReportFieldExtension;
+            if (ext != null) {
+                //customFontSize = String(ext.size);
+                align = ext.align == null ? "Left" : ext.align;
+                wordWrap = ext.wordWrap;
+                //fixedWidth = String(ext.fixedWidth);
+            }
+        }
+
+        public function set analysisItems(analysisItems:ArrayCollection):void {
+        }
+
+        [Bindable]
+        private var align:String = "Left";
+
+        [Bindable]
+        private var fixedWidth:String;
+
+        [Bindable]
+        private var wordWrap:Boolean;
+
+        [Bindable]
+        private var customFontSize:String;
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Align:">
+            <mx:ComboBox id="alignComboBox" selectedItem="{align}">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:String>Left</mx:String>
+                        <mx:String>Center</mx:String>
+                        <mx:String>Right</mx:String>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
+        </mx:FormItem>
+        <!--<mx:FormItem label="Font Size:">
+            <mx:TextInput id="fontSizeInput" text="{customFontSize}"/>
+        </mx:FormItem>-->
+        <!--<mx:FormItem label="Fixed Width:">
+            <mx:TextInput id="fixedWidthInput" text="{fixedWidth}"/>
+        </mx:FormItem>-->
+        <mx:FormItem label="Word Wrap:">
+            <mx:CheckBox id="wordWrapCheckbox" selected="{wordWrap}"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:VBox>

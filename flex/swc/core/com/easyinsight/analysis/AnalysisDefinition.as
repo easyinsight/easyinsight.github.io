@@ -1,5 +1,6 @@
 package com.easyinsight.analysis
 {
+import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.filtering.FilterRawData;
 
 import flash.events.Event;
@@ -45,6 +46,9 @@ import mx.collections.ArrayCollection;
         public static const STACKED_BAR:int = 32;
         public static const VERTICAL_LIST:int = 33;
         public static const COMBINED_VERTICAL_LIST:int = 34;
+        public static const TREND:int = 35;
+        public static const DIAGRAM:int = 36;
+        public static const TREND_GRID:int = 37;
 
 		public var dataFeedID:int;
         public var urlKey:String;
@@ -70,7 +74,7 @@ import mx.collections.ArrayCollection;
         public var description:String;
         public var solutionVisible:Boolean;
         public var temporaryReport:Boolean;
-        public var fontName:String = "Tahoma";
+        public var fontName:String = "Lucida Grande";
         public var fontSize:int = 12;
         public var backgroundAlpha:Number = 1;
         public var fixedWidth:int = 0;
@@ -85,6 +89,23 @@ import mx.collections.ArrayCollection;
 		{
 			reportType = type;
 		}
+
+        public function newFilters(filterDefinitions:ArrayCollection):ArrayCollection {
+            return new ArrayCollection();
+        }
+
+        public function cleanupReport(filterDefinitions:ArrayCollection):ArrayCollection {
+            var toRemove:ArrayCollection = new ArrayCollection();
+            if (filterDefinitions != null) {
+                for each (var filter:FilterDefinition in filterDefinitions) {
+                    if (filter.trendFilter) {
+                        toRemove.addItem(filter);
+                        //filterDefinitions.removeItemAt(filterDefinitions.getItemIndex(filter));
+                    }
+                }
+            }
+            return toRemove;
+        }
 
         public function populate(fields:ArrayCollection):void {
             

@@ -31,6 +31,8 @@ import mx.formatters.Formatter;
         public var lookupTableID:int = 0;
         public var originalDisplayName:String;
         public var tooltip:String;
+        public var reportFieldExtension:ReportFieldExtension;
+        public var marmotScript:String;
 		
 		public function AnalysisItem() {
 			super();
@@ -57,6 +59,9 @@ import mx.formatters.Formatter;
                         }
                     }
                 }
+            }
+            if (reportFieldExtension != null) {
+                reportFieldExtension.updateFromSaved(analysisItem.reportFieldExtension);
             }
         }
 		

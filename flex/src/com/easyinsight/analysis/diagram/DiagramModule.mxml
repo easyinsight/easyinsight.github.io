@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:diagrammer="com.anotherflexdev.diagrammer.*" width="100%" height="100%"
+        implements="com.easyinsight.analysis.IReportRenderer">
+    <mx:Script><![CDATA[
+        import com.anotherflexdev.diagrammer.LabelLinkEvent;
+        import com.anotherflexdev.diagrammer.Link;
+        import com.anotherflexdev.diagrammer.LinkEvent;
+        import com.anotherflexdev.diagrammer.NodeEvent;
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.ReportRendererEvent;
+        import com.easyinsight.analysis.TrendOutcome;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+
+        private var diagramDef:DiagramDefinition;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+            if (dataSet.length > 0) {
+                var editor:Boolean = additionalProperties["reportEditor"];
+                diagramDef = analysisDefinition as DiagramDefinition;
+                diagram.removeEventListener(LinkEvent.LINK_ADDED, onLinkAdd);
+                diagram.removeAllChildren();
+
+                var map:Object = new Object();
+                for (var i:int = 0; i < dataSet.length; i++) {
+                    var trendOutcome:TrendOutcome = dataSet.getItemAt(i) as TrendOutcome;
+                    trendOutcome.dataSourceID = diagramDef.dataFeedID;
+                    for each (var m:AnalysisMeasure in diagramDef.measures) {
+                        if (m.qualifiedName() == trendOutcome.measure.qualifiedName()) {
+                            trendOutcome.measure = m;
+                        }
+                    }
+                    var node:DiagramBaseNode = new DiagramBaseNode();
+                    node.editEnabled = editor;
+                    node.outcome = trendOutcome;
+                    node.x = DiagramReportFieldExtension(trendOutcome.measure.reportFieldExtension).x;
+                    node.y = DiagramReportFieldExtension(trendOutcome.measure.reportFieldExtension).y;
+                    diagram.addChild(node);
+                    map[trendOutcome.measure.qualifiedName()] = node;
+                }
+                var toRemove:Array = [];
+                for each (var dLink:DiagramLink in diagramDef.links) {
+                    var startNode:DiagramBaseNode = map[dLink.startItem.qualifiedName()];
+                    var endNode:DiagramBaseNode = map[dLink.endItem.qualifiedName()];
+                    if (startNode != null && endNode != null) {
+                        var link:Link = diagram.addLink(startNode, endNode);
+                        link.linkName = dLink.label;
+                    } else {
+                        toRemove.push(dLink);
+                    }
+                }
+                for each (var xLink:DiagramLink in toRemove) {
+                    diagramDef.links.removeItemAt(diagramDef.links.getItemIndex(xLink));
+                }
+                diagram.addEventListener(LinkEvent.LINK_ADDED, onLinkAdd);
+            } else {
+                diagram.removeAllChildren();
+            }
+        }
+
+        private function onLinkAdd(event:LinkEvent):void {
+            var link:Link = event.link;
+            var from:DiagramBaseNode = link.fromNode as DiagramBaseNode;
+            var to:DiagramBaseNode = link.toNode as DiagramBaseNode;
+            var dLink:DiagramLink = new DiagramLink();
+            dLink.startItem = from.outcome.measure;
+            dLink.endItem = to.outcome.measure;
+            diagramDef.links.addItem(dLink);
+        }
+
+        private function onLinkRemove(event:LinkEvent):void {
+            var link:Link = event.link;
+            var from:DiagramBaseNode = link.fromNode as DiagramBaseNode;
+            var to:DiagramBaseNode = link.toNode as DiagramBaseNode;
+            var target:DiagramLink = null;
+            for each (var dLink:DiagramLink in diagramDef.links) {
+                if (dLink.startItem.qualifiedName() == from.outcome.measure.qualifiedName() &&
+                        dLink.endItem.qualifiedName() == to.outcome.measure.qualifiedName()) {
+                    target = dLink;
+                }
+            }
+            diagramDef.links.removeItemAt(diagramDef.links.getItemIndex(target));
+        }
+
+        private function onLabel(event:LabelLinkEvent):void {
+            var link:Link = event.link;
+            var from:DiagramBaseNode = link.fromNode as DiagramBaseNode;
+            var to:DiagramBaseNode = link.toNode as DiagramBaseNode;
+            var target:DiagramLink = null;
+            for each (var dLink:DiagramLink in diagramDef.links) {
+                if (dLink.startItem.qualifiedName() == from.outcome.measure.qualifiedName() &&
+                        dLink.endItem.qualifiedName() == to.outcome.measure.qualifiedName()) {
+                    target = dLink;
+                }
+            }
+            target.label = link.linkName;
+        }
+
+        private function onNodeRemoved(event:NodeEvent):void {
+            var node:DiagramBaseNode = event.node as DiagramBaseNode;
+            dispatchEvent(new ReportRendererEvent(ReportRendererEvent.REMOVE_ITEM, node.outcome.measure));
+        }
+
+        public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }
+
+        public function preserveValues():Boolean {
+            return false;
+        }
+        ]]></mx:Script>
+    <diagrammer:Diagram id="diagram" width="100%" height="100%" linkRemoved="onLinkRemove(event)" labelLink="onLabel(event)"
+            addItem="dispatchEvent(event)" nodeRemoved="onNodeRemoved(event)"/>
+</mx:Module>

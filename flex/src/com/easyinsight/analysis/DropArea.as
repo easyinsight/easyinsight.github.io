@@ -16,10 +16,12 @@ import flash.ui.Keyboard;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.controls.AdvancedDataGrid;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.DataGrid;
 import mx.controls.Image;
 import mx.controls.List;
+import mx.core.Application;
 import mx.core.DragSource;
 import mx.core.IUIComponent;
 import mx.core.UIComponent;
@@ -42,6 +44,8 @@ public class DropArea extends HBox
 
     private var _analysisItems:ArrayCollection;
 
+    private var _report:AnalysisDefinition;
+
     private var _dataSourceID:int;
 
     public function set dataSourceID(value:int):void {
@@ -58,6 +62,7 @@ public class DropArea extends HBox
         this.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
         this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);
         this.addEventListener(KeyboardEvent.KEY_UP, keyPressed);
+
 
         editButton = new Button();
         editButton.label = "...";
@@ -84,6 +89,10 @@ public class DropArea extends HBox
         var deleteContextItem:ContextMenuItem = new ContextMenuItem("Delete Field", true);
         deleteContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDelete);
         PopupMenuFactory.assignMenu(this, [ deleteContextItem ]);
+    }
+
+    public function set report(value:AnalysisDefinition):void {
+        _report = value;
     }
 
     public function highlight():void {
@@ -126,13 +135,18 @@ public class DropArea extends HBox
         }
     }
 
-    private function editEvent(event:MouseEvent):void {
+    protected function editEvent(event:MouseEvent, initialWindow:int = 0):void {
         var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
         analysisItemEditor.editorClass = customEditor();
         analysisItemEditor.dataSourceID = _dataSourceID;
         analysisItemEditor.analysisItems = this._analysisItems;
         analysisItemEditor.analysisItem = this.analysisItem;
-        PopUpManager.addPopUp(analysisItemEditor, this);
+        analysisItemEditor.initialWindow = initialWindow;
+        if (_report != null) {
+            //Alert.show("have a report at drop area");
+            analysisItemEditor.reportType = _report.reportType;
+        }
+        PopUpManager.addPopUp(analysisItemEditor, UIComponent(Application.application));
         PopUpUtil.centerPopUp(analysisItemEditor);
         analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
     }
@@ -143,11 +157,6 @@ public class DropArea extends HBox
 
     public function createAnalysisItem():AnalysisItem {
         return analysisItem;
-    }
-
-    protected function toDefaultState():void {
-        removeChildAt(0);
-        addChild(createNoDataLabel());
     }
 
     public function get analysisItem():AnalysisItem {

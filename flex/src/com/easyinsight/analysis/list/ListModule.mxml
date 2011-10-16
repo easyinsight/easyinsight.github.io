@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" implements="com.easyinsight.analysis.ISelectableReportRenderer"
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" implements="com.easyinsight.analysis.IReportRenderer"
         width="100%" height="100%" creationComplete="globalListeners()">
     <mx:states>
         <mx:State name="keywordSearch">
@@ -44,6 +44,7 @@
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.StringValue;
         import com.easyinsight.analysis.TextCellRenderer;
+        import com.easyinsight.analysis.TextReportFieldExtension;
         import com.easyinsight.analysis.Value;
         import com.easyinsight.etl.LookupPair;
         import com.easyinsight.etl.LookupTable;
@@ -334,11 +335,13 @@
                     headerFactory.properties = { eiColor: def.headerTextColor };
                     columnHeaderObject.headerRenderer = headerFactory;
                     var factory:ClassFactory = new ClassFactory(getCellRendererClass(myHeader, myLookupTable));
-                    if (myHeader.hasType(AnalysisItemTypes.TEXT) || (myHeader.hasType(AnalysisItemTypes.DERIVED_GROUPING) && DerivedAnalysisDimension(myHeader).wordWrap)) {
+                    var ext:TextReportFieldExtension = myHeader.reportFieldExtension as TextReportFieldExtension;
+                    if (myHeader.hasType(AnalysisItemTypes.TEXT) || (myHeader.hasType(AnalysisItemTypes.DERIVED_GROUPING) && DerivedAnalysisDimension(myHeader).wordWrap) ||
+                            (ext != null && ext.wordWrap)) {
                         variableHeight = true;
                     }
                     if (myLookupTable == null) {
-                        factory.properties = { analysisItem: myHeader, selectionEnabled: selectionEnabled, report: def, rolloverIcon: listDef.rolloverIcon ? handIcon : null };
+                        factory.properties = { analysisItem: myHeader, report: def, rolloverIcon: listDef.rolloverIcon ? handIcon : null };
                     } else {
                         factory.properties = { analysisItem: myHeader, lookupTable: myLookupTable, pairMap: pairMap };
                     }
@@ -410,6 +413,10 @@
                 if (item.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
                     var d:DerivedAnalysisDimension = item as DerivedAnalysisDimension;
                     return d.wordWrap ? TextCellRenderer : AnalysisCellRenderer;
+                }
+                var ext:TextReportFieldExtension = item.reportFieldExtension as TextReportFieldExtension;
+                if (ext != null && ext.wordWrap) {
+                    return TextCellRenderer;
                 }
                 return AnalysisCellRenderer;
             }
@@ -571,51 +578,6 @@
         [Bindable]
         private var stackIndex:int = 0;
 
-        public function selectable():Boolean {
-            return true;
-        }
-
-        private var _selectionEnabled:Boolean;
-
-
-        [Bindable(event="selectionEnabledChanged")]
-        public function get selectionEnabled():Boolean {
-            return _selectionEnabled;
-        }
-
-        public function set selectionEnabled(value:Boolean):void {
-            if (_selectionEnabled == value) return;
-            _selectionEnabled = value;
-            dispatchEvent(new Event("selectionEnabledChanged"));
-            if (_selectionEnabled) {
-                gridSelectionMode = "multipleCells";
-            } else {
-                gridSelectionMode = "singleCell";
-            }
-            if (listDef != null) {
-                for (var i:int = 0; i < listDef.columns.length; i++) {
-                    var column:AdvancedDataGridColumn = dataGrid.columns[i];
-                    var field:AnalysisItem = listDef.columns.getItemAt(i) as AnalysisItem;
-                    var factory:ClassFactory = new ClassFactory(getCellRendererClass(field, null));
-                    factory.properties = { analysisItem: field, selectionEnabled: selectionEnabled };
-                    column.itemRenderer = factory;
-                }
-            }
-        }
-
-        private var _gridSelectionMode:String = "singleCell";
-
-        [Bindable(event="gridSelectionModeChanged")]
-        public function get gridSelectionMode():String {
-            return _gridSelectionMode;
-        }
-
-        public function set gridSelectionMode(value:String):void {
-            if (_gridSelectionMode == value) return;
-            _gridSelectionMode = value;
-            dispatchEvent(new Event("gridSelectionModeChanged"));
-        }
-
         public function clearContents():void {
         }]]></mx:Script>
     <mx:RemoteObject id="feedService" destination="feeds">
@@ -624,12 +586,34 @@
     <mx:Canvas width="100%" height="100%">
         <mx:VBox width="100%" height="100%">
             <mx:Box id="topBar" width="100%"/>
-            <analysis:ListViewGrid id="dataGrid" dataProvider="{myDataSet}" width="100%" height="100%"
+
+            <analysis:ListViewGrid id="dataGrid" dataProvider="{myDataSet}" height="100%"
                                dragEnter="dragEnterHandler(event)" dragComplete="dragCompleteHandler(event)"
-                               dragDrop="dragDropHandler(event)" selectionMode="{gridSelectionMode}"
+                               dragDrop="dragDropHandler(event)" selectionMode="none"
                                keyUp="keyboardHandler(event)" rowColorFunction="rowColor"
                                headerShift="headersShifted(event)" fontSize="12" dragExit="dragExitHandler(event)"
-                               dragOver="dragOverHandler(event)" fontFamily="Tahoma"/>
+                               dragOver="dragOverHandler(event)" fontFamily="Lucida Grande"
+                    horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
+                    verticalGridLines="true"
+                    borderStyle="none"/>
+
+            <!--<analysis:ListViewGrid id="dataGrid" dataProvider="{myDataSet}" height="100%"
+                               dragEnter="dragEnterHandler(event)" dragComplete="dragCompleteHandler(event)"
+                               dragDrop="dragDropHandler(event)" selectionMode="none"
+                               keyUp="keyboardHandler(event)" rowColorFunction="rowColor"
+                               headerShift="headersShifted(event)" fontSize="12" dragExit="dragExitHandler(event)"
+                               dragOver="dragOverHandler(event)" fontFamily="Lucida Grande"
+                    horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
+                    verticalGridLines="true"
+                    borderStyle="none" headerHorizontalSeparatorSkin="mx.skins.ProgrammaticSkin"
+                    headerSortSeparatorSkin="mx.skins.ProgrammaticSkin"
+                    headerSeparatorSkin="mx.skins.ProgrammaticSkin" />-->
+            <!--<analysis:ListViewGrid id="dataGrid" dataProvider="{myDataSet}" width="100%" height="100%"
+                               dragEnter="dragEnterHandler(event)" dragComplete="dragCompleteHandler(event)"
+                               dragDrop="dragDropHandler(event)"
+                               keyUp="keyboardHandler(event)" rowColorFunction="rowColor"
+                               headerShift="headersShifted(event)" fontSize="12" dragExit="dragExitHandler(event)"
+                               dragOver="dragOverHandler(event)" fontFamily="Lucida Grande"/>-->
         </mx:VBox>
         <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false" mouseEnabled="false">
             <mx:Canvas width="100%" height="100%"/>
