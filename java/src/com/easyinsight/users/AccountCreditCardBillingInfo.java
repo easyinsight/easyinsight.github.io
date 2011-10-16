@@ -28,10 +28,11 @@ public class AccountCreditCardBillingInfo {
 
     public static final String INVOICE_EMAIL = "Thank you for using Easy Insight.\r\n" +
             "This is an invoice for your Easy Insight account.\r\n" +
-            "SUMMARY\r\nYour credit card has been automatically charged {0} to cover your subscription to Easy Insight.\r\n\r\n" +
+            "{0}" +
+            "SUMMARY\r\nYour credit card has been automatically charged {1} to cover your subscription to Easy Insight.\r\n\r\n" +
             "NEED TO CANCEL?\r\n" +
             "Log into your Easy Insight account, go to the Accounts page, and click Cancel Account. " +
-            "Once you cancel you won''t be charged again, but you are responsible for charges already incurred.\r\n\r\n===============================================\r\nINVOICE\r\n{1}         Transaction ID:{2}\r\n..............................\r\nEasy Insight LLC\r\n1401 Wewatta St Unit 606\r\nDenver, CO\r\n\r\nPlease email support@easy-insight.com with any questions or concerns.";
+            "Once you cancel you won''t be charged again, but you are responsible for charges already incurred.\r\n\r\n===============================================\r\nINVOICE\r\n{2}         Transaction ID:{2}\r\n..............................\r\nEasy Insight LLC\r\n1401 Wewatta St Unit 606\r\nDenver, CO\r\n\r\nPlease email support@easy-insight.com with any questions or concerns.";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -115,11 +116,36 @@ public class AccountCreditCardBillingInfo {
         this.responseString = responseString;
     }
 
-    public String toInvoiceText() {
+    public String toInvoiceText(Account account) {
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+        StringBuilder builder = new StringBuilder();
+        builder.append(account.getName()).append("\r\n");
+        if (account.getVat() != null && !"".equals(account.getVat().trim())) {
+            builder.append("VAT: ").append(account.getVat()).append("\r\n");
+        }
+        if (account.getAddressLine1() != null && !"".equals(account.getAddressLine1().trim())) {
+            builder.append(account.getAddressLine1()).append("\r\n");
+        }
+        if (account.getAddressLine2() != null && !"".equals(account.getAddressLine2().trim())) {
+            builder.append(account.getAddressLine2()).append("\r\n");
+        }
+        if (account.getCity() != null && !"".equals(account.getCity().trim())) {
+            builder.append(account.getCity());
+            if (account.getState() != null && !"".equals(account.getState().trim())) {
+                builder.append(", ").append(account.getState());
+                if (account.getPostalCode() != null && !"".equals(account.getPostalCode().trim())) {
+                    builder.append(" ").append(account.getPostalCode());
+
+                }
+            }
+        }
+        if (account.getCountry() != null && !"".equals(account.getCountry().trim())) {
+            builder.append("\r\n").append(account.getCountry());
+        }
+        builder.append("\r\n");
         String bill = currencyFormat.format(Double.parseDouble(amount));
         DateFormat df = SimpleDateFormat.getInstance();
         String date = df.format(getTransactionTime());
-        return MessageFormat.format(INVOICE_EMAIL, bill, date, String.valueOf(transactionID));
+        return MessageFormat.format(INVOICE_EMAIL, builder.toString(), bill, date, String.valueOf(transactionID));
     }
 }

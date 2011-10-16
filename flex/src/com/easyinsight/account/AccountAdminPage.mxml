@@ -21,6 +21,7 @@
             </mx:Form>
             <mx:Button label="Upgrade Account..." click="upgrade()" styleName="grayButton" fontSize="14" width="220" id="upgradeButton"/>
             <mx:Button label="View Invoices..." click="invoices()" styleName="grayButton" fontSize="14" width="220" id="invoicesButton"/>
+            <mx:Button label="Edit Invoice Properties..." click="editInvoiceProps()" styleName="grayButton" fontSize="14" width="220" id="invoicePropsButton"/>
             <mx:Button label="Set Up Billing..." click="navigateToURL(new URLRequest('billing/billing.jsp'), '_self');" styleName="grayButton" fontSize="14" width="220"/>
             <mx:Button label="Cancel Account..." click="cancelPaidAccount()" styleName="grayButton" fontSize="14" width="220"/>
         </mx:VBox>
@@ -91,6 +92,12 @@
             applicationSkinWindow.skinMode = ApplicationSkinWindow.USER_SKIN;
             PopUpManager.addPopUp(applicationSkinWindow, this, true);
             PopUpUtil.centerPopUp(applicationSkinWindow);
+        }
+
+        private function editInvoiceProps():void {
+            var accountAreaWindow:AccountAreaWindow = new AccountAreaWindow();
+            PopUpManager.addPopUp(accountAreaWindow, this, true);
+            PopUpUtil.centerPopUp(accountAreaWindow);
         }
 
         private function setupWizard():void {

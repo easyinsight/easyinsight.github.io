@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="accountService.getAccountAreaInfo.send()">
+    <mx:Script><![CDATA[
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var addressLine1:String;
+        [Bindable]
+        public var addressLine2:String;
+        [Bindable]
+        public var city:String;
+        [Bindable]
+        public var state:String;
+        [Bindable]
+        public var postalCode:String;
+        [Bindable]
+        public var country:String;
+        [Bindable]
+        public var vat:String;
+        [Bindable]
+        public var companyName:String;
+
+        private function save():void {
+            var accountInfo:AccountAreaInfo = new AccountAreaInfo();
+            accountInfo.addressLine1 = addressLine1Input.text;
+            accountInfo.addressLine2 = addressLine2Input.text;
+            accountInfo.city = cityInput.text;
+            accountInfo.state = stateInput.text;
+            accountInfo.country = countryInput.text;
+            accountInfo.postalCode = postalCodeInput.text;
+            accountInfo.vat = vatInput.text;
+            accountInfo.companyName = companyNameInput.text;
+            accountService.updateAccountAreaInfo.send(accountInfo);
+        }
+
+        private function gotInfo():void {
+            var accountInfo:AccountAreaInfo = accountService.getAccountAreaInfo.lastResult as AccountAreaInfo;
+            addressLine1 = accountInfo.addressLine1;
+            addressLine2 = accountInfo.addressLine2;
+            vat = accountInfo.vat;
+            city = accountInfo.city;
+            state = accountInfo.state;
+            country = accountInfo.country;
+            postalCode = accountInfo.postalCode;
+            companyName = accountInfo.companyName;
+        }
+
+        private function saved():void {
+            var result:String = accountService.updateAccountAreaInfo.lastResult as String;
+            if (result == null) {
+                PopUpManager.removePopUp(this);
+            } else {
+                Alert.show(result);
+            }
+        }
+
+        ]]></mx:Script>
+    <mx:RemoteObject destination="accountAdmin" id="accountService">
+        <mx:method name="getAccountAreaInfo" result="gotInfo()"/>
+        <mx:method name="updateAccountAreaInfo" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:Label text="The following information will be added to your monthly invoice."/>
+    <mx:Form>
+        <mx:FormItem label="Company Name:">
+            <mx:TextInput id="companyNameInput" text="{companyName}" width="400"/>
+        </mx:FormItem>
+        <mx:FormItem label="VAT:">
+            <mx:TextInput id="vatInput" text="{vat}" width="400"/>
+        </mx:FormItem>
+        <mx:FormItem label="Address Line 1:">
+            <mx:TextInput id="addressLine1Input" text="{addressLine1}" width="400"/>
+        </mx:FormItem>
+        <mx:FormItem label="Address Line 2:">
+            <mx:TextInput id="addressLine2Input" text="{addressLine2}" width="400"/>
+        </mx:FormItem>
+        <mx:FormItem label="City:">
+            <mx:TextInput id="cityInput" text="{city}" width="400"/>
+        </mx:FormItem>
+        <mx:FormItem label="State:">
+            <mx:TextInput id="stateInput" text="{state}" width="400"/>
+        </mx:FormItem>
+        <mx:FormItem label="Postal Code:">
+            <mx:TextInput id="postalCodeInput" text="{postalCode}" width="400"/>
+        </mx:FormItem>
+        <mx:FormItem label="Country:">
+            <mx:TextInput id="countryInput" text="{country}" width="400"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

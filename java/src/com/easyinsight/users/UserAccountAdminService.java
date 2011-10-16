@@ -60,6 +60,73 @@ public class UserAccountAdminService {
         return (results.size() > 0);
     }
 
+    public AccountAreaInfo getAccountAreaInfo() {
+        SecurityUtil.authorizeAccountAdmin();
+        long accountID = SecurityUtil.getAccountID();
+        AccountAreaInfo accountAreaInfo = new AccountAreaInfo();
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
+            Account account = (Account) results.get(0);
+            accountAreaInfo.setAddressLine1(account.getAddressLine1());
+            accountAreaInfo.setAddressLine2(account.getAddressLine2());
+            accountAreaInfo.setCity(account.getCity());
+            accountAreaInfo.setState(account.getState());
+            accountAreaInfo.setPostalCode(account.getPostalCode());
+            accountAreaInfo.setCountry(account.getCountry());
+            accountAreaInfo.setVat(account.getVat());
+            accountAreaInfo.setCompanyName(account.getName());
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return accountAreaInfo;
+    }
+
+    public String updateAccountAreaInfo(AccountAreaInfo accountAreaInfo) {
+        SecurityUtil.authorizeAccountAdmin();
+        long accountID = SecurityUtil.getAccountID();
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
+            Account account = (Account) results.get(0);
+            if (accountAreaInfo.getCompanyName() == null || accountAreaInfo.getCompanyName().trim().length() < 1) {
+                session.getTransaction().commit();
+                return "Invalid company name.";
+            }
+            if (!account.getName().equals(accountAreaInfo.getCompanyName())) {
+                List existing = session.createQuery("from Account where name = ?").setString(0, accountAreaInfo.getCompanyName()).list();
+                if (existing.size() > 0) {
+                    session.getTransaction().commit();
+                    return "That name is already taken.";
+                }
+            }
+            account.setVat(accountAreaInfo.getVat());
+            account.setAddressLine1(accountAreaInfo.getAddressLine1());
+            account.setAddressLine2(accountAreaInfo.getAddressLine2());
+            account.setCity(accountAreaInfo.getCity());
+            account.setState(accountAreaInfo.getState());
+            account.setPostalCode(accountAreaInfo.getPostalCode());
+            account.setCountry(accountAreaInfo.getCountry());
+            account.setName(accountAreaInfo.getCompanyName());
+            session.update(account);
+            session.getTransaction().commit();
+            return null;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
     public List<UserTransferObject> getUsers() {
         List<UserTransferObject> users = new ArrayList<UserTransferObject>();
         long accountID = SecurityUtil.getAccountID();
@@ -226,9 +293,11 @@ public class UserAccountAdminService {
         List<InvoiceInfo> invoices = new ArrayList<InvoiceInfo>();
         Session session = Database.instance().createSession();
         try {
+            List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list();
+            Account account = (Account) accountResults.get(0);
             @SuppressWarnings({"unchecked"}) List<AccountCreditCardBillingInfo> results = session.createQuery("from AccountCreditCardBillingInfo where accountId = ? and responseCode = ? and amount > ?").setLong(0, SecurityUtil.getAccountID()).setString(1, "100").setDouble(2, 20.).list();
             for (AccountCreditCardBillingInfo info : results) {
-                invoices.add(new InvoiceInfo(info.getTransactionTime(), info.toInvoiceText()));
+                invoices.add(new InvoiceInfo(info.getTransactionTime(), info.toInvoiceText(account)));
             }
         } catch (Exception e) {
             LogClass.error(e);

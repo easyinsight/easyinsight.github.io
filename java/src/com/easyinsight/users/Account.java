@@ -159,9 +159,93 @@ public class Account {
     @Column(name="heat_map_Enabled")
     private boolean heatMapEnabled;
 
+    @Column(name="pricing_model")
+    private int pricingModel;
+
+    @Column(name="address_line1")
+    private String addressLine1;
+    @Column(name="address_line2")
+    private String addressLine2;
+    @Column(name="city")
+    private String city;
+    @Column(name="state")
+    private String state;
+    @Column(name="postal_code")
+    private String postalCode;
+    @Column(name="country")
+    private String country;
+    @Column(name="vat")
+    private String vat;
+
+
+
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public int getPricingModel() {
+        return pricingModel;
+    }
+
+    public void setPricingModel(int pricingModel) {
+        this.pricingModel = pricingModel;
+    }
+
+    public String getAddressLine1() {
+        return addressLine1;
+    }
+
+    public void setAddressLine1(String addressLine1) {
+        this.addressLine1 = addressLine1;
+    }
+
+    public String getAddressLine2() {
+        return addressLine2;
+    }
+
+    public void setAddressLine2(String addressLine2) {
+        this.addressLine2 = addressLine2;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getVat() {
+        return vat;
+    }
+
+    public void setVat(String vat) {
+        this.vat = vat;
+    }
 
     public boolean isIlogEnabled() {
         return ilogEnabled;
@@ -507,11 +591,22 @@ public class Account {
         info.setTransactionID(params.get("transactionid"));
         info.setTransactionTime(new Date());
         if (successful) {
-            String invoiceBody = info.toInvoiceText();
+            String invoiceBody = info.toInvoiceText(this);
             for (User user : getUsers()) {
                 if (user.isAccountAdmin()) {
                     try {
                         new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, "support@easy-insight.com", false, "Easy Insight");
+                    } catch (Exception e) {
+                        LogClass.error(e);
+                    }
+                }
+            }
+        } else {
+            String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information to resume service.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
+            for (User user : getUsers()) {
+                if (user.isAccountAdmin()) {
+                    try {
+                        new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
                     } catch (Exception e) {
                         LogClass.error(e);
                     }
