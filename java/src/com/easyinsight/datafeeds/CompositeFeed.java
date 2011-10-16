@@ -665,7 +665,7 @@ public class CompositeFeed extends Feed {
             }
             /*WSListDefinition analysisDefinition = new WSListDefinition();
             analysisDefinition.setColumns(new ArrayList<AnalysisItem>(queryData.neededItems));*/
-            pipeline.setup(queryData.neededItems);
+            pipeline.setup(queryData.neededItems, feed.getFields());
             originalDataSet = pipeline.toDataSet(dataSet);
             return originalDataSet;
         }
