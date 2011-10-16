@@ -1,10 +1,7 @@
 package com.easyinsight.dashboard;
 
 
-import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.DataSourceInfo;
-import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -261,10 +258,16 @@ public class Dashboard implements Cloneable {
                 Key clonedKey = analysisItem.getKey().clone();
                 analysisItem.setKey(clonedKey);
             }
-            analysisItem.updateIDs(replacementMap);
         }
+
+        ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+
+        for (AnalysisItem analysisItem : replacementMap.values()) {
+            analysisItem.updateIDs(replacements);
+        }
+
         for (FilterDefinition filter : filterDefinitions) {
-            filter.updateIDs(replacementMap);
+            filter.updateIDs(replacements);
         }
 
         dashboard.setFilters(filterDefinitions);
