@@ -24,6 +24,11 @@
             PopUpManager.removePopUp(this);
         }
 
+        private function newTrendFilter():void {
+            dispatchEvent(new NewFilterEvent(NewFilterEvent.TREND_FILTER));
+            PopUpManager.removePopUp(this);
+        }
+
         private function newFieldChoiceFilter():void {
             dispatchEvent(new NewFilterEvent(NewFilterEvent.FIELD_CHOICE_FILTER, AnalysisItemWrapper(aFieldBox.selectedItem).analysisItem));
             PopUpManager.removePopUp(this);
@@ -37,6 +42,8 @@
                 stackIndex = 0;
             } else if (typeGroup.selectedValue == "namedRef") {
                 stackIndex = 3;
+            } else if (typeGroup.selectedValue == "trendFilter") {
+                stackIndex = 4;
             } else if (typeGroup.selectedValue == "fieldChoiceFilter") {
                 stackIndex = 2;
             } else {
@@ -51,6 +58,7 @@
             <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
             <mx:RadioButton label="Create a Field Choice Filter" groupName="typeGroup" value="fieldChoiceFilter"/>
             <mx:RadioButton label="Create a Named Reference Filter" groupName="typeGroup" value="namedRef"/>
+            <mx:RadioButton label="Create a Trend Filter" groupName="typeGroup" value="trendFilter"/>
         </mx:HBox>
         <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
             <mx:VBox>
@@ -75,6 +83,10 @@
             </mx:VBox>
             <mx:HBox>
                 <util:SaveButton label="Create a new Named Reference Filter" click="newRefFilter()"/>
+                <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            </mx:HBox>
+            <mx:HBox>
+                <util:SaveButton label="Create a new Trend Filter" click="newTrendFilter()"/>
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
         </mx:ViewStack>
