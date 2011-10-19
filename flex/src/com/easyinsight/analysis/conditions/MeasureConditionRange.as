@@ -18,11 +18,11 @@ package com.easyinsight.analysis.conditions
 			var valueRange:ValueRange;
 			if (valueRangeType == FIXED_VALUE) {
 				valueRange = new FixedValueRange(condition.lowValue, condition.highValue);
-			} else if (valueRangeType == PERCENTAGE) {
+			} else if (valueRangeType == PERCENTAGE || valueRangeType == LOGARITHM) {
 				valueRange = new PercentageValueRange();
-			} else if (valueRangeType == LOGARITHM) {
+			}/* else if (valueRangeType == LOGARITHM) {
 				valueRange = new LogarithmicValueRange();
-			}
+			}*/
 			return valueRange;
 		}
 
