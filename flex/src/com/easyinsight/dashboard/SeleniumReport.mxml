@@ -205,7 +205,7 @@
 
         private function onSetup(event:ReportSetupEvent):void {
             dataViewFactory.filterDefinitions = event.reportInfo.report.filterDefinitions;
-            dataViewFactory.refresh(false);
+            dataViewFactory.refresh();
         }
 
         private var _snapshotOnLoad:Boolean = false;
@@ -226,7 +226,7 @@
         }
 
         public function refreshData():void {
-            dataViewFactory.refresh(false);
+            dataViewFactory.refresh();
         }
         ]]>
     </mx:Script>
