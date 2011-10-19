@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.treemap.*"
-           xmlns:maps="com.easyinsight.analysis.maps.*"
+
            implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%">
     <mx:states>
         <mx:State name="hasData">
@@ -214,9 +214,9 @@
                 if (treeMap != null) {
                     treeMap.colorFunction = colorFunction;
                 }
-                if (minValue != Number.MAX_VALUE && maxValue != Number.MIN_VALUE) {
+                /*if (minValue != Number.MAX_VALUE && maxValue != Number.MIN_VALUE) {
                     legend.recreate();
-                }
+                }*/
                 currentState = "hasData";
             } else {
                 currentState = "";
@@ -235,8 +235,8 @@
         }]]></mx:Script>
     <mx:HBox width="100%" height="100%" id="canvas" backgroundColor="#FFFFFF" backgroundAlpha="1">
         <mx:Canvas id="box" width="100%" height="100%"/>
-        <maps:ColorRangeLegend points="5" conditionRenderer="{conditionRenderer}" maxValue="{maxValue}"
+        <!--<maps:ColorRangeLegend points="5" conditionRenderer="{conditionRenderer}" maxValue="{maxValue}"
                                        minValue="{minValue}"
-                                       formatter="{formatter}" id="legend"/>
+                                       formatter="{formatter}" id="legend"/>-->
     </mx:HBox>
 </mx:Module>
