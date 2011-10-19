@@ -301,9 +301,6 @@
                     if (coreSpace.getChildren().length > 0) {
                         coreSpace.removeChildAt(0);
                     }
-                    if (event.perspective is IModulePerspective) {
-
-                    }
                     this.perspective = event.perspective;
                     if (event.properties != null) {
                         for (var propKey:String in event.properties) {

@@ -167,7 +167,7 @@
         }
 
         private function cancel():void {
-            PopUpManager.removePopUp(this);
+            this.close();
         }
 
         private function onSaveComplete(event:AnalysisItemSaveEvent):void {

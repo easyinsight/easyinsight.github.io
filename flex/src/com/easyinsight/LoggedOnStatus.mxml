@@ -13,6 +13,20 @@
         [Bindable]
         private var message:String;
 
+        private var _textColor:int;
+
+
+        [Bindable(event="textColorChanged")]
+        public function get textColor():int {
+            return _textColor;
+        }
+
+        public function set textColor(value:int):void {
+            if (_textColor == value) return;
+            _textColor = value;
+            dispatchEvent(new Event("textColorChanged"));
+        }
+
         public function logout():void {
             User.destroy();
             CookieUtil.deleteCookie("eisession");
@@ -24,7 +38,7 @@
 	<mx:RemoteObject id="authService" destination="login">
 	</mx:RemoteObject>
     <mx:Spacer width="100%"/>
-    <mx:Label text="{Constants.instance().userName}" color="#FFFFFF"/>
+    <mx:Label text="{Constants.instance().userName}" color="{textColor}"/>
     <mx:VRule height="20"/>
 	<mx:Button label="Log Out" click="logout()" styleName="grayButton"/>
 </mx:HBox>

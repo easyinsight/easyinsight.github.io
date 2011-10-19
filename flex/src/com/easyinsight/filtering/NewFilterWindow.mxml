@@ -4,34 +4,33 @@
         import com.easyinsight.analysis.AnalysisItemWrapper;
 
         import mx.collections.ArrayCollection;
-        import mx.managers.PopUpManager;
 
         [Bindable]
         public var availableFields:ArrayCollection;
 
         private function newFieldFilter():void {
             dispatchEvent(new NewFilterEvent(NewFilterEvent.FIELD_FILTER, AnalysisItemWrapper(fieldBox.selectedItem).analysisItem));
-            PopUpManager.removePopUp(this);
+            this.close();
         }
 
         private function newOrFilter():void {
             dispatchEvent(new NewFilterEvent(NewFilterEvent.OR_FILTER));
-            PopUpManager.removePopUp(this);
+            this.close();
         }
 
         private function newRefFilter():void {
             dispatchEvent(new NewFilterEvent(NewFilterEvent.NAMED_REF_FILTER));
-            PopUpManager.removePopUp(this);
+            this.close();
         }
 
         private function newTrendFilter():void {
             dispatchEvent(new NewFilterEvent(NewFilterEvent.TREND_FILTER));
-            PopUpManager.removePopUp(this);
+            this.close();
         }
 
         private function newFieldChoiceFilter():void {
             dispatchEvent(new NewFilterEvent(NewFilterEvent.FIELD_CHOICE_FILTER, AnalysisItemWrapper(aFieldBox.selectedItem).analysisItem));
-            PopUpManager.removePopUp(this);
+            this.close();
         }
 
         [Bindable]
@@ -66,28 +65,28 @@
                 <mx:ComboBox dataProvider="{availableFields}" id="fieldBox" labelField="displayName"/>
                 <mx:HBox>
                     <util:SaveButton label="Create the Filter" click="newFieldFilter()"/>
-                    <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+                    <util:CancelButton label="Cancel" click="this.close()"/>
                 </mx:HBox>
             </mx:VBox>
             <mx:HBox>
                 <util:SaveButton label="Create a new Or Filter" click="newOrFilter()"/>
-                <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+                <util:CancelButton label="Cancel" click="this.close()"/>
             </mx:HBox>
             <mx:VBox>
                 <mx:Label text="Choose a field for the filter:"/>
                 <mx:ComboBox dataProvider="{availableFields}" id="aFieldBox" labelField="displayName"/>
                 <mx:HBox>
                     <util:SaveButton label="Create a new Field Choice Filter" click="newFieldChoiceFilter()"/>
-                    <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+                    <util:CancelButton label="Cancel" click="this.close()"/>
                 </mx:HBox>
             </mx:VBox>
             <mx:HBox>
                 <util:SaveButton label="Create a new Named Reference Filter" click="newRefFilter()"/>
-                <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+                <util:CancelButton label="Cancel" click="this.close()"/>
             </mx:HBox>
             <mx:HBox>
                 <util:SaveButton label="Create a new Trend Filter" click="newTrendFilter()"/>
-                <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+                <util:CancelButton label="Cancel" click="this.close()"/>
             </mx:HBox>
         </mx:ViewStack>
     </mx:VBox>

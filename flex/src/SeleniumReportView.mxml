@@ -45,7 +45,11 @@
         [Bindable]
         private var reportHeight:int;
 
+        [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf",fontName="Lucida Grande", fontStyle="normal")]
+        private var myNormalLucida:Class;
+
         private function handleFlashVars():void {
+            Font.registerFont(myNormalLucida);
             Constants.setup();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             this.urlKey = String(Application.application.parameters.analysisID);

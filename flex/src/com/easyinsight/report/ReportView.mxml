@@ -549,7 +549,7 @@
                    labelPlacement="right" id="editReportButton"
                    toolTip="Open this report in the report editor..." label="Edit Report" styleName="grayButton"/>
         <mx:Spacer width="100%"/>
-        <easyinsight:LoggedOnStatus/>
+        <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
     </mx:HBox>
     <mx:HBox width="100%" horizontalAlign="center" paddingTop="5" paddingBottom="5" verticalAlign="middle">
         <mx:Label text="{reportName}" fontSize="24" maxWidth="600" color="#000000"/>
