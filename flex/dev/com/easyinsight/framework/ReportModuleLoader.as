@@ -15,16 +15,22 @@ import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartModule;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartModule;
+import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartModule;
 import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartModule;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartModule;
+import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartModule;
 import com.easyinsight.analysis.crosstab.CrosstabModule;
+import com.easyinsight.analysis.diagram.DiagramModule;
+import com.easyinsight.analysis.form.FormModule;
 import com.easyinsight.analysis.gantt.GanttModule;
 import com.easyinsight.analysis.gauge.GaugeModule;
 import com.easyinsight.analysis.heatmap.HeatMapModule;
 import com.easyinsight.analysis.list.ListModule;
 import com.easyinsight.analysis.tree.TreeModule;
+import com.easyinsight.analysis.trend.TrendGridModule;
+import com.easyinsight.analysis.trend.TrendModule;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListModule;
 import com.easyinsight.analysis.verticallist.VerticalListModule;
 
@@ -57,10 +63,10 @@ public class ReportModuleLoader extends EventDispatcher {
             case "TreeModule.swf":
                 module = new TreeModule();
                 break;
-            case "VerticalListModule.swf":
+            case "VerticalList.swf":
                 module = new VerticalListModule();
                 break;
-            case "CombinedVerticalListModule.swf":
+            case "CombinedVerticalList.swf":
                 module = new CombinedVerticalListModule();
                 break;
             case "HeatMapModule.swf":
@@ -78,11 +84,17 @@ public class ReportModuleLoader extends EventDispatcher {
             case "ColumnChartModule.swf":
                 module = new ColumnChartModule();
                 break;
+            case "StackedColumnChartModule.swf":
+                module = new StackedColumnChartModule();
+                break;
             case "Column3DChartModule.swf":
                 module = new Column3DChartModule();
                 break;
             case "BarChartModule.swf":
                 module = new BarChartModule();
+                break;
+            case "StackedBarChartModule.swf":
+                module = new StackedBarChartModule();
                 break;
             case "Bar3DChartModule.swf":
                 module = new Bar3DChartModule();
@@ -99,7 +111,7 @@ public class ReportModuleLoader extends EventDispatcher {
             case "Line3DChartModule.swf":
                 module = new Line3DChartModule();
                 break;
-            case "PieModule.swf":
+            case "PieChartModule.swf":
                 module = new PieChartModule();
                 break;
             case "Pie3DChartModule.swf":
@@ -110,6 +122,18 @@ public class ReportModuleLoader extends EventDispatcher {
                 break;
             case "BubbleChartModule.swf":
                 module = new BubbleChartModule();
+                break;
+            case "FormModule.swf":
+                module = new FormModule();
+                break;
+            case "TrendModule.swf":
+                module = new TrendModule();
+                break;
+            case "TrendGridModule.swf":
+                module = new TrendGridModule();
+                break;
+            case "DiagramModule.swf":
+                module = new DiagramModule();
                 break;
         }
         return module;

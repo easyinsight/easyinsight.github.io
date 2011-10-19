@@ -1,7 +1,6 @@
 package com.easyinsight.framework {
 import com.easyinsight.ReportEditor;
 import com.easyinsight.account.AccountBasePage;
-import com.easyinsight.account.AccountSetupWizard;
 import com.easyinsight.account.Help;
 import com.easyinsight.administration.feed.FeedAdministrationContainer;
 import com.easyinsight.analysis.AnalysisItemEditor;
@@ -19,7 +18,6 @@ import com.easyinsight.schedule.ScheduleManagement;
 import com.easyinsight.scorecard.ScorecardEditor;
 import com.easyinsight.scorecard.ScorecardView;
 import com.easyinsight.solutions.ConnectionDetail;
-import com.easyinsight.solutions.PostInstallPage;
 import com.easyinsight.solutions.RevisedSolutionSummary;
 
 public class PerspectiveFactory implements IPerspectiveFactory {
@@ -43,12 +41,6 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 break;
             case PerspectiveInfo.DATA_SOURCE_ADMIN:
                 perspective = new DirectUIComponent(new FeedAdministrationContainer());
-                break;
-            case PerspectiveInfo.POST_CONNECTION_INSTALL:
-                perspective = new DirectUIComponent(new PostInstallPage());
-                break;
-            case PerspectiveInfo.ACCOUNT_CREATION:
-                perspective = new DirectUIComponent(new AccountSetupWizard());
                 break;
             case PerspectiveInfo.LOOKUP_TABLE:
                 perspective = new DirectUIComponent(new LookupTableEditor());
