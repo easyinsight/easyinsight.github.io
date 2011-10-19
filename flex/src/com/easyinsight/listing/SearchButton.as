@@ -56,8 +56,6 @@ public class SearchButton extends Button {
                 User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.REPORT_EDITOR, {dataSourceID: eiDescriptor.id})));
             } else if (event.eiDescriptor.getType() == EIDescriptor.REPORT) {
                 User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new ReportPerspectiveInfo(event.eiDescriptor as InsightDescriptor)));
-            } else if (event.eiDescriptor.getType() == EIDescriptor.GOAL_TREE) {
-                User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.KPI_TREE_VIEW, {goalTreeID: event.eiDescriptor.id})));
             } else if (event.eiDescriptor.getType() == EIDescriptor.DASHBOARD) {
                 //User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id})));
                 var dashboardWindow:DashboardContextWindow = new DashboardContextWindow();
