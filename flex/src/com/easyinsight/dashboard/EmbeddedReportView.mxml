@@ -245,7 +245,7 @@
 
         private function transformsUpdated(event:TransformsUpdatedEvent):void {
             dataViewFactory.filterDefinitions = transformContainer.getFilterDefinitions();
-            dataViewFactory.refresh(false);
+            dataViewFactory.refresh();
         }
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
@@ -272,7 +272,7 @@
         }
 
         public function refreshData():void {
-            dataViewFactory.refresh(false);
+            dataViewFactory.refresh();
         }
 
         private function exportData():void {
