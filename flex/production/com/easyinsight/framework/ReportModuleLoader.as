@@ -50,7 +50,7 @@ public class ReportModuleLoader extends EventDispatcher {
                 _reportRendererModule == "CrosstabModule.swf" || _reportRendererModule == "ColumnChartModule.swf" ||
                 _reportRendererModule == "BarChartModule.swf" || _reportRendererModule == "StackedColumnChartModule.swf" ||
                 _reportRendererModule == "StackedBarChartModule.swf" || _reportRendererModule == "ListModule.swf" ||
-                _reportRendererModule == "TreeModule.swf") {
+                _reportRendererModule == "TreeModule.swf" || _reportRendererModule == "ListModule.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));

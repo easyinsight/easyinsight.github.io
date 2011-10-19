@@ -1,7 +1,6 @@
 package com.easyinsight.framework {
 import com.easyinsight.ReportEditor;
 import com.easyinsight.account.AccountBasePage;
-import com.easyinsight.account.AccountSetupWizard;
 import com.easyinsight.account.Help;
 import com.easyinsight.analysis.AnalysisItemEditor;
 import com.easyinsight.dashboard.DashboardEditor;
@@ -15,7 +14,6 @@ import com.easyinsight.report.ReportView;
 import com.easyinsight.schedule.ScheduleManagement;
 import com.easyinsight.scorecard.ScorecardEditor;
 import com.easyinsight.scorecard.ScorecardView;
-import com.easyinsight.solutions.PostInstallPage;
 import com.easyinsight.solutions.RevisedSolutionSummary;
 
 public class PerspectiveFactory implements IPerspectiveFactory {
@@ -37,20 +35,8 @@ public class PerspectiveFactory implements IPerspectiveFactory {
             case PerspectiveInfo.COMPOSITE_WORKSPACE:
                 perspective = new DirectUIComponent(new NewCompositeFeedWorkspace());
                 break;
-/*            case PerspectiveInfo.KPI_TREE_ADMIN:
-                perspective = new ModuleUIComponent("KPITreeAdmin", "Loading the KPI tree configuration page...");
-                break;
-            case PerspectiveInfo.KPI_TREE_VIEW:
-                perspective = new ModuleUIComponent("KPITreeView", "Loading the KPI tree view page...");
-                break;*/
             case PerspectiveInfo.DATA_SOURCE_ADMIN:
                 perspective = new ModuleUIComponent("DataSourceAdmin", "Loading the data source administration page...");
-                break;
-            case PerspectiveInfo.POST_CONNECTION_INSTALL:
-                perspective = new DirectUIComponent(new PostInstallPage());
-                break;
-            case PerspectiveInfo.ACCOUNT_CREATION:
-                perspective = new DirectUIComponent(new AccountSetupWizard());
                 break;
             case PerspectiveInfo.LOOKUP_TABLE:
                 perspective = new DirectUIComponent(new LookupTableEditor());
@@ -58,12 +44,6 @@ public class PerspectiveFactory implements IPerspectiveFactory {
             case PerspectiveInfo.HOME_PAGE:
                 perspective = new DirectUIComponent(new MyData());
                 break;
-            /*case PerspectiveInfo.SCORECARDS:
-                perspective = new DirectUIComponent(new ScorecardHome());
-                break;*/
-            /*case PerspectiveInfo.API:
-                perspective = new DirectUIComponent(new APIPage());
-                break;*/
             case PerspectiveInfo.EXCHANGE:
                 perspective = new DirectUIComponent(new Exchange());
                 break;
