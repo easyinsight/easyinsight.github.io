@@ -13,8 +13,12 @@ import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartModul
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartModule;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartModule;
 import com.easyinsight.analysis.crosstab.CrosstabModule;
+import com.easyinsight.analysis.diagram.DiagramModule;
+import com.easyinsight.analysis.gauge.GaugeModule;
 import com.easyinsight.analysis.list.ListModule;
 import com.easyinsight.analysis.tree.TreeModule;
+import com.easyinsight.analysis.trend.TrendGridModule;
+import com.easyinsight.analysis.trend.TrendModule;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListModule;
 import com.easyinsight.analysis.verticallist.VerticalListModule;
 
@@ -50,7 +54,9 @@ public class ReportModuleLoader extends EventDispatcher {
                 _reportRendererModule == "CrosstabModule.swf" || _reportRendererModule == "ColumnChartModule.swf" ||
                 _reportRendererModule == "BarChartModule.swf" || _reportRendererModule == "StackedColumnChartModule.swf" ||
                 _reportRendererModule == "StackedBarChartModule.swf" || _reportRendererModule == "ListModule.swf" ||
-                _reportRendererModule == "TreeModule.swf" || _reportRendererModule == "ListModule.swf") {
+                _reportRendererModule == "TreeModule.swf" || _reportRendererModule == "ListModule.swf" ||
+                _reportRendererModule == "TrendGridModule.swf" || _reportRendererModule == "DiagramModule.swf" ||
+                _reportRendererModule == "TrendModule.swf" || _reportRendererModule == "GaugeModule.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
@@ -99,6 +105,14 @@ public class ReportModuleLoader extends EventDispatcher {
                 return new StackedColumnChartModule();
             } else if (moduleName == "StackedBarChartModule.swf") {
                 return new StackedBarChartModule();
+            } else if (moduleName == "DiagramModule.swf") {
+                return new DiagramModule();
+            } else if (moduleName == "TrendModule.swf") {
+                return new TrendModule();
+            } else if (moduleName == "TrendGridModule.swf") {
+                return new TrendGridModule();
+            } else if (moduleName == "GaugeModule.swf") {
+                return new GaugeModule();
             }
         }
         return moduleInfo.factory.create();
