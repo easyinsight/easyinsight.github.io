@@ -92,8 +92,9 @@ public class DashboardReport extends DashboardElement {
     public static DashboardElement loadReport(long elementID, EIConnection conn) throws SQLException {
         DashboardReport dashboardReport = null;
         PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.title, analysis.data_feed_id, analysis.report_type, analysis.analysis_id, analysis.url_key, " +
-                "dashboard_report.label_placement, dashboard_report.show_label from " +
-                "analysis, dashboard_report where dashboard_report.dashboard_element_id = ? and dashboard_report.report_id = analysis.analysis_id");
+                "dashboard_report.label_placement, dashboard_report.show_label, dashboard_element.preferred_width, dashboard_element.preferred_height from " +
+                "analysis, dashboard_report, dashboard_element where dashboard_report.dashboard_element_id = dashboard_element.dashboard_element_id and " +
+                "dashboard_report.report_id = analysis.analysis_id and dashboard_element.dashboard_element_id = ?");
         queryStmt.setLong(1, elementID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -101,6 +102,8 @@ public class DashboardReport extends DashboardElement {
             dashboardReport.setReport(new InsightDescriptor(rs.getLong(4), rs.getString(1), rs.getLong(2), rs.getInt(3), rs.getString(5), Roles.SUBSCRIBER, false));
             dashboardReport.setLabelPlacement(rs.getInt(6));
             dashboardReport.setShowLabel(rs.getBoolean(7));
+            dashboardReport.setPreferredWidth(rs.getInt(8));
+            dashboardReport.setPreferredHeight(rs.getInt(9));
             dashboardReport.loadElement(elementID, conn);
         }
         queryStmt.close();

@@ -46,6 +46,25 @@ public abstract class DashboardElement implements Cloneable {
     private int headerBackgroundColor;
     private double headerBackgroundAlpha;
 
+    private int preferredWidth;
+    private int preferredHeight;
+
+    public int getPreferredWidth() {
+        return preferredWidth;
+    }
+
+    public void setPreferredWidth(int preferredWidth) {
+        this.preferredWidth = preferredWidth;
+    }
+
+    public int getPreferredHeight() {
+        return preferredHeight;
+    }
+
+    public void setPreferredHeight(int preferredHeight) {
+        this.preferredHeight = preferredHeight;
+    }
+
     public double getFilterBackgroundAlpha() {
         return filterBackgroundAlpha;
     }
@@ -168,7 +187,8 @@ public abstract class DashboardElement implements Cloneable {
 
     public void loadElement(long elementID, EIConnection conn) throws SQLException {
         PreparedStatement loadStmt = conn.prepareStatement("SELECT LABEL, FILTER_BORDER_STYLE, FILTER_BORDER_COLOR, filter_background_color, filter_background_alpha," +
-                "padding_left, padding_right, padding_top, padding_bottom, header_image_id, user_image.image_name, header_background_color, header_background_alpha from dashboard_element " +
+                "padding_left, padding_right, padding_top, padding_bottom, header_image_id, user_image.image_name, header_background_color, header_background_alpha," +
+                "preferred_width, preferred_height from dashboard_element " +
                 "left join user_image on dashboard_element.header_image_id = user_image.user_image_id where " +
                 "dashboard_element_id = ?");
         loadStmt.setLong(1, elementID);
@@ -197,14 +217,16 @@ public abstract class DashboardElement implements Cloneable {
             setHeaderBackground(imageDescriptor);
         }
         setHeaderBackgroundColor(rs.getInt(i++));
-        setHeaderBackgroundAlpha(rs.getDouble(i));
+        setHeaderBackgroundAlpha(rs.getDouble(i++));
+        setPreferredWidth(rs.getInt(i++));
+        setPreferredHeight(rs.getInt(i));
         loadStmt.close();
     }
 
     public long save(EIConnection conn) throws SQLException {
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_ELEMENT (ELEMENT_TYPE, LABEL, filter_border_style, filter_border_color," +
                 "filter_background_color, filter_background_alpha, padding_left, padding_right, padding_top, padding_bottom, header_image_id," +
-                "header_background_color, header_background_alpha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "header_background_color, header_background_alpha, preferred_width, preferred_height) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertStmt.setInt(i++, getType());
@@ -223,7 +245,9 @@ public abstract class DashboardElement implements Cloneable {
             insertStmt.setLong(i++, headerBackground.getId());
         }
         insertStmt.setInt(i++, headerBackgroundColor);
-        insertStmt.setDouble(i, headerBackgroundAlpha);
+        insertStmt.setDouble(i++, headerBackgroundAlpha);
+        insertStmt.setInt(i++, preferredWidth);
+        insertStmt.setInt(i, preferredHeight);
         insertStmt.execute();
         setElementID(Database.instance().getAutoGenKey(insertStmt));
         insertStmt.close();

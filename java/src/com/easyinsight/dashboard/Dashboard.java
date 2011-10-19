@@ -34,12 +34,10 @@ public class Dashboard implements Cloneable {
     private String authorName;
     private boolean temporary;
     private boolean publicVisible;
-    private int paddingLeft;
-    private int paddingRight;
-    private String filterBorderStyle;
-    private int filterBorderColor;
-    private int filterBackgroundColor;
-    private double filterBackgroundAlpha;
+    private int padding;
+    private int backgroundColor;
+    private int borderThickness;
+    private int borderColor;
     private int headerStyle;
     private String ytdMonth;
     private boolean overrideYTD;
@@ -47,6 +45,38 @@ public class Dashboard implements Cloneable {
     private DataSourceInfo dataSourceInfo;
     private int role;
     private String marmotScript;
+
+    public int getPadding() {
+        return padding;
+    }
+
+    public void setPadding(int padding) {
+        this.padding = padding;
+    }
+
+    public int getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(int backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
+
+    public int getBorderThickness() {
+        return borderThickness;
+    }
+
+    public void setBorderThickness(int borderThickness) {
+        this.borderThickness = borderThickness;
+    }
+
+    public int getBorderColor() {
+        return borderColor;
+    }
+
+    public void setBorderColor(int borderColor) {
+        this.borderColor = borderColor;
+    }
 
     public String getMarmotScript() {
         return marmotScript;
@@ -288,46 +318,6 @@ public class Dashboard implements Cloneable {
         this.publicVisible = publicVisible;
     }
 
-    public int getPaddingLeft() {
-        return paddingLeft;
-    }
-
-    public void setPaddingLeft(int paddingLeft) {
-        this.paddingLeft = paddingLeft;
-    }
-
-    public int getPaddingRight() {
-        return paddingRight;
-    }
-
-    public void setPaddingRight(int paddingRight) {
-        this.paddingRight = paddingRight;
-    }
-
-    public String getFilterBorderStyle() {
-        return filterBorderStyle;
-    }
-
-    public void setFilterBorderStyle(String filterBorderStyle) {
-        this.filterBorderStyle = filterBorderStyle;
-    }
-
-    public int getFilterBorderColor() {
-        return filterBorderColor;
-    }
-
-    public void setFilterBorderColor(int filterBorderColor) {
-        this.filterBorderColor = filterBorderColor;
-    }
-
-    public int getFilterBackgroundColor() {
-        return filterBackgroundColor;
-    }
-
-    public void setFilterBackgroundColor(int filterBackgroundColor) {
-        this.filterBackgroundColor = filterBackgroundColor;
-    }
-
     public int getHeaderStyle() {
         return headerStyle;
     }
@@ -336,15 +326,11 @@ public class Dashboard implements Cloneable {
         this.headerStyle = headerStyle;
     }
 
-    public double getFilterBackgroundAlpha() {
-        return filterBackgroundAlpha;
-    }
-
-    public void setFilterBackgroundAlpha(double filterBackgroundAlpha) {
-        this.filterBackgroundAlpha = filterBackgroundAlpha;
-    }
-
     public void visit(IDashboardVisitor dashboardVisitor) {
         rootElement.visit(dashboardVisitor);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Integer.parseInt("CCCCCC", 16));
     }
 }

@@ -128,9 +128,9 @@ public class DashboardStorage {
         if (dashboard.getId() == 0) {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD (DASHBOARD_NAME, URL_KEY, " +
                     "ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE, UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, TEMPORARY_DASHBOARD," +
-                    "PUBLIC_VISIBLE, PADDING_LEFT, PADDING_RIGHT, FILTER_BORDER_STYLE, FILTER_BORDER_COLOR, filter_background_color, FILTER_BACKGROUND_ALPHA," +
+                    "PUBLIC_VISIBLE, border_color, border_thickness, background_color, padding," +
                     "recommended_exchange, ytd_date, ytd_override, marmotscript) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             insertStmt.setString(1, dashboard.getName());
             insertStmt.setString(2, dashboard.getUrlKey());
             insertStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -142,24 +142,22 @@ public class DashboardStorage {
             insertStmt.setString(9, dashboard.getAuthorName());
             insertStmt.setBoolean(10, dashboard.isTemporary());
             insertStmt.setBoolean(11, dashboard.isPublicVisible());
-            insertStmt.setInt(12, dashboard.getPaddingLeft());
-            insertStmt.setInt(13, dashboard.getPaddingRight());
-            insertStmt.setString(14, dashboard.getFilterBorderStyle());
-            insertStmt.setInt(15, dashboard.getFilterBorderColor());
-            insertStmt.setInt(16, dashboard.getFilterBackgroundColor());
-            insertStmt.setDouble(17, dashboard.getFilterBackgroundAlpha());
-            insertStmt.setBoolean(18, dashboard.isRecommendedExchange());
-            insertStmt.setString(19, dashboard.getYtdMonth() == null ? "December" : dashboard.getYtdMonth());
-            insertStmt.setBoolean(20, dashboard.isOverrideYTD());
-            insertStmt.setString(21, dashboard.getMarmotScript());
+            insertStmt.setInt(12, dashboard.getBorderColor());
+            insertStmt.setInt(13, dashboard.getBorderThickness());
+            insertStmt.setInt(14, dashboard.getBackgroundColor());
+            insertStmt.setInt(15, dashboard.getPadding());
+            insertStmt.setBoolean(16, dashboard.isRecommendedExchange());
+            insertStmt.setString(17, dashboard.getYtdMonth() == null ? "December" : dashboard.getYtdMonth());
+            insertStmt.setBoolean(18, dashboard.isOverrideYTD());
+            insertStmt.setString(19, dashboard.getMarmotScript());
             insertStmt.execute();
             dashboard.setId(Database.instance().getAutoGenKey(insertStmt));
             insertStmt.close();
         } else {
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET DASHBOARD_NAME = ?," +
                     "URL_KEY = ?, ACCOUNT_VISIBLE = ?, UPDATE_DATE = ?, DESCRIPTION = ?, EXCHANGE_VISIBLE = ?, AUTHOR_NAME = ?, TEMPORARY_DASHBOARD = ?," +
-                    "PUBLIC_VISIBLE = ?, PADDING_LEFT = ?, PADDING_RIGHT = ?, filter_border_style = ?, filter_border_color = ?, filter_background_color = ?," +
-                    "filter_background_alpha = ?, recommended_exchange = ?, ytd_date = ?, ytd_override = ?, marmotscript = ? WHERE DASHBOARD_ID = ?");
+                    "PUBLIC_VISIBLE = ?, border_color = ?, border_thickness = ?, background_color = ?, padding = ?," +
+                    "recommended_exchange = ?, ytd_date = ?, ytd_override = ?, marmotscript = ? WHERE DASHBOARD_ID = ?");
             updateStmt.setString(1, dashboard.getName());
             updateStmt.setString(2, dashboard.getUrlKey());
             updateStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -169,17 +167,15 @@ public class DashboardStorage {
             updateStmt.setString(7, dashboard.getAuthorName());
             updateStmt.setBoolean(8, dashboard.isTemporary());
             updateStmt.setBoolean(9, dashboard.isPublicVisible());
-            updateStmt.setInt(10, dashboard.getPaddingLeft());
-            updateStmt.setInt(11, dashboard.getPaddingRight());
-            updateStmt.setString(12, dashboard.getFilterBorderStyle());
-            updateStmt.setInt(13, dashboard.getFilterBorderColor());
-            updateStmt.setInt(14, dashboard.getFilterBackgroundColor());
-            updateStmt.setDouble(15, dashboard.getFilterBackgroundAlpha());
-            updateStmt.setBoolean(16, dashboard.isRecommendedExchange());
-            updateStmt.setString(17, dashboard.getYtdMonth() == null ? "December" : dashboard.getYtdMonth());
-            updateStmt.setBoolean(18, dashboard.isOverrideYTD());
-            updateStmt.setString(19, dashboard.getMarmotScript());
-            updateStmt.setLong(20, dashboard.getId());
+            updateStmt.setInt(10, dashboard.getBorderColor());
+            updateStmt.setInt(11, dashboard.getBorderThickness());
+            updateStmt.setInt(12, dashboard.getBackgroundColor());
+            updateStmt.setInt(13, dashboard.getPadding());
+            updateStmt.setBoolean(14, dashboard.isRecommendedExchange());
+            updateStmt.setString(15, dashboard.getYtdMonth() == null ? "December" : dashboard.getYtdMonth());
+            updateStmt.setBoolean(16, dashboard.isOverrideYTD());
+            updateStmt.setString(17, dashboard.getMarmotScript());
+            updateStmt.setLong(18, dashboard.getId());
             updateStmt.executeUpdate();
             updateStmt.close();
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ?");
@@ -236,8 +232,8 @@ public class DashboardStorage {
     public Dashboard getDashboard(long dashboardID, EIConnection conn) throws Exception {
         Dashboard dashboard;
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, URL_KEY, ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE," +
-                    "UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, temporary_dashboard, public_visible, padding_left, padding_right," +
-                "filter_border_style, filter_border_color, filter_background_color, filter_background_alpha, recommended_exchange, ytd_date, ytd_override, marmotscript FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                    "UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, temporary_dashboard, public_visible, border_color, border_thickness," +
+                "background_color, padding, recommended_exchange, ytd_date, ytd_override, marmotscript FROM DASHBOARD WHERE DASHBOARD_ID = ?");
         queryStmt.setLong(1, dashboardID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -254,16 +250,14 @@ public class DashboardStorage {
             dashboard.setAuthorName(rs.getString(9));
             dashboard.setTemporary(rs.getBoolean(10));
             dashboard.setPublicVisible(rs.getBoolean(11));
-            dashboard.setPaddingLeft(rs.getInt(12));
-            dashboard.setPaddingRight(rs.getInt(13));
-            dashboard.setFilterBorderStyle(rs.getString(14) == null ? "solid" : rs.getString(14));
-            dashboard.setFilterBorderColor(rs.getInt(15));
-            dashboard.setFilterBackgroundColor(rs.getInt(16));
-            dashboard.setFilterBackgroundAlpha(rs.getDouble(17));
-            dashboard.setRecommendedExchange(rs.getBoolean(18));
-            dashboard.setYtdMonth(rs.getString(19));
-            dashboard.setOverrideYTD(rs.getBoolean(20));
-            dashboard.setMarmotScript(rs.getString(21));
+            dashboard.setBorderColor(rs.getInt(12));
+            dashboard.setBorderThickness(rs.getInt(13));
+            dashboard.setBackgroundColor(rs.getInt(14));
+            dashboard.setPadding(rs.getInt(15));
+            dashboard.setRecommendedExchange(rs.getBoolean(16));
+            dashboard.setYtdMonth(rs.getString(17));
+            dashboard.setOverrideYTD(rs.getBoolean(18));
+            dashboard.setMarmotScript(rs.getString(19));
             PreparedStatement findElementsStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, ELEMENT_TYPE FROM " +
                     "DASHBOARD_ELEMENT, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ? AND DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID = DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID");
             findElementsStmt.setLong(1, dashboardID);
