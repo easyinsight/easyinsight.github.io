@@ -6,7 +6,7 @@
             <mx:RemoveChild target="{legend}"/>
         </mx:State>
     </mx:states>
-    <mx:Style>
+    <!--<mx:Style>
         .axisTitles {
             fontSize: 14;
             fontFamily: "Tahoma";
@@ -17,7 +17,7 @@
             fontFamily: "Tahoma";
             fontSize: 14;
         }
-    </mx:Style>
+    </mx:Style>-->
     <mx:Script><![CDATA[
 
         import com.easyinsight.analysis.AnalysisDateDimension;

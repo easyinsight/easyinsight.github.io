@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.analysis.ISelectableReportRenderer">
-    <mx:Style>
+    <!--<mx:Style>
         .axisTitles {
             fontSize: 14;
             fontFamily: "Tahoma";
@@ -11,7 +11,7 @@
             fontFamily: "Tahoma";
             fontSize: 14;
         }
-    </mx:Style>
+    </mx:Style>-->
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -63,6 +63,7 @@
             var plotChartDef:BubbleChartDefinition = analysisDefinition as BubbleChartDefinition;
             if (dataSet.length > 0) {
                 this.bubbleChart = plotChartDef;
+                plotChart.setStyle("fontFamily", plotChartDef.getFont());
                 plotChart.setStyle("backgroundAlpha", plotChartDef.backgroundAlpha);
                 measure1 = plotChartDef.xaxisMeasure.qualifiedName();
                 measure1Name = plotChartDef.xaxisMeasure.display;

@@ -24,19 +24,8 @@ public class IntentionRenderer extends HBox {
     private var button:Button;
 
     public function IntentionRenderer() {
-        setStyle("horizontalGap", 20);
         titleLabel = new Label();
-        titleLabel.width = 200;
         descriptionArea = new AutoSizeTextArea();
-        descriptionArea.editable = false;
-        descriptionArea.selectable = false;
-        descriptionArea.width = 300;
-        button = new Button();
-        button.styleName = "grayButton";
-        button.label = "Apply Suggestion";
-        button.addEventListener(MouseEvent.CLICK, onClick);
-        setStyle("paddingRight", 10);
-        setStyle("verticalAlign", "middle");
     }
 
     private function onClick(event:MouseEvent):void {
@@ -45,6 +34,19 @@ public class IntentionRenderer extends HBox {
 
     override protected function createChildren():void {
         super.createChildren();
+        setStyle("horizontalGap", 20);
+        titleLabel.width = 200;
+        descriptionArea.editable = false;
+        descriptionArea.selectable = false;
+        descriptionArea.verticalScrollPolicy = "off";
+        descriptionArea.horizontalScrollPolicy = "off";
+        descriptionArea.width = 300;
+        button = new Button();
+        button.styleName = "grayButton";
+        button.label = "Apply Suggestion";
+        button.addEventListener(MouseEvent.CLICK, onClick);
+        setStyle("paddingRight", 10);
+        setStyle("verticalAlign", "middle");
         addChild(titleLabel);
         addChild(descriptionArea);
         addChild(button);
@@ -55,7 +57,6 @@ public class IntentionRenderer extends HBox {
         if (suggestion != null) {
             titleLabel.text = suggestion.headline;
             descriptionArea.text = suggestion.description;
-            invalidateSize();
         }
     }
 

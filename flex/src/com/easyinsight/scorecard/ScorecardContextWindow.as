@@ -1,9 +1,6 @@
 package com.easyinsight.scorecard {
 import com.easyinsight.analysis.list.ListDefinition;
-import com.easyinsight.framework.NavigationEvent;
 import com.easyinsight.genredata.AnalyzeEvent;
-import com.easyinsight.goals.GoalDataAnalyzeSource;
-import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.listing.ReportEditorAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
@@ -45,15 +42,6 @@ public class ScorecardContextWindow {
                     var reportContextItem:ContextMenuItem = new ContextMenuItem(report.name);
                     reportContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, createReport(report, kpi.filters));
                     items.push(reportContextItem);
-                }
-            }
-            if (kpi.kpiTrees != null && kpi.kpiTrees.length > 0) {
-                for each (var kpiTree:GoalTreeDescriptor in kpi.kpiTrees) {
-                    var kpiTreeItem:ContextMenuItem = new ContextMenuItem(kpiTree.name);
-                    kpiTreeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-                        passthroughFunction.call(passthroughObject, new AnalyzeEvent(new GoalDataAnalyzeSource(GoalTreeDescriptor(event.currentTarget.data).id)));
-                    });
-                    items.push(kpiTreeItem);
                 }
             }
         }

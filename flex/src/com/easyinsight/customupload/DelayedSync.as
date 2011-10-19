@@ -11,14 +11,17 @@ import com.easyinsight.administration.feed.CallData;
 import com.easyinsight.administration.feed.CredentialsResponse;
 import com.easyinsight.administration.feed.FeedDefinitionData;
 import com.easyinsight.analysis.ReportFault;
-import com.easyinsight.genredata.AnalyzeEvent;
+import com.easyinsight.datasources.DataSourceBehavior;
+import com.easyinsight.framework.NavigationEvent;
+import com.easyinsight.schedule.DailyScheduleType;
+import com.easyinsight.schedule.DataSourceRefreshActivity;
 import com.easyinsight.scorecard.DataSourceAsyncEvent;
-import com.easyinsight.solutions.DataSourceDescriptor;
-
-import com.easyinsight.solutions.PostInstallSource;
+import com.easyinsight.solutions.SolutionKPIData;
 import com.easyinsight.util.CancelButton;
 import com.easyinsight.util.EISlimWindow;
 import com.easyinsight.util.ProgressAlert;
+
+import flash.events.Event;
 
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
@@ -42,6 +45,7 @@ public class DelayedSync extends EISlimWindow {
     private var progressBar:ProgressBar;
 
     private var uploadService:RemoteObject;
+    private var solutionService:RemoteObject;
 
     public function set dataSourceDefinition(value:FeedDefinitionData):void {
         _dataSourceDefinition = value;
@@ -54,6 +58,9 @@ public class DelayedSync extends EISlimWindow {
         asyncService = new RemoteObject();
         asyncService.destination = "asyncService";
         asyncService.getCallData.addEventListener(ResultEvent.RESULT, gotCallData);
+        solutionService = new RemoteObject();
+        solutionService.destination = "solutionService";
+        solutionService.addKPIData.addEventListener(ResultEvent.RESULT, installed);
         this.width = 550;
     }
 
@@ -102,11 +109,7 @@ public class DelayedSync extends EISlimWindow {
                 timer.addEventListener(TimerEvent.TIMER, onTimer);
                 timer.start();
             } else {
-                var descriptor:DataSourceDescriptor = new DataSourceDescriptor();
-                descriptor.id = _dataSourceDefinition.dataFeedID;
-                descriptor.name = _dataSourceDefinition.feedName;
-                dispatchEvent(new AnalyzeEvent(new PostInstallSource(descriptor)));
-                PopUpManager.removePopUp(this);
+                connectionInstalled();
             }
         } else {
             progressBar.visible = false;
@@ -114,15 +117,40 @@ public class DelayedSync extends EISlimWindow {
         }
     }
 
+    private function connectionInstalled():void {
+        var kpiData:SolutionKPIData = new SolutionKPIData();
+        kpiData.dataSourceID = _dataSourceDefinition.dataFeedID;
+        if (DataSourceBehavior.pullDataSource(_dataSourceDefinition.getFeedType())) {
+            var activity:DataSourceRefreshActivity = new DataSourceRefreshActivity();
+            activity.dataSourceID = _dataSourceDefinition.dataFeedID;
+            activity.dataSourceName = _dataSourceDefinition.feedName;
+            var schedule:DailyScheduleType = new DailyScheduleType();
+            var morningOrEvening:int = int(Math.random() * 2);
+            if (morningOrEvening == 0) {
+                schedule.hour = int(Math.random() * 6);
+            } else {
+                schedule.hour = int(Math.random() * 6) + 18;
+            }
+            schedule.minute = int(Math.random() * 60);
+            activity.scheduleType = schedule;
+            kpiData.utcOffset = new Date().getTimezoneOffset();
+            kpiData.activity = activity;
+        }
+        kpiData.addDataSourceToGroup = true;
+        ProgressAlert.alert(this, "Completing installation...", null, solutionService.addKPIData);
+        solutionService.addKPIData.send(kpiData);
+    }
+
+    private function installed(event:Event):void {
+        dispatchEvent(new NavigationEvent("Home"));
+        PopUpManager.removePopUp(this);
+    }
+
     private function gotCallData(event:ResultEvent):void {
         var callData:CallData = asyncService.getCallData.lastResult as CallData;
         if (callData.status == CallData.DONE) {
             timer.stop();
-            var descriptor:DataSourceDescriptor = new DataSourceDescriptor();
-            descriptor.id = _dataSourceDefinition.dataFeedID;
-            descriptor.name = _dataSourceDefinition.feedName;
-            dispatchEvent(new AnalyzeEvent(new PostInstallSource(descriptor)));
-            PopUpManager.removePopUp(this);
+            connectionInstalled();
         } else if (callData.status == CallData.FAILED) {
             timer.stop();
             progressBar.visible = false;
@@ -133,7 +161,7 @@ public class DelayedSync extends EISlimWindow {
                 var fault:ReportFault = callData.result as ReportFault;
                 Alert.show(fault.getMessage());
             } else {
-                Alert.show("Something went wrong in trying to retrive data. Please double check your configuration information.");
+                Alert.show("Something went wrong in trying to retrieve data. Please double check your configuration information.");
             }
         } else if (callData.status == CallData.RUNNING) {
             if (callData.result != null) {

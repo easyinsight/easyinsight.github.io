@@ -6,18 +6,6 @@
             <mx:RemoveChild target="{legend}"/>
         </mx:State>
     </mx:states>
-    <mx:Style>
-        .axisTitles {
-            fontSize: 14;
-            fontFamily: "Tahoma";
-        }
-
-        CartesianChart {
-            axisTitleStyleName:axisTitles;
-            fontFamily: "Tahoma";
-            fontSize: 14;
-        }
-    </mx:Style>
     <mx:Script><![CDATA[
 
         import com.easyinsight.analysis.AnalysisDateDimension;
@@ -41,7 +29,6 @@
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.events.ChartItemEvent;
-        import mx.charts.renderers.CircleItemRenderer;
         import mx.charts.series.LineSeries;
         import mx.charts.series.items.LineSeriesItem;
         import mx.collections.ArrayCollection;
@@ -135,6 +122,8 @@
                 hbox.removeChild(lineChart);
 
                 lineChart = new LineChart();
+                lineChart.setStyle("fontFamily", lineChartDef.getFont());
+                lineChart.setStyle("fontSize", lineChartDef.fontSize);
                 legend.visible = true;
                 lineChart.percentHeight = 100;
                 lineChart.percentWidth = 100;
@@ -247,7 +236,9 @@
                     stroke.weight = lineChartDef.strokeWeight;
                     uniqueLineSeries.setStyle("lineStroke", stroke);
                     uniqueLineSeries.setStyle("stroke", stroke);
-                    uniqueLineSeries.setStyle("itemRenderer", new ClassFactory(CircleItemRenderer));
+                    var cf:ClassFactory = new ClassFactory(EICircleItemRenderer);
+                    cf.properties = { analysisItem: lineChartDef.multiMeasure ? lineChartDef.xaxis : lineChartDef.yaxis};
+                    uniqueLineSeries.setStyle("itemRenderer", cf);
                     uniqueLineSeries.xField = lineChartDef.xaxis.qualifiedName();
                     if (key == null || key == "") {
                         key = "[ No Value ]";

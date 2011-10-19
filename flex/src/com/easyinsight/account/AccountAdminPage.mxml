@@ -45,7 +45,6 @@
     </mx:HBox>
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
-        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.skin.ApplicationSkinWindow;
         import com.easyinsight.util.PopUpUtil;
 
@@ -98,10 +97,6 @@
             var accountAreaWindow:AccountAreaWindow = new AccountAreaWindow();
             PopUpManager.addPopUp(accountAreaWindow, this, true);
             PopUpUtil.centerPopUp(accountAreaWindow);
-        }
-
-        private function setupWizard():void {
-            dispatchEvent(new AnalyzeEvent(new AccountSetupWizardSource()));
         }
 
         private function onCreationComplete():void {

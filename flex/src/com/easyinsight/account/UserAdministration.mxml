@@ -71,7 +71,7 @@
 
         private function addUser():void {
             var newUserDialog:NewUserDialog = NewUserDialog(PopUpManager.createPopUp(this, NewUserDialog, true));
-            newUserDialog.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, addedUser);
+            newUserDialog.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, addedUser, false, 0, true);
             PopUpUtil.centerPopUp(newUserDialog);
         }
 
@@ -106,12 +106,6 @@
         [Bindable]
         private var changesIndex:int;
 
-        <!--private function importUsers():void {
-            var window:ImportUsersStartWindow = new ImportUsersStartWindow();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }-->
-
 
         ]]>
     </mx:Script>
@@ -144,7 +138,6 @@
         <mx:Label text="{usersAvailableString}" fontFamily="Lucida Grande" fontWeight="normal"/>
         <mx:Spacer width="30"/>
         <mx:Button label="Add User..." click="addUser()" enabled="{enableAdd}" fontSize="14" styleName="grayButton"/>
-        <!--<mx:Button label="Import Users..." click="importUsers()" enabled="{enableAdd}" fontSize="14" styleName="grayButton"/>-->
     </mx:HBox>
 
     <mx:DataGrid dataProvider="{users}" rowHeight="28">

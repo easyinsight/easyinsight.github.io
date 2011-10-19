@@ -25,6 +25,10 @@ import mx.collections.ArrayCollection;
 		public function ListDefinition()
 		{
 		}
+
+        override public function supportsEmbeddedFonts():Boolean {
+            return true;
+        }
 		
 		override public function getFields():ArrayCollection {
 			return columns;

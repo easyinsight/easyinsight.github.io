@@ -98,7 +98,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
                 if (_report is ListDefinition) {
                     var listDefinition:ListDefinition = _report as ListDefinition;
                     if (objVal.summary) {
-                        setColor(listDefinition.summaryRowTextColor);
+                        color = listDefinition.summaryRowTextColor;
                     } else {
                         if (objVal.valueExtension != null) {
                             var ext:TextValueExtension = objVal.valueExtension as TextValueExtension;
@@ -125,8 +125,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         if (rext != null && rext.align != null) {
             align = rext.align.toLowerCase();
         }
-        //var tf:UITextFormat = new UITextFormat(this.systemManager, _report.fontName, _report.fontSize, color);
-        var tf:UITextFormat = new UITextFormat(this.systemManager, "Droid Sans", _report.fontSize, color);
+        var tf:UITextFormat = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color);
         tf.align = align;
         setTextFormat(tf);
         new StandardContextWindow(analysisItem, passThrough, this, value);

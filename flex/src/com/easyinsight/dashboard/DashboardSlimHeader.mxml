@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+         xmlns:report="com.easyinsight.report.*"
+         width="100%" styleName="topButtonBar">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.IRetrievable;
+        import com.easyinsight.datasources.DataSourceInfo;
+        import com.easyinsight.genredata.ExchangeItem;
+
+        import mx.controls.Alert;
+
+        import mx.controls.TextArea;
+        import mx.core.UIComponent;
+        import mx.states.RemoveChild;
+        import mx.states.State;
+
+
+        [Bindable]
+        private var _dashboardView:DashboardView;
+
+        public function set dashboardView(value:DashboardView):void {
+            _dashboardView = value;
+        }
+
+        private var _dashboard:Dashboard;
+
+        public function set dashboard(value:Dashboard):void {
+            _dashboard = value;
+            if (_dashboard != null) {
+                description = _dashboard.description;
+                dashboardName = _dashboard.name;
+            }
+        }
+
+        [Bindable]
+        private var description:String;
+
+        [Bindable]
+        private var dashboardName:String;
+
+        private var stateIndex:int;
+        private var lastState:State;
+
+        public function generateState(description:String, exchangeItem:ExchangeItem, dashboardView:DashboardView):void {
+            _dashboardView = dashboardView;
+            var ops:Array = [];
+            var textAreas:Array = [];
+            var remainingSections:Array = [];
+
+            if (ops.length > 0) {
+                var len:int = Math.max(2, textAreas.length);
+                for each (var area:TextArea in textAreas) {
+                    area.width = 780 / len;
+                }
+                for each (var comp:UIComponent in remainingSections) {
+                    comp.width = 830 / len;
+                }
+                var state:State = new State();
+                var name:String = "report" + stateIndex++;
+                state.name = name;
+                state.overrides = ops;
+                var states:Array = [];
+                states.push(state);
+                if (lastState != null) {
+                    states.push(lastState);
+                }
+                this.states = states;
+                lastState = state;
+                currentState = name;
+            } else {
+                currentState = "";
+            }
+        }
+
+        private var _dataSource:DataSourceInfo;
+
+        private var _viewFactory:IRetrievable;
+
+
+        [Bindable(event="dataSourceChanged")]
+        public function get dataSource():DataSourceInfo {
+            return _dataSource;
+        }
+
+        public function set dataSource(value:DataSourceInfo):void {
+            if (_dataSource == value) return;
+            _dataSource = value;
+            dispatchEvent(new Event("dataSourceChanged"));
+        }
+
+        [Bindable(event="viewFactoryChanged")]
+        public function get viewFactory():IRetrievable {
+            return _viewFactory;
+        }
+
+        public function set viewFactory(value:IRetrievable):void {
+            if (_viewFactory == value) return;
+            _viewFactory = value;
+            dispatchEvent(new Event("viewFactoryChanged"));
+        }
+        ]]></mx:Script>
+    <mx:Button click="_dashboardView.close()" styleName="grayButton" labelPlacement="right"
+               id="backButton"
+               toolTip="Close the report view" label="Close Dashboard"/>
+    <report:RefreshButton styleName="grayButton" labelPlacement="right"
+               id="refreshButton" toolTip="Refresh this dashboard" label="Refresh" viewFactory="{viewFactory}"
+            dataSource="{dataSource}"/>
+    <mx:Button styleName="grayButton" click="_dashboardView.exportDashboard(exportButton)"
+           labelPlacement="right"
+           id="exportButton" toolTip="Export the report..." label="Export"/>
+    <mx:Button click="_dashboardView.toggleFilters()" styleName="grayButton" labelPlacement="right"
+               id="filterButton" label="Toggle Filters"/>
+    <mx:Spacer width="100%"/>
+    <mx:Label text="{dashboardName}" maxWidth="350"
+              fontSize="14" toolTip="{description}"/>
+    <mx:Spacer width="100%"/>
+    <easyinsight:LoggedOnStatus/>
+</mx:HBox>

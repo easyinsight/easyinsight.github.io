@@ -5,6 +5,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.datasources.DataSourceDisplay;
+        import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.TransformContainer;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -29,9 +30,9 @@
 
         private var _wrappers:ArrayCollection;
 
-        private var _dataSourceDisplay:DataSourceDisplay;
+        private var _dataSourceDisplay:DataSourceInfo;
 
-        public function set dataSourceDisplay(value:DataSourceDisplay):void {
+        public function set dataSourceDisplay(value:DataSourceInfo):void {
             _dataSourceDisplay = value;
         }
 
@@ -68,9 +69,9 @@
             var suggestions:ArrayCollection = analysisService.generatePossibleIntentions.lastResult as ArrayCollection;
 
             /*    suggestionList.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
-                this.suggestions = suggestions;
-                suggestionList.rowCount = suggestions.length + 1;
-            }*/
+             this.suggestions = suggestions;
+             suggestionList.rowCount = suggestions.length + 1;
+             }*/
 
         }
 
@@ -90,15 +91,13 @@
                 intention.addEventListener(IntentionTriggerEvent.INTENTION_TRIGGER, onIntentionEvent);
                 intention.apply(metadata);
             }
-            _dataView.retrieveData();
+            _dataView.refresh();
             PopUpManager.removePopUp(this);
         }
 
         private function onIntentionEvent(event:IntentionTriggerEvent):void {
             dispatchEvent(event);
         }
-
-
         ]]></mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="getIntentions" result="gotIntentions()"/>

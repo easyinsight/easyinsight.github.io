@@ -47,6 +47,10 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         this.percentHeight = 100;
     }
 
+    public function obtainPreferredSizeInfo():SizeInfo {
+        return new SizeInfo(dashboardStack.preferredWidth, dashboardStack.preferredHeight);
+    }
+
     private var viewStack:ViewStack;
 
     private var viewChildren:ArrayCollection;
@@ -86,7 +90,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     private var leftEffect:Effect;
     private var rightEffect:Effect;
 
-    private var childFilterBox:Box;
+    protected var childFilterBox:Box;
 
     protected override function createChildren():void {
         super.createChildren();
@@ -99,21 +103,21 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             //myFiltersBox.percentWidth = 100;
             childFilterBox = new HBox();
             childFilterBox.percentWidth = 100;
-            var buttonsBox:HBox = new HBox();
+            buttonsBox = new HBox();
             headerHBox.addChild(myFiltersBox);
             headerHBox.addChild(childFilterBox);
             headerHBox.addChild(buttonsBox);
             addChild(headerHBox);
         } else {
             var headerArea:Canvas = new Canvas();
-            var defaultButtonsBox:Container = styleHeaderArea(headerArea);
+            defaultButtonsBox = styleHeaderArea(headerArea);
             addChild(headerArea);
         }
         viewStack = new ViewStack();
         viewStack.percentHeight = 100;
         viewStack.percentWidth = 100;
         viewChildren = new ArrayCollection();
-        createStackChildren(dashboardStack.consolidateHeaderElements ? buttonsBox : defaultButtonsBox);
+        createStackContents();
         var transformContainer:TransformContainer = createTransformContainer();
         if (transformContainer != null) {
             if (dashboardStack.consolidateHeaderElements) {
@@ -133,6 +137,16 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             }
         }
         addChild(viewStack);
+
+    }
+
+    private var buttonsBox:HBox;
+    private var defaultButtonsBox:Container;
+
+    protected function createStackContents():void {
+        viewStack.removeAllChildren();
+        viewChildren.removeAll();
+        createStackChildren(dashboardStack.consolidateHeaderElements ? buttonsBox : defaultButtonsBox);
     }
 
     private var _consolidateHeader:Container = null;
@@ -224,7 +238,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     }
 
     private function createStackChildren(headerbar:Container):void {
-        for (var i:int = 0; i < dashboardStack.gridItems.length; i++) {
+        for (var i:int = 0; i < dashboardStack.count; i++) {
             var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
             var report:DashboardElement = stackItem.dashboardElement;
             if (dashboardStack.selectionType == 'Buttons') {
@@ -232,7 +246,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                 topButton.styleName = "grayButton";
                 topButton.data = i;
                 topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
-                if (report is DashboardReport) {
+                if (report == null) {
+                    topButton.label = "Stack Item " + i;
+                } else if (report is DashboardReport) {
                     topButton.label = DashboardReport(report).report.name;
                     if (DashboardReport(report).report.reportType == AnalysisDefinition.HEATMAP) {
                         leftEffect = null;
@@ -245,24 +261,11 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                         topButton.label = String(i);
                     }
                 }
-                if (dashboardStack.gridItems.length > 1) {
+                if (dashboardStack.count > 1) {
                     headerbar.addChild(topButton);
                 }
             }
-            var comp:UIComponent = DashboardElementFactory.createViewUIComponent(report, dashboardEditorMetadata);
-            if (comp is DashboardStackViewComponent) {
-                DashboardStackViewComponent(comp).stackFilterMap = this.stackFilterMap;
-            }
-            if (dashboardStack.consolidateHeaderElements) {
-                var filterContainer:Container = new HBox();
-                childFilters.addItem(filterContainer);
-                if (i == 0) {
-                    childFilterBox.addChild(filterContainer);
-                }
-                if (dashboardStack.consolidateHeaderElements && comp is DashboardStackViewComponent) {
-                    DashboardStackViewComponent(comp).consolidateHeader = filterContainer;
-                }
-            }
+            var comp:UIComponent = createComp(report, i);
             viewChildren.addItem(comp);
             viewStack.addChild(comp);
         }
@@ -275,7 +278,37 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         }
     }
 
-    private var childFilters:ArrayCollection = new ArrayCollection();
+    protected function stackChildSize():int {
+        return viewChildren.length;
+    }
+
+    protected function stackComponents():ArrayCollection {
+        return viewChildren;
+    }
+
+    protected function createComp(element:DashboardElement, i:int):UIComponent {
+        var comp:UIComponent = DashboardElementFactory.createViewUIComponent(element, dashboardEditorMetadata);
+        if (comp is DashboardStackViewComponent) {
+            DashboardStackViewComponent(comp).stackFilterMap = this.stackFilterMap;
+        } else if (comp is DashboardReportViewComponent) {
+            //DashboardReportViewComponent(comp).stackFilterMap = this.stackFilterMap;
+        }
+        if (dashboardStack.consolidateHeaderElements) {
+            var filterContainer:Container = new HBox();
+            childFilters.addItem(filterContainer);
+            if (i == 0) {
+                childFilterBox.addChild(filterContainer);
+            }
+            if (dashboardStack.consolidateHeaderElements && comp is DashboardStackViewComponent) {
+                DashboardStackViewComponent(comp).consolidateHeader = filterContainer;
+            } else if (dashboardStack.consolidateHeaderElements && comp is DashboardReportViewComponent) {
+                //DashboardReportViewComponent(comp).consolidateHeader = filterContainer;
+            }
+        }
+        return comp;
+    }
+
+    protected var childFilters:ArrayCollection = new ArrayCollection();
 
     private function comboBoxLabelFunction(object:Object):String {
         var report:DashboardElement = DashboardStackItem(object).dashboardElement;
@@ -324,7 +357,6 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
             transformContainer.role = dashboardEditorMetadata.role;
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-            //addHeaderArea(transformContainer);
         } else {
             filterMap[elementID] = new ArrayCollection();
         }
@@ -401,10 +433,25 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         if (transformContainer != null) {
             changed = transformContainer.updateState() || changed;
         }
-        if (changed) {
-            IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).refresh();
-        } else {
-            IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).initialRetrieve();
+        if (viewChildren != null && viewChildren.length > 0) {
+            if (changed) {
+                IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).refresh();
+            } else {
+                IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).initialRetrieve();
+            }
+        }
+    }
+
+    public function toggleFilters(showFilters:Boolean):void {
+        if (transformContainer != null) {
+            if (showFilters) {
+
+            } else {
+
+            }
+        }
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.toggleFilters(showFilters);
         }
     }
 }

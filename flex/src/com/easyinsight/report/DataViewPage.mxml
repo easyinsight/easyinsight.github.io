@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:skin="com.easyinsight.skin.*">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -55,6 +55,7 @@
 
         protected var _originID:int;
 
+        [Bindable]
         protected var _showAddBar:Boolean;
 
         public var exchangeItem:ExchangeItem;
@@ -144,4 +145,4 @@
         <mx:method name="installEntity" result="installed()"/>
         <mx:method name="determineDataSourceForEntity" result="determined()"/>
     </mx:RemoteObject>
-</skin:BackgroundImage>
+</mx:VBox>

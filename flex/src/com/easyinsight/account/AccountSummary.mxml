@@ -7,12 +7,10 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.groups.GroupsSummary;
         import com.easyinsight.preferences.PersonaManagement;
-        import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;        
         import mx.core.Container;
         import mx.events.ItemClickEvent;
-        import mx.managers.PopUpManager;
 
         private var accountInfo:AccountInfo;
         [Bindable]
@@ -97,18 +95,6 @@
             var accountOption:AccountOption = event.item as AccountOption;
             this.index = toggleOptions.getItemIndex(accountOption);
         }
-
-        private function showSecurityStatement():void {
-            var window:SecurityStatement = new SecurityStatement();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function showTermsOfService():void {
-            var window:TermsOfService = new TermsOfService();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
 		]]>
     </mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
@@ -122,13 +108,5 @@
         <mx:ViewStack id="coreBox" width="100%" resizeToContent="true" selectedIndex="{index}">
 
         </mx:ViewStack>
-        <mx:Spacer height="30"/>
-        <mx:HBox width="100%" horizontalAlign="center">
-            <mx:LinkButton textDecoration="underline" label="Security Statement" click="showSecurityStatement()"
-                           fontSize="16"/>
-            <mx:Spacer width="20"/>
-            <mx:LinkButton textDecoration="underline" label="Terms of Service" click="showTermsOfService()"
-                           fontSize="16"/>
-        </mx:HBox>
     </mx:VBox>
 </mx:Box>

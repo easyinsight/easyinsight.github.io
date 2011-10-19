@@ -1,17 +1,10 @@
 package com.easyinsight.dashboard {
 
-import flash.display.Bitmap;
-import flash.display.Loader;
-import flash.display.LoaderInfo;
-import flash.events.Event;
-import flash.utils.ByteArray;
+import com.easyinsight.util.AutoSizeTextArea;
 
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
-import mx.controls.Image;
 import mx.controls.TextArea;
-import mx.rpc.events.ResultEvent;
-import mx.rpc.remoting.RemoteObject;
 
 public class DashboardTextViewComponent extends Box implements IDashboardViewComponent  {
 
@@ -27,9 +20,14 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
         setStyle("verticalAlign", "middle");
     }
 
+    public function obtainPreferredSizeInfo():SizeInfo {
+        return new SizeInfo();
+    }
+
     protected override function createChildren():void {
         super.createChildren();
-        textArea = new TextArea();
+        textArea = new AutoSizeTextArea();
+        textArea.percentWidth = 100;
         textArea.editable = false;
         textArea.text = dashboardText.text;
         addChild(textArea);
@@ -46,6 +44,9 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
 
     public function reportCount():ArrayCollection {
         return new ArrayCollection();
+    }
+
+    public function toggleFilters(showFilters:Boolean):void {
     }
 }
 }

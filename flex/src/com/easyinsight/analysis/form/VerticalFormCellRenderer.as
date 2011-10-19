@@ -50,7 +50,7 @@ public class VerticalFormCellRenderer extends VBox
                 var textFieldTextArea:TextArea = new TextArea();
                 textFieldTextArea.width = 400;
                 textFieldTextArea.setStyle("fontSize", _report.fontSize);
-                textFieldTextArea.setStyle("fontFamily", _report.fontName);
+                textFieldTextArea.setStyle("fontFamily", _report.getFont());
                 textFieldTextArea.setStyle("fontWeight", "normal");
                 textFieldTextArea.setStyle("borderStyle", "none");
                 textFieldTextArea.setStyle("backgroundAlpha", 0);
@@ -62,7 +62,7 @@ public class VerticalFormCellRenderer extends VBox
                     var textArea:TextArea = new TextArea();
                     textArea.width = 400;
                     textArea.setStyle("fontSize", _report.fontSize);
-                    textArea.setStyle("fontFamily", _report.fontName);
+                    textArea.setStyle("fontFamily", _report.getFont());
                     textArea.setStyle("fontWeight", "normal");
                     textArea.setStyle("borderStyle", "none");
                     textArea.setStyle("backgroundAlpha", 0);
@@ -74,7 +74,7 @@ public class VerticalFormCellRenderer extends VBox
                     //label.width = 400;
                     label.setStyle("fontWeight", "normal");
                     label.setStyle("fontSize", _report.fontSize);
-                    label.setStyle("fontFamily", _report.fontName);
+                    label.setStyle("fontFamily", _report.getFont());
                     label.text = text;
                     addChild(label);
                 }

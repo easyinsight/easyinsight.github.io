@@ -136,7 +136,7 @@
 
         private function applyGeneralStyling():void {
             canvas.setStyle("backgroundAlpha", chartDef.backgroundAlpha);
-            chart.setStyle("fontFamily", "Lucida Grande");
+            chart.setStyle("fontFamily", chartDef.getFont());
             chart.setStyle("fontSize", chartDef.fontSize);
 
             /*var style:CSSStyleDeclaration = new CSSStyleDeclaration(".chartAxis");

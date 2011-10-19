@@ -21,6 +21,8 @@ public class DashboardElement {
     public var headerBackground:ImageDescriptor;
     public var headerBackgroundColor:uint = 0xFFFFFF;
     public var headerBackgroundAlpha:Number = 0;
+    public var preferredWidth:int;
+    public var preferredHeight:int;
 
     public function DashboardElement() {
     }

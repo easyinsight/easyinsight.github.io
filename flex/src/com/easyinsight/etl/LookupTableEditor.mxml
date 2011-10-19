@@ -2,7 +2,7 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:filtering="com.easyinsight.filtering.*"
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%"
-         horizontalAlign="center" backgroundColor="#000000" creationComplete="setup()">
+         horizontalAlign="center" styleName="screenBackground" creationComplete="setup()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisItem;
@@ -284,13 +284,13 @@
         <!--<mx:method name="getAnalysisItemMetadata" result="gotMetadata()"/>-->
         <mx:method name="getFeedMetadata" result="gotDefinition()"/>
     </mx:RemoteObject>
+    <mx:HBox width="100%" styleName="topButtonBar">
+        <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
+                   toolTip="Close" labelPlacement="right" label="Close Editor"/>
+        <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
+                   toolTip="Save" labelPlacement="right" label="Save"/>
+    </mx:HBox>
     <mx:VBox width="1000" height="100%" horizontalAlign="center" paddingTop="5" backgroundColor="#FFFFFF" paddingBottom="10">
-        <mx:HBox width="100%" paddingLeft="15">
-            <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
-                       toolTip="Close" labelPlacement="right" label="Close Editor"/>
-            <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
-                       toolTip="Save" labelPlacement="right" label="Save"/>
-        </mx:HBox>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Label text="Lookup Table Name: " fontFamily="Tahoma" fontWeight="bold"/>
             <mx:Label text="{tableName}"/>

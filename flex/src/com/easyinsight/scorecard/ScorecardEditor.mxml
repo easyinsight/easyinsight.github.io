@@ -12,8 +12,6 @@
         import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.goals.KPITreeSetupEvent;
-        import com.easyinsight.goals.KPITreeSetupWindow;
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.kpi.KPIEvent;
         import com.easyinsight.kpi.KPIOutcome;
@@ -88,24 +86,10 @@
                 scorecardService.getScorecard.send(_scorecardID);
                 UserAudit.instance().log(new ActionScorecardLog(ActionScorecardLog.EDIT, _scorecardID));
             } else {
-                if (_startDataSourceID == 0) {
-                    var window:KPITreeSetupWindow = new KPITreeSetupWindow();
-                    window.addEventListener(KPITreeSetupEvent.KPI_TREE_SETUP, choseDataSource);
-                    PopUpManager.addPopUp(window, this, true);
-                    PopUpUtil.centerPopUp(window);
-                } else {
-                    scorecard = new Scorecard();
-                    scorecard.kpis = kpis;
-                    scorecard.dataSourceID = _startDataSourceID;
-                }
+                scorecard = new Scorecard();
+                scorecard.kpis = kpis;
+                scorecard.dataSourceID = _startDataSourceID;
             }
-        }
-
-        private function choseDataSource(event:KPITreeSetupEvent):void {
-            _startDataSourceID = event.dataSource.id;
-            scorecard = new Scorecard();
-            scorecard.kpis = kpis;
-            scorecard.dataSourceID = event.dataSource.id;
         }
 
         private function deletedKPI(event:KPIEvent):void {

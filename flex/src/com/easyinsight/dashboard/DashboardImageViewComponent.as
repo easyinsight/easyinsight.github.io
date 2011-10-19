@@ -28,6 +28,10 @@ public class DashboardImageViewComponent extends Box implements IDashboardViewCo
         setStyle("verticalAlign", "middle");
     }
 
+    public function obtainPreferredSizeInfo():SizeInfo {
+        return new SizeInfo();
+    }
+
     protected override function createChildren():void {
         super.createChildren();
         image = new Image();
@@ -68,6 +72,9 @@ public class DashboardImageViewComponent extends Box implements IDashboardViewCo
 
     public function reportCount():ArrayCollection {
         return new ArrayCollection();
+    }
+
+    public function toggleFilters(showFilters:Boolean):void {
     }
 }
 }

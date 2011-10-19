@@ -4,6 +4,8 @@ import com.easyinsight.skin.ImageUploadEvent;
 
 import flash.events.MouseEvent;
 
+import mx.collections.ArrayCollection;
+
 import mx.containers.VBox;
 import mx.controls.Label;
 
@@ -19,6 +21,10 @@ public class DashboardImageEditorComponent extends VBox implements IDashboardEdi
         setStyle("horizontalAlign", "center");
         this.percentWidth = 100;
         this.percentHeight = 100;
+    }
+
+    public function obtainPreferredSizeInfo():SizeInfo {
+        return new SizeInfo();
     }
 
     protected override function createChildren():void {
@@ -52,6 +58,22 @@ public class DashboardImageEditorComponent extends VBox implements IDashboardEdi
     }
 
     public function edit():void {
+    }
+
+    public function refresh():void {
+    }
+
+    public function updateAdditionalFilters(filterMap:Object):void {
+    }
+
+    public function initialRetrieve():void {
+    }
+
+    public function reportCount():ArrayCollection {
+        return null;
+    }
+
+    public function toggleFilters(showFilters:Boolean):void {
     }
 }
 }

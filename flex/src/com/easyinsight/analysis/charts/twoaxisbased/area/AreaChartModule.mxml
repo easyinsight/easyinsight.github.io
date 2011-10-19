@@ -122,6 +122,8 @@
             hbox.removeChild(areaChart);
 
             areaChart = new AreaChart();
+            areaChart.setStyle("fontFamily", areaChartDef.getFont());
+            areaChart.setStyle("fontSize", areaChartDef.fontSize);
             areaChart.showDataTips = true;
             areaChart.dataTipFunction = dataTipFunction;
             areaChart.percentHeight = 100;

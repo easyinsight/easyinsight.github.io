@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas  xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:buttons="com.anotherflexdev.ui.buttons.*"  width="46" height="80" verticalScrollPolicy="off" horizontalScrollPolicy="off" rollOut="this.currentState=null; this.width=46; this.height=80;" remove="this.currentState=null; this.width=46; this.height=80;" styleName="Balloon" resizeEffect="{resize}">
+	<mx:Style source="./assets/style/balloon.css"/>
+	<mx:Script>
+		<![CDATA[
+			import mx.effects.easing.Bounce;
+			private function handleRemoveClick(event:Event):void {
+				this.currentState = "removeQuestion";
+			}
+		]]>
+	</mx:Script>
+	<mx:Metadata>
+		[Event(name="removeNode", type="flash.events.MouseEvent")]
+		[Event(name="linkNode", type="flash.events.MouseEvent")]
+	</mx:Metadata>
+	<mx:states>
+		<mx:State name="removeQuestion">
+			<mx:SetProperty name="width" value="178"/>
+			<mx:AddChild position="lastChild">
+				<mx:Canvas x="27" y="10" width="109" height="58" id="msgCanvas">
+					<mx:Label x="15" y="5" text="Remove me?" fontWeight="bold"/>
+					<mx:Button x="5" y="30" label="Yes" width="47" click="dispatchEvent(new MouseEvent('removeNode'))"/>
+					<mx:Button x="54" y="30" label="No" width="49" click="this.currentState=null"/>
+				</mx:Canvas>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<buttons:GlowButton id="removeBtn" source="@Embed(source='./assets/images/btn-remove.png')" glowColor="#000000" y="10" click="handleRemoveClick(event)" right="9"/>
+	<buttons:GlowButton id="linkBtn" source="@Embed(source='./assets/images/btn-link.png')" glowColor="#000000" y="42" click="dispatchEvent(new MouseEvent('linkNode', event.bubbles, event.cancelable, event.localX, event.localY, event.relatedObject, event.ctrlKey, event.altKey, event.shiftKey, event.buttonDown))" right="9"/>
+	<mx:Resize id="resize" easingFunction="{Bounce.easeOut}"/>
+</mx:Canvas>

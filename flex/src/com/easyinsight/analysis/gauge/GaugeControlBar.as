@@ -6,10 +6,10 @@ import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.IReportControlBar;
+import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
-import com.easyinsight.map.MapDropAreaGrouping;
 import flash.events.Event;
 
 import flash.events.MouseEvent;
@@ -22,13 +22,13 @@ import mx.controls.Label;
 import mx.controls.TextInput;
 public class GaugeControlBar extends ReportControlBar implements IReportControlBar {
 
-    private var measureGrouping:MapDropAreaGrouping;
+    private var measureGrouping:ListDropAreaGrouping;
     private var maxValueInput:TextInput;
     private var gaugeTypeBox:ComboBox;
     private var gaugeDefinition:GaugeDefinition;
 
     public function GaugeControlBar() {
-        measureGrouping = new MapDropAreaGrouping();
+        measureGrouping = new ListDropAreaGrouping();
         measureGrouping.maxElements = 1;
         measureGrouping.dropAreaType = MeasureDropArea;
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);

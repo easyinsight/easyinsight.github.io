@@ -34,6 +34,7 @@
         import com.easyinsight.analysis.CustomChangeEvent;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.formatters.Formatter;
 
@@ -72,7 +73,7 @@
                     }
                     var column:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                     var factory:ClassFactory = new ClassFactory(CrosstabCellRenderer);
-                    factory.properties = { formatter: measureFormatter, cellProperty: String(i) };
+                    factory.properties = { formatter: measureFormatter, cellProperty: String(i), report: crosstabDefinition };
                     column.dataField = String(i);
                     column.width = maxWidth;
                     column.itemRenderer = factory;

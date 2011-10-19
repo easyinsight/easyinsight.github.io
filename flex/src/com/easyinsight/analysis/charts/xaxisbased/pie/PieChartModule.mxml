@@ -6,7 +6,7 @@
             <mx:RemoveChild target="{legend}"/>
         </mx:State>
     </mx:states>
-    <mx:Style>
+    <!--<mx:Style>
         PieSeries {
             fontSize: 10;
             fontFamily: "Lucida Grande";
@@ -18,7 +18,7 @@
             fontFamily: "Lucida Grande";
             fontWeight: normal;
         }
-    </mx:Style>
+    </mx:Style>-->
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -26,11 +26,9 @@
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
-        import com.easyinsight.filtering.FilterRawData;
 
-        import com.easyinsight.pseudocontext.PseudoContextWindow;
+        //import com.easyinsight.pseudocontext.PseudoContextWindow;
 
-        import mx.charts.ChartItem;
         import mx.charts.series.PieSeries;
         import mx.formatters.Formatter;
         import mx.charts.series.items.PieSeriesItem;
@@ -73,9 +71,9 @@
                 pieChart.visible = true;
                 legend.visible = true;
                 labelPosition = pieChartDef.labelPosition;
-                pieChart.setStyle("fontFamily", pieChartDef.fontName);
+                pieChart.setStyle("fontFamily", pieChartDef.getFont());
                 pieChart.setStyle("fontSize", pieChartDef.fontSize);
-                pieSeries.setStyle("fontFamily", pieChartDef.fontName);
+                pieSeries.setStyle("fontFamily", pieChartDef.getFont());
                 pieSeries.setStyle("fontSize", pieChartDef.fontSize);
                 if (pieChartDef.colorScheme == FillProvider.radialGradients) {
                     pieSeries.setStyle("fills", FillProvider.createRadialGradients());
@@ -84,7 +82,6 @@
                 } else {
                     pieSeries.setStyle("fills", FillProvider.createRadialGradients());
                 }
-                //StyleManager.getStyleDeclaration("UITextField");
                 this.measureFormatter = pieChartDef.measures.getItemAt(0).getFormatter();
                 measureName = pieChartDef.measures.getItemAt(0).qualifiedName();
                 dimension = pieChartDef.xaxis.qualifiedName();
@@ -98,7 +95,7 @@
         }
 
         private function chartSelection(event:ChartItemEvent):void {
-            for (var j:int = 0; j < graphData.length; j++) {
+            /*for (var j:int = 0; j < graphData.length; j++) {
                 var graphObj:Object = graphData.getItemAt(j);
                 var explode:Boolean = false;
                 for (var i:int = 0; i < pieChart.selectedChartItems.length; i++) {
@@ -114,7 +111,7 @@
                 }
             }
             var pieChartSeries:PieSeries = pieChart.series[0] as PieSeries;
-            pieChartSeries.perWedgeExplodeRadius = explodeData;
+            pieChartSeries.perWedgeExplodeRadius = explodeData;*/
         }
 
         private function renderPieLabel(data:Object, field:String, index:Number, percentValue:Number):String {
@@ -123,25 +120,15 @@
 
         private function onClick(event:ChartItemEvent):void {
 
-            var window:PseudoContextWindow = new PseudoContextWindow(dimensionItem, passThrough, this, pieChartDef, event.hitData.item);
+            /*var window:PseudoContextWindow = new PseudoContextWindow(dimensionItem, passThrough, this, pieChartDef, event.hitData.item);
             PopUpManager.addPopUp(window, this);
             window.x = event.stageX + 5;
-            window.y = event.stageY + 5;
+            window.y = event.stageY + 5;*/
         }
 
         private function passThrough(event:Event):void {
             dispatchEvent(event);
         }
-
-        public function createFilterRawData():FilterRawData {
-            var filterRawData:FilterRawData = new FilterRawData();
-            for (var i:int = 0; i < pieChart.selectedChartItems.length; i++) {
-                var obj:ChartItem = pieChart.selectedChartItems[i];
-                filterRawData.addPair(dimensionItem, obj.item[dimensionItem.key.createString()]);
-            }
-            return filterRawData;
-        }
-
 
         public function updateExportMetadata():void {
         }

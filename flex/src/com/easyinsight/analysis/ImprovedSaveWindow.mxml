@@ -3,13 +3,11 @@
         creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.account.Account;
-        import com.easyinsight.administration.feed.TagCloud;
         import com.easyinsight.framework.User;
         import com.easyinsight.schedule.ReportDelivery;
         import com.easyinsight.schedule.ReportDeliveryScheduleWindow;
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
         import mx.validators.Validator;
@@ -23,7 +21,6 @@
             } else {
                 exportIndex = 1;
             }
-            reportTags = TagCloud.toString(_report.tagCloud);
             reportDescription = _report.description;
             accountVisible = _report.accountVisible;
             showConnectionSave = _exchangeSave;
@@ -81,11 +78,6 @@
         private var reportName:String;
 
         [Bindable]
-        private var reportTags:String;
-
-        private var reportTagCollection:ArrayCollection;
-
-        [Bindable]
         private var reportDescription:String;
 
         private function saved():void {
@@ -111,7 +103,6 @@
                 reportNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
             } else {
                 reportName = reportNameInput.text;
-                reportTagCollection = TagCloud.fromString(reportTagsInput.text);
                 reportDescription = reportDescriptionInput.text;
                 if (User.getInstance().getAccountType() > Account.PERSONAL) {
                     stackIndex++;
@@ -126,7 +117,6 @@
 
         private function save():void {
             _report.name = reportName;
-            _report.tagCloud = reportTagCollection;
             _report.description = reportDescription;
             _report.solutionVisible = exchangeGroup.selectedValue == "yes";
             _report.accountVisible = sharingGroup.selectedValue == "yes";
@@ -217,8 +207,6 @@
                     <mx:Label text="What do you want to name this report?" fontSize="14" fontWeight="bold"/>
                     <mx:TextInput text="{reportName}" id="reportNameInput" width="530" fontSize="14"/>
                     <mx:Spacer height="20"/>
-                    <mx:Label text="What tags should be applied to this report?" fontSize="14" fontWeight="bold"/>
-                    <mx:TextInput text="{reportTags}" id="reportTagsInput" width="530" fontSize="14"/>
                     <mx:Spacer height="20"/>
                     <mx:Label text="How do you want to describe this report?" fontSize="14" fontWeight="bold"/>
                     <mx:TextArea width="530" height="75" id="reportDescriptionInput"

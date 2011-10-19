@@ -69,16 +69,8 @@
         }
 
         [Bindable]
-        [Embed(source="../../../../assets/find.png")]
-        private var findIcon:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/headericons/house.png")]
         private var homeIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/chart_area.png")]
-        private var myDataIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/headericons/shopping_bag.png")]
@@ -89,20 +81,8 @@
         private var scheduleIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/headericons/users2.png")]
-        private var groupsIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/arrow_up_green.png")]
-        private var scorecardIcon:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/headericons/components.png")]
         private var solutionsIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/branch.png")]
-        private var goalsIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/headericons/user.png")]
@@ -111,10 +91,6 @@
         [Bindable]
         [Embed(source="../../../../assets/headericons/help.png")]
         private var helpIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/bug_red.png")]
-        private var bugIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/logo2.PNG")]

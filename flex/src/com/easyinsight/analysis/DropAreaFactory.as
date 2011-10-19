@@ -1,5 +1,4 @@
 package com.easyinsight.analysis {
-import com.easyinsight.HierarchyComboBox;
 
 import mx.controls.Label;
 import mx.core.UIComponent;

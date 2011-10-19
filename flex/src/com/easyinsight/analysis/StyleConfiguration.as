@@ -22,10 +22,8 @@ import com.easyinsight.analysis.form.FormReport;
 import com.easyinsight.analysis.gauge.GaugeDefinition;
 import com.easyinsight.analysis.heatmap.HeatMapDefinition;
 import com.easyinsight.analysis.list.ListDefinition;
-import com.easyinsight.analysis.maps.MapDefinition;
 import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
-import com.easyinsight.analysis.trend.TrendDefinition;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.dashboard.Dashboard;
@@ -45,15 +43,13 @@ public class StyleConfiguration {
 
     public static function getDashboardItems(dashboard:Dashboard):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
-        items.addItem(new NumericReportFormItem("Padding Left", "paddingLeft", dashboard.paddingLeft, dashboard, 0, 100));
-        items.addItem(new NumericReportFormItem("Padding Right", "paddingRight", dashboard.paddingRight, dashboard, 0, 100));
-        items.addItem(new ComboBoxReportFormItem("Filter Border Style", "filterBorderStyle", dashboard.filterBorderStyle, dashboard, ["solid", "none"]));
+        items.addItem(new NumericReportFormItem("Padding", "padding", dashboard.padding, dashboard, 0, 100));
+        items.addItem(new NumericReportFormItem("Border Thickness", "borderThickness", dashboard.borderThickness, dashboard, 0, 100));
+        items.addItem(new ColorReportFormItem("Border Color", "borderColor",  dashboard.borderColor, dashboard));
+        items.addItem(new ColorReportFormItem("Background Color", "backgroundColor",  dashboard.backgroundColor, dashboard));
         items.addItem(new ComboBoxReportFormItem("YTD Month", "ytdMonth", dashboard.ytdMonth, dashboard, ["January", "February",
             "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]));
         items.addItem(new CheckBoxReportFormItem("YTD Override", "overrideYTD", dashboard.overrideYTD, dashboard));
-        items.addItem(new ColorReportFormItem("Filter Border Color", "filterBorderColor",  dashboard.filterBorderColor, dashboard));
-        items.addItem(new ColorReportFormItem("Filter Background Color", "filterBackgroundColor",  dashboard.filterBackgroundColor, dashboard));
-        items.addItem(new NumericReportFormItem("Filter Background Alpha", "filterBackgroundAlpha",  dashboard.filterBackgroundAlpha, dashboard, 0, 1));
         return items;
     }
 
@@ -116,8 +112,12 @@ public class StyleConfiguration {
 
     public static function getFormItems(report:AnalysisDefinition):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
-        items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Arial", "Arial Black", "Comic Sans MS",
-                "Courier", "Georgia", "Impact", "Lucida Grande", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
+        if (report.supportsEmbeddedFonts()) {
+            items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande"]));
+        } else {
+            items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Arial", "Arial Black", "Comic Sans MS",
+                "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
+        }
         items.addItem(new NumericReportFormItem("Font Size", "fontSize", report.fontSize, report, 8, 48));
         items.addItem(new NumericReportFormItem("Background Alpha", "backgroundAlpha", report.backgroundAlpha, report, 0, 1));
         items.addItem(new NumericReportFormItem("Fixed Report Width", "fixedWidth", report.fixedWidth, report, 0, 5000));
@@ -160,12 +160,6 @@ public class StyleConfiguration {
                 report, ["Linear", "Logarithmic"]));
             items.addItem(new ColorReportFormItem("High Color", "highColor", TreeMapDefinition(report).highColor, report));
             items.addItem(new ColorReportFormItem("Low Color", "lowColor", TreeMapDefinition(report).lowColor, report));
-        }
-        if (report is MapDefinition) {
-            items.addItem(new ComboBoxReportFormItem("Color Strategy", "colorStrategy", MapDefinition(report).colorStrategy,
-                report, ["Linear", "Logarithmic"]));
-            items.addItem(new ColorReportFormItem("High Color", "highColor", MapDefinition(report).highColor, report));
-            items.addItem(new ColorReportFormItem("Low Color", "lowColor", MapDefinition(report).lowColor, report));
         }
         if (report is LineChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Form", "form", TwoAxisDefinition(report).form,

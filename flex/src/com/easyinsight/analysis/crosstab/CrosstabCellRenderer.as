@@ -23,23 +23,21 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
 
     private var text:UITextField;
 
-    //private var background:UIComponent;
+    private var _report:CrosstabDefinition;
 
     public function CrosstabCellRenderer() {
         text = new UITextField();
         text.alpha = 1;
-        /*background = new UIComponent();
-        background.percentWidth = 100;
-        background.percentHeight = 100;*/
         percentHeight = 100;
         percentWidth = 100;
     }
 
+    public function set report(value:CrosstabDefinition):void {
+        _report = value;
+    }
+
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
-        if (unscaledHeight > 24) {
-            Alert.show("larger field");
-        }
         if (text != null) {
             text.setActualSize(this.width, this.height);
         }
@@ -47,7 +45,6 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
 
     override protected function createChildren():void {
         super.createChildren();
-        /*addChild(background);*/
         addChild(text);
     }
 
@@ -68,15 +65,15 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
         if (crosstabValue != null) {
             if (crosstabValue.header == null) {
                 if (crosstabValue.summaryValue) {
-                    text.setTextFormat(new TextFormat("Lucida Grande", 11, 0xFFFFFF, null));
+                    text.setTextFormat(new TextFormat(_report.getFont(), 11, 0xFFFFFF, null));
                 } else {
-                    text.setTextFormat(new TextFormat("Lucida Grande", 11, 0x000000, null));
+                    text.setTextFormat(new TextFormat(_report.getFont(), 11, 0x000000, null));
                 }
             } else {
                 if (crosstabValue.headerLabel) {
-                    text.setTextFormat(new TextFormat("Lucida Grande", 12, 0xFFFFFF, null));
+                    text.setTextFormat(new TextFormat(_report.getFont(), 12, 0xFFFFFF, null));
                 } else {
-                    text.setTextFormat(new TextFormat("Lucida Grande", 11, 0xFFFFFF, null));
+                    text.setTextFormat(new TextFormat(_report.getFont(), 11, 0xFFFFFF, null));
                 }
             }
         }

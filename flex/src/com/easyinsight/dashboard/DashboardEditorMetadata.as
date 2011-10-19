@@ -7,6 +7,7 @@
  */
 package com.easyinsight.dashboard {
 import mx.collections.ArrayCollection;
+import mx.core.UIComponent;
 
 public class DashboardEditorMetadata {
 
@@ -15,6 +16,9 @@ public class DashboardEditorMetadata {
     public var availableFields:ArrayCollection;
     public var role:int;
     public var fixedID:Boolean;
+    public var dashboardView:UIComponent;
+    public var borderThickness:int;
+    public var borderColor:uint;
 
     public function DashboardEditorMetadata() {
     }

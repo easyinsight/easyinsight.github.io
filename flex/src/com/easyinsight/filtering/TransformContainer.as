@@ -53,8 +53,8 @@ public class TransformContainer extends HBox
         this.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
         this.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
         this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);
-        setStyle("borderThickness", 1);
-        setStyle("borderStyle", "solid");
+        //setStyle("borderThickness", 1);
+        //setStyle("borderStyle", "solid");
     }
 
     public function set reportID(value:int):void {

@@ -109,7 +109,7 @@ public class TextCellRenderer extends UITextField implements IListItemRenderer
             if (rext != null && rext.align != null) {
                 align = rext.align.toLowerCase();
             }
-            var tf:UITextFormat = new UITextFormat(this.systemManager, "Lucida Grande", size, color);
+            var tf:UITextFormat = new UITextFormat(this.systemManager, _report.getFont(), size, color);
             tf.align = align;
             setTextFormat(tf);
             new StandardContextWindow(analysisItem, passThrough, this, value);

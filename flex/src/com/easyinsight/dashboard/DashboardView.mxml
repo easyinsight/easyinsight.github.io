@@ -1,15 +1,13 @@
 <?xml version="1.0"?>
-<report:DataViewPage xmlns:mx="http://www.adobe.com/2006/mxml"
-                     applyCenterScreenLogic="false" creationComplete="onCreation()"
-                     implements="com.easyinsight.listing.IPerspective" xmlns:report="com.easyinsight.report.*">
+<report:DataViewPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:dashboard="com.easyinsight.dashboard.*"
+                     xmlns:filtering="com.easyinsight.filtering.*"
+                     creationComplete="onCreation()"
+                     implements="com.easyinsight.listing.IPerspective" xmlns:report="com.easyinsight.report.*"
+        styleName="screenBackground" width="100%" height="100%">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
-        import com.easyinsight.filtering.TransformContainer;
-        import com.easyinsight.util.AntiScrollCanvas;
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.framework.User;
-
-        import mx.binding.utils.BindingUtils;
 
         import mx.containers.VBox;
 
@@ -25,7 +23,6 @@
         import com.easyinsight.commands.CommandProcessor;
 
         import com.easyinsight.datasources.DataSourceInfo;
-        import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.LoginEvent;
 
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -49,6 +46,7 @@
             _fixedID = value;
         }
 
+        [Bindable]
         private var _dashboardID:int = -1;
 
         [Bindable]
@@ -85,6 +83,7 @@
             commandProcessor.addCommand(event.command);
         }
 
+        [Bindable]
         private var rootView:IDashboardViewComponent;
 
 
@@ -92,57 +91,79 @@
             _dashboardID = value;
         }
 
-        private var dashboardHeader:DashboardHeader;
-
         private function createDashboard():void {
             var primary:VBox = new VBox();
             primary.percentHeight = 100;
             primary.percentWidth = 100;
             primary.setStyle("verticalGap", 0);
             primary.setStyle("horizontalAlign", "center");
-            primary.setStyle("paddingLeft", dashboard.paddingLeft);
-            primary.setStyle("paddingRight", dashboard.paddingRight);
-            if (!_fixedID) {
-                dashboardHeader = new DashboardHeader();
-                BindingUtils.bindProperty(dashboardHeader, "dataSource", this, "dataSource");
-                BindingUtils.bindProperty(dashboardHeader, "viewFactory", this, "viewFactory");
-                primary.addChild(dashboardHeader);
+
+            dashboardStyleArea.setStyle("paddingLeft", dashboard.padding);
+            dashboardStyleArea.setStyle("paddingRight", dashboard.padding);
+            dashboardStyleArea.setStyle("paddingTop", dashboard.padding);
+            dashboardStyleArea.setStyle("paddingBottom", dashboard.padding);
+
+            dashboardStyleArea.setStyle("backgroundColor", dashboard.backgroundColor);
+
+            if (dashboard.backgroundColor == 0xFFFFFF) {
+                setStyle("backgroundColor", 0xFFFFFF);
             }
-            if (dashboard.filters.length > 0) {
-                var transformContainer:TransformContainer = new TransformContainer();
-                transformContainer.filterEditable = false;
-                transformContainer.setStyle("borderStyle", "solid");
-                transformContainer.setStyle("borderThickness", 1);
-                transformContainer.existingFilters = dashboard.filters;
-                transformContainer.percentWidth = 100;
-                transformContainer.setStyle("paddingLeft", 10);
-                transformContainer.setStyle("paddingTop", 10);
-                transformContainer.setStyle("paddingBottom", 10);
-                transformContainer.setStyle("paddingRight", 10);
-                transformContainer.feedID = dashboard.dataSourceID;
-                transformContainer.setStyle("borderColor", 0xAAAAAA);
-                transformContainer.setStyle("backgroundColor", 0xFFFFFF);
-                transformContainer.setStyle("backgroundAlpha", 0.8);
-                transformContainer.reportView = true;
-                transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-                primary.addChild(transformContainer);
+
+            dashboardStyleArea.setStyle("borderThickness", dashboard.borderThickness);
+            if (dashboard.borderThickness > 0) {
+                dashboardStyleArea.setStyle("cornerRadius", 8);
+                dashboardStyleArea.setStyle("borderStyle", "solid");
+                dashboardStyleArea.setStyle("borderColor", dashboard.borderColor);
+                dashboardStyleArea.setStyle("dropShadowEnabled", true);
             }
-            var dashboardCanvas:AntiScrollCanvas = new AntiScrollCanvas();
-            dashboardCanvas.percentHeight = 100;
+
+            /*primary.setStyle("paddingLeft", dashboard.paddingLeft);
+             primary.setStyle("paddingRight", dashboard.paddingRight);*/
+            /*if (dashboard.filters.length > 0) {
+             var transformContainer:TransformContainer = new TransformContainer();
+             transformContainer.filterEditable = false;
+             transformContainer.setStyle("borderStyle", "solid");
+             transformContainer.setStyle("borderThickness", 1);
+             transformContainer.existingFilters = dashboard.filters;
+             transformContainer.percentWidth = 100;
+             transformContainer.setStyle("paddingLeft", 10);
+             transformContainer.setStyle("paddingTop", 10);
+             transformContainer.setStyle("paddingBottom", 10);
+             transformContainer.setStyle("paddingRight", 10);
+             transformContainer.feedID = dashboard.dataSourceID;
+             transformContainer.setStyle("borderColor", 0xAAAAAA);
+             transformContainer.setStyle("backgroundColor", 0xFFFFFF);
+             transformContainer.setStyle("backgroundAlpha", 0.8);
+             transformContainer.reportView = true;
+             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+             primary.addChild(transformContainer);
+             }*/
+            filterDefinitions = dashboard.filters;
+            filterIndex = (dashboard.filters != null && dashboard.filters.length > 0) ? 1 : 0;
+            /*var dashboardCanvas:Box = new Box();
+             dashboardCanvas.percentHeight = 100;
+
+             dashboardCanvas.setStyle("paddingLeft", 10);
+             dashboardCanvas.setStyle("paddingRight", 10);
+             dashboardCanvas.setStyle("borderStyle", "solid");
+             dashboardCanvas.setStyle("borderThickness", 1);
+             dashboardCanvas.setStyle("cornerRadius", 8);*/
             var grid:DashboardGrid = dashboard.rootElement as DashboardGrid;
-            if (grid.width != 0) {
-                dashboardCanvas.width = grid.width;
-            } else {
-                dashboardCanvas.percentWidth = 100;
-            }
-            dashboardCanvas.setStyle("backgroundAlpha", grid.backgroundAlpha);
-            if (grid.backgroundColor != 0) {
-                dashboardCanvas.setStyle("backgroundColor", grid.backgroundColor);
-            }
+            /*if (grid.width != 0) {
+             dashboardCanvas.width = grid.width;
+             } else {
+             dashboardCanvas.percentWidth = 100;
+             }
+             dashboardCanvas.setStyle("backgroundAlpha", grid.backgroundAlpha);
+             if (grid.backgroundColor != 0) {
+             dashboardCanvas.setStyle("backgroundColor", grid.backgroundColor);
+             }*/
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = dataSourceID;
             dashboardEditorMetadata.role = dashboard.role;
             dashboardEditorMetadata.fixedID = _fixedID > 0;
+            dashboardEditorMetadata.borderColor = dashboard.borderColor;
+            dashboardEditorMetadata.borderThickness = dashboard.borderThickness;
             rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
             UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
                 var filterMap:Object = new Object();
@@ -151,10 +172,10 @@
                 rootView.initialRetrieve();
             });
             dashboardCanvas.addChild(rootView as UIComponent);
-            primary.addChild(dashboardCanvas);
-            removeChild(loadingBox);
-            addChild(primary);
+            //primary.addChild(dashboardCanvas);
+            //addChild(primary);
             if (dashboardHeader != null) {
+                dashboardHeader.dashboard = dashboard;
                 dashboardHeader.generateState(description, exchangeItem, this);
             }
         }
@@ -166,19 +187,6 @@
             description = dashboard.description;
             dataSourceID = dashboard.dataSourceID;
             filterDefinitions = dashboard.filters;
-            dashboardPaddingLeft = dashboard.paddingLeft;
-            dashboardPaddingRight = dashboard.paddingRight;
-            if (!_fixedID) {
-                var feedFragmentObject:Object = new Object();
-                if (exchangeItem == null) {
-                    feedFragmentObject.dashboardID = String(dashboard.urlKey);
-                } else {
-                    feedFragmentObject.reportTemplateID = String(dashboard.urlKey);
-                }
-            }
-            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-            BrowserManager.getInstance().setFragment(feedFragmentString);
-            BrowserManager.getInstance().setTitle("Easy Insight - " + dashboardName);
             createDashboard();
             UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.VIEW, _dashboardID));
             generateState();
@@ -226,6 +234,7 @@
 
         private function keptDashboard():void {
             exchangeItem = null;
+            _showAddBar = false;
             generateState();
             var window:DashboardAddedWindow = new DashboardAddedWindow();
             window.dashboard = dashboard;
@@ -233,7 +242,7 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        public function saveReport(event:Event):void {
+        public function saveReport():void {
             dashboardService.keepDashboard.send(dashboard.id, exchangeItem.id);
         }
 
@@ -259,10 +268,9 @@
         }
 
         public function toggleFilters():void {
-
+            filterIndex = filterIndex == 1 ? 0 : 1;
+            rootView.toggleFilters(filterIndex == 1);
         }
-
-        private var transformContainer:TransformContainer;
 
         public function exportDashboard(exportButton:Button):void {
             var window:DashboardExportWindow = new DashboardExportWindow();
@@ -289,41 +297,71 @@
             dispatchEvent(new Event("dataSourceChanged"));
         }
 
-        private var dashboardPaddingLeft:int;
+        private function toggleReportInfo():void {
+            if (reportInfoLabel == "Show Dashboard Info") {
+                reportInfoLabel = "Hide Dashboard Info";
+                addChildAt(box, 2);
+            } else {
+                reportInfoLabel = "Show Report Info";
+                removeChild(box);
+            }
+        }
 
-        private var dashboardPaddingRight:int;
+        [Bindable]
+        private var reportInfoLabel:String = "Show Dashboard Info";
+
+        [Bindable]
+        private var showReportInfoButton:Boolean;
 
         public function cleanup():void {
-            cleanupBindings();
+        }
+
+        override protected function generateState():void {
+            super.generateState();
+            showReportInfoButton = !_showAddBar;
+            if (!_showAddBar) {
+                removeChild(box);
+            }
+            box.visible = true;
+            if (!_fixedID) {
+                var feedFragmentObject:Object = new Object();
+                if (exchangeItem == null) {
+                    feedFragmentObject.dashboardID = String(dashboard.urlKey);
+                } else {
+                    feedFragmentObject.reportTemplateID = String(exchangeItem.descriptor.urlKey);
+                }
+            }
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + dashboardName);
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="getDashboardView" result="gotDashboard()"/>
         <mx:method name="keepDashboard" result="keptDashboard()"/>
     </mx:RemoteObject>
-    <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center" id="loadingBox">
-        <mx:ProgressBar label="Loading the dashboard..." indeterminate="true"/>
+    <dashboard:DashboardSlimHeader id="dashboardHeader" dataSource="{dataSource}" viewFactory="{rootView}"/>
+    <mx:HBox width="100%" horizontalAlign="center" paddingTop="5" paddingBottom="5" verticalAlign="middle">
+        <mx:Label text="{dashboardName}" fontSize="24" maxWidth="600" color="#000000"/>
+        <mx:LinkButton label="{reportInfoLabel}" textDecoration="underline" fontSize="14" visible="{showReportInfoButton}" click="toggleReportInfo()"/>
+    </mx:HBox>
+    <mx:Box width="100%" styleName="descriptionContainer" id="box" visible="false">
+        <report:DefaultDescriptionArea previousReportLabel="{previousReportLabel}" previousReportAvailable="{previousReportAvailable}"
+                nextReportAvailable="{nextReportAvailable}" nextReportLabel="{nextReportLabel}" showAdd="{_showAddBar}" description="{description}"
+                previousReport="toPreviousReport()" nextReport="toNextReport()" saveToAccount="saveReport()"/>
     </mx:Box>
-    <!--<mx:VBox width="100%" height="100%" verticalGap="0"
-             horizontalAlign="center"
-             direction="vertical" id="primary" paddingLeft="{dashboardPaddingLeft}" paddingRight="{dashboardPaddingRight}">
-        <mx:Box id="topTarget" width="100%" horizontalAlign="center"/>
-        <mx:VBox width="100%" height="100%" paddingLeft="0" paddingRight="0" horizontalAlign="center" verticalGap="0">
-            <mx:ViewStack width="{dashboardWidth}" resizeToContent="true" creationPolicy="all"
-                          selectedIndex="{filterIndex}">
-                <mx:Box/>
-                <mx:VBox width="100%" horizontalAlign="center">
-                    <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid"
-                                                  borderThickness="1"
-                                                  existingFilters="{filterDefinitions}"
-                                                  width="100%" paddingLeft="10"
-                                                  paddingTop="10" paddingBottom="10"
-                                                  paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
-                                                  backgroundColor="#FFFFFF" backgroundAlpha=".8" reportView="true"/>
-                </mx:VBox>
-            </mx:ViewStack>
-            <util:AntiScrollCanvas height="100%" id="dashboardCanvas" backgroundColor="#FFFFFF"
-                       backgroundAlpha=".8"/>
+    <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
+        <mx:Box/>
+        <mx:VBox width="100%" horizontalAlign="center">
+            <filtering:TransformContainer id="transformContainer" filterEditable="false"
+                                          existingFilters="{filterDefinitions}"
+                                          width="100%" feedID="{dataSourceID}"
+                                          reportView="true" dashboardID="{_dashboardID}" updatedTransforms="transformsUpdated(event)"/>
         </mx:VBox>
-    </mx:VBox>-->
+    </mx:ViewStack>
+    <mx:Box width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10">
+        <mx:VBox width="100%" height="100%" backgroundAlpha="1" borderColor="0" id="dashboardStyleArea">
+            <mx:Canvas id="dashboardCanvas" width="100%" height="100%"/>
+        </mx:VBox>
+    </mx:Box>
 </report:DataViewPage>

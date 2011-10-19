@@ -54,6 +54,7 @@
         import mx.collections.Sort;
         import mx.collections.SortField;
         import mx.controls.AdvancedDataGrid;
+        import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.controls.advancedDataGridClasses.SortInfo;
         import mx.events.DragEvent;
@@ -190,7 +191,7 @@
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var def:ListDefinition = analysisDefinition as ListDefinition;
-            dataGrid.setStyle("fontFamily", def.fontName);
+            //dataGrid.setStyle("fontFamily", def.getFont());
             dataGrid.setStyle("fontSize", def.fontSize);
             dataGrid.setStyle("color", def.textColor);
             dataGrid.setStyle("alternatingItemColors", [ def.rowColor1, def.rowColor2 ]);

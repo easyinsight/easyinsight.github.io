@@ -22,12 +22,12 @@ public class Dashboard {
     public var authorName:String;
     public var creationDate:Date;
     public var updateDate:Date;
-    public var paddingLeft:int = 10;
-    public var paddingRight:int = 10;
-    public var filterBorderStyle:String = "solid";
-    public var filterBorderColor:uint = 0xCCCCCC;
-    public var filterBackgroundColor:uint = 0xFFFFFF;
-    public var filterBackgroundAlpha:Number = 0;
+
+    public var backgroundColor:uint = 0xCCCCCC;
+    public var padding:int = 3;
+    public var borderColor:uint = 0x000000;
+    public var borderThickness:int = 1;
+
     public var headerStyle:int;
     public var recommendedExchange:Boolean;
     public var dataSourceInfo:DataSourceInfo;

@@ -8,21 +8,17 @@ public class PerspectiveInfo {
     public static const KPI_TREE_ADMIN:int = 5;
     public static const KPI_TREE_VIEW:int = 6;
     public static const DATA_SOURCE_ADMIN:int = 7;
-    public static const POST_CONNECTION_INSTALL:int = 8;
 
     public static const LOOKUP_TABLE:int = 10;
 
-    public static const GOAL_DETAIL:int = 12;
     public static const COMPOSITE_WORKSPACE:int = 13;
     public static const ACCOUNT_CREATION:int = 14;
     public static const HOME_PAGE:int = 15;
-    /*public static const SCORECARDS:int = 16;*/
     public static const CONNECTIONS:int = 18;
     public static const API:int = 19;
     public static const ACCOUNT:int = 20;
     public static const EXCHANGE:int = 21;
     public static const HELP:int = 22;
-    public static const GROUPS:int = 24;
     public static const CONNECTION_DETAIL:int = 25;
     public static const KPI_WINDOW:int = 26;
     public static const ANALYSIS_ITEM_EDITOR:int = 27;

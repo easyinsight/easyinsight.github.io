@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" verticalAlign="middle"
+         visible="true" paddingLeft="20" paddingRight="20"
+         borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
+         horizontalGap="20"
+         backgroundColor="#FFFFFF" paddingTop="5" paddingBottom="5" width="100%">
+    <mx:Metadata>
+        [Event(name="previousReport", type="flash.events.Event")]
+        [Event(name="nextReport", type="flash.events.Event")]
+        [Event(name="saveToAccount", type="flash.events.Event")]
+    </mx:Metadata>
+    <mx:states>
+        <mx:State name="showExchangeAdd">
+            <mx:AddChild position="before" relativeTo="{descriptionArea}">
+                <mx:Button icon="{previousReportArrow}" labelPlacement="bottom" toolTip="{previousReportLabel}"
+                           click="dispatchEvent(new Event('previousReport'))" id="previousReportButton"
+                           visible="{previousReportAvailable}"/>
+            </mx:AddChild>
+            <mx:AddChild position="after" relativeTo="{descriptionArea}">
+                <mx:Button icon="{nextReportArrow}" labelPlacement="bottom" toolTip="{nextReportLabel}"
+                           click="dispatchEvent(new Event('nextReport'))" id="nextReportButton"
+                           visible="{nextReportAvailable}"/>
+            </mx:AddChild>
+            <mx:AddChild position="after" relativeTo="{descriptionArea}">
+                <mx:VBox verticalAlign="middle" horizontalAlign="center" id="exchangeBox" width="430" height="110">
+                    <mx:Text fontSize="11" text="Want to save this report template to your account? Upon saving the template,&#13;the report will be available from your Home page, you can set up recurring&#13;email delivery of the report, and you can modify the report as you want." selectable="false"/>
+                    <mx:Button label="Save to my Account" fontSize="12" styleName="grayButton"
+                               click="dispatchEvent(new Event('saveToAccount'))"/>
+                </mx:VBox>
+            </mx:AddChild>
+            <mx:AddChild position="after" relativeTo="{descriptionArea}">
+                <mx:VRule height="30" id="rule1"/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        [Bindable]
+        [Embed(source="../../../../assets/arrow_left_blue.png")]
+        protected var previousReportArrow:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/arrow_right_blue.png")]
+        protected var nextReportArrow:Class;
+
+        private var _previousReportAvailable:Boolean;
+        private var _previousReportLabel:String;
+
+        private var _nextReportAvailable:Boolean;
+        private var _nextReportLabel:String;
+
+        private var _description:String;
+
+        private var _showAdd:Boolean;
+
+        [Bindable(event="showAddChanged")]
+        public function get showAdd():Boolean {
+            return _showAdd;
+        }
+
+        public function set showAdd(value:Boolean):void {
+            if (_showAdd == value) return;
+            _showAdd = value;
+            dispatchEvent(new Event("showAddChanged"));
+            invalidateProperties();
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (showAdd) {
+                currentState = "showExchangeAdd";
+            } else {
+                currentState = "";
+            }
+        }
+
+        [Bindable(event="descriptionChanged")]
+        public function get description():String {
+            return _description;
+        }
+
+        public function set description(value:String):void {
+            if (_description == value) return;
+            _description = value;
+            dispatchEvent(new Event("descriptionChanged"));
+        }
+
+        [Bindable(event="previousReportAvailableChanged")]
+        public function get previousReportAvailable():Boolean {
+            return _previousReportAvailable;
+        }
+
+        public function set previousReportAvailable(value:Boolean):void {
+            if (_previousReportAvailable == value) return;
+            _previousReportAvailable = value;
+            dispatchEvent(new Event("previousReportAvailableChanged"));
+        }
+
+        [Bindable(event="previousReportLabelChanged")]
+        public function get previousReportLabel():String {
+            return _previousReportLabel;
+        }
+
+        public function set previousReportLabel(value:String):void {
+            if (_previousReportLabel == value) return;
+            _previousReportLabel = value;
+            dispatchEvent(new Event("previousReportLabelChanged"));
+        }
+
+        [Bindable(event="nextReportAvailableChanged")]
+        public function get nextReportAvailable():Boolean {
+            return _nextReportAvailable;
+        }
+
+        public function set nextReportAvailable(value:Boolean):void {
+            if (_nextReportAvailable == value) return;
+            _nextReportAvailable = value;
+            dispatchEvent(new Event("nextReportAvailableChanged"));
+        }
+
+        [Bindable(event="nextReportLabelChanged")]
+        public function get nextReportLabel():String {
+            return _nextReportLabel;
+        }
+
+        public function set nextReportLabel(value:String):void {
+            if (_nextReportLabel == value) return;
+            _nextReportLabel = value;
+            dispatchEvent(new Event("nextReportLabelChanged"));
+        }
+        ]]></mx:Script>
+    <util:AutoSizeTextArea text="{description}" width="100%" id="descriptionArea"
+                           focusEnabled="false" editable="false" selectable="false"
+                           verticalScrollPolicy="off"
+                           horizontalScrollPolicy="off"/>
+</mx:HBox>

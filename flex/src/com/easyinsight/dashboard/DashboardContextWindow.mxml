@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" horizontalAlign="center">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.genredata.AnalyzeEvent;
+
+        import mx.managers.PopUpManager;
+
+        private var _dashboardDescriptor:DashboardDescriptor;
+
+        public function set dashboardDescriptor(value:DashboardDescriptor):void {
+            _dashboardDescriptor = value;
+        }
+
+        private function viewDashboard():void {
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboardDescriptor.id})));
+            PopUpManager.removePopUp(this)
+        }
+
+        private function editDashboard():void {
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {dashboardID: _dashboardDescriptor.id})));
+            PopUpManager.removePopUp(this)
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <util:MultiLineButton label="View the Dashboard" click="viewDashboard()" styleName="grayButton" fontSize="20"/>
+        <util:MultiLineButton label="Edit the Dashboard" click="editDashboard()" styleName="grayButton" fontSize="20"/>
+    </mx:HBox>
+    <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+</util:EISlimWindow>

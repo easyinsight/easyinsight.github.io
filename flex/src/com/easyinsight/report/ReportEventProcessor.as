@@ -135,7 +135,7 @@ public class ReportEventProcessor extends EITitleWindow {
 
     private function onReportSetup(event:ReportSetupEvent):void {
         viewFactory.filterDefinitions = event.reportInfo.report.filterDefinitions;
-        viewFactory.retrieveData(false);
+        viewFactory.refresh();
     }
 
     private function toReport(event:MouseEvent):void {

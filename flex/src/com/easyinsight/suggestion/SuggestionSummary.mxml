@@ -7,7 +7,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.DataViewFactory;
-        import com.easyinsight.datasources.DataSourceDisplay;
+        import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.TransformContainer;
         import com.easyinsight.util.PopUpUtil;
 
@@ -111,10 +111,10 @@
             _dataView = value;
         }
 
-        private var _dataSourceDisplay:DataSourceDisplay;
+        private var _dataSource:DataSourceInfo;
 
-        public function set dataSourceDisplay(value:DataSourceDisplay):void {
-            _dataSourceDisplay = value;
+        public function set dataSource(value:DataSourceInfo):void {
+            _dataSource = value;
         }
 
         private function gotIntentions():void {
@@ -123,12 +123,12 @@
                 items.addItem(wrapper.analysisItem);
             }
             var intentions:ArrayCollection = analysisService.getIntentions.lastResult as ArrayCollection;
-            var metadata:SuggestionMetadata = new SuggestionMetadata(_report, _transformContainer, _availableFields, _fields, _dataSourceDisplay);
+            var metadata:SuggestionMetadata = new SuggestionMetadata(_report, _transformContainer, _availableFields, _fields, _dataSource);
             for each (var intention:Intention in intentions) {
                 intention.addEventListener(IntentionTriggerEvent.INTENTION_TRIGGER, onIntentionEvent);
                 intention.apply(metadata);
             }
-            _dataView.retrieveData();
+            _dataView.refresh();
         }
 
         private function moreSuggestions():void {
@@ -141,7 +141,7 @@
             window.report = _report;
             window.fields = items;
             window.allFields = _availableFields;
-            window.dataSourceDisplay = _dataSourceDisplay;
+            window.dataSourceDisplay = _dataSource;
             window.wrappers = _fields;
             window.transformContainer = _transformContainer;
             window.dataView = _dataView;

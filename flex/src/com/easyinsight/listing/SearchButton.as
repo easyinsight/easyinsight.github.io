@@ -6,6 +6,8 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.listing {
+import com.easyinsight.dashboard.DashboardContextWindow;
+import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
@@ -17,6 +19,8 @@ import com.easyinsight.report.ReportPerspectiveInfo;
 import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.PopUpUtil;
+
+import flash.events.Event;
 
 import flash.events.MouseEvent;
 
@@ -55,11 +59,20 @@ public class SearchButton extends Button {
             } else if (event.eiDescriptor.getType() == EIDescriptor.GOAL_TREE) {
                 User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.KPI_TREE_VIEW, {goalTreeID: event.eiDescriptor.id})));
             } else if (event.eiDescriptor.getType() == EIDescriptor.DASHBOARD) {
-                User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id})));
+                //User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id})));
+                var dashboardWindow:DashboardContextWindow = new DashboardContextWindow();
+                dashboardWindow.dashboardDescriptor = event.eiDescriptor as DashboardDescriptor;
+                dashboardWindow.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
+                PopUpManager.addPopUp(dashboardWindow, this, false);
+                PopUpUtil.centerPopUp(dashboardWindow);
             } else if (event.eiDescriptor.getType() == EIDescriptor.SCORECARD) {
                 User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID: event.eiDescriptor.id})));
             }
         }
+    }
+
+    private function onAnalyze(event:Event):void {
+        User.getEventNotifier().dispatchEvent(event);
     }
 }
 }

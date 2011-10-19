@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.suggestion {
+import com.easyinsight.datasources.DataSourceRefreshExecutor;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.intention.DataSourceIntention")]
@@ -19,7 +20,8 @@ public class DataSourceIntention extends Intention {
 
     override public function apply(suggestionMetadata:SuggestionMetadata):void {
         if (refreshData) {
-            suggestionMetadata.dataSourceDisplay.refresh();
+            var executor:DataSourceRefreshExecutor = new DataSourceRefreshExecutor();
+            executor.refresh(suggestionMetadata.dataSource);
         } else if (adminData) {
             dispatchEvent(new IntentionTriggerEvent(IntentionTriggerEvent.INTENTION_TRIGGER, true));
         }

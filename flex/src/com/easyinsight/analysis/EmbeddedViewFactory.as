@@ -219,7 +219,7 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
         dispatchEvent(new ReportSetupEvent(info));
     }
 
-    public function retrieveData(allSources:Boolean = false):void {
+    public function refresh():void {
         if (_reportRenderer == null) {
             pendingRequest = true;
         } else {
@@ -238,7 +238,7 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
                     filters.addItem(filter);
                 }
             }
-            _dataService.retrieveData(reportID, dataSourceID, filters, allSources, drillthroughFilters, _noCache, overrides);
+            _dataService.retrieveData(reportID, dataSourceID, filters, false, drillthroughFilters, _noCache, overrides);
         }
     }
 
@@ -352,7 +352,7 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
         reportCanvas.reportBox.addChild(_reportRenderer as DisplayObject);
         if (pendingRequest) {
             pendingRequest = false;
-            retrieveData(false);
+            refresh();
         }
     }
 
@@ -389,7 +389,7 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
     }
 
     private function forceRender(event:ReportRendererEvent):void {
-        retrieveData(false);
+        refresh();
     }
     }
 }

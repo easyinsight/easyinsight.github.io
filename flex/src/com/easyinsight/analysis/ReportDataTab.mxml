@@ -183,7 +183,7 @@
 
         private function onJoinOverride(event:JoinOverrideEvent):void {
             _analysisDefinition.joinOverrides = event.joins;
-            _dataView.retrieveData();
+            _dataView.refresh();
         }
 
         private var _joinsCustomizable:Boolean;

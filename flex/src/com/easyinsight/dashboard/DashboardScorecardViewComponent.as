@@ -27,6 +27,10 @@ public class DashboardScorecardViewComponent extends Canvas implements IDashboar
         PopUpUtil.centerPopUp(window);
     }*/
 
+    public function obtainPreferredSizeInfo():SizeInfo {
+        return new SizeInfo();
+    }
+
     protected override function createChildren():void {
         super.createChildren();
 
@@ -67,6 +71,9 @@ public class DashboardScorecardViewComponent extends Canvas implements IDashboar
 
     public function reportCount():ArrayCollection {
         return new ArrayCollection();
+    }
+
+    public function toggleFilters(showFilters:Boolean):void {
     }
 }
 }

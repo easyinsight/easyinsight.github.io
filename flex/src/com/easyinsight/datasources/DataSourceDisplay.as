@@ -2,7 +2,7 @@ package com.easyinsight.datasources {
 import com.easyinsight.analysis.IRetrievable;
 import com.easyinsight.framework.User;
 import com.easyinsight.util.AutoSizeTextArea;
-import com.easyinsight.util.PopUpUtil;
+import com.easyinsight.util.MultiLineButton;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -12,22 +12,60 @@ import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.TextArea;
+import mx.controls.VRule;
+import mx.effects.Effect;
+import mx.effects.Fade;
+import mx.events.FlexEvent;
 import mx.formatters.DateFormatter;
 import mx.managers.PopUpManager;
 
 [Event(name="dataSourceRefreshed", type="com.easyinsight.datasources.DataSourceRefreshEvent")]
-public class DataSourceDisplay extends VBox {
+public class DataSourceDisplay extends HBox {
 
     private var _dataSource:DataSourceInfo;
     public var sourceLabel:TextArea;
 
     private var _labelText:String;
+
     public function DataSourceDisplay() {
         super();
-        setStyle("horizontalAlign", "center");
+        setStyle("verticalAlign", "middle");
+        setStyle("backgroundColor", 0xFFFFFF);
+        setStyle("borderStyle", "inset");
+        setStyle("dropShadowEnabled", true);
+        setStyle("borderThickness", 1);
+        setStyle("cornerRadius", 8);
+        setStyle("paddingLeft", 5);
+        setStyle("paddingRight", 5);
+        setStyle("paddingTop", 5);
+        setStyle("paddingBottom", 5);
+        setStyle("alpha", 0);
+        addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
+    }
+
+    private function onCreation(event:FlexEvent):void {
+        stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
+        var resizeEffect:Effect = new Fade(this);
+        resizeEffect.duration = 500;
+        Fade(resizeEffect).alphaFrom = 0;
+        Fade(resizeEffect).alphaTo = 1;
+        resizeEffect.play();
+
+        var fadeEffect:Effect = new Fade(this);
+        fadeEffect.duration = 500;
+        Fade(fadeEffect).alphaFrom = 1;
+        Fade(fadeEffect).alphaTo = 0;
+        setStyle("removedEffect", fadeEffect);
+    }
+
+    private function onMouseDown(event:MouseEvent):void {
+        var result:Boolean = hitTestPoint(event.stageX, event.stageY);
+        if (!result) {
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN,  onMouseDown);
+            PopUpManager.removePopUp(this);
+        }
     }
 
     private var _dataView:IRetrievable;
@@ -123,22 +161,43 @@ public class DataSourceDisplay extends VBox {
 
     private var viewStack:ViewStack;
 
+    private function vanillaRetrieval(event:MouseEvent):void {
+        _dataView.refresh();
+        stage.removeEventListener(MouseEvent.MOUSE_DOWN,  onMouseDown);
+        PopUpManager.removePopUp(this);
+    }
+
     override protected function createChildren():void {
         super.createChildren();
         /*if (sourceBox == null) {
             sourceBox = new HBox();
         }
         addChild(sourceBox);*/
+        var refreshButton:Button = new MultiLineButton();
+        refreshButton.label = "Rerun the Report Against Existing Data";
+        refreshButton.styleName = "grayButton";
+        refreshButton.width = 120;
+        refreshButton.setStyle("fontSize", 12);
+        refreshButton.addEventListener(MouseEvent.CLICK, vanillaRetrieval);
+        addChild(refreshButton);
+        var stroke:VRule = new VRule();
+        stroke.height = 60;
+        addChild(stroke);
+        var vbox:VBox = new VBox();
+        vbox.setStyle("horizontalAlign", "center");
         if (sourceLabel == null) {
             sourceLabel = new AutoSizeTextArea();
             sourceLabel.width = 250;
+            sourceLabel.setStyle("fontSize", 12);
             sourceLabel.setStyle("backgroundAlpha", 0);
             sourceLabel.setStyle("borderThickness", 0);
+            sourceLabel.horizontalScrollPolicy = "off";
+            sourceLabel.verticalScrollPolicy = "off";
             sourceLabel.editable = false;
             sourceLabel.selectable = false;
             BindingUtils.bindProperty(sourceLabel, "text", this, "labelText");
         }
-        addChild(sourceLabel);
+        vbox.addChild(sourceLabel);
         viewStack = new ViewStack();
         viewStack.resizeToContent = true;
         var emptyBox:Box = new Box();
@@ -148,6 +207,7 @@ public class DataSourceDisplay extends VBox {
         outOfDateBox.setStyle("horizontalAlign", "center");
         var button:Button = new Button();
         button.label = "Refresh the data source";
+        button.setStyle("fontSize", 12);
         button.styleName = "grayButton";
         button.addEventListener(MouseEvent.CLICK, onClick);
         outOfDateBox.addChild(button);
@@ -155,37 +215,21 @@ public class DataSourceDisplay extends VBox {
         viewStack.addChild(emptyBox);
         viewStack.addChild(outOfDateBox);
 
-        addChild(viewStack);
+        vbox.addChild(viewStack);
+        addChild(vbox);
         BindingUtils.bindProperty(viewStack, "selectedIndex", this, "stackIndex");
     }
 
-    public function refresh():void {
-        if (dataSource.scheduled) {
-            forceRefresh();
-        } else {
-            var setupWindow:DataSourceRefreshSetupWindow = new DataSourceRefreshSetupWindow();
-            setupWindow.dataSourceInfo = _dataSource;
-            setupWindow.addEventListener("done", forceRefresh, false, 0, true);
-            PopUpManager.addPopUp(setupWindow, this, true);
-            PopUpUtil.centerPopUp(setupWindow);
-        }
-    }
-
-    private function forceRefresh(event:Event = null):void {
-        var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
-        dsRefreshWindow.dataSourceID = _dataSource.dataSourceID;
-        dsRefreshWindow.addEventListener(DataSourceRefreshEvent.DATA_SOURCE_REFRESH, onRefresh, false, 0, true);
-        PopUpManager.addPopUp(dsRefreshWindow, this, true);
-        PopUpUtil.centerPopUp(dsRefreshWindow);
-    }
-
     private function onClick(event:MouseEvent):void {
-        refresh();
+        var executor:DataSourceRefreshExecutor = new DataSourceRefreshExecutor();
+        executor.addEventListener(DataSourceRefreshEvent.DATA_SOURCE_REFRESH, onRefresh, false, 0, true);
+        executor.refresh(dataSource);
     }
 
     private function onRefresh(event:DataSourceRefreshEvent):void {
         updateString(event.newDateTime);
-        dispatchEvent(event);
+        stage.removeEventListener(MouseEvent.MOUSE_DOWN,  onMouseDown);
+        PopUpManager.removePopUp(this);
     }
 }
 }

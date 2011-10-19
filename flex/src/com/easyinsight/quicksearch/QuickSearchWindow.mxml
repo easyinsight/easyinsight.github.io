@@ -5,7 +5,6 @@
          backgroundColor="0xECE9D8" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.controls.List;
         import mx.core.UIComponent;
         import mx.managers.PopUpManager;
@@ -29,10 +28,6 @@
         [Bindable]
         [Embed(source="../../../../assets/data_blue_x16.png")]
         private var dataSourceIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/branchx16.png")]
-        private var goalTreeIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/presentation_chart.png")]
@@ -67,8 +62,6 @@
                     descriptorMap[descriptor.name] = descriptor;
                     if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
                         descriptor.icon = dataSourceIcon;
-                    } else if (descriptor.getType() == EIDescriptor.GOAL_TREE) {
-                        descriptor.icon = goalTreeIcon;
                     } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
                         descriptor.icon = dashboardIcon;
                     } else if (descriptor.getType() == EIDescriptor.SCORECARD) {
@@ -142,8 +135,6 @@
                 descriptorMap[descriptor.name] = descriptor;
                 if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
                     descriptor.icon = dataSourceIcon;
-                } else if (descriptor.getType() == EIDescriptor.GOAL_TREE) {
-                    descriptor.icon = goalTreeIcon;
                 } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
                     descriptor.icon = dashboardIcon;
                 } else if (descriptor.getType() == EIDescriptor.SCORECARD) {

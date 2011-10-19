@@ -2,7 +2,6 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" label="Export" icon="@Embed(source='../../../../assets/tables_add.png')" height="43">
     <mx:Script>
     <![CDATA[
-        import com.easyinsight.analysis.feed.AnalysisBasedFeedCreationWindow;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.report.URLWindow;
@@ -43,17 +42,6 @@
             if (_analysisDefinition == value) return;
             _analysisDefinition = value;
             dispatchEvent(new Event("analysisDefinitionChanged"));
-        }
-
-        private function createFeed():void {
-            if (analysisDefinition.analysisID == 0) {
-                Alert.show("You need to save the report first.");
-            } else {
-                var feedCreationWindow:AnalysisBasedFeedCreationWindow = AnalysisBasedFeedCreationWindow(PopUpManager.
-                        createPopUp(this, AnalysisBasedFeedCreationWindow, true));
-                feedCreationWindow.analysisDefinition = analysisDefinition;
-                PopUpUtil.centerPopUp(feedCreationWindow);
-            }
         }
 
         private function embed():void {

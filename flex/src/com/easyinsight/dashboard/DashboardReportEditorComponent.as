@@ -1,15 +1,14 @@
 package com.easyinsight.dashboard {
+
+import mx.collections.ArrayCollection;
 import mx.containers.VBox;
-import mx.controls.Image;
-import mx.controls.Label;
 import mx.managers.PopUpManager;
 
 public class DashboardReportEditorComponent extends VBox implements IDashboardEditorComponent {
 
-    [Embed(source="../../../../assets/chart_area_x32.png")]
-    private var reportIcon:Class;
-
     public var report:DashboardReport;
+
+    public var dashboardEditorMetadata:DashboardEditorMetadata;
 
     public function DashboardReportEditorComponent() {
         super();
@@ -19,14 +18,18 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
         this.percentHeight = 100;
     }
 
+    public function obtainPreferredSizeInfo():SizeInfo {
+        return new SizeInfo();
+    }
+
+    private var reportComp:DashboardReportViewComponent = new DashboardReportViewComponent();
+
     protected override function createChildren():void {
         super.createChildren();
-        var image:Image = new Image();
-        image.source = reportIcon;
-        addChild(image);
-        var label:Label = new Label();
-        label.text = report.report.name;
-        addChild(label);
+        reportComp.dashboardReport = report;
+        reportComp.dashboardEditorMetadata = dashboardEditorMetadata;
+        reportComp.elementID = String(DashboardElementFactory.counter++);
+        addChild(reportComp);
     }
 
     public function save():void {
@@ -40,6 +43,25 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
         var window:DashboardEditWindow = new DashboardEditWindow();
         window.dashboardElement = report;
         PopUpManager.addPopUp(window, this, true);
+    }
+
+    public function refresh():void {
+        reportComp.refresh();
+    }
+
+    public function updateAdditionalFilters(filterMap:Object):void {
+        reportComp.updateAdditionalFilters(filterMap);
+    }
+
+    public function initialRetrieve():void {
+        reportComp.initialRetrieve();
+    }
+
+    public function reportCount():ArrayCollection {
+        return reportComp.reportCount();
+    }
+
+    public function toggleFilters(showFilters:Boolean):void {
     }
 }
 }

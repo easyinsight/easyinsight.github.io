@@ -2,8 +2,7 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:filtering="com.easyinsight.filtering.*"
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%" creationComplete="populateData()"
-         paddingLeft="5"
-         paddingRight="5">
+         styleName="screenBackground">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
@@ -30,7 +29,9 @@
         import mx.collections.Sort;
         import mx.collections.SortField;
         import mx.controls.Alert;
+        import mx.core.UIComponent;
         import mx.events.CloseEvent;
+        import mx.events.FlexEvent;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
@@ -128,14 +129,22 @@
         private function gotDashboard():void {
             _dashboard = dashboardService.getDashboard.lastResult as Dashboard;
             dataSourceID = _dashboard.dataSourceID;
+            metadata.dataSourceID = dataSourceID;
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.dashboardAdminID = String(_dashboard.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
             var box:DashboardBox = new DashboardBox();
+            rootView = box;
             box.dashboardEditorMetadata = metadata;
             box.element = _dashboard.rootElement;
             box.allowDelete = false;
+            UIComponent(box).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
+                var filterMap:Object = new Object();
+                filterMap["master"] = _dashboard.filters;
+                box.updateAdditionalFilters(filterMap);
+                box.initialRetrieve();
+            });
             dashboardCanvas.addChild(box);
             ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource, scorecardService.getScorecardDescriptorsForDataSource);
             analysisService.getInsightDescriptorsForDataSource.send(_dashboard.dataSourceID);
@@ -144,6 +153,8 @@
             UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.EDIT, _dashboardID));
             dataService.getFeedMetadata.send(_dashboard.dataSourceID);
         }
+
+        private var rootView:IDashboardViewComponent;
 
         private function onDimensions(event:DashboardSetupEvent):void {
             var grid:DashboardGrid = new DashboardGrid();
@@ -272,6 +283,15 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        private function transformsUpdated(event:Event):void {
+            var filterMap:Object = new Object();
+            if (transformContainer != null) {
+                filterMap["master"] = transformContainer.getFilterDefinitions();
+            }
+            rootView.updateAdditionalFilters(filterMap);
+            rootView.refresh();
+        }
+
         private function onScript(event:MarmotScriptEvent):void {
             _dashboard.marmotScript = event.script;
         }
@@ -297,19 +317,19 @@
     <mx:RemoteObject id="scorecardService" destination="scorecardService">
         <mx:method name="getScorecardDescriptorsForDataSource" result="gotScorecards()"/>
     </mx:RemoteObject>
-    <mx:HBox width="100%" paddingLeft="15" paddingTop="5">
+    <mx:HBox width="100%" styleName="topButtonBar">
         <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="closeEditor()"
-                   toolTip="Close" labelPlacement="right" label="Close Editor"/>
+                   toolTip="Close" labelPlacement="right" label="Close Editor" styleName="grayButton"/>
         <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
-                   toolTip="Save" labelPlacement="right" label="Save"/>
+                   toolTip="Save" labelPlacement="right" label="Save" styleName="grayButton"/>
         <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="viewDashboard()"
-                   toolTip="View Dashboard" label="Dashboard View" labelPlacement="right" enabled="{dashboardViewable}"/>
+                   toolTip="View Dashboard" label="Dashboard View" labelPlacement="right" enabled="{dashboardViewable}" styleName="grayButton"/>
         <mx:Button icon="@Embed(source='../../../../assets/document_edit.png')" click="configureDashboard()"
-                   toolTip="Configure Dashboard" label="Configure Dashboard" labelPlacement="right"/>
+                   toolTip="Configure Dashboard" label="Configure Dashboard" labelPlacement="right" styleName="grayButton"/>
         <mx:Button icon="@Embed(source='../../../../assets/code_edit.png')" click="editCode()"
-                   toolTip="Edit Code" label="Edit Code" labelPlacement="right"/>
+                   toolTip="Edit Code" label="Edit Code" labelPlacement="right" styleName="grayButton"/>
     </mx:HBox>
-    <mx:HBox width="100%" height="100%">
+    <mx:HBox width="100%" height="100%" paddingLeft="10" paddingRight="10">
         <mx:VBox height="100%" horizontalAlign="center" width="200" paddingTop="20" paddingBottom="20">
             <mx:Label text="Controls" fontSize="14"/>
             <mx:List id="controlsList" dataProvider="{availableControls}" labelField="name" dragEnabled="true"
@@ -321,38 +341,17 @@
                      width="100%" height="100%"/>
         </mx:VBox>
         <mx:VBox width="100%" height="100%" horizontalAlign="center">
-            <mx:HBox>
-                <mx:ToggleButtonBar id="toggleBar" itemClick="index = toggleBar.selectedIndex">
-                    <mx:dataProvider>
-                        <mx:ArrayCollection>
-                            <mx:Array>
-                                <mx:String>Dashboard Canvas</mx:String>
-                                <mx:String>Filters</mx:String>
-                            </mx:Array>
-                        </mx:ArrayCollection>
-                    </mx:dataProvider>
-                </mx:ToggleButtonBar>
+            <mx:HBox width="100%">
+                <mx:Button icon="@Embed(source='../../../../assets/funnel.png')"
+                       toolTip="Create New Filter..." click="transformContainer.addNewFilter()" label="New Filter"/>
+                <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
+                                              borderStyle="solid"
+                                              borderThickness="1" backgroundColor="#ffffff"
+                                              backgroundAlpha=".1" feedID="{dataSourceID}"
+                                              analysisItems="{allFields}"
+                                              updatedTransforms="transformsUpdated(event)"/>
             </mx:HBox>
-            <mx:Label text="Drag controls or reports from the left into the canvas below to create your dashboard." fontSize="18"/>
-            <mx:ViewStack width="100%" height="100%" selectedIndex="{index}" creationPolicy="all">
-                <mx:Canvas width="100%" height="100%" id="dashboardCanvas"/>
-                <mx:HDividedBox height="50%" width="100%" backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5"
-                                paddingRight="5" paddingTop="10">
-                    <mx:List dataProvider="{availableDimensions}" labelField="display"
-                             dragEnabled="true"
-                             dragMoveEnabled="false" width="30%"
-                             height="100%"/>
-                    <mx:Canvas width="70%" height="100%">
-                        <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
-                                                      borderStyle="solid"
-                                                      borderThickness="1" backgroundColor="#ffffff"
-                                                      backgroundAlpha=".1" feedID="{dataSourceID}"
-                                                      analysisItems="{allFields}"
-                                                      paddingBottom="5" paddingLeft="5" paddingRight="5"
-                                                      paddingTop="5"/>
-                    </mx:Canvas>
-                </mx:HDividedBox>
-            </mx:ViewStack>
+            <mx:Canvas width="100%" height="100%" id="dashboardCanvas"/>
         </mx:VBox>
     </mx:HBox>
 </mx:VBox>

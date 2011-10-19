@@ -47,7 +47,7 @@
         private function gotOverrides():void {
             var results:ReportJoins = analysisService.determineOverrides.lastResult as ReportJoins;
             configurableDataSources = results.configurableDataSources;
-            if (startJoins != null && startJoins.length) {
+            if (startJoins != null) {
                 for each (var joinOverride:JoinOverride in startJoins) {
                     if (joinOverride.dataSourceID == 0) {
                         joinOverride.dataSourceID = DataSourceDescriptor(configurableDataSources.getItemAt(0)).id;
@@ -150,7 +150,7 @@
             }
             dataSources = dataSourceMap[String(dataSource.id)] as ArrayCollection;
             connections = new ArrayCollection();
-            if (startJoins == null || startJoins.length == 0) {
+            if (startJoins == null) {
                 var joins:ArrayCollection = joinMap[String(dataSource.id)];
                 for each (var join:JoinOverride in joins) {
                     connections.addItem(join.toConnection());

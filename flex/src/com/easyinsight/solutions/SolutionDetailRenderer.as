@@ -7,11 +7,15 @@ import com.easyinsight.analysis.PromptEvent;
 import com.easyinsight.analysis.SavePromptWindow;
 import com.easyinsight.customupload.ConfigureDataSource;
 import com.easyinsight.customupload.DataSourceConfiguredEvent;
+import com.easyinsight.datasources.DataSourceBehavior;
+import com.easyinsight.framework.NavigationEvent;
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.listing.IPerspective;
 import com.easyinsight.listing.DescriptorAnalyzeSource;
 import com.easyinsight.quicksearch.EIDescriptor;
+import com.easyinsight.schedule.DailyScheduleType;
+import com.easyinsight.schedule.DataSourceRefreshActivity;
 import com.easyinsight.skin.BackgroundImage;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
@@ -53,6 +57,7 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
         solutionService.installSolution.addEventListener(ResultEvent.RESULT, installedSolution);
         solutionService.getSolutionArchive.addEventListener(ResultEvent.RESULT, gotSolutionArchive);
         solutionService.connectionInstalled.addEventListener(ResultEvent.RESULT, checkedValidity);
+        solutionService.addKPIData.addEventListener(ResultEvent.RESULT, installed);
         addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
         setStyle("borderStyle", "none");
         setStyle("borderThickness", 0);
@@ -102,15 +107,36 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     }
 
     private function onSourceConfigured(event:DataSourceConfiguredEvent):void {
-        postInstall();
+        connectionInstalled();
     }
 
-    private function postInstall():void {
-        var desc:DataSourceDescriptor = new DataSourceDescriptor();
-        desc.id = installResult.dataFeedID;
-        desc.name = installResult.feedName;
-        desc.dataSourceType = installResult.getFeedType();
-        dispatchEvent(new AnalyzeEvent(new PostInstallSource(desc)));
+    private function connectionInstalled():void {
+        var kpiData:SolutionKPIData = new SolutionKPIData();
+        kpiData.dataSourceID = installResult.dataFeedID;
+        if (DataSourceBehavior.pullDataSource(installResult.getFeedType())) {
+            var activity:DataSourceRefreshActivity = new DataSourceRefreshActivity();
+            activity.dataSourceID = installResult.dataFeedID;
+            activity.dataSourceName = installResult.feedName;
+            var schedule:DailyScheduleType = new DailyScheduleType();
+            var morningOrEvening:int = int(Math.random() * 2);
+            if (morningOrEvening == 0) {
+                schedule.hour = int(Math.random() * 6);
+            } else {
+                schedule.hour = int(Math.random() * 6) + 18;
+            }
+            schedule.minute = int(Math.random() * 60);
+            activity.scheduleType = schedule;
+            kpiData.utcOffset = new Date().getTimezoneOffset();
+            kpiData.activity = activity;
+        }
+        kpiData.addDataSourceToGroup = true;
+        ProgressAlert.alert(this, "Completing installation...", null, solutionService.addKPIData);
+        solutionService.addKPIData.send(kpiData);
+    }
+
+    private function installed(event:Event):void {
+        dispatchEvent(new NavigationEvent("Home"));
+        PopUpManager.removePopUp(this);
     }
 
     private function installedSolution(event:ResultEvent):void {
@@ -126,9 +152,6 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
         configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured, false, 0, true);
         PopUpManager.addPopUp(configWindow, this, true);
         PopUpUtil.centerPopUp(configWindow);
-        /*if (immediate) {
-            postInstall();
-        }*/
         dispatchEvent(new SolutionEvent(SolutionEvent.SOLUTION_INSTALLED, _solution.solutionID));
     }
 

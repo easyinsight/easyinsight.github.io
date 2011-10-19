@@ -1,4 +1,6 @@
 package com.easyinsight.dashboard {
+import com.easyinsight.dashboard.SizeInfo;
+
 import mx.collections.ArrayCollection;
 import mx.containers.Grid;
 import mx.containers.GridItem;
@@ -15,33 +17,67 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
         super();
         this.percentWidth = 100;
         this.percentHeight = 100;
+        setStyle("paddingLeft", 0);
+        setStyle("paddingRight", 0);
+        setStyle("paddingTop", 0);
+        setStyle("paddingBottom", 0);
+        setStyle("horizontalGap", 0);
+        setStyle("verticalGap", 0);
     }
 
     private var viewChildren:ArrayCollection;
 
     protected override function createChildren():void {
         super.createChildren();
+        setStyle("backgroundColor", dashboardGrid.backgroundColor);
+        setStyle("backgroundAlpha", dashboardGrid.backgroundAlpha);
         viewChildren = new ArrayCollection();
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
             var gridRow:GridRow = new GridRow();
             gridRow.percentWidth = 100;
             gridRow.percentHeight = 100;
+            gridRow.setStyle("paddingLeft", 0);
+            gridRow.setStyle("paddingRight", 0);
+            gridRow.setStyle("paddingTop", 0);
+            gridRow.setStyle("paddingBottom", 0);
             addChild(gridRow);
             for (var j:int = 0; j < dashboardGrid.columns; j++) {
                 var e:DashboardGridItem = findItem(i, j);
                 var gridItem:GridItem = new GridItem();
-                gridItem.setStyle("paddingLeft", dashboardGrid.paddingLeft);
+                /*gridItem.setStyle("paddingLeft", dashboardGrid.paddingLeft);
                 gridItem.setStyle("paddingRight", dashboardGrid.paddingRight);
                 gridItem.setStyle("paddingTop", dashboardGrid.paddingTop);
-                gridItem.setStyle("paddingBottom", dashboardGrid.paddingBottom);
-                gridItem.percentWidth = 100;
-                gridItem.percentHeight = 100;
+                gridItem.setStyle("paddingBottom", dashboardGrid.paddingBottom);*/
+
                 var child:UIComponent = DashboardElementFactory.createViewUIComponent(e.dashboardElement, dashboardEditorMetadata);
+                var childSizeInfo:SizeInfo = IDashboardViewComponent(child).obtainPreferredSizeInfo();
+                if (childSizeInfo.preferredWidth != 0) {
+                    gridItem.width = childSizeInfo.preferredWidth + dashboardGrid.paddingLeft + dashboardGrid.paddingRight;
+                } else {
+                    gridItem.percentWidth = 100;
+                }
+                if (childSizeInfo.preferredHeight != 0) {
+                    gridItem.height = childSizeInfo.preferredHeight + dashboardGrid.paddingTop + dashboardGrid.paddingBottom;
+                } else {
+                    gridItem.percentHeight = 100;
+                }
+
+                if (e.dashboardElement is DashboardReport) {
+                    gridItem.setStyle("paddingLeft", 3);
+                    gridItem.setStyle("paddingRight", 3);
+                    gridItem.setStyle("paddingTop", 3);
+                    gridItem.setStyle("paddingBottom", 3);
+                }
+
                 viewChildren.addItem(child);
                 gridItem.addChild(child);
                 gridRow.addChild(gridItem);
             }
         }
+    }
+
+    public function obtainPreferredSizeInfo():SizeInfo {
+        return new SizeInfo(dashboardGrid.preferredWidth, dashboardGrid.preferredHeight);
     }
 
     private function findItem(x:int, y:int):DashboardGridItem {
@@ -68,6 +104,13 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
     public function initialRetrieve():void {
         for each (var comp:IDashboardViewComponent in viewChildren) {
             comp.initialRetrieve();
+        }
+    }
+
+
+    public function toggleFilters(showFilters:Boolean):void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.toggleFilters(showFilters);
         }
     }
 

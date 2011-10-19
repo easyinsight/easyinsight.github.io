@@ -1,4 +1,5 @@
 package com.easyinsight.dashboard {
+import mx.collections.ArrayCollection;
 import mx.containers.VBox;
 import mx.controls.Image;
 import mx.controls.Label;
@@ -17,6 +18,10 @@ public class DashboardScorecardEditorComponent extends VBox implements IDashboar
         setStyle("horizontalAlign", "center");
         this.percentWidth = 100;
         this.percentHeight = 100;
+    }
+
+    public function obtainPreferredSizeInfo():SizeInfo {
+        return new SizeInfo();
     }
 
     protected override function createChildren():void {
@@ -40,6 +45,22 @@ public class DashboardScorecardEditorComponent extends VBox implements IDashboar
         var window:DashboardEditWindow = new DashboardEditWindow();
         window.dashboardElement = scorecard;
         PopUpManager.addPopUp(window, this, true);
+    }
+
+    public function refresh():void {
+    }
+
+    public function updateAdditionalFilters(filterMap:Object):void {
+    }
+
+    public function initialRetrieve():void {
+    }
+
+    public function reportCount():ArrayCollection {
+        return null;
+    }
+
+    public function toggleFilters(showFilters:Boolean):void {
     }
 }
 }

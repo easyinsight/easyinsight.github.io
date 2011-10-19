@@ -11,7 +11,7 @@ import mx.core.UIComponent;
 
 public class DashboardElementFactory {
 
-    private static var counter:int = 0;
+    public static var counter:int = 0;
 
     public function DashboardElementFactory() {
     }
@@ -24,6 +24,7 @@ public class DashboardElementFactory {
             return gridComp;
         } else if (element is DashboardStack) {
             var stackComp:DashboardStackEditorComponent = new DashboardStackEditorComponent();
+            stackComp.elementID = String(counter++);
             stackComp.dashboardStack = element as DashboardStack;
             stackComp.dashboardEditorMetadata = dashboardEditorMetadata;
             return stackComp;
@@ -33,6 +34,7 @@ public class DashboardElementFactory {
             return imageComp;
         } else if (element is DashboardReport) {
             var reportComp:DashboardReportEditorComponent = new DashboardReportEditorComponent();
+            reportComp.dashboardEditorMetadata = dashboardEditorMetadata;
             reportComp.report = element as DashboardReport;
             return reportComp;
         } else if (element is DashboardScorecard) {
@@ -65,8 +67,8 @@ public class DashboardElementFactory {
             return imageComp;
         } else if (element is DashboardReport) {
             var reportComp:DashboardReportViewComponent = new DashboardReportViewComponent();
-            //reportComp.elementID = String(counter++);
-            //reportComp.dashboardEditorMetadata = dashboardEditorMetadata;
+            reportComp.elementID = String(counter++);
+            reportComp.dashboardEditorMetadata = dashboardEditorMetadata;
             reportComp.dashboardReport = element as DashboardReport;
             return reportComp;
         } else if (element is DashboardScorecard) {

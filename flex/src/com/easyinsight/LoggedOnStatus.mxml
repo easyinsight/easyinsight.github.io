@@ -24,7 +24,7 @@
 	<mx:RemoteObject id="authService" destination="login">
 	</mx:RemoteObject>
     <mx:Spacer width="100%"/>
-    <mx:Label text="{Constants.instance().userName}"/>
+    <mx:Label text="{Constants.instance().userName}" color="#FFFFFF"/>
     <mx:VRule height="20"/>
-	<mx:Button label="Log Out" click="logout()"/>
+	<mx:Button label="Log Out" click="logout()" styleName="grayButton"/>
 </mx:HBox>

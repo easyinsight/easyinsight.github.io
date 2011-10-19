@@ -20,7 +20,6 @@ import com.easyinsight.analysis.gantt.GanttController;
 import com.easyinsight.analysis.gauge.GaugeController;
 import com.easyinsight.analysis.heatmap.HeatMapController;
 import com.easyinsight.analysis.list.ListController;
-import com.easyinsight.analysis.timeline.TimelineController;
 import com.easyinsight.analysis.tree.TreeController;
 import com.easyinsight.analysis.treemap.TreeMapController;
 import com.easyinsight.analysis.trend.TrendController;
@@ -92,9 +91,6 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.TREE:
                 controller = TreeController;
-                break;
-            case AnalysisDefinition.TIMELINE:
-                controller = TimelineController;
                 break;
             case AnalysisDefinition.HEATMAP:
                 controller = HeatMapController;

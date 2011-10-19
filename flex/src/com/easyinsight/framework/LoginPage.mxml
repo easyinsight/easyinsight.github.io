@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" 
-        xmlns:framework="com.easyinsight.framework.*" xmlns:account="com.easyinsight.account.*"
+        xmlns:framework="com.easyinsight.framework.*"
         backgroundColor="#EEEEEE" creationComplete="setup()" width="100%" height="100%" horizontalAlign="center"
         verticalAlign="middle">
     <mx:Metadata>
@@ -165,27 +165,6 @@
             <framework:LoginComponent loginEvent2="loginHandler(event)" id="loginComponent"
                                       y="114"/>
         </mx:HBox>
-
-        <!-- 1, initial account creation -->
-        <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
-            <mx:VBox horizontalAlign="center" verticalAlign="middle"
-                     paddingTop="10" paddingBottom="10"
-                     paddingLeft="10" paddingRight="10" cornerRadius="10"
-                     borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
-                <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
-                                         kpiTutorialNext="remaining()"
-                                         accountType="{accountType}"/>
-            </mx:VBox>
-        </mx:Box>
-        <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
-            <mx:VBox horizontalAlign="center" verticalAlign="middle"
-                     paddingTop="10" paddingBottom="10"
-                     paddingLeft="10" paddingRight="10" cornerRadius="10"
-                     borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
-                <account:InitialPreferences id="preferencesPanel" setupData="{setupData}"
-                                        kpiTutorialFinish="finishAccountSetup()" accountType="{accountType}"/>
-            </mx:VBox>
-        </mx:Box>
 
         <!-- 3, delinquent -->
         <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">

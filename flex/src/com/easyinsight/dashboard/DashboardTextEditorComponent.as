@@ -1,5 +1,6 @@
 package com.easyinsight.dashboard {
 
+import mx.collections.ArrayCollection;
 import mx.containers.VBox;
 import mx.controls.TextArea;
 
@@ -15,6 +16,10 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
         setStyle("horizontalAlign", "center");
         this.percentWidth = 100;
         this.percentHeight = 100;
+    }
+
+    public function obtainPreferredSizeInfo():SizeInfo {
+        return new SizeInfo();
     }
 
     protected override function createChildren():void {
@@ -33,6 +38,22 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
     }
 
     public function edit():void {
+    }
+
+    public function refresh():void {
+    }
+
+    public function updateAdditionalFilters(filterMap:Object):void {
+    }
+
+    public function initialRetrieve():void {
+    }
+
+    public function reportCount():ArrayCollection {
+        return null;
+    }
+
+    public function toggleFilters(showFilters:Boolean):void {
     }
 }
 }

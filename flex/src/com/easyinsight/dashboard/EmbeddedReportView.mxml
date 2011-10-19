@@ -240,12 +240,12 @@
             }
             dataViewFactory.filterDefinitions = filterDefinitions;
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-            dataViewFactory.retrieveData();
+            dataViewFactory.refresh();
         }
 
         private function transformsUpdated(event:TransformsUpdatedEvent):void {
             dataViewFactory.filterDefinitions = transformContainer.getFilterDefinitions();
-            dataViewFactory.retrieveData(false);
+            dataViewFactory.refresh(false);
         }
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
@@ -272,7 +272,7 @@
         }
 
         public function refreshData():void {
-            dataViewFactory.retrieveData(false);
+            dataViewFactory.refresh(false);
         }
 
         private function exportData():void {

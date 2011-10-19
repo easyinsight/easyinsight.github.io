@@ -16,6 +16,10 @@ import mx.collections.ArrayCollection;
 		{			
 		}
 
+        override public function supportsEmbeddedFonts():Boolean {
+            return true;
+        }
+
         override public function fromSave(savedDef:AnalysisDefinition):void {
             super.fromSave(savedDef);
             this.crosstabDefinitionID = CrosstabDefinition(savedDef).crosstabDefinitionID;

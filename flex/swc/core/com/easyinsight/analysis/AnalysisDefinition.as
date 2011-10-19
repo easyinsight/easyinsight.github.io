@@ -107,6 +107,26 @@ import mx.collections.ArrayCollection;
             return toRemove;
         }
 
+        public function supportsEmbeddedFonts():Boolean {
+            return false;
+        }
+
+        public function getFont():String {
+            if (fontName != null) {
+                var supportsEmbedded:Boolean = supportsEmbeddedFonts();
+                if (supportsEmbedded) {
+                    if (fontName == "Tahoma") {
+                        fontName = "Lucida Grande";
+                    }
+                } else {
+                    if (fontName == "Lucida Grande") {
+                        fontName = "Tahoma";
+                    }
+                }
+            }
+            return fontName;
+        }
+
         public function populate(fields:ArrayCollection):void {
             
         }

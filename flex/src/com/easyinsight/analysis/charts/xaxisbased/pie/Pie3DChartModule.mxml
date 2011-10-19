@@ -8,7 +8,7 @@
             <mx:RemoveChild target="{legend}"/>
         </mx:State>
     </mx:states>
-    <mx:Style>
+    <!--<mx:Style>
         PieSeries {
             fontSize: 10;
             fontFamily: "Lucida Grande";
@@ -20,7 +20,7 @@
             fontFamily: "Lucida Grande";
             fontWeight: normal;
         }
-    </mx:Style>
+    </mx:Style>-->
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -99,9 +99,9 @@
                 pieChart.visible = true;
                 legend.visible = true;
                 labelPosition = pieChartDef.labelPosition;
-                pieChart.setStyle("fontFamily", pieChartDef.fontName);
+                pieChart.setStyle("fontFamily", pieChartDef.getFont());
                 pieChart.setStyle("fontSize", pieChartDef.fontSize);
-                pieSeries.setStyle("fontFamily", pieChartDef.fontName);
+                pieSeries.setStyle("fontFamily", pieChartDef.getFont());
                 pieSeries.setStyle("fontSize", pieChartDef.fontSize);
                 if (pieChartDef.colorScheme == FillProvider.radialGradients) {
                     pieSeries.setStyle("fills", FillProvider.createSolidColors());

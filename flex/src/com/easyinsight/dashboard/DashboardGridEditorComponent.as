@@ -19,6 +19,10 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         this.percentHeight = 100;
     }
 
+    public function obtainPreferredSizeInfo():SizeInfo {
+        return new SizeInfo();
+    }
+
     public function save():void {
         var items:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
@@ -48,8 +52,11 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         recreateStructure();
     }
 
+    private var viewChildren:ArrayCollection;
+
     private function recreateStructure():void {
         removeAllChildren();
+        viewChildren = new ArrayCollection();
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
             var gridRow:GridRow = new GridRow();
             gridRow.percentWidth = 100;
@@ -63,6 +70,7 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
                 gridItem.percentWidth = 100;
                 gridItem.percentHeight = 100;
                 var box:DashboardBox = new DashboardBox();
+                viewChildren.addItem(box);
                 box.dashboardEditorMetadata = dashboardEditorMetadata;
                 if (e != null && e.dashboardElement != null) {
                     box.element = e.dashboardElement;
@@ -113,6 +121,35 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         var window:DashboardEditWindow = new DashboardEditWindow();
         window.dashboardElement = dashboardGrid;
         PopUpManager.addPopUp(window, this, true);
+    }
+
+    public function refresh():void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.refresh();
+        }
+    }
+
+    public function updateAdditionalFilters(filters:Object):void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.updateAdditionalFilters(filters);
+        }
+    }
+
+    public function initialRetrieve():void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.initialRetrieve();
+        }
+    }
+
+    public function reportCount():ArrayCollection {
+        var reports:ArrayCollection = new ArrayCollection();
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            reports.addAll(comp.reportCount());
+        }
+        return reports;
+    }
+
+    public function toggleFilters(showFilters:Boolean):void {
     }
 }
 }

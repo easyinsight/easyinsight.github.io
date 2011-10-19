@@ -283,6 +283,8 @@ public class ComboBoxFilter extends HBox implements IFilter {
             _filterDefinition.inclusive = true;
             _filterDefinition.enabled = true;
             _filterDefinition.singleValue = true;
+            _filterDefinition.allOption = true;
+            _filterDefinition.toggleEnabled = true;
         }
         var selectedValue:String;
         if (_filterDefinition.filteredValues.length == 0 && strings.length > 0) {

@@ -23,6 +23,10 @@ public class TreeDefinition extends AnalysisDefinition{
         super();
     }
 
+    override public function supportsEmbeddedFonts():Boolean {
+        return true;
+    }
+
     override public function fromSave(savedDef:AnalysisDefinition):void {
         super.fromSave(savedDef);
         this.treeDefinitionID = TreeDefinition(savedDef).treeDefinitionID;

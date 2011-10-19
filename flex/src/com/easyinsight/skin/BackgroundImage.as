@@ -95,7 +95,7 @@ public class BackgroundImage extends Canvas {
                 watcher2 = BindingUtils.bindProperty(this, "skinBackgroundColor", ApplicationSkin.instance(), "coreAppBackgroundColor");
                 watcher3 = BindingUtils.bindProperty(this, "backgroundImageStyle", ApplicationSkin.instance(), "coreAppBackgroundSize");
             } else {
-                watcher4 = BindingUtils.bindProperty(this, "backgroundImageSource", ApplicationSkin.instance(), "reportBackground");
+                //watcher4 = BindingUtils.bindProperty(this, "backgroundImageSource", ApplicationSkin.instance(), "reportBackground");
                 //BindingUtils.bindProperty(this, "backgroundImageStyle", ApplicationSkin.instance(), "reportBackgroundSize");
             }
             if (_applyCenterScreenLogic && centerScreen != null) {

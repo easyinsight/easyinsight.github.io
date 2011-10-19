@@ -20,7 +20,6 @@ import com.easyinsight.analysis.gantt.GanttEmbeddedController;
 import com.easyinsight.analysis.gauge.GaugeEmbeddedController;
 import com.easyinsight.analysis.heatmap.HeatMapEmbeddedController;
 import com.easyinsight.analysis.list.ListEmbeddedController;
-import com.easyinsight.analysis.timeline.TimelineEmbeddedController;
 import com.easyinsight.analysis.tree.TreeEmbeddedController;
 import com.easyinsight.analysis.treemap.TreeMapEmbeddedController;
 import com.easyinsight.analysis.trend.TrendEmbeddedController;
@@ -92,9 +91,6 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.TREE:
                 controller = TreeEmbeddedController;
-                break;
-            case AnalysisDefinition.TIMELINE:
-                controller = TimelineEmbeddedController;
                 break;
             case AnalysisDefinition.HEATMAP:
                 controller = HeatMapEmbeddedController;

@@ -19,6 +19,7 @@ import mx.containers.Box;
 import mx.containers.Canvas;
 import mx.containers.VBox;
 import mx.controls.ProgressBar;
+import mx.core.Container;
 
 public class DataViewFactory extends VBox implements IRetrievable {
 
@@ -163,8 +164,8 @@ public class DataViewFactory extends VBox implements IRetrievable {
         box2.setStyle("paddingRight", 5);
         box2.setStyle("paddingBottom", 5);
         box2.setStyle("paddingTop", 5);
-        box2.setStyle("backgroundAlpha", .8);
-        box2.setStyle("backgroundColor", 0xFFFFFF);
+        box2.setStyle("backgroundAlpha", 1);
+        box2.setStyle("backgroundColor", 0xF8F8F8);
         box2.setStyle("cornerRadius", 5);
         box2.setStyle("borderStyle", "solid");
         box2.setStyle("borderThickness", 0);
@@ -174,6 +175,12 @@ public class DataViewFactory extends VBox implements IRetrievable {
         box2.addChild(_controlBar as DisplayObject);
 
         canvas = new Canvas();
+        canvas.setStyle("borderStyle", "solid");
+        canvas.setStyle("borderThickness", 1);
+        canvas.setStyle("cornerRadius", 8);
+        canvas.setStyle("dropShadowEnabled", true);
+        canvas.setStyle("backgroundAlpha", 1);
+        canvas.setStyle("backgroundColor", 0xFFFFFF);
         canvas.percentHeight = 100;
         canvas.percentWidth = 100;
         var box:Box = new Box();
@@ -188,15 +195,26 @@ public class DataViewFactory extends VBox implements IRetrievable {
         screen.setStyle("backgroundColor", 0x000000);
         screen.setStyle("backgroundAlpha", .1);
         BindingUtils.bindProperty(screen, "visible", this, "showLoading");
-        reportCanvas = new Canvas();
-        reportCanvas.percentHeight = 100;
+        var rContent:Box = new Box();
+        rContent.percentHeight = 100;
+        rContent.percentWidth = 100;
+        rContent.setStyle("paddingLeft", 5);
+        rContent.setStyle("paddingRight", 5);
+        rContent.setStyle("paddingBottom", 5);
+        rContent.setStyle("paddingTop", 5);
+
+        reportCanvas = new Box();
+        reportCanvas.setStyle("backgroundAlpha", 1);
+        reportCanvas.setStyle("backgroundColor", 0xFFFFFF);
         reportCanvas.percentWidth = 100;
+        reportCanvas.percentHeight = 100;
+        rContent.addChild(reportCanvas);
         var progressBar:ProgressBar = new ProgressBar();
         BindingUtils.bindProperty(progressBar, "indeterminate", this, "showLoading");
         progressBar.label = "Loading the report...";
         progressBar.setStyle("fontSize", 18);
         box.addChild(progressBar);
-        canvas.addChild(reportCanvas);
+        canvas.addChild(rContent);
         canvas.addChild(screen);
         canvas.addChild(box);
         addChild(canvas);
@@ -205,7 +223,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     private var canvas:Canvas;
 
-    private var reportCanvas:Canvas;
+    private var reportCanvas:Container;
 
     private var _showLoading:Boolean = false;
 
@@ -244,7 +262,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     private function onDataRequest(event:ReportDataEvent):void {
         if (event.reload || _lastData == null) {
-            retrieveData();
+            refresh();
         } else {
             _analysisDefinition = _controlBar.createAnalysisDefinition();
             _reportRenderer.renderReport(_lastData, _analysisDefinition, new Object(), _lastProperties);
@@ -253,14 +271,14 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     public function rerender():void {
         if (_lastData == null) {
-            retrieveData();
+            refresh();
         } else {
             _analysisDefinition = _controlBar.createAnalysisDefinition();
             _reportRenderer.renderReport(_lastData, _analysisDefinition, new Object(), _lastProperties);
         }
     }
 
-    public function retrieveData(refreshAllSources:Boolean = false):void {
+    public function refresh():void {
         if (_adHocMode) {
             if (_reportRenderer == null) {
                 pendingRequest = true;
@@ -268,7 +286,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
                 _analysisDefinition = _controlBar.createAnalysisDefinition();
                 if (_controlBar.isDataValid()) {
                     _analysisDefinition.createDefaultLimits();
-                    _dataService.retrieveData(_analysisDefinition, refreshAllSources);
+                    _dataService.retrieveData(_analysisDefinition, false);
                 } else {
                     _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object(), null);
                 }
@@ -352,7 +370,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
             reportCanvas.addChild(_reportRenderer as DisplayObject);
             if (pendingRequest) {
                 pendingRequest = false;
-                retrieveData();
+                refresh();
             }
         }
     }
@@ -391,7 +409,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     private function forceRender(event:ReportRendererEvent):void {
-        retrieveData();
+        refresh();
     }
 
     private function onItemAdded(event:ReportRendererEvent):void {

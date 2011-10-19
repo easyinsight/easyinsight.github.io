@@ -8,8 +8,11 @@ import flash.events.Event;
 
 import flash.events.MouseEvent;
 
+import mx.controls.Alert;
+
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UITextField;
+import mx.core.UITextFormat;
 import mx.managers.PopUpManager;
 
 public class CustomTreeTextRenderer extends UITextField implements IListItemRenderer {
@@ -20,7 +23,6 @@ public class CustomTreeTextRenderer extends UITextField implements IListItemRend
 
     public function CustomTreeTextRenderer() {
         super();
-        addEventListener(MouseEvent.CLICK, onClick);
     }
 
     public function set report(value:AnalysisDefinition):void {
@@ -43,22 +45,14 @@ public class CustomTreeTextRenderer extends UITextField implements IListItemRend
 
     public function validateSize(recursive:Boolean = false):void {
     }
-
-    private function onClick(event:MouseEvent):void {
-        if (event.shiftKey) {
-            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report, data);
-            PopUpManager.addPopUp(window, this);
-            window.x = event.stageX + 5;
-            window.y = event.stageY + 5;
-        }
-    }
-
     public function get data():Object {
         return _data;
     }
 
     public function set data(value:Object):void {
-        this._data = value;        
+        this._data = value;
+        var tf:UITextFormat = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, 0);
+        setTextFormat(tf);
         new StandardContextWindow(analysisItem, passThrough, this, value, false);
     }
 

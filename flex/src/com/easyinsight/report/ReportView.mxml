@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <report:DataViewPage xmlns:mx="http://www.adobe.com/2006/mxml"
-                      xmlns:filtering="com.easyinsight.filtering.*"
-                      xmlns:datasources="com.easyinsight.datasources.*"
-                      xmlns:report="com.easyinsight.report.*" xmlns:util="com.easyinsight.util.*"
-                      width="100%" height="100%"
-                      creationComplete="onCreation()"
-                      implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
-                      applyCenterScreenLogic="false">
+                     xmlns:filtering="com.easyinsight.filtering.*"
+                     xmlns:report="com.easyinsight.report.*"
+                     xmlns:easyinsight="com.easyinsight.*"
+                     width="100%" height="100%"
+                     creationComplete="onCreation()"
+                     implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
+                     styleName="screenBackground">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -36,21 +36,15 @@
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
-        import mx.controls.TextArea;
         import mx.core.Container;
-        import mx.core.UIComponent;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.states.RemoveChild;
         import mx.states.State;
         import mx.utils.URLUtil;
 
-        [Bindable]
-        [Embed(source="../../../../assets/banner4.jpg")]
-        public var backImage:Class;
-
         public function forceRefresh():void {
-            viewFactory.retrieveData();
+            viewFactory.refresh();
         }
 
         private function confirmedKeep():void {
@@ -105,7 +99,7 @@
 
         private function fieldChange(event:AnalysisItemOverrideEvent):void {
             viewFactory.addOverride(event.analysisItemOverride);
-            viewFactory.retrieveData(false);
+            viewFactory.refresh();
         }
 
         private function childFilterCreation(event:HierarchyDrilldownEvent):void {
@@ -119,7 +113,7 @@
 
         private function transformsUpdated(event:TransformsUpdatedEvent):void {
             viewFactory.filterDefinitions = transformContainer.getFilterDefinitions();
-            viewFactory.retrieveData(false);
+            viewFactory.refresh();
         }
 
         private var _filterDefinitions:ArrayCollection;
@@ -247,7 +241,7 @@
 
 
         private function onProblem(event:ProblemDataEvent):void {
-            viewFactory.retrieveData(false);
+            viewFactory.refresh();
         }
 
         private var report:AnalysisDefinition;
@@ -262,7 +256,6 @@
                 receivedData = true;
                 dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
                 retrievedDataOnce = true;
-                generateState();
             }
         }
 
@@ -278,6 +271,7 @@
 
         [Bindable]
         private var filterTooltip:String = "Hide Filters";
+
         private function close():void {
             dispatchEvent(new AnalysisCloseEvent());
         }
@@ -309,7 +303,7 @@
         }
 
         public function refreshData():void {
-            viewFactory.retrieveData(false);
+            viewFactory.refresh();
         }
 
         private var _showBack:Boolean = true;
@@ -356,7 +350,7 @@
             }
         }
 
-        private function saveReport(event:MouseEvent):void {
+        private function saveReport():void {
             analysisService.keepReport.send(_reportID, exchangeItem.id);
         }
 
@@ -437,20 +431,8 @@
                 }
             }
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-            if (!_showAddBar) {
-                var feedFragmentObject:Object = new Object();
-                feedFragmentObject.reportID = report.urlKey;
-                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                BrowserManager.getInstance().setFragment(feedFragmentString);
-                BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-            } else {
-                var templateFragmentObject:Object = new Object();
-                templateFragmentObject.reportTemplateID = exchangeItem.descriptor.urlKey;
-                var templateFragmentString:String = URLUtil.objectToString(templateFragmentObject);
-                BrowserManager.getInstance().setFragment(templateFragmentString);
-                BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-            }
-            viewFactory.retrieveData();
+            generateState();
+            viewFactory.refresh();
         }
 
         private function onError(event:EIErrorEvent):void {
@@ -470,14 +452,11 @@
         }
 
         public function cleanup():void {
-            cleanupBindings();
         }
 
         override protected function generateState():void {
             super.generateState();
             var ops:Array = [];
-            var textAreas:Array = [];
-            var remainingSections:Array = [];
             if (!_showExport) {
                 var removeExportButton:RemoveChild = new RemoveChild();
                 removeExportButton.target = exportButton;
@@ -493,42 +472,7 @@
                 removeRefreshButton.target = refreshButton;
                 ops.push(removeRefreshButton);
             }
-            if (description == null || description.length == 0) {
-                var removeDescription:RemoveChild = new RemoveChild();
-                removeDescription.target = descriptionBox;
-                ops.push(removeDescription);
-                var removeRule1:RemoveChild = new RemoveChild();
-                removeRule1.target = rule1;
-                ops.push(removeRule1);
-            } else {
-                textAreas.push(descriptionArea);
-                remainingSections.push(descriptionBox);
-            }
-            if (!_showAddBar) {
-                var removeExchange:RemoveChild = new RemoveChild();
-                removeExchange.target = exchangeBox;
-                ops.push(removeExchange);
-            } else {
-                textAreas.push(exchangeArea);
-                remainingSections.push(exchangeBox);
-            }
-
-            if (_showAddBar) {
-                var removeData:RemoveChild = new RemoveChild();
-                removeData.target = dataSourceDisplay;
-                ops.push(removeData);
-            } else {
-                textAreas.push(dataSourceDisplay.sourceLabel);
-                remainingSections.push(dataSourceDisplay);
-            }
             if (ops.length > 0) {
-                var len:int = Math.max(2, textAreas.length);
-                for each (var area:TextArea in textAreas) {
-                    area.width = 780 / len;
-                }
-                for each (var comp:UIComponent in remainingSections) {
-                    comp.width = 830 / len;
-                }
                 var state:State = new State();
                 var name:String = "report" + stateIndex++;
                 state.name = name;
@@ -544,7 +488,34 @@
             } else {
                 currentState = "";
             }
-            hbox.visible = true;
+            showReportInfoButton = !_showAddBar;
+            if (!_showAddBar && contains(box)) {
+                removeChild(box);
+            }
+            box.visible = true;
+            if (!_showAddBar) {
+                var feedFragmentObject:Object = new Object();
+                feedFragmentObject.reportID = report.urlKey;
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
+                BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+            } else {
+                var templateFragmentObject:Object = new Object();
+                templateFragmentObject.reportTemplateID = exchangeItem.descriptor.urlKey;
+                var templateFragmentString:String = URLUtil.objectToString(templateFragmentObject);
+                BrowserManager.getInstance().setFragment(templateFragmentString);
+                BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+            }
+        }
+
+        private function toggleReportInfo():void {
+            if (reportInfoLabel == "Show Report Info") {
+                reportInfoLabel = "Hide Report Info";
+                addChildAt(box, 2);
+            } else {
+                reportInfoLabel = "Show Report Info";
+                removeChild(box);
+            }
         }
 
         private var stateIndex:int = 1;
@@ -555,77 +526,56 @@
         private var stackTrace:String;
 
         [Bindable]
+        private var reportInfoLabel:String = "Show Report Info";
+
+        [Bindable]
+        private var showReportInfoButton:Boolean;
+
+        [Bindable]
         private var showingFilters:Boolean = false;
-
-
         ]]></mx:Script>
-    <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0" horizontalAlign="center"
-                      direction="vertical" id="topLevelVBox">
-    <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay" backgroundColor="#FFFFFF"
-            horizontalAlign="center">
+    <mx:HBox width="100%" id="leftButtonBar" styleName="topButtonBar">
+        <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="right" id="backButton"
+                   toolTip="Close the report" label="Close Report" styleName="grayButton"/>
+        <report:RefreshButton icon="{refreshIcon}" labelPlacement="right"
+                   id="refreshButton" toolTip="Refresh this report" label="Refresh" styleName="grayButton"
+                viewFactory="{viewFactory}" dataSource="{dataSource}"/>
+        <mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
+                   labelPlacement="right"
+                   id="exportButton" toolTip="Export the report..." label="Export" styleName="grayButton"/>
+        <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="right"
+                   id="filterButton" toolTip="{filterTooltip}" label="Toggle Filters" styleName="grayButton"/>
+        <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
+                   labelPlacement="right" id="editReportButton"
+                   toolTip="Open this report in the report editor..." label="Edit Report" styleName="grayButton"/>
+        <mx:Spacer width="100%"/>
+        <easyinsight:LoggedOnStatus/>
+    </mx:HBox>
+    <mx:HBox width="100%" horizontalAlign="center" paddingTop="5" paddingBottom="5" verticalAlign="middle">
+        <mx:Label text="{reportName}" fontSize="24" maxWidth="600" color="#000000"/>
+        <mx:LinkButton label="{reportInfoLabel}" textDecoration="underline" fontSize="14" visible="{showReportInfoButton}" click="toggleReportInfo()"/>
+    </mx:HBox>
 
-        <mx:VBox width="1000" id="highBox" paddingLeft="10" paddingRight="10">
-            <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
-                <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="right" id="backButton"
-                           toolTip="Close the report" label="Close Report"/>
-                <!--<mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="right"
-                           id="fullScreenButton" toolTip="View full screen" label="Full Screen"/>-->
-                <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="right"
-                           id="refreshButton" toolTip="Refresh this report" label="Refresh"/>
-                <mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
-                           labelPlacement="right"
-                           id="exportButton" toolTip="Export the report..." label="Export"/>
-                <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="right"
-                           id="filterButton" toolTip="{filterTooltip}" label="Toggle Filters"/>
-                <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
-                           labelPlacement="right" id="editReportButton"
-                           toolTip="Open this report in the report editor..." label="Edit Report"/>
-                <mx:Spacer width="100%"/>
-                <mx:Label text="{reportName}" fontSize="14" maxWidth="350"/>
-                <mx:Spacer width="100%"/>
-            </mx:HBox>
-            <mx:HBox width="100%" verticalAlign="middle" id="hbox" visible="false">
-                <mx:Button icon="{previousReportArrow}" labelPlacement="bottom" toolTip="{previousReportLabel}"
-                        click="toPreviousReport()" id="previousReportButton" visible="{previousReportAvailable}"/>
-                <mx:VBox id="descriptionBox">
-                    <util:AutoSizeTextArea text="{description}" width="250" id="descriptionArea"
-                            focusEnabled="false" editable="false" selectable="false"/>
-                </mx:VBox>
-                <mx:VRule height="30" id="rule1"/>
-                <mx:VBox verticalAlign="middle" horizontalAlign="center" id="exchangeBox">
-                    <util:AutoSizeTextArea
-                            text="Want to save this report to your account? You can alter the report after saving."
-                            editable="false" selectable="false" width="250" backgroundAlpha="0"
-                            focusEnabled="false" id="exchangeArea"/>
-                    <mx:Button label="Save to my Account" fontSize="12" styleName="grayButton"
-                               click="saveReport(event)"/>
-                </mx:VBox>
-                <datasources:DataSourceDisplay dataSource="{dataSource}" dataView="{viewFactory}"
-                                           id="dataSourceDisplay" dataSourceRefreshed="refreshData()"/>
-                <mx:Spacer width="100%"/>
-                <mx:Button icon="{nextReportArrow}" labelPlacement="bottom" toolTip="{nextReportLabel}"
-                        click="toNextReport()" id="nextReportButton" visible="{nextReportAvailable}"/>
-            </mx:HBox>
+    <mx:Box width="100%" styleName="descriptionContainer" id="box" visible="false">
+        <report:DefaultDescriptionArea previousReportLabel="{previousReportLabel}" previousReportAvailable="{previousReportAvailable}"
+                nextReportAvailable="{nextReportAvailable}" nextReportLabel="{nextReportLabel}" showAdd="{_showAddBar}" description="{description}"
+                previousReport="toPreviousReport()" nextReport="toNextReport()" saveToAccount="saveReport()"/>
+    </mx:Box>
+    <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
+        <mx:Box/>
+        <mx:VBox width="100%" horizontalAlign="center">
+            <filtering:TransformContainer id="transformContainer" filterEditable="false"
+                                          existingFilters="{filterDefinitions}"
+                                          width="100%" feedID="{dataSourceID}"
+                                          reportView="true" reportID="{_reportID}"/>
         </mx:VBox>
-        <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
-    </mx:VBox>
-    <mx:VBox width="100%" height="100%" paddingLeft="0" paddingRight="0">
-        <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
-            <mx:Box/>
-            <mx:VBox width="100%" horizontalAlign="center">
-                <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid"
-                                              borderThickness="1"
-                                              existingFilters="{filterDefinitions}"
-                                              width="100%" paddingLeft="10"
-                                              paddingTop="10" paddingBottom="10"
-                                              paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
-                                              backgroundColor="#FFFFFF" reportView="true" reportID="{_reportID}"/>
-            </mx:VBox>
-        </mx:ViewStack>
-        <report:ReportCanvas id="reportCanvas" stackTrace="{stackTrace}" overlayIndex="{overlayIndex}"
-                             loading="false"/>
-    </mx:VBox>
-    </mx:VBox>
+    </mx:ViewStack>
+    <mx:Box width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10">
+        <mx:VBox width="100%" height="100%" styleName="screenContent">
+            <report:ReportCanvas id="reportCanvas" stackTrace="{stackTrace}" overlayIndex="{overlayIndex}"
+                                 loading="false"/>
+        </mx:VBox>
+    </mx:Box>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="keepReport" result="confirmedKeep()"/>
     </mx:RemoteObject>

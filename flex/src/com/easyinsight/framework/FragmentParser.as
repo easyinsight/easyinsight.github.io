@@ -9,8 +9,6 @@ import com.easyinsight.etl.DelayedLookupTableLink;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.genredata.DelayedReportTemplate;
 import com.easyinsight.goals.DelayedDashboardAdminLink;
-import com.easyinsight.goals.DelayedGoalAdminLink;
-import com.easyinsight.goals.DelayedGoalLink;
 import com.easyinsight.goals.DelayedScorecardAdminLink;
 import com.easyinsight.goals.DelayedScorecardViewLink;
 import com.easyinsight.listing.ListingChangeEvent;
@@ -42,11 +40,6 @@ public class FragmentParser {
                 deepAPILink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 deepAPILink.execute();
             }),
-            new FragmentTester("goalTreeID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                var goalLink:DelayedGoalLink = new DelayedGoalLink(key);
-                goalLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
-                goalLink.execute();
-            }),
             new FragmentTester("solutionID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 var solutionLink:DelayedSolutionLink = new DelayedSolutionLink(Number(key));
                 solutionLink.addEventListener(ListingChangeEvent.LISTING_CHANGE, workspace.changePerspective);
@@ -56,11 +49,6 @@ public class FragmentParser {
                 var deepReportLink:DelayedReportLink = new DelayedReportLink(key);
                 deepReportLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 deepReportLink.execute();
-            }),
-            new FragmentTester("goalTreeAdminID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                var delayedGoalAdminLink:DelayedGoalAdminLink = new DelayedGoalAdminLink(key);
-                delayedGoalAdminLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
-                delayedGoalAdminLink.execute();
             }),
             new FragmentTester("scorecardAdminID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 var delayedScorecardAdminLink:DelayedScorecardAdminLink = new DelayedScorecardAdminLink(key);

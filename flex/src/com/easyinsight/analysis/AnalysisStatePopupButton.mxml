@@ -83,6 +83,8 @@
         	<node label="List" type="{AnalysisDefinition.LIST}"/>
         	<node label="Crosstab" type="{AnalysisDefinition.CROSSTAB}"/>
         	<node label="Tree" type="{AnalysisDefinition.TREE}"/>
+        	<node label="Trends" type="{AnalysisDefinition.TREND}"/>
+        	<node label="Trend Grid" type="{AnalysisDefinition.TREND_GRID}"/>
         </node>
         <node label="Chart" icon="">
         	<node label="Column">
@@ -115,6 +117,7 @@
         <node label="Gauge" type="{AnalysisDefinition.GAUGE}"/>
         <node label="Gantt" type="{AnalysisDefinition.GANTT}"/>
         <node label="Form" type="{AnalysisDefinition.FORM}"/>
+        <node label="Diagram" type="{AnalysisDefinition.DIAGRAM}"/>
         <node label="Advanced" icon="">
             <node label="Vertical List" type="{AnalysisDefinition.VERTICAL_LIST}"/>
             <node label="Combined Vertical List" type="{AnalysisDefinition.COMBINED_VERTICAL_LIST}"/>

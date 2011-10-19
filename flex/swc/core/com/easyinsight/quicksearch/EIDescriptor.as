@@ -7,9 +7,6 @@ public class EIDescriptor {
     public static const DATA_SOURCE:int = 1;
     public static const REPORT:int = 2;
     public static const GROUP:int = 3;
-    public static const GOAL_TREE:int = 4;
-
-    public static const MY_GOALS:int = 5;
 
     public static const GOAL_HISTORY:int = 7;
     public static const SCORECARD:int = 9;

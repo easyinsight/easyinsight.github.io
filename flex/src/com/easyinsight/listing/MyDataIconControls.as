@@ -9,9 +9,6 @@ import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.etl.LookupTableSource;
 import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.genredata.AnalyzeEvent;
-import com.easyinsight.goals.GoalDataAnalyzeSource;
-import com.easyinsight.goals.GoalTreeAdminAnalyzeSource;
-import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.scorecard.ScorecardDescriptor;
@@ -286,8 +283,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));
         } else if (obj is LookupTableDescriptor) {
             dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(obj).id)));
-        } else if (obj is GoalTreeDescriptor) {
-            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(GoalTreeDescriptor(obj).id)));
         } else if (obj is DashboardDescriptor ){
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(obj).id})));
         } else if (obj is ScorecardDescriptor ){
@@ -317,9 +312,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
-        } else if (obj is GoalTreeDescriptor) {
-            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(GoalTreeDescriptor(obj).id, 0)));
-        }  else if (obj is DashboardDescriptor ){
+        } else if (obj is DashboardDescriptor ){
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {dashboardID: DashboardDescriptor(obj).id}))); 
         } else if (obj is ScorecardDescriptor ){
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_EDITOR, {scorecardID: ScorecardDescriptor(obj).id})));
@@ -344,9 +337,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             } else if (value is LookupTableDescriptor) {
                 refreshVisible = false;
                 adminVisible = false;
-            } else if (value is GoalTreeDescriptor) {
-                refreshVisible = false;
-                adminVisible = true;
             } else if (value is DashboardDescriptor) {
                 refreshVisible = false;
                 adminVisible = true;
