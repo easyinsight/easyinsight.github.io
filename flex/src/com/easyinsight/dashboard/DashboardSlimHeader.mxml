@@ -114,5 +114,5 @@
     <mx:Label text="{dashboardName}" maxWidth="350"
               fontSize="14" toolTip="{description}"/>
     <mx:Spacer width="100%"/>
-    <easyinsight:LoggedOnStatus/>
+    <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
 </mx:HBox>

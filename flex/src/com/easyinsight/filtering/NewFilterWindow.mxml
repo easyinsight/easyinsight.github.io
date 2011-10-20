@@ -1,7 +1,21 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <util:states>
+        <mx:State name="advanced">
+            <mx:RemoveChild target="{advancedOptionsButton}"/>
+            <mx:AddChild relativeTo="{optionsBox}">
+                <mx:HBox creationComplete="PopUpUtil.centerPopUp(this)">
+                    <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
+                    <mx:RadioButton label="Create a Field Choice Filter" groupName="typeGroup" value="fieldChoiceFilter"/>
+                    <mx:RadioButton label="Create a Named Reference Filter" groupName="typeGroup" value="namedRef"/>
+                    <mx:RadioButton label="Create a Trend Filter" groupName="typeGroup" value="trendFilter"/>
+                </mx:HBox>
+            </mx:AddChild>
+        </mx:State>
+    </util:states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
 
@@ -49,15 +63,16 @@
                 stackIndex = 1;
             }
         }
+
+        private function toAdvanced():void {
+            currentState = "advanced";
+        }
         ]]></mx:Script>
     <mx:VBox>
         <mx:RadioButtonGroup id="typeGroup" change="updateStack()" selectedValue="fieldFilter"/>
-        <mx:HBox>
+        <mx:HBox id="optionsBox">
             <mx:RadioButton label="Create a Filter on a Field" groupName="typeGroup" value="fieldFilter"/>
-            <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
-            <mx:RadioButton label="Create a Field Choice Filter" groupName="typeGroup" value="fieldChoiceFilter"/>
-            <mx:RadioButton label="Create a Named Reference Filter" groupName="typeGroup" value="namedRef"/>
-            <mx:RadioButton label="Create a Trend Filter" groupName="typeGroup" value="trendFilter"/>
+            <mx:LinkButton label="Show Advanced Options" click="toAdvanced()" textDecoration="underline" id="advancedOptionsButton"/>
         </mx:HBox>
         <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
             <mx:VBox>

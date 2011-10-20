@@ -3,6 +3,8 @@ import flash.events.ContextMenuEvent;
 import flash.geom.Point;
 import flash.ui.ContextMenuItem;
 
+import mx.controls.Alert;
+
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.Application;
 import mx.core.UITextField;
@@ -55,13 +57,17 @@ public class AvailableFieldTextRenderer extends UITextField implements IListItem
             items.push(filterItem);
             var copyItem:ContextMenuItem = new ContextMenuItem("Copy Field", true);
             copyItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-                dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_COPY, wrapper));
+                var p:Point = new Point(this.x, this.y);
+                var g:Point = parent.localToGlobal(p);
+                dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_COPY, wrapper, g.x, g.y));
             });
             items.push(copyItem);
             if (!wrapper.analysisItem.concrete) {
                 var editItem:ContextMenuItem = new ContextMenuItem("Edit Field");
                 editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-                    dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_EDIT, wrapper));
+                    var p:Point = new Point(this.x, this.y);
+                    var g:Point = parent.localToGlobal(p);
+                    dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_EDIT, wrapper, g.x, g.y));
                 });
                 items.push(editItem);
                 var deleteItem:ContextMenuItem = new ContextMenuItem("Delete Field");

@@ -5,6 +5,7 @@ import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
+import flash.geom.Point;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
@@ -144,7 +145,9 @@ public class ReportEditorFieldControls extends UIComponent implements IListItemR
 
     private function onCopy(event:ResultEvent):void {
         var copyItem:AnalysisItem = analysisService.cloneItem.lastResult as AnalysisItem;
-        dispatchEvent(new AnalysisItemCopyEvent(AnalysisItemCopyEvent.ITEM_COPY, copyItem));
+        var p:Point = new Point(this.x, this.y);
+        var g:Point = parent.localToGlobal(p);
+        dispatchEvent(new AnalysisItemCopyEvent(AnalysisItemCopyEvent.ITEM_COPY, copyItem, null, g.x, g.y));
     }
 		
 		[Bindable]

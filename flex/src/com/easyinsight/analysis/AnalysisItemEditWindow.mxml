@@ -10,10 +10,13 @@
 
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.controls.Alert;
+        import mx.core.Application;
 
         import mx.core.Container;
         import mx.core.UIComponent;
+        import mx.effects.Move;
+        import mx.effects.Parallel;
+        import mx.effects.Resize;
         import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
@@ -45,6 +48,34 @@
             }
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
+
+            var resize:Resize = new Resize(this);
+            resize.duration = 500;
+            resize.widthFrom = 20;
+            resize.heightFrom = 20;
+
+            var appWidth:int = Application.application.width;
+            var appHeight:int = Application.application.height;
+
+            // The appWidth may smaller than parentWidth if the application is
+            // clipped by the parent application.
+            var x:int = Math.max(0, appWidth - this.width) / 2;
+            var y:int = Math.max(0, appHeight - this.height) / 2;
+
+            var pt:Point = new Point(0, 0);
+            //pt = popUpParent.localToGlobal(pt);
+            //pt = popUp.parent.globalToLocal(pt);
+            var targetX:int = Math.round(x) + pt.x;
+            var targetY:int = Math.round(y) + pt.y;
+
+            var move:Move = new Move(this);
+            move.duration = 500;
+            move.xTo = targetX;
+            move.yTo = targetY;
+            var parallel:Parallel = new Parallel(this);
+            parallel.children = [ resize, move ];
+
+            parallel.play();
         }
 
         private var commandProcessor:CommandProcessor;
@@ -145,6 +176,7 @@
                 tabNavigator.addChild(textEditor);
             }
             if (initialWindow == EXTENSION) {
+                lastTab = tabNavigator.getChildIndex(DisplayObject(_reportEditor));
                 tabNavigator.selectedChild = _reportEditor as Container;
             }
         }

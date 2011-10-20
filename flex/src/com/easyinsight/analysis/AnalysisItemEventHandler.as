@@ -3,6 +3,7 @@ import com.easyinsight.AnalysisItemDeleteEvent;
 import com.easyinsight.util.PopUpUtil;
 
 import mx.collections.ArrayCollection;
+import mx.controls.Alert;
 import mx.core.UIComponent;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
@@ -35,8 +36,13 @@ public class AnalysisItemEventHandler extends UIComponent {
     }
 
     public function copyField(event:ReportEditorFieldEvent):void {
+        tmpX = event.x;
+        tmpY = event.y;
         analysisService.cloneItem.send(event.item.analysisItem);
     }
+
+    private var tmpX:int;
+    private var tmpY:int;
 
     private function onCopy(event:ResultEvent):void {
         var copyItem:AnalysisItem = analysisService.cloneItem.lastResult as AnalysisItem;
@@ -47,7 +53,7 @@ public class AnalysisItemEventHandler extends UIComponent {
         dispatchEvent(new AnalysisItemDeleteEvent(event.item));
     }
 
-    private function edit(analysisItem:AnalysisItem, handler:Function, analysisItemWrapper:AnalysisItemWrapper = null):void {
+    private function edit(analysisItem:AnalysisItem, handler:Function, analysisItemWrapper:AnalysisItemWrapper = null, x:int = 0, y:int = 0):void {
         var editor:Class;
         if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
             editor = HierarchyWindow;
@@ -59,6 +65,8 @@ public class AnalysisItemEventHandler extends UIComponent {
             editor = DerivedDateWindow;
         }
         var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+        analysisItemEditor.x = tmpX;
+        analysisItemEditor.y = tmpY;
         analysisItemEditor.editorClass = editor;
         analysisItemEditor.originalWrapper = analysisItemWrapper;
         analysisItemEditor.analysisItem = analysisItem;
@@ -66,7 +74,6 @@ public class AnalysisItemEventHandler extends UIComponent {
         analysisItemEditor.analysisItems = this._analysisItems;
         analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, handler, false, 0, true);
         PopUpManager.addPopUp(analysisItemEditor, this.parent);
-        PopUpUtil.centerPopUp(analysisItemEditor);
     }
 
     private function analysisItemCreated(event:AnalysisItemEditEvent):void {
@@ -78,6 +85,8 @@ public class AnalysisItemEventHandler extends UIComponent {
     }
 
     public function editField(event:ReportEditorFieldEvent):void {
+        tmpX = event.x;
+        tmpY = event.y;
         var analysisItemWrapper:AnalysisItemWrapper = event.item;
         edit(event.item.analysisItem, analysisItemEdited, analysisItemWrapper);
     }

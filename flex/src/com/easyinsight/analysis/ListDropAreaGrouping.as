@@ -1,14 +1,12 @@
 package com.easyinsight.analysis {
-import com.easyinsight.commands.CommandEvent;
 
 import flash.display.DisplayObject;
 import flash.events.Event;
+import flash.geom.Point;
 
 import flexlib.containers.FlowBox;
 
 import mx.collections.ArrayCollection;
-import mx.containers.HBox;
-import mx.controls.Alert;
 import mx.core.UIComponent;
 import mx.events.FlexEvent;
 
@@ -19,7 +17,6 @@ public class ListDropAreaGrouping extends FlowBox {
 
     private var _unlimited:Boolean = false;
     private var _maxElements:int = -1;
-    private var hardStop:Boolean = false;
     private var _analysisItems:ArrayCollection;
     private var _dataSourceID:int;
     private var _report:AnalysisDefinition;
@@ -85,18 +82,6 @@ public class ListDropAreaGrouping extends FlowBox {
             }
             else {
                 fb.height = fb.viewMetrics.top + fb.viewMetrics.bottom;
-            }
-        }
-    }
-
-    public function invalidateItems(items:ArrayCollection):void {
-        for each (var itemID:int in items) {
-            for each (var dropArea:DropArea in dropAreas) {
-                if (dropArea.analysisItem != null && dropArea.analysisItem.analysisItemID == itemID) {
-                    removeChild(dropArea);
-                    var index:int = dropAreas.getItemIndex(dropArea);
-                    dropAreas.removeItemAt(index);
-                }
             }
         }
     }
@@ -263,15 +248,6 @@ public class ListDropAreaGrouping extends FlowBox {
         }
     }
 
-    public function getAvailableDropArea():DropArea {
-        return null;
-    }
-
-    public function newAnalysisItem(analysisItem:AnalysisItem):void {
-        var dropArea:DropArea = dropAreas.getItemAt(dropAreas.length - 1) as DropArea;
-        dispatchEvent(new CommandEvent(new DropAreaAddedCommand(dropArea, analysisItem)));
-    }
-
     public function addAnalysisItem(analysisItem:AnalysisItem, position:int = -1):void {
         var dropArea:DropArea = new _dropAreaType();
         dropArea.dataSourceID = _dataSourceID;
@@ -280,6 +256,13 @@ public class ListDropAreaGrouping extends FlowBox {
         dropArea.addEventListener(DropAreaAddedEvent.DROP_AREA_ADD, dropAreaFilledIn);
         dropArea.addEventListener(DropAreaDeletionEvent.DROP_AREA_DELETE, deleteOccurred);
         dropArea.report = _report;
+        if (dropAreas.length > 0) {
+            var existingLastPoint:DropArea = dropAreas.getItemAt(dropAreas.length - 1) as DropArea;
+            var p:Point = new Point(existingLastPoint.x, existingLastPoint.y);
+            var g:Point = contentToGlobal(p);
+            dropArea.startX = g.x;
+            dropArea.startY = g.y;
+        }
         dropArea.analysisItem = analysisItem;
         var targetLocation:int = position == -1 ? dropAreas.length - 1 : position;
         dropAreas.addItemAt(dropArea, targetLocation);

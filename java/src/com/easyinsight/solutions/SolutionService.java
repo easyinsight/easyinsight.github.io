@@ -315,7 +315,7 @@ public class SolutionService {
                 String authorName = rs.getString(5);
                 String description = rs.getString(6);
                 boolean recommended = rs.getBoolean(7);
-                EIDescriptor descriptor = new InsightDescriptor(reportID, null, dataSourceID, 0, null, Roles.NONE, false);
+                EIDescriptor descriptor = new InsightDescriptor(reportID, null, dataSourceID, 0, urlKey, Roles.NONE, false);
                 PreparedStatement ratingStmt = conn.prepareStatement("SELECT count(exchange_report_install_id) from " +
                     "exchange_report_install where report_id = ?");
                 ratingStmt.setLong(1, reportID);

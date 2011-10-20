@@ -1,5 +1,7 @@
 package com.easyinsight.dashboard {
 
+import com.easyinsight.util.AutoSizeTextArea;
+
 import mx.collections.ArrayCollection;
 import mx.containers.VBox;
 import mx.controls.TextArea;
@@ -8,7 +10,7 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
 
     public var dashboardText:DashboardTextElement;
 
-    private var textArea:TextArea;
+    private var textArea:AutoSizeTextArea;
 
     public function DashboardTextEditorComponent() {
         super();
@@ -24,7 +26,9 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
 
     protected override function createChildren():void {
         super.createChildren();
-        textArea = new TextArea();
+        textArea = new AutoSizeTextArea();
+        textArea.percentHeight = 100;
+        textArea.percentWidth = 100;
         textArea.editable = true;
         addChild(textArea);
     }

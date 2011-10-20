@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-         implements="com.easyinsight.analysis.IReportExtensionEditor" label="Diagram">
+         implements="com.easyinsight.analysis.IReportExtensionEditor" label="Diagram"
+        paddingLeft="20" paddingBottom="20" paddingRight="20" paddingTop="20">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.diagram.DiagramReportFieldExtension;
         import com.easyinsight.icons.IconSelectionEvent;

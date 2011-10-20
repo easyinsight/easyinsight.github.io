@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-         xmlns:filtering="com.easyinsight.filtering.*"
+         xmlns:filtering="com.easyinsight.filtering.*" xmlns:easyinsight="com.easyinsight.*"
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%" creationComplete="populateData()"
          styleName="screenBackground">
     <mx:Script><![CDATA[
@@ -48,7 +48,7 @@
             controls.addItem(new DashboardControl("Grid", DashboardGrid));
             controls.addItem(new DashboardControl("Stack", DashboardStack));
             controls.addItem(new DashboardControl("Image", DashboardImage));
-            //controls.addItem(new DashboardControl("Text", DashboardTextElement));
+            controls.addItem(new DashboardControl("Text", DashboardTextElement));
             this.availableControls = controls;
             if (_dashboardID == 0) {
                 ProgressAlert.alert(this, "Retrieving reports...", null, feedService.searchForSubscribedFeeds, scorecardService.getScorecardDescriptorsForDataSource);
@@ -328,12 +328,14 @@
                    toolTip="Configure Dashboard" label="Configure Dashboard" labelPlacement="right" styleName="grayButton"/>
         <mx:Button icon="@Embed(source='../../../../assets/code_edit.png')" click="editCode()"
                    toolTip="Edit Code" label="Edit Code" labelPlacement="right" styleName="grayButton"/>
+        <mx:Spacer width="100%"/>
+        <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
     </mx:HBox>
     <mx:HBox width="100%" height="100%" paddingLeft="10" paddingRight="10">
         <mx:VBox height="100%" horizontalAlign="center" width="200" paddingTop="20" paddingBottom="20">
             <mx:Label text="Controls" fontSize="14"/>
             <mx:List id="controlsList" dataProvider="{availableControls}" labelField="name" dragEnabled="true"
-                     width="100%" rowCount="3"/>
+                     width="100%" rowCount="4"/>
             <mx:Label text="Reports" fontSize="14"/>
             <mx:List id="reportsList" dataProvider="{availableReports}" labelField="name" dragEnabled="true"
                      width="100%" height="100%"/>

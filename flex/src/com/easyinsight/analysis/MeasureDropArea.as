@@ -1,10 +1,8 @@
 package com.easyinsight.analysis
 {
-	import mx.controls.ComboBox;
 	
 	public class MeasureDropArea extends DropArea
 	{
-		private var aggregationBox:ComboBox;
 		
 		public function MeasureDropArea()
 		{
@@ -19,6 +17,13 @@ package com.easyinsight.analysis
 			return "Drop Measure Here";
 		}
 
+        override protected function accept(analysisItem:AnalysisItem):Boolean {
+            if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING) || analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                return false;
+            }
+            return true;
+        }
+
         override public function set analysisItem(analysisItem:AnalysisItem):void {
 
             if (analysisItem != null) {
@@ -26,7 +31,9 @@ package com.easyinsight.analysis
                     var analysisMeasure:AnalysisMeasure = new AnalysisMeasure();
                     analysisMeasure.key = analysisItem.key;
                     analysisMeasure.displayName = analysisItem.displayName;
-                    analysisMeasure.aggregation = AggregationTypes.SUM;
+                    analysisMeasure.aggregation = AggregationTypes.COUNT;
+                    analysisMeasure.concrete = analysisItem.concrete;
+                    analysisMeasure.filters = analysisItem.filters;
                     analysisItem = analysisMeasure;
                 }
             }

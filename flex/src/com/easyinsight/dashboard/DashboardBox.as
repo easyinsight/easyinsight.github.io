@@ -4,8 +4,11 @@ import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.display.DisplayObject;
+import flash.events.Event;
 
 import flash.events.MouseEvent;
+
+import mx.binding.utils.BindingUtils;
 
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
@@ -58,6 +61,19 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
 
     private var labelText:Label;
 
+    private var _buttonsVisible:Boolean;
+
+    [Bindable(event="buttonsVisibleChanged")]
+    public function get buttonsVisible():Boolean {
+        return _buttonsVisible;
+    }
+
+    public function set buttonsVisible(value:Boolean):void {
+        if (_buttonsVisible == value) return;
+        _buttonsVisible = value;
+        dispatchEvent(new Event("buttonsVisibleChanged"));
+    }
+
     protected override function createChildren():void {
         super.createChildren();
         var topCanvas:Canvas = new Canvas();
@@ -78,10 +94,12 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         var editButton:Button = new Button();
         editButton.setStyle("icon", editIcon);
         editButton.addEventListener(MouseEvent.CLICK, onEdit);
+        BindingUtils.bindProperty(editButton, "visible", this, "buttonsVisible");
         var deleteButton:Button = new Button();
         deleteButton.setStyle("icon", deleteIcon);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         deleteButton.enabled = _allowDelete;
+        BindingUtils.bindProperty(deleteButton, "visible", this, "buttonsVisible");
         topBox.addChild(editButton);
         topBox.addChild(deleteButton);
         topCanvas.addChild(topBox);
@@ -95,11 +113,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         dropBox.percentWidth = 100;
         addChild(dropBox);
         if (element != null) {
-            if (element is DashboardReport) {
-                labelText.text = DashboardReport(element).report.name;
-            } else {
-                labelText.text = element.label;
-            }
+            updateText();
             dropBox.setStyle("backgroundColor", 0xEEEEEE);
             if (editorComp == null) {
                 editorComp = IDashboardEditorComponent(DashboardElementFactory.createEditorUIComponent(element, dashboardEditorMetadata));
@@ -109,6 +123,27 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
             dropBox.setStyle("backgroundColor", 0xFFFFFF);
             dropBox.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
             dropBox.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
+        }
+        buttonsVisible = element != null;
+    }
+
+    private function updateText():void {
+        if (element is DashboardReport) {
+            labelText.text = DashboardReport(element).report.name;
+        } else {
+            if (element.label == null) {
+                if (element is DashboardGrid) {
+                    labelText.text = "Grid";
+                } else if (element is DashboardStack) {
+                    labelText.text = "Stack";
+                } else if (element is DashboardImage) {
+                    labelText.text = "Image";
+                } else if (element is DashboardTextElement) {
+                    labelText.text = "Text";
+                }
+            } else {
+                labelText.text = element.label;
+            }
         }
     }
 
@@ -124,6 +159,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
             labelText.text = "";
             element = null;
             editorComp = null;
+            buttonsVisible = false;
             dropBox.removeAllChildren();
             dropBox.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
             dropBox.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
@@ -169,8 +205,10 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
             this.element = null;
             editorComp = null;
         }
-        labelText.text = element.label;
+
+        buttonsVisible = true;
         this.element = element;
+        updateText();
         errorString = null;
         editorComp = IDashboardEditorComponent(DashboardElementFactory.createEditorUIComponent(element, dashboardEditorMetadata));
         editorComp.initialRetrieve();

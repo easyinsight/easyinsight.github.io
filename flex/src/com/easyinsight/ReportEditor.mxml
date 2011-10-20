@@ -203,8 +203,12 @@
         }
 
         private function onDataReturn(event:DataServiceEvent):void {
-            this.dataSourceInfo = event.dataSource;
-            this.suggestions = event.suggestions;
+            if (event.dataSource != null) {
+                this.dataSourceInfo = event.dataSource;
+            }
+            if (event.suggestions != null) {
+                this.suggestions = event.suggestions;
+            }
             if (suggestions != null && suggestions.length > 0) {
                 currentState = "showSuggestions";
             } else {
@@ -936,7 +940,7 @@
                    labelPlacement="right" x="202" styleName="grayButton"/>
         <report:RefreshButton id="refreshButton" toolTip="Refresh Data"
                    icon="@Embed(source='../../../assets/refresh.png')"
-                   click="dataView.forceRetrieve()" label="Refresh" labelPlacement="right" x="295" styleName="grayButton"
+                   label="Refresh" labelPlacement="right" x="295" styleName="grayButton"
                 dataSource="{dataSourceInfo}" viewFactory="{dataView}"/>
         <analysis:AdHocMode id="adHocButton" modeChange="dataView.forceRetrieve()" labelPlacement="right"
                             label="Ad Hoc Mode"

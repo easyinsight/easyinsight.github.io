@@ -10,6 +10,7 @@ import flash.events.ContextMenuEvent;
 import flash.events.Event;
 import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
+import flash.geom.Point;
 import flash.ui.ContextMenuItem;
 import flash.ui.Keyboard;
 
@@ -146,10 +147,21 @@ public class DropArea extends HBox
             //Alert.show("have a report at drop area");
             analysisItemEditor.reportType = _report.reportType;
         }
+        if (startX > 0) {
+            analysisItemEditor.x = startX;
+            analysisItemEditor.y = startY;
+        } else {
+            var p:Point = new Point(this.x, this.y);
+            var g:Point = localToGlobal(p);
+            analysisItemEditor.x = g.x;
+            analysisItemEditor.y = g.y;
+        }
         PopUpManager.addPopUp(analysisItemEditor, UIComponent(Application.application));
-        PopUpUtil.centerPopUp(analysisItemEditor);
         analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
     }
+
+    public var startX:int;
+    public var startY:int;
 
     private function itemEdited(event:AnalysisItemEditEvent):void {
         dispatchEvent(new CommandEvent(new DropAreaDragUpdateCommand(this, this.analysisItem, event.analysisItem)));
