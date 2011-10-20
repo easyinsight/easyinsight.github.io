@@ -125,6 +125,18 @@ public class ComboBoxFilter extends HBox implements IFilter {
 
     override protected function createChildren():void {
         super.createChildren();
+
+        if (_filterDefinition == null) {
+            _filterDefinition = new FilterValueDefinition();
+            _filterDefinition.field = _analysisItem;
+            _filterDefinition.filteredValues = new ArrayCollection();
+            _filterDefinition.inclusive = true;
+            _filterDefinition.enabled = true;
+            _filterDefinition.singleValue = true;
+            _filterDefinition.allOption = true;
+            _filterDefinition.toggleEnabled = true;
+        }
+
         viewStack = new ViewStack();
         viewStack.resizeToContent = true;
 
@@ -276,16 +288,6 @@ public class ComboBoxFilter extends HBox implements IFilter {
         strings = strings.reverse();
         comboBox.dataProvider = new ArrayCollection(strings);
         comboBox.rowCount = Math.min(strings.length, 15);
-        if (_filterDefinition == null) {
-            _filterDefinition = new FilterValueDefinition();
-            _filterDefinition.field = _analysisItem;
-            _filterDefinition.filteredValues = new ArrayCollection();
-            _filterDefinition.inclusive = true;
-            _filterDefinition.enabled = true;
-            _filterDefinition.singleValue = true;
-            _filterDefinition.allOption = true;
-            _filterDefinition.toggleEnabled = true;
-        }
         var selectedValue:String;
         if (_filterDefinition.filteredValues.length == 0 && strings.length > 0) {
             _filterDefinition.filteredValues.addItem(strings[0]);
