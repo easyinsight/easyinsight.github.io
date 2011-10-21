@@ -11,7 +11,7 @@
         public function save(analysisItem:AnalysisItem):void {
             var ext:TextReportFieldExtension = new TextReportFieldExtension();
             //ext.size = parseInt(fontSizeInput.text);
-            //ext.fixedWidth = parseInt(fixedWidthInput.text);
+            ext.fixedWidth = parseInt(fixedWidthInput.text);
             ext.align = alignComboBox.selectedItem as String;
             ext.wordWrap = wordWrapCheckbox.selected;
             analysisItem.reportFieldExtension = ext;
@@ -24,7 +24,7 @@
                 //customFontSize = String(ext.size);
                 align = ext.align == null ? "Left" : ext.align;
                 wordWrap = ext.wordWrap;
-                //fixedWidth = String(ext.fixedWidth);
+                fixedWidth = String(ext.fixedWidth);
             }
         }
 
@@ -58,9 +58,9 @@
         <!--<mx:FormItem label="Font Size:">
             <mx:TextInput id="fontSizeInput" text="{customFontSize}"/>
         </mx:FormItem>-->
-        <!--<mx:FormItem label="Fixed Width:">
+        <mx:FormItem label="Fixed Width:">
             <mx:TextInput id="fixedWidthInput" text="{fixedWidth}"/>
-        </mx:FormItem>-->
+        </mx:FormItem>
         <mx:FormItem label="Word Wrap:">
             <mx:CheckBox id="wordWrapCheckbox" selected="{wordWrap}"/>
         </mx:FormItem>

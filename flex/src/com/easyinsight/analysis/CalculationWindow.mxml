@@ -406,7 +406,7 @@
             </mx:Form>
             <mx:Form>
                 <mx:FormItem label="{detailItemLabel}" direction="horizontal">
-                    <util:SmartComboBox id="dateBox" rowCount="10" selectedValue="{dateLevel}" selectedProperty="dateLevel">
+                    <util:SmartComboBox id="dateBox" rowCount="10" selectedValue="{dateLevel}" selectedProperty="data">
                         <mx:ArrayCollection>
                             <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
                             <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>

@@ -17,6 +17,7 @@ import mx.controls.TextArea;
 import mx.controls.VRule;
 import mx.effects.Effect;
 import mx.effects.Fade;
+import mx.events.EffectEvent;
 import mx.events.FlexEvent;
 import mx.formatters.DateFormatter;
 import mx.managers.PopUpManager;
@@ -52,19 +53,26 @@ public class DataSourceDisplay extends HBox {
         Fade(resizeEffect).alphaFrom = 0;
         Fade(resizeEffect).alphaTo = 1;
         resizeEffect.play();
+    }
 
+    public function close():void {
         var fadeEffect:Effect = new Fade(this);
         fadeEffect.duration = 500;
         Fade(fadeEffect).alphaFrom = 1;
         Fade(fadeEffect).alphaTo = 0;
-        setStyle("removedEffect", fadeEffect);
+        fadeEffect.addEventListener(EffectEvent.EFFECT_END, onEffectEnd);
+        fadeEffect.play();
+    }
+
+    private function onEffectEnd(event:Event):void {
+        stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+        PopUpManager.removePopUp(this);
     }
 
     private function onMouseDown(event:MouseEvent):void {
         var result:Boolean = hitTestPoint(event.stageX, event.stageY);
         if (!result) {
-            stage.removeEventListener(MouseEvent.MOUSE_DOWN,  onMouseDown);
-            PopUpManager.removePopUp(this);
+            close();
         }
     }
 
@@ -163,8 +171,7 @@ public class DataSourceDisplay extends HBox {
 
     private function vanillaRetrieval(event:MouseEvent):void {
         _dataView.refresh();
-        stage.removeEventListener(MouseEvent.MOUSE_DOWN,  onMouseDown);
-        PopUpManager.removePopUp(this);
+        close();
     }
 
     override protected function createChildren():void {
@@ -228,8 +235,7 @@ public class DataSourceDisplay extends HBox {
 
     private function onRefresh(event:DataSourceRefreshEvent):void {
         updateString(event.newDateTime);
-        stage.removeEventListener(MouseEvent.MOUSE_DOWN,  onMouseDown);
-        PopUpManager.removePopUp(this);
+        close();
     }
 }
 }

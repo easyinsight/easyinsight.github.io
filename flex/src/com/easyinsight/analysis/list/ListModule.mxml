@@ -287,8 +287,6 @@
 
                 // we need to reduce the size of existing columns
 
-                var variableHeight:Boolean = false;
-
                 activeLookupTables = new ArrayCollection();
                 pairMaps = new ArrayCollection();
 
@@ -337,9 +335,11 @@
                     columnHeaderObject.headerRenderer = headerFactory;
                     var factory:ClassFactory = new ClassFactory(getCellRendererClass(myHeader, myLookupTable));
                     var ext:TextReportFieldExtension = myHeader.reportFieldExtension as TextReportFieldExtension;
-                    if (myHeader.hasType(AnalysisItemTypes.TEXT) || (myHeader.hasType(AnalysisItemTypes.DERIVED_GROUPING) && DerivedAnalysisDimension(myHeader).wordWrap) ||
-                            (ext != null && ext.wordWrap)) {
-                        variableHeight = true;
+                    if (ext != null) {
+                        if (ext.fixedWidth > 0) {
+                            columnHeaderObject.width = ext.fixedWidth;
+                            columnHeaderObject.resizable = false;
+                        }
                     }
                     if (myLookupTable == null) {
                         factory.properties = { analysisItem: myHeader, report: def, rolloverIcon: listDef.rolloverIcon ? handIcon : null };
@@ -349,7 +349,6 @@
                     columnHeaderObject.itemRenderer = factory;
                     columns[k + initColumn] = columnHeaderObject;
                 }
-                dataGrid.variableRowHeight = variableHeight;
                 dataGrid.columns = columns;
                 dataGrid.rowCount = dataSet.length;
             } else {
@@ -596,7 +595,7 @@
                                dragOver="dragOverHandler(event)" fontFamily="Lucida Grande"
                     horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
                     verticalGridLines="true"
-                    borderStyle="none"/>
+                    borderStyle="none" variableRowHeight="true"/>
 
             <!--<analysis:ListViewGrid id="dataGrid" dataProvider="{myDataSet}" height="100%"
                                dragEnter="dragEnterHandler(event)" dragComplete="dragCompleteHandler(event)"

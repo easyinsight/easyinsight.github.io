@@ -12,7 +12,7 @@ public class TextReportFieldExtension extends ReportFieldExtension {
 
     public var size:int;
     public var align:String;
-    public var fixedWidth:int;
+    public var fixedWidth:int = 150;
     public var wordWrap:Boolean;
 
     public function TextReportFieldExtension() {

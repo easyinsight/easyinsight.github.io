@@ -59,15 +59,12 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         viewFactory.reportID = dashboardReport.report.id;
         viewFactory.dataSourceID = dashboardReport.report.dataFeedID;
         if (dashboardReport.showLabel) {
-            var vbox:VBox = new VBox();
-            vbox.percentHeight = 100;
-            vbox.percentWidth = 100;
-            vbox.setStyle("horizontalAlign", "center");
-            addChild(vbox);
             var label:Label = new Label();
+            label.setStyle("fontSize", 14);
+            label.setStyle("fontWeight", "bold");
             label.text = dashboardReport.report.name;
-            vbox.addChild(label);
-            vbox.addChild(viewFactory);
+            addChild(label);
+            addChild(viewFactory);
         } else {
             addChild(viewFactory);
         }
@@ -128,14 +125,16 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     public var dashboardEditorMetadata:DashboardEditorMetadata;
 
     public function toggleFilters(showFilters:Boolean):void {
-        if (transformContainer != null) {
-            if (showFilters) {
+        if (hasFilters) {
+            if (!showFilters) {
                 removeChild(transformContainer);
             } else {
-                addChildAt(transformContainer, 0);
+                addChildAt(transformContainer, dashboardReport.showLabel ? 1 : 0);
             }
         }
     }
+
+    private var hasFilters:Boolean = false;
 
     private function onReportSetup(event:ReportSetupEvent):void {
         var filterDefinitions:ArrayCollection = event.reportInfo.report.filterDefinitions;
@@ -162,6 +161,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                 myFilterColl.addItem(filterDefinition);
             }
             if (myFilterColl.length > 0) {
+                hasFilters = true;
                 transformContainer.existingFilters = myFilterColl;
                 filterMap[elementID] = myFilterColl;
                 updateAdditionalFilters(filterMap);
@@ -174,7 +174,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                 transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
                 transformContainer.role = dashboardEditorMetadata.role;
                 transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-                addChildAt(transformContainer, 0);
+                addChildAt(transformContainer, dashboardReport.showLabel ? 1 : 0);
             }
         }
         viewFactory.additionalFilterDefinitions = createAdditionalFilters(filterMap);

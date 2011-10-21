@@ -278,6 +278,13 @@
                     columnHeaderObject.headerRenderer = headerFactory;
 
                     var factory:ClassFactory = new ClassFactory(getCellRendererClass(myHeader, myLookupTable));
+                    var ext:TextReportFieldExtension = myHeader.reportFieldExtension as TextReportFieldExtension;
+                    if (ext != null) {
+                        if (ext.fixedWidth > 0) {
+                            columnHeaderObject.width = ext.fixedWidth;
+                            columnHeaderObject.resizable = false;
+                        }
+                    }
                     if (myLookupTable == null) {
                         factory.properties = { analysisItem: myHeader, report: treeDef };
                         columnHeaderObject.itemRenderer = factory;

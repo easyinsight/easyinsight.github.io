@@ -98,18 +98,35 @@
             _viewFactory = value;
             dispatchEvent(new Event("viewFactoryChanged"));
         }
+
+        [Bindable]
+        [Embed(source='../../../../assets/table.png')]
+        private var exportToExcelIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/document_out.png")]
+        private var closeIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/edit.png")]
+        private var reportEditorIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/funnel.png")]
+        private var filterIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/refresh.png")]
+        private var refreshIcon:Class;
         ]]></mx:Script>
     <mx:Button click="_dashboardView.close()" styleName="grayButton" labelPlacement="right"
                id="backButton"
-               toolTip="Close the report view" label="Close Dashboard"/>
+               toolTip="Close the report view" label="Close Dashboard" icon="{closeIcon}"/>
     <report:RefreshButton styleName="grayButton" labelPlacement="right"
                id="refreshButton" toolTip="Refresh this dashboard" label="Refresh" viewFactory="{viewFactory}"
-            dataSource="{dataSource}"/>
+            dataSource="{dataSource}" icon="{refreshIcon}"/>
     <mx:Button styleName="grayButton" click="_dashboardView.exportDashboard(exportButton)"
            labelPlacement="right"
-           id="exportButton" toolTip="Export the report..." label="Export"/>
+           id="exportButton" toolTip="Export the dashboard..." label="Export" icon="{exportToExcelIcon}"/>
     <mx:Button click="_dashboardView.toggleFilters()" styleName="grayButton" labelPlacement="right"
-               id="filterButton" label="Toggle Filters"/>
+               id="filterButton" label="Toggle Filters" icon="{filterIcon}"/>
     <mx:Spacer width="100%"/>
     <mx:Label text="{dashboardName}" maxWidth="350"
               fontSize="14" toolTip="{description}"/>

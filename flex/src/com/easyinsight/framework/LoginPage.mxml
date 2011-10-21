@@ -81,18 +81,17 @@
 
         private function loginHandler(event:LoginEvent):void {
             if (event.authResponse.accountState == Account.DELINQUENT) {
-                panelIndex = 3;
+                panelIndex = 1;
             } else if (event.authResponse.accountState == Account.REACTIVATION_POSSIBLE) {
-                panelIndex = 6;
+                panelIndex = 4;
                 dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
             } else if (event.authResponse.accountState == Account.INACTIVE) {
-                panelIndex = 4;
+                panelIndex = 2;
             } else if (event.authResponse.firstLogin && event.authResponse.accountAdmin) {
-                dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
-                panelIndex = 1;
+                dispatchEvent(event);
             } else if (event.authResponse.firstLogin && !event.authResponse.accountAdmin) {
                 dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
-                panelIndex = 8;
+                panelIndex = 6;
             } else {
                 dispatchEvent(event);
             }
@@ -166,7 +165,7 @@
                                       y="114"/>
         </mx:HBox>
 
-        <!-- 3, delinquent -->
+        <!-- 1, delinquent -->
         <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
             <mx:VBox horizontalAlign="center" verticalAlign="middle"
                      paddingTop="10" paddingBottom="10"
@@ -184,7 +183,7 @@
             </mx:VBox>
         </mx:Box>
 
-        <!-- 4, not activated yet -->
+        <!-- 2, not activated yet -->
         <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
             <mx:VBox horizontalAlign="center" verticalAlign="middle"
                      paddingTop="10" paddingBottom="10"
@@ -203,6 +202,9 @@
                 </mx:HBox>
             </mx:VBox>
         </mx:Box>
+
+        <!-- 3, help with activation -->
+
         <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
             <mx:VBox horizontalAlign="center" verticalAlign="middle"
                      paddingTop="10" paddingBottom="10"
@@ -217,7 +219,7 @@
             </mx:VBox>
         </mx:Box>
 
-        <!-- 6, reactivate -->
+        <!-- 4, reactivate -->
         <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
             <mx:VBox horizontalAlign="center" verticalAlign="middle"
                      paddingTop="10" paddingBottom="10"
@@ -232,6 +234,9 @@
                 <mx:Button label="Reactivate" click="reactivate()" fontSize="18"/>
             </mx:VBox>
         </mx:Box>
+
+        <!-- 5, reactivated -->
+
         <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
             <mx:VBox horizontalAlign="center" verticalAlign="middle"
                      paddingTop="10" paddingBottom="10"
@@ -243,7 +248,7 @@
             </mx:VBox>
         </mx:Box>
 
-        <!-- 8, initial user creation -->
+        <!-- 6, initial user creation -->
         <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
             <mx:VBox horizontalAlign="center" verticalAlign="middle"
                      paddingTop="10" paddingBottom="10"
