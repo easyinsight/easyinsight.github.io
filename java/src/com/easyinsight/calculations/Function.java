@@ -56,8 +56,12 @@ public abstract class Function implements IFunction {
         Value value = paramMap.get(position);
         if (value == null) {
             EvaluationVisitor subNode = new EvaluationVisitor(row, analysisItem, calculationMetadata);
-            ((CalculationTreeNode) functionNode.getChild(position + 1)).accept(subNode);
-            paramMap.put(position, subNode.getResult());
+            if (functionNode.getChild(position + 1) != null) {
+                ((CalculationTreeNode) functionNode.getChild(position + 1)).accept(subNode);
+                paramMap.put(position, subNode.getResult());
+            } else {
+                paramMap.put(position, new EmptyValue());
+            }
         }
         return paramMap.get(position);
     }

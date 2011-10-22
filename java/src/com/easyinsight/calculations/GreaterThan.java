@@ -24,6 +24,6 @@ public class GreaterThan extends Function {
     }
 
     public int getParameterCount() {
-        return 4;
+        return -1;
     }
 }
