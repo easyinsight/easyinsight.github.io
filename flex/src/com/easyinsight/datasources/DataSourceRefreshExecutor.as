@@ -10,7 +10,6 @@ import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
 import flash.events.EventDispatcher;
-import flash.events.MouseEvent;
 
 import mx.core.Application;
 import mx.core.UIComponent;
@@ -31,7 +30,7 @@ public class DataSourceRefreshExecutor extends EventDispatcher {
         } else {
             var setupWindow:DataSourceRefreshSetupWindow = new DataSourceRefreshSetupWindow();
             setupWindow.dataSourceInfo = dataSource;
-            setupWindow.addEventListener("done", forceRefresh, false, 0, true);
+            setupWindow.addEventListener("done", forceRefresh);
             PopUpManager.addPopUp(setupWindow, UIComponent(Application.application), true);
             PopUpUtil.centerPopUp(setupWindow);
         }
@@ -40,7 +39,7 @@ public class DataSourceRefreshExecutor extends EventDispatcher {
     private function forceRefresh(event:Event = null):void {
         var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
         dsRefreshWindow.dataSourceID = dataSource.dataSourceID;
-        dsRefreshWindow.addEventListener(DataSourceRefreshEvent.DATA_SOURCE_REFRESH, onRefresh, false, 0, true);
+        dsRefreshWindow.addEventListener(DataSourceRefreshEvent.DATA_SOURCE_REFRESH, onRefresh);
         PopUpManager.addPopUp(dsRefreshWindow, UIComponent(Application.application), true);
         PopUpUtil.centerPopUp(dsRefreshWindow);
     }

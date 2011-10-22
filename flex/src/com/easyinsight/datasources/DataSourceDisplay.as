@@ -237,6 +237,7 @@ public class DataSourceDisplay extends HBox {
 
     private function onRefresh(event:DataSourceRefreshEvent):void {
         updateString(event.newDateTime);
+        _dataView.refresh();
         close();
     }
 }
