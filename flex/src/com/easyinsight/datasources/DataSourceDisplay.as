@@ -65,7 +65,9 @@ public class DataSourceDisplay extends HBox {
     }
 
     private function onEffectEnd(event:Event):void {
-        stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+        if (stage != null) {
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+        }
         PopUpManager.removePopUp(this);
     }
 
