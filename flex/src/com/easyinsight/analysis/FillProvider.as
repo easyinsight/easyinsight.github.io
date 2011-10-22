@@ -59,9 +59,10 @@ public class FillProvider {
     public static function createLinearGradients(angle:int):Array {
         return [ lg(0xf9fbf5, 0xa6bc59, angle), lg(0xf1f3f7, 0x597197, angle), lg(0xf9f3e0, 0xd6ab2a, angle),
         lg(0xfcf3ef, 0xd86068, angle), lg(0xe9f1e5, 0x5d9942, angle), lg(0xd4c5cd, 0x7a4c6c, angle),
-
-        lg(0xffffff, 0xF0B400, angle), lg(0xffffff, 0x1E6C0B, angle), lg(0xffffff, 0x00488C, angle),
-        lg(0xffffff, 0x332600, angle), lg(0xffffff, 0xD84000, angle), lg(0xffffff, 0x846D74, angle)];
+        lg(0xffffff, 0x61B796, angle), lg(0xffffff, 0x3a93e8, angle), lg(0xffffff, 0xAB3032, angle),
+        lg(0xffffff, 0x377026, angle), lg(0xffffff, 0x8e3160, angle), lg(0xffffff, 0x5a46cc, angle),
+        lg(0xffffff, 0xBBC417, angle), lg(0xffffff, 0x2921B8, angle), lg(0xffffff, 0xB57C99, angle),
+        lg(0xffffff, 0xB57C99, angle)];
     }
 
     public static function createRadialGradients():Array {

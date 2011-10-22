@@ -8,6 +8,8 @@
 package com.easyinsight.framework {
 
 import com.easyinsight.analysis.LoadingModuleDisplay;
+import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartModule;
+import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartModule;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartModule;
@@ -56,7 +58,8 @@ public class ReportModuleLoader extends EventDispatcher {
                 _reportRendererModule == "StackedBarChartModule.swf" || _reportRendererModule == "ListModule.swf" ||
                 _reportRendererModule == "TreeModule.swf" || _reportRendererModule == "ListModule.swf" ||
                 _reportRendererModule == "TrendGridModule.swf" || _reportRendererModule == "DiagramModule.swf" ||
-                _reportRendererModule == "TrendModule.swf" || _reportRendererModule == "GaugeModule.swf") {
+                _reportRendererModule == "TrendModule.swf" || _reportRendererModule == "GaugeModule.swf" ||
+                _reportRendererModule == "LineChartModule.swf" || _reportRendererModule == "AreaChartModule.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
@@ -113,6 +116,10 @@ public class ReportModuleLoader extends EventDispatcher {
                 return new TrendGridModule();
             } else if (moduleName == "GaugeModule.swf") {
                 return new GaugeModule();
+            } else if (moduleName == "LineChartModule.swf") {
+                return new LineChartModule();
+            } else if (moduleName == "AreaChartModule.swf") {
+                return new AreaChartModule();
             }
         }
         return moduleInfo.factory.create();
