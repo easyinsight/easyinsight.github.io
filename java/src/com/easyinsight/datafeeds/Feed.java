@@ -205,6 +205,7 @@ public abstract class Feed implements Serializable {
                     session.close();
                 }
             }
+            dlsStmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -258,6 +259,7 @@ public abstract class Feed implements Serializable {
                     date = date1;
                 }
             }
+            stmt.close();
         }
         DataSourceInfo dataSourceInfo = getDataSourceInfo();
         dataSourceInfo.setLastDataTime(date);
@@ -265,6 +267,7 @@ public abstract class Feed implements Serializable {
         scheduleStmt.setLong(1, getFeedID());
         ResultSet scheduleRS = scheduleStmt.executeQuery();
         dataSourceInfo.setScheduled(scheduleRS.next());
+        versionStmt.close();
         scheduleStmt.close();
         return dataSourceInfo;
     }

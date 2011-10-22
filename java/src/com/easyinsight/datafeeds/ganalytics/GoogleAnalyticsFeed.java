@@ -201,7 +201,8 @@ public class GoogleAnalyticsFeed extends Feed {
             Set<String> titleFilters = new HashSet<String>();
 
             for (FilterDefinition filterDefinition : filters) {
-                if (filterDefinition.getField().getKey().toKeyString().equals(GoogleAnalyticsDataSource.DATE)) {
+                if (filterDefinition.getField().getKey().toKeyString().equals(GoogleAnalyticsDataSource.DATE) ||
+                        filterDefinition.getField().toDisplay().equals("Date")) {
                     if (filterDefinition instanceof FilterDateRangeDefinition) {
                         FilterDateRangeDefinition dateRange = (FilterDateRangeDefinition) filterDefinition;
                         startDate = dateRange.getStartDate();
