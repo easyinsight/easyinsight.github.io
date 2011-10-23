@@ -505,26 +505,31 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 analysisItem.setLinks(new ArrayList<Link>());
             }
             if (isContactLinkable(analysisItem)) {
+                removeURLLinkIfExists("/people/["+HighRiseContactSource.CONTACT_ID+"]", analysisItem);
                 URLLink urlLink = new URLLink();
                 urlLink.setUrl(getUrl() + "/people/["+HighRiseContactSource.CONTACT_ID+"]");
                 urlLink.setLabel("View Contact in Highrise...");
                 analysisItem.getLinks().add(urlLink);
             } else if (isCompanyLinkable(analysisItem)) {
                 URLLink urlLink = new URLLink();
+                removeURLLinkIfExists("/companies/["+HighRiseCompanySource.COMPANY_ID+"]", analysisItem);
                 urlLink.setUrl(getUrl() + "/companies/["+HighRiseCompanySource.COMPANY_ID+"]");
                 urlLink.setLabel("View Company in Highrise...");
                 analysisItem.getLinks().add(urlLink);
             } else if (isDealLinkable(analysisItem)) {
+                removeURLLinkIfExists("/deals/["+HighRiseDealSource.DEAL_ID+"]", analysisItem);
                 URLLink urlLink = new URLLink();
                 urlLink.setUrl(getUrl() + "/deals/["+HighRiseDealSource.DEAL_ID+"]");
                 urlLink.setLabel("View Deal in Highrise...");
                 analysisItem.getLinks().add(urlLink);
             } else if (isCaseLinkable(analysisItem)) {
+                removeURLLinkIfExists("/kases/["+HighRiseCaseSource.CASE_ID+"]", analysisItem);
                 URLLink urlLink = new URLLink();
                 urlLink.setUrl(getUrl() + "/kases/["+HighRiseCaseSource.CASE_ID+"]");
                 urlLink.setLabel("View Case in Highrise...");
                 analysisItem.getLinks().add(urlLink);
             } else if (isTaskLinkable(analysisItem)) {
+                removeURLLinkIfExists("/tasks", analysisItem);
                 URLLink upcomingTasks = new URLLink();
                 upcomingTasks.setUrl(getUrl() + "/tasks");
                 upcomingTasks.setLabel("View Upcoming Tasks in Highrise...");

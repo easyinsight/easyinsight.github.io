@@ -658,4 +658,20 @@ public class FeedDefinition implements Cloneable, Serializable {
         return new ArrayList<Intention>();
     }
 
+    public void updateLinks(AnalysisItem analysisItem) {
+        decorateLinks(Arrays.asList(analysisItem));
+    }
+
+    public void removeURLLinkIfExists(String pattern, AnalysisItem analysisItem) {
+        Iterator<Link> iter = analysisItem.getLinks().iterator();
+        while (iter.hasNext()) {
+            Link link = iter.next();
+            if (link instanceof URLLink) {
+                URLLink urlLink = (URLLink) link;
+                if (urlLink.getUrl() != null && urlLink.getUrl().contains(pattern)) {
+                    iter.remove();
+                }
+            }
+        }
+    }
 }

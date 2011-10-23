@@ -481,6 +481,9 @@ public class AnalysisDefinition implements Cloneable {
             }
         }
         for (AnalysisItem analysisItem : replacementMap.getFields()) {
+            if (target != null) {
+                target.updateLinks(analysisItem);
+            }
             analysisItem.updateIDs(replacementMap);
         }
         for (Map.Entry<String, AnalysisItem> entry : getReportStructure().entrySet()) {
