@@ -27,6 +27,8 @@ public class DiagramDropArea extends DropArea {
                 analysisMeasure.key = analysisItem.key;
                 analysisMeasure.displayName = analysisItem.displayName;
                 analysisMeasure.aggregation = AggregationTypes.SUM;
+                analysisMeasure.concrete = analysisItem.concrete;
+                analysisMeasure.filters = analysisItem.filters;
                 analysisItem = analysisMeasure;
             }
         }
