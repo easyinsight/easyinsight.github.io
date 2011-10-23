@@ -441,18 +441,21 @@ public class AnalysisDefinition implements Cloneable {
             analysisDefinition.setJoinOverrides(clones);
         }
 
-        Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
+        /*
         for (Map.Entry<String, AnalysisItem> entry : clonedStructure.entrySet()) {
             replacementMap.addField(entry.getValue(), changingDataSource);
             List<AnalysisItem> items = entry.getValue().getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS);
             for (AnalysisItem item : items) {
                 replacementMap.addField(item, changingDataSource);
             }
-        }
+        }*/
 
-        for (AnalysisItem analysisItem : replacementMap.getFields()) {
-            Key key = null;
-            if (target != null) {
+        Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
+
+        if (target != null) {
+            for (AnalysisItem analysisItem : replacementMap.getFields()) {
+                Key key = null;
+
                 AnalysisItem dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
                 if (dataSourceItem != null) {
                     key = dataSourceItem.getKey();
@@ -476,6 +479,8 @@ public class AnalysisDefinition implements Cloneable {
                     analysisItem.setKey(clonedKey);
                 }
             }
+        }
+        for (AnalysisItem analysisItem : replacementMap.getFields()) {
             analysisItem.updateIDs(replacementMap);
         }
         for (Map.Entry<String, AnalysisItem> entry : getReportStructure().entrySet()) {

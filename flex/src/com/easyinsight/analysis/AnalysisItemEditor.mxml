@@ -273,7 +273,7 @@
                      analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
                      }*/
                     analysisItem.displayName = fieldNameInput.text;
-                    analysisItem.originalDisplayName = startingAnalysisItem.originalDisplayName;
+                    analysisItem.originalDisplayName = startingAnalysisItem.originalDisplayName != null ? startingAnalysisItem.originalDisplayName : startingAnalysisItem.display;
                     analysisItem.key = key;
                     analysisItem.hidden = hiddenCheckbox.selected;
                     analysisItem.tooltip = fieldTooltipInput.text;

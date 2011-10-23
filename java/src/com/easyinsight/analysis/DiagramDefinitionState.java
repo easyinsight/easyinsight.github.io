@@ -98,6 +98,12 @@ public class DiagramDefinitionState extends AnalysisDefinitionState {
     public AnalysisDefinitionState clone(List<AnalysisItem> allFields) throws CloneNotSupportedException {
         DiagramDefinitionState trendState = (DiagramDefinitionState) super.clone(allFields);
         trendState.setDiagramReportID(0);
+        List<DiagramLink> targetLinks = new ArrayList<DiagramLink>();
+        for (DiagramLink link : this.links) {
+            DiagramLink clone = link.clone();
+            targetLinks.add(clone);
+        }
+        trendState.setLinks(targetLinks);
         return trendState;
     }
 

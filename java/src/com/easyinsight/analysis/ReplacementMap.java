@@ -33,11 +33,8 @@ public class ReplacementMap {
         if (exists == null) {
             exists = analysisItem.clone();
             cleanup(exists, changingDataSource);
-            if (analysisItem.getAnalysisItemID() > 0) {
-                replacementMap.put(analysisItem.getAnalysisItemID(), exists);
-            } else {
-                qualifiedNameReplacementMap.put(analysisItem.qualifiedName(), exists);
-            }
+            replacementMap.put(analysisItem.getAnalysisItemID(), exists);
+            qualifiedNameReplacementMap.put(analysisItem.toDisplay() + "-" + analysisItem.getQualifiedSuffix(), exists);
         }
         return exists;
     }
@@ -46,7 +43,7 @@ public class ReplacementMap {
         if (analysisItem.getAnalysisItemID() > 0) {
             return replacementMap.get(analysisItem.getAnalysisItemID());
         } else {
-            return qualifiedNameReplacementMap.get(analysisItem.qualifiedName());
+            return qualifiedNameReplacementMap.get(analysisItem.toDisplay() + "-" + analysisItem.getQualifiedSuffix());
         }
     }
 

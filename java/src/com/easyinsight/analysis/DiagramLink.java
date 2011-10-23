@@ -13,7 +13,7 @@ import java.util.Map;
  */
 @Entity
 @Table(name="diagram_report_link")
-public class DiagramLink {
+public class DiagramLink implements Cloneable {
 
     @Id @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="diagram_report_link_id")
@@ -28,6 +28,12 @@ public class DiagramLink {
 
     @Column(name="link_name")
     private String label;
+
+    public DiagramLink clone() throws CloneNotSupportedException {
+        DiagramLink clone = (DiagramLink) super.clone();
+        clone.setDiagramLinkID(0);
+        return clone;
+    }
 
     public long getDiagramLinkID() {
         return diagramLinkID;

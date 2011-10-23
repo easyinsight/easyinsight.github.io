@@ -228,7 +228,9 @@
             dataSourceID = dashboard.dataSourceID;
             filterDefinitions = dashboard.filters;
             createDashboard();
-            UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.VIEW, _dashboardID));
+            if (_dashboardID != 0 && exchangeItem == null) {
+                UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.VIEW, _dashboardID));
+            }
             generateState();
             loadingBox.parent.removeChild(loadingBox);
             /*if (_fixedID) {

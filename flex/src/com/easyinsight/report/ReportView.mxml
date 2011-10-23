@@ -383,7 +383,7 @@
 
                 // if filters were passed in
                 overlayIndex = 0;
-                if (_reportID != 0) {
+                if (_reportID != 0 && exchangeItem == null) {
                     UserAudit.instance().log(new ActionReportLog(ActionReportLog.VIEW, _reportID));
                 }
                 viewFactory.setup();
