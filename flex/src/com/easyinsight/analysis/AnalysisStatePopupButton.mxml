@@ -110,7 +110,7 @@
         	<node label="Plot" type="{AnalysisDefinition.PLOT}"/>
         	<node label="Bubble" type="{AnalysisDefinition.BUBBLE}"/>
         </node>
-        <node label="Chart" icon="">
+        <node label="Trend" icon="">
             <node label="Trends" type="{AnalysisDefinition.TREND}"/>
         	<node label="Trend Grid" type="{AnalysisDefinition.TREND_GRID}"/>
             <node label="Diagram" type="{AnalysisDefinition.DIAGRAM}"/>
