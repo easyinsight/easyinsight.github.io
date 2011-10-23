@@ -13,12 +13,14 @@ import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
+import com.easyinsight.analysis.DiagramDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.analysis.ReportRendererEvent;
+import com.easyinsight.analysis.TrendDropArea;
 
 import mx.collections.ArrayCollection;
 
@@ -41,7 +43,7 @@ public class DiagramControlBar extends ReportControlBar implements IReportContro
         super();
         listViewGrouping = new ListDropAreaGrouping();
         listViewGrouping.unlimited = true;
-        listViewGrouping.dropAreaType = MeasureDropArea;
+        listViewGrouping.dropAreaType = DiagramDropArea;
         listViewGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         addEventListener(ReportRendererEvent.REMOVE_ITEM, onRemoveEvent);
         setStyle("verticalAlign", "middle");
