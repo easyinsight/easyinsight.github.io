@@ -12,6 +12,12 @@
             _dashboardDescriptor = value;
         }
 
+        [Embed(source="../../../../assets/businessman_edit.png")]
+        public var adminIcon:Class;
+
+        [Embed(source="../../../../assets/media_play_green.png")]
+        public var playIcon:Class;
+
         private function viewDashboard():void {
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboardDescriptor.id})));
             PopUpManager.removePopUp(this)
@@ -23,8 +29,8 @@
         }
         ]]></mx:Script>
     <mx:HBox>
-        <util:MultiLineButton label="View the Dashboard" click="viewDashboard()" styleName="grayButton" fontSize="20"/>
-        <util:MultiLineButton label="Edit the Dashboard" click="editDashboard()" styleName="grayButton" fontSize="20"/>
+        <util:MultiLineButton label="View the Dashboard" click="viewDashboard()" styleName="grayButton" fontSize="20" icon="{playIcon}"/>
+        <util:MultiLineButton label="Edit the Dashboard" click="editDashboard()" styleName="grayButton" fontSize="20" icon="{adminIcon}"/>
     </mx:HBox>
     <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
 </util:EISlimWindow>

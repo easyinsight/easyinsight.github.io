@@ -219,7 +219,7 @@
                     label="Edit Code" labelPlacement="right" styleName="grayButton"/>
             <mx:Label fontSize="14" color="#FFFFFF"/>
             <mx:Spacer width="100%"/>
-            <easyinsight:LoggedOnStatus/>
+            <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
         </mx:HBox>
         <mx:Box width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" paddingTop="10">
             <mx:VBox width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10" verticalGap="0" borderStyle="solid"
