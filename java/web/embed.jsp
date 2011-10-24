@@ -7,6 +7,7 @@
     String width = request.getParameter("width");
     String height = request.getParameter("height");
     String reportID = request.getParameter("analysisID");
+        System.out.println("REPORT ID = " + reportID);
     String dataSourceID = request.getParameter("dataSourceID");
     String reportType = request.getParameter("reportType");
     String reportName = request.getParameter("reportName");
