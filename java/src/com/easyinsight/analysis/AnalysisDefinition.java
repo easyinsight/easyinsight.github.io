@@ -57,12 +57,6 @@ public class AnalysisDefinition implements Cloneable {
     @JoinColumn(name = "analysis_id", nullable = false)
     private List<UserToAnalysisBinding> userBindings = new ArrayList<UserToAnalysisBinding>();
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "analysis_to_tag",
-            joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "analysis_tags_id", nullable = false))
-    private List<Tag> tags = new ArrayList<Tag>();
-
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "report_state_id")
     private AnalysisDefinitionState analysisDefinitionState;
@@ -299,14 +293,6 @@ public class AnalysisDefinition implements Cloneable {
         this.urlKey = urlKey;
     }
 
-    public List<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<Tag> tags) {
-        this.tags = tags;
-    }
-
     public int getAnalysisPolicy() {
         return analysisPolicy;
     }
@@ -504,11 +490,6 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setReportStructure(clonedStructure);
         analysisDefinition.setAddedItems(addedItems);
         analysisDefinition.setUserBindings(new ArrayList<UserToAnalysisBinding>());
-        List<Tag> clonedTags = new ArrayList<Tag>();
-        for (Tag tag : tags) {
-            clonedTags.add(tag.clone());
-        }
-        analysisDefinition.setTags(clonedTags);
         List<ReportProperty> clonedProperties = new ArrayList<ReportProperty>();
         for (ReportProperty reportProperty : this.properties) {
             clonedProperties.add(reportProperty.clone());
@@ -558,7 +539,6 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setDateCreated(getDateCreated());
         analysisDefinition.setDateUpdated(getDateUpdated());
         analysisDefinition.setUrlKey(urlKey);
-        analysisDefinition.setTagCloud(new ArrayList<Tag>(getTags()));
         analysisDefinition.setMarketplaceVisible(marketplaceVisible);
         analysisDefinition.setPubliclyVisible(publiclyVisible);
         analysisDefinition.setVisibleAtFeedLevel(visibleAtFeedLevel);

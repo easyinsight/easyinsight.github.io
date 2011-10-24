@@ -164,7 +164,6 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setTitle(wsAnalysisDefinition.getName());
         analysisDefinition.setAnalysisPolicy(wsAnalysisDefinition.getPolicy());
         analysisDefinition.setDataFeedID(wsAnalysisDefinition.getDataFeedID());
-        analysisDefinition.setTags(wsAnalysisDefinition.getTagCloud());
         analysisDefinition.setPubliclyVisible(wsAnalysisDefinition.isPubliclyVisible());
         analysisDefinition.setMarketplaceVisible(wsAnalysisDefinition.isMarketplaceVisible());
         analysisDefinition.setTemporaryReport(wsAnalysisDefinition.isTemporaryReport());
