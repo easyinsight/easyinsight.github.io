@@ -109,22 +109,26 @@ public class DataSourceDisplay extends HBox {
 
     private function updateString(date:Date):void {
         var dateFormatter:DateFormatter = new DateFormatter();
-        switch (User.getInstance().dateFormat) {
-            case 0:
-                dateFormatter.formatString = "MM/DD/YYYY HH:NN";
-                break;
-            case 1:
-                dateFormatter.formatString = "YYYY-MM-DD HH:NN";
-                break;
-            case 2:
-                dateFormatter.formatString = "DD-MM-YYYY HH:NN";
-                break;
-            case 3:
-                dateFormatter.formatString = "DD/MM/YYYY HH:NN";
-                break;
-            case 4:
-                dateFormatter.formatString = "DD.MM.YYYY HH:NN";
-                break;
+        if (User.getInstance() != null) {
+            switch (User.getInstance().dateFormat) {
+                case 0:
+                    dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+                    break;
+                case 1:
+                    dateFormatter.formatString = "YYYY-MM-DD HH:NN";
+                    break;
+                case 2:
+                    dateFormatter.formatString = "DD-MM-YYYY HH:NN";
+                    break;
+                case 3:
+                    dateFormatter.formatString = "DD/MM/YYYY HH:NN";
+                    break;
+                case 4:
+                    dateFormatter.formatString = "DD.MM.YYYY HH:NN";
+                    break;
+            }
+        } else {
+            dateFormatter.formatString = "YYYY-MM-DD HH:NN";
         }
         var dateString:String = dateFormatter.format(date);
         if (_dataSource.type == DataSourceInfo.STORED_PUSH) {

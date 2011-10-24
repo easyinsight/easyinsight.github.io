@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*"
-         xmlns:util="com.easyinsight.util.*"
-         width="100%" height="100%" creationComplete="initStuff()" paddingLeft="7" paddingBottom="7" paddingRight="7"
-         paddingTop="7"
-         borderStyle="solid" borderThickness="1">
+         xmlns:util="com.easyinsight.util.*" xmlns:report="com.easyinsight.report.*"
+         width="100%" height="100%" creationComplete="initStuff()">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
-        import com.easyinsight.analysis.EmbeddedViewFactory;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataServiceLoadingEvent;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.core.UIComponent;
         import mx.events.FlexEvent;
 
@@ -36,29 +33,20 @@
         private function initStuff():void {
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
-            if (_urlKey != null) {
-                dashboardService.canAccessDashboard.send(_urlKey);
-            } else {
-                Alert.show("No dashboardID parameter was specified in the dashboard embed HTML code.");
-            }
             if (!_showControls) {
                 removeChild(buttonBox);
             }
             filterIndex = 0;
+            dashboardService.getDashboardView.send(dashboardID);
         }
 
-        private function accessInfo():void {
-            var id:int = dashboardService.canAccessDashboard.lastResult as int;
-            dashboardService.getDashboardView.send(id);
-        }
+        [Bindable]
+        public var dashboardID:int;
 
         [Bindable]
         private var title:String;
         [Bindable]
         private var _dataSourceID:int;
-
-        [Bindable]
-        private var dataViewFactory:EmbeddedViewFactory;
 
         private var _filterDefinitions:ArrayCollection;
 
@@ -82,19 +70,24 @@
         }
 
         private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
-            if (event.type == DataServiceLoadingEvent.LOADING_STARTED) {
+            /*if (event.type == DataServiceLoadingEvent.LOADING_STARTED) {
                 currentState = "Loading";
                 dataViewFactory.enabled = false;
             } else {
                 currentState = "";
                 dataViewFactory.enabled = true;
-            }
+            }*/
         }
 
         private var dashboard:Dashboard;
 
+        [Bindable]
+        private var dataSource:DataSourceInfo;
+
+
         private function gotDashboard():void {
             dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
+            dataSource = dashboard.dataSourceInfo;
             var grid:DashboardGrid = dashboard.rootElement as DashboardGrid;
             dashboardCanvas.setStyle("backgroundAlpha", grid.backgroundAlpha);
             if (grid.backgroundColor != 0) {
@@ -108,7 +101,10 @@
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = _dataSourceID;
+            dashboardEditorMetadata.dashboardID = dashboardID;
             dashboardEditorMetadata.role = dashboard.role;
+            dashboardEditorMetadata.borderColor = dashboard.borderColor;
+            dashboardEditorMetadata.borderThickness = dashboard.borderThickness;
             rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
             UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
                 var filterMap:Object = new Object();
@@ -119,11 +115,16 @@
             dashboardCanvas.addChild(rootView as UIComponent);
         }
 
+        [Bindable]
         private var rootView:IDashboardViewComponent;
 
         private function transformsUpdated(event:TransformsUpdatedEvent):void {
-            dataViewFactory.filterDefinitions = transformContainer.getFilterDefinitions();
-            dataViewFactory.refresh();
+            var filterMap:Object = new Object();
+            if (transformContainer != null) {
+                filterMap["master"] = transformContainer.getFilterDefinitions();
+            }
+            rootView.updateAdditionalFilters(filterMap);
+            rootView.refresh();
         }
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
@@ -142,7 +143,7 @@
         private var showFilters:Boolean = false;
 
         public function refreshData():void {
-            dataViewFactory.refresh();
+            rootView.refresh();
         }
 
         [Bindable]
@@ -162,24 +163,20 @@
         private var filterTooltip:String = "Hide Filters";
 
         private function toggleFilterIndex():void {
-            if (filterIndex == 1) {
-                filterIndex = 0;
-                filterTooltip = "Show Filters";
-            } else {
-                filterIndex = 1;
-                filterTooltip = "Hide Filters";
-            }
+            filterIndex = filterIndex == 1 ? 0 : 1;
+            rootView.toggleFilters(filterIndex == 1);
         }
         ]]>
     </mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="getDashboardView" result="gotDashboard()"/>
-        <mx:method name="canAccessDashboard" result="accessInfo()"/>
     </mx:RemoteObject>
-    <mx:HBox width="100%" id="buttonBox">
-        <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
-                                       id="refreshButton"/>
-        <mx:Button toolTip="{filterTooltip}" click="toggleFilterIndex()" icon="{filterIcon}"/>
+    <mx:HBox width="100%" id="buttonBox" backgroundColor="0" backgroundAlpha="1" paddingLeft="5" paddingBottom="5" paddingTop="5">
+        <report:RefreshButton icon="{refreshIcon}" labelPlacement="right"
+                       id="refreshButton" styleName="grayButton" label="Refresh" viewFactory="{rootView}"
+                    dataSource="{dataSource}"/>
+        <mx:Button toolTip="{filterTooltip}" click="toggleFilterIndex()" icon="{filterIcon}" labelPlacement="right"
+                styleName="grayButton" label="Toggle Filters"/>
         <mx:Spacer width="100%"/>
     </mx:HBox>
     <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
@@ -187,9 +184,8 @@
         <mx:VBox width="100%" horizontalAlign="center">
             <filtering:TransformContainer id="transformContainer" filterEditable="false"
                           existingFilters="{filterDefinitions}"
-                          updatedTransforms="transformsUpdated(event)" width="100%" paddingLeft="10"
-                          paddingTop="10" paddingBottom="10"
-                          paddingRight="10" feedID="{_dataSourceID}"/>
+                          updatedTransforms="transformsUpdated(event)" width="100%"
+                          feedID="{_dataSourceID}" dashboardID="{dashboardID}"/>
         </mx:VBox>
     </mx:ViewStack>
     <util:AntiScrollCanvas height="100%" id="dashboardCanvas" backgroundColor="#FFFFFF"

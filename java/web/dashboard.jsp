@@ -7,7 +7,12 @@
     String width = request.getParameter("width");
     String height = request.getParameter("height");
     String dashboardID = request.getParameter("id");
-    String flashVars = "id=" + dashboardID;
+
+    String flashVars = "id=" + dashboardID + "&showToolbar=";
+    String showToolbar = request.getParameter("showToolbar");
+    if(showToolbar != null) {
+        flashVars = flashVars + "&showToolbar=" + showToolbar;
+    }
 %>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 

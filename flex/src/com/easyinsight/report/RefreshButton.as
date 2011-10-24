@@ -9,6 +9,7 @@ package com.easyinsight.report {
 import com.easyinsight.analysis.IRetrievable;
 import com.easyinsight.datasources.DataSourceDisplay;
 import com.easyinsight.datasources.DataSourceInfo;
+import com.easyinsight.framework.User;
 
 import flash.events.MouseEvent;
 import flash.geom.Point;
@@ -38,7 +39,7 @@ public class RefreshButton extends Button {
     }
 
     private function onClick(event:MouseEvent):void {
-        if (_dataSource.type == DataSourceInfo.STORED_PULL || _dataSource.type == DataSourceInfo.COMPOSITE_PULL) {
+        if (User.getInstance() != null && (_dataSource.type == DataSourceInfo.STORED_PULL || _dataSource.type == DataSourceInfo.COMPOSITE_PULL)) {
             var window:DataSourceDisplay = new DataSourceDisplay();
             var p:Point = new Point(this.x, this.y);
             var g:Point = parent.localToGlobal(p);

@@ -35,6 +35,7 @@ import com.easyinsight.analysis.ServerError;
 import com.easyinsight.analysis.SixSigmaMeasure;
 import com.easyinsight.analysis.StorageLimitFault;
 import com.easyinsight.analysis.StringValue;
+import com.easyinsight.analysis.TextReportFieldExtension;
 import com.easyinsight.analysis.URLLink;
 import com.easyinsight.analysis.charts.bubble.BubbleChartDefinition;
 import com.easyinsight.analysis.charts.plot.PlotChartDefinition;
@@ -51,6 +52,7 @@ import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartDefinition;
 import com.easyinsight.analysis.crosstab.CrosstabDefinition;
+import com.easyinsight.analysis.diagram.DiagramReportFieldExtension;
 import com.easyinsight.analysis.form.FormReport;
 import com.easyinsight.analysis.gantt.GanttReport;
 import com.easyinsight.analysis.gauge.GaugeDefinition;
@@ -273,6 +275,8 @@ public class TORegistry {
         var nhi:NewHierarchyIntention;
         var vRend:VerticalListRenderer;
         var vRend2:VerticalListRowHeaderRenderer;
+        var text:TextReportFieldExtension;
+        var dext:DiagramReportFieldExtension;
     }
 }
 }

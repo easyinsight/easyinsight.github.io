@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*"
+         xmlns:report="com.easyinsight.report.*"
          width="100%" height="100%" creationComplete="initStuff()" paddingLeft="0" paddingBottom="0" paddingRight="0"
          paddingTop="0"
          borderStyle="solid" borderThickness="1">
@@ -199,11 +200,6 @@
             }
         }
 
-        override protected function commitProperties():void {
-            super.commitProperties();
-
-        }
-
         private function gotReportInfo():void {
             var response:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
             if (response.status == InsightResponse.SUCCESS) {
@@ -271,10 +267,6 @@
             dispatchEvent(new ReturnToListEvent());
         }
 
-        public function refreshData():void {
-            dataViewFactory.refresh();
-        }
-
         private function exportData():void {
             var window:EmbeddedReportExportWindow = new EmbeddedReportExportWindow();
             window.report = dataViewFactory.report;
@@ -310,11 +302,14 @@
     </mx:RemoteObject>
     <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{showToolbar ? 1 : 0}">
         <mx:Box/>
-        <mx:HBox width="100%">
-            <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
-                       id="refreshButton"/>
-            <mx:Button toolTip="Export Report" click="exportData()" icon="{exportIcon}" id="exportButton"/>
-            <mx:Button toolTip="{filterTooltip}" click="toggleFilterIndex()" icon="{filterIcon}"/>
+        <mx:HBox width="100%" backgroundColor="0" backgroundAlpha="1" paddingTop="5" paddingBottom="5" paddingLeft="5">
+            <report:RefreshButton icon="{refreshIcon}" labelPlacement="right"
+                       id="refreshButton" styleName="grayButton" label="Refresh" viewFactory="{dataViewFactory}"
+                    dataSource="{dataSource}"/>
+            <mx:Button toolTip="Export Report..." click="exportData()" icon="{exportIcon}" id="exportButton" styleName="grayButton"
+                    labelPlacement="right" label="Export"/>
+            <mx:Button toolTip="{filterTooltip}" click="toggleFilterIndex()" icon="{filterIcon}" labelPlacement="right"
+                    styleName="grayButton" label="Toggle Filters"/>
             <mx:Spacer width="100%"/>
         </mx:HBox>
     </mx:ViewStack>

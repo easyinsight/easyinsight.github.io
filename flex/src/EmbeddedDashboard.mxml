@@ -17,6 +17,8 @@
         import com.easyinsight.framework.UserServiceResponse;
         import com.easyinsight.report.EmbedReportContextMenuFactory;
 
+        import mx.controls.Alert;
+
         [Bindable]
         private var urlKey:String;
 
@@ -38,7 +40,7 @@
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             PopupMenuFactory.reportFactory = new EmbedReportContextMenuFactory();
             this.urlKey = String(Application.application.parameters.id);
-            this.showControls = Boolean(Application.application.parameters.showControls);
+            this.showControls = int(Application.application.parameters.showToolbar) == 1;
             // session check
             userService.getBuildPath.send();
         }
@@ -75,13 +77,16 @@
         }
 
         private function accessInfo():void {
-            var id:int = dashboardService.canAccessDashboard.lastResult as int;
-            if (id > 0) {
+            dashboardID = dashboardService.canAccessDashboard.lastResult as int;
+            if (dashboardID > 0) {
                 stackIndex = 2;
             } else {
                 stackIndex = 1;
             }
         }
+
+        [Bindable]
+        private var dashboardID:int;
 
         private function login(event:LoginEvent):void {
             quietLogin(event.authResponse);
@@ -90,7 +95,7 @@
         private function quietLogin(authResponse:UserServiceResponse):void {
             User.initializeUser(authResponse);
             User.getInstance().userName = authResponse.userName;            
-            stackIndex = 2;
+            dashboardService.canAccessDashboard.send(urlKey);
         }
 
         private function setup():void {
@@ -114,8 +119,8 @@
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
     <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
         <mx:Box/>
-        <framework:LoginComponent loginEvent2="stackIndex = 2"/>
-        <dashboard:EmbeddedDashboardView id="panel" urlKey="{urlKey}"
+        <framework:LoginComponent loginEvent2="dashboardService.canAccessDashboard.send(urlKey)"/>
+        <dashboard:EmbeddedDashboardView id="panel" dashboardID="{dashboardID}"
                                       showControls="{showControls}"/>
     </mx:ViewStack>
 </mx:Application>
