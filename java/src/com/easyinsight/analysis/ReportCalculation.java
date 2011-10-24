@@ -35,6 +35,79 @@ public class ReportCalculation {
         this.code = code;
     }
 
+    public static List<AnalysisItem> getAnalysisItems(String calculationString, List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems,
+                                                      boolean getEverything, boolean includeFilters, int criteria) {
+        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+        if (allItems != null) {
+            for (AnalysisItem analysisItem : allItems) {
+                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    keyMap.put(analysisItem.getKey().toKeyString(), items);
+                }
+                items.add(analysisItem);
+            }
+
+            for (AnalysisItem analysisItem : allItems) {
+                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    displayMap.put(analysisItem.toDisplay(), items);
+                }
+                items.add(analysisItem);
+            }
+        }
+        CalculationTreeNode tree;
+        Set<KeySpecification> specs;
+
+            ICalculationTreeVisitor visitor;
+            CalculationsParser.startExpr_return ret;
+
+            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
+            CommonTokenStream tokes = new CommonTokenStream();
+            tokes.setTokenSource(lexer);
+            CalculationsParser parser = new CalculationsParser(tokes);
+            parser.setTreeAdaptor(new NodeFactory());
+
+            try {
+                ret = parser.startExpr();
+                tree = (CalculationTreeNode) ret.getTree();
+
+                visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+                tree.accept(visitor);
+            }  catch (FunctionException fe) {
+                throw fe;
+            } catch (ReportException re) {
+                throw re;
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage() + " in calculating " + calculationString, e);
+            }
+
+            VariableListVisitor variableVisitor = new VariableListVisitor();
+            tree.accept(variableVisitor);
+
+            specs = variableVisitor.getVariableList();
+
+
+
+        List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
+
+        for (KeySpecification spec : specs) {
+            AnalysisItem analysisItem;
+            try {
+                analysisItem = spec.findAnalysisItem(keyMap, displayMap);
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+            if (analysisItem != null) {
+                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
+            }
+        }
+
+        return analysisItemList;
+    }
+
     private DataSet createDataSet(List<AnalysisItem> allFields, Feed feed, List<FilterDefinition> dlsFilters, EIConnection conn, Map<String, List<AnalysisItem>> keyMap,
                                   Map<String, List<AnalysisItem>> displayMap) throws RecognitionException {
         CalculationTreeNode calculationTreeNode;
@@ -120,7 +193,7 @@ public class ReportCalculation {
                 items.add(analysisItem);
             }
 
-            DataSet dataSet = createDataSet(myFields, feed, dlsFilters, conn, keyMap,  displayMap);
+            DataSet dataSet = createDataSet(myFields, feed, dlsFilters, conn, keyMap, displayMap);
             if (dataSet == null) {
                 dataSet = new DataSet();
                 dataSet.createRow();
@@ -261,6 +334,55 @@ public class ReportCalculation {
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
+            calculationTreeNode.accept(rowVisitor);
+        } catch (RecognitionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void applyAfterReport(WSAnalysisDefinition report, List<AnalysisItem> allFields, IRow row) {
+        try {
+            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+            for (AnalysisItem analysisItem : allFields) {
+                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    keyMap.put(analysisItem.getKey().toKeyString(), items);
+                }
+                items.add(analysisItem);
+            }
+
+            for (AnalysisItem analysisItem : allFields) {
+                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    displayMap.put(analysisItem.toDisplay(), items);
+                }
+                items.add(analysisItem);
+            }
+            CalculationMetadata calculationMetadata = new CalculationMetadata();
+            calculationMetadata.setReport(report);
+            calculationMetadata.setDataSourceFields(allFields);
+            CalculationTreeNode calculationTreeNode;
+            ICalculationTreeVisitor visitor;
+            CalculationsParser.expr_return ret;
+            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
+            CommonTokenStream tokes = new CommonTokenStream();
+            tokes.setTokenSource(lexer);
+            CalculationsParser parser = new CalculationsParser(tokes);
+            parser.setTreeAdaptor(new NodeFactory());
+            ret = parser.expr();
+            calculationTreeNode = (CalculationTreeNode) ret.getTree();
+            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
+                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
+                    calculationTreeNode.deleteChild(i);
+                    break;
+                }
+            }
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            calculationTreeNode.accept(visitor);
+            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, null, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);
         } catch (RecognitionException e) {
             throw new RuntimeException(e);

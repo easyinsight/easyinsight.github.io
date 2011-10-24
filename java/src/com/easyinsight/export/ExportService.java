@@ -338,7 +338,7 @@ public class ExportService {
     }
 
     public static String crosstab(WSAnalysisDefinition analysisDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
         Crosstab crosstab = new Crosstab();
         crosstab.crosstab(crosstabDefinition, dataSet);
@@ -378,7 +378,7 @@ public class ExportService {
     public byte[] toListPDF(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         Document document = new Document(PageSize.A4.rotate());
         PdfWriter.getInstance(document, baos);
         document.open();
@@ -591,7 +591,7 @@ public class ExportService {
     public byte[] toExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) throws IOException, SQLException {
         EIConnection conn = Database.instance().getConnection();
         try {
-            ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+            ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
 
             HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, exportMetadata, conn, insightRequestMetadata);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -624,7 +624,7 @@ public class ExportService {
     }
 
     public byte[] toExcelEmail(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws IOException, SQLException {
-        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, exportMetadata, conn, insightRequestMetadata);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         workbook.write(baos);
@@ -757,7 +757,7 @@ public class ExportService {
     }
 
     public static String argh2(WSAnalysisDefinition listDefinition, List<DataSet> dataSets, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSCombinedVerticalListDefinition verticalList = (WSCombinedVerticalListDefinition) listDefinition;
         VListInfo vListInfo = getCombinedVListInfo(verticalList, dataSets);
         return vListToTable(vListInfo, exportMetadata);
@@ -835,7 +835,7 @@ public class ExportService {
     }
 
     public static String exportKPIReport(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSKPIDefinition kpiReport = (WSKPIDefinition) listDefinition;
         TrendDataResults trendDataResults = DataService.getTrendDataResults(kpiReport, insightRequestMetadata, conn);
         List<TrendOutcome> outcomes = trendDataResults.getTrendOutcomes();
@@ -884,7 +884,7 @@ public class ExportService {
     }
 
     public static String argh(WSAnalysisDefinition listDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSVerticalListDefinition verticalList = (WSVerticalListDefinition) listDefinition;
         VListInfo vListInfo = getVListInfo(verticalList, dataSet);
         return vListToTable(vListInfo, exportMetadata);
@@ -928,6 +928,9 @@ public class ExportService {
     private HSSFWorkbook createWorkbookFromList(WSAnalysisDefinition listDefinition, ExportMetadata exportMetadata,
                                                 EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         HSSFWorkbook workbook = new HSSFWorkbook();
+
+
+
         Map<String, HSSFCellStyle> styleMap = new HashMap<String, HSSFCellStyle>();
         HSSFCellStyle currencyStyle = workbook.createCellStyle();
         currencyStyle.setDataFormat(workbook.createDataFormat().getFormat(exportMetadata.currencySymbol + "##,##0.00"));
@@ -1196,6 +1199,10 @@ public class ExportService {
 
     private HSSFCellStyle getStyle(Map<String, HSSFCellStyle> styleMap, AnalysisItem analysisItem, HSSFWorkbook wb, int dateFormat, Value value) {
         HSSFCellStyle style;
+        TextReportFieldExtension textExtension = null;
+        if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+            textExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+        }
         if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             FormattingConfiguration formattingConfiguration = analysisItem.getFormattingConfiguration();
             switch (formattingConfiguration.getFormattingType()) {
@@ -1271,6 +1278,10 @@ public class ExportService {
             style = cellStyle;
         } else {
             style = styleMap.get(GENERIC_STYLE);
+        }
+
+        if (textExtension != null) {
+            style.setWrapText(textExtension.isWordWrap());
         }
         return style;
     }
@@ -1354,9 +1365,13 @@ public class ExportService {
             PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT, CURRENCY_SYMBOL FROM ACCOUNT WHERE ACCOUNT_ID = ?");
             dateFormatStmt.setLong(1, accountID);
             ResultSet rs = dateFormatStmt.executeQuery();
-            rs.next();
-            dateFormat = rs.getInt(1);
-            currencySymbol = rs.getString(2);
+            if (rs.next()) {
+                dateFormat = rs.getInt(1);
+                currencySymbol = rs.getString(2);
+            } else {
+                dateFormat = 1;
+                currencySymbol = "$";
+            }
         } catch (com.easyinsight.security.SecurityException e) {
             dateFormat = 1;
             currencySymbol = "$";

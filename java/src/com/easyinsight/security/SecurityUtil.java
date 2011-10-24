@@ -258,6 +258,22 @@ public class SecurityUtil {
         }
     }
 
+    public static long getAccountID(boolean required) {
+        UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+        if (userPrincipal == null) {
+            userPrincipal = threadLocal.get();
+            if (userPrincipal == null && required) {
+                throw new SecurityException();
+            } else if (!required) {
+                return 0;
+            } else {
+                return userPrincipal.getAccountID();
+            }
+        } else {
+            return userPrincipal.getAccountID();
+        }
+    }
+
     public static long getAccountID() {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {

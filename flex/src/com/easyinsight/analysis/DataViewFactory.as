@@ -439,7 +439,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.name = source.name;
         target.dataFeedID = source.dataFeedID;
         target.analysisID = source.analysisID;
-        target.tagCloud = source.tagCloud;
         target.dataScrubs = source.dataScrubs;
         target.dateCreated = source.dateCreated;
         target.filterDefinitions = source.filterDefinitions;
@@ -461,6 +460,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.fontName = source.fontName;
         target.fontSize = source.fontSize;
         target.marmotScript = source.marmotScript;
+        target.reportRunMarmotScript = source.reportRunMarmotScript;
         target.joinOverrides = source.joinOverrides;
     }
 

@@ -87,10 +87,19 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean optimized;
     private boolean fullJoins;
     private String marmotScript;
+    private String reportRunMarmotScript;
 
     private String fontName = "Tahoma";
     private int fontSize = 12;
     private double backgroundAlpha = 1;
+
+    public String getReportRunMarmotScript() {
+        return reportRunMarmotScript;
+    }
+
+    public void setReportRunMarmotScript(String reportRunMarmotScript) {
+        this.reportRunMarmotScript = reportRunMarmotScript;
+    }
 
     public String getMarmotScript() {
         return marmotScript;
@@ -238,16 +247,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
         this.marketplaceVisible = marketplaceVisible;
     }
 
-    //private LimitsMetadata limitsMetadata;
-
-    /*public LimitsMetadata getLimitsMetadata() {
-        return limitsMetadata;
-    }
-
-    public void setLimitsMetadata(LimitsMetadata limitsMetadata) {
-        this.limitsMetadata = limitsMetadata;
-    }*/
-
     public boolean isCanSaveDirectly() {
         return canSaveDirectly;
     }
@@ -384,14 +383,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 columnSet.add(analysisItem);
             }
         }
-        /*if (getMarmotScript() != null) {
-            StringTokenizer toker = new StringTokenizer(getMarmotScript(), "\r\n");
+        if (getReportRunMarmotScript() != null) {
+            StringTokenizer toker = new StringTokenizer(getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
                 columnSet.addAll(items);
             }
-        }*/
+        }
         return columnSet;
     }
 

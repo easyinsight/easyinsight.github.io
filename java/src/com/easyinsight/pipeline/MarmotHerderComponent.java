@@ -16,18 +16,15 @@ import java.util.StringTokenizer;
  */
 public class MarmotHerderComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        /*if (pipelineData.getReport().getMarmotScript() != null) {
-            StringTokenizer toker = new StringTokenizer(pipelineData.getReport().getMarmotScript(), "\r\n");
+        if (pipelineData.getReport().getReportRunMarmotScript() != null) {
+            StringTokenizer toker = new StringTokenizer(pipelineData.getReport().getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 for (IRow row : dataSet.getRows()) {
                     new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), pipelineData.getAllItems(), row);
                 }
             }
-        }*/
-
-        /*
-
+        }/*
 
         for (AnalysisItem item : pipelineData.getReportItems()) {
             if (item.getMarmotScript() != null && !"".equals(item.getMarmotScript().trim())) {

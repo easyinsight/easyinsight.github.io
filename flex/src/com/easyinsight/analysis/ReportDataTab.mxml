@@ -6,7 +6,7 @@
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.code.MarmotScriptEvent;
-        import com.easyinsight.code.MarmotScriptWindow;
+        import com.easyinsight.code.ReportMarmotScriptWindow;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.framework.DataService;
         import com.easyinsight.util.PopUpUtil;
@@ -201,8 +201,9 @@
         }
 
         private function customCode():void {
-            var window:MarmotScriptWindow = new MarmotScriptWindow();
+            var window:ReportMarmotScriptWindow = new ReportMarmotScriptWindow();
             window.script = analysisDefinition.marmotScript;
+            window.afterScript = analysisDefinition.reportRunMarmotScript;
             window.addEventListener(MarmotScriptEvent.SAVE_SCRIPT, onScript, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
@@ -210,6 +211,7 @@
 
         private function onScript(event:MarmotScriptEvent):void {
             analysisDefinition.marmotScript = event.script;
+            analysisDefinition.reportRunMarmotScript = event.afterScript;
         }
         ]]></mx:Script>
     <mx:Button id="calculationButton" toolTip="Create Calculation"

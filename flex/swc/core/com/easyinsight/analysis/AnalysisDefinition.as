@@ -56,7 +56,6 @@ import mx.collections.ArrayCollection;
 		public var analysisID:int;
 		public var filterDefinitions:ArrayCollection = new ArrayCollection();
 		public var dataScrubs:ArrayCollection = new ArrayCollection();
-		public var tagCloud:ArrayCollection = new ArrayCollection();
         public var reportType:int;
 		public var policy:int = 2;
 		public var dateCreated:Date;
@@ -84,6 +83,7 @@ import mx.collections.ArrayCollection;
         public var optimized:Boolean;
         public var fullJoins:Boolean;
         public var marmotScript:String;
+        public var reportRunMarmotScript:String;
 
 		public function AnalysisDefinition()
 		{

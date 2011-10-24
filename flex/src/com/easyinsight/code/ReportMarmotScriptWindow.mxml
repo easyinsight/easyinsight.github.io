@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" backgroundColor="#FFFFFF">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private var _script:String;
+
+        [Bindable(event="scriptChanged")]
+        public function get script():String {
+            return _script;
+        }
+
+        public function set script(value:String):void {
+            if (_script == value) return;
+            _script = value;
+            dispatchEvent(new Event("scriptChanged"));
+        }
+
+        private var _afterScript:String;
+
+
+        [Bindable(event="afterScriptChanged")]
+        public function get afterScript():String {
+            return _afterScript;
+        }
+
+        public function set afterScript(value:String):void {
+            if (_afterScript == value) return;
+            _afterScript = value;
+            dispatchEvent(new Event("afterScriptChanged"));
+        }
+
+        private function save():void {
+            dispatchEvent(new MarmotScriptEvent(MarmotScriptEvent.SAVE_SCRIPT, scriptArea.text, afterScriptArea.text));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:TabNavigator>
+        <mx:Box label="Before Load">
+            <mx:TextArea editable="true" borderStyle="solid" borderThickness="1" width="700"
+                 height="400" id="scriptArea" text="{script}"/>
+        </mx:Box>
+        <mx:Box label="On Run">
+            <mx:TextArea editable="true" borderStyle="solid" borderThickness="1" width="700"
+                 height="400" id="afterScriptArea" text="{afterScript}"/>
+        </mx:Box>
+
+    </mx:TabNavigator>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EITitleWindow>

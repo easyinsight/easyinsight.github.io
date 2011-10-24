@@ -1,0 +1,1 @@
+alter table analysis add report_run_marmotscript text default null;
