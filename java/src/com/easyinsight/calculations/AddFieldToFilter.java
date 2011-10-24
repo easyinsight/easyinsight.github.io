@@ -13,15 +13,19 @@ import com.easyinsight.core.Value;
  */
 public class AddFieldToFilter extends Function {
     public Value evaluate() {
-        String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
-        AnalysisItem fieldToAdd = null;
-        for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
-            if (analysisItem.toDisplay().toLowerCase().equals(fieldName)) {
-                fieldToAdd = analysisItem;
+        if (calculationMetadata.getFilterDefinition() != null) {
+            String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
+            AnalysisItem fieldToAdd = null;
+            for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
+                if (analysisItem.toDisplay().toLowerCase().equals(fieldName)) {
+                    fieldToAdd = analysisItem;
+                }
+            }
+            AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) calculationMetadata.getFilterDefinition();
+            if (!analysisItemFilterDefinition.getAvailableItems().contains(fieldToAdd)) {
+                analysisItemFilterDefinition.getAvailableItems().add(fieldToAdd);
             }
         }
-        AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) calculationMetadata.getFilterDefinition();
-        analysisItemFilterDefinition.getAvailableItems().add(fieldToAdd);
         return new EmptyValue();
     }
 

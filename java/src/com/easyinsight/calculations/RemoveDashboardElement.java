@@ -16,25 +16,27 @@ import java.util.Iterator;
  */
 public class RemoveDashboardElement extends Function {
     public Value evaluate() {
-        final String target = minusQuotes(0);
+        if (calculationMetadata.getDashboard() != null) {
+            final String target = minusQuotes(0);
 
-        final String toRemove = minusQuotes(1);
+            final String toRemove = minusQuotes(1);
 
-        IDashboardVisitor findStackVisitor = new IDashboardVisitor() {
-            public void accept(DashboardElement dashboardElement) {
-                if (target.equals(dashboardElement.getLabel())) {
-                    DashboardStack dashboardStack = (DashboardStack) dashboardElement;
-                    Iterator<DashboardStackItem> iter = dashboardStack.getGridItems().iterator();
-                    while (iter.hasNext()) {
-                        DashboardStackItem dashboardStackItem = iter.next();
-                        if (toRemove.equals(dashboardStackItem.getDashboardElement().getLabel())) {
-                            iter.remove();
+            IDashboardVisitor findStackVisitor = new IDashboardVisitor() {
+                public void accept(DashboardElement dashboardElement) {
+                    if (target.equals(dashboardElement.getLabel())) {
+                        DashboardStack dashboardStack = (DashboardStack) dashboardElement;
+                        Iterator<DashboardStackItem> iter = dashboardStack.getGridItems().iterator();
+                        while (iter.hasNext()) {
+                            DashboardStackItem dashboardStackItem = iter.next();
+                            if (toRemove.equals(dashboardStackItem.getDashboardElement().getLabel())) {
+                                iter.remove();
+                            }
                         }
                     }
                 }
-            }
-        };
-        calculationMetadata.getDashboard().visit(findStackVisitor);
+            };
+            calculationMetadata.getDashboard().visit(findStackVisitor);
+        }
         return new EmptyValue();
     }
 

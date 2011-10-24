@@ -14,13 +14,15 @@ import java.util.Iterator;
  */
 public class RemoveField extends Function {
     public Value evaluate() {
-        WSVerticalListDefinition verticalListDefinition = (WSVerticalListDefinition) calculationMetadata.getReport();
-        String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
-        Iterator<AnalysisItem> iter = verticalListDefinition.getMeasures().iterator();
-        while (iter.hasNext()) {
-            AnalysisItem item = iter.next();
-            if (item.toDisplay().toLowerCase().equals(fieldName)) {
-                iter.remove();
+        if (calculationMetadata.getReport() != null) {
+            WSVerticalListDefinition verticalListDefinition = (WSVerticalListDefinition) calculationMetadata.getReport();
+            String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
+            Iterator<AnalysisItem> iter = verticalListDefinition.getMeasures().iterator();
+            while (iter.hasNext()) {
+                AnalysisItem item = iter.next();
+                if (item.toDisplay().toLowerCase().equals(fieldName)) {
+                    iter.remove();
+                }
             }
         }
         return new EmptyValue();

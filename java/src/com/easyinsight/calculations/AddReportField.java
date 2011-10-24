@@ -12,15 +12,19 @@ import com.easyinsight.core.Value;
  */
 public class AddReportField extends Function {
     public Value evaluate() {
-        String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
-        AnalysisItem fieldToAdd = null;
-        for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
-            if (analysisItem.toDisplay().toLowerCase().equals(fieldName)) {
-                fieldToAdd = analysisItem;
+        if (calculationMetadata.getReport() != null) {
+            String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
+            AnalysisItem fieldToAdd = null;
+            for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
+                if (analysisItem.toDisplay().toLowerCase().equals(fieldName)) {
+                    fieldToAdd = analysisItem;
+                }
+            }
+            WSVerticalListDefinition verticalListDefinition = (WSVerticalListDefinition) calculationMetadata.getReport();
+            if (!verticalListDefinition.getMeasures().contains(fieldToAdd)) {
+                verticalListDefinition.getMeasures().add(fieldToAdd);
             }
         }
-        WSVerticalListDefinition verticalListDefinition = (WSVerticalListDefinition) calculationMetadata.getReport();
-        verticalListDefinition.getMeasures().add(fieldToAdd);
         return new EmptyValue();
     }
 

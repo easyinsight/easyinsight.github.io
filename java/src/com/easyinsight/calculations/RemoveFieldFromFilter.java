@@ -14,13 +14,15 @@ import java.util.Iterator;
  */
 public class RemoveFieldFromFilter extends Function {
     public Value evaluate() {
-        String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
-        AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) calculationMetadata.getFilterDefinition();
-        Iterator<AnalysisItem> iter = analysisItemFilterDefinition.getAvailableItems().iterator();
-        while (iter.hasNext()) {
-            AnalysisItem analysisItem = iter.next();
-            if (analysisItem.toDisplay().toLowerCase().equals(fieldName)) {
-                iter.remove();
+        if (calculationMetadata.getFilterDefinition() != null) {
+            String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
+            AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) calculationMetadata.getFilterDefinition();
+            Iterator<AnalysisItem> iter = analysisItemFilterDefinition.getAvailableItems().iterator();
+            while (iter.hasNext()) {
+                AnalysisItem analysisItem = iter.next();
+                if (analysisItem.toDisplay().toLowerCase().equals(fieldName)) {
+                    iter.remove();
+                }
             }
         }
 
