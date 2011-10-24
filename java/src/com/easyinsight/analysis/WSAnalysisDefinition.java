@@ -384,14 +384,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 columnSet.add(analysisItem);
             }
         }
-        if (getMarmotScript() != null) {
+        /*if (getMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(getMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
                 columnSet.addAll(items);
             }
-        }
+        }*/
         return columnSet;
     }
 

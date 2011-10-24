@@ -90,14 +90,14 @@ public abstract class Pipeline {
             }
         }
         allNeededAnalysisItems.addAll(report.getLimitFields());
-        if (report.getMarmotScript() != null) {
+        /*if (report.getMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(report.getMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
                 allNeededAnalysisItems.addAll(items);
             }
-        }
+        }*/
 
         pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource == null ? new HashMap<String, String>() : dataSource.getProperties(), allRequestedAnalysisItems);
         return allNeededAnalysisItems;

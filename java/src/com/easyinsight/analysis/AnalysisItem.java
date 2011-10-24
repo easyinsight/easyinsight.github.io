@@ -416,13 +416,13 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (reportFieldExtension != null) {
             items.addAll(reportFieldExtension.getAnalysisItems(getEverything));
         }
-        if (getMarmotScript() != null && !"".equals(getMarmotScript().trim())) {
+        /*if (getMarmotScript() != null && !"".equals(getMarmotScript().trim())) {
             StringTokenizer toker = new StringTokenizer(getMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 items.addAll(ReportCalculation.getAnalysisItems(line, allItems, insightItems, getEverything, includeFilters, criteria));
             }
-        }
+        }*/
         return items;
     }
 

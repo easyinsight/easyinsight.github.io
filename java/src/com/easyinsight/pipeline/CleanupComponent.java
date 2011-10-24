@@ -43,14 +43,14 @@ public class CleanupComponent implements IComponent {
                 allNeededAnalysisItems.addAll(linkItems);
             }
         }
-        if (report.getMarmotScript() != null) {
+        /*if (report.getMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(report.getMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, pipelineData.getAllItems(), allRequestedAnalysisItems, false, true, AGGREGATE_CALCULATIONS);
                 allNeededAnalysisItems.addAll(items);
             }
-        }
+        }*/
         pipelineData.setReportItems(allNeededAnalysisItems);
         return dataSet;
     }
