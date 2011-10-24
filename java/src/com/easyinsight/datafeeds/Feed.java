@@ -186,7 +186,7 @@ public abstract class Feed implements Serializable {
                         "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
                         "user_dls.user_id = ?");
             dlsStmt.setLong(1, feedID);
-            dlsStmt.setLong(2, SecurityUtil.getUserID());
+            dlsStmt.setLong(2, SecurityUtil.getUserID(false));
 
             ResultSet dlsRS = dlsStmt.executeQuery();
             while (dlsRS.next()) {
