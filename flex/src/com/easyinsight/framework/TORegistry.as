@@ -21,6 +21,7 @@ import com.easyinsight.analysis.AnalysisZipCode;
 import com.easyinsight.analysis.ComplexAnalysisMeasure;
 import com.easyinsight.analysis.CoordinateValue;
 import com.easyinsight.analysis.DataSourceConnectivityReportFault;
+import com.easyinsight.analysis.DerivedAnalysisDateDimension;
 import com.easyinsight.analysis.DerivedAnalysisDimension;
 import com.easyinsight.analysis.DrillThrough;
 import com.easyinsight.analysis.DrillThroughEvent;
@@ -163,6 +164,7 @@ public class TORegistry {
         var hierarchyLevel:HierarchyLevel;
         var calc:AnalysisCalculation;
         var derived:DerivedAnalysisDimension;
+        var derivedDate:DerivedAnalysisDateDimension;
         var urlLink:URLLink;
         var drillthrough:DrillThrough;
         var coordinate:CoordinateValue;
