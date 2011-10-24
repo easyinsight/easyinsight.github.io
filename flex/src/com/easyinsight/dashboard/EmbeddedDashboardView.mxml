@@ -101,7 +101,6 @@
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = _dataSourceID;
-            dashboardEditorMetadata.dashboardID = dashboardID;
             dashboardEditorMetadata.role = dashboard.role;
             dashboardEditorMetadata.borderColor = dashboard.borderColor;
             dashboardEditorMetadata.borderThickness = dashboard.borderThickness;
