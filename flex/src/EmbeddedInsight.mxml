@@ -19,8 +19,6 @@
         import com.easyinsight.report.EmbedReportContextMenuFactory;
         import com.easyinsight.util.UserAudit;
 
-        import mx.controls.Alert;
-
 
         [Bindable]
         private var urlKey:String;
@@ -61,7 +59,6 @@
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             PopupMenuFactory.reportFactory = new EmbedReportContextMenuFactory();
             this.urlKey = String(Application.application.parameters.analysisID);
-            Alert.show("url key = " + this.urlKey);
             this.reportType = int(Application.application.parameters.reportType);
             this.dataSourceID = int(Application.application.parameters.dataSourceID);
             this.reportName = String(Application.application.parameters.reportName);
