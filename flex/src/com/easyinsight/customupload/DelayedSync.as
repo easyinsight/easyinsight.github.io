@@ -13,6 +13,7 @@ import com.easyinsight.administration.feed.FeedDefinitionData;
 import com.easyinsight.analysis.ReportFault;
 import com.easyinsight.datasources.DataSourceBehavior;
 import com.easyinsight.framework.NavigationEvent;
+import com.easyinsight.framework.User;
 import com.easyinsight.schedule.DailyScheduleType;
 import com.easyinsight.schedule.DataSourceRefreshActivity;
 import com.easyinsight.scorecard.DataSourceAsyncEvent;
@@ -142,7 +143,7 @@ public class DelayedSync extends EISlimWindow {
     }
 
     private function installed(event:Event):void {
-        dispatchEvent(new NavigationEvent("Home"));
+        User.getEventNotifier().dispatchEvent(new NavigationEvent("Home"));
         PopUpManager.removePopUp(this);
     }
 

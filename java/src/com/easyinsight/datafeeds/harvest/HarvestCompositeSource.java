@@ -21,11 +21,12 @@ import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.ParsingException;
 import org.apache.commons.httpclient.*;
-import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -161,7 +162,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
             if (httpRequest != null) {
                 String code = httpRequest.getParameter("code");
                 if (code != null) {
-                    OAuthClientRequest request = OAuthClientRequest.tokenLocation("https://easyinsight.harvestapp.com/oauth2/token").
+                    OAuthClientRequest request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
                                 setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(CONSUMER_KEY).
                                 setClientSecret(SECRET_KEY).
                                 setRedirectURI("https://www.easy-insight.com/app/oauth").
@@ -171,6 +172,14 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
                     accessToken = response.getAccessToken();
                     refreshToken = response.getRefreshToken();
                 }
+            } else if (refreshToken != null && !"".equals(refreshToken)) {
+                OAuthClientRequest request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
+                                setGrantType(GrantType.REFRESH_TOKEN).setClientId(CONSUMER_KEY).
+                                setClientSecret(SECRET_KEY).setRefreshToken(refreshToken).buildBodyMessage();
+                    OAuthClient client = new OAuthClient(new URLConnectionClient());
+                    OAuthJSONAccessTokenResponse response = client.accessToken(request);
+                    accessToken = response.getAccessToken();
+                    refreshToken = response.getRefreshToken();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -250,7 +259,12 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
 
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, boolean badCredentialsOnError, FeedDefinition parentDefinition, boolean logRequest) throws ParsingException, ReportException {
         HarvestCompositeSource harvestCompositeSource = (HarvestCompositeSource) parentDefinition;
-        String accessToken = harvestCompositeSource.getAccessToken();
+        String accessToken;
+        try {
+            accessToken = URLEncoder.encode(harvestCompositeSource.getAccessToken(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
 
         String target = url + path;
         if (target.contains("?")) {
@@ -355,6 +369,11 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
     @Override
     public boolean checkDateTime(String name, Key key) {
         return false;
+    }
+
+    @Override
+    public int getDataSourceType() {
+        return DataSourceInfo.COMPOSITE_PULL;
     }
 }
 

@@ -143,7 +143,7 @@
                 //Alert.show("unscaled width = " + (vbox.width - 40) + " available columns = " + availableColumns);
                 solutionGrid.width = availableColumns * 240 + 2;
                 var itemsPerRow:int = solutionGrid.width / solutionGrid.columnWidth;
-                var rows:int = availableSolutions.length / itemsPerRow;
+                var rows:int = Math.ceil(availableSolutions.length / itemsPerRow);
                 solutionGrid.height = solutionGrid.rowHeight * rows + 4;
             }
         }

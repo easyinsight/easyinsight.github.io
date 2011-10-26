@@ -11,6 +11,8 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * User: jamesboe
@@ -36,7 +38,15 @@ public abstract class HarvestBaseSource extends ServerDataSourceDefinition {
 
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, boolean badCredentialsOnError, FeedDefinition parentDefinition, boolean logRequest) throws ParsingException, ReportException {
         HarvestCompositeSource harvestCompositeSource = (HarvestCompositeSource) parentDefinition;
-        String accessToken = harvestCompositeSource.getAccessToken();
+        if (harvestCompositeSource.getAccessToken() == null) {
+            throw new ReportException(new DataSourceConnectivityReportFault("You need to update your Harvest configuration.", harvestCompositeSource));
+        }
+        String accessToken;
+        try {
+            accessToken = URLEncoder.encode(harvestCompositeSource.getAccessToken(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
 
         String target = url + path;
         if (target.contains("?")) {

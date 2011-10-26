@@ -3,6 +3,7 @@ package com.easyinsight.users;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksCompositeSource;
+import com.easyinsight.datafeeds.harvest.HarvestCompositeSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
@@ -89,8 +90,9 @@ public class TokenService {
                         "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
                         "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
             } else if (type == FeedType.HARVEST_COMPOSITE.getType()) {
+                HarvestCompositeSource harvestCompositeSource = (HarvestCompositeSource) dataSource;
                 OAuthClientRequest request = OAuthClientRequest
-                    .authorizationLocation("https://easyinsight.harvestapp.com/oauth2/authorize")
+                    .authorizationLocation(harvestCompositeSource.getUrl() + "/oauth2/authorize")
                     .setClientId("7wBqPVAr2om0aWwNbHjFHQ==")
                     .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
                     .buildQueryMessage();

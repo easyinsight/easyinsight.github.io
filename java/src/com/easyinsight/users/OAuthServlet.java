@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -106,5 +108,9 @@ public class OAuthServlet extends HttpServlet {
         } catch (Exception e) {
             LogClass.error(e);
         }
+    }
+
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        System.out.println(URLEncoder.encode("lBDyXPYoWmwN+frEa8KexO9lALDFPGZSNYBQ4tPbwspkRiqcGbwN53hWfiNp8FFdPIao6JDlYBW0gNiKIviktA==", "UTF-8"));
     }
 }
