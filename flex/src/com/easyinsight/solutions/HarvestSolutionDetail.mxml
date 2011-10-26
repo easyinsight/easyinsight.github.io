@@ -16,7 +16,6 @@
         </mx:State>
     </solutions:states>
     <mx:Script><![CDATA[
-        import com.easyinsight.skin.ApplicationSkin;
 
         override protected function toAccountBelowRequiredState():void {
             currentState = "AccountBelowRequired";

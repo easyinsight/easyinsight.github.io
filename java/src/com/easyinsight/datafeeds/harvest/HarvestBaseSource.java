@@ -20,9 +20,9 @@ import java.io.IOException;
 public abstract class HarvestBaseSource extends ServerDataSourceDefinition {
     protected static HttpClient getHttpClient(String username, String password) {
         HttpClient client = new HttpClient();
-        client.getParams().setAuthenticationPreemptive(true);
+        /*client.getParams().setAuthenticationPreemptive(true);
         Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
-        client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
+        client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);*/
         return client;
     }
 
@@ -35,12 +35,21 @@ public abstract class HarvestBaseSource extends ServerDataSourceDefinition {
     }
 
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, boolean badCredentialsOnError, FeedDefinition parentDefinition, boolean logRequest) throws ParsingException, ReportException {
-        System.out.println(url + path);
-        HttpMethod restMethod = new GetMethod(url + path);
+        HarvestCompositeSource harvestCompositeSource = (HarvestCompositeSource) parentDefinition;
+        String accessToken = harvestCompositeSource.getAccessToken();
+
+        String target = url + path;
+        if (target.contains("?")) {
+            target = target + "&" + "access_token=" + accessToken;
+        } else {
+            target = target + "?" + "access_token=" + accessToken;
+        }
+        HttpMethod restMethod = new GetMethod(target);
         /*try {
             Thread.sleep(250);
         } catch (InterruptedException e) {
         }*/
+        System.out.println(target);
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
         boolean successful = false;

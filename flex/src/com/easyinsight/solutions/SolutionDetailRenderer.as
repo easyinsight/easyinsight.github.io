@@ -19,7 +19,6 @@ import com.easyinsight.schedule.DataSourceRefreshActivity;
 import com.easyinsight.skin.BackgroundImage;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
-import com.easyinsight.util.UserAudit;
 
 import flash.display.Bitmap;
 import flash.display.Loader;
@@ -236,10 +235,6 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
             fileRef.addEventListener(Event.COMPLETE, complete);
             fileRef.save(bytes, _solution.solutionArchiveName);
         }
-    }
-
-    private function doEvent(event:Event):void {
-        trace(event);
     }
 
     override protected function createChildren():void {

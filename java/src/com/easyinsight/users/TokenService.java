@@ -88,6 +88,15 @@ public class TokenService {
                 provider = new DefaultOAuthProvider(
                         "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
                         "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
+            } else if (type == FeedType.HARVEST_COMPOSITE.getType()) {
+                OAuthClientRequest request = OAuthClientRequest
+                    .authorizationLocation("https://easyinsight.harvestapp.com/oauth2/authorize")
+                    .setClientId("7wBqPVAr2om0aWwNbHjFHQ==")
+                    .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
+                    .buildQueryMessage();
+                FlexContext.getHttpRequest().getSession().setAttribute("redirectTarget", redirectType);
+                FlexContext.getHttpRequest().getSession().setAttribute("dataSourceID", dataSource.getApiKey());
+                return new OAuthResponse(request.getLocationUri(), true);
             } else if (type == FeedType.SALESFORCE.getType()) {
                 /*consumer = new DefaultOAuthConsumer(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY,
                         SalesforceBaseDataSource.SALESFORCE_SECRET_KEY);

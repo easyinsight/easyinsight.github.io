@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.harvest;
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -11,6 +12,11 @@ import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.users.Account;
+import net.smartam.leeloo.client.OAuthClient;
+import net.smartam.leeloo.client.URLConnectionClient;
+import net.smartam.leeloo.client.request.OAuthClientRequest;
+import net.smartam.leeloo.client.response.OAuthJSONAccessTokenResponse;
+import net.smartam.leeloo.common.message.types.GrantType;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.ParsingException;
@@ -18,6 +24,7 @@ import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,11 +39,34 @@ import java.util.*;
  */
 public class HarvestCompositeSource extends CompositeServerDataSource {
 
+    public static final String CONSUMER_KEY = "7wBqPVAr2om0aWwNbHjFHQ==";
+    public static final String SECRET_KEY = "qwnEmV0EuIptVUjYRNbgM+D80IdUqBYYkonIGDifTXAmhI8+AS2UXf0xPhzQsAVK8xTp02++C5HDXqAa/g8i5A==";
+
     private String url = "";
     private String username = "";
     private String password = "";
 
+    private String accessToken;
+    private String refreshToken;
+
+
     private Document projects;
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 
     public Document getOrRetrieveProjects(HttpClient client, Builder builder) throws ParsingException {
         if(projects == null) {
@@ -126,6 +156,28 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
+    public void exchangeTokens(EIConnection conn, HttpServletRequest httpRequest, String externalPin) throws Exception {
+        try {
+            if (httpRequest != null) {
+                String code = httpRequest.getParameter("code");
+                if (code != null) {
+                    OAuthClientRequest request = OAuthClientRequest.tokenLocation("https://easyinsight.harvestapp.com/oauth2/token").
+                                setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(CONSUMER_KEY).
+                                setClientSecret(SECRET_KEY).
+                                setRedirectURI("https://www.easy-insight.com/app/oauth").
+                                setCode(code).buildBodyMessage();
+                    OAuthClient client = new OAuthClient(new URLConnectionClient());
+                    OAuthJSONAccessTokenResponse response = client.accessToken(request);
+                    accessToken = response.getAccessToken();
+                    refreshToken = response.getRefreshToken();
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     protected Collection<ChildConnection> getChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.HARVEST_CLIENT, FeedType.HARVEST_CONTACTS, HarvestClientSource.CLIENT_ID, HarvestClientContactSource.CLIENT_ID),
                 new ChildConnection(FeedType.HARVEST_CLIENT, FeedType.HARVEST_PROJECT,  HarvestClientSource.CLIENT_ID, HarvestProjectSource.CLIENT_ID),
@@ -147,11 +199,13 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
         PreparedStatement deleteStatement = conn.prepareStatement("delete from HARVEST where data_feed_id = ?");
         deleteStatement.setLong(1, this.getDataFeedID());
         deleteStatement.execute();
-        PreparedStatement statement = conn.prepareStatement("insert into HARVEST(data_feed_id, url, username, password) VALUES (?, ?, ?, ?)");
+        PreparedStatement statement = conn.prepareStatement("insert into HARVEST(data_feed_id, url, username, password, access_token, refresh_token) VALUES (?, ?, ?, ?, ?, ?)");
         statement.setLong(1, this.getDataFeedID());
         statement.setString(2, getUrl());
         statement.setString(3, getUsername());
         statement.setString(4, getPassword() != null ? PasswordStorage.encryptString(getPassword()) : null);
+        statement.setString(5, getAccessToken());
+        statement.setString(6, getRefreshToken());
         statement.execute();
         statement.close();
         deleteStatement.close();
@@ -160,7 +214,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement statement = conn.prepareStatement("select url, username, password from HARVEST where data_feed_id = ?");
+        PreparedStatement statement = conn.prepareStatement("select url, username, password, access_token, refresh_token from HARVEST where data_feed_id = ?");
         statement.setLong(1, getDataFeedID());
         ResultSet rs = statement.executeQuery();
         if(rs.next()) {
@@ -168,6 +222,8 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
             this.setUsername(rs.getString(2));
             String pw = rs.getString(3);
             this.setPassword(pw != null ? PasswordStorage.decryptString(pw) : null);
+            setAccessToken(rs.getString(4));
+            setRefreshToken(rs.getString(5));
         }
         statement.close();
     }
@@ -189,15 +245,20 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
 
     protected static HttpClient getHttpClient(String username, String password) {
         HttpClient client = new HttpClient();
-        client.getParams().setAuthenticationPreemptive(true);
-        Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
-        client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
         return client;
     }
 
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, boolean badCredentialsOnError, FeedDefinition parentDefinition, boolean logRequest) throws ParsingException, ReportException {
-        System.out.println(url + path);
-        HttpMethod restMethod = new GetMethod(url + path);
+        HarvestCompositeSource harvestCompositeSource = (HarvestCompositeSource) parentDefinition;
+        String accessToken = harvestCompositeSource.getAccessToken();
+
+        String target = url + path;
+        if (target.contains("?")) {
+            target = target + "&" + "access_token=" + accessToken;
+        } else {
+            target = target + "?" + "access_token=" + accessToken;
+        }
+        HttpMethod restMethod = new GetMethod(target);
         /*try {
             Thread.sleep(250);
         } catch (InterruptedException e) {

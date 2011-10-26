@@ -40,7 +40,6 @@
         private function gotURL():void {
             var response:OAuthResponse = tokenService.getOAuthURL.lastResult as OAuthResponse;
             if (response.successful) {
-                stackIndex = 1;
                 var requestToken:String = response.requestToken;
                 navigateToURL(new URLRequest(requestToken), "_self");
             } else {
@@ -49,11 +48,8 @@
             }
         }
 
-        [Bindable]
-        private var stackIndex:int = 0;
-
         public function validate():Boolean {
-            installButton.errorString = "You need to authorize Easy Insight to access your Constant Contact data.";
+            installButton.errorString = "You need to authorize Easy Insight to access your Salesforce data.";
             installButton.setFocus();
             installButton.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
             return false;

@@ -10,6 +10,8 @@ public class HarvestDataSource extends CompositeServerDataSource {
     public var url:String;
     public var username:String;
     public var password:String;
+    public var accessToken:String;
+    public var refreshToken:String;
 
     public function HarvestDataSource() {
         super();
