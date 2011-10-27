@@ -52,6 +52,7 @@
         protected override function commitProperties():void {
             super.commitProperties();
             if (_activity != null) {
+                recipients = new ArrayCollection();
                 htmlEmail = _activity.htmlEmail;
                 for each (var user:UserStub in _activity.users) {
                     recipients.addItem(user);
