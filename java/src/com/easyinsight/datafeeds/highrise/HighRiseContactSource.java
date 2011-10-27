@@ -96,6 +96,8 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                 }
                 analysisItems.add(new AnalysisDimension(key, "Contact " + entry.getValue()));
             }
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
