@@ -51,11 +51,9 @@ public class TagsTest extends TestCase {
         tags.add(new Tag("Blah"));
         tags.add(new Tag("Foo"));
         tagCloud.setTags(tags);
-        listDefinition.setTagCloud(tags);
         AnalysisService analysisService = new AnalysisService();
         long savedID = analysisService.saveAnalysisDefinition(listDefinition).getAnalysisID();
         WSAnalysisDefinition retrievedDefinition = analysisService.openAnalysisDefinition(savedID);
-        assertEquals(2, retrievedDefinition.getTagCloud().size());
     }
 
     private long createFirstDataFeed(long accountID, UserUploadService userUploadService) throws SQLException {

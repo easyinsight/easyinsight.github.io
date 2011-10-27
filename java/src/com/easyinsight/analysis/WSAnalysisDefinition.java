@@ -70,7 +70,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private long reportStateID;
     private List<FilterDefinition> filterDefinitions;
     private int policy;
-    private List<Tag> tagCloud = new ArrayList<Tag>();
     private List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
     private boolean canSaveDirectly;
     private boolean publiclyVisible;
@@ -219,7 +218,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
      */
     public void optimizeSize() {
         filterDefinitions = null;
-        tagCloud = null;
         addedItems = null;
     }
 
@@ -261,14 +259,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setAddedItems(List<AnalysisItem> addedItems) {
         this.addedItems = addedItems;
-    }
-
-    public List<Tag> getTagCloud() {
-        return tagCloud;
-    }
-
-    public void setTagCloud(List<Tag> tagCloud) {
-        this.tagCloud = tagCloud;
     }
 
     public int getPolicy() {
