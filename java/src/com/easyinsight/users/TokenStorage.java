@@ -20,6 +20,7 @@ public class TokenStorage {
     public static final int HIGHRISE_TOKEN = 23;
     public static final int FRESHBOOKS_TOKEN = FeedType.FRESHBOOKS_COMPOSITE.getType();
     public static final int PIVOTAL_TRACKER_TOKEN = FeedType.PIVOTAL_TRACKER.getType();
+    public static final int KASHOO = FeedType.KASHOO_COMPOSITE.getType();
     public static final int CONSTANT_CONTACT_TOKEN = FeedType.CONSTANT_CONTACT.getType();
 
     public void saveToken(Token token, long dataSourceID) {
