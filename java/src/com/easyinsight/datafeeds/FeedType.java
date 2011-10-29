@@ -126,6 +126,9 @@ public class FeedType {
     public static final FeedType SAMPLE_PRODUCT = new FeedType(118);
     public static final FeedType HIGHRISE_CASE_JOIN = new FeedType(119);
 
+    public static final FeedType KASHOO_COMPOSITE = new FeedType(120);
+    public static final FeedType KASHOO_BUSINESSES = new FeedType(121);
+
     private int type;
 
 

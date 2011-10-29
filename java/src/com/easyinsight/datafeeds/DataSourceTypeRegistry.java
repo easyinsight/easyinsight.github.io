@@ -16,6 +16,8 @@ import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
 import com.easyinsight.datafeeds.harvest.*;
 import com.easyinsight.datafeeds.highrise.*;
+import com.easyinsight.datafeeds.kashoo.KashooBusinessSource;
+import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.marketo.MarketoDataSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
@@ -177,6 +179,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.SAMPLE_CUSTOMER, SampleCustomerDataSource.class);
         registerType(FeedType.SAMPLE_PRODUCT, SampleProductDataSource.class);
         registerType(FeedType.SAMPLE_SALES, SampleSalesDataSource.class);
+        registerType(FeedType.KASHOO_COMPOSITE, KashooCompositeSource.class);
+        registerType(FeedType.KASHOO_BUSINESSES, KashooBusinessSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
