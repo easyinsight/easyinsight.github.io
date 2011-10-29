@@ -50,7 +50,9 @@ public abstract class ScheduledTask implements Runnable {
             execute(executionDate, conn);
             onComplete(session);
             session.flush();
-            conn.commit();
+            if (!conn.getAutoCommit()) {
+                conn.commit();
+            }
         } catch (Exception e) {
             LogClass.error(e);
             if (!conn.getAutoCommit()) {
