@@ -337,10 +337,7 @@
                     toLogin(LoginPage.REACTIVATE);
                 } else if (authResult.accountState == Account.INACTIVE) {
                     toLogin(LoginPage.NEEDS_ACTIVATION);
-                } else if (authResult.firstLogin && authResult.accountAdmin) {
-                    quietLogin(authResult, false);
-                    toLogin(LoginPage.INITIAL_ADMIN_SETUP);
-                } else if (authResult.firstLogin && !authResult.accountAdmin) {
+                }  else if (authResult.firstLogin && !authResult.accountAdmin) {
                     quietLogin(authResult, false);
                     toLogin(LoginPage.INITIAL_USER_SETUP);
                 } else {

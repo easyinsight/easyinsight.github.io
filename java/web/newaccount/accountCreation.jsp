@@ -30,6 +30,7 @@
             user.setEmail(email);
             user.setAccountAdmin(true);
             user.setOptInEmail(true);
+            user.setInitialSetupDone(true);
             com.easyinsight.users.AccountTransferObject account = new com.easyinsight.users.AccountTransferObject();
             account.setName(company);
             String tierString = request.getParameter("tier");

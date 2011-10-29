@@ -23,6 +23,7 @@ public class UserTransferObject {
     private boolean accountAdmin;
     private boolean optInEmail;
     private long fixedDashboardID;
+    private boolean initialSetupDone;
 
     public UserTransferObject() {
     }
@@ -33,6 +34,14 @@ public class UserTransferObject {
         this.email = email;
         this.name = name;
         this.firstName = firstName;
+    }
+
+    public boolean isInitialSetupDone() {
+        return initialSetupDone;
+    }
+
+    public void setInitialSetupDone(boolean initialSetupDone) {
+        this.initialSetupDone = initialSetupDone;
     }
 
     public long getFixedDashboardID() {
@@ -134,6 +143,7 @@ public class UserTransferObject {
         user.setName(getName());
         user.setUserName(getUserName());
         user.setOptInEmail(isOptInEmail());
+        user.setInitialSetupDone(isInitialSetupDone());
         if (getFixedDashboardID() > 0) {
             user.setFixedDashboardID(getFixedDashboardID());
         }
