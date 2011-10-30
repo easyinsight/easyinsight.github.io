@@ -170,9 +170,9 @@ public class CompositeFeed extends Feed {
 
         itemSet.removeAll(alwaysSet);
 
-        if (itemSet.size() > 0) {
+        /*if (itemSet.size() > 0) {
             throw new InvalidFieldsException(itemSet);
-        }
+        }*/
 
         for (CompositeFeedConnection connection : connections) {
             QueryStateNode source = queryNodeMap.get(connection.getSourceFeedID());
