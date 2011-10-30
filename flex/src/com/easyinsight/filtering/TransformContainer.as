@@ -309,7 +309,6 @@ public class TransformContainer extends HBox
             tempField.key = key;
 
             var filter:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
-            filter.intrinsic = true;
             filter.trendFilter = true;
             filter.filterName = "Trend Date";
             filter.interval = RollingDateRangeFilterDefinition.WEEK;

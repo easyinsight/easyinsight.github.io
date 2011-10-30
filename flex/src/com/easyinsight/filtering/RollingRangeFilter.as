@@ -120,7 +120,7 @@ public class RollingRangeFilter extends HBox implements IFilter
             checkbox.toolTip = "Click to disable this filter.";
             checkbox.addEventListener(Event.CHANGE, onChange);
             addChild(checkbox);
-            if (rollingFilter != null && rollingFilter.intrinsic) {
+            if (rollingFilter != null && (rollingFilter.intrinsic || rollingFilter.trendFilter)) {
                 checkbox.enabled = false;
                 checkbox.toolTip = "This filter is an intrinsic part of the data source and cannot be disabled.";
             }
