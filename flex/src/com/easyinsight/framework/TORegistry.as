@@ -30,6 +30,7 @@ import com.easyinsight.analysis.FeedFolder;
 import com.easyinsight.analysis.FolderNode;
 import com.easyinsight.analysis.GenericReportFault;
 import com.easyinsight.analysis.HierarchyLevel;
+import com.easyinsight.analysis.JoinOverride;
 import com.easyinsight.analysis.NumericValue;
 import com.easyinsight.analysis.ReaggregateAnalysisMeasure;
 import com.easyinsight.analysis.ServerError;
@@ -279,6 +280,7 @@ public class TORegistry {
         var vRend2:VerticalListRowHeaderRenderer;
         var text:TextReportFieldExtension;
         var dext:DiagramReportFieldExtension;
+        var joinOverride:JoinOverride;
     }
 }
 }
