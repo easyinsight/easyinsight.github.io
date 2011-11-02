@@ -102,6 +102,7 @@
         }
 
         private function email():void {
+            _dataView.updateExportMetadata();
             var window:EmailReportWindow = new EmailReportWindow();
             window.report = _analysisDefinition;
             PopUpManager.addPopUp(window, this, true);
