@@ -238,7 +238,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     }
 
     private function createStackChildren(headerbar:Container):void {
-        for (var i:int = 0; i < dashboardStack.count; i++) {
+        for (var i:int = 0; i < dashboardStack.gridItems.length; i++) {
             var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
             var report:DashboardElement = stackItem.dashboardElement;
             if (dashboardStack.selectionType == 'Buttons') {
