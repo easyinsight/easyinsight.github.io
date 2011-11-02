@@ -631,7 +631,7 @@ public class ExportService {
             if (formattingConfiguration.getFormattingType() == FormattingConfiguration.CURRENCY) {
                 NumberFormat currencyFormatter = new DecimalFormat(currencySymbol + "###,###.##");
                 currencyFormatter.setMaximumFractionDigits(analysisMeasure.getPrecision());
-                currencyFormatter.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
+                //currencyFormatter.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
                 valueString = currencyFormatter.format(doubleValue);
             } else if (formattingConfiguration.getFormattingType() == FormattingConfiguration.MILLISECONDS) {
                 if (doubleValue < 60000) {
