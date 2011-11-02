@@ -382,7 +382,6 @@ public class ExportService {
                 }
             }
             sb.append("</tr>\r\n");
-            System.out.println();
         }
         sb.append("</table>\r\n");
 
@@ -1854,7 +1853,6 @@ public class ExportService {
             sb.append("</tr>");
         }
         sb.append("</table>");
-        System.out.println(sb.toString());
         return sb.toString();
     }
 
