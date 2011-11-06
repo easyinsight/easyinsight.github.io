@@ -60,7 +60,7 @@ public class EmbeddedVerticalListService extends EmbeddedDataService implements 
         }
         var listData:EmbeddedDataResults = verticalResults.list.getItemAt(0) as EmbeddedDataResults;
         dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, results, verticalResults.report, listData.dataSourceAccessible,
-                listData.reportFault, listData.dataSourceInfo, listData.additionalProperties));
+                listData.reportFault, listData.dataSourceInfo, verticalResults.additionalProperties));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 }

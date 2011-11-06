@@ -116,7 +116,7 @@ import flash.events.KeyboardEvent;
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
 			this.lblNodeName.x = this.textMargin;
 			this.lblNodeName.width = this.width - this.textMargin * 2;
-			this.lblNodeName.setStyle("fontFamily", this.getStyle("labelFontFamily"));
+			//this.lblNodeName.setStyle("fontFamily", this.getStyle("labelFontFamily"));
 			this.lblNodeName.setStyle("fontSize", this.getStyle("labelFontSize"));
 			this.lblNodeName.setStyle("color",this.getStyle("labelFontColor"));
 			this.lblNodeName.setStyle("fontWeight",this.getStyle("labelFontWeight"));

@@ -23,6 +23,7 @@ import mx.controls.TextInput;
 public class GaugeControlBar extends ReportControlBar implements IReportControlBar {
 
     private var measureGrouping:ListDropAreaGrouping;
+    private var benchmarkGrouping:ListDropAreaGrouping;
     private var maxValueInput:TextInput;
     private var gaugeTypeBox:ComboBox;
     private var gaugeDefinition:GaugeDefinition;
@@ -32,6 +33,10 @@ public class GaugeControlBar extends ReportControlBar implements IReportControlB
         measureGrouping.maxElements = 1;
         measureGrouping.dropAreaType = MeasureDropArea;
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+        benchmarkGrouping = new ListDropAreaGrouping();
+        benchmarkGrouping.maxElements = 1;
+        benchmarkGrouping.dropAreaType = MeasureDropArea;
+        benchmarkGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         maxValueInput = new TextInput();
         gaugeTypeBox = new ComboBox();
         gaugeTypeBox.dataProvider = new ArrayCollection( [{label: "Circular Gauge", type: GaugeDefinition.CIRCULAR_GAUGE},
@@ -57,6 +62,12 @@ public class GaugeControlBar extends ReportControlBar implements IReportControlB
         measureLabel.text = "Measure: ";
         addChild(measureLabel);
         addDropAreaGrouping(measureGrouping);
+
+        var benchmarkLabel:Label = new Label();
+        benchmarkLabel.text = "Benchmark: ";
+        addChild(benchmarkLabel);
+        addDropAreaGrouping(benchmarkGrouping);
+
         var maxValueLabel:Label = new Label();
         maxValueLabel.text = "Max Value: ";
         addChild(maxValueLabel);
@@ -68,6 +79,9 @@ public class GaugeControlBar extends ReportControlBar implements IReportControlB
         //maxValueInput.addEventListener(Event.CHANGE, onMaxValueChange);
         if (gaugeDefinition.measure != null) {
             measureGrouping.addAnalysisItem(gaugeDefinition.measure);
+        }
+        if (gaugeDefinition.benchmarkMeasure != null) {
+            benchmarkGrouping.addAnalysisItem(gaugeDefinition.benchmarkMeasure);
         }
         maxValueInput.text = String(gaugeDefinition.maxValue);
     }
@@ -90,6 +104,11 @@ public class GaugeControlBar extends ReportControlBar implements IReportControlB
 
     public function createAnalysisDefinition():AnalysisDefinition {
         gaugeDefinition.measure = measureGrouping.getListColumns()[0];
+        if (benchmarkGrouping.getListColumns().length > 0) {
+            gaugeDefinition.benchmarkMeasure = benchmarkGrouping.getListColumns()[0];
+        } else {
+            gaugeDefinition.benchmarkMeasure = null;
+        }
         gaugeDefinition.gaugeType = GaugeDefinition.CIRCULAR_GAUGE;
         gaugeDefinition.maxValue = int(maxValueInput.text);
         return gaugeDefinition;

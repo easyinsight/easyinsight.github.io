@@ -2,7 +2,13 @@
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
            xmlns:bttc="com.betterthantomorrow.components.*" width="100%"
            height="100%" implements="com.easyinsight.analysis.IReportRenderer" resize="onResize()">
-
+    <mx:states>
+        <mx:State name="benchmark">
+            <mx:AddChild>
+                <mx:Label text="{benchmarkValue}" textAlign="center"/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
@@ -15,6 +21,9 @@
 
         [Bindable]
         private var maxValue:int = 100;
+
+        [Bindable]
+        private var benchmarkValue:String;
 
         private var gaugeDefinition:GaugeDefinition;
 
@@ -29,11 +38,14 @@
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
             super.updateDisplayList(unscaledWidth, unscaledHeight);
             if (gauge != null) {
-                var width:int = Math.min(this.width - 20, this.height - 20);
+                var width:int = Math.min(unscaledWidth - 20, unscaledHeight - (benchmarkValue != null ? 80 : 20));
                 if (width != gauge.width) {
                     gauge.x = 10;
                     gauge.width = width;
                 }
+            }
+            if (benchmarkValueLabel != null) {
+                benchmarkValueLabel.y = this.unscaledHeight - 40;
             }
         }
 
@@ -48,10 +60,14 @@
                 gauge.alertRatios = [ gaugeDefinition.alertPoint1, gaugeDefinition.alertPoint2 ];
                 gauge.alertColors = [ gaugeDefinition.color1, gaugeDefinition.color2,  gaugeDefinition.color3 ];
                 numFormatter = gaugeDefinition.measure.getFormatter();
+                if (gaugeDefinition.benchmarkMeasure != null) {
+                    benchmarkValue = "Benchmark: " + gaugeDefinition.benchmarkMeasure.getFormatter().format(row[gaugeDefinition.benchmarkMeasure.qualifiedName()]);
+                } else {
+                    benchmarkValue = null;
+                }
                 gauge.invalidateDisplayList();
                 gauge.visible = true;
             } else {
-                currentState = "";
                 value = 0;
             }
         }
@@ -70,9 +86,12 @@
         }
         ]]>
     </mx:Script>
-    <bttc:Gauge id="gauge"
-       width="100"
-       verticalCenter="0" horizontalCenter="0"  valueFormatter="{numFormatter}"
-       minValue="0"  maxValue="{maxValue}" value="{value}"
-       bigTicks="9" smallTicks="45" showMinMax="true" showValue="true" fontColor="#FFFFFF" visible="false"/>
+    <mx:Canvas id="canvas">
+        <bttc:Gauge id="gauge"
+           width="100"
+           verticalCenter="0" horizontalCenter="0"  valueFormatter="{numFormatter}"
+           minValue="0"  maxValue="{maxValue}" value="{value}"
+           bigTicks="9" smallTicks="45" showMinMax="true" showValue="true" fontColor="#FFFFFF" visible="false"/>
+        <mx:Label text="{benchmarkValue}" id="benchmarkValueLabel" width="100%" textAlign="center" fontSize="24" visible="{benchmarkValue != null}"/>
+    </mx:Canvas>
 </mx:Module>

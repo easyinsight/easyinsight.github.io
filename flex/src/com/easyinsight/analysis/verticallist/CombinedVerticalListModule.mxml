@@ -18,6 +18,8 @@
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.Value;
+        import com.easyinsight.filtering.FilterDefinition;
+        import com.easyinsight.filtering.MultiFlatDateFilterDefinition;
 
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
@@ -56,6 +58,7 @@
             if (vert == null) {
                 return;
             }
+            var filters:Array = additionalProperties["labelFilters"];
             var measures:ArrayCollection = VerticalListDefinition(EmbeddedDataWrapper(dataSet.getItemAt(i)).report).measures;
             var headerWidth:int = 0;
             var columnWidths:Object = new Object();
@@ -90,6 +93,16 @@
                         var val:Value;
                         if (report.column == null) {
                             columnValue = report.name;
+                            if (report.patternName == null || report.patternName == "") {
+                                columnValue = report.name;
+                            } else {
+                                var filter:FilterDefinition = filters[i];
+                                if (filter == null) {
+                                    columnValue = report.name;
+                                } else {
+                                    columnValue = MultiFlatDateFilterDefinition(filter).createLabel() + " " + report.name;
+                                }
+                            }
                         } else {
                             val = row[report.column.qualifiedName()];
                             columnValue = val.toString();

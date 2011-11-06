@@ -19,6 +19,16 @@ public class WSVerticalListDefinition extends WSAnalysisDefinition {
     private int headerWidth;
     private int columnWidth;
 
+    private String patternName;
+
+    public String getPatternName() {
+        return patternName;
+    }
+
+    public void setPatternName(String patternName) {
+        this.patternName = patternName;
+    }
+
     public int getHeaderWidth() {
         return headerWidth;
     }
@@ -98,12 +108,14 @@ public class WSVerticalListDefinition extends WSAnalysisDefinition {
         super.populateProperties(properties);
         headerWidth = (int) findNumberProperty(properties, "headerWidth", 140);
         columnWidth = (int) findNumberProperty(properties, "columnWidth", 73);
+        patternName = findStringProperty(properties, "patternName", "");
     }
 
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportNumericProperty("headerWidth", headerWidth));
         properties.add(new ReportNumericProperty("columnWidth", columnWidth));
+        properties.add(new ReportStringProperty("patternName", patternName));
         return properties;
     }
 }

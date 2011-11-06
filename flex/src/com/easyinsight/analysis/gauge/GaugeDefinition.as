@@ -11,6 +11,7 @@ public class GaugeDefinition extends AnalysisDefinition {
     public static const HORIZONTAL_GAUGE:int = 2;
 
     public var measure:AnalysisItem;
+    public var benchmarkMeasure:AnalysisItem;
     public var gaugeType:int = CIRCULAR_GAUGE;
     public var gaugeDefinitionID:int;
     public var maxValue:int;
