@@ -106,7 +106,7 @@
                     var results:Array = Validator.validateAll([ urlValidator ]);
                     if (results.length == 0) {
                         var urlLink:URLLink = new URLLink();
-                        urlLink.defaultLink = defaultLinkCheckbox.selected;
+                        urlLink.defaultLink = defaultLinkURLCheckbox.selected;
                         urlLink.url = urlInput.text;
                         _link = urlLink;
                     } else {
@@ -177,6 +177,10 @@
                     <mx:HBox width="100%">
                         <mx:Label text="URL: " width="150" fontFamily="Tahoma" fontWeight="bold"/>
                         <mx:TextInput id="urlInput" text="{urlText}" width="450"/>
+                    </mx:HBox>
+                    <mx:HBox>
+                        <mx:Label text="Default Link:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                        <mx:CheckBox label="" id="defaultLinkURLCheckbox" selected="{defaultLink}"/>
                     </mx:HBox>
                 </mx:VBox>
                 <mx:VBox>
