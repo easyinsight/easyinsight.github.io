@@ -303,7 +303,6 @@
                     this.perspective = event.perspective;
                     if (event.properties != null) {
                         for (var propKey:String in event.properties) {
-                            Alert.show(getQualifiedClassName(ModulePerspective(perspective).actualModule));
                             ModulePerspective(perspective).actualModule[propKey] = event.properties[propKey];
                         }
                     }
