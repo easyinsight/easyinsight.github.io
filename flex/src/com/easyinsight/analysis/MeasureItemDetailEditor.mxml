@@ -39,6 +39,9 @@
                 case "Percent of Total":
                     analysisMeasure = new AnalysisMeasure(AggregationTypes.PERCENT_OF_TOTAL);
                     break;
+                case "Count Distinct":
+                    analysisMeasure = new AnalysisMeasure(AggregationTypes.COUNT_DISTINCT);
+                    break;
             }
             return analysisMeasure;
         }

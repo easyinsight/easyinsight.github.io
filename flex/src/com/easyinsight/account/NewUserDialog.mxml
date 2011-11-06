@@ -101,7 +101,9 @@
                 preferencesService.getUserDLS.send(userID, personaID);
             } else {
                 dlsList = new ArrayCollection();
-                tabNavigator.removeChild(dlsVBox);
+                if (dlsVBox != null && tabNavigator.contains(dlsVBox)) {
+                    tabNavigator.removeChild(dlsVBox);
+                }
                 dlsVBox = null;
             }
         }

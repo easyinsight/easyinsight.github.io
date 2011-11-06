@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.DashboardPDFCreator;
         import com.easyinsight.analysis.EmbedDashboardWindow;
         import com.easyinsight.report.URLWindow;
 
@@ -18,8 +19,17 @@
             _dashboardName = _dashboard.name;
         }
 
+        public function set coreView(value:DisplayObject):void {
+            _coreView = value;
+        }
+
         public function set dashboard(value:Dashboard):void {
             _dashboard = value;
+        }
+
+        private function pdf():void {
+            new DashboardPDFCreator().exportReportToPDF(_dashboard, this, _coreView);
+            PopUpManager.removePopUp(this);
         }
 
         private function url():void {
@@ -46,6 +56,9 @@
         <mx:Label text="Click any of the options below to export the dashboard:" fontSize="14"/>
         <mx:Grid>
             <mx:GridRow>
+                <mx:GridItem>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/document_x16.png')" label="Export to PDF" click="pdf()" labelPlacement="right" width="250"/>
+                </mx:GridItem>
                 <mx:GridItem>
                     <util:SaveButton icon="@Embed(source='../../../../assets/link.png')" label="Link by URL" click="url()" labelPlacement="right" width="250"/>
                 </mx:GridItem>

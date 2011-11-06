@@ -7,9 +7,9 @@
  */
 package com.easyinsight.analysis.crosstab {
 
-import flash.text.TextFormat;
+import com.easyinsight.analysis.TextValueExtension;
 
-import mx.controls.Alert;
+import flash.text.TextFormat;
 
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
@@ -67,7 +67,14 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
                 if (crosstabValue.summaryValue) {
                     text.setTextFormat(new TextFormat(_report.getFont(), 11, 0xFFFFFF, null));
                 } else {
-                    text.setTextFormat(new TextFormat(_report.getFont(), 11, 0x000000, null));
+                    var color:uint;
+                    if (crosstabValue.value.valueExtension != null) {
+                        var ext:TextValueExtension = crosstabValue.value.valueExtension as TextValueExtension;
+                        color = ext.color;
+                    } else {
+                        color = 0x0;
+                    }
+                    text.setTextFormat(new TextFormat(_report.getFont(), 11, color, null));
                 }
             } else {
                 if (crosstabValue.headerLabel) {
@@ -87,7 +94,11 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
             if (crosstabValue.header == null) {
                 text.text = _formatter.format(crosstabValue.value);
             } else {
-                text.text = crosstabValue.header.getFormatter().format(crosstabValue.value.getValue());
+                if (crosstabValue.headerLabel) {
+                    text.text = String(crosstabValue.value.getValue());
+                } else {
+                    text.text = crosstabValue.header.getFormatter().format(crosstabValue.value.getValue());
+                }
             }
         } else {
             text.text = "";

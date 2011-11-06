@@ -155,6 +155,7 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setMarmotScript(wsAnalysisDefinition.getMarmotScript());
         analysisDefinition.setReportRunMarmotScript(wsAnalysisDefinition.getReportRunMarmotScript());
         analysisDefinition.setAccountVisible(wsAnalysisDefinition.isAccountVisible());
+        analysisDefinition.setFolder(wsAnalysisDefinition.getFolder());
         analysisDefinition.setDateCreated(wsAnalysisDefinition.getDateCreated());
         analysisDefinition.setDateUpdated(wsAnalysisDefinition.getDateUpdated());
         analysisDefinition.setReportType(wsAnalysisDefinition.getReportType());

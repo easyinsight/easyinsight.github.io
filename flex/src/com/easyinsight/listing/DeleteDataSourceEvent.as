@@ -1,12 +1,14 @@
 package com.easyinsight.listing {
+import com.easyinsight.quicksearch.EIDescriptor;
+
 import flash.events.Event;
 public class DeleteDataSourceEvent extends Event{
 
     public static const DELETE_DATA_SOURCE:String = "deleteDataSource";
 
-    public var descriptor:Object;
+    public var descriptor:EIDescriptor;
 
-    public function DeleteDataSourceEvent(descriptor:Object) {
+    public function DeleteDataSourceEvent(descriptor:EIDescriptor) {
         super(DELETE_DATA_SOURCE, true);
         this.descriptor = descriptor;
     }

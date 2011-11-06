@@ -1,4 +1,6 @@
 package com.easyinsight.analysis {
+
+import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.util.ProgressAlert;
 
 import flash.display.DisplayObject;
@@ -16,15 +18,24 @@ public class DrillThroughExecutor extends EventDispatcher {
     private var drillThrough:DrillThrough;
 
     public function DrillThroughExecutor(drillThrough:DrillThrough) {
-        analysisService = new RemoteObject();
-        analysisService.destination = "analysisDefinition";
-        analysisService.openAnalysisIfPossibleByID.addEventListener(ResultEvent.RESULT, onResult);
         this.drillThrough = drillThrough;
+        if (drillThrough.reportID > 0) {
+            analysisService = new RemoteObject();
+            analysisService.destination = "analysisDefinition";
+            analysisService.openAnalysisIfPossibleByID.addEventListener(ResultEvent.RESULT, onResult);
+        } else if (drillThrough.dashboardID > 0) {
+        }
     }
 
     public function send():void {
-        ProgressAlert.alert(Application.application as DisplayObject, "Retrieving report information...", null, analysisService.openAnalysisIfPossibleByID);
-        analysisService.openAnalysisIfPossibleByID.send(drillThrough.reportID);
+        if (drillThrough.reportID > 0) {
+            ProgressAlert.alert(Application.application as DisplayObject, "Retrieving report information...", null, analysisService.openAnalysisIfPossibleByID);
+            analysisService.openAnalysisIfPossibleByID.send(drillThrough.reportID);
+        } else {
+            var dd:DashboardDescriptor = new DashboardDescriptor();
+            dd.id = drillThrough.dashboardID;
+            dispatchEvent(new DrillThroughEvent(dd, drillThrough));
+        }
     }
 
     private function onResult(event:ResultEvent):void {

@@ -6,8 +6,6 @@ import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
-import com.easyinsight.goals.GoalStorage;
-import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.scorecard.ScorecardInternalService;
 import com.easyinsight.storage.DataStorage;
@@ -50,6 +48,30 @@ public class UserUploadService {
     public UserUploadService() {
     }
 
+    public void move(EIDescriptor descriptor, int targetFolder) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            if (descriptor.getType() == EIDescriptor.REPORT) {
+                SecurityUtil.authorizeInsight(descriptor.getId());
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET FOLDER = ? WHERE ANALYSIS_ID = ?");
+                updateStmt.setInt(1, targetFolder);
+                updateStmt.setLong(2, descriptor.getId());
+                updateStmt.executeUpdate();
+            } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                SecurityUtil.authorizeDashboard(descriptor.getId());
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET FOLDER = ? WHERE DASHBOARDID = ?");
+                updateStmt.setInt(1, targetFolder);
+                updateStmt.setLong(2, descriptor.getId());
+                updateStmt.executeUpdate();
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public List<SolutionInstallInfo> copyDataSource(long dataSourceID, String newName, boolean copyData, boolean includeChildren) {
         SecurityUtil.authorizeFeed(dataSourceID, Roles.OWNER);
         EIConnection conn = Database.instance().getConnection();
@@ -77,8 +99,6 @@ public class UserUploadService {
     private long getDataSourceID(EIDescriptor descriptor) {
         if (descriptor.getType() == EIDescriptor.DASHBOARD) {
             return ((DashboardDescriptor) descriptor).getDataSourceID();
-        } else if (descriptor.getType() == EIDescriptor.GOAL_TREE) {
-            return ((GoalTreeDescriptor) descriptor).getDataSourceID();
         } else if (descriptor.getType() == EIDescriptor.REPORT) {
             return ((InsightDescriptor) descriptor).getDataFeedID();
         } else if (descriptor.getType() == EIDescriptor.SCORECARD) {
@@ -87,6 +107,8 @@ public class UserUploadService {
             throw new RuntimeException();
         }
     }
+
+
 
     public MyDataTree getFeedAnalysisTree(boolean onlyMyData) {
         return getFeedAnalysisTree(onlyMyData, 0);
@@ -118,7 +140,6 @@ public class UserUploadService {
             AnalysisStorage analysisStorage = new AnalysisStorage();
 
             if (groupID == 0) {
-                objects.addAll(new GoalStorage().getTrees(userID, accountID, conn).values());
                 objects.addAll(new DashboardStorage().getDashboards(userID, accountID, conn).values());
                 objects.addAll(analysisStorage.getReports(userID, accountID, conn).values());
                 objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn).values());
@@ -148,6 +169,13 @@ public class UserUploadService {
                 }
             }
 
+            PreparedStatement stmt = conn.prepareStatement("SELECT DATA_FEED.FEED_NAME, DATA_FEED.FEED_TYPE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME FROM DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID WHERE " +
+                    "DATA_FEED_ID = ?");
+            PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT FIRST_NAME, NAME FROM USER, UPLOAD_POLICY_USERS WHERE UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
+                "UPLOAD_POLICY_USERS.FEED_ID = ?");
+
+            DataSourceDescriptor placeholder = new DataSourceDescriptor("Not Tied to a Data Source", 0, 0, false);
+            descriptorMap.put(0L, placeholder);
             iter = objects.iterator();
             while (iter.hasNext()) {
                 EIDescriptor descriptor = iter.next();
@@ -155,11 +183,45 @@ public class UserUploadService {
                 DataSourceDescriptor dataSource = descriptorMap.get(dataSourceID);
                 if (dataSource != null) {
                     dataSource.getChildren().add(descriptor);
-                    iter.remove();
+                } else {
+                    if (dataSourceID == 0) {
+                        placeholder.getChildren().add(dataSource);
+                    } else {
+                        stmt.setLong(1, dataSourceID);
+                        ResultSet dsRS = stmt.executeQuery();
+                        if (dsRS.next()) {
+                            findOwnerStmt.setLong(1, dataSourceID);
+                            ResultSet ownerRS = findOwnerStmt.executeQuery();
+                            String name;
+                            if (ownerRS.next()) {
+                                String firstName = ownerRS.getString(1);
+                                String lastName = ownerRS.getString(2);
+                                name = firstName != null ? firstName + " " + lastName : lastName;
+                            } else {
+                                name = "";
+                            }
+                            Timestamp lastTime = dsRS.getTimestamp(3);
+                            Date lastDataTime = null;
+                            if (lastTime != null) {
+                                lastDataTime = new Date(lastTime.getTime());
+                            }
+                            DataSourceDescriptor stub = new DataSourceDescriptor(dsRS.getString(1), dataSourceID, dsRS.getInt(2), false);
+                            stub.setAuthor(name);
+                            stub.setLastDataTime(lastDataTime);
+                            dataSources.add(stub);
+                            descriptorMap.put(dataSourceID, stub);
+                            stub.getChildren().add(descriptor);
+                        }
+                    }
                 }
+                iter.remove();
             }
 
-            results.addAll(objects);
+            if (!placeholder.getChildren().isEmpty()) {
+                dataSources.add(placeholder);
+            }
+
+            //results.addAll(objects);
             if (groupID == 0) {
                 for (LookupTableDescriptor lookupTableDescriptor : feedStorage.getLookupTableDescriptors(conn)) {
                     DataSourceDescriptor feedDescriptor = descriptorMap.get(lookupTableDescriptor.getDataSourceID());
@@ -204,10 +266,18 @@ public class UserUploadService {
             int dataSourceCount = 0;
             int reportCount = 0;
             int dashboardCount = 0;
+            PreparedStatement getLogoStmt = conn.prepareStatement("SELECT SOLUTION.solution_image FROM SOLUTION, DATA_FEED, solution_install, solution_to_feed WHERE " +
+                    "solution_install.installed_data_source_id = ? and solution_install.original_data_source_id = solution_to_feed.feed_id and " +
+                    "solution_to_feed.solution_id = solution.solution_id");
             for (EIDescriptor descriptor : results) {
                 if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
                     dataSourceCount++;
                     DataSourceDescriptor dataSourceDescriptor = (DataSourceDescriptor) descriptor;
+                    getLogoStmt.setLong(1, dataSourceDescriptor.getId());
+                    ResultSet logoRS = getLogoStmt.executeQuery();
+                    if (logoRS.next()) {
+                        dataSourceDescriptor.setLogoImage(logoRS.getBytes(1));
+                    }
                     for (EIDescriptor child : dataSourceDescriptor.getChildren()) {
                         if (child.getType() == EIDescriptor.REPORT) {
                             reportCount++;
@@ -217,6 +287,7 @@ public class UserUploadService {
                     }
                 }
             }
+            getLogoStmt.close();
             MyDataTree myDataTree = new MyDataTree(results, onlyMyData);
             myDataTree.setDashboardCount(dashboardCount);
             myDataTree.setDataSourceCount(dataSourceCount);

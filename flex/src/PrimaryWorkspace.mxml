@@ -24,7 +24,6 @@
         import com.easyinsight.framework.Constants;
         import com.easyinsight.framework.TORegistry;
         import com.easyinsight.listing.HeaderBar;
-        import com.easyinsight.listing.IModulePerspective;
         import com.easyinsight.report.AppReportContextMenuFactory;
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.util.CookieUtil;
@@ -304,7 +303,8 @@
                     this.perspective = event.perspective;
                     if (event.properties != null) {
                         for (var propKey:String in event.properties) {
-                            perspective[propKey] = event.properties[propKey];
+                            Alert.show(getQualifiedClassName(ModulePerspective(perspective).actualModule));
+                            ModulePerspective(perspective).actualModule[propKey] = event.properties[propKey];
                         }
                     }
                     coreSpace.addChildAt(perspective as DisplayObject, 0);

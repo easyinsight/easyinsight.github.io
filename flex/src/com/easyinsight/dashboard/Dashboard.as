@@ -1,5 +1,6 @@
 package com.easyinsight.dashboard {
 import com.easyinsight.datasources.DataSourceInfo;
+import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.skin.ImageDescriptor;
 
 import mx.collections.ArrayCollection;
@@ -35,6 +36,7 @@ public class Dashboard {
     public var ytdMonth:String;
     public var overrideYTD:Boolean;
     public var marmotScript:String;
+    public var folder:int = EIDescriptor.MAIN_VIEWS_FOLDER;
 
     public function Dashboard() {
     }

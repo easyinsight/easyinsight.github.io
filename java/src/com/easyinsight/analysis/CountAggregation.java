@@ -3,6 +3,9 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.NumericValue;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * User: James Boe
  * Date: Jan 21, 2008
@@ -11,6 +14,12 @@ import com.easyinsight.core.NumericValue;
 public class CountAggregation extends Aggregation {
 
     private double count;
+
+    private Set<Value> distinctSet = new HashSet<Value>();
+
+    private boolean usingDistinctSet;
+
+    private Double distinctValue;
 
     public void setCount(double count) {
         this.count = count;
@@ -26,11 +35,19 @@ public class CountAggregation extends Aggregation {
                     addValue = 1;
                 } else if (aggregation instanceof CountAggregation) {
                     CountAggregation countAggregation = (CountAggregation) aggregation;
-                    addValue = countAggregation.count;
+                    if (countAggregation.usingDistinctSet) {
+                        usingDistinctSet = true;
+                        distinctSet.addAll(countAggregation.distinctSet);
+                        addValue = 1;
+                    } else {
+                        addValue = countAggregation.count;
+                    }
                 } else {
                     addValue = 1;
                 }
             } else {
+                usingDistinctSet = true;
+                distinctSet.add(value);
                 addValue = 1;
             }
             //addValue = 1;
@@ -39,6 +56,14 @@ public class CountAggregation extends Aggregation {
     }
 
     public Value getValue() {
-        return new NumericValue(count, this);
+        if (usingDistinctSet) {
+            return new NumericValue((double) distinctSet.size(), this);
+        } else {
+            /*if (distinctValue != null) {
+                return new NumericValue(distinctValue, this);
+            } else {*/
+                return new NumericValue(count, this);
+            //}
+        }
     }
 }

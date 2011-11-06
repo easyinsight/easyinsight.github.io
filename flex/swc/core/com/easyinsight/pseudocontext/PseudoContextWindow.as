@@ -15,6 +15,7 @@ import com.easyinsight.analysis.ReportWindowEvent;
 import com.easyinsight.analysis.URLLink;
 import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.report.ReportNavigationEvent;
+import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.events.ContextMenuEvent;
 import flash.events.Event;
@@ -24,7 +25,6 @@ import flash.events.MouseEvent;
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
 import flash.system.System;
-import flash.ui.ContextMenuItem;
 import flash.ui.Keyboard;
 
 import mx.collections.ArrayCollection;
@@ -242,7 +242,7 @@ public class PseudoContextWindow extends VBox {
         filterDefinition.inclusive = true;
         var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);
         if (event.drillThrough.miniWindow) {
-            onReport(new ReportWindowEvent(event.report.id, 0, 0, filters, event.report.dataFeedID, event.report.reportType));
+            onReport(new ReportWindowEvent(event.report.id, 0, 0, filters, InsightDescriptor(event.report).dataFeedID, InsightDescriptor(event.report).reportType));
         } else {
             onReport(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.report, filters));
         }

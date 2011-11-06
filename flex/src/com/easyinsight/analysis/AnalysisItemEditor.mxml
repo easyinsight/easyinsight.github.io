@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:range="com.easyinsight.analysis.range.*"
-         xmlns:analysis="com.easyinsight.analysis.*" xmlns:icons="com.easyinsight.icons.*"
+         xmlns:analysis="com.easyinsight.analysis.*"
          creationComplete="initStuff()" creationPolicy="all"
          implements="com.easyinsight.analysis.IAnalysisItemEditor" horizontalAlign="center" paddingLeft="10">
     <mx:states>
@@ -251,7 +251,7 @@
         }
 
         protected function getMeasureOptions():ArrayCollection {
-            return new ArrayCollection(["Sum", "Average", "Min", "Max", "Count", "Median", "Variance", "Ranking", "Percent of Total"]);
+            return new ArrayCollection(["Sum", "Average", "Min", "Max", "Count", "Median", "Variance", "Ranking", "Percent of Total", "Count Distinct"]);
         }
 
         protected function getComplexOptions():ArrayCollection {
@@ -299,6 +299,7 @@
                 case "Variance":
                 case "Ranking":
                 case "Percent of Total":
+                case "Count Distinct":
                     currentState = "Measure";
                     break;
                 case "Normality":
@@ -414,7 +415,7 @@
                 </mx:Box>
                 <mx:Box>
                     <mx:ComboBox id="measureAggregationBox"
-                         close="aggregationTypeChanged(event)" rowCount="9">
+                         close="aggregationTypeChanged(event)" rowCount="10">
                         <mx:dataProvider>
                             <mx:Array>
                                 <mx:String>Sum</mx:String>
@@ -426,6 +427,7 @@
                                 <mx:String>Variance</mx:String>
                                 <mx:String>Ranking</mx:String>
                                 <mx:String>Percent of Total</mx:String>
+                                <mx:String>Count Distinct</mx:String>
                             </mx:Array>
                         </mx:dataProvider>
                     </mx:ComboBox>

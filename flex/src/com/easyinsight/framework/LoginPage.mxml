@@ -22,7 +22,6 @@
 
         public static const DELINQUENT:int = 1;
         public static const REACTIVATE:int = 2;
-        public static const INITIAL_ADMIN_SETUP:int = 3;
         public static const NEEDS_ACTIVATION:int = 4;
         public static const INITIAL_USER_SETUP:int = 5;
 

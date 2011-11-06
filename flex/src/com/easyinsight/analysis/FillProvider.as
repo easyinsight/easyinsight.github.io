@@ -66,11 +66,22 @@ public class FillProvider {
     }
 
     public static function createRadialGradients():Array {
-        return [ cg(0xf9fbf5, 0xa6bc59), cg(0xf1f3f7, 0x597197), cg(0xf9f3e0, 0xd6ab2a),
-        cg(0xfcf3ef, 0xd86068), cg(0xe9f1e5, 0x5d9942), cg(0xd4c5cd, 0x7a4c6c),
+        return [ cg(0xf9fbf5, 0xa6bc59)  // green
+            , cg(0xf1f3f7, 0x597197), // blue
+            cg(0xf9f3e0, 0xd6ab2a), // yellow
+        cg(0xfcf3ef, 0xd86068),               // red
+            cg(0xe9f1e5, 0x5d9942),  // green
+            cg(0xd4c5cd, 0x7a4c6c),           // purple
+        cg(0xffffff, 0x889949), // green
+                cg(0xffffff, 0x38517A), // dark blue
 
-        cg(0xffffff, 0xF0B400), cg(0xffffff, 0x1E6C0B), cg(0xffffff, 0x00488C),
-        cg(0xffffff, 0x332600), cg(0xffffff, 0xD84000), cg(0xffffff, 0x846D74)];
+        cg(0xffffff, 0xBC8F08), // yellow
+            cg(0xffffff, 0x944248), // red
+                cg(0xffffff, 0x447030), // dark green
+            cg(0xffffff, 0x56354C) // dark purple
+        ];
+        /*return [cg(0xffffff, 0xA6BC59), cg(0xffffff, 0x59BC66), cg(0xffffff, 0x59BCB7),
+        cg(0xffffff, 0x598EBC), cg(0xffffff, 0x7D59BC)];*/
     }
 
     public static function createSolidColors():Array {
@@ -96,12 +107,12 @@ public class FillProvider {
     private static function cg(startColor:uint, endColor:uint):IFill {
         var gradient:RadialGradient = new RadialGradient();
         gradient.angle = 90;
-        var entry1:GradientEntry = new GradientEntry(startColor, 0.0);
-        var entry2:GradientEntry = new GradientEntry(endColor, .3);
+        /*var entry1:GradientEntry = new GradientEntry(startColor, 0.0);
+        var entry2:GradientEntry = new GradientEntry(endColor, .3);*/
         var entry3:GradientEntry = new GradientEntry(endColor, .7);
         var entry4:GradientEntry = new GradientEntry(startColor, .9);
         var entry5:GradientEntry = new GradientEntry(endColor, 1);
-        gradient.entries = [ entry1, entry2, entry3, entry4, entry5 ];
+        gradient.entries = [ entry3, entry4, entry5 ];
         return gradient;
     }
 }

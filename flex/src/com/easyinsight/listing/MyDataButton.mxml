@@ -1,101 +1,41 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" height="100%" paddingLeft="10" paddingRight="10" paddingTop="10"
-                         paddingBottom="10" horizontalAlign="center">
+                         paddingBottom="10" horizontalAlign="center" verticalScrollPolicy="off">
     <mx:Metadata>
-        [Event(name="createReport", type="flash.events.Event")]
-        [Event(name="createScorecard", type="flash.events.Event")]
         [Event(name="uiChange", type="flash.events.Event")]
     </mx:Metadata>
     <mx:Script><![CDATA[
-        import com.easyinsight.etl.NewLookupTableWindow;
         import com.easyinsight.feedassembly.CompositeCreator;
-        import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.skin.ApplicationSkinWindow;
-        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
 
-        import mx.controls.AdvancedDataGrid;
         import mx.managers.PopUpManager;
         import mx.states.RemoveChild;
         import mx.states.State;
 
         [Bindable]
-        [Embed(source="../../../../assets/presentation_chart.png")]
-        private var dashboardIcon:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/preferences.png")]
         private var configIcon:Class;
 
-        [Bindable]
-        [Embed(source="../../../../assets/arrow2_up_green.png")]
-        private var scorecardIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/chart_column.png")]
-        private var crosstabIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/data_table.png")]
         private var joinIcon:Class;
 
-        [Bindable]
-        [Embed(source="../../../../assets/tables_x16.png")]
-        private var tablesAddIcon:Class;
-
-        private var _uploadGrid:AdvancedDataGrid;
-
         public function refreshActions():void {
             adminService.getRecentActions.send()
         }
 
-        public function set uploadGrid(value:AdvancedDataGrid):void {
-            _uploadGrid = value;
-        }
-
         private function createCompositeFeed():void {
             var descriptors:ArrayCollection = new ArrayCollection();
-            if (_uploadGrid.selectedItems != null) {
-
-                for each (var obj:Object in _uploadGrid.selectedItems) {
-                    if (obj is DataSourceDescriptor) {
-                        descriptors.addItem(obj);
-                    }
-                }
-
-            }
             var creator:CompositeCreator = new CompositeCreator(this);
             creator.dataSources = descriptors;
             creator.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
             creator.start();
-        }
-
-        private function createLookupTable():void {
-            var window:NewLookupTableWindow = new NewLookupTableWindow();
-            window.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
-            if (_uploadGrid.selectedItems != null && _uploadGrid.selectedItems.length > 0) {
-                var obj:Object = _uploadGrid.selectedItems[0];
-                if (obj is DataSourceDescriptor) {
-                    window.selectedDataSource = obj as DataSourceDescriptor;
-                }
-            }
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function createDashboard():void {
-            var dataSourceID:int;
-            if (_uploadGrid.selectedItems != null && _uploadGrid.selectedItems.length > 0) {
-                var obj:Object = _uploadGrid.selectedItems[0];
-                if (obj is DataSourceDescriptor) {
-                    dataSourceID = DataSourceDescriptor(obj).id;
-                }
-            }
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { startDataSourceID: dataSourceID})));
         }
 
         [Bindable]
@@ -114,21 +54,6 @@
                 var removeComposite:RemoveChild = new RemoveChild();
                 removeComposite.target = compositeFeedButton;
                 ops.push(removeComposite);
-            }
-            if (!ApplicationSkin.instance().myDataLookupTable) {
-                var removeLookupTable:RemoveChild = new RemoveChild();
-                removeLookupTable.target = lookupTableButton;
-                ops.push(removeLookupTable);
-            }
-            if (!ApplicationSkin.instance().myDataNewDashboard) {
-                var removeDashboard:RemoveChild = new RemoveChild();
-                removeDashboard.target = createDashboardButton;
-                ops.push(removeDashboard);
-            }
-            if (!ApplicationSkin.instance().myDataNewScorecard) {
-                var removeScorecard:RemoveChild = new RemoveChild();
-                removeScorecard.target = createScorecardButton;
-                ops.push(removeScorecard);
             }
             showState.overrides = ops;
             states = [ showState ];
@@ -152,25 +77,9 @@
     <mx:RemoteObject id="adminService" destination="admin">
         <mx:method name="getRecentActions" result="gotRecentActions()"/>
     </mx:RemoteObject>
-    <mx:Button toolTip="Add report..." click="dispatchEvent(new Event('createReport'))"
-               id="createReportButton" icon="{crosstabIcon}"
-               label="New Report..." labelPlacement="right" fontSize="12" styleName="grayButton"
-               width="180"/>
-    <mx:Button toolTip="Add Dashboard..." click="createDashboard()" icon="{dashboardIcon}"
-               id="createDashboardButton"
-               label="New Dashboard..." labelPlacement="right" fontSize="12" styleName="grayButton"
-               width="180"/>
-    <mx:Button toolTip="Add Scorecard..." click="dispatchEvent(new Event('createScorecard'))" icon="{scorecardIcon}"
-               id="createScorecardButton"
-               label="New Scorecard..." labelPlacement="right" fontSize="12" styleName="grayButton"
-               width="180"/>
     <mx:Button toolTip="Create composite data source..." click="createCompositeFeed()"
                id="compositeFeedButton" icon="{joinIcon}"
                label="Join Data Sources..." labelPlacement="right" fontSize="12" styleName="grayButton"
-               width="180"/>
-    <mx:Button toolTip="Create lookup table..." click="createLookupTable()" id="lookupTableButton"
-               icon="{tablesAddIcon}"
-               label="New Lookup Table..." labelPlacement="right" fontSize="12" styleName="grayButton"
                width="180"/>
     <mx:Button toolTip="Customize Page..." click="customizeMyData()" icon="{configIcon}"
                label="Customize Page..." labelPlacement="right" fontSize="12" styleName="grayButton"
@@ -178,5 +87,5 @@
     <mx:HRule width="180"/>
     <mx:Label text="Recent Actions" fontSize="16" fontWeight="bold"/>
     <mx:List dataProvider="{recentActions}" backgroundAlpha="0" borderStyle="none" height="100%"
-            itemRenderer="com.easyinsight.listing.LastActionLink" variableRowHeight="true"/>
+            itemRenderer="com.easyinsight.listing.LastActionLink" variableRowHeight="true" verticalScrollPolicy="off"/>
 </mx:VBox>

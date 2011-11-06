@@ -1,4 +1,6 @@
 package com.easyinsight.scorecard {
+import com.easyinsight.quicksearch.EIDescriptor;
+
 import flash.events.Event;
 import flash.events.EventDispatcher;
 
@@ -17,6 +19,7 @@ public class Scorecard extends EventDispatcher {
     public var exchangeVisible:Boolean;
     public var dataSourceID:int;
     private var _configuring:Boolean;
+    public var folder:int = EIDescriptor.MAIN_VIEWS_FOLDER;
 
     public function Scorecard() {
     }

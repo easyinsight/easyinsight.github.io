@@ -64,6 +64,8 @@
                         var text:String;
                         if (crosstabValue.header == null) {
                             text = measureFormatter.format(crosstabValue.value);
+                        } else if (crosstabValue.headerLabel) {
+                            text = String(crosstabValue.value.getValue());
                         } else {
                             text = crosstabValue.header.getFormatter().format(crosstabValue.value);
                         }

@@ -13,8 +13,6 @@ import com.easyinsight.report.ReportSetupEvent;
 import flash.events.Event;
 
 import mx.collections.ArrayCollection;
-import mx.containers.Box;
-import mx.containers.Canvas;
 import mx.containers.VBox;
 import mx.controls.Label;
 
@@ -49,15 +47,16 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     protected override function createChildren():void {
         super.createChildren();
         if (dashboardEditorMetadata.borderThickness > 0) {
-            setStyle("borderStyle", "solid");
-            setStyle("borderThickness", dashboardEditorMetadata.borderThickness);
-            setStyle("borderColor", dashboardEditorMetadata.borderColor);
+            setStyle("borderStyle", "inset");
+            setStyle("borderThickness", 3);
+            setStyle("borderColor", 0x00000);
         }
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(dashboardReport.report.reportType);
         var controller:IEmbeddedReportController = new controllerClass();
         viewFactory = controller.createEmbeddedView();
         viewFactory.reportID = dashboardReport.report.id;
-        viewFactory.dataSourceID = dashboardReport.report.dataFeedID;
+        viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
+        viewFactory.dashboardID = dashboardEditorMetadata.dashboardID;
         if (dashboardReport.showLabel) {
             var label:Label = new Label();
             label.setStyle("fontSize", 14);
@@ -171,6 +170,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                 transformContainer.setStyle("paddingTop", 10);
                 transformContainer.setStyle("paddingBottom", 10);
                 transformContainer.reportView = true;
+                transformContainer.dashboardID = dashboardEditorMetadata.dashboardID;
                 transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
                 transformContainer.role = dashboardEditorMetadata.role;
                 transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);

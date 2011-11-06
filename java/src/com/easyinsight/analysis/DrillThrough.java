@@ -15,17 +15,39 @@ import java.util.Map;
 @PrimaryKeyJoinColumn(name="link_id")
 public class DrillThrough extends Link {
     @Column(name="report_id")
-    private long reportID;
+    private Long reportID;
+
+    @Column(name="dashboard_id")
+    private Long dashboardID;
 
     @Column(name="mini_window")
     private boolean miniWindow;
 
-    public long getReportID() {
+    public Long getDashboardID() {
+        return dashboardID;
+    }
+
+    public void setDashboardID(Long dashboardID) {
+        this.dashboardID = dashboardID;
+    }
+
+    public Long getReportID() {
         return reportID;
     }
 
-    public void setReportID(long reportID) {
+    public void setReportID(Long reportID) {
         this.reportID = reportID;
+    }
+
+    @Override
+    public void beforeSave() {
+        super.beforeSave();
+        if (reportID == 0) {
+            reportID = null;
+        }
+        if (dashboardID == 0) {
+            dashboardID = null;
+        }
     }
 
     public boolean isMiniWindow() {

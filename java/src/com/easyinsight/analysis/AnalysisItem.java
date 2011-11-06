@@ -7,7 +7,6 @@ import javax.persistence.Table;
 import java.util.*;
 import java.io.Serializable;
 
-import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
@@ -16,7 +15,6 @@ import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedNode;
 import com.easyinsight.datafeeds.AnalysisItemNode;
-import com.easyinsight.calculations.Resolver;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.pipeline.IComponent;
 import org.hibernate.Session;
@@ -426,39 +424,29 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return items;
     }
 
-    public List<AnalysisItem> addLinkItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
+    public List<AnalysisItem> addLinkItems(List<AnalysisItem> allItems) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         if (getLinks().size() > 0) {
-            Key myKey = getKey();
-            DerivedKey myDerivedKey = null;
-            if (myKey instanceof DerivedKey) {
-                myDerivedKey = (DerivedKey) myKey;
-            }
-            Map<Key, AnalysisItem> map = new HashMap<Key, AnalysisItem>();
+            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
             for (AnalysisItem analysisItem : allItems) {
-                Key key = analysisItem.getKey();
-                if (key instanceof DerivedKey) {
-                    DerivedKey derivedKey = (DerivedKey) key;
-                    if (myDerivedKey != null && derivedKey.getFeedID() != myDerivedKey.getFeedID()) {
-                        continue;
-                    }
+                List<AnalysisItem> myItems = keyMap.get(analysisItem.getKey().toKeyString());
+                if (myItems == null) {
+                    myItems = new ArrayList<AnalysisItem>(1);
+                    keyMap.put(analysisItem.getKey().toKeyString(), myItems);
                 }
-                map.put(analysisItem.getKey(), analysisItem);
+                myItems.add(analysisItem);
             }
-            Resolver resolver = new Resolver(new ArrayList<AnalysisItem>(map.values()));
-            for (Link link : getLinks()) {
-                List<Key> keys = link.neededKeys(resolver);
-                //Set<Key> keys = variableVisitor.getVariableList();
-                for (Key key : keys) {
-                    AnalysisItem analysisItem = map.get(key);
-                    boolean alreadyInInsight = false;
-                    for (AnalysisItem insightItem : insightItems) {
-                        if (insightItem.getKey().equals(analysisItem.getKey())) {
-                            alreadyInInsight = true;
-                        }
-                    }
-                    if (!alreadyInInsight) items.add(analysisItem);
+            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+            for (AnalysisItem analysisItem : allItems) {
+                List<AnalysisItem> myItems = displayMap.get(analysisItem.toDisplay());
+                if (myItems == null) {
+                    myItems = new ArrayList<AnalysisItem>(1);
+                    displayMap.put(analysisItem.toDisplay(), myItems);
                 }
+                myItems.add(analysisItem);
+            }
+            for (Link link : getLinks()) {
+                items.addAll(link.neededKeys(keyMap, displayMap));
             }
         }
         return items;
@@ -535,6 +523,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (reportFieldExtension != null) {
             reportFieldExtension.reportSave(session);
             session.saveOrUpdate(reportFieldExtension);
+        }
+        if (getLinks() != null) {
+            for (Link link : getLinks()) {
+                link.beforeSave();
+            }
         }
     }
 

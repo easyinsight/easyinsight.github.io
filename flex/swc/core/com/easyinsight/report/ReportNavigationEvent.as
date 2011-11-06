@@ -1,5 +1,5 @@
 package com.easyinsight.report {
-import com.easyinsight.solutions.InsightDescriptor;
+import com.easyinsight.quicksearch.EIDescriptor;
 
 import flash.events.Event;
 
@@ -9,10 +9,10 @@ public class ReportNavigationEvent extends Event{
 
     public static const TO_REPORT:String = "toReport";
 
-    public var descriptor:InsightDescriptor;
+    public var descriptor:EIDescriptor;
     public var filters:ArrayCollection;
 
-    public function ReportNavigationEvent(type:String, descriptor:InsightDescriptor, filters:ArrayCollection) {
+    public function ReportNavigationEvent(type:String, descriptor:EIDescriptor, filters:ArrayCollection) {
         super(type, true);
         this.descriptor = descriptor;
         this.filters = filters;

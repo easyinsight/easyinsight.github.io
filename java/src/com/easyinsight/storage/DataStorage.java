@@ -590,6 +590,7 @@ public class DataStorage implements IDataStorage {
             insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setNow(new Date());
         }
+        boolean countDistinct = false;
         if (keys == null) {
             keys = new HashMap<Key, KeyMetadata>();
             for (AnalysisItem analysisItem : reportItems) {
@@ -600,7 +601,13 @@ public class DataStorage implements IDataStorage {
                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                     keys.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
                 } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                    keys.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+                    AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+                    if (analysisMeasure.getAggregation() == AggregationTypes.COUNT_DISTINCT) {
+                        countDistinct = true;
+                        keys.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
+                    } else {
+                        keys.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+                    }
                 } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
                     keys.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
                 } else {
@@ -615,7 +622,7 @@ public class DataStorage implements IDataStorage {
         StringBuilder whereBuilder = new StringBuilder();
         StringBuilder groupByBuilder = new StringBuilder();
         Collection<Key> groupByItems = new HashSet<Key>();
-        boolean aggregateQuery = insightRequestMetadata.isAggregateQuery();
+        boolean aggregateQuery = insightRequestMetadata.isAggregateQuery() && !countDistinct;
         createSelectClause(reportItems, selectBuilder, groupByBuilder, aggregateQuery, insightRequestMetadata.isOptimized());
         selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
         createFromClause(version, fromBuilder);

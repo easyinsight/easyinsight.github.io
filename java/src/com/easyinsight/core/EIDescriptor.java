@@ -21,6 +21,9 @@ public abstract class EIDescriptor {
     public static final int LOOKUP_TABLE = 10;
     public static final int DASHBOARD = 11;
 
+    public static final int MAIN_VIEW = 1;
+    public static final int OTHER_VIEW = 2;
+
     private String name;
     private String urlKey;
     private String author;
@@ -28,6 +31,7 @@ public abstract class EIDescriptor {
     private boolean accountVisible;
     private long id;
     private int role = Roles.SUBSCRIBER;
+    private int folder = MAIN_VIEW;
 
     public abstract int getType();
 
@@ -69,6 +73,14 @@ public abstract class EIDescriptor {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getFolder() {
+        return folder;
+    }
+
+    public void setFolder(int folder) {
+        this.folder = folder;
     }
 
     public long getId() {

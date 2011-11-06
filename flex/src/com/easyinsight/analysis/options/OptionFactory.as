@@ -41,6 +41,8 @@ package com.easyinsight.analysis.options
                     option = OptionTypeNames.MEDIAN;
                 } else if (analysisMeasure.aggregation == AggregationTypes.VARIANCE) {
                     option = OptionTypeNames.VARIANCE;
+                } else if (analysisMeasure.aggregation == AggregationTypes.COUNT_DISTINCT) {
+                    option = OptionTypeNames.COUNT_DISTINCT;
                 }
 			} else {
                 if (analysisItem.hasType(AnalysisItemTypes.STEP)) {

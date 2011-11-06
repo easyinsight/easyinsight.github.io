@@ -25,6 +25,9 @@ public class AnalysisMeasure extends AnalysisItem {
     @Column(name="fp_precision")
     private int precision;
 
+    @Column(name="min_precision")
+    private int minPrecision;
+
     public AnalysisMeasure() {
     }
 
@@ -59,6 +62,14 @@ public class AnalysisMeasure extends AnalysisItem {
         FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
         formattingConfiguration.setFormattingType(formattingType);
         setFormattingConfiguration(formattingConfiguration);
+    }
+
+    public int getMinPrecision() {
+        return minPrecision;
+    }
+
+    public void setMinPrecision(int minPrecision) {
+        this.minPrecision = minPrecision;
     }
 
     public boolean isRowCountField() {
@@ -123,6 +134,9 @@ public class AnalysisMeasure extends AnalysisItem {
     }
 
     public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata, boolean timezoneShift) {
+        if (getAggregation() == AggregationTypes.COUNT_DISTINCT) {
+            return value;
+        }
         Value result;
         if (value == null) {
             result = new EmptyValue();

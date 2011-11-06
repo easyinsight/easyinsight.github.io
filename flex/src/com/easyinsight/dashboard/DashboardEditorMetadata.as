@@ -19,6 +19,7 @@ public class DashboardEditorMetadata {
     public var dashboardView:UIComponent;
     public var borderThickness:int;
     public var borderColor:uint;
+    public var dashboardID:int;
 
     public function DashboardEditorMetadata() {
     }

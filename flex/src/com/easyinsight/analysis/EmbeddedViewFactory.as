@@ -369,7 +369,7 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
     }
 
     private function toReport(event:ReportNavigationEvent):void {
-        dispatchEvent(event);
+        //dispatchEvent(event);
     }
 
     private function onRollup(event:HierarchyRollupEvent):void {

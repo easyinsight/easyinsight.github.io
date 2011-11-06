@@ -1,5 +1,4 @@
 package com.easyinsight.dashboard {
-import com.easyinsight.dashboard.SizeInfo;
 
 import mx.collections.ArrayCollection;
 import mx.containers.Grid;

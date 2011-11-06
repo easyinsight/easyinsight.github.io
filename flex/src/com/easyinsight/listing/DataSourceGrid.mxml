@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center">
+    <mx:Script><![CDATA[
+        import com.easyinsight.solutions.DataSourceDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.utils.ObjectUtil;
+
+        private var _dataProvider:ArrayCollection;
+
+
+        [Bindable(event="dataProviderChanged")]
+        public function get dataProvider():ArrayCollection {
+            return _dataProvider;
+        }
+
+        public function set dataProvider(value:ArrayCollection):void {
+            if (_dataProvider == value) return;
+            _dataProvider = value;
+            dispatchEvent(new Event("dataProviderChanged"));
+            if (dataSourceGrid != null) {
+                dataSourceGrid.invalidateSize();
+            }
+        }
+
+        override protected function measure():void {
+            super.measure();
+            if (_dataProvider != null) {
+                dataSourceGrid.height = _dataProvider.length * dataSourceGrid.rowHeight + 4 + dataSourceGrid.headerHeight;
+            }
+        }
+
+        private function customSort(obj1:Object, obj2:Object):int {
+            var date1:Date = null;
+            var date2:Date = null;
+            if (obj1 is DataSourceDescriptor) {
+                date1 = DataSourceDescriptor(obj1).lastDataTime;
+            }
+            if (obj2 is DataSourceDescriptor) {
+                date2 = DataSourceDescriptor(obj2).lastDataTime;
+            }
+            if (date1 == null) {
+                date1 = new Date();
+                date1.setUTCFullYear(1970);
+            }
+            if (date2 == null) {
+                date2 = new Date();
+                date2.setUTCFullYear(1970);
+            }
+            return ObjectUtil.dateCompare(date1, date2);
+        }
+        ]]></mx:Script>
+    <mx:HBox paddingLeft="20" paddingRight="20"
+         borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
+         horizontalGap="20"
+         backgroundColor="#FFFFFF" paddingTop="20" paddingBottom="20">
+        <mx:DataGrid fontSize="12" horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
+            verticalGridLines="true" id="dataSourceGrid" horizontalScrollPolicy="off" verticalScrollPolicy="off" selectable="false"
+                dataProvider="{dataProvider}">
+            <mx:columns>
+                <mx:DataGridColumn dataField="name" itemRenderer="com.easyinsight.listing.MyDataNameRenderer" headerText="Data Source" width="400"/>
+                <mx:DataGridColumn dataField="lastDataTime" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel" headerText="Last Data Time" width="140"
+                        sortCompareFunction="customSort"/>
+                <mx:DataGridColumn dataField="author" headerText="Owner" width="140"/>
+            </mx:columns>
+        </mx:DataGrid>
+    </mx:HBox>
+</mx:HBox>

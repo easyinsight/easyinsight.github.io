@@ -37,6 +37,8 @@
     </report:states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.framework.User;
 
@@ -108,7 +110,18 @@
         }
 
         private function onNavigation(event:ReportNavigationEvent):void {
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(event.descriptor, event.filters)));
+            if (event.descriptor is InsightDescriptor) {
+                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
+            } else if (event.descriptor is DashboardDescriptor) {
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(event.descriptor).id,
+                    initialFilters: event.filters})));
+            }
+        }
+
+        private var _initialFilters:ArrayCollection;
+
+        public function set initialFilters(value:ArrayCollection):void {
+            _initialFilters = value;
         }
 
         private var commandProcessor:CommandProcessor;
@@ -156,48 +169,12 @@
                 dashboardStyleArea.setStyle("borderColor", dashboard.borderColor);
                 dashboardStyleArea.setStyle("dropShadowEnabled", true);
             }
-
-            /*primary.setStyle("paddingLeft", dashboard.paddingLeft);
-             primary.setStyle("paddingRight", dashboard.paddingRight);*/
-            /*if (dashboard.filters.length > 0) {
-             var transformContainer:TransformContainer = new TransformContainer();
-             transformContainer.filterEditable = false;
-             transformContainer.setStyle("borderStyle", "solid");
-             transformContainer.setStyle("borderThickness", 1);
-             transformContainer.existingFilters = dashboard.filters;
-             transformContainer.percentWidth = 100;
-             transformContainer.setStyle("paddingLeft", 10);
-             transformContainer.setStyle("paddingTop", 10);
-             transformContainer.setStyle("paddingBottom", 10);
-             transformContainer.setStyle("paddingRight", 10);
-             transformContainer.feedID = dashboard.dataSourceID;
-             transformContainer.setStyle("borderColor", 0xAAAAAA);
-             transformContainer.setStyle("backgroundColor", 0xFFFFFF);
-             transformContainer.setStyle("backgroundAlpha", 0.8);
-             transformContainer.reportView = true;
-             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-             primary.addChild(transformContainer);
-             }*/
-            filterDefinitions = dashboard.filters;
+            var filterDefinitions:ArrayCollection = dashboard.filters;
+            if (_initialFilters != null) {
+                filterDefinitions.addAll(_initialFilters);
+            }
+            this.filterDefinitions = filterDefinitions;
             filterIndex = (dashboard.filters != null && dashboard.filters.length > 0) ? 1 : 0;
-            /*var dashboardCanvas:Box = new Box();
-             dashboardCanvas.percentHeight = 100;
-
-             dashboardCanvas.setStyle("paddingLeft", 10);
-             dashboardCanvas.setStyle("paddingRight", 10);
-             dashboardCanvas.setStyle("borderStyle", "solid");
-             dashboardCanvas.setStyle("borderThickness", 1);
-             dashboardCanvas.setStyle("cornerRadius", 8);*/
-            var grid:DashboardGrid = dashboard.rootElement as DashboardGrid;
-            /*if (grid.width != 0) {
-             dashboardCanvas.width = grid.width;
-             } else {
-             dashboardCanvas.percentWidth = 100;
-             }
-             dashboardCanvas.setStyle("backgroundAlpha", grid.backgroundAlpha);
-             if (grid.backgroundColor != 0) {
-             dashboardCanvas.setStyle("backgroundColor", grid.backgroundColor);
-             }*/
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = dataSourceID;
             dashboardEditorMetadata.role = dashboard.role;
@@ -212,8 +189,6 @@
                 rootView.initialRetrieve();
             });
             dashboardCanvas.addChild(rootView as UIComponent);
-            //primary.addChild(dashboardCanvas);
-            //addChild(primary);
             if (dashboardHeader != null) {
                 dashboardHeader.dashboard = dashboard;
                 dashboardHeader.generateState(description, exchangeItem, this);
@@ -318,6 +293,7 @@
         public function exportDashboard(exportButton:Button):void {
             var window:DashboardExportWindow = new DashboardExportWindow();
             window.dashboard = dashboard;
+            window.coreView = rootView as DisplayObject;
             PopUpManager.addPopUp(window, this, true);
             window.x = exportButton.x - 20;
             window.y = exportButton.y + exportButton.height + 10;

@@ -32,13 +32,23 @@ public class URLLink extends Link {
         this.url = url;
     }
 
-    public List<Key> neededKeys(Resolver resolver) {
+    public List<AnalysisItem> neededKeys(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems) {
         List<String> keyString = URLPattern.getKeys(url);
-        List<Key> keys = new ArrayList<Key>();
+
+        List<AnalysisItem> keys = new ArrayList<AnalysisItem>();
         for (String string : keyString) {
-            Key key = resolver.getKey(string);
-            if (key != null) {
-                keys.add(key);
+            AnalysisItem analysisItem = null;
+            List<AnalysisItem> analysisItems = keyItems.get(string);
+            if (analysisItems != null) {
+                analysisItem = analysisItems.get(0);
+            } else {
+                analysisItems = displayItems.get(string);
+                if (analysisItems != null) {
+                    analysisItem = analysisItems.get(0);
+                }
+            }
+            if (analysisItem != null) {
+                keys.add(analysisItem);
             }
         }
         return keys;

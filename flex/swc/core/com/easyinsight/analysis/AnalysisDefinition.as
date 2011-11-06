@@ -2,6 +2,7 @@ package com.easyinsight.analysis
 {
 import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.filtering.FilterRawData;
+import com.easyinsight.quicksearch.EIDescriptor;
 
 import flash.events.Event;
 
@@ -84,6 +85,7 @@ import mx.collections.ArrayCollection;
         public var fullJoins:Boolean;
         public var marmotScript:String;
         public var reportRunMarmotScript:String;
+        public var folder:int = EIDescriptor.MAIN_VIEWS_FOLDER;
 
 		public function AnalysisDefinition()
 		{

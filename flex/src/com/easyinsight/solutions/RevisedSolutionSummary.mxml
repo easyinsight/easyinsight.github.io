@@ -156,17 +156,20 @@
         <mx:method name="getSolutions" result="gotAllSolutions()"/>
     </mx:RemoteObject>
     <mx:Canvas verticalScrollPolicy="auto" horizontalScrollPolicy="off">
-    <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10" id="vbox" horizontalAlign="center" width="100%" paddingBottom="10">
-    <mx:HBox width="100%" horizontalAlign="center">
-        <mx:VBox width="100%" height="100%" horizontalAlign="center">
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-                <mx:Label fontSize="24" text="Ready to connect to your own data?"/>
-            </mx:Box>
-            <mx:Label text="Click on any of the options below to quickly connect and get started." fontSize="18"/>
+        <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10" id="vbox" horizontalAlign="center" width="100%"
+                 paddingBottom="10">
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:VBox width="100%" height="100%" horizontalAlign="center">
+                    <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                        <mx:Label fontSize="24" text="Ready to connect to your own data?"/>
+                    </mx:Box>
+                    <mx:Label text="Click on any of the options below to quickly connect and get started."
+                              fontSize="18"/>
+                </mx:VBox>
+            </mx:HBox>
+            <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView"
+                         dataProvider="{availableSolutions}" id="solutionGrid"
+                         columnWidth="240" rowHeight="160" verticalScrollPolicy="off"/>
         </mx:VBox>
-    </mx:HBox>
-        <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView" dataProvider="{availableSolutions}" id="solutionGrid"
-            columnWidth="240" rowHeight="160" verticalScrollPolicy="off"/>
-    </mx:VBox>
     </mx:Canvas>
 </skin:BackgroundImage>

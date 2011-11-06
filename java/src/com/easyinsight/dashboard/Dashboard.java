@@ -45,6 +45,15 @@ public class Dashboard implements Cloneable {
     private DataSourceInfo dataSourceInfo;
     private int role;
     private String marmotScript;
+    private int folder;
+
+    public int getFolder() {
+        return folder;
+    }
+
+    public void setFolder(int folder) {
+        this.folder = folder;
+    }
 
     public int getPadding() {
         return padding;

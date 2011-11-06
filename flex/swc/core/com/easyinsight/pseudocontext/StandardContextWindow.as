@@ -16,6 +16,7 @@ import com.easyinsight.analysis.URLLink;
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.report.ReportNavigationEvent;
+import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.display.InteractiveObject;
 import flash.events.ContextMenuEvent;
@@ -174,7 +175,7 @@ public class StandardContextWindow {
             filters = filterDefinitions;
         }
         if (event.drillThrough.miniWindow) {
-            onReport(new ReportWindowEvent(event.report.id, 0, 0, filters, event.report.dataFeedID, event.report.reportType));
+            onReport(new ReportWindowEvent(event.report.id, 0, 0, filters, InsightDescriptor(event.report).dataFeedID, InsightDescriptor(event.report).reportType));
         } else {
             onReport(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.report, filters));
         }

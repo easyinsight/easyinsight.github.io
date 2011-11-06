@@ -17,6 +17,7 @@ package com.easyinsight.analysis
         public static const VARIANCE:int = 12;
         public static const RANK:int = 13;
         public static const PERCENT_OF_TOTAL:int = 14;
+        public static const COUNT_DISTINCT:int = 15;
 
 		public function AggregationTypes()
 		{

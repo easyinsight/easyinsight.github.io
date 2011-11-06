@@ -19,10 +19,12 @@
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.customupload.ProblemDataEvent;
+        import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.HierarchyOverride;
+        import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
 
@@ -344,7 +346,12 @@
 
         private function reportNavigation(event:ReportNavigationEvent):void {
             if (_reportNavHandler == null) {
-                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(event.descriptor, event.filters)));
+                if (event.descriptor is InsightDescriptor) {
+                    dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
+                } else if (event.descriptor is DashboardDescriptor) {
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(event.descriptor).id,
+                        initialFilters: event.filters})));
+                }
             } else {
                 _reportNavHandler.call(null, event);
             }

@@ -118,8 +118,8 @@ public class AdminService {
                     return actionLog1.getActionDate().compareTo(actionLog.getActionDate());
                 }
             });
-            if (actionList.size() > 5) {
-                actionList = actionList.subList(0, 5);
+            if (actionList.size() > 10) {
+                actionList = actionList.subList(0, 10);
             }
             return actionList;
         } catch (Exception e) {

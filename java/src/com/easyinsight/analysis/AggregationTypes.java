@@ -21,4 +21,5 @@ public interface AggregationTypes {
     public static final int VARIANCE = 12;
     public static final int RANK = 13;
     public static final int PERCENT_OF_TOTAL = 14;
+    public static final int COUNT_DISTINCT = 15;
 }

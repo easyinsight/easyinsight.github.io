@@ -17,7 +17,16 @@ public class DataSourceDescriptor extends EIDescriptor {
     private Date creationDate;
     private Date lastDataTime;
     private long groupSourceID;
+    private byte[] logoImage;
     private List<EIDescriptor> children = new ArrayList<EIDescriptor>();
+
+    public byte[] getLogoImage() {
+        return logoImage;
+    }
+
+    public void setLogoImage(byte[] logoImage) {
+        this.logoImage = logoImage;
+    }
 
     public List<EIDescriptor> getChildren() {
         return children;

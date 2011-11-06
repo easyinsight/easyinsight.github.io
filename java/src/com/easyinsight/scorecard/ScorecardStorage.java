@@ -39,8 +39,8 @@ public class ScorecardStorage {
         }
         if (scorecard.getScorecardID() == 0) {
             PreparedStatement insertScorecardStmt = conn.prepareStatement("INSERT INTO SCORECARD (SCORECARD_NAME, USER_ID, URL_KEY, ACCOUNT_VISIBLE," +
-                    "EXCHANGE_VISIBLE, DESCRIPTION, CREATION_DATE, UPDATE_DATE, DATA_SOURCE_ID) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "EXCHANGE_VISIBLE, DESCRIPTION, CREATION_DATE, UPDATE_DATE, DATA_SOURCE_ID, folder) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             insertScorecardStmt.setString(1, scorecard.getName());
             insertScorecardStmt.setLong(2, userID);
             insertScorecardStmt.setString(3, scorecard.getUrlKey());
@@ -54,12 +54,13 @@ public class ScorecardStorage {
             } else {
                 insertScorecardStmt.setLong(9, scorecard.getDataSourceID());
             }
+            insertScorecardStmt.setInt(10, scorecard.getFolder());
             insertScorecardStmt.execute();
             scorecard.setScorecardID(Database.instance().getAutoGenKey(insertScorecardStmt));
             insertScorecardStmt.close();
         } else {
             PreparedStatement updateScorecardStmt = conn.prepareStatement("UPDATE SCORECARD SET SCORECARD_NAME = ?," +
-                    "USER_ID = ?, URL_KEY = ?, ACCOUNT_VISIBLE = ?, EXCHANGE_VISIBLE = ?, DESCRIPTION = ?, UPDATE_DATE = ?, DATA_SOURCE_ID = ? WHERE SCORECARD_ID = ?");
+                    "USER_ID = ?, URL_KEY = ?, ACCOUNT_VISIBLE = ?, EXCHANGE_VISIBLE = ?, DESCRIPTION = ?, UPDATE_DATE = ?, DATA_SOURCE_ID = ?, FOLDER = ? WHERE SCORECARD_ID = ?");
             updateScorecardStmt.setString(1, scorecard.getName());
             updateScorecardStmt.setLong(2, userID);
             updateScorecardStmt.setString(3, scorecard.getUrlKey());
@@ -72,7 +73,8 @@ public class ScorecardStorage {
             } else {
                 updateScorecardStmt.setLong(8, scorecard.getDataSourceID());
             }
-            updateScorecardStmt.setLong(9, scorecard.getScorecardID());
+            updateScorecardStmt.setInt(9, scorecard.getFolder());
+            updateScorecardStmt.setLong(10, scorecard.getScorecardID());
             updateScorecardStmt.executeUpdate();
             updateScorecardStmt.close();
         }
@@ -128,7 +130,7 @@ public class ScorecardStorage {
     }
 
     public Scorecard getScorecard(long scorecardID, EIConnection conn) throws Exception {
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD_ID, SCORECARD_NAME, URL_KEY, ACCOUNT_VISIBLE, EXCHANGE_VISIBLE, DESCRIPTION, data_source_id FROM " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD_ID, SCORECARD_NAME, URL_KEY, ACCOUNT_VISIBLE, EXCHANGE_VISIBLE, DESCRIPTION, data_source_id, folder FROM " +
                 "SCORECARD WHERE SCORECARD_ID = ?");
         queryStmt.setLong(1, scorecardID);
         ResultSet rs = queryStmt.executeQuery();
@@ -152,6 +154,7 @@ public class ScorecardStorage {
             if (rs.wasNull()) {
                 dataSourceID = 0;
             }
+            scorecard.setFolder(rs.getInt(8));
             scorecard.setDataSourceID(dataSourceID);
             PreparedStatement getKPIStmt = conn.prepareStatement("SELECT SCORECARD_TO_KPI.KPI_ID FROM SCORECARD_TO_KPI WHERE " +
                     "scorecard_to_kpi.scorecard_id = ? order by scorecard_to_kpi.kpi_index");

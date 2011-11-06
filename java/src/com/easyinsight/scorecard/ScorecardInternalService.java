@@ -47,7 +47,7 @@ public class ScorecardInternalService {
 
     public RolePrioritySet<ScorecardDescriptor> getScorecards(long userID, long accountID, EIConnection conn) throws SQLException {
         RolePrioritySet<ScorecardDescriptor> scorecards = new RolePrioritySet<ScorecardDescriptor>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, SCORECARD.creation_date, SCORECARD.data_source_id from " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, SCORECARD.creation_date, SCORECARD.data_source_id, scorecard.folder from " +
                 "scorecard where scorecard.user_id = ?");
         PreparedStatement userStmt = conn.prepareStatement("SELECT USER.name, USER.first_name FROM USER, SCORECARD WHERE USER.USER_ID = SCORECARD.USER_ID AND " +
                 "SCORECARD.scorecard_id = ?");
@@ -79,9 +79,10 @@ public class ScorecardInternalService {
             scorecardDescriptor.setCreationDate(creationDate);
             long dataSourceID = rs.getLong(4);
             scorecardDescriptor.setDataSourceID(dataSourceID);
+            scorecardDescriptor.setFolder(rs.getInt(5));
             scorecards.add(scorecardDescriptor);
         }
-        PreparedStatement accountStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD.SCORECARD_NAME, scorecard.creation_date, scorecard.data_source_id FROM " +
+        PreparedStatement accountStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD.SCORECARD_NAME, scorecard.creation_date, scorecard.data_source_id, scorecard.folder FROM " +
                 "SCORECARD, USER WHERE SCORECARD.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? and SCORECARD.ACCOUNT_VISIBLE = ?");
         accountStmt.setLong(1, accountID);
         accountStmt.setBoolean(2, true);
@@ -112,10 +113,11 @@ public class ScorecardInternalService {
             scorecardDescriptor.setCreationDate(creationDate);
             long dataSourceID = accountRS.getLong(4);
             scorecardDescriptor.setDataSourceID(dataSourceID);
+            scorecardDescriptor.setFolder(accountRS.getInt(5));
             scorecards.add(scorecardDescriptor);
         }
         PreparedStatement groupStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, scorecard.group_id, " +
-                "group_to_user_join.binding_type, COMMUNITY_GROUP.name, scorecard.creation_date from " +
+                "group_to_user_join.binding_type, COMMUNITY_GROUP.name, scorecard.creation_date, scorecard.data_source_id, scorecard.folder from " +
                 "scorecard, group_to_user_join, community_group where scorecard.group_id = group_to_user_join.group_id AND group_to_user_join.user_id = ? AND " +
                 "SCORECARD.group_id = COMMUNITY_GROUP.community_group_id");
         groupStmt.setLong(1, userID);
@@ -146,8 +148,9 @@ public class ScorecardInternalService {
                 creationDate = new Date(creationTimestamp.getTime());
             }
             scorecardDescriptor.setCreationDate(creationDate);
-            long dataSourceID = groupRS.getLong(4);
+            long dataSourceID = groupRS.getLong(7);
             scorecardDescriptor.setDataSourceID(dataSourceID);
+            scorecardDescriptor.setFolder(groupRS.getInt(8));
             scorecards.add(scorecardDescriptor);
         }
         return scorecards;

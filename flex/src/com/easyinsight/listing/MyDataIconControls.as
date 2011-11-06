@@ -1,41 +1,33 @@
 package com.easyinsight.listing
 {
-import com.easyinsight.customupload.FileFeedUpdateWindow;
+
 import com.easyinsight.dashboard.DashboardDescriptor;
-import com.easyinsight.datasources.DataSourceBehavior;
-import com.easyinsight.datasources.DataSourceRefreshWindow;
 import com.easyinsight.datasources.DataSourceType;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.etl.LookupTableSource;
+import com.easyinsight.framework.DataFolder;
 import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.scorecard.ScorecardDescriptor;
-import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
-
-import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
 import mx.events.FlexEvent;
-import mx.managers.PopUpManager;
 
 public class MyDataIconControls extends UIComponent implements IListItemRenderer
 {
     private var obj:Object;
 
-    [Embed(source="../../../../assets/refresh.png")]
-    public var refreshIcon:Class;
 
-    [Embed(source="../../../../assets/businessman_edit.png")]
+    [Embed(source="../../../../assets/pencil.png")]
     public var adminIcon:Class;
 
     [Embed(source="../../../../assets/media_play_green.png")]
@@ -44,15 +36,12 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     [Embed(source="../../../../assets/navigate_cross.png")]
     public var deleteIcon:Class;
 
-    private var refreshButton:Button;
     private var adminButton:Button;
     private var analyzeButton:Button;
     private var deleteButton:Button;
 
     private var _analyzeTooltip:String = "Analyze...";
     private var _analyzeVisible:Boolean = true;
-    private var _refreshTooltip:String = "Refresh...";
-    private var _refreshVisible:Boolean = true;
     private var _adminTooltip:String = "Administer...";
     private var _adminVisible:Boolean = true;
     private var _deleteTooltip:String = "Delete...";
@@ -61,26 +50,14 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     public function MyDataIconControls()
     {
         super();
-
-
-
-        this.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
-
-        this.setStyle("paddingLeft", 5);
-        this.setStyle("paddingRight", 5);
     }
 
     private var _showAnalyze:Boolean = true;
-    private var _showRefresh:Boolean = true;
     private var _showAdmin:Boolean = true;
     private var _showDelete:Boolean = true;
 
     public function set showAnalyze(value:Boolean):void {
         _showAnalyze = value;
-    }
-
-    public function set showRefresh(value:Boolean):void {
-        _showRefresh = value;
     }
 
     public function set showAdmin(value:Boolean):void {
@@ -102,17 +79,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
                 analyzeButton.addEventListener(MouseEvent.CLICK, analyzeCalled);
             }
             addChild(analyzeButton);
-        }
-
-        if (_showRefresh) {
-            if (refreshButton == null) {
-                refreshButton = new Button();
-                refreshButton.setStyle("icon", refreshIcon);
-                BindingUtils.bindProperty(refreshButton, "toolTip", this, "refreshTooltip");
-                BindingUtils.bindProperty(refreshButton, "visible", this, "refreshVisible");
-                refreshButton.addEventListener(MouseEvent.CLICK, refreshCalled);
-            }
-            addChild(refreshButton);
         }
 
         if (_showAdmin) {
@@ -149,11 +115,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             analyzeButton.setActualSize(buttonWidth, buttonHeight);
             i++;
         }
-        if (refreshButton != null) {
-            refreshButton.move((padding * i) + (buttonWidth),0);
-            refreshButton.setActualSize(buttonWidth, buttonHeight);
-            i++;
-        }
         if (adminButton != null) {
             adminButton.move((padding * i) + (buttonWidth * (i - 1)),0);
             adminButton.setActualSize(buttonWidth, buttonHeight);
@@ -186,28 +147,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         if (_analyzeVisible == value) return;
         _analyzeVisible = value;
         dispatchEvent(new Event("analyzeVisibleChanged"));
-    }
-
-    [Bindable(event="refreshTooltipChanged")]
-    public function get refreshTooltip():String {
-        return _refreshTooltip;
-    }
-
-    public function set refreshTooltip(value:String):void {
-        if (_refreshTooltip == value) return;
-        _refreshTooltip = value;
-        dispatchEvent(new Event("refreshTooltipChanged"));
-    }
-
-    [Bindable(event="refreshVisibleChanged")]
-    public function get refreshVisible():Boolean {
-        return _refreshVisible;
-    }
-
-    public function set refreshVisible(value:Boolean):void {
-        if (_refreshVisible == value) return;
-        _refreshVisible = value;
-        dispatchEvent(new Event("refreshVisibleChanged"));
     }
 
     [Bindable(event="adminTooltipChanged")]
@@ -254,31 +193,12 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         dispatchEvent(new Event("deleteVisibleChanged"));
     }
 
-    private function notifyRefresh(event:RefreshNotificationEvent):void {
-        Alert.show("Your data has begun to refresh and will be available when the refresh completes. This process may take some time depending on the size of the data source. You will receive a notification when the process is complete.");
-    }
-
-    private function refreshCalled(event:MouseEvent):void {
-        if (obj is DataSourceDescriptor) {
-            var feedDescriptor:DataSourceDescriptor = obj as DataSourceDescriptor;
-            if (feedDescriptor.dataSourceType == DataSourceType.STATIC ||
-                    feedDescriptor.dataSourceType == DataSourceType.EMPTY) {
-                fileData(feedDescriptor);
-            } else {
-                refreshData(feedDescriptor);
-            }
-        }
-    }
-
     private function deleteCalled(event:MouseEvent):void {
-        dispatchEvent(new DeleteDataSourceEvent(obj));
+        dispatchEvent(new DeleteDataSourceEvent(EIDescriptor(obj)));
     }
 
     private function analyzeCalled(event:MouseEvent):void {
-        if (obj is DataSourceDescriptor) {
-            var descriptor:DataSourceDescriptor = obj as DataSourceDescriptor;
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.id)));
-        } else if (obj is InsightDescriptor) {
+        if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));
         } else if (obj is LookupTableDescriptor) {
@@ -290,26 +210,8 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         }
     }
 
-    private function refreshData(feedDescriptor:DataSourceDescriptor):void {
-        var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
-        dsRefreshWindow.dataSourceID = feedDescriptor.id;
-        PopUpManager.addPopUp(dsRefreshWindow, this, true);
-        PopUpUtil.centerPopUp(dsRefreshWindow);
-    }
-
-    private function fileData(feedDescriptor:DataSourceDescriptor):void {
-        var feedUpdateWindow:FileFeedUpdateWindow = FileFeedUpdateWindow(PopUpManager.createPopUp(this.parent.parent.parent, FileFeedUpdateWindow, true));
-        feedUpdateWindow.feedID = feedDescriptor.id;
-        feedUpdateWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
-        PopUpUtil.centerPopUp(feedUpdateWindow);
-
-    }
-
     private function adminCalled(event:MouseEvent):void {
-        if (obj is DataSourceDescriptor) {
-            var descriptor:DataSourceDescriptor = obj as DataSourceDescriptor;
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.id})));
-        } else if (obj is InsightDescriptor) {
+        if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
         } else if (obj is DashboardDescriptor ){
@@ -324,25 +226,21 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         this.obj = value;
         if (value is EIDescriptor) {
             var desc:EIDescriptor = value as EIDescriptor;
+            analyzeVisible = true;
             deleteVisible = desc.role <= DataSourceType.EDITOR;
-            if (value is DataSourceDescriptor) {
-                var descriptor:DataSourceDescriptor = value as DataSourceDescriptor;
-                adminVisible = descriptor.role <= DataSourceType.EDITOR;
-                adminTooltip = "Administer the data source...";
-                refreshVisible = DataSourceBehavior.pullDataSource(descriptor.dataSourceType);
-            } else if (value is InsightDescriptor) {
-                refreshVisible = false;
+            if (value is InsightDescriptor) {
                 adminVisible = true;
                 adminTooltip = "Open report in the report editor...";
             } else if (value is LookupTableDescriptor) {
-                refreshVisible = false;
                 adminVisible = false;
             } else if (value is DashboardDescriptor) {
-                refreshVisible = false;
                 adminVisible = true;
             } else if (value is ScorecardDescriptor) {
-                refreshVisible = false;
                 adminVisible = true;
+            } else if (value is DataFolder) {
+                deleteVisible = false;
+                adminVisible = false;
+                analyzeVisible = false;
             }
         }
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));

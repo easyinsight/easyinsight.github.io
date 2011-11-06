@@ -24,6 +24,7 @@ public class Scorecard implements Cloneable {
     private String urlKey;
     private boolean accountVisible;
     private long dataSourceID;
+    private int folder;
 
     public Scorecard clone(FeedDefinition target, List<AnalysisItem> allFields) throws CloneNotSupportedException {
         Scorecard scorecard = (Scorecard) super.clone();
@@ -35,6 +36,14 @@ public class Scorecard implements Cloneable {
         }
         scorecard.setKpis(clonedKPIs);
         return scorecard;
+    }
+
+    public int getFolder() {
+        return folder;
+    }
+
+    public void setFolder(int folder) {
+        this.folder = folder;
     }
 
     public long getDataSourceID() {

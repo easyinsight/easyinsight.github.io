@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.analysis.definitions.WSKPIDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
@@ -87,10 +88,19 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean fullJoins;
     private String marmotScript;
     private String reportRunMarmotScript;
+    private int folder;
 
     private String fontName = "Tahoma";
     private int fontSize = 12;
     private double backgroundAlpha = 1;
+
+    public int getFolder() {
+        return folder;
+    }
+
+    public void setFolder(int folder) {
+        this.folder = folder;
+    }
 
     public String getReportRunMarmotScript() {
         return reportRunMarmotScript;
@@ -328,6 +338,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
                                 "All".equals(filterValueDefinition.getFilteredValues().get(0).toString())) {
                             continue;
                         }
+                    } else if (filter.isTrendFilter()) {
+                        if (!(this instanceof WSKPIDefinition)) {
+                            continue;
+                        }
                     }
                     filters.add(filter);
                 }
@@ -355,7 +369,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     }
                     //}
                 }
-                List<AnalysisItem> linkItems = analysisItem.addLinkItems(allItems, analysisItems);
+                List<AnalysisItem> linkItems = analysisItem.addLinkItems(allItems);
                 for (AnalysisItem item : linkItems) {
                     if (!columnSet.contains(item)) {
                         columnSet.add(item);

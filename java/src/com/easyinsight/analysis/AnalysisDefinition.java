@@ -70,6 +70,9 @@ public class AnalysisDefinition implements Cloneable {
             inverseJoinColumns = @JoinColumn(name = "join_override_id", nullable = false))
     private List<JoinOverride> joinOverrides;
 
+    @Column(name = "folder")
+    private int folder;
+
     @Column(name = "policy")
     private int analysisPolicy;
 
@@ -127,6 +130,14 @@ public class AnalysisDefinition implements Cloneable {
 
     @Column(name = "account_visible")
     private boolean accountVisible;
+
+    public int getFolder() {
+        return folder;
+    }
+
+    public void setFolder(int folder) {
+        this.folder = folder;
+    }
 
     public boolean isRecommendedExchange() {
         return recommendedExchange;
@@ -548,6 +559,7 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setCanSaveDirectly(isOwner(SecurityUtil.getUserID(false)));
         analysisDefinition.setAuthorName(getAuthorName());
         analysisDefinition.setDateCreated(getDateCreated());
+        analysisDefinition.setFolder(getFolder());
         analysisDefinition.setDateUpdated(getDateUpdated());
         analysisDefinition.setUrlKey(urlKey);
         analysisDefinition.setMarketplaceVisible(marketplaceVisible);

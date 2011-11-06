@@ -134,9 +134,11 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     }
 
     private function installed(event:Event):void {
-        dispatchEvent(new NavigationEvent("Home"));
+        dispatchEvent(new NavigationEvent("Home", null, { dataSourceDescriptor: dataSourceDescriptor}));
         PopUpManager.removePopUp(this);
     }
+
+    private var dataSourceDescriptor:DataSourceDescriptor;
 
     private function installedSolution(event:ResultEvent):void {
         this.installResult = solutionService.installSolution.lastResult as FeedDefinitionData;
@@ -146,6 +148,12 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
                 configuredSources++;
             }
         }
+        var dataSourceDescriptor:DataSourceDescriptor = new DataSourceDescriptor();
+        dataSourceDescriptor.id = installResult.dataFeedID;
+        dataSourceDescriptor.name = installResult.feedName;
+        dataSourceDescriptor.dataSourceType = installResult.getFeedType();
+        dataSourceDescriptor.role = 1;
+        this.dataSourceDescriptor = dataSourceDescriptor;
         var configWindow:ConfigureDataSource = new ConfigureDataSource();
         configWindow.dataSourceDefinition = installResult;
         configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured, false, 0, true);

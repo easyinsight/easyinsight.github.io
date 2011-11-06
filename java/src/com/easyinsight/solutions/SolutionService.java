@@ -57,6 +57,33 @@ public class SolutionService {
                     new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset(), conn);
                 }
             }
+            PreparedStatement analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID FROM ANALYSIS, DATA_FEED " +
+                    " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
+                    "DATA_FEED.feed_type = ? AND ANALYSIS.SOLUTION_VISIBLE = ? AND " +
+                    "analysis.recommended_exchange = ?");
+            analysisQueryStmt.setInt(1, dataSource.getFeedType().getType());
+            analysisQueryStmt.setBoolean(2, true);
+            analysisQueryStmt.setBoolean(3, true);
+            ResultSet rs = analysisQueryStmt.executeQuery();
+            Session session = Database.instance().createSession(conn);
+            while (rs.next()) {
+                long reportID = rs.getLong(1);
+                installReport(reportID, solutionKPIData.getDataSourceID(), conn, session, false);
+            }
+
+            PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID FROM DASHBOARD, DATA_FEED " +
+                    " WHERE DASHBOARD.DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
+                    "DATA_FEED.feed_type = ? AND DASHBOARD.EXCHANGE_VISIBLE = ? AND " +
+                    "DASHBOARD.recommended_exchange = ?");
+            dashboardQueryStmt.setInt(1, dataSource.getFeedType().getType());
+            dashboardQueryStmt.setBoolean(2, true);
+            dashboardQueryStmt.setBoolean(3, true);
+            ResultSet dashboardRS = dashboardQueryStmt.executeQuery();
+            while (dashboardRS.next()) {
+                long dashboardID = dashboardRS.getLong(1);
+                installDashboard(dashboardID, solutionKPIData.getDataSourceID(), conn, session, false);
+            }
+            session.close();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -444,71 +471,7 @@ public class SolutionService {
         try {
             conn.setAutoCommit(false);
             Session session = Database.instance().createSession(conn);
-            DashboardStorage dashboardStorage = new DashboardStorage();
-            FeedStorage feedStorage = new FeedStorage();
-            Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
-            Set<Long> reportIDs = dashboard.containedReports();
-            List<AnalysisDefinition> reports = new ArrayList<AnalysisDefinition>();
-
-            for (Long containedReportID : reportIDs) {
-                AnalysisDefinition report = new AnalysisStorage().getPersistableReport(containedReportID, session);
-                reports.add(report);
-                Set<Long> containedReportIDs = report.containedReportIDs();
-                for (Long childReportID : containedReportIDs) {
-                    reports.add(new AnalysisStorage().getPersistableReport(childReportID, session));
-                }
-            }
-
-            Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
-
-            FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
-            
-            List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
-            for (AnalysisDefinition child : reports) {
-                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child);
-                reportReplacementMap.put(child.getAnalysisID(), copyReport);
-                reportList.add(copyReport);
-            }
-
-            for (AnalysisDefinition copiedReport : reportList) {
-                new AnalysisStorage().saveAnalysis(copiedReport, session);
-            }
-
-            for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
-                copiedReport.updateReportIDs(reportReplacementMap);
-            }
-
-            for (AnalysisDefinition copiedReport : reportList) {
-                new AnalysisStorage().saveAnalysis(copiedReport, session);
-            }
-
-            Set<Long> scorecardIDs = dashboard.containedScorecards();
-            List<Scorecard> scorecards = new ArrayList<Scorecard>();
-
-            for (Long containedScorecardID : scorecardIDs) {
-                Scorecard scorecard = new ScorecardStorage().getScorecard(containedScorecardID, conn);
-                scorecards.add(scorecard);
-            }
-
-            Map<Long, Scorecard> scorecardReplacementMap = new HashMap<Long, Scorecard>();
-            List<Scorecard> scorecardList = new ArrayList<Scorecard>();
-            for (Scorecard child : scorecards) {
-                Scorecard copyScorecard = copyScorecardToDataSource(targetDataSource, child);
-                scorecardReplacementMap.put(child.getScorecardID(), copyScorecard);
-                scorecardList.add(copyScorecard);
-            }
-
-            for (Scorecard copiedScorecard : scorecardList) {
-                new ScorecardStorage().saveScorecardForUser(copiedScorecard, SecurityUtil.getUserID(), conn);
-            }
-
-            Dashboard copiedDashboard = dashboard.cloneDashboard(reportReplacementMap, scorecardReplacementMap, true, targetDataSource.getFields(), targetDataSource);
-
-            copiedDashboard.setDataSourceID(dataSourceID);
-
-            dashboardStorage.saveDashboard(copiedDashboard, conn);
-
-            DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(copiedDashboard.getName(), copiedDashboard.getId(), copiedDashboard.getUrlKey(), 0, Roles.NONE, null, false);
+            DashboardDescriptor dashboardDescriptor = installDashboard(dashboardID, dataSourceID, conn, session, true);
 
             session.flush();
 
@@ -526,53 +489,85 @@ public class SolutionService {
         }
     }
 
+    private DashboardDescriptor installDashboard(long dashboardID, long dataSourceID, EIConnection conn, Session session, boolean temporaryDashboard) throws Exception {
+        DashboardStorage dashboardStorage = new DashboardStorage();
+        FeedStorage feedStorage = new FeedStorage();
+        Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
+        Set<Long> reportIDs = dashboard.containedReports();
+        List<AnalysisDefinition> reports = new ArrayList<AnalysisDefinition>();
+
+        for (Long containedReportID : reportIDs) {
+            AnalysisDefinition report = new AnalysisStorage().getPersistableReport(containedReportID, session);
+            reports.add(report);
+            Set<Long> containedReportIDs = report.containedReportIDs();
+            for (Long childReportID : containedReportIDs) {
+                reports.add(new AnalysisStorage().getPersistableReport(childReportID, session));
+            }
+        }
+
+        Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
+
+        FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+
+        List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
+        for (AnalysisDefinition child : reports) {
+            child.setFolder(EIDescriptor.OTHER_VIEW);
+            AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child);
+            reportReplacementMap.put(child.getAnalysisID(), copyReport);
+            reportList.add(copyReport);
+        }
+
+        for (AnalysisDefinition copiedReport : reportList) {
+            copiedReport.setTemporaryReport(temporaryDashboard);
+            new AnalysisStorage().saveAnalysis(copiedReport, session);
+        }
+
+        for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
+            copiedReport.updateReportIDs(reportReplacementMap);
+        }
+
+        for (AnalysisDefinition copiedReport : reportList) {
+            new AnalysisStorage().saveAnalysis(copiedReport, session);
+        }
+
+        Set<Long> scorecardIDs = dashboard.containedScorecards();
+        List<Scorecard> scorecards = new ArrayList<Scorecard>();
+
+        for (Long containedScorecardID : scorecardIDs) {
+            Scorecard scorecard = new ScorecardStorage().getScorecard(containedScorecardID, conn);
+            scorecards.add(scorecard);
+        }
+
+        Map<Long, Scorecard> scorecardReplacementMap = new HashMap<Long, Scorecard>();
+        List<Scorecard> scorecardList = new ArrayList<Scorecard>();
+        for (Scorecard child : scorecards) {
+            Scorecard copyScorecard = copyScorecardToDataSource(targetDataSource, child);
+            scorecardReplacementMap.put(child.getScorecardID(), copyScorecard);
+            scorecardList.add(copyScorecard);
+        }
+
+        for (Scorecard copiedScorecard : scorecardList) {
+            new ScorecardStorage().saveScorecardForUser(copiedScorecard, SecurityUtil.getUserID(), conn);
+        }
+
+        Dashboard copiedDashboard = dashboard.cloneDashboard(reportReplacementMap, scorecardReplacementMap, true, targetDataSource.getFields(), targetDataSource);
+        copiedDashboard.setTemporary(temporaryDashboard);
+        copiedDashboard.setDataSourceID(dataSourceID);
+
+        dashboardStorage.saveDashboard(copiedDashboard, conn);
+
+        return new DashboardDescriptor(copiedDashboard.getName(), copiedDashboard.getId(), copiedDashboard.getUrlKey(), 0, Roles.NONE, null, false);
+    }
+
     public InsightDescriptor installReport(long reportID, long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            FeedStorage feedStorage = new FeedStorage();
+
 
 
             Session session = Database.instance().createSession(conn);
-            AnalysisDefinition originalBaseReport = new AnalysisStorage().getPersistableReport(reportID, session);
-            //FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
-            // okay, we might have multiple reports here...
-            // find all the other reports in the dependancy graph here
-            List<AnalysisDefinition> reports = originalBaseReport.containedReports(session);
-            Set<Long> containedReportIDs = originalBaseReport.containedReportIDs();
-            for (Long containedReportID : containedReportIDs) {
-                reports.add(new AnalysisStorage().getPersistableReport(containedReportID, session));
-            }
-            reports.add(originalBaseReport);
-            FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
-            Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
-            List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
-            for (AnalysisDefinition child : reports) {
-
-                //Map<Key, Key> keyReplacementMap = createKeyReplacementMap(targetDataSource, sourceDataSource);
-                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child);
-                reportReplacementMap.put(child.getAnalysisID(), copyReport);
-                reportList.add(copyReport);
-            }
-
-            for (AnalysisDefinition copiedReport : reportList) {
-                new AnalysisStorage().saveAnalysis(copiedReport, session);
-            }
-
-            for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
-                copiedReport.updateReportIDs(reportReplacementMap);
-            }
-
-            for (AnalysisDefinition copiedReport : reportList) {
-                new AnalysisStorage().saveAnalysis(copiedReport, session);
-            }
-
-            session.flush();
-
-            AnalysisDefinition copiedBaseReport = reportReplacementMap.get(reportID);
-            InsightDescriptor insightDescriptor = new InsightDescriptor(copiedBaseReport.getAnalysisID(), copiedBaseReport.getTitle(),
-                    copiedBaseReport.getDataFeedID(), copiedBaseReport.getReportType(), copiedBaseReport.getUrlKey(), Roles.OWNER, false);
-
+            InsightDescriptor insightDescriptor = installReport(reportID, dataSourceID, conn, session, true);
             conn.commit();
             session.close();
             return insightDescriptor;
@@ -584,6 +579,49 @@ public class SolutionService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
+    }
+
+    private InsightDescriptor installReport(long reportID, long dataSourceID, EIConnection conn, Session session, boolean keepTemporary) throws SQLException, CloneNotSupportedException {
+        AnalysisDefinition originalBaseReport = new AnalysisStorage().getPersistableReport(reportID, session);
+        //FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
+        // okay, we might have multiple reports here...
+        // find all the other reports in the dependancy graph here
+        List<AnalysisDefinition> reports = originalBaseReport.containedReports(session);
+        Set<Long> containedReportIDs = originalBaseReport.containedReportIDs();
+        for (Long containedReportID : containedReportIDs) {
+            reports.add(new AnalysisStorage().getPersistableReport(containedReportID, session));
+        }
+        reports.add(originalBaseReport);
+        FeedStorage feedStorage = new FeedStorage();
+        FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+        Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
+        List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
+        for (AnalysisDefinition child : reports) {
+
+            //Map<Key, Key> keyReplacementMap = createKeyReplacementMap(targetDataSource, sourceDataSource);
+            AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child);
+            reportReplacementMap.put(child.getAnalysisID(), copyReport);
+            reportList.add(copyReport);
+        }
+
+        for (AnalysisDefinition copiedReport : reportList) {
+            copiedReport.setTemporaryReport(keepTemporary);
+            new AnalysisStorage().saveAnalysis(copiedReport, session);
+        }
+
+        for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
+            copiedReport.updateReportIDs(reportReplacementMap);
+        }
+
+        for (AnalysisDefinition copiedReport : reportList) {
+            new AnalysisStorage().saveAnalysis(copiedReport, session);
+        }
+
+        session.flush();
+
+        AnalysisDefinition copiedBaseReport = reportReplacementMap.get(reportID);
+        return new InsightDescriptor(copiedBaseReport.getAnalysisID(), copiedBaseReport.getTitle(),
+                copiedBaseReport.getDataFeedID(), copiedBaseReport.getReportType(), copiedBaseReport.getUrlKey(), Roles.OWNER, false);
     }
 
     private Map<Key, Key> createKeyReplacementMap(FeedDefinition localDefinition, FeedDefinition sourceDefinition) {

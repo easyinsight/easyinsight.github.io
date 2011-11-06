@@ -9,6 +9,7 @@
         import com.easyinsight.analysis.DrillThrough;
         import com.easyinsight.analysis.DrillThroughEvent;
         import com.easyinsight.analysis.DrillThroughExecutor;
+        import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.analysis.Link;
         import com.easyinsight.analysis.ReportWindowEvent;
         import com.easyinsight.filtering.FilterRawData;
@@ -199,7 +200,8 @@
                         filterDefinition.singleValue = true;
                         var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);
                         if (event.drillThrough.miniWindow) {
-                            dispatchEvent(new ReportWindowEvent(event.report.id, 0, 0, filters, event.report.dataFeedID, event.report.reportType));
+                            dispatchEvent(new ReportWindowEvent(event.report.id, 0, 0, filters, InsightDescriptor(event.report).dataFeedID,
+                                    InsightDescriptor(event.report).reportType));
                         } else {
                             dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.report, filters));
                         }

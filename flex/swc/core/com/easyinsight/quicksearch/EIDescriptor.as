@@ -12,6 +12,10 @@ public class EIDescriptor {
     public static const SCORECARD:int = 9;
     public static const LOOKUP_TABLE:int = 10;
     public static const DASHBOARD:int = 11;
+    public static const FOLDER:int = 12;
+
+    public static const MAIN_VIEWS_FOLDER:int = 1;
+    public static const OTHER_VIEWS_FOLDER:int = 2;
 
     public var id:int;
     public var name:String;
@@ -21,8 +25,13 @@ public class EIDescriptor {
     public var urlKey:String;
     public var role:int;
     public var accountVisible:Boolean;
+    public var folder:int;
     
     public function EIDescriptor() {
+    }
+
+    public function get qualifiedName():String {
+        return getType() + "-" + id;
     }
 
     public function getType():int {

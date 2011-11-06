@@ -1,8 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.Key;
-import com.easyinsight.calculations.Resolver;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
@@ -19,6 +16,7 @@ import java.util.Map;
 @Table(name="link")
 @Inheritance(strategy=InheritanceType.JOINED)
 public class Link implements Cloneable, Serializable {
+
     public static final int URL = 1;
     public static final int DRILLTHROUGH = 2;
 
@@ -31,6 +29,17 @@ public class Link implements Cloneable, Serializable {
 
     @Column(name="code_generated")
     private boolean codeGenerated;
+
+    @Column(name="default_link")
+    private boolean defaultLink;
+
+    public boolean isDefaultLink() {
+        return defaultLink;
+    }
+
+    public void setDefaultLink(boolean defaultLink) {
+        this.defaultLink = defaultLink;
+    }
 
     @Override
     public Link clone() throws CloneNotSupportedException {
@@ -63,12 +72,16 @@ public class Link implements Cloneable, Serializable {
         this.label = label;
     }
 
-    public List<Key> neededKeys(Resolver resolver) {
-        return new ArrayList<Key>();
+    public List<AnalysisItem> neededKeys(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems) {
+        return new ArrayList<AnalysisItem>();
     }
 
     public boolean generatesURL() {
         return false;
+    }
+
+    public void beforeSave() {
+
     }
 
     public String generateLink(IRow row, Map<String, String> dataSourceProperties, Collection<AnalysisItem> fields) {

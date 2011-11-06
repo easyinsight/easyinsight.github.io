@@ -2,7 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSCombinedVerticalListDefinition;
 import com.easyinsight.analysis.definitions.WSKPIDefinition;
-import com.easyinsight.analysis.definitions.WSTrendDefinition;
+import com.easyinsight.analysis.definitions.WSVerticalListDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -271,16 +271,28 @@ public class DataService {
             List<EmbeddedResults> list = new ArrayList<EmbeddedResults>();
 
             analysisDefinition.setFilterDefinitions(customFilters);
-
+            FilterDefinition[] labelFilters = new FilterDefinition[analysisDefinition.getReports().size()];
+            int i = 0;
             for (WSAnalysisDefinition analysis : analysisDefinition.getReports()) {
+                WSVerticalListDefinition verticalListDefinition = (WSVerticalListDefinition) analysis;
                 List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
                 filters.addAll(customFilters);
                 filters.addAll(analysis.getFilterDefinitions());
+                if (verticalListDefinition.getPatternName() != null && !"".equals(verticalListDefinition.getPatternName())) {
+                    for (FilterDefinition filter : filters) {
+                        System.out.println("checking " + verticalListDefinition.getPatternName() + " against " + filter.getFilterName());
+                        if (verticalListDefinition.getPatternName().equals(filter.getFilterName())) {
+                            labelFilters[i] = filter;
+                        }
+                    }
+                }
                 list.add(getEmbeddedResults(analysis.getAnalysisID(), dataSourceID, filters, insightRequestMetadata, null));
+                i++;
             }
             EmbeddedVerticalResults verticalDataResults = new EmbeddedVerticalResults();
             verticalDataResults.setList(list);
             verticalDataResults.setReport(analysisDefinition);
+            verticalDataResults.getAdditionalProperties().put("labelFilters", labelFilters);
             return verticalDataResults;
         } catch (ReportException re) {
             EmbeddedVerticalResults results = new EmbeddedVerticalResults();
@@ -342,6 +354,7 @@ public class DataService {
         try {
             conn.setAutoCommit(false);
             WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            analysisDefinition.setDataFeedID(dataSourceID);
             if (analysisDefinition == null) {
                 return null;
             }

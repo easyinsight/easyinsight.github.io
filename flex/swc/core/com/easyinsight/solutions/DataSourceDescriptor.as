@@ -8,6 +8,8 @@
 package com.easyinsight.solutions {
 import com.easyinsight.quicksearch.EIDescriptor;
 
+import flash.utils.ByteArray;
+
 import mx.collections.ArrayCollection;
 
 [Bindable]
@@ -19,6 +21,7 @@ public class DataSourceDescriptor extends EIDescriptor{
     public var size:int;
     public var lastDataTime:Date;
     public var groupSourceID:int;
+    public var logoImage:ByteArray;
     public var children:ArrayCollection;
 
     public function DataSourceDescriptor() {

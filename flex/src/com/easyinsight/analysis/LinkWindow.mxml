@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                    creationComplete="analysisService.getInsightDescriptors.send()" width="700" height="400">
+                    creationComplete="feedService.getDescriptors.send()" width="700" height="400">
     <mx:Script><![CDATA[
+        import com.easyinsight.quicksearch.EIDescriptor;
 
         import mx.collections.ArrayCollection;
 
@@ -11,8 +12,15 @@
 
         import mx.validators.Validator;
 
-        private function gotReports():void {
-            var reportList:ArrayCollection = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+        private function gotDescriptors():void {
+            var descriptors:ArrayCollection = feedService.getDescriptors.lastResult as ArrayCollection;
+            var reports:Array = [];
+            for each (var desc:EIDescriptor in descriptors) {
+                if (desc.getType() == EIDescriptor.DASHBOARD || desc.getType() == EIDescriptor.REPORT) {
+                    reports.push(desc);
+                }
+            }
+            var reportList:ArrayCollection = new ArrayCollection(reports);
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("name", true) ];
             reportList.sort = sort;
@@ -39,7 +47,10 @@
         private var linkLabel:String;
 
         [Bindable]
-        private var reportID:int;
+        private var defaultLink:Boolean;
+
+        [Bindable]
+        private var qualifiedName:String;
 
         [Bindable]
         private var miniWindow:Boolean = true;
@@ -65,6 +76,7 @@
                 typeValue = _link.type;
                 linkLabel = _link.label;
                 linkID = _link.linkID;
+                defaultLink = _link.defaultLink;
                 if (typeValue == "URL") {
                     stackIndex = 0;
                     var urlLink:URLLink = _link as URLLink;
@@ -72,7 +84,11 @@
                 } else if (typeValue == "Drillthrough") {
                     stackIndex = 1;
                     var drillthrough:DrillThrough = _link as DrillThrough;
-                    reportID = drillthrough.reportID;
+                    if (drillthrough.reportID > 0) {
+                        qualifiedName = EIDescriptor.REPORT + "-" + drillthrough.reportID;
+                    } else if (drillthrough.dashboardID > 0) {
+                        qualifiedName = EIDescriptor.DASHBOARD + "-" + drillthrough.dashboardID;
+                    }
                     miniWindow = drillthrough.miniWindow;
                 }
             }
@@ -99,7 +115,13 @@
                     }
                 } else {
                     var drillThrough:DrillThrough = new DrillThrough();
-                    drillThrough.reportID = reportChooser.selectedItem.id;
+                    drillThrough.defaultLink = defaultLinkCheckbox.selected;
+                    var desc:EIDescriptor = reportChooser.selectedItem as EIDescriptor;
+                    if (desc.getType() == EIDescriptor.REPORT) {
+                        drillThrough.reportID = desc.id;
+                    } else if (desc.getType() == EIDescriptor.DASHBOARD) {
+                        drillThrough.dashboardID = desc.id;
+                    }
                     drillThrough.miniWindow = miniWindowCheckbox.selected;
                     _link = drillThrough;
                 }
@@ -116,8 +138,8 @@
             }
         }
         ]]></mx:Script>
-    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
-        <mx:method name="getInsightDescriptors" result="gotReports()"/>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="getDescriptors" result="gotDescriptors()"/>
     </mx:RemoteObject>
     <mx:VBox backgroundColor="#FFFFFF" width="100%" height="100%">
         <mx:RadioButtonGroup id="typeGroup" selectedValue="{typeValue}"/>
@@ -159,12 +181,16 @@
                 <mx:VBox>
                     <mx:HBox>
                         <mx:Label text="Target Report:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
-                        <util:SmartComboBox id="reportChooser" dataProvider="{reports}" labelField="name" selectedProperty="id"
-                                selectedValue="{reportID}"/>
+                        <util:SmartComboBox id="reportChooser" dataProvider="{reports}" labelField="name" selectedProperty="qualifiedName"
+                                selectedValue="{qualifiedName}"/>
                     </mx:HBox>
                     <mx:HBox>
                         <mx:Label text="Use Popup Window:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
                         <mx:CheckBox label="" id="miniWindowCheckbox" selected="{miniWindow}"/>
+                    </mx:HBox>
+                    <mx:HBox>
+                        <mx:Label text="Default Link:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                        <mx:CheckBox label="" id="defaultLinkCheckbox" selected="{defaultLink}"/>
                     </mx:HBox>
                 </mx:VBox>
             </mx:ViewStack>
