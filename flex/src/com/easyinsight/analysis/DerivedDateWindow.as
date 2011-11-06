@@ -18,6 +18,8 @@ public class DerivedDateWindow extends CalculationWindow {
             calcText = derivedGrouping.derivationCode;
             calcName = derivedGrouping.display;
             dateLevel = derivedGrouping.dateLevel;
+        } else {
+            dateLevel = AnalysisItemTypes.DAY_LEVEL;
         }
         detailIndex = 2;
         detailItemLabel = "Date Level:";
