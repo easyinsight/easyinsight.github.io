@@ -170,6 +170,35 @@ public class CompositeFeed extends Feed {
 
         itemSet.removeAll(alwaysSet);
 
+        if (itemSet.size() > 0) {
+            Map<Key, Key> keyMap = new HashMap<Key, Key>();
+            for (AnalysisItem analysisItem : getFields()) {
+                Key key = analysisItem.getKey();
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    keyMap.put(derivedKey.getParentKey(), derivedKey);
+                }
+            }
+
+            for (AnalysisItem analysisItem : itemSet) {
+                Key replacement = keyMap.get(analysisItem.getKey());
+                if (replacement != null) {
+                    analysisItem.setKey(replacement);
+                }
+            }
+
+            Iterator<AnalysisItem> analysisItemIterator = itemSet.iterator();
+            while (analysisItemIterator.hasNext()) {
+                AnalysisItem analysisItem = analysisItemIterator.next();
+                for (QueryStateNode queryStateNode : queryNodeMap.values()) {
+                    if (queryStateNode.handles(analysisItem.getKey())) {
+                        analysisItemIterator.remove();
+                        neededNodes.put(queryStateNode.feedID, queryStateNode);
+                        queryStateNode.addItem(analysisItem);
+                    }
+                }
+            }
+        }
         /*if (itemSet.size() > 0) {
             throw new InvalidFieldsException(itemSet);
         }*/
@@ -503,8 +532,6 @@ public class CompositeFeed extends Feed {
         } else {
             return dataSet;
         }
-        /**/
-        //return dataSet;
     }
 
     private FilterDefinition createJoinFilter(QueryStateNode sourceNode, DataSet dataSet, QueryStateNode targetNode, CompositeFeedConnection connection) {
