@@ -58,17 +58,16 @@
         private function backToSources(event:Event = null):void {
             showLoading = true;
             loadingIndex = 1;
-            uploadService.getFeedAnalysisTree.send(true);
             dsList.removeEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
             dsList.removeEventListener("refresh", onRefresh);
             dsList.removeEventListener("backToDataSources", backToSources);
             dataSourceDescriptor = null;
+            uploadService.getFeedAnalysisTree.send(true);
             toDataGrid();
         }
 
         private function onDelete(event:DeleteDataSourceEvent):void {
             if (event.descriptor is DataSourceDescriptor) {
-                backToSources();
                 ProgressAlert.alert(this, "Deleting data source...", null, uploadService.deleteUserUpload);
                 uploadService.deleteUserUpload.send(event.descriptor.id);
             }
@@ -154,6 +153,7 @@
                 dataSourceDescriptor = myDataTree.objects.getItemAt(0) as DataSourceDescriptor;
                 toDataSourceView();
             } else if (dataSourceDescriptor != null) {
+                Alert.show("apparently we think data descriptor is still set");
                 toDataSourceView();
             } else if (myDataTree.objects.length > 1) {
                 if (dsList == null || !blah.contains(dsList)) {
@@ -207,9 +207,7 @@
         }
 
         private function deleted():void {
-            showLoading = true;
-            loadingIndex = 1;
-            uploadService.getFeedAnalysisTree.send(true);
+            backToSources();
         }
 
         public function cleanup():void {
