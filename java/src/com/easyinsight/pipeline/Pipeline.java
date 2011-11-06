@@ -82,7 +82,7 @@ public abstract class Pipeline {
             if (item.isValid()) {
                 List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
                 allNeededAnalysisItems.addAll(baseItems);
-                List<AnalysisItem> linkItems = item.addLinkItems(allFields, allRequestedAnalysisItems);
+                List<AnalysisItem> linkItems = item.addLinkItems(allFields);
                 allNeededAnalysisItems.addAll(linkItems);
                 if (item.isVirtual()) {
                     allNeededAnalysisItems.add(item);
@@ -115,6 +115,7 @@ public abstract class Pipeline {
 
     public DataSet toDataSet(DataSet dataSet) {
         for (IComponent component : components) {
+            //System.out.println(component.getClass().getName() + " - " + dataSet);
             dataSet = component.apply(dataSet, pipelineData);
         }
         return dataSet;
@@ -128,6 +129,7 @@ public abstract class Pipeline {
 
     public DataResults toList(DataSet dataSet) {
         for (IComponent component : components) {
+            //System.out.println(component.getClass().getName() + " - " + dataSet);
             dataSet = component.apply(dataSet, pipelineData);
         }
         resultSet = dataSet;
