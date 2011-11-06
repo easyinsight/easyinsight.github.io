@@ -351,7 +351,7 @@
                 }
                 dataGrid.maxHeight = this.height;
                 dataGrid.columns = columns;
-                //dataGrid.rowCount = dataSet.length;
+                dataGrid.rowCount = dataSet.length;
             } else {
                 if (def.columns.length > 0) stackIndex = 2;
                 else stackIndex = 1;
