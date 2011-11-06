@@ -1,10 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.intention.Intention;
-import com.easyinsight.intention.IntentionSuggestion;
-import com.easyinsight.intention.ReportPropertiesIntention;
 
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -160,7 +156,7 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         return properties;
     }
 
-    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
+    /*public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
         List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
         WSGaugeDefinition gaugeReport = (WSGaugeDefinition) report;
         if (gaugeReport.alertPoint1 == 0) {
@@ -179,5 +175,5 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         } else {
             throw new RuntimeException("Unrecognized intention type");
         }
-    }
+    }*/
 }
