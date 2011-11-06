@@ -24,7 +24,7 @@ public class FieldCalculationLogic extends CalculationLogic {
         for (IRow row : dataSet.getRows()) {
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, analysisItem, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);
-            Value value = new StringValue(rowVisitor.getResult().toString());
+            Value value = rowVisitor.getResult();
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                 if (value.type() == Value.STRING || value.type() == Value.DATE) {
                     value = new NumericValue(value.toDouble());
