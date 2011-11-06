@@ -113,6 +113,8 @@ public class FunctionFactory {
             return new OriginalTags();
         } else if (s.equals("colortext")) {
             return new ColorText();
+        } else if (s.equals("colortextall")) {
+            return new ColorTextAll();
         } else {
             return null;
         }

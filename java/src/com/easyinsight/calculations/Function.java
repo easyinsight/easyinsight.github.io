@@ -44,6 +44,10 @@ public abstract class Function implements IFunction {
     private IRow row;
     private AnalysisItem analysisItem;
 
+    public IRow getRow() {
+        return row;
+    }
+
     public void setRow(IRow row) {
         this.row = row;
     }
