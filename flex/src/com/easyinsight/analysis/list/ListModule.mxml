@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" implements="com.easyinsight.analysis.IReportRenderer"
-        width="100%" height="100%" creationComplete="globalListeners()">
+        width="100%" height="100%" creationComplete="globalListeners()" horizontalScrollPolicy="off" verticalScrollPolicy="off" resize="onResize()">
     <mx:states>
         <mx:State name="keywordSearch">
             <mx:AddChild relativeTo="{topBar}">
@@ -349,8 +349,9 @@
                     columnHeaderObject.itemRenderer = factory;
                     columns[k + initColumn] = columnHeaderObject;
                 }
+                dataGrid.maxHeight = this.height;
                 dataGrid.columns = columns;
-                dataGrid.rowCount = dataSet.length;
+                //dataGrid.rowCount = dataSet.length;
             } else {
                 if (def.columns.length > 0) stackIndex = 2;
                 else stackIndex = 1;
@@ -358,6 +359,10 @@
                 myDataSet = new ArrayCollection();
             }
 
+        }
+
+        private function onResize():void {
+            dataGrid.maxHeight = this.height;
         }
 
         private function updateLookupTables():void {
@@ -583,8 +588,8 @@
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="updateLookupTable"/>
     </mx:RemoteObject>
-    <mx:Canvas width="100%" height="100%">
-        <mx:VBox width="100%" height="100%">
+    <mx:Canvas width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+        <mx:VBox width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
             <mx:Box id="topBar" width="100%"/>
 
             <analysis:ListViewGrid id="dataGrid" dataProvider="{myDataSet}" height="100%"

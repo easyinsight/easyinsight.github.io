@@ -3,11 +3,18 @@ package com.easyinsight.analysis
 
 
 import com.easyinsight.analysis.list.ListDefinition;
+import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.pseudocontext.PseudoContextWindow;
 import com.easyinsight.pseudocontext.StandardContextWindow;
+import com.easyinsight.report.ReportNavigationEvent;
+import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
+import flash.net.URLRequest;
+import flash.net.navigateToURL;
+
+import mx.collections.ArrayCollection;
 
 import mx.controls.Alert;
 
@@ -28,10 +35,13 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
     private var _report:AnalysisDefinition;
     private var _rolloverIcon:Class;
 
+    private var hyperlinked:Boolean;
+
     public function AnalysisCellRenderer() {
         super();
         addEventListener(MouseEvent.ROLL_OVER, onRollOver);
         addEventListener(MouseEvent.ROLL_OUT, onRollOut);
+        addEventListener(MouseEvent.CLICK, onClick);
         this.percentWidth = 100;
     }
 
@@ -43,15 +53,66 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         _rolloverIcon = value;
     }
 
+    private function onClick(event:MouseEvent):void {
+        if (defaultLink != null) {
+            if (defaultLink is URLLink) {
+                var urlLink:URLLink = defaultLink as URLLink;
+                var url:String = data[urlLink.label + "_link"];
+                navigateToURL(new URLRequest(url), "_blank");
+            } else if (defaultLink is DrillThrough) {
+                var drillThrough:DrillThrough = defaultLink as DrillThrough;
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough);
+                executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
+                executor.send();
+            }
+        }
+    }
+
+    private function onDrill(event:DrillThroughEvent):void {
+        var filters:ArrayCollection;
+        if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+            var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
+            filterDefinition.field = analysisItem;
+            filterDefinition.singleValue = true;
+            filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
+            filterDefinition.enabled = true;
+            filterDefinition.inclusive = true;
+            filters = new ArrayCollection([ filterDefinition ]);
+        }
+        if (event.drillThrough.miniWindow) {
+            dispatchEvent(new ReportWindowEvent(event.report.id, 0, 0, filters, InsightDescriptor(event.report).dataFeedID, InsightDescriptor(event.report).reportType));
+        } else {
+            dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.report, filters));
+        }
+    }
+
     private function onRollOver(event:MouseEvent):void {
         if (_rolloverIcon && !_selectionEnabled) {
             CursorManager.setCursor(_rolloverIcon);
         }
+        if (hyperlinked) {
+            if (utf != null) {
+                var tf:UITextFormat = new UITextFormat(this.systemManager, utf.font, utf.size, utf.color, null, null, true);
+                tf.align = utf.align;
+                setTextFormat(tf);
+                invalidateProperties();
+            }
+        }
     }
+
+    private var utf:UITextFormat;
 
     private function onRollOut(event:MouseEvent):void {
         if (_rolloverIcon && !_selectionEnabled) {
             CursorManager.removeAllCursors();
+        }
+        if (hyperlinked) {
+            if (utf != null) {
+                var tf:UITextFormat = new UITextFormat(this.systemManager, utf.font, utf.size, utf.color, null, null, false);
+                tf.align = utf.align;
+                setTextFormat(tf);
+                invalidateProperties();
+            }
         }
     }
 
@@ -63,10 +124,20 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         return _analysisItem;
     }
 
+    private var defaultLink:Link;
+
     public function set analysisItem(val:AnalysisItem):void {
         _analysisItem = val;
         if (_analysisItem != null) {
             toolTip = _analysisItem.tooltip;
+            if (_analysisItem.links != null) {
+                for each (var link:Link in _analysisItem.links) {
+                    if (link.defaultLink) {
+                        defaultLink = link;
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -108,7 +179,11 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
                         }
                     }
                 }
+                if (defaultLink != null && objVal != null && objVal.type() != Value.EMPTY) {
+                    hyperlinked = true;
+                }
             } else {
+                hyperlinked = false;
                 if (value[field] != null) {
                     this.text = formatter.format(value[field]);
                 } else {
@@ -125,9 +200,9 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         if (rext != null && rext.align != null) {
             align = rext.align.toLowerCase();
         }
-        var tf:UITextFormat = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color);
-        tf.align = align;
-        setTextFormat(tf);
+        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color);
+        utf.align = align;
+        setTextFormat(utf);
         new StandardContextWindow(analysisItem, passThrough, this, value);
         invalidateProperties();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
