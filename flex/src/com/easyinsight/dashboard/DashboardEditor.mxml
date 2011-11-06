@@ -161,6 +161,7 @@
             grid.rows = event.rows;
             grid.columns = event.columns;
             var box:DashboardBox = new DashboardBox();
+            rootView = box;
             box.dashboardEditorMetadata = metadata;
             box.element = grid;
             box.allowDelete = false;
