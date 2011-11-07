@@ -61,6 +61,7 @@
             dsList.removeEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
             dsList.removeEventListener("refresh", onRefresh);
             dsList.removeEventListener("backToDataSources", backToSources);
+            dsList = null;
             dataSourceDescriptor = null;
             uploadService.getFeedAnalysisTree.send(true);
             toDataGrid();
