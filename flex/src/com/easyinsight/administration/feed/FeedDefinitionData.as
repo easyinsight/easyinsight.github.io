@@ -20,8 +20,6 @@ package com.easyinsight.administration.feed
 		public var ownerName:String;
 		public var attribution:String;
 		public var description:String;
-		public var analysisDefinitionID:int;
-		public var tags:ArrayCollection;
 		public var dynamicServiceDefinitionID:int;
 		public var dataPersisted:Boolean;
 		public var publiclyVisible:Boolean;
