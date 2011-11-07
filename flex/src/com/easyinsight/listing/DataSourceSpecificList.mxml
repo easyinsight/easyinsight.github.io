@@ -325,7 +325,9 @@
         }
 
         private function alertDataSourceListener(event:CloseEvent):void {
-            dispatchEvent(new DeleteDataSourceEvent(_dataSourceDescriptor));
+            if (event.detail == Alert.OK) {
+                dispatchEvent(new DeleteDataSourceEvent(_dataSourceDescriptor));
+            }
         }
 
         private function deleteItem(selectedItem:Object):void {
