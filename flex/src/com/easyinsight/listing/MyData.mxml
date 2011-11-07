@@ -153,7 +153,6 @@
                 dataSourceDescriptor = myDataTree.objects.getItemAt(0) as DataSourceDescriptor;
                 toDataSourceView();
             } else if (dataSourceDescriptor != null) {
-                Alert.show("apparently we think data descriptor is still set");
                 toDataSourceView();
             } else if (myDataTree.objects.length > 1) {
                 if (dsList == null || !blah.contains(dsList)) {
