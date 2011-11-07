@@ -17,7 +17,6 @@ package com.easyinsight.administration.feed
 		public var dateCreated:Date;
 		public var dateUpdated:Date;
 
-		public var tagCloud:ArrayCollection;
 		public var ownerName:String;
 		public var attribution:String;
 		public var description:String;

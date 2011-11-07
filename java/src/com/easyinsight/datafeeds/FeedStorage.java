@@ -128,7 +128,6 @@ public class FeedStorage {
         feedDefinition.setDataFeedID(feedID);
         saveFields(feedID, conn, feedDefinition.getFields());
         saveFolders(feedID, conn, feedDefinition.getFolders(), feedDefinition.getFields());
-        saveTags(feedID, conn, feedDefinition.getTags());
         feedDefinition.exchangeTokens((EIConnection) conn, FlexContext.getHttpRequest(), null);
         feedDefinition.customStorage(conn);
 
@@ -395,33 +394,6 @@ public class FeedStorage {
         updateVersionStmt.close();
     }
 
-    private void saveTags(long feedID, Connection conn, Collection<Tag> tags) throws SQLException {
-        PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM feed_to_tag WHERE FEED_ID = ?");
-        deleteStmt.setLong(1, feedID);
-        deleteStmt.executeUpdate();
-        deleteStmt.close();
-        if (tags != null) {
-            Session session = Database.instance().createSession(conn);
-            try {
-                for (Tag tag : tags) {
-
-                    session.saveOrUpdate(tag);
-                }
-                session.flush();
-            } finally {
-                session.close();
-            }
-            PreparedStatement insertLinkStmt = conn.prepareStatement("INSERT INTO FEED_TO_TAG (FEED_ID, ANALYSIS_TAGS_ID) " +
-                    "VALUES (?, ?)");
-            for (Tag tag : tags) {
-                insertLinkStmt.setLong(1, feedID);
-                insertLinkStmt.setLong(2, tag.getTagID());
-                insertLinkStmt.execute();
-            }
-            insertLinkStmt.close();
-        }
-    }
-
     private void saveFields(long feedID, Connection conn, List<AnalysisItem> analysisItems) throws SQLException {
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_TO_ANALYSIS_ITEM WHERE FEED_ID = ?");
         deleteStmt.setLong(1, feedID);
@@ -458,31 +430,6 @@ public class FeedStorage {
             }
             insertLinkStmt.close();
         }
-    }
-
-    public Set<Tag> getTags(long feedID, Connection conn) throws SQLException {
-        PreparedStatement queryTagsStmt = conn.prepareStatement("SELECT ANALYSIS_TAGS_ID FROM FEED_TO_TAG WHERE FEED_ID = ?");
-        queryTagsStmt.setLong(1, feedID);
-        Set<Long> tagIDs = new HashSet<Long>();
-        ResultSet rs = queryTagsStmt.executeQuery();
-        while (rs.next()) {
-            tagIDs.add(rs.getLong(1));
-        }
-        queryTagsStmt.close();
-        Set<Tag> tags = new HashSet<Tag>();
-        Session session = Database.instance().createSession(conn);
-        try {
-            for (Long tagID : tagIDs) {
-                List items = session.createQuery("from Tag where tagID = ?").setLong(0, tagID).list();
-                if (items.size() > 0) {
-                    Tag tag = (Tag) items.get(0);
-                    tags.add(tag);
-                }
-            }
-        } finally {
-            session.close();
-        }
-        return tags;
     }
 
     public void retrieveFields(FeedDefinition feedDefinition, Connection conn) throws SQLException {
@@ -619,7 +566,6 @@ public class FeedStorage {
         savePolicy(conn, feedDefinition.getDataFeedID(), feedDefinition.getUploadPolicy());
         saveFields(feedDefinition.getDataFeedID(), conn, feedDefinition.getFields());
         saveFolders(feedDefinition.getDataFeedID(), conn, feedDefinition.getFolders(), feedDefinition.getFields());
-        saveTags(feedDefinition.getDataFeedID(), conn, feedDefinition.getTags());
         clearProblems(feedDefinition.getDataFeedID(), conn);
         feedDefinition.exchangeTokens((EIConnection) conn, FlexContext.getHttpRequest(), null);
         feedDefinition.customStorage(conn);
@@ -711,7 +657,6 @@ public class FeedStorage {
             }
             feedDefinition.setMarmotScript(rs.getString(i));
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
-            feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
             feedDefinition.customLoad(conn);
         } else {
             throw new RuntimeException("Could not find data source " + identifier);

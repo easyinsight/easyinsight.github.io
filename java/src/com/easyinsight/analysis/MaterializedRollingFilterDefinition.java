@@ -32,6 +32,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     public static final int LAST_YEAR = 16;
     public static final int ALL_TIME = 17;
     public static final int CUSTOM = 18;
+    public static final int ALL = 19;
 
     private long limitDate;
     private long endDate;
@@ -317,6 +318,9 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     }
 
     public boolean allows(Value value) {
+        if (interval == MaterializedRollingFilterDefinition.ALL) {
+            return true;
+        }
         boolean allowed = false;
         if (interval == LAST_DAY) {
             allowed = true;

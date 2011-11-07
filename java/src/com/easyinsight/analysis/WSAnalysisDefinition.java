@@ -338,6 +338,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
                                 "All".equals(filterValueDefinition.getFilteredValues().get(0).toString())) {
                             continue;
                         }
+                    } else if (filter instanceof RollingFilterDefinition) {
+                        RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;
+                        if (rollingFilterDefinition.getInterval() == MaterializedRollingFilterDefinition.ALL) {
+                            continue;
+                        }
                     } else if (filter.isTrendFilter()) {
                         if (!(this instanceof WSKPIDefinition)) {
                             continue;

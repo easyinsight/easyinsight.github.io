@@ -1,7 +1,5 @@
 package com.easyinsight.groups;
 
-import com.easyinsight.analysis.Tag;
-
 import java.util.List;
 import java.util.ArrayList;
 
@@ -14,7 +12,6 @@ public class Group {
     private long groupID;
     private String name;
     private String description;
-    private List<Tag> tags;
     private List<GroupUser> groupUsers = new ArrayList<GroupUser>();
     private String urlKey;
 
@@ -57,12 +54,4 @@ public class Group {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    public List<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<Tag> tags) {
-        this.tags = tags;
-    }    
 }

@@ -156,15 +156,16 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
     public function set data(value:Object):void {
         _data = value;
         var color:uint = 0;
+        var text:String;
         if (value != null) {
             var field:String = analysisItem.qualifiedName();
             var formatter:Formatter = analysisItem.getFormatter();
             if (value[field] is Value) {
                 var objVal:Value = value[field];
                 if (objVal == null) {
-                    this.text = "";
+                    text = "";
                 } else {
-                    this.text = formatter.format(objVal.getValue());
+                    text = formatter.format(objVal.getValue());
                 }
                 if (_report is ListDefinition) {
                     var listDefinition:ListDefinition = _report as ListDefinition;
@@ -185,15 +186,17 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
             } else {
                 hyperlinked = false;
                 if (value[field] != null) {
-                    this.text = formatter.format(value[field]);
+                    text = formatter.format(value[field]);
                 } else {
-                    this.text = "";
+                    text = "";
                 }
 
             }
         } else {
-            this.text = "";
+            text = "";
         }
+
+        setText(text);
 
         var rext:TextReportFieldExtension = analysisItem.reportFieldExtension as TextReportFieldExtension;
         var align:String = "left";
@@ -206,6 +209,10 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         new StandardContextWindow(analysisItem, passThrough, this, value);
         invalidateProperties();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+    }
+
+    protected function setText(text:String):void {
+        this.text = text;
     }
 
     public function get data():Object {

@@ -954,38 +954,6 @@ public class SolutionService {
         return bytes;
     }
 
-    public List<Solution> getSolutionsWithTags(List<Tag> tags) {
-        List<Solution> solutions = new ArrayList<Solution>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            StringBuilder queryBuilder = new StringBuilder("SELECT SOLUTION.SOLUTION_ID FROM SOLUTION, SOLUTION_TAG WHERE SOLUTION_TAG.TAG_NAME IN (");
-            Iterator<Tag> tagIter = tags.iterator();
-            while (tagIter.hasNext()) {
-                tagIter.next();
-                queryBuilder.append("?");
-                if (tagIter.hasNext()) {
-                    queryBuilder.append(",");
-                }
-            }
-            queryBuilder.append(") AND SOLUTION_TAG.SOLUTION_ID = SOLUTION.SOLUTION_ID");
-            PreparedStatement querySolutionsStmt = conn.prepareStatement(queryBuilder.toString());
-            int i = 1;
-            for (Tag tag : tags) {
-                querySolutionsStmt.setString(i++, tag.getTagName());
-            }
-            ResultSet solutionIDRS = querySolutionsStmt.executeQuery();
-            while (solutionIDRS.next()) {
-                solutions.add(getSolution(solutionIDRS.getLong(1)));
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return solutions;
-    }
-
     public void addSolutionImage(byte[] bytes, long solutionID) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         Connection conn = Database.instance().getConnection();

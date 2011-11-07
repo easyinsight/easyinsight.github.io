@@ -19,6 +19,7 @@ package com.easyinsight.filtering
 		public static const LAST_FULL_WEEK:int = 13;
 		public static const LAST_FULL_MONTH:int = 14;        
 		public static const CUSTOM:int = 18;
+		public static const ALL:int = 19;
 
         public static const LAST:int = 0;
         public static const NEXT:int = 1;

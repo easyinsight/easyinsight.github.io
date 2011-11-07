@@ -1,10 +1,8 @@
 package com.easyinsight.groups;
 
 import com.easyinsight.util.RandomTextGenerator;
-import org.hibernate.Session;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.analysis.Tag;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.security.Roles;
@@ -63,7 +61,6 @@ public class GroupStorage {
         insertGroupStmt.execute();
         long groupID = Database.instance().getAutoGenKey(insertGroupStmt);
         addUserToGroup(userID, groupID, GroupToUserBinding.OWNER, conn);
-        saveTags(group.getTags(), groupID, conn);
         return groupID;
     }
 
@@ -103,7 +100,6 @@ public class GroupStorage {
                 group.setGroupID(groupID);
                 group.setDescription(description);
                 group.setUrlKey(urlKey);
-                group.setTags(new ArrayList<Tag>(getTags(groupID, conn)));
             }
         } finally {
             Database.closeConnection(conn);
@@ -122,7 +118,6 @@ public class GroupStorage {
             if (rows != 1) {
                 throw new RuntimeException("Update failed");
             }
-            saveTags(group.getTags(), group.getGroupID(), conn);
         } catch (Exception e) {
             try {
                 conn.rollback();
@@ -130,65 +125,6 @@ public class GroupStorage {
                 LogClass.error(e1);
             }
             throw new RuntimeException(e);
-        }
-    }
-
-    public Set<Tag> getTags(long groupID, Connection conn) throws SQLException {
-        PreparedStatement queryTagsStmt = conn.prepareStatement("SELECT ANALYSIS_TAGS_ID FROM GROUP_TO_TAG WHERE GROUP_ID = ?");
-        queryTagsStmt.setLong(1, groupID);
-        Set<Long> tagIDs = new HashSet<Long>();
-        ResultSet rs = queryTagsStmt.executeQuery();
-        while (rs.next()) {
-            tagIDs.add(rs.getLong(1));
-        }
-        queryTagsStmt.close();
-        Set<Tag> tags = new HashSet<Tag>();
-        Session session = Database.instance().createSession();
-        try {
-            session.beginTransaction();
-            for (Long tagID : tagIDs) {
-                List items = session.createQuery("from Tag where tagID = ?").setLong(0, tagID).list();
-                if (items.size() > 0) {
-                    Tag tag = (Tag) items.get(0);
-                    tags.add(tag);
-                }
-            }
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-        return tags;
-    }
-
-    private void saveTags(List<Tag> tags, long groupID, Connection conn) throws SQLException {
-        PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM GROUP_TO_TAG WHERE GROUP_ID = ?");
-        deleteStmt.setLong(1, groupID);
-        deleteStmt.executeUpdate();
-        deleteStmt.close();
-        if (tags != null) {
-            Session session = Database.instance().createSession(conn);
-            try {
-                for (Tag tag : tags) {
-                    
-                    session.saveOrUpdate(tag);
-                }
-                session.flush();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                session.close();
-            }
-            PreparedStatement insertLinkStmt = conn.prepareStatement("INSERT INTO GROUP_TO_TAG (GROUP_ID, ANALYSIS_TAGS_ID) " +
-                    "VALUES (?, ?)");
-            for (Tag tag : tags) {
-                insertLinkStmt.setLong(1, groupID);
-                insertLinkStmt.setLong(2, tag.getTagID());
-                insertLinkStmt.execute();
-            }
-            insertLinkStmt.close();
         }
     }
 

@@ -62,7 +62,7 @@ public class CalculationLogic {
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage() + " in calculating " + code, e);
+            throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of " + code, null));
         }
     }
 

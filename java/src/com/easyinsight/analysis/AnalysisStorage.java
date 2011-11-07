@@ -370,28 +370,6 @@ public class AnalysisStorage {
         return false;
     }
 
-    public Tag getTag(String tagName) {
-        Session session = Database.instance().createSession();
-        try {
-            session.beginTransaction();
-            Tag tag;
-            List results = session.createQuery("from Tag as tag where tag.tagName  = ?").setString(0, tagName).list();
-            if (results.size() > 0) {
-                tag = (Tag) results.get(0);
-            } else {
-                tag = new Tag(tagName);
-            }
-            session.getTransaction().commit();
-            return tag;
-        } catch (Exception e) {
-
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-    }
-
     public boolean canUserDelete(long userID, AnalysisDefinition analysisDefinition) {
         for (UserToAnalysisBinding binding : analysisDefinition.getUserBindings()) {
             if (binding.getUserID() == userID && binding.getRelationshipType() == UserPermission.OWNER) {

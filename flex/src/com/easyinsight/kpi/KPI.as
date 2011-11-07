@@ -37,7 +37,6 @@ public class KPI extends EventDispatcher {
     public var reports:ArrayCollection;
     public var kpiTrees:ArrayCollection;
 
-    public var tags:ArrayCollection = new ArrayCollection();
     public var filters:ArrayCollection;
     public var objectives:ArrayCollection;
 

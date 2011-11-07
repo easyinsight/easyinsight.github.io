@@ -146,6 +146,9 @@
                         dsList.data = desc;
                         this.dataSourceDescriptor = desc as DataSourceDescriptor;
                     }
+                    if (dataSourceDescriptor != null && dataSourceDescriptor.id == desc.id) {
+                        this.dataSourceDescriptor = desc as DataSourceDescriptor;
+                    }
                     dataSourceArray.push(desc);
                 }
             }

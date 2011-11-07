@@ -4,7 +4,6 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.pipeline.CleanupComponent;
 
 import java.util.ArrayList;
@@ -30,8 +29,6 @@ public class KPI implements Cloneable {
     private AnalysisMeasure analysisMeasure;
     private AnalysisDateDimension dateDimension;
     private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
-
-    private List<Tag> tags = new ArrayList<Tag>();
     
     private boolean goalDefined;
 
@@ -51,7 +48,6 @@ public class KPI implements Cloneable {
     private KPIOutcome kpiOutcome;
 
     private List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
-    private List<GoalTreeDescriptor> kpiTrees = new ArrayList<GoalTreeDescriptor>();
 
     private List<KPIUser> kpiUsers = new ArrayList<KPIUser>();
 
@@ -101,14 +97,6 @@ public class KPI implements Cloneable {
 
     public void setDayWindow(int dayWindow) {
         this.dayWindow = dayWindow;
-    }
-
-    public List<GoalTreeDescriptor> getKpiTrees() {
-        return kpiTrees;
-    }
-
-    public void setKpiTrees(List<GoalTreeDescriptor> kpiTrees) {
-        this.kpiTrees = kpiTrees;
     }
 
     public double getThreshold() {
@@ -228,14 +216,6 @@ public class KPI implements Cloneable {
 
     public void setFilters(List<FilterDefinition> filters) {
         this.filters = filters;
-    }
-
-    public List<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<Tag> tags) {
-        this.tags = tags;
     }
 
     public KPIOutcome getKpiOutcome() {

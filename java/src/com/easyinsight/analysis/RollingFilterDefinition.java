@@ -71,6 +71,11 @@ public class RollingFilterDefinition extends FilterDefinition {
         return new MaterializedRollingFilterDefinition(this, insightRequestMetadata == null ? null : insightRequestMetadata.getNow(), insightRequestMetadata);
     }
 
+    @Override
+    public boolean validForQuery() {
+        return interval != MaterializedRollingFilterDefinition.ALL && super.validForQuery();
+    }
+
     public String toQuerySQL(String tableName) {
         StringBuilder queryBuilder = new StringBuilder();
         if (interval == MaterializedRollingFilterDefinition.LAST_DAY) {

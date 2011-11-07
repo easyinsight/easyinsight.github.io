@@ -45,8 +45,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private long size;
     private Date dateCreated;
     private Date dateUpdated;
-    private boolean dataPersisted;    
-    private Collection<Tag> tags = new HashSet<Tag>();
+    private boolean dataPersisted;
     private String ownerName;
     private String attribution;
     private String description;
@@ -214,14 +213,6 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public void setDataPersisted(boolean dataPersisted) {
         this.dataPersisted = dataPersisted;
-    }
-
-    public Collection<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(Collection<Tag> tags) {
-        this.tags = tags;
     }
 
     public Date getDateCreated() {
@@ -414,11 +405,6 @@ public class FeedDefinition implements Cloneable, Serializable {
             analysisItem.updateIDs(replacements);
         }
         feedDefinition.setFields(clonedFields);
-        List<Tag> clonedTags = new ArrayList<Tag>();
-        for (Tag tag : tags) {
-            clonedTags.add(tag);
-        }
-        feedDefinition.setTags(clonedTags);
         feedDefinition.setVisible(visible);
         feedDefinition.setDataFeedID(0);
         feedDefinition.setApiKey(RandomTextGenerator.generateText(12));

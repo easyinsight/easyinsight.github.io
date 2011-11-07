@@ -6,11 +6,9 @@ import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.groups.Group;
 import com.easyinsight.groups.GroupService;
 import com.easyinsight.groups.GroupUser;
-import com.easyinsight.analysis.Tag;
 import com.easyinsight.security.Roles;
 
 import java.util.Arrays;
-import java.util.List;
 
 import test.util.TestUtil;
 
@@ -33,8 +31,6 @@ public class GroupTest extends TestCase {
         group.setName("Test Group");
         group.setDescription("Test Description");
 
-        List<Tag> tagList = Arrays.asList(new Tag("Test"), new Tag("Group"));
-        group.setTags(tagList);
         GroupUser groupUser = new GroupUser(userID, null, null, null, Roles.OWNER, null);
         group.setGroupUsers(Arrays.asList(groupUser));
         Group retrieved = groupService.addGroup(group);
