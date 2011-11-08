@@ -46,7 +46,7 @@ public class RollingRangeFilter extends HBox implements IFilter
         this._feedID = feedID;
         this._analysisItem = analysisItem;
         rangeOptions = new ArrayCollection();
-        rangeOptions.addItem(new RangeOption("All", RollingDateRangeFilterDefinition.ALL));
+        //rangeOptions.addItem(new RangeOption("All", RollingDateRangeFilterDefinition.ALL));
         rangeOptions.addItem(new RangeOption("Last Day", RollingDateRangeFilterDefinition.DAY));
         rangeOptions.addItem(new RangeOption("Last 7 Days", RollingDateRangeFilterDefinition.WEEK));
         rangeOptions.addItem(new RangeOption("Last 30 Days", RollingDateRangeFilterDefinition.MONTH));
