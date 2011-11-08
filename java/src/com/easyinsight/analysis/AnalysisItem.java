@@ -7,6 +7,7 @@ import javax.persistence.Table;
 import java.util.*;
 import java.io.Serializable;
 
+import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
@@ -427,15 +428,12 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     public List<AnalysisItem> addLinkItems(List<AnalysisItem> allItems) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         if (getLinks().size() > 0) {
-            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : allItems) {
-                List<AnalysisItem> myItems = keyMap.get(analysisItem.getKey().toKeyString());
-                if (myItems == null) {
-                    myItems = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), myItems);
-                }
-                myItems.add(analysisItem);
+            Key myKey = getKey();
+            DerivedKey myDerivedKey = null;
+            if (myKey instanceof DerivedKey) {
+                myDerivedKey = (DerivedKey) myKey;
             }
+            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
             for (AnalysisItem analysisItem : allItems) {
                 List<AnalysisItem> myItems = displayMap.get(analysisItem.toDisplay());
@@ -444,9 +442,21 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                     displayMap.put(analysisItem.toDisplay(), myItems);
                 }
                 myItems.add(analysisItem);
+                Key key = analysisItem.getKey();
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    if (myDerivedKey != null && derivedKey.getFeedID() != myDerivedKey.getFeedID()) {
+                        continue;
+                    }
+                }
+                keyMap.put(analysisItem.getKey().toDisplayName(), Arrays.asList(analysisItem));
             }
             for (Link link : getLinks()) {
-                items.addAll(link.neededKeys(keyMap, displayMap));
+                List<AnalysisItem> keys = link.neededKeys(keyMap, displayMap);
+                //Set<Key> keys = variableVisitor.getVariableList();
+                for (AnalysisItem key : keys) {
+                    items.add(key);
+                }
             }
         }
         return items;
