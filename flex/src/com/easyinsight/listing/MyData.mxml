@@ -144,7 +144,6 @@
                 if (desc.getType() == EIDescriptor.DATA_SOURCE) {
                     if (dsList != null && dsList.dataSourceDescriptor.id == desc.id) {
                         dsList.data = desc;
-                        this.dataSourceDescriptor = desc as DataSourceDescriptor;
                     }
                     if (dataSourceDescriptor != null && dataSourceDescriptor.id == desc.id) {
                         this.dataSourceDescriptor = desc as DataSourceDescriptor;

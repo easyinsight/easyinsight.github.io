@@ -46,7 +46,7 @@ public class RollingRangeFilter extends HBox implements IFilter
         this._feedID = feedID;
         this._analysisItem = analysisItem;
         rangeOptions = new ArrayCollection();
-        //rangeOptions.addItem(new RangeOption("All", RollingDateRangeFilterDefinition.ALL));
+        rangeOptions.addItem(new RangeOption("All", RollingDateRangeFilterDefinition.ALL));
         rangeOptions.addItem(new RangeOption("Last Day", RollingDateRangeFilterDefinition.DAY));
         rangeOptions.addItem(new RangeOption("Last 7 Days", RollingDateRangeFilterDefinition.WEEK));
         rangeOptions.addItem(new RangeOption("Last 30 Days", RollingDateRangeFilterDefinition.MONTH));
@@ -132,12 +132,21 @@ public class RollingRangeFilter extends HBox implements IFilter
         addChild(label);
 
         if (comboBox == null) {
+            var newFilter:Boolean = false;
+            if (rollingFilter == null) {
+                newFilter = true;
+                rollingFilter = new RollingDateRangeFilterDefinition();
+                rollingFilter.field = _analysisItem;
+            }
+            if (rollingFilter.intrinsic || rollingFilter.trendFilter) {
+                rangeOptions.removeItemAt(0);
+            }
             comboBox = new ComboBox();
-            comboBox.rowCount = 16;
+            comboBox.rowCount = 16 + ((rollingFilter.intrinsic || rollingFilter.trendFilter) ? 0 : 1);
             comboBox.dataProvider = rangeOptions;
             comboBox.addEventListener(DropdownEvent.CLOSE, filterValueChanged);
 
-            if (rollingFilter == null) {
+            if (newFilter) {
                 comboBox.selectedIndex = 0;
             } else {
                 for each (var rangeOption:RangeOption in rangeOptions) {
@@ -146,10 +155,7 @@ public class RollingRangeFilter extends HBox implements IFilter
                     }
                 }
             }
-            if (rollingFilter == null) {
-                rollingFilter = new RollingDateRangeFilterDefinition();
-                rollingFilter.field = _analysisItem;
-            }
+
             if (_loadingFromReport) {
                 _loadingFromReport = false;
             } else {

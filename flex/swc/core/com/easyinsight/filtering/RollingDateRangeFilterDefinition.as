@@ -26,7 +26,7 @@ package com.easyinsight.filtering
         public static const BEFORE:int = 2;
         public static const AFTER:int = 3; 
 
-		public var interval:int = DAY;
+		public var interval:int = ALL;
         public var customBeforeOrAfter:int = LAST;
         public var customIntervalType:int = 2;
         public var customIntervalAmount:int = 1;
