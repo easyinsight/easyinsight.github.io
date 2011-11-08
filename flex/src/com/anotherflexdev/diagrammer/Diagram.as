@@ -104,8 +104,8 @@ import mx.core.ClassFactory;
                 var node:BaseNode = event.dragSource.dataForFormat("node") as BaseNode;
                 var pt:Point = new Point(event.localX, event.localY);
                 pt = event.target.localToContent(pt);
-                node.x = pt.x - Number(event.dragSource.dataForFormat("mouseX"));//.stageX
-                node.y = pt.y - Number(event.dragSource.dataForFormat("mouseY"));//.stageY
+                node.x = Math.round((pt.x - Number(event.dragSource.dataForFormat("mouseX"))) / 10) * 10;//.stageX
+                node.y = Math.round((pt.y - Number(event.dragSource.dataForFormat("mouseY"))) / 10) * 10;//.stageY
             }
 		}
 				
