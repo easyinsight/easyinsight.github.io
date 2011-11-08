@@ -922,7 +922,9 @@ public class UserUploadService {
             return credentialsResponse;
         } catch (Exception e) {
             LogClass.error(e);
-            conn.rollback();
+            if (!conn.getAutoCommit()) {
+                conn.rollback();
+            }
             throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);

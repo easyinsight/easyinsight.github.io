@@ -61,34 +61,36 @@ public class ReportCalculation {
         CalculationTreeNode tree;
         Set<KeySpecification> specs;
 
-            ICalculationTreeVisitor visitor;
-            CalculationsParser.startExpr_return ret;
+        ICalculationTreeVisitor visitor;
+        CalculationsParser.startExpr_return ret;
 
-            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
-            CommonTokenStream tokes = new CommonTokenStream();
-            tokes.setTokenSource(lexer);
-            CalculationsParser parser = new CalculationsParser(tokes);
-            parser.setTreeAdaptor(new NodeFactory());
+        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
+        CommonTokenStream tokes = new CommonTokenStream();
+        tokes.setTokenSource(lexer);
+        CalculationsParser parser = new CalculationsParser(tokes);
+        parser.setTreeAdaptor(new NodeFactory());
 
-            try {
-                ret = parser.startExpr();
-                tree = (CalculationTreeNode) ret.getTree();
+        try {
+            ret = parser.startExpr();
+            tree = (CalculationTreeNode) ret.getTree();
 
-                visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
-                tree.accept(visitor);
-            }  catch (FunctionException fe) {
-                throw fe;
-            } catch (ReportException re) {
-                throw re;
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage() + " in calculating " + calculationString, e);
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            tree.accept(visitor);
+        } catch (FunctionException fe) {
+            throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + calculationString + ".", null));
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
+                throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + calculationString + ".", null));
             }
+            throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of " + calculationString + ".", null));
+        }
 
-            VariableListVisitor variableVisitor = new VariableListVisitor();
-            tree.accept(variableVisitor);
+        VariableListVisitor variableVisitor = new VariableListVisitor();
+        tree.accept(variableVisitor);
 
-            specs = variableVisitor.getVariableList();
-
+        specs = variableVisitor.getVariableList();
 
 
         List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
@@ -119,7 +121,7 @@ public class ReportCalculation {
         parser.setTreeAdaptor(new NodeFactory());
         ret = parser.expr();
         calculationTreeNode = (CalculationTreeNode) ret.getTree();
-        for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
+        for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
             if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
                 calculationTreeNode.deleteChild(i);
                 break;
@@ -223,7 +225,7 @@ public class ReportCalculation {
             parser.setTreeAdaptor(new NodeFactory());
             ret = parser.expr();
             calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
+            for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
                 if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
                     calculationTreeNode.deleteChild(i);
                     break;
@@ -259,7 +261,7 @@ public class ReportCalculation {
                 }
                 items.add(analysisItem);
             }
-            DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap,  displayMap);
+            DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setFilterDefinition(filterDefinition);
             calculationMetadata.setDataSet(dataSet);
@@ -274,7 +276,7 @@ public class ReportCalculation {
             parser.setTreeAdaptor(new NodeFactory());
             ret = parser.expr();
             calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
+            for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
                 if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
                     calculationTreeNode.deleteChild(i);
                     break;
@@ -310,7 +312,7 @@ public class ReportCalculation {
                 }
                 items.add(analysisItem);
             }
-            DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap,  displayMap);
+            DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setReport(report);
             calculationMetadata.setDataSet(dataSet);
@@ -325,7 +327,7 @@ public class ReportCalculation {
             parser.setTreeAdaptor(new NodeFactory());
             ret = parser.expr();
             calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
+            for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
                 if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
                     calculationTreeNode.deleteChild(i);
                     break;
@@ -374,7 +376,7 @@ public class ReportCalculation {
             parser.setTreeAdaptor(new NodeFactory());
             ret = parser.expr();
             calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
+            for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
                 if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
                     calculationTreeNode.deleteChild(i);
                     break;

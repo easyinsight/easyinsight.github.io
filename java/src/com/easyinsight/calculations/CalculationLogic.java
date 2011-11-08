@@ -3,6 +3,7 @@ package com.easyinsight.calculations;
 import com.easyinsight.analysis.*;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.generated.CalculationsParser;
+import com.easyinsight.logging.LogClass;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 
@@ -62,6 +63,10 @@ public class CalculationLogic {
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
+            if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
+                throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + code + ".", null));
+            }
+            LogClass.error(e);
             throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of " + code, null));
         }
     }
