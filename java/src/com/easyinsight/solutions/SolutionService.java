@@ -68,7 +68,7 @@ public class SolutionService {
             Session session = Database.instance().createSession(conn);
             while (rs.next()) {
                 long reportID = rs.getLong(1);
-                installReport(reportID, solutionKPIData.getDataSourceID(), conn, session, false);
+                installReport(reportID, solutionKPIData.getDataSourceID(), conn, session, false, true);
             }
 
             PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID FROM DASHBOARD, DATA_FEED " +
@@ -81,7 +81,7 @@ public class SolutionService {
             ResultSet dashboardRS = dashboardQueryStmt.executeQuery();
             while (dashboardRS.next()) {
                 long dashboardID = dashboardRS.getLong(1);
-                installDashboard(dashboardID, solutionKPIData.getDataSourceID(), conn, session, false);
+                installDashboard(dashboardID, solutionKPIData.getDataSourceID(), conn, session, false, true);
             }
             session.close();
             conn.commit();
@@ -471,7 +471,7 @@ public class SolutionService {
         try {
             conn.setAutoCommit(false);
             Session session = Database.instance().createSession(conn);
-            DashboardDescriptor dashboardDescriptor = installDashboard(dashboardID, dataSourceID, conn, session, true);
+            DashboardDescriptor dashboardDescriptor = installDashboard(dashboardID, dataSourceID, conn, session, true, false);
 
             session.flush();
 
@@ -489,7 +489,8 @@ public class SolutionService {
         }
     }
 
-    private DashboardDescriptor installDashboard(long dashboardID, long dataSourceID, EIConnection conn, Session session, boolean temporaryDashboard) throws Exception {
+    private DashboardDescriptor installDashboard(long dashboardID, long dataSourceID, EIConnection conn, Session session, boolean temporaryDashboard,
+                                                 boolean makeAccountVisible) throws Exception {
         DashboardStorage dashboardStorage = new DashboardStorage();
         FeedStorage feedStorage = new FeedStorage();
         Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
@@ -519,6 +520,7 @@ public class SolutionService {
 
         for (AnalysisDefinition copiedReport : reportList) {
             copiedReport.setTemporaryReport(temporaryDashboard);
+            copiedReport.setAccountVisible(makeAccountVisible);
             new AnalysisStorage().saveAnalysis(copiedReport, session);
         }
 
@@ -553,6 +555,7 @@ public class SolutionService {
         Dashboard copiedDashboard = dashboard.cloneDashboard(reportReplacementMap, scorecardReplacementMap, true, targetDataSource.getFields(), targetDataSource);
         copiedDashboard.setTemporary(temporaryDashboard);
         copiedDashboard.setDataSourceID(dataSourceID);
+        copiedDashboard.setAccountVisible(makeAccountVisible);
 
         dashboardStorage.saveDashboard(copiedDashboard, conn);
 
@@ -567,7 +570,7 @@ public class SolutionService {
 
 
             Session session = Database.instance().createSession(conn);
-            InsightDescriptor insightDescriptor = installReport(reportID, dataSourceID, conn, session, true);
+            InsightDescriptor insightDescriptor = installReport(reportID, dataSourceID, conn, session, true, false);
             conn.commit();
             session.close();
             return insightDescriptor;
@@ -581,7 +584,7 @@ public class SolutionService {
         }
     }
 
-    private InsightDescriptor installReport(long reportID, long dataSourceID, EIConnection conn, Session session, boolean keepTemporary) throws SQLException, CloneNotSupportedException {
+    private InsightDescriptor installReport(long reportID, long dataSourceID, EIConnection conn, Session session, boolean keepTemporary, boolean makeAccountVisible) throws SQLException, CloneNotSupportedException {
         AnalysisDefinition originalBaseReport = new AnalysisStorage().getPersistableReport(reportID, session);
         //FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
         // okay, we might have multiple reports here...
@@ -606,6 +609,7 @@ public class SolutionService {
 
         for (AnalysisDefinition copiedReport : reportList) {
             copiedReport.setTemporaryReport(keepTemporary);
+            copiedReport.setAccountVisible(makeAccountVisible);
             new AnalysisStorage().saveAnalysis(copiedReport, session);
         }
 

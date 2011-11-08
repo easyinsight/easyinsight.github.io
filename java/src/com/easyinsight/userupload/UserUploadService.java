@@ -115,6 +115,7 @@ public class UserUploadService {
     }
 
     public MyDataTree getFeedAnalysisTree(boolean onlyMyData, long groupID) {
+        onlyMyData = false;
         long userID = SecurityUtil.getUserID();
         long accountID = SecurityUtil.getAccountID();
         EIConnection conn = Database.instance().getConnection();
