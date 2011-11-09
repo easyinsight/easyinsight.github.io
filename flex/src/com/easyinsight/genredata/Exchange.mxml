@@ -204,9 +204,9 @@
                     label="Refresh Listing"/>
         </mx:HBox>
         <mx:Label text="Recommended Reports and Dashboards" fontSize="16" fontWeight="bold"/>
-            <genredata:SolutionExchangeGridPage dataProvider="{recommendedReports}" verticalScrollPolicy="off" id="recGrid"/>
+        <genredata:SolutionExchangeGridPage dataProvider="{recommendedReports}" verticalScrollPolicy="off" id="recGrid"/>
         <mx:Label text="All Reports and Dashboards" fontSize="16" fontWeight="bold"/>
-            <genredata:SolutionExchangeGridPage dataProvider="{reports}" height="100%" verticalScrollPolicy="off" id="reportGrid"/>
+        <genredata:SolutionExchangeGridPage dataProvider="{reports}" height="100%" verticalScrollPolicy="off" id="reportGrid"/>
 
     </mx:VBox>
     </mx:Canvas>
