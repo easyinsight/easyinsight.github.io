@@ -60,6 +60,17 @@ public class CalcGraph {
                 AnalysisItem calcNode = iterator.next();
                 if (calcNode.hasType(AnalysisItemTypes.CALCULATION)) {
                     components.add(new CalculationComponent((AnalysisCalculation) calcNode));
+                    if (calcNode.getFilters() != null && !rowLevel) {
+                        FieldFilterComponent fieldFilterComponent = new FieldFilterComponent();
+                        components.add(fieldFilterComponent);
+                        for (FilterDefinition filterDefinition : calcNode.getFilters()) {
+                            if (filterDefinition.getField() != null) {
+                                fieldFilterComponent.addFilterPair(calcNode, filterDefinition);
+                            } else {
+                                components.addAll(filterDefinition.createComponents(true, new FieldFilterProcessor(calcNode), calcNode, true));
+                            }
+                        }
+                    }
                 } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                     components.add(new DerivedGroupingComponent((DerivedAnalysisDimension) calcNode));
                 } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DATE)) {

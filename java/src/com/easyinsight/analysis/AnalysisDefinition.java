@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.security.SecurityUtil;
@@ -538,10 +539,13 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setAnalysisID(analysisID);
         analysisDefinition.setDataFeedID(dataFeedID);
         if (getAddedItems() != null) {
-            analysisDefinition.setAddedItems(new ArrayList<AnalysisItem>(getAddedItems()));
-            for (AnalysisItem analysisItem : analysisDefinition.getAddedItems()) {
+            List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
+            for (AnalysisItem analysisItem : getAddedItems()) {
+                analysisItem = (AnalysisItem) Database.deproxy(analysisItem);
                 analysisItem.afterLoad();
+                addedItems.add(analysisItem);
             }
+            analysisDefinition.setAddedItems(addedItems);
         }
         analysisDefinition.setName(title);
         analysisDefinition.setFilterDefinitions(FilterDefinitionConverter.fromPersistableFilters(filterDefinitions));

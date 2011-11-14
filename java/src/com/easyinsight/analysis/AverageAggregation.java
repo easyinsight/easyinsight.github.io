@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.NumericValue;
 
@@ -14,14 +15,19 @@ public class AverageAggregation extends Aggregation {
     private int points;
 
     public void addValue(Value value) {
-        Double valueObj = value.toDouble();
-        if (valueObj != null) {
-            total += valueObj;
-            points++;
+        if (value.type() != Value.EMPTY) {
+            Double valueObj = value.toDouble();
+            if (valueObj != null) {
+                total += valueObj;
+                points++;
+            }
         }
     }
 
     public Value getValue() {
+        if (points == 0) {
+            return new EmptyValue();
+        }
         return new NumericValue(total / points);
     }
 }

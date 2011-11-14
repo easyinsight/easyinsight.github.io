@@ -78,6 +78,12 @@ public class StandardReportPipeline extends Pipeline {
         components.add(fieldFilterComponent);
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getFilters() != null) {
+                if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
+                    if (!analysisCalculation.isApplyBeforeAggregation()) {
+                        continue;
+                    }
+                }
                 for (FilterDefinition filterDefinition : analysisItem.getFilters()) {
                     if (filterDefinition.getField() != null) {
                         fieldFilterComponent.addFilterPair(analysisItem, filterDefinition);
@@ -95,18 +101,22 @@ public class StandardReportPipeline extends Pipeline {
 
         // done with row level operations, clean everything up
 
-        components.add(new CleanupComponent(CleanupComponent.AGGREGATE_CALCULATIONS));
+        boolean measureFilter = false;
+        for (AnalysisItem analysisCalculation : items(AnalysisItemTypes.CALCULATION, allNeededAnalysisItems)) {
+            if (analysisCalculation.getFilters() != null && analysisCalculation.getFilters().size() > 0) {
+                measureFilter = true;
+            }
+        }
+
+        components.add(new CleanupComponent(CleanupComponent.AGGREGATE_CALCULATIONS, measureFilter));
         components.add(new NormalizationComponent());
         components.add(new AggregationComponent());
 
-        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, false));
-
-        /*for (AnalysisItem reaggregate : items(AnalysisItemTypes.REAGGREGATE_MEASURE, allNeededAnalysisItems)) {
-            components.add(new ReaggregateComponent((ReaggregateAnalysisMeasure) reaggregate));
-        }*/
+        List<IComponent> postAggCalculations = new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, false);
+        components.addAll(postAggCalculations);
 
         // need another cleanup component here...
-        components.add(new CleanupComponent(0));
+        components.add(new CleanupComponent(0, false));
 
         components.add(new AggregationComponent(AggregationTypes.RANK));
 

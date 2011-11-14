@@ -19,8 +19,11 @@ public class CleanupComponent implements IComponent {
 
     private int cleanupCriteria;
 
-    public CleanupComponent(int cleanupCriteria) {
+    private boolean keepFilters;
+
+    public CleanupComponent(int cleanupCriteria, boolean keepFilters) {
         this.cleanupCriteria = cleanupCriteria;
+        this.keepFilters = keepFilters;
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
@@ -30,14 +33,14 @@ public class CleanupComponent implements IComponent {
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 if (filterDefinition.isEnabled() && !filterDefinition.isApplyBeforeAggregation()) {
-                    List<AnalysisItem> items = filterDefinition.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, false, cleanupCriteria);
+                    List<AnalysisItem> items = filterDefinition.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, cleanupCriteria);
                     allNeededAnalysisItems.addAll(items);
                 }
             }
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
-                List<AnalysisItem> baseItems = item.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, false, cleanupCriteria);
+                List<AnalysisItem> baseItems = item.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, cleanupCriteria);
                 allNeededAnalysisItems.addAll(baseItems);
                 List<AnalysisItem> linkItems = item.addLinkItems(pipelineData.getAllItems());
                 allNeededAnalysisItems.addAll(linkItems);
@@ -47,7 +50,7 @@ public class CleanupComponent implements IComponent {
             StringTokenizer toker = new StringTokenizer(report.getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
-                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, pipelineData.getAllItems(), allRequestedAnalysisItems, false, true, AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, AGGREGATE_CALCULATIONS);
                 allNeededAnalysisItems.addAll(items);
             }
         }

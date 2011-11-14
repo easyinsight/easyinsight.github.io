@@ -343,7 +343,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         if (rollingFilterDefinition.getInterval() == MaterializedRollingFilterDefinition.ALL) {
                             continue;
                         }
-                    } else if (filter.isTrendFilter()) {
+                    }
+                    if (filter.isTrendFilter()) {
                         if (!(this instanceof WSKPIDefinition)) {
                             continue;
                         }

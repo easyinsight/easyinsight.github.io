@@ -721,6 +721,13 @@ public class DataService {
                     new ReportCalculation(line).apply(analysisDefinition, allFields, feed, conn, dlsFilters);
                 }
             }
+            if (feed.getDataSource().getMarmotScript() != null) {
+                StringTokenizer toker = new StringTokenizer(feed.getDataSource().getMarmotScript(), "\r\n");
+                while (toker.hasMoreTokens()) {
+                    String line = toker.nextToken();
+                    new ReportCalculation(line).apply(analysisDefinition, allFields, feed, conn, dlsFilters);
+                }
+            }
             //new ReportCalculation("replacefields(\"Procedures\", \"*PT/OT*\")").apply(analysisDefinition, allFields);
             //new ReportCalculation("equals([Group Name], \"Atlantic Orthopedics\", addfield(\"Charges\"))").apply(analysisDefinition, allFields, feed, conn, dlsFilters);
             /*new ReportCalculation("copyfields(\"2009 Procedures\", \"2009 !0#\", \"9*-PT/OT*\")").apply(analysisDefinition, allFields);

@@ -124,9 +124,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
 
 
 
-        List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
-
-        analysisItemList.add(this);
+        List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria);
 
         if (!includeFilters && isApplyBeforeAggregation()) return analysisItemList;
 

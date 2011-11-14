@@ -1,6 +1,7 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.definitions.WSVerticalListDefinition;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
@@ -12,7 +13,7 @@ import com.easyinsight.core.Value;
  */
 public class AddReportField extends Function {
     public Value evaluate() {
-        if (calculationMetadata.getReport() != null) {
+        if (calculationMetadata.getReport() != null && calculationMetadata.getReport().getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
             String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
             AnalysisItem fieldToAdd = null;
             for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
