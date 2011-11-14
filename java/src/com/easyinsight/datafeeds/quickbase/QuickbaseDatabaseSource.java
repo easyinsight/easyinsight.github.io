@@ -137,9 +137,35 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         String host = quickbaseCompositeSource.getHost();
         String fullPath = "https://" + host + "/db/" + databaseID;
         if (databaseID.equals("beutk2zd6")) {
-            return acsDataLogRetrieval(IDataStorage, conn, quickbaseCompositeSource, sessionTicket, applicationToken, fullPath);
+            try {
+                return acsDataLogRetrieval(IDataStorage, conn, quickbaseCompositeSource, sessionTicket, applicationToken, fullPath);
+            } catch (ReportException e) {
+                if (quickbaseCompositeSource.isPreserveCredentials()) {
+                    try {
+                        quickbaseCompositeSource.exchangeTokens(conn, null, null);
+                    } catch (Exception e1) {
+                        throw new RuntimeException(e1);
+                    }
+                    return acsDataLogRetrieval(IDataStorage, conn, quickbaseCompositeSource, quickbaseCompositeSource.getSessionTicket(), applicationToken, fullPath);
+                } else {
+                    throw e;
+                }
+            }
         } else {
-            return normalRetrieval(IDataStorage, conn, quickbaseCompositeSource, sessionTicket, applicationToken, fullPath);
+            try {
+                return normalRetrieval(IDataStorage, conn, quickbaseCompositeSource, sessionTicket, applicationToken, fullPath);
+            } catch (ReportException e) {
+                if (quickbaseCompositeSource.isPreserveCredentials()) {
+                    try {
+                        quickbaseCompositeSource.exchangeTokens(conn, null, null);
+                    } catch (Exception e1) {
+                        throw new RuntimeException(e1);
+                    }
+                    return normalRetrieval(IDataStorage, conn, quickbaseCompositeSource, quickbaseCompositeSource.getSessionTicket(), applicationToken, fullPath);
+                } else {
+                    throw e;
+                }
+            }
         }
     }
 
@@ -157,6 +183,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
             AnalysisItem wtdProcedures = null;
             AnalysisItem initEvalsItem = null;
+            AnalysisItem hoursItem = null;
             StringBuilder columnBuilder = new StringBuilder();
             Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
             for (AnalysisItem analysisItem : getFields()) {
@@ -164,6 +191,8 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     wtdProcedures = analysisItem;
                 } else if ("Init Evals".equals(analysisItem.toDisplay())) {
                     initEvalsItem = analysisItem;
+                } else if ("Hr".equals(analysisItem.toDisplay())) {
+                    hoursItem = analysisItem;
                 }
                 if (analysisItem.getKey().indexed()) {
                     String fieldID = analysisItem.getKey().toBaseKey().toKeyString().split("\\.")[1];
@@ -257,6 +286,9 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         Elements childElements = record.getChildElements();
                         double initEvalsPMR = 0;
                         double initEvalsFD = 0;
+                        double hrOverride = 0;
+                        double hrPatientFD = 0;
+                        double hrWeekPerFD = 0;
                         for (int j = 0; j < childElements.size(); j++) {
                             Element childElement = childElements.get(j);
                             if (childElement.getLocalName().equals("f")) {
@@ -267,6 +299,12 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                     initEvalsPMR = Double.parseDouble(value);
                                 } else if ("42".equals(fieldID)) {
                                     initEvalsFD = Double.parseDouble(value);
+                                } else if ("445".equals(fieldID)) {
+                                    hrOverride = Double.parseDouble(value);
+                                } else if ("109".equals(fieldID)) {
+                                    hrPatientFD = Double.parseDouble(value);
+                                } else if ("112".equals(fieldID)) {
+                                    hrWeekPerFD = Double.parseDouble(value);
                                 }
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
                                     Date shiftedDate = new Date(Long.parseLong(value) - (7 * 60 * 60 * 1000));
@@ -282,7 +320,16 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         } else {
                             initEvals = initEvalsFD;
                         }
+                        double hours;
+                        if (hrOverride > 0) {
+                            hours = hrOverride;
+                        } else if (hrPatientFD > 0) {
+                            hours = hrPatientFD;
+                        } else {
+                            hours = hrWeekPerFD;
+                        }
                         row.addValue(initEvalsItem.createAggregateKey(), initEvals);
+                        row.addValue(hoursItem.createAggregateKey(), hours);
                     }
                     //dataSet = new DataSet();
 
