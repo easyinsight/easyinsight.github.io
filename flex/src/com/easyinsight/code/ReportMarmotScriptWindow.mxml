@@ -35,7 +35,7 @@
             PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
-    <mx:TabNavigator>
+    <mx:TabNavigator creationPolicy="all">
         <mx:Box label="Before Load">
             <mx:TextArea editable="true" borderStyle="solid" borderThickness="1" width="700"
                  height="400" id="scriptArea" text="{script}"/>
