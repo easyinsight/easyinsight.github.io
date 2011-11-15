@@ -13,7 +13,7 @@ import com.easyinsight.core.Value;
  */
 public class AddFieldToFilter extends Function {
     public Value evaluate() {
-        if (calculationMetadata.getFilterDefinition() != null) {
+        if (calculationMetadata.getFilterDefinition() != null && calculationMetadata.getFilterDefinition() instanceof AnalysisItemFilterDefinition) {
             String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
             AnalysisItem fieldToAdd = null;
             for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {

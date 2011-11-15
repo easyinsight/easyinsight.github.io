@@ -40,11 +40,13 @@ import mx.formatters.NumberBaseRoundType;
 					var currencyFormatter:CurrencyFormatter = new EICurrencyFormatter();
 					currencyFormatter.precision = precision;
                     currencyFormatter.currencySymbol = User.getInstance() == null ? "$" : User.getInstance().currencySymbol;
+                    currencyFormatter.rounding = numberFormatter.rounding = NumberBaseRoundType.NEAREST;
 					formatter = currencyFormatter;
 					break;
 				case PERCENTAGE:
                     var percentageFormatter:PercentageNumberFormatter = new PercentageNumberFormatter();
                     percentageFormatter.precision = precision;
+                    percentageFormatter.rounding = NumberBaseRoundType.NEAREST;
                     formatter = percentageFormatter;
                     break;
                 case MILLISECONDS:

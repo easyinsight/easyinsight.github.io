@@ -14,7 +14,7 @@ import java.util.Iterator;
  */
 public class RemoveFieldFromFilter extends Function {
     public Value evaluate() {
-        if (calculationMetadata.getFilterDefinition() != null) {
+        if (calculationMetadata.getFilterDefinition() != null && calculationMetadata.getFilterDefinition() instanceof AnalysisItemFilterDefinition) {
             String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
             AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) calculationMetadata.getFilterDefinition();
             Iterator<AnalysisItem> iter = analysisItemFilterDefinition.getAvailableItems().iterator();

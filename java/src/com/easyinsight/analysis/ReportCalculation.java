@@ -253,6 +253,7 @@ public class ReportCalculation {
                 items.add(analysisItem);
             }
 
+
             for (AnalysisItem analysisItem : allFields) {
                 List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
                 if (items == null) {

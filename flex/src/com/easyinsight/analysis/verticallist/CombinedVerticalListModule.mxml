@@ -17,6 +17,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.TextValueExtension;
         import com.easyinsight.analysis.Value;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.MultiFlatDateFilterDefinition;
@@ -117,13 +118,19 @@
                             atLeastOneValue = true;
                         }
                         var text:String;
+                        var color:uint = 0;
                         if (measureValue != null) {
+                            if (measureValue.valueExtension != null) {
+                                var ext:TextValueExtension = measureValue.valueExtension as TextValueExtension;
+                                color = ext.color;
+                            }
                             var num:Number = measureValue.toNumber();
                             text = formatter.format(num);
                         } else {
                             text = "";
                         }
                         obj[columnValue] = text;
+                        obj[columnValue + "color"] = color;
                         obj[columnValue + "measure"] = applyMeasure;
                         var columnSize:int = columnWidths[columnValue];
                         var firstRow:Boolean = firstRows[columnValue];

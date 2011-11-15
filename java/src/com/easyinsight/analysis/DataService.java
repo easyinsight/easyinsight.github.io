@@ -718,14 +718,26 @@ public class DataService {
                 StringTokenizer toker = new StringTokenizer(analysisDefinition.getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
-                    new ReportCalculation(line).apply(analysisDefinition, allFields, feed, conn, dlsFilters);
+                    try {
+                        new ReportCalculation(line).apply(analysisDefinition, allFields, feed, conn, dlsFilters);
+                    } catch (ReportException re) {
+                        throw re;
+                    } catch (Exception e) {
+                        throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of report code " + line + ".", null));
+                    }
                 }
             }
             if (feed.getDataSource().getMarmotScript() != null) {
                 StringTokenizer toker = new StringTokenizer(feed.getDataSource().getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
-                    new ReportCalculation(line).apply(analysisDefinition, allFields, feed, conn, dlsFilters);
+                    try {
+                        new ReportCalculation(line).apply(analysisDefinition, allFields, feed, conn, dlsFilters);
+                    } catch (ReportException re) {
+                        throw re;
+                    } catch (Exception e) {
+                        throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of data source code " + line + ".", null));
+                    }
                 }
             }
             //new ReportCalculation("replacefields(\"Procedures\", \"*PT/OT*\")").apply(analysisDefinition, allFields);

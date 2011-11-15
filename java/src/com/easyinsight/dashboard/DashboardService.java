@@ -314,6 +314,13 @@ public class DashboardService {
                                 new ReportCalculation(line).apply(filterDefinition, feed.getFields(), feed, conn, dlsFilters);
                             }
                         }
+                        if (feed.getDataSource().getMarmotScript() != null) {
+                            StringTokenizer toker = new StringTokenizer(feed.getDataSource().getMarmotScript(), "\r\n");
+                            while (toker.hasMoreTokens()) {
+                                String line = toker.nextToken();
+                                new ReportCalculation(line).apply(filterDefinition, feed.getFields(), feed, conn, dlsFilters);
+                            }
+                        }
                     }
                 }
             }

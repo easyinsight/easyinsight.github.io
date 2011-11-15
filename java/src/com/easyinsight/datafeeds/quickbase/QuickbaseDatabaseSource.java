@@ -184,6 +184,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             AnalysisItem wtdProcedures = null;
             AnalysisItem initEvalsItem = null;
             AnalysisItem hoursItem = null;
+            AnalysisItem visitsItem = null;
             StringBuilder columnBuilder = new StringBuilder();
             Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
             for (AnalysisItem analysisItem : getFields()) {
@@ -193,6 +194,8 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     initEvalsItem = analysisItem;
                 } else if ("Hr".equals(analysisItem.toDisplay())) {
                     hoursItem = analysisItem;
+                } else if ("Visits".equals(analysisItem.toDisplay())) {
+                    visitsItem = analysisItem;
                 }
                 if (analysisItem.getKey().indexed()) {
                     String fieldID = analysisItem.getKey().toBaseKey().toKeyString().split("\\.")[1];
@@ -285,10 +288,15 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         masterCount++;
                         Elements childElements = record.getChildElements();
                         double initEvalsPMR = 0;
-                        double initEvalsFD = 0;
+                        double initEvalsScheduled = 0;
                         double hrOverride = 0;
                         double hrPatientFD = 0;
                         double hrWeekPerFD = 0;
+                        double visitsOverride = 0;
+                        double visitsPerFD = 0;
+                        double fuvCXNS = 0;
+                        double initEvalCXNS = 0;
+                        double visitsScheduled = 0;
                         for (int j = 0; j < childElements.size(); j++) {
                             Element childElement = childElements.get(j);
                             if (childElement.getLocalName().equals("f")) {
@@ -300,9 +308,9 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                         initEvalsPMR = Double.parseDouble(value);
                                     } catch (NumberFormatException e) {
                                     }
-                                } else if ("42".equals(fieldID)) {
+                                } else if ("40".equals(fieldID)) {
                                     try {
-                                        initEvalsFD = Double.parseDouble(value);
+                                        initEvalsScheduled = Double.parseDouble(value);
                                     } catch (NumberFormatException e) {
                                     }
                                 } else if ("445".equals(fieldID)) {
@@ -320,6 +328,31 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                         hrWeekPerFD = Double.parseDouble(value);
                                     } catch (NumberFormatException e) {
                                     }
+                                } else if ("442".equals(fieldID)) {
+                                    try {
+                                        visitsOverride = Double.parseDouble(value);
+                                    } catch (NumberFormatException e) {
+                                    }
+                                } else if ("58".equals(fieldID)) {
+                                    try {
+                                        visitsPerFD = Double.parseDouble(value);
+                                    } catch (NumberFormatException e) {
+                                    }
+                                } else if ("48".equals(fieldID)) {
+                                    try {
+                                        fuvCXNS = Double.parseDouble(value);
+                                    } catch (NumberFormatException e) {
+                                    }
+                                } else if ("41".equals(fieldID)) {
+                                    try {
+                                        initEvalCXNS = Double.parseDouble(value);
+                                    } catch (NumberFormatException e) {
+                                    }
+                                } else if ("55".equals(fieldID)) {
+                                    try {
+                                        visitsScheduled = Double.parseDouble(value);
+                                    } catch (NumberFormatException e) {
+                                    }
                                 }
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
                                     Date shiftedDate = new Date(Long.parseLong(value) - (7 * 60 * 60 * 1000));
@@ -333,7 +366,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         if (initEvalsPMR > 0) {
                             initEvals = initEvalsPMR;
                         } else {
-                            initEvals = initEvalsFD;
+                            initEvals = initEvalsScheduled - initEvalCXNS;
                         }
                         double hours;
                         if (hrOverride > 0) {
@@ -343,8 +376,15 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         } else {
                             hours = hrWeekPerFD;
                         }
+                        double visits;
+                        if (visitsOverride > 0) {
+                            visits = visitsOverride;
+                        } else {
+                            visits = visitsScheduled - initEvalCXNS - fuvCXNS;
+                        }
                         row.addValue(initEvalsItem.createAggregateKey(), initEvals);
                         row.addValue(hoursItem.createAggregateKey(), hours);
+                        row.addValue(visitsItem.createAggregateKey(), visits);
                     }
                     //dataSet = new DataSet();
 

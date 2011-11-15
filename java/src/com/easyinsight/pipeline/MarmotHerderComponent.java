@@ -1,9 +1,6 @@
 package com.easyinsight.pipeline;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.DataResults;
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.ReportCalculation;
+import com.easyinsight.analysis.*;
 import com.easyinsight.calculations.FieldDecorationCalculationLogic;
 import com.easyinsight.dataset.DataSet;
 
@@ -21,7 +18,13 @@ public class MarmotHerderComponent implements IComponent {
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 for (IRow row : dataSet.getRows()) {
-                    new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), pipelineData.getAllItems(), row);
+                    try {
+                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), pipelineData.getAllItems(), row);
+                    } catch (ReportException re) {
+                        throw re;
+                    } catch (Exception e) {
+                        throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of report code " + line + ".", null));
+                    }
                 }
             }
         }/*
