@@ -303,7 +303,14 @@
                     this.perspective = event.perspective;
                     if (event.properties != null) {
                         for (var propKey:String in event.properties) {
-                            ModulePerspective(perspective).actualModule[propKey] = event.properties[propKey];
+                            if (ModulePerspective(perspective).actualModule == null) {
+                                if (ModulePerspective(perspective).properties == null) {
+                                    ModulePerspective(perspective).properties = new Object();
+                                }
+                                ModulePerspective(perspective).properties[propKey] = event.properties[propKey];
+                            } else {
+                                ModulePerspective(perspective).actualModule[propKey] = event.properties[propKey];
+                            }
                         }
                     }
                     coreSpace.addChildAt(perspective as DisplayObject, 0);
