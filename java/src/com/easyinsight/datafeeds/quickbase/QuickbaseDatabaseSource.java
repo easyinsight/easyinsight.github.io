@@ -296,15 +296,30 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                 AnalysisItem analysisItem = map.get(fieldID);
                                 String value = childElement.getValue();
                                 if ("43".equals(fieldID)) {
-                                    initEvalsPMR = Double.parseDouble(value);
+                                    try {
+                                        initEvalsPMR = Double.parseDouble(value);
+                                    } catch (NumberFormatException e) {
+                                    }
                                 } else if ("42".equals(fieldID)) {
-                                    initEvalsFD = Double.parseDouble(value);
+                                    try {
+                                        initEvalsFD = Double.parseDouble(value);
+                                    } catch (NumberFormatException e) {
+                                    }
                                 } else if ("445".equals(fieldID)) {
-                                    hrOverride = Double.parseDouble(value);
+                                    try {
+                                        hrOverride = Double.parseDouble(value);
+                                    } catch (NumberFormatException e) {
+                                    }
                                 } else if ("109".equals(fieldID)) {
-                                    hrPatientFD = Double.parseDouble(value);
+                                    try {
+                                        hrPatientFD = Double.parseDouble(value);
+                                    } catch (NumberFormatException e) {
+                                    }
                                 } else if ("112".equals(fieldID)) {
-                                    hrWeekPerFD = Double.parseDouble(value);
+                                    try {
+                                        hrWeekPerFD = Double.parseDouble(value);
+                                    } catch (NumberFormatException e) {
+                                    }
                                 }
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
                                     Date shiftedDate = new Date(Long.parseLong(value) - (7 * 60 * 60 * 1000));
