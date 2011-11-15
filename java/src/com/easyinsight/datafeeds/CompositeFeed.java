@@ -157,7 +157,7 @@ public class CompositeFeed extends Feed {
             }
             if (filters != null) {
                 for (FilterDefinition filterDefinition : filters) {
-                    if (filterDefinition.isSingleSource()) {
+                    if (filterDefinition.isSingleSource() && filterDefinition.getField() != null) {
                         if (queryStateNode.handles(filterDefinition.getField().getKey())) {
                             queryStateNode.addFilter(filterDefinition);
                         } else if (alwaysPassThrough(filterDefinition.getField())) {
