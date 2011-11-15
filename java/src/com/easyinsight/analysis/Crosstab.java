@@ -108,7 +108,7 @@ public class Crosstab {
 
         List<Section> columnSections = getColumnSections();
         List<Section> rowSections = getRowSections();
-        CrosstabValue[][] array = new CrosstabValue[rowSections.size() + crosstabDefinition.getColumns().size() + 2][columnSections.size() + crosstabDefinition.getRows().size() + 1];
+        CrosstabValue[][] array = new CrosstabValue[rowSections.size() + crosstabDefinition.getColumns().size() + 2][Math.max(columnSections.size(), crosstabDefinition.getColumns().size()) + crosstabDefinition.getRows().size() + 1];
         for (int i = 0; i < crosstabDefinition.getRows().size(); i++) {
             AnalysisItem row = crosstabDefinition.getRows().get(i);
             array[1][i] = new CrosstabValue(new StringValue(row.toDisplay()), row, true, false);
