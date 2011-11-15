@@ -22,7 +22,7 @@ public class ModulePerspective extends Canvas implements IPerspective, IModulePe
     private var perspectiveType:int;
     public var actualModule:UIComponent;
 
-    private var properties:Object;
+    public var properties:Object;
 
     public function ModulePerspective(perspectiveInfo:PerspectiveInfo) {
         percentWidth = 100;
