@@ -104,7 +104,7 @@ public class StandardReportPipeline extends Pipeline {
         boolean measureFilter = false;
         for (AnalysisItem analysisCalculation : items(AnalysisItemTypes.CALCULATION, allNeededAnalysisItems)) {
             if (analysisCalculation.getFilters() != null && analysisCalculation.getFilters().size() > 0) {
-                measureFilter = true;
+                measureFilter = false;
             }
         }
 
