@@ -267,28 +267,6 @@ public class UserUploadService {
             int dataSourceCount = 0;
             int reportCount = 0;
             int dashboardCount = 0;
-            PreparedStatement getLogoStmt = conn.prepareStatement("SELECT SOLUTION.solution_image FROM SOLUTION, DATA_FEED, solution_install, solution_to_feed WHERE " +
-                    "solution_install.installed_data_source_id = ? and solution_install.original_data_source_id = solution_to_feed.feed_id and " +
-                    "solution_to_feed.solution_id = solution.solution_id");
-            for (EIDescriptor descriptor : results) {
-                if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
-                    dataSourceCount++;
-                    DataSourceDescriptor dataSourceDescriptor = (DataSourceDescriptor) descriptor;
-                    getLogoStmt.setLong(1, dataSourceDescriptor.getId());
-                    ResultSet logoRS = getLogoStmt.executeQuery();
-                    if (logoRS.next()) {
-                        dataSourceDescriptor.setLogoImage(logoRS.getBytes(1));
-                    }
-                    for (EIDescriptor child : dataSourceDescriptor.getChildren()) {
-                        if (child.getType() == EIDescriptor.REPORT) {
-                            reportCount++;
-                        } else if (child.getType() == EIDescriptor.DASHBOARD) {
-                            dashboardCount++;
-                        }
-                    }
-                }
-            }
-            getLogoStmt.close();
             MyDataTree myDataTree = new MyDataTree(results, onlyMyData);
             myDataTree.setDashboardCount(dashboardCount);
             myDataTree.setDataSourceCount(dataSourceCount);
