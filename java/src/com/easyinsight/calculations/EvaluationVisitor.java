@@ -213,9 +213,9 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
                 // TODO: Better handling of empty values in functions
                 if(subNode.getResult() instanceof EmptyValue) {
                     result = new EmptyValue();
-                    if (!(f instanceof FirstValueFunction) && !(f instanceof IfNotNull) && !(f instanceof GreaterThan) && !(f instanceof IsOnly) && !(f instanceof EqualTo)) {
+                    /*if (!(f instanceof FirstValueFunction) && !(f instanceof IfNotNull) && !(f instanceof GreaterThan) && !(f instanceof IsOnly) && !(f instanceof EqualTo)) {
                         return;
-                    }
+                    }*/
                     //return;
                 }
                 params.add(subNode.getResult());
