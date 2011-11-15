@@ -32,10 +32,8 @@ public class IsOnly extends Function {
             }
             Value matchValue = minusQuotes(getParameter(1));
             if (values.size() == 1 && values.contains(matchValue)) {
-                System.out.println("doing it...");
                 return getParameter(2);
             }
-            System.out.println("no joy");
         }
         return new EmptyValue();
     }

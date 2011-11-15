@@ -1,6 +1,7 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemFilterDefinition;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.definitions.WSVerticalListDefinition;
 import com.easyinsight.core.EmptyValue;
@@ -22,6 +23,16 @@ public class RemoveField extends Function {
             while (iter.hasNext()) {
                 AnalysisItem item = iter.next();
                 if (item.toDisplay().toLowerCase().equals(fieldName)) {
+                    iter.remove();
+                }
+            }
+        } else if (calculationMetadata.getFilterDefinition() != null && calculationMetadata.getFilterDefinition() instanceof AnalysisItemFilterDefinition) {
+            String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
+            AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) calculationMetadata.getFilterDefinition();
+            Iterator<AnalysisItem> iter = analysisItemFilterDefinition.getAvailableItems().iterator();
+            while (iter.hasNext()) {
+                AnalysisItem analysisItem = iter.next();
+                if (analysisItem.toDisplay().toLowerCase().equals(fieldName)) {
                     iter.remove();
                 }
             }

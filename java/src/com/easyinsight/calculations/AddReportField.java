@@ -1,6 +1,7 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemFilterDefinition;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.definitions.WSVerticalListDefinition;
 import com.easyinsight.core.EmptyValue;
@@ -24,6 +25,18 @@ public class AddReportField extends Function {
             WSVerticalListDefinition verticalListDefinition = (WSVerticalListDefinition) calculationMetadata.getReport();
             if (!verticalListDefinition.getMeasures().contains(fieldToAdd)) {
                 verticalListDefinition.getMeasures().add(fieldToAdd);
+            }
+        } else if (calculationMetadata.getFilterDefinition() != null && calculationMetadata.getFilterDefinition() instanceof AnalysisItemFilterDefinition) {
+            String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
+            AnalysisItem fieldToAdd = null;
+            for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
+                if (analysisItem.toDisplay().toLowerCase().equals(fieldName)) {
+                    fieldToAdd = analysisItem;
+                }
+            }
+            AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) calculationMetadata.getFilterDefinition();
+            if (!analysisItemFilterDefinition.getAvailableItems().contains(fieldToAdd)) {
+                analysisItemFilterDefinition.getAvailableItems().add(fieldToAdd);
             }
         }
         return new EmptyValue();
