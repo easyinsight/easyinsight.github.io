@@ -40,7 +40,7 @@ import mx.formatters.NumberBaseRoundType;
 					var currencyFormatter:CurrencyFormatter = new EICurrencyFormatter();
 					currencyFormatter.precision = precision;
                     currencyFormatter.currencySymbol = User.getInstance() == null ? "$" : User.getInstance().currencySymbol;
-                    currencyFormatter.rounding = numberFormatter.rounding = NumberBaseRoundType.NEAREST;
+                    currencyFormatter.rounding = NumberBaseRoundType.NEAREST;
 					formatter = currencyFormatter;
 					break;
 				case PERCENTAGE:
