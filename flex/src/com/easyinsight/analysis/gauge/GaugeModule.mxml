@@ -63,6 +63,7 @@
                 } else {
                     benchmarkValue = null;
                 }
+                gauge.invalidateDisplayList();
                 this.invalidateDisplayList();
                 gauge.visible = true;
             } else {
