@@ -14,6 +14,7 @@ import com.easyinsight.users.UserServiceResponse;
 import com.easyinsight.userupload.UploadPolicy;
 import nu.xom.Builder;
 import nu.xom.Document;
+import nu.xom.ParsingException;
 import sun.misc.BASE64Decoder;
 
 import javax.servlet.ServletException;
@@ -74,6 +75,9 @@ public abstract class APIServlet extends HttpServlet {
                     conn.rollback();
                     LogClass.error(sre);
                     responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>" + sre.getMessage() + "</message>");
+                } catch (ParsingException spe) {
+                    conn.rollback();
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>" + spe.getMessage() + "</message>");
                 } catch (Exception e) {
                     conn.rollback();
                     LogClass.error(e);
