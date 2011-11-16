@@ -367,6 +367,7 @@ import mx.rpc.events.ResultEvent;
 			var newLowVal:int = ((event.newDate.valueOf() - lowDate.valueOf()) / delta) * 100;			
 			hslider.values = [ newLowVal, hslider.values[1] ] ;
 			_filterDefinition.startDate = event.newDate;
+            _filterDefinition.startDate.hours = 0;
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, null, this));
 		}
 		
