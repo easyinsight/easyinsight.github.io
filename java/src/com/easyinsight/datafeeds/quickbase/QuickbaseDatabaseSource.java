@@ -355,7 +355,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                     }
                                 }
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
-                                    Date shiftedDate = new Date(Long.parseLong(value) - (7 * 60 * 60 * 1000));
+                                    Date shiftedDate = new Date(Long.parseLong(value) - (8 * 60 * 60 * 1000));
                                     row.addValue(analysisItem.createAggregateKey(), shiftedDate);
                                 } else {
                                     row.addValue(analysisItem.createAggregateKey(), value);
