@@ -60,6 +60,7 @@ public class QuickbaseFeed extends Feed {
                     continue;
                 }
                 if (!analysisItem.getKey().indexed()) {
+                    System.out.println(analysisItem.toDisplay() + " was not indexed");
                     indexed = false;
                 }
             }
