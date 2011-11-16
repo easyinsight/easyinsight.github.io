@@ -317,7 +317,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                         initEvalsScheduled = Double.parseDouble(value);
                                     } catch (NumberFormatException e) {
                                     }
-                                } else if ("445".equals(fieldID)) {
+                                } else if ("446".equals(fieldID)) {
                                     try {
                                         hrOverride = Double.parseDouble(value);
                                     } catch (NumberFormatException e) {
@@ -388,7 +388,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         } else {
                             visits = visitsScheduled - initEvalCXNS - fuvCXNS;
                         }
-                        //row.addValue(initEvalsItem.createAggregateKey(), initEvals);
+                        row.addValue(initEvalsItem.createAggregateKey(), initEvals);
                         row.addValue(hoursItem.createAggregateKey(), hours);
                         row.addValue(visitsItem.createAggregateKey(), visits);
                     }
