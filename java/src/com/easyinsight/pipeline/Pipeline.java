@@ -90,11 +90,29 @@ public abstract class Pipeline {
             }
         }
         allNeededAnalysisItems.addAll(report.getLimitFields());
+        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+        for (AnalysisItem analysisItem : allFields) {
+            List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+            if (items == null) {
+                items = new ArrayList<AnalysisItem>(1);
+                keyMap.put(analysisItem.getKey().toKeyString(), items);
+            }
+            items.add(analysisItem);
+        }
+        for (AnalysisItem analysisItem : allFields) {
+            List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+            if (items == null) {
+                items = new ArrayList<AnalysisItem>(1);
+                displayMap.put(analysisItem.toDisplay(), items);
+            }
+            items.add(analysisItem);
+        }
         if (report.getReportRunMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(report.getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
-                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allFields, keyMap, displayMap, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
                 allNeededAnalysisItems.addAll(items);
             }
         }
@@ -116,7 +134,10 @@ public abstract class Pipeline {
     public DataSet toDataSet(DataSet dataSet) {
         for (IComponent component : components) {
             //System.out.println(component.getClass().getName() + " - " + dataSet);
+            long startTime = System.currentTimeMillis();
             dataSet = component.apply(dataSet, pipelineData);
+            long endTime = System.currentTimeMillis();
+            System.out.println(component.getClass().getName() + " - " + (endTime - startTime));
         }
         return dataSet;
     }
@@ -130,7 +151,10 @@ public abstract class Pipeline {
     public DataResults toList(DataSet dataSet) {
         for (IComponent component : components) {
             //System.out.println(component.getClass().getName() + " - " + dataSet);
+            long startTime = System.currentTimeMillis();
             dataSet = component.apply(dataSet, pipelineData);
+            long endTime = System.currentTimeMillis();
+            System.out.println(component.getClass().getName() + " - " + (endTime - startTime));
         }
         resultSet = dataSet;
         DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()));
