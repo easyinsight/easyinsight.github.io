@@ -366,9 +366,8 @@ import mx.rpc.events.ResultEvent;
 		private function lowDateChange(event:CalendarLayoutChangeEvent):void {
 			var newLowVal:int = ((event.newDate.valueOf() - lowDate.valueOf()) / delta) * 100;			
 			hslider.values = [ newLowVal, hslider.values[1] ] ;
-			_filterDefinition.startDate = event.newDate;
-            _filterDefinition.startDate.hours = 0;
-            Alert.show("argh = " + event.newDate.timezoneOffset);
+            var date:Date = new Date(event.newDate.fullYear, event.newDate.month, event.newDate.date);
+			_filterDefinition.startDate = date;
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, null, this));
 		}
 		
