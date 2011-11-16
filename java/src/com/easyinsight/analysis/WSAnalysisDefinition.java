@@ -393,11 +393,29 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 columnSet.add(analysisItem);
             }
         }
+        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+            for (AnalysisItem analysisItem : allItems) {
+                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    keyMap.put(analysisItem.getKey().toKeyString(), items);
+                }
+                items.add(analysisItem);
+            }
+            for (AnalysisItem analysisItem : allItems) {
+                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    displayMap.put(analysisItem.toDisplay(), items);
+                }
+                items.add(analysisItem);
+            }
         if (getReportRunMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
-                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allItems, keyMap, displayMap, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
                 columnSet.addAll(items);
             }
         }

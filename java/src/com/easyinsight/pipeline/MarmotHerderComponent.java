@@ -1,10 +1,9 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.calculations.FieldDecorationCalculationLogic;
 import com.easyinsight.dataset.DataSet;
 
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -14,12 +13,30 @@ import java.util.StringTokenizer;
 public class MarmotHerderComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         if (pipelineData.getReport().getReportRunMarmotScript() != null) {
+            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+            for (AnalysisItem analysisItem : pipelineData.getAllItems()) {
+                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    keyMap.put(analysisItem.getKey().toKeyString(), items);
+                }
+                items.add(analysisItem);
+            }
+            for (AnalysisItem analysisItem : pipelineData.getAllItems()) {
+                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    displayMap.put(analysisItem.toDisplay(), items);
+                }
+                items.add(analysisItem);
+            }
             StringTokenizer toker = new StringTokenizer(pipelineData.getReport().getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 for (IRow row : dataSet.getRows()) {
                     try {
-                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), pipelineData.getAllItems(), row);
+                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), pipelineData.getAllItems(), keyMap, displayMap, row);
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {

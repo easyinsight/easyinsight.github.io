@@ -35,29 +35,9 @@ public class ReportCalculation {
         this.code = code;
     }
 
-    public static List<AnalysisItem> getAnalysisItems(String calculationString, List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems,
+    public static List<AnalysisItem> getAnalysisItems(String calculationString, List<AnalysisItem> allItems, Map<String, List<AnalysisItem>> keyMap,
+                                                      Map<String, List<AnalysisItem>> displayMap, Collection<AnalysisItem> insightItems,
                                                       boolean getEverything, boolean includeFilters, int criteria) {
-        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-        if (allItems != null) {
-            for (AnalysisItem analysisItem : allItems) {
-                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), items);
-                }
-                items.add(analysisItem);
-            }
-
-            for (AnalysisItem analysisItem : allItems) {
-                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    displayMap.put(analysisItem.toDisplay(), items);
-                }
-                items.add(analysisItem);
-            }
-        }
         CalculationTreeNode tree;
         Set<KeySpecification> specs;
 
@@ -168,32 +148,14 @@ public class ReportCalculation {
         }
     }
 
-    public void apply(Dashboard dashboard, List<AnalysisItem> allFields, Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters) throws SQLException {
+    public void apply(Dashboard dashboard, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap, Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters) throws SQLException {
         try {
             AnalysisDimension personaDimension = new AnalysisDimension();
             Key key = new NamedKey("Persona");
             personaDimension.setKey(key);
+            keyMap.put("Persona", Arrays.<AnalysisItem>asList(personaDimension));
             List<AnalysisItem> myFields = new ArrayList<AnalysisItem>(allFields);
             myFields.add(personaDimension);
-            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : myFields) {
-                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), items);
-                }
-                items.add(analysisItem);
-            }
-
-            for (AnalysisItem analysisItem : myFields) {
-                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    displayMap.put(analysisItem.toDisplay(), items);
-                }
-                items.add(analysisItem);
-            }
 
             DataSet dataSet = createDataSet(myFields, feed, dlsFilters, conn, keyMap, displayMap);
             if (dataSet == null) {
@@ -240,28 +202,8 @@ public class ReportCalculation {
         }
     }
 
-    public void apply(FilterDefinition filterDefinition, List<AnalysisItem> allFields, Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters) {
+    public void apply(FilterDefinition filterDefinition, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap, Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters) {
         try {
-            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : allFields) {
-                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), items);
-                }
-                items.add(analysisItem);
-            }
-
-
-            for (AnalysisItem analysisItem : allFields) {
-                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    displayMap.put(analysisItem.toDisplay(), items);
-                }
-                items.add(analysisItem);
-            }
             DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setFilterDefinition(filterDefinition);
@@ -292,27 +234,9 @@ public class ReportCalculation {
         }
     }
 
-    public void apply(WSAnalysisDefinition report, List<AnalysisItem> allFields, Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters) {
+    public void apply(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
+                      Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters) {
         try {
-            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : allFields) {
-                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), items);
-                }
-                items.add(analysisItem);
-            }
-
-            for (AnalysisItem analysisItem : allFields) {
-                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    displayMap.put(analysisItem.toDisplay(), items);
-                }
-                items.add(analysisItem);
-            }
             DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setReport(report);
@@ -343,27 +267,8 @@ public class ReportCalculation {
         }
     }
 
-    public void applyAfterReport(WSAnalysisDefinition report, List<AnalysisItem> allFields, IRow row) {
+    public void applyAfterReport(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap, IRow row) {
         try {
-            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : allFields) {
-                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), items);
-                }
-                items.add(analysisItem);
-            }
-
-            for (AnalysisItem analysisItem : allFields) {
-                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    displayMap.put(analysisItem.toDisplay(), items);
-                }
-                items.add(analysisItem);
-            }
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setReport(report);
             calculationMetadata.setDataSourceFields(allFields);

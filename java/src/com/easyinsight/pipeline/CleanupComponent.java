@@ -3,10 +3,7 @@ package com.easyinsight.pipeline;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -46,11 +43,29 @@ public class CleanupComponent implements IComponent {
                 allNeededAnalysisItems.addAll(linkItems);
             }
         }
+        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+        for (AnalysisItem analysisItem : pipelineData.getAllItems()) {
+            List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+            if (items == null) {
+                items = new ArrayList<AnalysisItem>(1);
+                keyMap.put(analysisItem.getKey().toKeyString(), items);
+            }
+            items.add(analysisItem);
+        }
+        for (AnalysisItem analysisItem : pipelineData.getAllItems()) {
+            List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+            if (items == null) {
+                items = new ArrayList<AnalysisItem>(1);
+                displayMap.put(analysisItem.toDisplay(), items);
+            }
+            items.add(analysisItem);
+        }
         if (report.getReportRunMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(report.getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
-                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, pipelineData.getAllItems(), keyMap, displayMap, allRequestedAnalysisItems, false, keepFilters, AGGREGATE_CALCULATIONS);
                 allNeededAnalysisItems.addAll(items);
             }
         }

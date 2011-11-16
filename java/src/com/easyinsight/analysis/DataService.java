@@ -32,15 +32,15 @@ public class DataService {
     private FeedRegistry feedRegistry = FeedRegistry.instance();
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID) {
-        if (reportID > 0) {
-            SecurityUtil.authorizeInsight(reportID);
-        } else if (dashboardID > 0) {
-            SecurityUtil.authorizeDashboard(dashboardID);
-        } else {
-            SecurityUtil.authorizeFeedAccess(feedID);
-        }
         EIConnection conn = Database.instance().getConnection();
         try {
+            if (reportID > 0) {
+                SecurityUtil.authorizeInsight(reportID);
+            } else if (dashboardID > 0) {
+                SecurityUtil.authorizeDashboard(dashboardID);
+            } else {
+                SecurityUtil.authorizeFeedAccess(feedID);
+            }
             if (analysisItem == null) {
                 LogClass.error("Received null analysis item from feed " + feedID);
                 return null;
@@ -59,9 +59,9 @@ public class DataService {
     }
 
     public FeedMetadata getFeedMetadata(long feedID) {
-        SecurityUtil.authorizeFeedAccess(feedID);
         EIConnection conn = Database.instance().getConnection();
         try {
+            SecurityUtil.authorizeFeedAccess(feedID);
             Feed feed = feedRegistry.getFeed(feedID, conn);
             Collection<AnalysisItem> feedItems = feed.getFields();
             // need to apply renames from the com.easyinsight.analysis definition here?
@@ -157,6 +157,8 @@ public class DataService {
     public EmbeddedTrendDataResults getEmbeddedTrendDataResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();
         try {
+            SecurityUtil.authorizeInsight(reportID);
+            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSKPIDefinition analysisDefinition = (WSKPIDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
             RollingFilterDefinition reportFilter = null;
             for (FilterDefinition customFilter : customFilters) {
@@ -219,9 +221,10 @@ public class DataService {
     }
 
     public EmbeddedCrosstabDataResults getEmbeddedCrosstabResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
-        SecurityUtil.authorizeInsight(reportID);
         EIConnection conn = Database.instance().getConnection();
         try {
+            SecurityUtil.authorizeInsight(reportID);
+            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSCrosstabDefinition crosstabReport = (WSCrosstabDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
             ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, crosstabReport, conn, customFilters, null);
             Crosstab crosstab = new Crosstab();
@@ -266,6 +269,7 @@ public class DataService {
     public EmbeddedVerticalResults getEmbeddedVerticalDataResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
         try {
             SecurityUtil.authorizeInsight(reportID);
+            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSCombinedVerticalListDefinition analysisDefinition = (WSCombinedVerticalListDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
             List<EmbeddedResults> list = new ArrayList<EmbeddedResults>();
@@ -280,7 +284,6 @@ public class DataService {
                 filters.addAll(analysis.getFilterDefinitions());
                 if (verticalListDefinition.getPatternName() != null && !"".equals(verticalListDefinition.getPatternName())) {
                     for (FilterDefinition filter : filters) {
-                        System.out.println("checking " + verticalListDefinition.getPatternName() + " against " + filter.getFilterName());
                         if (verticalListDefinition.getPatternName().equals(filter.getFilterName())) {
                             labelFilters[i] = filter;
                         }
@@ -348,10 +351,10 @@ public class DataService {
 
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters) {
-        SecurityUtil.authorizeInsight(reportID);
-
         EIConnection conn = Database.instance().getConnection();
         try {
+            SecurityUtil.authorizeInsight(reportID);
+            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             conn.setAutoCommit(false);
             WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             analysisDefinition.setDataFeedID(dataSourceID);
@@ -473,6 +476,8 @@ public class DataService {
     public TrendDataResults getTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();
         try {
+            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             RollingFilterDefinition reportFilter = null;
             for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
                 if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
@@ -538,6 +543,8 @@ public class DataService {
     public CrossTabDataResults getCrosstabDataResults(WSCrosstabDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();
         try {
+            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             Crosstab crosstab = new Crosstab();
             crosstab.crosstab(analysisDefinition, reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet()));
@@ -581,6 +588,7 @@ public class DataService {
     public VerticalDataResults getVerticalDataResults(WSCombinedVerticalListDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         try {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
             List<DataResults> list = new ArrayList<DataResults>();
             for (WSAnalysisDefinition analysis : analysisDefinition.getReports()) {
@@ -607,9 +615,10 @@ public class DataService {
     }
 
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         try {
+            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet());
             results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
@@ -714,12 +723,32 @@ public class DataService {
             if (analysisDefinition.getAddedItems() != null) {
                 allFields.addAll(analysisDefinition.getAddedItems());
             }
+
+            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+            for (AnalysisItem analysisItem : allFields) {
+                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    keyMap.put(analysisItem.getKey().toKeyString(), items);
+                }
+                items.add(analysisItem);
+            }
+            for (AnalysisItem analysisItem : allFields) {
+                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    displayMap.put(analysisItem.toDisplay(), items);
+                }
+                items.add(analysisItem);
+            }
+
             if (analysisDefinition.getMarmotScript() != null) {
                 StringTokenizer toker = new StringTokenizer(analysisDefinition.getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
                     try {
-                        new ReportCalculation(line).apply(analysisDefinition, allFields, feed, conn, dlsFilters);
+                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters);
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {
@@ -732,7 +761,7 @@ public class DataService {
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
                     try {
-                        new ReportCalculation(line).apply(analysisDefinition, allFields, feed, conn, dlsFilters);
+                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters);
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {

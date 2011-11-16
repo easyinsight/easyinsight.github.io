@@ -218,11 +218,29 @@ public class DashboardService {
             dashboard.setRole(role);
             Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
             List<FilterDefinition> dlsFilters = DataService.addDLSFilters(dashboard.getDataSourceID(), conn);
+            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+            for (AnalysisItem analysisItem : feed.getFields()) {
+                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    keyMap.put(analysisItem.getKey().toKeyString(), items);
+                }
+                items.add(analysisItem);
+            }
+            for (AnalysisItem analysisItem : feed.getFields()) {
+                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    displayMap.put(analysisItem.toDisplay(), items);
+                }
+                items.add(analysisItem);
+            }
             if (dashboard.getMarmotScript() != null && !"".equals(dashboard.getMarmotScript().trim())) {
                 StringTokenizer toker = new StringTokenizer(dashboard.getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
-                    new ReportCalculation(line).apply(dashboard, feed.getFields(), feed, conn, dlsFilters);
+                    new ReportCalculation(line).apply(dashboard, feed.getFields(), keyMap, displayMap, feed, conn, dlsFilters);
                 }
             }
             dashboard.visit(new AnalysisItemFilterVisitor(feed, dlsFilters, conn));
@@ -295,11 +313,33 @@ public class DashboardService {
         private Feed feed;
         private List<FilterDefinition> dlsFilters;
         private EIConnection conn;
+        private Map<String, List<AnalysisItem>> keyMap;
+        private Map<String, List<AnalysisItem>> displayMap;
 
         private AnalysisItemFilterVisitor(Feed feed, List<FilterDefinition> dlsFilters, EIConnection conn) throws SQLException {
             this.feed = feed;
             this.dlsFilters = dlsFilters;
             this.conn = conn;
+            keyMap = new HashMap<String, List<AnalysisItem>>();
+            displayMap = new HashMap<String, List<AnalysisItem>>();
+            for (AnalysisItem analysisItem : feed.getFields()) {
+                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    keyMap.put(analysisItem.getKey().toKeyString(), items);
+                }
+                items.add(analysisItem);
+            }
+
+
+            for (AnalysisItem analysisItem : feed.getFields()) {
+                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    displayMap.put(analysisItem.toDisplay(), items);
+                }
+                items.add(analysisItem);
+            }
         }
 
         public void accept(DashboardElement dashboardElement) {
@@ -311,14 +351,14 @@ public class DashboardService {
                             StringTokenizer toker = new StringTokenizer(filterDefinition.getMarmotScript(), "\r\n");
                             while (toker.hasMoreTokens()) {
                                 String line = toker.nextToken();
-                                new ReportCalculation(line).apply(filterDefinition, feed.getFields(), feed, conn, dlsFilters);
+                                new ReportCalculation(line).apply(filterDefinition, feed.getFields(), keyMap, displayMap, feed, conn, dlsFilters);
                             }
                         }
                         if (feed.getDataSource().getMarmotScript() != null) {
                             StringTokenizer toker = new StringTokenizer(feed.getDataSource().getMarmotScript(), "\r\n");
                             while (toker.hasMoreTokens()) {
                                 String line = toker.nextToken();
-                                new ReportCalculation(line).apply(filterDefinition, feed.getFields(), feed, conn, dlsFilters);
+                                new ReportCalculation(line).apply(filterDefinition, feed.getFields(), keyMap, displayMap, feed, conn, dlsFilters);
                             }
                         }
                     }
