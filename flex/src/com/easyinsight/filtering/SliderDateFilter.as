@@ -368,6 +368,7 @@ import mx.rpc.events.ResultEvent;
 			hslider.values = [ newLowVal, hslider.values[1] ] ;
 			_filterDefinition.startDate = event.newDate;
             _filterDefinition.startDate.hours = 0;
+            Alert.show("argh = " + event.newDate.timezoneOffset);
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, null, this));
 		}
 		
