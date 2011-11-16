@@ -266,6 +266,7 @@ public class StyleConfiguration {
         }
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
+        items.addItem(new CheckBoxReportFormItem("Log Report", "logReport", report.logReport, report));
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];
         items.sort = sort;

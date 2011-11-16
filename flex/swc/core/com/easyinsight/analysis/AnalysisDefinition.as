@@ -57,6 +57,7 @@ import mx.collections.ArrayCollection;
 		public var analysisID:int;
 		public var filterDefinitions:ArrayCollection = new ArrayCollection();
 		public var dataScrubs:ArrayCollection = new ArrayCollection();
+        public var logReport:Boolean;
         public var reportType:int;
 		public var policy:int = 2;
 		public var dateCreated:Date;

@@ -64,6 +64,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private String name;
     private String authorName;
+    private boolean logReport;
     private String urlKey;
     private long analysisID;
     private long dataFeedID;
@@ -93,6 +94,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String fontName = "Tahoma";
     private int fontSize = 12;
     private double backgroundAlpha = 1;
+
+    public boolean isLogReport() {
+        return logReport;
+    }
+
+    public void setLogReport(boolean logReport) {
+        this.logReport = logReport;
+    }
 
     public int getFolder() {
         return folder;

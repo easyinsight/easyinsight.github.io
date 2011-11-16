@@ -137,7 +137,11 @@ public abstract class Pipeline {
             long startTime = System.currentTimeMillis();
             dataSet = component.apply(dataSet, pipelineData);
             long endTime = System.currentTimeMillis();
-            System.out.println(component.getClass().getName() + " - " + (endTime - startTime));
+            //if (pipelineData.getReport() != null) {
+             //   if (pipelineData.getReport().isLogReport()) {
+                    //System.out.println(dataSet.getRows().size() + " - " + component.getClass().getName() + " - " + (endTime - startTime));
+             //   }
+           // }
         }
         return dataSet;
     }
@@ -154,7 +158,9 @@ public abstract class Pipeline {
             long startTime = System.currentTimeMillis();
             dataSet = component.apply(dataSet, pipelineData);
             long endTime = System.currentTimeMillis();
-            System.out.println(component.getClass().getName() + " - " + (endTime - startTime));
+            if (pipelineData.getReport().isLogReport()) {
+                System.out.println(dataSet.getRows().size() + " - " + component.getClass().getName() + " - " + (endTime - startTime));
+            }
         }
         resultSet = dataSet;
         DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()));

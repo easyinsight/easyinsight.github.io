@@ -415,31 +415,13 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (reportFieldExtension != null) {
             items.addAll(reportFieldExtension.getAnalysisItems(getEverything));
         }
-        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-        for (AnalysisItem analysisItem : allItems) {
-            List<AnalysisItem> localItems = keyMap.get(analysisItem.getKey().toKeyString());
-            if (localItems == null) {
-                localItems = new ArrayList<AnalysisItem>(1);
-                keyMap.put(analysisItem.getKey().toKeyString(), localItems);
-            }
-            localItems.add(analysisItem);
-        }
-        for (AnalysisItem analysisItem : allItems) {
-            List<AnalysisItem> localItems = displayMap.get(analysisItem.toDisplay());
-            if (localItems == null) {
-                localItems = new ArrayList<AnalysisItem>(1);
-                displayMap.put(analysisItem.toDisplay(), localItems);
-            }
-            localItems.add(analysisItem);
-        }
-        if (getMarmotScript() != null && !"".equals(getMarmotScript().trim())) {
+        /*if (getMarmotScript() != null && !"".equals(getMarmotScript().trim())) {
             StringTokenizer toker = new StringTokenizer(getMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 items.addAll(ReportCalculation.getAnalysisItems(line, allItems, keyMap, displayMap, insightItems, getEverything, includeFilters, criteria));
             }
-        }
+        }*/
         return items;
     }
 
