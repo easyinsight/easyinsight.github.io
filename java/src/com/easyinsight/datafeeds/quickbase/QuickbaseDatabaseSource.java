@@ -303,6 +303,9 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                             if (childElement.getLocalName().equals("f")) {
                                 String fieldID = childElement.getAttribute("id").getValue();
                                 AnalysisItem analysisItem = map.get(fieldID);
+                                if (analysisItem == null) {
+                                    continue;
+                                }
                                 String value = childElement.getValue();
                                 if ("43".equals(fieldID)) {
                                     try {
