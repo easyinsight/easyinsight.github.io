@@ -203,6 +203,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     columnBuilder.append(fieldID).append(".");
                 }
             }
+            columnBuilder.append("3.");
 
             DataSet dataSet = new DataSet();
             int count;
