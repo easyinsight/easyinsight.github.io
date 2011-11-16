@@ -356,8 +356,8 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                 }
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
                                     // TODO: why are we doing this...
-                                    Date shiftedDate = new Date(Long.parseLong(value) - (8 * 60 * 60 * 1000));
-                                    //Date shiftedDate = new Date(Long.parseLong(value));
+                                    //Date shiftedDate = new Date(Long.parseLong(value) - (8 * 60 * 60 * 1000));
+                                    Date shiftedDate = new Date(Long.parseLong(value));
                                     row.addValue(analysisItem.createAggregateKey(), shiftedDate);
                                 } else {
                                     row.addValue(analysisItem.createAggregateKey(), value);
