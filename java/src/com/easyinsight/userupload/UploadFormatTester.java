@@ -52,7 +52,7 @@ public class UploadFormatTester {
                 XSSFWorkbook xb = new XSSFWorkbook(bais);
                 xb.getSheetAt(0).getRow(0).getLastCellNum();
                 uploadFormat = new XSSFExcelUploadFormat();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 uploadFormat = null;
             }
         } catch (Exception e) {

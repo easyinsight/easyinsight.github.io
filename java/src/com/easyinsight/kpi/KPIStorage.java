@@ -387,7 +387,6 @@ public class KPIStorage {
         try {
             PreparedStatement saveFiltersStmt = conn.prepareStatement("INSERT INTO KPI_TO_FILTER (KPI_ID, FILTER_ID) VALUES (?, ?)");
             for (FilterDefinition filterDefinition : kpi.getFilters()) {
-                filterDefinition.getField().reportSave(session);
                 filterDefinition.beforeSave(session);
                 session.saveOrUpdate(filterDefinition);
                 session.flush();
