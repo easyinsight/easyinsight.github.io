@@ -390,7 +390,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         }
                         row.addValue(initEvalsItem.createAggregateKey(), initEvals);
                         row.addValue(hoursItem.createAggregateKey(), hours);
-                        row.addValue(visitsItem.createAggregateKey(), visits);
+                        //row.addValue(visitsItem.createAggregateKey(), visits);
                     }
                     //dataSet = new DataSet();
 
