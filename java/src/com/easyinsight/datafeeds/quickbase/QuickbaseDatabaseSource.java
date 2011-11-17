@@ -260,7 +260,8 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             for (String provider : providerIDs) {
                 Map<String, InitEval> initEvalMap = new HashMap<String, InitEval>();
                 masterCount = 0;
-                String query = ("{'6'.CT.'" + provider + "'}");
+                System.out.println("Retrieving " + provider);
+                String query = ("{'6'.EX.'" + provider + "'}");
                 do {
                     count = 0;
                     String requestBody;
