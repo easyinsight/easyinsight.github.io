@@ -322,7 +322,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                         initEvalsScheduled = Double.parseDouble(value);
                                     } catch (NumberFormatException e) {
                                     }
-                                } else if ("446".equals(fieldID)) {
+                                } else if ("445".equals(fieldID)) {
                                     try {
                                         hrOverride = Double.parseDouble(value);
                                     } catch (NumberFormatException e) {
