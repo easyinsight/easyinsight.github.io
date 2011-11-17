@@ -221,9 +221,9 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 count = 0;
                 String requestBody;
                 if (masterCount == 0) {
-                    requestBody = MessageFormat.format(REQUEST, sessionTicket, applicationToken, "7");
+                    requestBody = MessageFormat.format(REQUEST, sessionTicket, applicationToken, "6");
                 } else {
-                    requestBody = MessageFormat.format(REQUEST_2, sessionTicket, applicationToken, "7", String.valueOf(masterCount));
+                    requestBody = MessageFormat.format(REQUEST_2, sessionTicket, applicationToken, "6", String.valueOf(masterCount));
                 }
                 byte[] contentBytes = requestBody.getBytes();
 
@@ -260,7 +260,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             for (String provider : providerIDs) {
                 Map<String, InitEval> initEvalMap = new HashMap<String, InitEval>();
                 masterCount = 0;
-                String query = ("{'7'.CT.'" + provider + "'}");
+                String query = ("{'6'.CT.'" + provider + "'}");
                 do {
                     count = 0;
                     String requestBody;
@@ -269,7 +269,6 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     } else {
                         requestBody = MessageFormat.format(REQUESTP_2, sessionTicket, applicationToken, columnBuilder.toString(), String.valueOf(masterCount), query);
                     }
-                    //System.out.println(requestBody);
                     byte[] contentBytes = requestBody.getBytes();
 
                 entity.setContent(new ByteArrayInputStream(contentBytes));
@@ -301,11 +300,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         double hrOverride = 0;
                         double hrPatientFD = 0;
                         double hrWeekPerFD = 0;
-                        double visitsOverride = 0;
-                        double visitsPerFD = 0;
-                        double fuvCXNS = 0;
                         double initEvalCXNS = 0;
-                        double visitsScheduled = 0;
                         Date date = null;
                         for (int j = 0; j < childElements.size(); j++) {
                             Element childElement = childElements.get(j);
@@ -341,29 +336,9 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                         hrWeekPerFD = Double.parseDouble(value);
                                     } catch (NumberFormatException e) {
                                     }
-                                } else if ("442".equals(fieldID)) {
-                                    try {
-                                        visitsOverride = Double.parseDouble(value);
-                                    } catch (NumberFormatException e) {
-                                    }
-                                } else if ("58".equals(fieldID)) {
-                                    try {
-                                        visitsPerFD = Double.parseDouble(value);
-                                    } catch (NumberFormatException e) {
-                                    }
-                                } else if ("48".equals(fieldID)) {
-                                    try {
-                                        fuvCXNS = Double.parseDouble(value);
-                                    } catch (NumberFormatException e) {
-                                    }
                                 } else if ("41".equals(fieldID)) {
                                     try {
                                         initEvalCXNS = Double.parseDouble(value);
-                                    } catch (NumberFormatException e) {
-                                    }
-                                } else if ("55".equals(fieldID)) {
-                                    try {
-                                        visitsScheduled = Double.parseDouble(value);
                                     } catch (NumberFormatException e) {
                                     }
                                 } else if ("214".equals(fieldID)) {
