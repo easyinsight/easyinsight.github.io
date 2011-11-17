@@ -269,7 +269,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     } else {
                         requestBody = MessageFormat.format(REQUESTP_2, sessionTicket, applicationToken, columnBuilder.toString(), String.valueOf(masterCount), query);
                     }
-                    System.out.println(requestBody);
+                    //System.out.println(requestBody);
                     byte[] contentBytes = requestBody.getBytes();
 
                 entity.setContent(new ByteArrayInputStream(contentBytes));
@@ -428,6 +428,8 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         row.addValue(initEvalsItem.createAggregateKey(), initEval.initEvalsScheduled - initEval.initEvalsCXNS);
                     }
                     row.addValue(dateItem.createAggregateKey(), initEval.date);
+                    System.out.println(initEval.date + " - " + initEval.relatedProvider + " - " + initEval.relatedProvider + " - " + initEval.initEvalsCXNS + " - " +
+                            initEval.initEvalsScheduled + " - " + initEval.initEvalsPMR);
                     row.addValue(relatedProvider.createAggregateKey(), initEval.relatedProvider);
                 }
                 Pipeline pipeline = new ACSPipeline();
@@ -512,7 +514,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 } else {
                     requestBody = MessageFormat.format(REQUEST_2, sessionTicket, applicationToken, columnBuilder.toString(), String.valueOf(masterCount));
                 }
-                System.out.println(requestBody);
+                //System.out.println(requestBody);
                 byte[] contentBytes = requestBody.getBytes();
                 entity.setContent(new ByteArrayInputStream(contentBytes));
                 entity.setContentLength(contentBytes.length);
