@@ -20,6 +20,7 @@ public class DashboardEditorMetadata {
     public var borderThickness:int;
     public var borderColor:uint;
     public var dashboardID:int;
+    public var dashboard:Dashboard;
 
     public function DashboardEditorMetadata() {
     }

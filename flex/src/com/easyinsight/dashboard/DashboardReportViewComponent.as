@@ -8,6 +8,7 @@ import com.easyinsight.analysis.PopupMenuFactory;
 import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.filtering.TransformContainer;
 import com.easyinsight.filtering.TransformsUpdatedEvent;
+import com.easyinsight.report.EmbedReportContextMenuFactory;
 import com.easyinsight.report.ReportSetupEvent;
 
 import flash.events.Event;
@@ -71,7 +72,12 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onReportSetup);
         viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, onData);
         viewFactory.setup();
-        viewFactory.contextMenu = PopupMenuFactory.reportFactory.createReportContextMenu(dashboardReport.report, viewFactory, this);
+        if (dashboardEditorMetadata.fixedID) {
+            viewFactory.contextMenu = new EmbedReportContextMenuFactory().createReportContextMenu(dashboardReport.report, viewFactory, this);
+        } else {
+            viewFactory.contextMenu = PopupMenuFactory.reportFactory.createReportContextMenu(dashboardReport.report, viewFactory, this);
+        }
+
     }
 
 

@@ -12,6 +12,8 @@ import com.easyinsight.skin.ImageLoader;
 import com.easyinsight.util.CookieUtil;
 import com.easyinsight.util.PopUpUtil;
 
+import flash.display.DisplayObject;
+
 import flash.events.Event;
 import flash.events.MouseEvent;
 
@@ -207,13 +209,17 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     private function share(event:MouseEvent):void {
         var reports:ArrayCollection = reportCount();
+        var window:TempReportExportWindow = new TempReportExportWindow();
+        window.dashboard = dashboardEditorMetadata.dashboard;
+        window.coreView = DashboardView(dashboardEditorMetadata.dashboardView).rootView as DisplayObject;
         if (reports.length == 1) {
-            var report:AnalysisDefinition = reports.getItemAt(0) as AnalysisDefinition;
-            var window:TempReportExportWindow = new TempReportExportWindow();
-            window.report = report;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+            window.report = reports.getItemAt(0) as AnalysisDefinition;
+            window.tabular = true;
+        } else {
+            window.tabular = false;
         }
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUp(window);
     }
 
 

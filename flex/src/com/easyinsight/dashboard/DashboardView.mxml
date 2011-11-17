@@ -131,7 +131,7 @@
         }
 
         [Bindable]
-        private var rootView:IDashboardViewComponent;
+        public var rootView:IDashboardViewComponent;
 
 
         public function set dashboardID(value:int):void {
@@ -181,6 +181,8 @@
             dashboardEditorMetadata.fixedID = _fixedID > 0;
             dashboardEditorMetadata.borderColor = dashboard.borderColor;
             dashboardEditorMetadata.borderThickness = dashboard.borderThickness;
+            dashboardEditorMetadata.dashboard = dashboard;
+            dashboardEditorMetadata.dashboardView = this;
             rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
             UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
                 var filterMap:Object = new Object();

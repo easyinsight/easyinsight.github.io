@@ -270,7 +270,7 @@ public class ExportService {
         EIConnection conn = Database.instance().getConnection();
         try {
             byte[] pdfBytes = toImagePDF(bytes, width, height);
-            toDatabase(dashboard.getName() + ".pdf", pdfBytes, conn);
+            toDatabase(dashboard.getName(), pdfBytes, conn);
         } catch (Exception e) {
             LogClass.error(e.getMessage() + " on saving PDF of dashboard " + dashboard.getId(), e);
             throw new RuntimeException(e);
@@ -1273,6 +1273,7 @@ public class ExportService {
         VListInfo vListInfo = getCombinedVListInfo(verticalList, dataSets);
         HSSFRow headerRow = sheet.createRow(0);
         for (int i = 0; i < vListInfo.columns.size(); i++) {
+            sheet.setColumnWidth(i, 5000);
             SortInfo sortInfo = vListInfo.columns.get(i);
             HSSFCell cell = headerRow.createCell(i + 1);
             cell.setCellValue(sortInfo.label);
@@ -1299,6 +1300,7 @@ public class ExportService {
         VListInfo vListInfo = getVListInfo(verticalList, dataSet);
         HSSFRow headerRow = sheet.createRow(0);
         for (int i = 0; i < vListInfo.columns.size(); i++) {
+            sheet.setColumnWidth(i, 5000);
             SortInfo sortInfo = vListInfo.columns.get(i);
             HSSFCell cell = headerRow.createCell(i + 1);
             cell.setCellValue(sortInfo.label);
@@ -1612,12 +1614,16 @@ public class ExportService {
                     style = styleMap.get(GENERIC_STYLE);
                     break;
                 default:
-                    double doubleValue = value.toDouble();
-                    int castInt = (int) doubleValue;
-                    if (doubleValue - castInt < 0.0001) {
+                    if (value == null) {
                         style = styleMap.get(GENERIC_STYLE);
                     } else {
-                        style = styleMap.get(PERCENT_STYLE);
+                        double doubleValue = value.toDouble();
+                        int castInt = (int) doubleValue;
+                        if (doubleValue - castInt < 0.0001) {
+                            style = styleMap.get(GENERIC_STYLE);
+                        } else {
+                            style = styleMap.get(PERCENT_STYLE);
+                        }
                     }
                     break;
             }
@@ -1688,7 +1694,9 @@ public class ExportService {
     private void populateCell(HSSFRow row, int cellIndex, Value value, HSSFCellStyle style, AnalysisItem analysisItem, Calendar cal) {
         HSSFCell cell = row.createCell(cellIndex);
         cell.setCellStyle(style);
-        if (value.type() == Value.STRING) {
+        if (value == null) {
+            cell.setCellValue("");
+        } else if (value.type() == Value.STRING) {
             StringValue stringValue = (StringValue) value;
             String string = stringValue.getValue();
             if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {

@@ -25,7 +25,7 @@ public class EmbedReportContextMenuFactory extends EventDispatcher implements IR
     }
 
     public function createReportContextMenu(insightDescriptor:InsightDescriptor, viewFactory:EmbeddedViewFactory, dObj:DisplayObject):ContextMenu {
-        var exportItem:ContextMenuItem = new ContextMenuItem("Export " + insightDescriptor.name);
+        var exportItem:ContextMenuItem = new ContextMenuItem("Export Report");
         exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
             viewFactory.updateExportMetadata();
             var window:EmbeddedReportExportWindow = new EmbeddedReportExportWindow();
