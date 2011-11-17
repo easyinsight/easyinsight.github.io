@@ -372,7 +372,11 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     protected Value queryUser(Node node, String target, Map<String, String> userCache, ZendeskCompositeSource zendeskCompositeSource, HttpClient client) throws InterruptedException {
         String value = queryField(node, target);
         if (value != null && !"".equals(value)) {
-            return new StringValue(getUserName(value, userCache, zendeskCompositeSource, client));
+            try {
+                return new StringValue(getUserName(value, userCache, zendeskCompositeSource, client));
+            } catch (Exception e) {
+                return new EmptyValue();
+            }
         }
         return new EmptyValue();
     }
