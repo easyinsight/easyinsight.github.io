@@ -261,7 +261,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 Map<String, InitEval> initEvalMap = new HashMap<String, InitEval>();
                 masterCount = 0;
                 System.out.println("Retrieving " + provider);
-                String query = ("{'6'.EX.'" + provider + "'}");
+                String query = ("{'6'.TV.'" + provider + "'}");
                 do {
                     count = 0;
                     String requestBody;
