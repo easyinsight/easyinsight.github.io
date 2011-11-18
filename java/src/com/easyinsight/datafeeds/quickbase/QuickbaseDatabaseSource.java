@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.quickbase;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
@@ -10,6 +11,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.CompositeReportPipeline;
 import com.easyinsight.pipeline.Pipeline;
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
 import nu.xom.*;
@@ -139,7 +141,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         String fullPath = "https://" + host + "/db/" + databaseID;
         if (databaseID.equals("beutk2zd6")) {
             try {
-                return acsDataLogRetrieval(IDataStorage, conn, quickbaseCompositeSource, sessionTicket, applicationToken, fullPath);
+                return acsDataLogRetrieval(IDataStorage, conn, quickbaseCompositeSource, sessionTicket, applicationToken, fullPath, lastRefreshDate);
             } catch (ReportException e) {
                 if (quickbaseCompositeSource.isPreserveCredentials()) {
                     try {
@@ -147,7 +149,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     } catch (Exception e1) {
                         throw new RuntimeException(e1);
                     }
-                    return acsDataLogRetrieval(IDataStorage, conn, quickbaseCompositeSource, quickbaseCompositeSource.getSessionTicket(), applicationToken, fullPath);
+                    return acsDataLogRetrieval(IDataStorage, conn, quickbaseCompositeSource, quickbaseCompositeSource.getSessionTicket(), applicationToken, fullPath, lastRefreshDate);
                 } else {
                     throw e;
                 }
@@ -170,8 +172,21 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    private DataSet acsDataLogRetrieval(IDataStorage IDataStorage, EIConnection conn, QuickbaseCompositeSource quickbaseCompositeSource, String sessionTicket, String applicationToken, String fullPath) {
+    @Override
+    protected boolean clearsData(FeedDefinition parentSource) {
+        QuickbaseCompositeSource quickbaseCompositeSource = (QuickbaseCompositeSource) parentSource;
+        if (databaseID.equals("beutk2zd6")) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private DataSet acsDataLogRetrieval(IDataStorage IDataStorage, EIConnection conn, QuickbaseCompositeSource quickbaseCompositeSource,
+                                        String sessionTicket, String applicationToken, String fullPath, Date lastRefreshDate) {
         try {
+            /*DataStorage readStorage = DataStorage.readConnection(getFields(), getDataFeedID());
+            DataSet dataSet = readStorage.allData(new ArrayList<FilterDefinition>(), null);*/
             Feed weightsFeed = FeedRegistry.instance().getFeed(weightsID, conn);
             List<AnalysisItem> weightFields = weightsFeed.getFields();
             DataSet weights = weightsFeed.getAggregateDataSet(new HashSet<AnalysisItem>(weightFields), new ArrayList<FilterDefinition>(), new InsightRequestMetadata(), weightFields, false, conn);
@@ -187,6 +202,9 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             AnalysisItem hoursItem = null;
             AnalysisItem visitsItem = null;
             AnalysisItem dateItem = null;
+            AnalysisItem initEvalSchdItem = null;
+            AnalysisItem initEvalCXNSItem = null;
+            AnalysisItem initEvalPMRItem = null;
             AnalysisItem relatedProvider = null;
             StringBuilder columnBuilder = new StringBuilder();
             Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
@@ -203,6 +221,12 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     dateItem = analysisItem;
                 } else if ("Related Provider".equals(analysisItem.toDisplay())) {
                     relatedProvider = analysisItem;
+                } else if ("Init Eval Schd".equals(analysisItem.toDisplay())) {
+                    initEvalSchdItem = analysisItem;
+                } else if ("Init Eval CX/NS".equals(analysisItem.toDisplay())) {
+                    initEvalCXNSItem = analysisItem;
+                } else if ("Init Eval per PMR".equals(analysisItem.toDisplay())) {
+                    initEvalPMRItem = analysisItem;
                 }
                 if (analysisItem.getKey().indexed()) {
                     String fieldID = analysisItem.getKey().toBaseKey().toKeyString().split("\\.")[1];
@@ -212,18 +236,26 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             }
             columnBuilder.append("3.");
 
-            DataSet dataSet = new DataSet();
             int count;
-            int masterCount = 0;
-            Set<String> providerIDs = new HashSet<String>();
 
+
+            int masterCount = 0;
+            //for (String provider : providerIDs) {
+
+            Map<String, InitEval> initEvalMap = new HashMap<String, InitEval>();
+            masterCount = 0;
+            //System.out.println("Retrieving " + provider);
+            int newRows = 0;
+            String query = ("{'2'.AF.'" + lastRefreshDate.getTime() + "'}");
+            DataSet dataSet = new DataSet();
+            boolean doneInit = false;
             do {
                 count = 0;
                 String requestBody;
                 if (masterCount == 0) {
-                    requestBody = MessageFormat.format(REQUEST, sessionTicket, applicationToken, "6");
+                    requestBody = MessageFormat.format(REQUESTP, sessionTicket, applicationToken, columnBuilder.toString(), query);
                 } else {
-                    requestBody = MessageFormat.format(REQUEST_2, sessionTicket, applicationToken, "6", String.valueOf(masterCount));
+                    requestBody = MessageFormat.format(REQUESTP_2, sessionTicket, applicationToken, columnBuilder.toString(), String.valueOf(masterCount), query);
                 }
                 byte[] contentBytes = requestBody.getBytes();
 
@@ -234,6 +266,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 ResponseHandler<String> responseHandler = new BasicResponseHandler();
                 String string = client.execute(httpRequest, responseHandler);
                 Document doc = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+
                 Nodes errors = doc.query("/qdbapi/errcode/text()");
                 if (errors.size() > 0) {
                     Node error = errors.get(0);
@@ -242,172 +275,130 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         throw new ReportException(new DataSourceConnectivityReportFault(errorDetail, quickbaseCompositeSource));
                     }
                 }
+
+
+
                 Nodes records = doc.query("/qdbapi/table/records/record");
                 for (int i = 0; i < records.size(); i++) {
+                    /*if (!doneInit) {
+                        for (IRow row : dataSet.getRows()) {
+                            DateValue dateValue = (DateValue) row.getValue(dateItem);
+                            Date date = dateValue.getDate();
+                            double initEvalsPMR = row.getValue(initEvalPMRItem).toDouble();
+                            double initEvalsScheduled = row.getValue(initEvalsScheduled).toDouble();
+                            double initEvalCXNS = row.getValue(initEvalCXNS).toDouble();
+                            if (date != null && (initEvalsPMR != 0 || initEvalsScheduled != 0 || initEvalCXNS != 0)) {
+                                Calendar cal = Calendar.getInstance();
+                                cal.setTime(date);
+                                String key = cal.get(Calendar.MONTH) + "-" + cal.get(Calendar.YEAR) + "-" + row.getValue(relatedProvider.createAggregateKey()).toString();
+                                InitEval initEval = initEvalMap.get(key);
+                                if (initEval == null) {
+                                    initEval = new InitEval();
+                                    initEvalMap.put(key, initEval);
+                                }
+                                initEval.initEvalsCXNS += initEvalCXNS;
+                                initEval.initEvalsPMR += initEvalsPMR;
+                                initEval.initEvalsScheduled += initEvalsScheduled;
+                                initEval.relatedProvider = row.getValue(relatedProvider.createAggregateKey());
+                                initEval.date = date;
+                            }
+                        }
+                    }*/
+                    newRows++;
+                    Element record = (Element) records.get(i);
+                    IRow row = dataSet.createRow();
                     count++;
                     masterCount++;
-                    Element record = (Element) records.get(i);
                     Elements childElements = record.getChildElements();
+                    double initEvalsPMR = 0;
+                    double initEvalsScheduled = 0;
+                    double hrOverride = 0;
+                    double hrPatientFD = 0;
+                    double hrWeekPerFD = 0;
+                    double initEvalCXNS = 0;
+                    Date date = null;
                     for (int j = 0; j < childElements.size(); j++) {
                         Element childElement = childElements.get(j);
                         if (childElement.getLocalName().equals("f")) {
-                            providerIDs.add(childElement.getValue());
+                            String fieldID = childElement.getAttribute("id").getValue();
+                            AnalysisItem analysisItem = map.get(fieldID);
+                            if (analysisItem == null) {
+                                continue;
+                            }
+                            String value = childElement.getValue();
+                            if ("43".equals(fieldID)) {
+                                try {
+                                    initEvalsPMR = Double.parseDouble(value);
+                                } catch (NumberFormatException e) {
+                                }
+                            } else if ("40".equals(fieldID)) {
+                                try {
+                                    initEvalsScheduled = Double.parseDouble(value);
+                                } catch (NumberFormatException e) {
+                                }
+                            } else if ("445".equals(fieldID)) {
+                                try {
+                                    hrOverride = Double.parseDouble(value);
+                                } catch (NumberFormatException e) {
+                                }
+                            } else if ("109".equals(fieldID)) {
+                                try {
+                                    hrPatientFD = Double.parseDouble(value);
+                                } catch (NumberFormatException e) {
+                                }
+                            } else if ("112".equals(fieldID)) {
+                                try {
+                                    hrWeekPerFD = Double.parseDouble(value);
+                                } catch (NumberFormatException e) {
+                                }
+                            } else if ("41".equals(fieldID)) {
+                                try {
+                                    initEvalCXNS = Double.parseDouble(value);
+                                } catch (NumberFormatException e) {
+                                }
+                            } else if ("214".equals(fieldID)) {
+                                date = new Date(Long.parseLong(value));
+                            }
+                            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
+                                // TODO: why are we doing this...
+                                Date shiftedDate = new Date(Long.parseLong(value));
+                                //Date shiftedDate = new Date(Long.parseLong(value));
+                                row.addValue(analysisItem.createAggregateKey(), shiftedDate);
+                            } else {
+                                row.addValue(analysisItem.createAggregateKey(), value);
+                            }
                         }
                     }
+                    if (date != null && (initEvalsPMR != 0 || initEvalsScheduled != 0 || initEvalCXNS != 0)) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(date);
+                        String key = cal.get(Calendar.MONTH) + "-" + cal.get(Calendar.YEAR) + "-" + row.getValue(relatedProvider.createAggregateKey()).toString();
+                        InitEval initEval = initEvalMap.get(key);
+                        if (initEval == null) {
+                            initEval = new InitEval();
+                            initEvalMap.put(key, initEval);
+                        }
+                        initEval.initEvalsCXNS += initEvalCXNS;
+                        initEval.initEvalsPMR += initEvalsPMR;
+                        initEval.initEvalsScheduled += initEvalsScheduled;
+                        initEval.relatedProvider = row.getValue(relatedProvider.createAggregateKey());
+                        initEval.date = date;
+                    }
+                    double hours;
+                    if (hrOverride > 0) {
+                        hours = hrOverride;
+                    } else if (hrPatientFD > 0) {
+                        hours = hrPatientFD;
+                    } else {
+                        hours = hrWeekPerFD;
+                    }
+                    row.addValue(initEvalsItem.createAggregateKey(), 0);
+                    row.addValue(hoursItem.createAggregateKey(), hours);
                 }
+
             } while (count == 1000);
 
-            for (String provider : providerIDs) {
-                Map<String, InitEval> initEvalMap = new HashMap<String, InitEval>();
-                masterCount = 0;
-                System.out.println("Retrieving " + provider);
-                String query = ("{'6'.TV.'" + provider + "'}");
-                do {
-                    count = 0;
-                    String requestBody;
-                    if (masterCount == 0) {
-                        requestBody = MessageFormat.format(REQUESTP, sessionTicket, applicationToken, columnBuilder.toString(), query);
-                    } else {
-                        requestBody = MessageFormat.format(REQUESTP_2, sessionTicket, applicationToken, columnBuilder.toString(), String.valueOf(masterCount), query);
-                    }
-                    byte[] contentBytes = requestBody.getBytes();
-
-                entity.setContent(new ByteArrayInputStream(contentBytes));
-                entity.setContentLength(contentBytes.length);
-                httpRequest.setEntity(entity);
-                HttpClient client = new DefaultHttpClient();
-                ResponseHandler<String> responseHandler = new BasicResponseHandler();
-                String string = client.execute(httpRequest, responseHandler);
-                Document doc = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
-
-                    Nodes errors = doc.query("/qdbapi/errcode/text()");
-                    if (errors.size() > 0) {
-                        Node error = errors.get(0);
-                        if (!"0".equals(error.getValue())) {
-                            String errorDetail = doc.query("/qdbapi/errdetail/text()").get(0).getValue();
-                            throw new ReportException(new DataSourceConnectivityReportFault(errorDetail, quickbaseCompositeSource));
-                        }
-                    }
-
-                    Nodes records = doc.query("/qdbapi/table/records/record");
-                    for (int i = 0; i < records.size(); i++) {
-                        Element record = (Element) records.get(i);
-                        IRow row = dataSet.createRow();
-                        count++;
-                        masterCount++;
-                        Elements childElements = record.getChildElements();
-                        double initEvalsPMR = 0;
-                        double initEvalsScheduled = 0;
-                        double hrOverride = 0;
-                        double hrPatientFD = 0;
-                        double hrWeekPerFD = 0;
-                        double initEvalCXNS = 0;
-                        Date date = null;
-                        for (int j = 0; j < childElements.size(); j++) {
-                            Element childElement = childElements.get(j);
-                            if (childElement.getLocalName().equals("f")) {
-                                String fieldID = childElement.getAttribute("id").getValue();
-                                AnalysisItem analysisItem = map.get(fieldID);
-                                if (analysisItem == null) {
-                                    continue;
-                                }
-                                String value = childElement.getValue();
-                                if ("43".equals(fieldID)) {
-                                    try {
-                                        initEvalsPMR = Double.parseDouble(value);
-                                    } catch (NumberFormatException e) {
-                                    }
-                                } else if ("40".equals(fieldID)) {
-                                    try {
-                                        initEvalsScheduled = Double.parseDouble(value);
-                                    } catch (NumberFormatException e) {
-                                    }
-                                } else if ("445".equals(fieldID)) {
-                                    try {
-                                        hrOverride = Double.parseDouble(value);
-                                    } catch (NumberFormatException e) {
-                                    }
-                                } else if ("109".equals(fieldID)) {
-                                    try {
-                                        hrPatientFD = Double.parseDouble(value);
-                                    } catch (NumberFormatException e) {
-                                    }
-                                } else if ("112".equals(fieldID)) {
-                                    try {
-                                        hrWeekPerFD = Double.parseDouble(value);
-                                    } catch (NumberFormatException e) {
-                                    }
-                                } else if ("41".equals(fieldID)) {
-                                    try {
-                                        initEvalCXNS = Double.parseDouble(value);
-                                    } catch (NumberFormatException e) {
-                                    }
-                                } else if ("214".equals(fieldID)) {
-                                    date = new Date(Long.parseLong(value));
-                                }
-                                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
-                                    // TODO: why are we doing this...
-                                    Date shiftedDate = new Date(Long.parseLong(value));
-                                    //Date shiftedDate = new Date(Long.parseLong(value));
-                                    row.addValue(analysisItem.createAggregateKey(), shiftedDate);
-                                } else {
-                                    row.addValue(analysisItem.createAggregateKey(), value);
-                                }
-                            }
-                        }
-                        if (date != null && (initEvalsPMR != 0 || initEvalsScheduled != 0 || initEvalCXNS != 0)) {
-                            Calendar cal = Calendar.getInstance();
-                            cal.setTime(date);
-                            String key = cal.get(Calendar.MONTH) + "-" + cal.get(Calendar.YEAR);
-                            InitEval initEval = initEvalMap.get(key);
-                            if (initEval == null) {
-                                initEval = new InitEval();
-                                initEvalMap.put(key, initEval);
-                            }
-                            initEval.initEvalsCXNS += initEvalCXNS;
-                            initEval.initEvalsPMR += initEvalsPMR;
-                            initEval.initEvalsScheduled += initEvalsScheduled;
-                            initEval.relatedProvider = row.getValue(relatedProvider.createAggregateKey());
-                            initEval.date = date;
-                        }
-                        /*double initEvals;
-                        if (initEvalsPMR > 0) {
-                            initEvals = initEvalsPMR;
-                        } else {
-                            initEvals = initEvalsScheduled - initEvalCXNS;
-                        }*/
-                        double hours;
-                        if (hrOverride > 0) {
-                            hours = hrOverride;
-                        } else if (hrPatientFD > 0) {
-                            hours = hrPatientFD;
-                        } else {
-                            hours = hrWeekPerFD;
-                        }
-                        row.addValue(initEvalsItem.createAggregateKey(), 0);
-                        row.addValue(hoursItem.createAggregateKey(), hours);
-                        //row.addValue(visitsItem.createAggregateKey(), visits);
-                    }
-                    //dataSet = new DataSet();
-
-                } while (count == 1000);
-
-                if (dataSet.getRows().size() == 0) {
-                    continue;
-                }
-                for (Map.Entry<String, InitEval> entry : initEvalMap.entrySet()) {
-                    IRow row = dataSet.createRow();
-                    InitEval initEval = entry.getValue();
-                    if (initEval.initEvalsPMR > 0) {
-                        row.addValue(initEvalsItem.createAggregateKey(), initEval.initEvalsPMR);
-                    } else {
-                        row.addValue(initEvalsItem.createAggregateKey(), initEval.initEvalsScheduled - initEval.initEvalsCXNS);
-                    }
-                    row.addValue(dateItem.createAggregateKey(), initEval.date);
-                    System.out.println(initEval.date + " - " + initEval.relatedProvider + " - " + initEval.relatedProvider + " - " + initEval.initEvalsCXNS + " - " +
-                            initEval.initEvalsScheduled + " - " + initEval.initEvalsPMR);
-                    row.addValue(relatedProvider.createAggregateKey(), initEval.relatedProvider);
-                }
+            if (newRows > 0) {
                 Pipeline pipeline = new ACSPipeline();
                 WSListDefinition analysisDefinition = new WSListDefinition();
                 List<AnalysisItem> columns = new ArrayList<AnalysisItem>(map.values());
@@ -439,9 +430,25 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 for (IRow row : dataSet.getRows()) {
                     row.addValue(wtdProcedures.getKey(), row.getValue(cachedWeightedProcedures.createAggregateKey()));
                 }
-                IDataStorage.insertData(dataSet);
-                dataSet = new DataSet();
             }
+
+            /*for (Map.Entry<String, InitEval> entry : initEvalMap.entrySet()) {
+                IRow row = dataSet.createRow();
+                InitEval initEval = entry.getValue();
+                if (initEval.initEvalsPMR > 0) {
+                    row.addValue(initEvalsItem.createAggregateKey(), initEval.initEvalsPMR);
+                } else {
+                    row.addValue(initEvalsItem.createAggregateKey(), initEval.initEvalsScheduled - initEval.initEvalsCXNS);
+                }
+                row.addValue(dateItem.createAggregateKey(), initEval.date);
+                System.out.println(initEval.date + " - " + initEval.relatedProvider + " - " + initEval.relatedProvider + " - " + initEval.initEvalsCXNS + " - " +
+                        initEval.initEvalsScheduled + " - " + initEval.initEvalsPMR);
+                row.addValue(relatedProvider.createAggregateKey(), initEval.relatedProvider);
+            }*/
+
+            IDataStorage.insertData(dataSet);
+            //dataSet = new DataSet();
+            //}
             return null;
         } catch (ReportException re) {
             throw re;
