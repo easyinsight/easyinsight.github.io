@@ -224,7 +224,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
                 dataStorage.truncate();
                 dataStorage.insertFromSelect(tempTable);
             } else {
-                dataStorage.updateFromTemp(tempTable, getUpdateKey());
+                if (getUpdateKeyName() == null) {
+                    dataStorage.insertFromSelect(tempTable);
+                } else {
+                    dataStorage.updateFromTemp(tempTable, getUpdateKey());
+                }
             }
             dataStorage.commit();
         } catch (Exception e) {
