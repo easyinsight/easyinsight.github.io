@@ -115,6 +115,8 @@ public class FunctionFactory {
             return new ColorText();
         } else if (s.equals("colortextall")) {
             return new ColorTextAll();
+        } else if (s.equals("invalidatedata")) {
+            return new InvalidateData();
         } else {
             return null;
         }

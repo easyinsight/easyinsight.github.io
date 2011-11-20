@@ -4,6 +4,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.dashboard.Dashboard;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.Collection;
@@ -19,6 +20,15 @@ public class CalculationMetadata {
     private DataSet dataSet;
     private FilterDefinition filterDefinition;
     private Dashboard dashboard;
+    private EIConnection connection;
+
+    public EIConnection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(EIConnection connection) {
+        this.connection = connection;
+    }
 
     public Dashboard getDashboard() {
         return dashboard;

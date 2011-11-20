@@ -175,6 +175,7 @@ public class ReportCalculation {
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setDashboard(dashboard);
             calculationMetadata.setDataSet(dataSet);
+            calculationMetadata.setConnection(conn);
 
             calculationMetadata.setDataSourceFields(myFields);
             CalculationTreeNode calculationTreeNode;
