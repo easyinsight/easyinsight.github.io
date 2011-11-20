@@ -361,11 +361,14 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
             } while (count == 1000);
 
-            Key noteKey = quickbaseCompositeSource.getField("Data Log - Record ID#").toBaseKey();
+
 
             if (lastRefreshDate == null) {
 //                IDataStorage.insertData(dataSet);
             } else {
+
+                Key noteKey = quickbaseCompositeSource.getField("beutk2zd6.3").toBaseKey();
+
                 for (IRow row : dataSet.getRows()) {
                     StringWhere userWhere = new StringWhere(noteKey, row.getValue(noteKey).toString());
                     IDataStorage.updateData(row, Arrays.asList((IWhere) userWhere));
