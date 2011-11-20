@@ -883,6 +883,40 @@ public class DataStorage implements IDataStorage {
         }
     }
 
+    public void insertData(IRow row, Map<Key, KeyMetadata> keys) throws Exception {
+        StringBuilder columnBuilder = new StringBuilder();
+        StringBuilder paramBuilder = new StringBuilder();
+        Iterator<KeyMetadata> keyIter = keys.values().iterator();
+        while (keyIter.hasNext()) {
+            KeyMetadata keyMetadata = keyIter.next();
+            columnBuilder.append(keyMetadata.createInsertClause());
+            //columnBuilder.append("k").append(keyMetadata.key.getKeyID());
+            //paramBuilder.append("?");
+            paramBuilder.append(keyMetadata.createInsertQuestionMarks());
+            if (keyIter.hasNext()) {
+                columnBuilder.append(",");
+                paramBuilder.append(",");
+            }
+        }
+        String columns = columnBuilder.toString();
+        String parameters = paramBuilder.toString();
+        String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") VALUES (" + parameters + ")";
+        PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
+        try {
+
+            int i = 1;
+            for (KeyMetadata keyMetadata : keys.values()) {
+                i = setValue(insertStmt, row, i, keyMetadata);
+            }
+            insertStmt.execute();
+
+            insertStmt.close();
+        } catch (Exception e) {
+            LogClass.error("Failure on persistence where SQL = " + insertSQL + ", database = " + database.getID());
+            throw e;
+        }
+    }
+
     public void updateData(DataSet dataSet, List<IWhere> wheres) throws Exception {
         StringBuilder fieldBuilder = new StringBuilder();
         List<KeyMetadata> updateKeys = new ArrayList<KeyMetadata>();
@@ -933,6 +967,62 @@ public class DataStorage implements IDataStorage {
         updateStmt.close();
         dataSet.mergeWheres(wheres);
         insertData(dataSet);
+    }
+
+    public void updateData(IRow row, List<IWhere> wheres) throws Exception {
+        StringBuilder fieldBuilder = new StringBuilder();
+        List<KeyMetadata> updateKeys = new ArrayList<KeyMetadata>();
+        for (KeyMetadata keyMetadata : keys.values()) {
+            //boolean inWhereClause = false;
+            for (IWhere where : wheres) {
+                if (where.getKey().equals(keyMetadata.getKey())) {
+                    where.getKey().setKeyID(keyMetadata.getKey().getKeyID());
+                    //inWhereClause = true;
+                }
+            }
+            //if (!inWhereClause) {
+            updateKeys.add(keyMetadata);
+            //}
+        }
+        Iterator<KeyMetadata> keyIter = updateKeys.iterator();
+        while (keyIter.hasNext()) {
+            KeyMetadata keyMetadata = keyIter.next();
+            fieldBuilder.append(keyMetadata.createUpdateClause());
+            if (keyIter.hasNext()) {
+                fieldBuilder.append(",");
+            }
+        }
+
+        StringBuilder whereBuilder = new StringBuilder();
+        Iterator<IWhere> whereIter = wheres.iterator();
+        while (whereIter.hasNext()) {
+            IWhere where = whereIter.next();
+            whereBuilder.append(where.createWhereSQL());
+            if (whereIter.hasNext()) {
+                whereBuilder.append(" AND ");
+            }
+        }
+        StringBuilder tableBuilder = new StringBuilder();
+        for (IWhere where : wheres) {
+            for (String extraTable : where.getExtraTables()) {
+                tableBuilder.append(extraTable).append(",");
+            }
+        }
+        tableBuilder.append(getTableName());
+        String updateSQL = "DELETE " + getTableName() + " FROM " + tableBuilder.toString() + " WHERE " + whereBuilder.toString();
+        PreparedStatement updateStmt = storageConn.prepareStatement(updateSQL);
+        int i = 1;
+        for (IWhere where : wheres) {
+            i = where.setValue(updateStmt, i);
+        }
+        updateStmt.executeUpdate();
+        updateStmt.close();
+        for (IWhere where : wheres) {
+            if (where.hasConcreteValue()) {
+                row.addValue(where.getKey(), where.getConcreteValue());
+            }
+        }
+        insertData(row, keys);
     }
 
     private int setValue(PreparedStatement insertStmt, IRow row, int i, KeyMetadata keyMetadata) throws SQLException {

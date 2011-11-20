@@ -133,6 +133,39 @@ public class TempStorage implements IDataStorage {
         }
     }
 
+    public void updateData(IRow row, List<IWhere> wheres) throws Exception {
+        StringWhere where = (StringWhere) wheres.get(0);
+        StringBuilder columnBuilder = new StringBuilder();
+        StringBuilder paramBuilder = new StringBuilder();
+        for (KeyMetadata keyMetadata : keys.values()) {
+            columnBuilder.append(keyMetadata.createInsertClause());
+            paramBuilder.append(keyMetadata.createInsertQuestionMarks());
+            columnBuilder.append(",");
+            paramBuilder.append(",");
+        }
+        columnBuilder.append("update_key_field");
+        paramBuilder.append("?");
+        String columns = columnBuilder.toString();
+        String parameters = paramBuilder.toString();
+        String insertSQL = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + parameters + ")";
+        EIConnection storageConn = storageDatabase.getConnection();
+
+        try {
+            PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
+
+            int i = 1;
+            for (KeyMetadata keyMetadata : keys.values()) {
+                i = setValue(insertStmt, row, i, keyMetadata, storageConn);
+            }
+            insertStmt.setString(i, where.getValue());
+            insertStmt.execute();
+
+            insertStmt.close();
+        } finally {
+            Database.closeConnection(storageConn);
+        }
+    }
+
     public void updateData(DataSet dataSet, List<IWhere> wheres) throws Exception {
         StringWhere where = (StringWhere) wheres.get(0);
         StringBuilder columnBuilder = new StringBuilder();

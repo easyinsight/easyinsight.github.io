@@ -1,5 +1,6 @@
 package com.easyinsight.storage;
 
+import com.easyinsight.analysis.IRow;
 import com.easyinsight.dataset.DataSet;
 
 import java.sql.SQLException;
@@ -16,4 +17,6 @@ public interface IDataStorage {
     void insertData(DataSet dataSet) throws Exception;
 
     void updateData(DataSet dataSet, List<IWhere> wheres) throws Exception;
+
+    void updateData(IRow row, List<IWhere> wheres) throws Exception;
 }

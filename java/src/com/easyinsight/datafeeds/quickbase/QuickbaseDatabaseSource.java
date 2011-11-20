@@ -13,6 +13,8 @@ import com.easyinsight.pipeline.CompositeReportPipeline;
 import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IDataStorage;
+import com.easyinsight.storage.IWhere;
+import com.easyinsight.storage.StringWhere;
 import com.easyinsight.users.Account;
 import nu.xom.*;
 import org.apache.http.client.HttpClient;
@@ -174,12 +176,16 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
     @Override
     protected boolean clearsData(FeedDefinition parentSource) {
-        QuickbaseCompositeSource quickbaseCompositeSource = (QuickbaseCompositeSource) parentSource;
         if (databaseID.equals("beutk2zd6")) {
             return false;
         } else {
             return true;
         }
+    }
+
+    @Override
+    protected String getUpdateKeyName() {
+        return "beutk2zd6.3";
     }
 
     private DataSet acsDataLogRetrieval(IDataStorage IDataStorage, EIConnection conn, QuickbaseCompositeSource quickbaseCompositeSource,
@@ -350,7 +356,16 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 }
             }
 
-            IDataStorage.insertData(dataSet);
+            Key noteKey = quickbaseCompositeSource.getField("Data Log - Record ID").toBaseKey();
+
+            if (lastRefreshDate == null) {
+                IDataStorage.insertData(dataSet);
+            } else {
+                for (IRow row : dataSet.getRows()) {
+                    StringWhere userWhere = new StringWhere(noteKey, row.getValue(noteKey).toString());
+                    IDataStorage.updateData(row, Arrays.asList((IWhere) userWhere));
+                }
+            }
             //dataSet = new DataSet();
             //}
             return null;
