@@ -323,7 +323,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn);
                     } else if (deliveryFormat == ReportDelivery.PDF) {
                         WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
-                        if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST) {
+                        if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST ||
+                                analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB ||
+                                analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID) {
                             analysisDefinition.updateMetadata();
                             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                             insightRequestMetadata.setUtcOffset(timezoneOffset);
