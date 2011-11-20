@@ -2,13 +2,11 @@ package com.easyinsight.calculations;
 
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
-import com.easyinsight.datafeeds.DataSourceInternalService;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.datafeeds.IServerDataSourceDefinition;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.security.SecurityUtil;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -21,15 +19,15 @@ public class InvalidateData extends Function {
         try {
             long dataSourceID = calculationMetadata.getDashboard().getDataSourceID();
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, calculationMetadata.getConnection());
-            IServerDataSourceDefinition dataSourceDefinition = (IServerDataSourceDefinition) dataSource;
-            Date now = new Date();
-            boolean changed = dataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), calculationMetadata.getConnection(), null, null, dataSource.getLastRefreshStart());
-            dataSource.setVisible(true);
-            dataSource.setLastRefreshStart(now);
-            if (changed) {
-                new DataSourceInternalService().updateFeedDefinition(dataSource, calculationMetadata.getConnection(), true, true);
+            if (dataSource.getFeedType().getType() == FeedType.COMPOSITE.getType()) {
+                CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) dataSource;
+                List<CompositeFeedNode> nodes = compositeFeedDefinition.getCompositeFeedNodes();
+                for (CompositeFeedNode node : nodes) {
+                    FeedDefinition child = new FeedStorage().getFeedDefinitionData(node.getDataFeedID(), calculationMetadata.getConnection());
+                    blah(child);
+                }
             } else {
-                new FeedStorage().updateDataFeedConfiguration(dataSource, calculationMetadata.getConnection());
+                blah(dataSource);
             }
             calculationMetadata.getConnection().commit();
         } catch (Exception e) {
@@ -41,6 +39,21 @@ public class InvalidateData extends Function {
             calculationMetadata.getConnection().setAutoCommit(true);
         }
         return new EmptyValue();
+    }
+
+    private void blah(FeedDefinition dataSource) throws Exception {
+        if (dataSource instanceof IServerDataSourceDefinition) {
+            IServerDataSourceDefinition dataSourceDefinition = (IServerDataSourceDefinition) dataSource;
+            Date now = new Date();
+            boolean changed = dataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), calculationMetadata.getConnection(), null, null, dataSource.getLastRefreshStart());
+            dataSource.setVisible(true);
+            dataSource.setLastRefreshStart(now);
+            if (changed) {
+                new DataSourceInternalService().updateFeedDefinition(dataSource, calculationMetadata.getConnection(), true, true);
+            } else {
+                new FeedStorage().updateDataFeedConfiguration(dataSource, calculationMetadata.getConnection());
+            }
+        }
     }
 
     public int getParameterCount() {
