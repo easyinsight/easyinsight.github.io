@@ -198,35 +198,14 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
 
             AnalysisItem wtdProcedures = null;
-            AnalysisItem initEvalsItem = null;
             AnalysisItem hoursItem = null;
-            AnalysisItem visitsItem = null;
-            AnalysisItem dateItem = null;
-            AnalysisItem initEvalSchdItem = null;
-            AnalysisItem initEvalCXNSItem = null;
-            AnalysisItem initEvalPMRItem = null;
-            AnalysisItem relatedProvider = null;
             StringBuilder columnBuilder = new StringBuilder();
             Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
             for (AnalysisItem analysisItem : getFields()) {
                 if ("Wtd Procedures".equals(analysisItem.toDisplay())) {
                     wtdProcedures = analysisItem;
-                } else if ("Init Evals".equals(analysisItem.toDisplay())) {
-                    initEvalsItem = analysisItem;
                 } else if ("Hr".equals(analysisItem.toDisplay())) {
                     hoursItem = analysisItem;
-                } else if ("Visits".equals(analysisItem.toDisplay())) {
-                    visitsItem = analysisItem;
-                } else if ("Date".equals(analysisItem.toDisplay())) {
-                    dateItem = analysisItem;
-                } else if ("Related Provider".equals(analysisItem.toDisplay())) {
-                    relatedProvider = analysisItem;
-                } else if ("Init Eval Schd".equals(analysisItem.toDisplay())) {
-                    initEvalSchdItem = analysisItem;
-                } else if ("Init Eval CX/NS".equals(analysisItem.toDisplay())) {
-                    initEvalCXNSItem = analysisItem;
-                } else if ("Init Eval per PMR".equals(analysisItem.toDisplay())) {
-                    initEvalPMRItem = analysisItem;
                 }
                 if (analysisItem.getKey().indexed()) {
                     String fieldID = analysisItem.getKey().toBaseKey().toKeyString().split("\\.")[1];
@@ -239,16 +218,18 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             int count;
 
 
-            int masterCount = 0;
-            //for (String provider : providerIDs) {
-
-            Map<String, InitEval> initEvalMap = new HashMap<String, InitEval>();
+            int masterCount;
             masterCount = 0;
-            //System.out.println("Retrieving " + provider);
             int newRows = 0;
-            String query = ("{'2'.AF.'" + lastRefreshDate.getTime() + "'}");
+            String query;
+            if (lastRefreshDate == null) {
+                query = "";
+            } else {
+                query = ("{'2'.AF.'" + lastRefreshDate.getTime() + "'}");
+            }
+
+
             DataSet dataSet = new DataSet();
-            boolean doneInit = false;
             do {
                 count = 0;
                 String requestBody;
@@ -280,43 +261,15 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
                 Nodes records = doc.query("/qdbapi/table/records/record");
                 for (int i = 0; i < records.size(); i++) {
-                    /*if (!doneInit) {
-                        for (IRow row : dataSet.getRows()) {
-                            DateValue dateValue = (DateValue) row.getValue(dateItem);
-                            Date date = dateValue.getDate();
-                            double initEvalsPMR = row.getValue(initEvalPMRItem).toDouble();
-                            double initEvalsScheduled = row.getValue(initEvalsScheduled).toDouble();
-                            double initEvalCXNS = row.getValue(initEvalCXNS).toDouble();
-                            if (date != null && (initEvalsPMR != 0 || initEvalsScheduled != 0 || initEvalCXNS != 0)) {
-                                Calendar cal = Calendar.getInstance();
-                                cal.setTime(date);
-                                String key = cal.get(Calendar.MONTH) + "-" + cal.get(Calendar.YEAR) + "-" + row.getValue(relatedProvider.createAggregateKey()).toString();
-                                InitEval initEval = initEvalMap.get(key);
-                                if (initEval == null) {
-                                    initEval = new InitEval();
-                                    initEvalMap.put(key, initEval);
-                                }
-                                initEval.initEvalsCXNS += initEvalCXNS;
-                                initEval.initEvalsPMR += initEvalsPMR;
-                                initEval.initEvalsScheduled += initEvalsScheduled;
-                                initEval.relatedProvider = row.getValue(relatedProvider.createAggregateKey());
-                                initEval.date = date;
-                            }
-                        }
-                    }*/
                     newRows++;
                     Element record = (Element) records.get(i);
                     IRow row = dataSet.createRow();
                     count++;
                     masterCount++;
                     Elements childElements = record.getChildElements();
-                    double initEvalsPMR = 0;
-                    double initEvalsScheduled = 0;
                     double hrOverride = 0;
                     double hrPatientFD = 0;
                     double hrWeekPerFD = 0;
-                    double initEvalCXNS = 0;
-                    Date date = null;
                     for (int j = 0; j < childElements.size(); j++) {
                         Element childElement = childElements.get(j);
                         if (childElement.getLocalName().equals("f")) {
@@ -326,17 +279,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                 continue;
                             }
                             String value = childElement.getValue();
-                            if ("43".equals(fieldID)) {
-                                try {
-                                    initEvalsPMR = Double.parseDouble(value);
-                                } catch (NumberFormatException e) {
-                                }
-                            } else if ("40".equals(fieldID)) {
-                                try {
-                                    initEvalsScheduled = Double.parseDouble(value);
-                                } catch (NumberFormatException e) {
-                                }
-                            } else if ("445".equals(fieldID)) {
+                            if ("445".equals(fieldID)) {
                                 try {
                                     hrOverride = Double.parseDouble(value);
                                 } catch (NumberFormatException e) {
@@ -351,38 +294,14 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                     hrWeekPerFD = Double.parseDouble(value);
                                 } catch (NumberFormatException e) {
                                 }
-                            } else if ("41".equals(fieldID)) {
-                                try {
-                                    initEvalCXNS = Double.parseDouble(value);
-                                } catch (NumberFormatException e) {
-                                }
-                            } else if ("214".equals(fieldID)) {
-                                date = new Date(Long.parseLong(value));
                             }
                             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
-                                // TODO: why are we doing this...
                                 Date shiftedDate = new Date(Long.parseLong(value));
-                                //Date shiftedDate = new Date(Long.parseLong(value));
                                 row.addValue(analysisItem.createAggregateKey(), shiftedDate);
                             } else {
                                 row.addValue(analysisItem.createAggregateKey(), value);
                             }
                         }
-                    }
-                    if (date != null && (initEvalsPMR != 0 || initEvalsScheduled != 0 || initEvalCXNS != 0)) {
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(date);
-                        String key = cal.get(Calendar.MONTH) + "-" + cal.get(Calendar.YEAR) + "-" + row.getValue(relatedProvider.createAggregateKey()).toString();
-                        InitEval initEval = initEvalMap.get(key);
-                        if (initEval == null) {
-                            initEval = new InitEval();
-                            initEvalMap.put(key, initEval);
-                        }
-                        initEval.initEvalsCXNS += initEvalCXNS;
-                        initEval.initEvalsPMR += initEvalsPMR;
-                        initEval.initEvalsScheduled += initEvalsScheduled;
-                        initEval.relatedProvider = row.getValue(relatedProvider.createAggregateKey());
-                        initEval.date = date;
                     }
                     double hours;
                     if (hrOverride > 0) {
@@ -392,7 +311,6 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     } else {
                         hours = hrWeekPerFD;
                     }
-                    row.addValue(initEvalsItem.createAggregateKey(), 0);
                     row.addValue(hoursItem.createAggregateKey(), hours);
                 }
 
@@ -432,20 +350,6 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 }
             }
 
-            /*for (Map.Entry<String, InitEval> entry : initEvalMap.entrySet()) {
-                IRow row = dataSet.createRow();
-                InitEval initEval = entry.getValue();
-                if (initEval.initEvalsPMR > 0) {
-                    row.addValue(initEvalsItem.createAggregateKey(), initEval.initEvalsPMR);
-                } else {
-                    row.addValue(initEvalsItem.createAggregateKey(), initEval.initEvalsScheduled - initEval.initEvalsCXNS);
-                }
-                row.addValue(dateItem.createAggregateKey(), initEval.date);
-                System.out.println(initEval.date + " - " + initEval.relatedProvider + " - " + initEval.relatedProvider + " - " + initEval.initEvalsCXNS + " - " +
-                        initEval.initEvalsScheduled + " - " + initEval.initEvalsPMR);
-                row.addValue(relatedProvider.createAggregateKey(), initEval.relatedProvider);
-            }*/
-
             IDataStorage.insertData(dataSet);
             //dataSet = new DataSet();
             //}
@@ -456,6 +360,12 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    private static class InitEvalKey {
+        private String key;
+        private String provider;
+        private String date;
     }
 
     private static class InitEval {

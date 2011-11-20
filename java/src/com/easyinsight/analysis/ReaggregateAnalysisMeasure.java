@@ -84,8 +84,8 @@ public class ReaggregateAnalysisMeasure extends AnalysisMeasure {
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
         List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria);
         if (criteria == CleanupComponent.AGGREGATE_CALCULATIONS) {
-            items.add(aggregationItem);
-            items.add(wrappedMeasure);
+            items.addAll(aggregationItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
+            items.addAll(wrappedMeasure.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
         }
         return items;
     }

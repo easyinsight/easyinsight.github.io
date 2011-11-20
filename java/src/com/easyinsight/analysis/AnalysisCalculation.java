@@ -124,8 +124,8 @@ public class AnalysisCalculation extends AnalysisMeasure {
 
 
 
-        List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
-        analysisItemList.add(this);
+        List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria);
+        //analysisItemList.add(this);
 
         if (!includeFilters && isApplyBeforeAggregation()) return analysisItemList;
 
@@ -141,6 +141,24 @@ public class AnalysisCalculation extends AnalysisMeasure {
             if (analysisItem != null) {
                 analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
             }
+        }
+
+        if (getFilters() != null && getFilters().size() > 0) {
+            List<AnalysisItem> copyItems = new ArrayList<AnalysisItem>();
+            for (AnalysisItem analysisItem : analysisItemList) {
+                if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && !analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                    try {
+                        AnalysisItem clone = analysisItem.clone();
+                        clone.getFilters().addAll(getFilters());
+                        copyItems.add(clone);
+                    } catch (CloneNotSupportedException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    copyItems.add(analysisItem);
+                }
+            }
+            analysisItemList = copyItems;
         }
         
         return analysisItemList;
