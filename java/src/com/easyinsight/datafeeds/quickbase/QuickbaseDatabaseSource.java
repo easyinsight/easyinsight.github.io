@@ -361,7 +361,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
             } while (count == 1000);
 
-            Key noteKey = quickbaseCompositeSource.getField("Data Log - Record ID").toBaseKey();
+            Key noteKey = quickbaseCompositeSource.getField("Data Log - Record ID#").toBaseKey();
 
             if (lastRefreshDate == null) {
 //                IDataStorage.insertData(dataSet);
