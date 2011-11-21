@@ -18,7 +18,7 @@ public class AdjustPipelineComponent implements IComponent {
     private String name = "Related Provider";
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        Iterator<AnalysisItem> iter = pipelineData.getAllRequestedItems().iterator();
+        Iterator<AnalysisItem> iter = pipelineData.getReportItems().iterator();
         while (iter.hasNext()) {
             AnalysisItem analysisItem = iter.next();
             System.out.println("Checking " + analysisItem.toDisplay());
