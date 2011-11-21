@@ -287,76 +287,88 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 row.addValue(key, value);
             }
 
-            int statusID = Integer.parseInt(queryField(ticketNode, "status-id/text()"));
+            try {
+                int statusID = Integer.parseInt(queryField(ticketNode, "status-id/text()"));
 
-            if (statusID == 0) {
-                row.addValue(keys.get(STATUS), "New");
-            } else if (statusID == 1) {
-                row.addValue(keys.get(STATUS), "Open");
-            } else if (statusID == 2) {
-                row.addValue(keys.get(STATUS), "Pending");
-            } else if (statusID == 3) {
-                row.addValue(keys.get(STATUS), "Solved");
-            } else if (statusID == 4) {
-                row.addValue(keys.get(STATUS), "Closed");
+                if (statusID == 0) {
+                    row.addValue(keys.get(STATUS), "New");
+                } else if (statusID == 1) {
+                    row.addValue(keys.get(STATUS), "Open");
+                } else if (statusID == 2) {
+                    row.addValue(keys.get(STATUS), "Pending");
+                } else if (statusID == 3) {
+                    row.addValue(keys.get(STATUS), "Solved");
+                } else if (statusID == 4) {
+                    row.addValue(keys.get(STATUS), "Closed");
+                }
+            } catch (NumberFormatException e) {
             }
 
-            int ticketTypeID = Integer.parseInt(queryField(ticketNode, "ticket-type-id/text()"));
+            try {
+                int ticketTypeID = Integer.parseInt(queryField(ticketNode, "ticket-type-id/text()"));
 
-            if (ticketTypeID == 0) {
-                row.addValue(keys.get(TICKET_TYPE), "( No Type Set )");
-            } else if (ticketTypeID == 1) {
-                row.addValue(keys.get(TICKET_TYPE), "Question");
-            } else if (ticketTypeID == 2) {
-                row.addValue(keys.get(TICKET_TYPE), "Incident");
-            } else if (ticketTypeID == 3) {
-                row.addValue(keys.get(TICKET_TYPE), "Problem");
-            } else if (ticketTypeID == 4) {
-                row.addValue(keys.get(TICKET_TYPE), "Task");
+                if (ticketTypeID == 0) {
+                    row.addValue(keys.get(TICKET_TYPE), "( No Type Set )");
+                } else if (ticketTypeID == 1) {
+                    row.addValue(keys.get(TICKET_TYPE), "Question");
+                } else if (ticketTypeID == 2) {
+                    row.addValue(keys.get(TICKET_TYPE), "Incident");
+                } else if (ticketTypeID == 3) {
+                    row.addValue(keys.get(TICKET_TYPE), "Problem");
+                } else if (ticketTypeID == 4) {
+                    row.addValue(keys.get(TICKET_TYPE), "Task");
+                }
+            } catch (NumberFormatException e) {
             }
 
-            int priorityID = Integer.parseInt(queryField(ticketNode, "priority-id/text()"));
+            try {
+                int priorityID = Integer.parseInt(queryField(ticketNode, "priority-id/text()"));
 
-            if (priorityID == 0) {
-                row.addValue(keys.get(PRIORITY), "( No Priority Set )");
-            } else if (priorityID == 1) {
-                row.addValue(keys.get(PRIORITY), "Low");
-            } else if (priorityID == 2) {
-                row.addValue(keys.get(PRIORITY), "Normal");
-            } else if (priorityID == 3) {
-                row.addValue(keys.get(PRIORITY), "High");
-            } else if (priorityID == 4) {
-                row.addValue(keys.get(PRIORITY), "Urgent");
+                if (priorityID == 0) {
+                    row.addValue(keys.get(PRIORITY), "( No Priority Set )");
+                } else if (priorityID == 1) {
+                    row.addValue(keys.get(PRIORITY), "Low");
+                } else if (priorityID == 2) {
+                    row.addValue(keys.get(PRIORITY), "Normal");
+                } else if (priorityID == 3) {
+                    row.addValue(keys.get(PRIORITY), "High");
+                } else if (priorityID == 4) {
+                    row.addValue(keys.get(PRIORITY), "Urgent");
+                }
+            } catch (NumberFormatException e) {
             }
 
-            int viaID = Integer.parseInt(queryField(ticketNode, "via-id/text()"));
+            try {
+                int viaID = Integer.parseInt(queryField(ticketNode, "via-id/text()"));
 
-            if (viaID == 0) {
-                row.addValue(keys.get(VIA), "Web Form");
-            } else if (viaID == 4) {
-                row.addValue(keys.get(VIA), "Mail");
-            } else if (viaID == 5) {
-                row.addValue(keys.get(VIA), "Web Service API");
-            } else if (viaID == 16) {
-                row.addValue(keys.get(VIA), "Get Satisfaction");
-            } else if (viaID == 17) {
-                row.addValue(keys.get(VIA), "Dropbox");
-            } else if (viaID == 19) {
-                row.addValue(keys.get(VIA), "Ticket merge");
-            } else if (viaID == 21) {
-                row.addValue(keys.get(VIA), "Recovered from suspended tickets");
-            } else if (viaID == 23) {
-                row.addValue(keys.get(VIA), "Twitter favorite");
-            } else if (viaID == 24) {
-                row.addValue(keys.get(VIA), "Forum topic");
-            } else if (viaID == 26) {
-                row.addValue(keys.get(VIA), "Twitter direct message");
-            } else if (viaID == 27) {
-                row.addValue(keys.get(VIA), "Closed ticket");
-            } else if (viaID == 29) {
-                row.addValue(keys.get(VIA), "Chat");
-            } else if (viaID == 30) {
-                row.addValue(keys.get(VIA), "Twitter public message");
+                if (viaID == 0) {
+                    row.addValue(keys.get(VIA), "Web Form");
+                } else if (viaID == 4) {
+                    row.addValue(keys.get(VIA), "Mail");
+                } else if (viaID == 5) {
+                    row.addValue(keys.get(VIA), "Web Service API");
+                } else if (viaID == 16) {
+                    row.addValue(keys.get(VIA), "Get Satisfaction");
+                } else if (viaID == 17) {
+                    row.addValue(keys.get(VIA), "Dropbox");
+                } else if (viaID == 19) {
+                    row.addValue(keys.get(VIA), "Ticket merge");
+                } else if (viaID == 21) {
+                    row.addValue(keys.get(VIA), "Recovered from suspended tickets");
+                } else if (viaID == 23) {
+                    row.addValue(keys.get(VIA), "Twitter favorite");
+                } else if (viaID == 24) {
+                    row.addValue(keys.get(VIA), "Forum topic");
+                } else if (viaID == 26) {
+                    row.addValue(keys.get(VIA), "Twitter direct message");
+                } else if (viaID == 27) {
+                    row.addValue(keys.get(VIA), "Closed ticket");
+                } else if (viaID == 29) {
+                    row.addValue(keys.get(VIA), "Chat");
+                } else if (viaID == 30) {
+                    row.addValue(keys.get(VIA), "Twitter public message");
+                }
+            } catch (NumberFormatException e) {
             }
 
             return id;
