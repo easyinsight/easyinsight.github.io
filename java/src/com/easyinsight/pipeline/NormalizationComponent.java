@@ -10,7 +10,7 @@ import com.easyinsight.dataset.DataSet;
  */
 public class NormalizationComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        dataSet.normalize();
+        dataSet.normalize(pipelineData.getReportItems());
         return dataSet;
     }
 

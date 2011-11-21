@@ -105,11 +105,9 @@ public class DataSet implements Serializable {
         Collection<AnalysisItem> paredDownColumns = new LinkedHashSet<AnalysisItem>(columns);
         List<String> keys = new ArrayList<String>();
         for (IRow row : rows) {
-            //Map<Key, Value> compositeDimensionKey = new HashMap<Key, Value>(ourDimensions.size());
             StringBuilder keyBuilder = new StringBuilder();
             for (AnalysisDimension dimension : ourDimensions) {
                 Value dimensionValue = row.getValue(dimension.createAggregateKey());
-                //compositeDimensionKey.put(dimension.createAggregateKey(), dimensionValue);
                 keyBuilder.append(dimension.qualifiedName()).append(":").append(dimensionValue.toString()).append(":");
             }
             String key = keyBuilder.toString();
@@ -186,8 +184,6 @@ public class DataSet implements Serializable {
         }
     }
 
-
-
     public void normalize() {
         Set<Key> keySet = new HashSet<Key>();
         for (IRow row : rows) {
@@ -205,6 +201,19 @@ public class DataSet implements Serializable {
                 } else if (value.type() == Value.STRING) {
                     if ("".equals(value.toString())) {
                         row.addValue(key, new EmptyValue());
+                    }
+                }
+            }
+        }
+    }
+
+    public void normalize(Collection<AnalysisItem> analysisItems) {
+        for (IRow row : rows) {
+            for (AnalysisItem analysisItem : analysisItems) {
+                Value value = row.getValue(analysisItem.createAggregateKey());
+                if (value.type() == Value.STRING) {
+                    if ("".equals(value.toString())) {
+                        row.addValue(analysisItem.createAggregateKey(), new EmptyValue());
                     }
                 }
             }
