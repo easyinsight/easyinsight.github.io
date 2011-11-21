@@ -77,6 +77,8 @@ public class ZendeskUserSource extends ZendeskBaseSource {
                 row.addValue(keys.get(COUNT), 1);
             }
             return dataSet;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

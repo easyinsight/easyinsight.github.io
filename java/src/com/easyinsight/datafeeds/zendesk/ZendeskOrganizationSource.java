@@ -68,6 +68,8 @@ public class ZendeskOrganizationSource extends ZendeskBaseSource {
                 row.addValue(keys.get(ID), queryField(organizationNode, "id/text()"));
             }
             return dataSet;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

@@ -154,6 +154,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 getUpdatedTickets(keys, (ZendeskCompositeSource) parentDefinition, lastRefreshDate, IDataStorage);
                 return null;
             }
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -358,6 +360,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             }
 
             return id;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             LogClass.error(e);
         }
