@@ -1815,6 +1815,9 @@ public class ExportService {
             }
         });
         String style = "style=\"font-size:" + report.getFontSize() + "px;font-family:" + report.getFontName() + ",serif;border-style:solid;border-width:1px;border-spacing:0\"";
+        if (report.getName() != null) {
+            sb.append("<div style=\"text-align:center\">").append(report.getName()).append("</div>");
+        }
         sb.append("<table ").append(style).append(">");
         sb.append("<tr style=\"background-color:#EEEEEE\">");
         for (AnalysisItem analysisItem : items) {
