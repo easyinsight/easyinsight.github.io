@@ -102,7 +102,8 @@ public class DataSet implements Serializable {
                 }
             }
         }
-        Collection<AnalysisItem> paredDownColumns = new LinkedHashSet<AnalysisItem>(columns);        
+        Collection<AnalysisItem> paredDownColumns = new LinkedHashSet<AnalysisItem>(columns);
+        List<String> keys = new ArrayList<String>();
         for (IRow row : rows) {
             //Map<Key, Value> compositeDimensionKey = new HashMap<Key, Value>(ourDimensions.size());
             StringBuilder keyBuilder = new StringBuilder();
@@ -112,6 +113,14 @@ public class DataSet implements Serializable {
                 keyBuilder.append(dimension.qualifiedName()).append(":").append(dimensionValue.toString()).append(":");
             }
             String key = keyBuilder.toString();
+            keys.add(key);
+
+        }
+        listTransform.addCompositeKeys(keys);
+        listTransform.addColumns(paredDownColumns);
+        for (int i = 0; i < rows.size(); i++) {
+            IRow row = rows.get(i);
+            String key = keys.get(i);
             for (AnalysisItem column : paredDownColumns) {
                 if (column.hasType(AnalysisItemTypes.MEASURE)) {
                     AnalysisMeasure measure = (AnalysisMeasure) column;
@@ -127,7 +136,6 @@ public class DataSet implements Serializable {
                     }
                 }
             }
-
         }
         return listTransform;
     }    

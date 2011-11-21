@@ -16,12 +16,15 @@ public class ListTransform {
     private Map<String, Aggregation[]> keyMap = new HashMap<String, Aggregation[]>();
     private Map<String, Value[]> dimensionMap = new HashMap<String, Value[]>();
 
-    private Set<String> compositeKeys = new HashSet<String>();
+    private Set<String> compositeKeys;
 
     private Map<AnalysisMeasure, AggregationFactory> factoryMap = new HashMap<AnalysisMeasure, AggregationFactory>();
 
     private Map<AnalysisItem, Integer> dimensionIndexMap = new HashMap<AnalysisItem, Integer>();
     private Map<AnalysisItem, Integer> measureIndexMap = new HashMap<AnalysisItem, Integer>();
+
+    private int measureIndexSize;
+    private int dimensionIndexSize;
 
     private Set<Integer> skipAggregations;
 
@@ -29,24 +32,29 @@ public class ListTransform {
         this.skipAggregations = skipAggregations;
     }
 
+    public void addCompositeKeys(Collection<String> keys) {
+        compositeKeys = new HashSet<String>(keys);
+    }
+
+    public void addColumns(Collection<AnalysisItem> paredDownColumns) {
+        for (AnalysisItem column : paredDownColumns) {
+            if (column.hasType(AnalysisItemTypes.MEASURE)) {
+                measureIndexMap.put(column, measureIndexMap.size());
+            } else {
+                dimensionIndexMap.put(column, dimensionIndexMap.size());
+            }
+        }
+        dimensionIndexSize = dimensionIndexMap.size();
+        measureIndexSize = measureIndexMap.size();
+    }
+
     public void groupData(String compositeDimensionKey, AnalysisMeasure measure, Value value) {
-        if (!compositeKeys.contains(compositeDimensionKey)) {
-            compositeKeys.add(compositeDimensionKey);
-        }
+
         Integer position = measureIndexMap.get(measure);
-        if (position == null) {
-            position = measureIndexMap.size();
-            measureIndexMap.put(measure, position);
-        }
         Aggregation[] values = keyMap.get(compositeDimensionKey);
 
         if (values == null) {
-            values = new Aggregation[position + 1];
-            keyMap.put(compositeDimensionKey, values);
-        } else if (position >= values.length) {
-            Aggregation[] copyTarget = new Aggregation[position + 1];
-            System.arraycopy(values, 0, copyTarget, 0, values.length);
-            values = copyTarget;
+            values = new Aggregation[measureIndexSize];
             keyMap.put(compositeDimensionKey, values);
         }
 
@@ -65,23 +73,12 @@ public class ListTransform {
     }
 
     public void groupData(String compositeDimensionKey, AnalysisDimension dimension, Value value) {
-        if (!compositeKeys.contains(compositeDimensionKey)) {
-            compositeKeys.add(compositeDimensionKey);
-        }
+
         Integer position = dimensionIndexMap.get(dimension);
-        if (position == null) {
-            position = dimensionIndexMap.size();
-            dimensionIndexMap.put(dimension, position);
-        }
 
         Value[] values = dimensionMap.get(compositeDimensionKey);
         if (values == null) {
-            values = new Value[position + 1];
-            dimensionMap.put(compositeDimensionKey, values);
-        } if (position >= values.length) {
-            Value[] copyTarget = new Value[position + 1];
-            System.arraycopy(values, 0, copyTarget, 0, values.length);
-            values = copyTarget;
+            values = new Value[dimensionIndexSize];
             dimensionMap.put(compositeDimensionKey, values);
         }
 
