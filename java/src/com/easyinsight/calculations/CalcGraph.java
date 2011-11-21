@@ -56,21 +56,41 @@ public class CalcGraph {
             }
 
             TopologicalOrderIterator<AnalysisItem, DefaultEdge> iterator = new TopologicalOrderIterator<AnalysisItem, DefaultEdge>(graph);
+            List<AnalysisItem> items = new ArrayList<AnalysisItem>();
             while (iterator.hasNext()) {
-                AnalysisItem calcNode = iterator.next();
+                items.add(iterator.next());
+            }
+            List<AnalysisItem> reaggregateItems = new ArrayList<AnalysisItem>();
+            List<AnalysisItem> allOtherItems = new ArrayList<AnalysisItem>();
+            for (AnalysisItem item : items) {
+                if (item.hasType(AnalysisItemTypes.CALCULATION)) {
+                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) item;
+                    if (analysisCalculation.getCalculationString().contains("aggregatefield")) {
+                        reaggregateItems.add(analysisCalculation);
+                    } else {
+                        allOtherItems.add(analysisCalculation);
+                    }
+                } else {
+                    allOtherItems.add(item);
+                }
+            }
+            if (!reaggregateItems.isEmpty()) {
+                for (AnalysisItem calcNode : reaggregateItems) {
+                    if (calcNode.hasType(AnalysisItemTypes.CALCULATION)) {
+                       components.add(new CalculationComponent((AnalysisCalculation) calcNode));
+                    } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                        components.add(new DerivedGroupingComponent((DerivedAnalysisDimension) calcNode));
+                    } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+                        components.add(new DerivedDateComponent((DerivedAnalysisDateDimension) calcNode));
+                    } else if (calcNode.hasType(AnalysisItemTypes.REAGGREGATE_MEASURE)) {
+                        components.add(new ReaggregateComponent((ReaggregateAnalysisMeasure) calcNode));
+                    }
+                }
+                components.add(new AdjustPipelineComponent());
+            }
+            for (AnalysisItem calcNode : allOtherItems) {
                 if (calcNode.hasType(AnalysisItemTypes.CALCULATION)) {
                     components.add(new CalculationComponent((AnalysisCalculation) calcNode));
-                    /*if (calcNode.getFilters() != null && !rowLevel) {
-                        FieldFilterComponent fieldFilterComponent = new FieldFilterComponent();
-                        components.add(fieldFilterComponent);
-                        for (FilterDefinition filterDefinition : calcNode.getFilters()) {
-                            if (filterDefinition.getField() != null) {
-                                fieldFilterComponent.addFilterPair(calcNode, filterDefinition);
-                            } else {
-                                components.addAll(filterDefinition.createComponents(true, new FieldFilterProcessor(calcNode), calcNode, true));
-                            }
-                        }
-                    }*/
                 } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                     components.add(new DerivedGroupingComponent((DerivedAnalysisDimension) calcNode));
                 } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DATE)) {

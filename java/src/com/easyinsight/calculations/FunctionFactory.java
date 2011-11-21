@@ -117,6 +117,8 @@ public class FunctionFactory {
             return new ColorTextAll();
         } else if (s.equals("invalidatedata")) {
             return new InvalidateData();
+        } else if (s.equals("aggregatefield")) {
+            return new AggregateField();
         } else {
             return null;
         }
