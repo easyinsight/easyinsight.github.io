@@ -25,6 +25,7 @@ public class ReplaceFields extends Function {
                 template = analysisItem;
             }
         }
+        int index = verticalListDefinition.getMeasures().indexOf(template);
         verticalListDefinition.getMeasures().remove(template);
         for (int i = 1; i < params.size(); i++) {
             String patternString = minusQuotes(params.get(i)).toString();
@@ -32,7 +33,7 @@ public class ReplaceFields extends Function {
             for (AnalysisItem field : calculationMetadata.getDataSourceFields()) {
                 Matcher matcher = pattern.matcher(field.toDisplay().toLowerCase());
                 if (matcher.matches()) {
-                    verticalListDefinition.getMeasures().add(fromTemplate(template, field));
+                    verticalListDefinition.getMeasures().add(index, fromTemplate(template, field));
                 }
             }
         }
