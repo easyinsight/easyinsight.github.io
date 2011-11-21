@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.dataset.DataSet;
@@ -14,10 +13,10 @@ import java.util.*;
  */
 public class ListTransform {
 
-    private Map<Map<Key, Value>, Aggregation[]> keyMap = new HashMap<Map<Key, Value>, Aggregation[]>();
-    private Map<Map<Key, Value>, Value[]> dimensionMap = new HashMap<Map<Key, Value>, Value[]>();
+    private Map<String, Aggregation[]> keyMap = new HashMap<String, Aggregation[]>();
+    private Map<String, Value[]> dimensionMap = new HashMap<String, Value[]>();
 
-    private Set<Map<Key, Value>> compositeKeys = new HashSet<Map<Key, Value>>();
+    private Set<String> compositeKeys = new HashSet<String>();
 
     private Map<AnalysisMeasure, AggregationFactory> factoryMap = new HashMap<AnalysisMeasure, AggregationFactory>();
 
@@ -30,7 +29,7 @@ public class ListTransform {
         this.skipAggregations = skipAggregations;
     }
 
-    public void groupData(Map<Key, Value> compositeDimensionKey, AnalysisMeasure measure, Value value, IRow row, int measures) {
+    public void groupData(String compositeDimensionKey, AnalysisMeasure measure, Value value) {
         if (!compositeKeys.contains(compositeDimensionKey)) {
             compositeKeys.add(compositeDimensionKey);
         }
@@ -65,7 +64,7 @@ public class ListTransform {
         aggregation.addValue(value);
     }
 
-    public void groupData(Map<Key, Value> compositeDimensionKey, AnalysisDimension dimension, Value value, int dimensions) {
+    public void groupData(String compositeDimensionKey, AnalysisDimension dimension, Value value) {
         if (!compositeKeys.contains(compositeDimensionKey)) {
             compositeKeys.add(compositeDimensionKey);
         }
@@ -89,9 +88,9 @@ public class ListTransform {
         values[position] = value;
     }
 
-    public DataSet aggregate(List<AnalysisItem> columns, List<AnalysisItem> derivedItems) {
+    public DataSet aggregate(List<AnalysisItem> derivedItems) {
         DataSet dataSet = new DataSet();
-        for (Map<Key, Value> compositeKey : compositeKeys) {
+        for (String compositeKey : compositeKeys) {
             IRow row = dataSet.createRow();
             Value[] dimensions = dimensionMap.get(compositeKey);
             Value[] measures = keyMap.get(compositeKey);

@@ -104,26 +104,26 @@ public class DataSet implements Serializable {
         }
         Collection<AnalysisItem> paredDownColumns = new LinkedHashSet<AnalysisItem>(columns);        
         for (IRow row : rows) {
-            Map<Key, Value> compositeDimensionKey = new HashMap<Key, Value>();
+            //Map<Key, Value> compositeDimensionKey = new HashMap<Key, Value>(ourDimensions.size());
+            StringBuilder keyBuilder = new StringBuilder();
             for (AnalysisDimension dimension : ourDimensions) {
                 Value dimensionValue = row.getValue(dimension.createAggregateKey());
-                compositeDimensionKey.put(dimension.createAggregateKey(), dimensionValue);
+                //compositeDimensionKey.put(dimension.createAggregateKey(), dimensionValue);
+                keyBuilder.append(dimension.qualifiedName()).append(":").append(dimensionValue.toString()).append(":");
             }
+            String key = keyBuilder.toString();
             for (AnalysisItem column : paredDownColumns) {
                 if (column.hasType(AnalysisItemTypes.MEASURE)) {
                     AnalysisMeasure measure = (AnalysisMeasure) column;
                     Value value = row.getValue(measure.createAggregateKey());
                     if (value != null) {
-                        listTransform.groupData(compositeDimensionKey, measure, value, row, paredDownColumns.size() - ourDimensions.size());
+                        listTransform.groupData(key, measure, value);
                     }
                 } else {
                     AnalysisDimension analysisDimension = (AnalysisDimension) column;
-                    Value transformedValue = compositeDimensionKey.get(analysisDimension.getKey());
-                    if (transformedValue == null) {
-                        transformedValue = row.getValue(analysisDimension.createAggregateKey());
-                    }
+                    Value transformedValue = row.getValue(analysisDimension.createAggregateKey());
                     if (transformedValue != null) {
-                        listTransform.groupData(compositeDimensionKey, (AnalysisDimension) column, transformedValue, ourDimensions.size());
+                        listTransform.groupData(key, (AnalysisDimension) column, transformedValue);
                     }
                 }
             }

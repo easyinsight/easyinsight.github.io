@@ -22,6 +22,7 @@ public class AdjustPipelineComponent implements IComponent {
         while (iter.hasNext()) {
             AnalysisItem analysisItem = iter.next();
             if (analysisItem.getDisplayName() != null && analysisItem.getDisplayName().contains(name)) {
+                System.out.println("Removed " + analysisItem.toDisplay() + " from pipeline");
                 iter.remove();
             }
         }

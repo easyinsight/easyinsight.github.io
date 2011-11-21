@@ -33,7 +33,9 @@ public class TypeTransformComponent implements IComponent {
                     }
                 }
                 Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift);
-                row.addValue(analysisItem.createAggregateKey(), transformedValue);
+                if (transformedValue != value) {
+                    row.addValue(analysisItem.createAggregateKey(), transformedValue);
+                }
             }
         }
         return dataSet;
