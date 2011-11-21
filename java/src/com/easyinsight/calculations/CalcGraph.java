@@ -87,6 +87,7 @@ public class CalcGraph {
                     }
                 }
                 components.add(new AdjustPipelineComponent());
+                components.add(new AggregationComponent());
             }
             for (AnalysisItem calcNode : allOtherItems) {
                 if (calcNode.hasType(AnalysisItemTypes.CALCULATION)) {
