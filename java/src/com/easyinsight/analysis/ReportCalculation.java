@@ -238,10 +238,18 @@ public class ReportCalculation {
     public void apply(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
                       Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters) {
         try {
-            DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
+            //DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setReport(report);
-            calculationMetadata.setDataSet(dataSet);
+            Collection<FilterDefinition> allFilters = new ArrayList<FilterDefinition>();
+            if (report.getFilterDefinitions() != null) {
+                allFilters.addAll(report.getFilterDefinitions());
+            }
+            if (dlsFilters != null) {
+                allFilters.addAll(dlsFilters);
+            }
+            calculationMetadata.setFilters(allFilters);
+            //calculationMetadata.setDataSet(dataSet);
             calculationMetadata.setDataSourceFields(allFields);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;

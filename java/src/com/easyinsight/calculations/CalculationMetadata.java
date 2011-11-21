@@ -21,6 +21,15 @@ public class CalculationMetadata {
     private FilterDefinition filterDefinition;
     private Dashboard dashboard;
     private EIConnection connection;
+    private Collection<FilterDefinition> filters;
+
+    public Collection<FilterDefinition> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(Collection<FilterDefinition> filters) {
+        this.filters = filters;
+    }
 
     public EIConnection getConnection() {
         return connection;

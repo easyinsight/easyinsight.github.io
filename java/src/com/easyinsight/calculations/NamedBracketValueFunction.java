@@ -25,7 +25,7 @@ public class NamedBracketValueFunction extends Function {
             while (!found) {
                 int startIndex = string.indexOf("[", index);
                 int endIndex = string.indexOf("]", index);
-                if (startIndex > -1 && endIndex > -1) {
+                if (startIndex > -1 && endIndex > -1 && startIndex < endIndex) {
                     String substring = string.substring(startIndex + 1, endIndex);
                     int colonIndex = substring.indexOf(":");
                     if (colonIndex > -1) {
