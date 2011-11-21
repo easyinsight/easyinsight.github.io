@@ -159,7 +159,7 @@ public abstract class Pipeline {
             dataSet = component.apply(dataSet, pipelineData);
             long endTime = System.currentTimeMillis();
             if (pipelineData.getReport().isLogReport()) {
-                System.out.println(dataSet.getRows().size() + " - " + pipelineData.getAllRequestedItems().size() + " - " + component.getClass().getName() + " - " + (endTime - startTime));
+                System.out.println(dataSet.getRows().size() + " - " + pipelineData.getReportItems().size() + " - " + component.getClass().getName() + " - " + (endTime - startTime));
             }
         }
         resultSet = dataSet;
