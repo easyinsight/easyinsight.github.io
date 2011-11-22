@@ -119,6 +119,8 @@ public class FunctionFactory {
             return new InvalidateData();
         } else if (s.equals("aggregatefield")) {
             return new AggregateField();
+        } else if (s.equals("notin")) {
+            return new NotIn();
         } else {
             return null;
         }

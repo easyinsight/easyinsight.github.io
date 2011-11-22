@@ -6,7 +6,6 @@ import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -70,8 +69,12 @@ public abstract class Function implements IFunction {
         return paramMap.get(position);
     }
 
+    protected int paramCount() {
+        return functionNode.getChildCount() - 1;
+    }
+
     protected String getParameterName(int position) {
-        return ((CalculationTreeNode) functionNode.getChild(position + 1)).getText();
+        return (functionNode.getChild(position + 1)).getText();
     }
 
     public void setCalculationMetadata(CalculationMetadata calculationMetadata) {
