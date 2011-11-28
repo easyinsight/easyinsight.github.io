@@ -11,6 +11,11 @@
     <taskdef name="UpdateStaging" classname="com.easyinsight.watchdog.updatetask.UpdateStagingTask" />
     <taskdef name="StopStaging" classname="com.easyinsight.watchdog.updatetask.ShutdownStagingTask" />
 
+    <taskdef name="StartLarge" classname="com.easyinsight.watchdog.updatetask.StartLargeTask" />
+    <taskdef name="UpdateLarge" classname="com.easyinsight.watchdog.updatetask.UpdateLargeTask" />
+    <taskdef name="DownloadLarge" classname="com.easyinsight.watchdog.updatetask.DownloadLargeTask" />
+    <taskdef name="StopLarge" classname="com.easyinsight.watchdog.updatetask.ShutdownLargeTask" />
+
     <taskdef name="SWFAnalysis" classname="com.easyinsight.swfanalysis.SWFAnalysis"/>
     <taskdef name="SWFSize" classname="com.easyinsight.swfanalysis.ArtifactSize"/>
 
