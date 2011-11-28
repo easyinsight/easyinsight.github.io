@@ -3,9 +3,11 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
-<title>Easy Insight</title>
+<title>Easy Insight Dashboard Documentation</title>
 <!-- InstanceEndEditable -->
 <!-- InstanceBeginEditable name="head" -->
+<meta name="description" content="Documentation of Easy Insight Dashboards" />
+<meta name="keywords" content="easy insight documentation, easy insight docs" />
 <!-- InstanceEndEditable -->
     <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
     <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
@@ -41,9 +43,9 @@
     </div>
             <div id="coreContent">
         <div class="coreContentBlock">
-            <h2 class="coreContentHeader">Collaboration Documentation</h2>
+            <h2 class="coreContentHeader">Dashboard Documentation</h2>
             <p class="coreContentParagraph">
-Need help using collaboration in Easy Insight? Here's the documentation to guide you through the process.
+Need help using dashboards in Easy Insight? Here's the documentation to guide you through the process.
             </p>
         </div>
         <div style="padding-top:50px;padding-right:50px;margin:0px;float:right">
@@ -54,31 +56,25 @@ Need help using collaboration in Easy Insight? Here's the documentation to guide
         <div id="midContent">
                 <h2><a href="toc.html">Table of Contents</a></h2>
                 <ul>
-                    <li><a href="collaboration.html#r1">How do I add users to my account?</a></li>
-                    <li><a href="collaboration.html#r2">What are the concepts of collaboration inside of Easy Insight?</a></li>
-                    <li><a href="collaboration.html#r3">How do I set access levels?</a></li>
-                    <li><a href="collaboration.html#r4">How do I add users to a group?</a></li>
-                    <li><a href="collaboration.html#r5">How do I add data sources, reports, and dashboards to groups?</a></li>
+                    <li><a href="dashboards.html#r1">Embedding a Report in Web Pages</a></li>
+                    <li><a href="dashboards.html#r2">Embedding a Report as a Basecamp Message</a></li>
+                    <li><a href="dashboards.html#r3">Creating a User Dashboard</a></li>
                 </ul>
-                <h2><a name="r1">How do I add users to my account?</a></h2>
-                <p>You can add other users from the User Administration page under Account.</p>
-                <h2><a name="r2">What are the concepts of collaboration inside of Easy Insight?</a></h2>
-                <p>There are three levels of access inside of Easy Insight for data sources, reports, and dashboards:</p>
-                <ul>
-                    <li>Owner -- the person who actually created the object</li>
-                    <li>Account Visible -- flag available when you save a data source, report, and dashboard</li>
-                    <li>Group Visible -- the object has been associated through a group</li>
-                </ul>
-                <p>
-                    For smaller teams, you can probably get away with doing but Owner and Account Visible settings. The Group Visible settings are more relevant to larger teams where you want to restrict certain sets of users to certain data sets.
-                </p>
-                <h2><a name="r3">How do I set access levels?</a></h2>
-                <p>When you save a data source, report, and dashboard, you have the option of setting a value for "Do you want to share this report with other users in the account?" If you check this option, the saved object will be visible to everyone in the account under the Home page</p>
-                <p>You can add users to a group by clicking in the group from the Group page, then clicking on Members and Add User.</p>
-                <h2><a name="r4">How do I add users to a group?</a></h2>
-                <p>You can add users to a group by clicking in the group from the Group page, then clicking on Members and Add User.</p>
-                <h2><a name="r5">How do I add data sources, reports, and dashboards to groups?</a></h2>
-                <p>Click to Data Sources and Reports under a given group and use the buttons on the right side of the page to add data sources, reports, and dashboards. These data sources and reports will become available to users in the group in both the group page and the individual user Home pages.</p>
+                <img src="../images/TodoAssignments.png" style="float:right;padding:10px;" alt="Display of Reports under My Data" />
+                <h2><a name="r1">Embedding a Report in Web Pages</a></h2>
+                <p>You can embed any report in a web page. From the report view, click on the export button, then click on the Embed button. This action opens up the embed window, showing you a snippet of HTML code. You can plug in values for width and height to customize the embedded display. Copy this HTML and paste it into any other page to display the report remotely.</p>
+                <h2><a name="r2">Embedding a Report as a Basecamp Message</a></h2>
+                <p>If you want to add a report to your Basecamp page, you can export a report as described above. Create a new Message in Basecamp. Change the editor over to the "Format text with Textile/HTML codes." Paste in the HTML from the embed window and save the message. You can use this functionality to display any report in the context of Basecamp.</p>
+                <p>You can apply this functionality to project templates inside of Basecamp as well. If you open up a Project Template in the Templates tab, you can add Messages at that template level to apply a report that will in turn display with each project.</p>
+                <h2><a name="r3">Creating a User Dashboard</a></h2>
+                <a href="../images/CustomDashboard.png" rel="lightbox-highrise"
+                   title="You can set Easy Insight up to display a single, customized dashboard with your own look and feel."><img
+                        src="../images/CustomDashboard.jpg"
+                        alt="Sample custom dashboard" style="float:left;padding-left:10px; padding-right:10px"/></a>
+                <p>You can create a single dashboard view for your users so that they have a simplified user experience with Easy Insight. When a user logs into the system, he or she will see a particular fixed dashboard rather than having to navigate through the system as normal.</p>
+            <p>The first step is to actually define your dashboard. To customize the look and feel as you see in the screenshot to the left, start by defining a new dashboard with a grid size of 1x1 and add a Stack to the grid. As part of the Stack configuration, upload a header image (something in the 1000x100 dimension size works well) and set up a background color for the area to the left and right of the header image. Add the actual dashboard contents from there--whatever grids, reports, and scorecards you want to assemble to create the actual user content.</p>
+            <p>Once the dashboard is defined, you can assign the dashboard to the user as part of the user administration process. When you create or edit a user, you can set up a "fixed dashboard." Assign the dashboard you created and the user will be automatically logged into that dashboard, rather than the normal Easy Insight user interface.</p>
+                <p></p>
             </div>
         <div id="contentHeaderEnd"></div>
         <div id="footer">

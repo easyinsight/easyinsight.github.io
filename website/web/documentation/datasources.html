@@ -54,52 +54,11 @@ Need help connecting data in Easy Insight? Here's the documentation to guide you
         <div id="midContent">
                 <h2><a href="toc.html">Table of Contents</a></h2>
                 <ul>
-                    <li><a href="datasources.html#r1">How do I upload a CSV or Excel file?</a></li>
-                    <li><a href="datasources.html#r2">How do I connect to a Google Spreadsheet?</a></li>
-                    <li><a href="datasources.html#r3">How do I connect to Basecamp?</a></li>
-                    <li><a href="datasources.html#r4">How do I connect to Highrise?</a></li>
-                    <li><a href="datasources.html#r5">How do I connect to Google Analytics?</a></li>
-                    <li><a href="datasources.html#r6">How do I connect to Salesforce?</a></li>
-                    <li><a href="datasources.html#r7">How do I connect to Sendgrid?</a></li>
-                    <li><a href="datasources.html#r8">How do I connect to Pivotal Tracker?</a></li>
-                    <li><a href="datasources.html#r9">How do I connect to Cloudwatch?</a></li>
-                    <li><a href="datasources.html#r10">How do I connect to FreshBooks?</a></li>
-                    <li><a href="datasources.html#r11">How do I pull data from MySQL, SQL Server, or Oracle?</a></li>
                     <li><a href="datasources.html#r12">How do I combine data sources?</a></li>
                     <li><a href="datasources.html#r13">How do I use lookup tables?</a></li>
                     <li><a href="datasources.html#r14">How do I administer a data source?</a></li>
                     <li><a href="datasources.html#r15">How do I schedule a data source to automatically refresh?</a></li>
                 </ul>
-                <h2><a name="r1">How do I upload a CSV or Excel file?</a></h2>
-                <p>Navigate to the Connections page of Easy Insight. Click on the Upload Excel or CSV button. Click on Upload a Spreadsheet, choose the file from your hard drive, and click Upload. Supported files are:</p>
-                <ul>
-                    <li>Excel 1997-2008</li>
-                    <li>Comma Separated Values</li>
-                    <li>Tab Separated Values</li>
-                    <li>Pipe Separated Values</li>
-                </ul>
-                <p>Once uploaded, you'll go through a wizard to name the data source and configure the discovered fields.</p>
-                <h2><a name="r2">How do I connect to a <a href="http://docs.google.com/">Google Spreadsheet?</a></a></h2>
-                <p>Navigate to the Connections page of Easy Insight. Click on the Google Spreadsheets button. Click Get Started Now. If this is the first time you've connected to Google, you'll be redirected to Google to authorize Easy Insight to access your documents. Grant access and you'll be redirected back to Easy Insight. The system will retrieve the set of available spreadsheets in your Google Docs account, which may take a minute. From the returned tree, you can choose a particular worksheet for the data source. Once you choose a worksheet, you'll go through a wizard to name the new data source and configure the discovered fields.</p>
-                <h2><a name="r3">How do I connect to <a href="http://basecamphq.com/">Basecamp?</a></a></h2>
-                <p>First, you'll need to enable API access to your Basecamp account. You can enable this access from the Account (Upgrade/Invoice) page of your Basecamp account. If this option is unavailable, you may need to contact your Basecamp administrator.</p>
-                <p>Once that's done, navigate to the Connections page of Easy Insight. Click on the Basecamp button, then click Get Started Now. You'll be prompted for your Basecamp path and your API token. You can find your API token under the My Info page on your Basecamp interface. Once you click Create, Easy Insight will begin synchronizing key aggregate data from your Basecamp account into the Easy Insight data warehouse. Depending on the size of your Basecamp instance, this process may take a while--if you have hundreds of projects and thousands of todo items, it might be several minutes to copy all of the necessary data across. Once synchronization is complete, a wizard will walk you through an initial scorecard and next steps with the data source.</p>
-                <h2><a name="r4">How do I connect to <a href="http://highrisehq.com/">Highrise?</a></a></h2>
-                <p>Detailed documentation for connecting to Highrise is available at <a href="http://www.easy-insight.com/documentation/highrise.html">http://www.easy-insight.com/documentation/highrise.html</a>.</p>
-                <h2><a name="r5">How do I connect to <a href="http://google.com/analytics">Google Analytics?</a></a></h2>
-                <p>Navigate to the Connections page of Easy Insight. Click on the Google Analytics button. Click Get Started Now. If this is the first time you've connecte to Google Analytics, you'll be redirected to Google to authorize Easy Insight to access your analytics data. Grant access and you'll be redirected back to Easy Insight. Click Connect and after a moment you'll be presented with an initial scorecard of web analytics data. From here, a wizard will walk you through next steps with the data source.</p>
-                <h2><a name="r6">How do I connect to <a href="http://www.salesforce.com/">Salesforce?</a></a></h2>
-                <p>At the moment, the Easy Insight connection to Salesforce requires an Enterprise or higher account with Salesforce. Navigate to the Connections page of Easy Insight. Click on the Salesforce button. Click on Get Started Now and fill in your Salesforce.com user name, password, and security token value. After a moment you'll be presented with an initial scorecard of your CRM data. From here, a wizard will walk you through next steps with the data source.</p>
-                <h2><a name="r7">How do I connect to <a href="http://www.sendgrid.com/">Sendgrid?</a></a></h2>
-                <p>Navigate to the Connections page of Easy Insight. Click on the Sendgrid button. Click Get Started Now. Fill in your user name (email address) and password for your Sendgrid account. After a moment you'll be presented with an initial scorecard of your email delivery data. From here, a wizard will walk you through next steps with the data source.</p>
-                <h2><a name="r8">How do I connect to <a href="http://www.pivotaltracker.com/">Pivotal Tracker?</a></a></h2>
-                <p>Navigate to the Connections page of Easy Insight. Click on the Pivotal Tracker button. Click Get Started Now and fill in your user name and password for your Pivotal Tracker account. Once you click Create, Easy Insight will begin synchronizing key aggregate data from your Pivotal Tracker account into the Easy Insight data warehouse. Depending on the size of your Pivotal Tracker instance, this process may take a while--if you have hundreds of iterations and thousands of stories, it might be several minutes to copy all of the necessary data across. Once synchronization is complete, a wizard will walk you through an initial scorecard and next steps with the data source.</p>
-                <h2><a name="r9">How do I connect to <a href="http://aws.amazon.com/cloudwatch/">Cloudwatch?</a></a></h2>
-                <p>Navigate to the Connections page of Easy Insight. Click on the Cloudwatch button. Click Get Started now. Fill in your Amazon Web Services key and secret key. After a moment you'll be presented with an initial scorecard of your EC2 infrastructure data. From here, a wizard will walk you through next steps with the data source.</p>
-                <h2><a name="r10">How do I connect to <a href="http://www.freshbooks.com/">FreshBooks?</a></a></h2>
-                <p>Navigate to the Connections page of Easy Insight. Click on the FreshBooks button. Click Get Started now. You'll be prompted for your FreshBooks path. Click Authorize Easy Insight Access and you'll be redirected to FreshBooks. Log in, grant access to Easy Insight, then copy the verifier value shown. Return to the Easy Insight connection page and paste that verifier value into the provided input. Click Create to actually create the connection to FreshBooks.</p>
-                <h2><a name="r11">How do I pull data from <a href="http://www.mysql.com/">MySQL</a>, <a href="http://www.microsoft.com/sqlserver/">SQL Server</a>, or <a href="http://www.oracle.com/">Oracle?</a></a></h2>
-                <p>Detailed documentation for these connections is available at <a href="http://www.easy-insight.com/documentation/database.html">http://www.easy-insight.com/documentation/database.html</a>.</p>
                 <h2><a name="r12">How do I combine data sources?</a></h2>
                 <p>Easy Insight provides you with the capability to combine any data sources. The key is that you need some common field between the data sources which Easy Insight can use to join the data sources. For example, you could join Basecamp and Highrise data by connecting Responsible Party from Basecamp with Deal Owner from Highrise to create a dashboard of unified todo items and deal data by owner.</p>
                 <img src="../images/docs/DataMart.jpg" style="float:left;padding:10px;" alt="Display of Reports under My Data" />

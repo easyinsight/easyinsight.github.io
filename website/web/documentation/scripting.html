@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%">
+<!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <!-- InstanceBeginEditable name="doctitle" -->
+    <title>Easy Insight Report Editing</title>
+    <!-- InstanceEndEditable -->
+    <!-- InstanceBeginEditable name="head" -->
+    <meta name="description" content="Documentation of filters in Easy Insight"/>
+    <meta name="keywords" content="easy insight documentation, easy insight docs"/>
+    <!-- InstanceEndEditable -->
+    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css"/>
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
+    <script type="text/javascript" src="/js/swfobject.js"></script>
+    <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
+    <script type="text/javascript" src="/js/startup.js"></script>
+    <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
+</head>
+<body style="width:100%;text-align:center;margin:0px auto;">
+<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
+<div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:108px"></div>
+<div style="width:1000px;margin:0 auto;">
+    <div id="topBar">
+        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+
+        <div class="signupHeadline">
+            <a href="/app/">Customer Login</a>
+            <a href="/app/htmlreport/">Mobile Login</a>
+            <a href="/app/newaccount/">Sign Up</a>
+            <a href="/contactus.html">Contact Us</a>
+        </div>
+    </div>
+    <div class="headline">
+        <a class="inactive" href="/product.html">Features</a>
+        <a class="inactive" href="/data.html">Connections</a>
+        <a class="inactive" href="/webanalytics.html">Solutions</a>
+        <a class="inactive" href="/customers.html">Customers</a>
+        <a class="inactive" href="/partners.html">Partners</a>
+        <a class="inactive" href="/company.html">Company</a>
+    </div>
+    <div id="coreContent">
+        <div class="coreContentBlock">
+            <h2 class="coreContentHeader">Filter Documentation</h2>
+
+            <p class="coreContentParagraph">
+                Need help with scripting in Easy Insight? Here's the documentation to guide you through the process.
+            </p>
+        </div>
+        <div style="padding-top:50px;padding-right:50px;margin:0px;float:right">
+            <img src="/images/documents.png" alt="Documentation Image"/>
+        </div>
+    </div>
+    <div id="contentHeaderStart"></div>
+    <div id="midContent">
+        <h2><a href="toc.html">Table of Contents</a></h2>
+        <ul>
+            <li><a href="scripting.html#r1">How do I create a basic calculation?</a></li>
+            <li><a href="scripting.html#r2">What are functions?</a></li>
+            <li><a href="scripting.html#r3">How can I add custom fields to my data through calculations?</a></li>
+            <li><a href="scripting.html#r4">How do I create conditional calculations?</a></li>
+        </ul>
+        <h2><a name="r1">How do I create a basic calculation?</a></h2>
+
+        <p>A basic calculation might be "Deal Value * Deal Probability." To create this sort of calculated field, you'll want to first click on the "New Calculation" button under the Data tab of the report editor.</p>
+        <p>In the calculation window itself, the key area is the "Calculation" text area. For our particular calculation, we'll want to do the following:</p>
+        <pre><code>[Deal Value] * [Deal Probability]</code></pre>
+        <p>The bracket notation of [Field Name] is used to identify fields in the calculation, since a particular field name might include special characters itself. You can use any of the basic mathematical operators (+, -, *, and /), as well as using parantheses to further build out more complex order of operations.</p>
+
+        <h2><a name="r2">What are functions?</a></h2>
+
+        <p>Functions provide additional calculation capabilities beyond the basic math operators. Easy Insight has a wide range of functions including additional math functions, text functions, and conditional functions.</p>
+
+        <h2><a name="r3">How can I add custom fields to my data through calculations?</a></h2>
+
+        <p>Let's walk through the process of defining three custom fields on top of Highrise data, a fairly common use case: Probability (a measure), Sales Channel (a grouping), and Expected Close Date (a date).</p>
+        <p>First, we'll want to tweak some of our sample data to include these custom fields. For example, in the Deal Description field of Highrise, you could add the following:</p>
+        <pre><code>
+            [Probability:50] [Channel:DirectMarketing] [ExpectedClose:2011-03-31]
+        </code></pre>
+        <p>With those values defined, we can step through building each of the necessary calculations. First, define a new calculation for the Probability field. Label it as Probability and use a calculation of:</p>
+        <pre><code>
+            namedbracketvalue(Deal Description, "Probability")
+        </code></pre>
+        <p>This expression will use the namedbracketvalue function in Easy Insight to find the value for the custom field called Probability which is surrounded by brackets and labeled with a colon, as shown in the earlier example. If you're operating in a project management scenario instead of a CRM scenario, you could define a custom field called Expected Time by doing:</p>
+        <pre><code>
+            namedbracketvalue(Todo Item Name, "Expected Hours")
+        </code></pre>
+        <p>Creating the derived grouping for Sales Channel will work almost identically--just make sure you start with New Derived Grouping instead of New Calculation.</p>
+        <pre><code>
+            namedbracketvalue(Deal Description, "Channel")
+        </code></pre>
+        <p>Finally, we can create a derived date--this'll add one wrinkle in that we need to specify how the date itself will be parsed. We'll use date formatting to specify that format. For example, if we pass in 2011-03-31 as the date in the custom field, we'll specify a format of yyyy-MM-dd for Year, Month, and Day of Month. You can see how that works in the following example:</p>
+        <pre><code>
+            namedbracketdate(Deal Description, "ExpectedClose", "yyyy-MM-dd")
+        </code></pre>
+
+        <h2><a name="r4">How do I create conditional calculations?</a></h2>
+
+        <p>There are currently three functions for doing conditional calculations--greaterthan, equalto, and notnull. Let's walk through each.</p>
+        <p>Here's an example of using the greaterthan function:</p>
+        <pre><code>greaterthan([Deal Value], 5000, "Big Deal", "Small Deal")</code></pre>
+        <p>The function compares the first and second arguments (Deal Value and 5000). If the value for the row is greater than 5000, the function will return a value of Big Deal. If the value for the row is less than or equal to 5000, the function will return a value of Small Deal.</p>
+        <p>Here's an example of using the equalto function:</p>
+        <pre><code>equalto([Status], "Pending", "The deal is in stage 1", "The deal is in stage 2")</code></pre>
+        <p>It follows the same pattern as the greaterthan function--compares the first and second arguments, if that evaluation is true, show the 3rd value, if that evaluation is false, show the 4th value.</p>
+        <p>Finally, the notnull function looks for the presence of any value in a field. For example:</p>
+        <pre><code>notnull([Company Name], "Company " + [Company Name], [Contact Name], "Contact " + [Contact Name])</code></pre>
+        <p>If the first value passed into notnull has a value, it returns the next value, so if the row has a value for Company Name, it returns Company (the name of the company). If no value is found, it proceeds to the next pair of arguments, so if Contact Name has a value, it displays Contact (the name of the contact).</p>
+    </div>
+    <div id="contentHeaderEnd"></div>
+    <div id="footer">
+        <div id="linkLine">
+            <div style="float:left;padding-left:10px;">
+                <a href="/documentation/toc.html">Documentation</a>
+            </div>
+            <div style="float:left;padding-left:40px;">
+                |
+            </div>
+            <div style="float:left;padding-left:40px;">
+                <a href="/pricing.html">Pricing</a>
+            </div>
+            <div style="float:left;padding-left:40px;">
+                |
+            </div>
+            <div style="float:left;padding-left:40px;">
+                <a href="/api/index.html">Developers</a>
+            </div>
+            <div style="float:left;padding-left:35px;">
+                |
+            </div>
+            <div style="float:left;padding-left:40px;">
+                <a href="/privacy.html">Privacy Policy</a>
+            </div>
+            <div style="float:left;padding-left:40px;">
+                |
+            </div>
+            <div style="float:left;padding-left:40px;">
+                <a href="/terms.html">Terms of Service</a>
+            </div>
+            <div style="float:left;padding-left:40px;">
+                |
+            </div>
+            <div style="float:left;padding-left:40px;">
+                <a href="/partners.html">Partners</a>
+            </div>
+            <div style="float:left;padding-left:40px;">
+                |
+            </div>
+            <div style="float:left;padding-left:40px;">
+                <a href="/contactus.html">Contact Us</a>
+            </div>
+        </div>
+        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+            Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+<script type="text/javascript">
+    var pageTracker = _gat._getTracker("UA-8316271-1");
+    pageTracker._trackPageview();
+</script>
+</body>
+<!-- InstanceEnd --></html>

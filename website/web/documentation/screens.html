@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%">
+<!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <!-- InstanceBeginEditable name="doctitle" -->
+    <title>Easy Insight Report Editing</title>
+    <!-- InstanceEndEditable -->
+    <!-- InstanceBeginEditable name="head" -->
+    <meta name="description" content="Documentation of filters in Easy Insight"/>
+    <meta name="keywords" content="easy insight documentation, easy insight docs"/>
+    <!-- InstanceEndEditable -->
+    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css"/>
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
+    <script type="text/javascript" src="/js/swfobject.js"></script>
+    <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
+    <script type="text/javascript" src="/js/startup.js"></script>
+    <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
+</head>
+<body style="width:100%;text-align:center;margin:0px auto;">
+<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
+<div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:108px"></div>
+<div style="width:1000px;margin:0 auto;">
+    <div id="topBar">
+        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+
+        <div class="signupHeadline">
+            <a href="/app/">Customer Login</a>
+            <a href="/app/htmlreport/">Mobile Login</a>
+            <a href="/app/newaccount/">Sign Up</a>
+            <a href="/contactus.html">Contact Us</a>
+        </div>
+    </div>
+    <div class="headline">
+        <a class="inactive" href="/product.html">Features</a>
+        <a class="inactive" href="/data.html">Connections</a>
+        <a class="inactive" href="/webanalytics.html">Solutions</a>
+        <a class="inactive" href="/customers.html">Customers</a>
+        <a class="inactive" href="/partners.html">Partners</a>
+        <a class="inactive" href="/company.html">Company</a>
+    </div>
+    <div id="coreContent">
+        <div class="coreContentBlock">
+            <h2 class="coreContentHeader">Filter Documentation</h2>
+
+            <p class="coreContentParagraph">
+                Need help with filters in Easy Insight? Here's the documentation to guide you through the process.
+            </p>
+        </div>
+        <div style="padding-top:50px;padding-right:50px;margin:0px;float:right">
+            <img src="/images/documents.png" alt="Documentation Image"/>
+        </div>
+    </div>
+    <div id="contentHeaderStart"></div>
+    <div id="midContent">
+        <h2><a href="toc.html">Table of Contents</a></h2>
+        <ul>
+            <li><a href="filters.html#r1">How do I create a filter?</a></li>
+            <li><a href="filters.html#r2">What are the different Grouping filters?</a></li>
+            <li><a href="filters.html#r3">What are the different Date filters?</a></li>
+            <li><a href="filters.html#r4">What are the different Measure filters?</a></li>
+            <li><a href="filters.html#r5">What are the advanced filter options available back on the New Filter options?</a></li>
+            <li><a href="filters.html#r6">What's the difference between creating a filter in the Filters tab of the report editor and on creating a filter in the Filters tab of the field editor?</a></li>
+        </ul>
+        <h2><a name="r1">How do I create a filter?</a></h2>
+
+        <p>In the report editor, click on the Filters tab. Click on the New Filter button. For the most common types of filters, simple choose the field on which you wish to filter and click "Create the Filter." You'll then be prompted based on the type of the field to choose the specific type of filter.</p>
+
+        <h2><a name="r2">What are the different Grouping filters?</a></h2>
+
+        <p>If you choose a Grouping such as Deal Name, Customer or Project Name for your filter, you will have the following basic options:</p>
+
+        <ul>
+            <li>
+                Single Value
+                <p>
+                    A Single Value filter is a simple dropdown box enabling you to restrict the report to one value of the Grouping--for example, one Deal, one Status, one Customer, and so on.
+                </p>
+            </li>
+            <li>
+                Multi Value
+                <p>
+                    A Multi Value filter is a swap box enabling you to restrict the report to either one or more values *or* to exclude one or more values.
+                </p>
+            </li>
+        </ul>
+
+        <p>If you click on "Show Me More Types of Filters", you will see the following options as well:</p>
+
+        <ul>
+            <li>
+                Pattern Match
+                <p>A pattern match filter enables you to restrict to either a wildcard or regular expression pattern of the chosen value.</p>
+            </li>
+            <li>
+                Auto Completion
+                <p>An auto completion filter is similar to Single Value, but instead of a dropdown box, it'll present you with an auto completion text input. This filter can be useful for larger data sets where a dropdown box would be unwieldly because of the sheer number of options.</p>
+            </li>
+        </ul>
+
+        <h2><a name="r3">What are the different Date filters?</a></h2>
+
+        <p>If you choose a Date such as Creation Date for your filter, you will have the following basic options:</p>
+
+        <ul>
+            <li>
+                Absolute
+                <p>
+                    An Absolute filter provides you with two date pickers and a slider. You can use this to choose an arbitrary two fixed dates. The report will show everything between those two fixed dates.
+                </p>
+            </li>
+            <li>
+                Rolling
+                <p>
+                    A Rolling filter is a dropdown box with a variety of options such as Last Week, Last Full Quarter, and many others. You can also choose to create a Custom rolling filter from the dropdown box which displays arbitrary rolling intervals such as "Last 5 Years" or "Next 3 Months."
+                </p>
+            </li>
+        </ul>
+
+        <p>If you click on "Show Me More Types of Filters", you will see the following options as well:</p>
+
+        <ul>
+            <li>
+                Newest Date
+                <p>A Newest Date filter will show only the newest record for the chosen field.</p>
+            </li>
+            <li>
+                Oldest Date
+                <p>An Oldest Date filter will show only the oldest record for the chosen field.</p>
+            </li>
+            <li>
+                No Date
+                <p>A No Date filter will show only records where the date value is empty for the chosen field.</p>
+            </li>
+            <li>
+                Single Value
+                <p>A Single Value Date filter will restrict data to a fixed year, as presented through a dropdown box.</p>
+            </li>
+            <li>
+                Multiple Flat Value
+                <p>A Multiple Flat Value filter will restrict data to one or more months of the year.</p>
+            </li>
+        </ul>
+
+        <h2><a name="r4">What are the different Measure filters?</a></h2>
+
+        <p>If you choose a Measure such as Revenue for your filter, it will automatically create a filter with a minimum and a maximum value. You can use this to only show records where Revenue is greater than X or less than Y.</p>
+
+        <h2><a name="r5">What are the advanced filter options available back on the New Filter options?</a></h2>
+
+        <p>If you click on Show Advanced Options on the New Filter window, you also have the following advanced options:</p>
+
+        <ul>
+            <li>Or Filter
+            <p>An Or filter allows you to add in additional filters of the other various filter types. If any one of the added filters is true, the whole expression will evaluate to true.</p>
+            </li>
+            <li>Field Choice Filter
+                <p>A Field Choice filter helps you to create interactive reports. For example, if you have a column chart with an Orders measure, you could create a Field Choice filter on the Orders measure and add in Quantity, Revenue, and Margin measures. The result of this filter is a dropdown box on the report view, enabling report users to easily adjust the displayed report data without having to actually go into the report editor.</p>
+            </li>
+            <li>Named Reference Filter
+                <p>Documentation coming...</p>
+            </li>
+            <li>Trend Filter
+                <p>If you're adding filters to a dashboard and want to add a filter for any Trend type reports you may have within the dashboard, a filter created through this option will propagate through the dashboard and adjust the trend range on any of those reports.</p>
+            </li>
+        </ul>
+
+        <h2><a name="r6">What's the difference between creating a filter in the Filters tab of the report editor and on creating a filter in the Filters tab of the field editor?</a></h2>
+        <p>When you create a filter on the Filters tab of the report editor, it applies to the whole report. For example, if you filter your Status field to Pending, the report as a whole will only show records where Status is equal to Pending. On the other hand, if you create that filter inside the field editor's Filter section, it will only apply to that particular field.</p>
+        <p>For example, you might want to display two columns in a list report, Pending Deal Value and Won Deal Value. You're operating off of the same Deal Value field, but using a filter on the column level to restrict results. To achieve this goal, you'd create your Status filter on the field editor of each respective column, adjusting one column to Pending and one column to Won.</p>
+    </div>
+    <div id="contentHeaderEnd"></div>
+    <div id="footer">
+        <div id="linkLine">
+            <div style="float:left;padding-left:10px;">
+                <a href="/documentation/toc.html">Documentation</a>
+            </div>
+            <div style="float:left;padding-left:40px;">
+                |
+            </div>
+            <div style="float:left;padding-left:40px;">
+                <a href="/pricing.html">Pricing</a>
+            </div>
+            <div style="float:left;padding-left:40px;">
+                |
+            </div>
+            <div style="float:left;padding-left:40px;">
+                <a href="/api/index.html">Developers</a>
+            </div>
+            <div style="float:left;padding-left:35px;">
+                |
+            </div>
+            <div style="float:left;padding-left:40px;">
+                <a href="/privacy.html">Privacy Policy</a>
+            </div>
+            <div style="float:left;padding-left:40px;">
+                |
+            </div>
+            <div style="float:left;padding-left:40px;">
+                <a href="/terms.html">Terms of Service</a>
+            </div>
+            <div style="float:left;padding-left:40px;">
+                |
+            </div>
+            <div style="float:left;padding-left:40px;">
+                <a href="/partners.html">Partners</a>
+            </div>
+            <div style="float:left;padding-left:40px;">
+                |
+            </div>
+            <div style="float:left;padding-left:40px;">
+                <a href="/contactus.html">Contact Us</a>
+            </div>
+        </div>
+        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+            Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+<script type="text/javascript">
+    var pageTracker = _gat._getTracker("UA-8316271-1");
+    pageTracker._trackPageview();
+</script>
+</body>
+<!-- InstanceEnd --></html>
