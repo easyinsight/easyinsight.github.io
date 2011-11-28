@@ -56,6 +56,22 @@
         <StopStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
 
+    <target name="shutdownLargeInstances">
+        <StopLarge userName="einsight" password="eJAqp0Q~j!n>L"/>
+    </target>
+
+    <target name="downloadLargeInstances">
+        <DownloadLarge userName="einsight" password="eJAqp0Q~j!n>L"/>
+    </target>
+
+    <target name="updateLargeInstances">
+        <UpdateLarge userName="einsight" password="eJAqp0Q~j!n>L"/>
+    </target>
+
+    <target name="startLargeInstances">
+        <StartLarge userName="einsight" password="eJAqp0Q~j!n>L"/>
+    </target>
+
     <target name="updateInstances">
         <UpdateInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
