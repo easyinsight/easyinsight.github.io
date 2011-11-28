@@ -43,7 +43,7 @@
                                 report.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                             ListDataResults dataResults = (ListDataResults) new DataService().list(report, new InsightRequestMetadata());
                             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-                            out.println(ExportService.toTable(report, dataResults, conn, insightRequestMetadata));
+                            out.println(ExportService.listReportToHTMLTable(report, dataResults, conn, insightRequestMetadata));
                         } else {
                             session.setAttribute("report", report);
                             %>
