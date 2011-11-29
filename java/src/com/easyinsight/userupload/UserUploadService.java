@@ -53,13 +53,14 @@ public class UserUploadService {
         try {
             if (descriptor.getType() == EIDescriptor.REPORT) {
                 SecurityUtil.authorizeInsight(descriptor.getId());
+                new AnalysisStorage().clearCache(descriptor.getId());
                 PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET FOLDER = ? WHERE ANALYSIS_ID = ?");
                 updateStmt.setInt(1, targetFolder);
                 updateStmt.setLong(2, descriptor.getId());
                 updateStmt.executeUpdate();
             } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
                 SecurityUtil.authorizeDashboard(descriptor.getId());
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET FOLDER = ? WHERE DASHBOARDID = ?");
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET FOLDER = ? WHERE DASHBOARD_ID = ?");
                 updateStmt.setInt(1, targetFolder);
                 updateStmt.setLong(2, descriptor.getId());
                 updateStmt.executeUpdate();
