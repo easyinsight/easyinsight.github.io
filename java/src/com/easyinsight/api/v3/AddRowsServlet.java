@@ -4,7 +4,6 @@ package com.easyinsight.api.v3;
 import com.easyinsight.analysis.*;
 import com.easyinsight.api.ServiceRuntimeException;
 import com.easyinsight.core.EmptyValue;
-import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
@@ -13,6 +12,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import nu.xom.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,7 +27,7 @@ import java.util.Map;
 public class AddRowsServlet extends APIServlet {
 
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn) throws Exception {
+    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
         DataStorage dataStorage = null;
         try {
             Nodes baseRows = document.query("/rows");

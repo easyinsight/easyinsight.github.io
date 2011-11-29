@@ -36,6 +36,69 @@ import java.util.Map;
  * Time: 2:02 PM
  */
 public abstract class APIServlet extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String authHeader = req.getHeader("Authorization");
+        String headerValue = authHeader.split(" ")[1];
+        BASE64Decoder decoder = new BASE64Decoder();
+        String userPass = new String(decoder.decodeBuffer(headerValue));
+        int p = userPass.indexOf(":");
+        UserServiceResponse userResponse = null;
+        if (p != -1) {
+            String userID = userPass.substring(0, p);
+            String password = userPass.substring(p+1);
+            try {
+                userResponse = SecurityUtil.authenticateKeys(userID, password);
+            } catch (com.easyinsight.security.SecurityException se) {
+                userResponse = new UserService().authenticate(userID, password, false);
+            }
+        }
+
+        if (userResponse == null || !userResponse.isSuccessful()) {
+            resp.setContentType("text/xml");
+            resp.setStatus(401);
+            resp.getOutputStream().write("<response><code>401</code><message>Your credentials were rejected.</message></response>".getBytes());
+            resp.getOutputStream().flush();
+        } else {
+            try {
+                SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
+                        userResponse.getAccountType(), userResponse.isAccountAdmin(), userResponse.isGuestUser(), userResponse.getFirstDayOfWeek());
+                EIConnection conn = Database.instance().getConnection();
+                ResponseInfo responseInfo;
+                try {
+                    conn.setAutoCommit(false);
+                    responseInfo = processXML(null, conn, req);
+                    conn.commit();
+                } catch (ServiceRuntimeException sre) {
+                    conn.rollback();
+                    LogClass.error(sre);
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>" + sre.getMessage() + "</message>");
+                } catch (ParsingException spe) {
+                    conn.rollback();
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>" + spe.getMessage() + "</message>");
+                } catch (Exception e) {
+                    conn.rollback();
+                    LogClass.error(e);
+                    responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, "<message>An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.</message>");
+                } finally {
+                    conn.setAutoCommit(true);
+                    Database.closeConnection(conn);
+                    SecurityUtil.clearThreadLocal();
+                }
+                resp.setContentType("text/xml");
+                resp.setStatus(responseInfo.getCode());
+                resp.getOutputStream().write(responseInfo.toResponse().getBytes());
+                resp.getOutputStream().flush();
+            } catch (Exception e) {
+                resp.setContentType("text/xml");
+                resp.setStatus(400);
+                resp.getOutputStream().write("<response><code>400</code><message>Your XML was malformed.</message></response>".getBytes());
+                resp.getOutputStream().flush();
+            }
+        }
+    }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String authHeader = req.getHeader("Authorization");
@@ -69,7 +132,7 @@ public abstract class APIServlet extends HttpServlet {
                     conn.setAutoCommit(false);
 
                     Document doc = new Builder().build(req.getInputStream());
-                    responseInfo = processXML(doc, conn);
+                    responseInfo = processXML(doc, conn, req);
                     conn.commit();
                 } catch (ServiceRuntimeException sre) {
                     conn.rollback();
@@ -100,7 +163,7 @@ public abstract class APIServlet extends HttpServlet {
         }
     }
 
-    protected abstract ResponseInfo processXML(Document document, EIConnection conn) throws Exception;
+    protected abstract ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception;
 
     protected static class CallData {
         DataStorage dataStorage;

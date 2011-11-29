@@ -12,6 +12,7 @@ import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.util.RandomTextGenerator;
 import nu.xom.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ import java.util.Map;
 public class DefineCompositeDataSourceServlet extends APIServlet {
 
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn) throws Exception {
+    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
 
         DataStorage dataStorage = null;
         try {

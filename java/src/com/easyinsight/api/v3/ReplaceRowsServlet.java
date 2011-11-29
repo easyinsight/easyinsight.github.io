@@ -12,6 +12,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import nu.xom.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,7 +27,7 @@ import java.util.Map;
 public class ReplaceRowsServlet extends APIServlet {
 
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn) throws Exception {
+    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
         DataStorage dataStorage = null;
         try {
             Nodes baseRows = document.query("/rows");

@@ -7,6 +7,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.storage.DataStorage;
 import nu.xom.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,7 @@ import java.util.List;
 public class DefineDataSourceServlet extends APIServlet {
 
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn) throws Exception {
+    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
         // "<defineDataSource><dataSourceName></dataSourceName><fields><field type=\"\"><key></key><name></name></field></fields></defineDataSource>";
 
         DataStorage dataStorage = null;

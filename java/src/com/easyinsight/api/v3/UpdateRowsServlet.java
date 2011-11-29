@@ -17,6 +17,7 @@ import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import nu.xom.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,7 +34,7 @@ import java.util.Map;
 public class UpdateRowsServlet extends APIServlet {
 
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn) throws Exception {
+    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
         DataStorage dataStorage = null;
         try {
             Nodes baseNodes = document.query("/update");

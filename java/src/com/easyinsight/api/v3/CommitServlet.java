@@ -10,6 +10,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import nu.xom.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -26,7 +27,7 @@ import java.util.Map;
 public class CommitServlet extends APIServlet {
 
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn) throws Exception {
+    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
         DataStorage dataStorage = null;
         try {
             Nodes transactionIDNodes = document.query("/commit/transactionID/text()");

@@ -1,29 +1,15 @@
 package com.easyinsight.api.v3;
 
 
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.api.ServiceRuntimeException;
-import com.easyinsight.core.NamedKey;
-import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.dataset.DataSet;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.storage.DataStorage;
 import com.easyinsight.util.RandomTextGenerator;
 import nu.xom.Document;
-import nu.xom.Element;
-import nu.xom.Node;
 import nu.xom.Nodes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Map;
 
 /**
  * User: jamesboe
@@ -33,7 +19,7 @@ import java.util.Map;
 public class BeginTransactionServlet extends APIServlet {
 
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn) throws Exception {
+    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
         Nodes dataSourceNameNodes = document.query("/beginTransaction/dataSourceName/text()");
         String dataSourceName;
         if (dataSourceNameNodes.size() == 0) {

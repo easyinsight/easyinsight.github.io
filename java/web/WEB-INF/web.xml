@@ -117,6 +117,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>RunReport</servlet-name>
+        <display-name>RunReport</display-name>
+        <servlet-class>com.easyinsight.api.v3.RunReportServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>Commit</servlet-name>
         <display-name>Commit</display-name>
         <servlet-class>com.easyinsight.api.v3.CommitServlet</servlet-class>
@@ -244,6 +251,11 @@
     <servlet-mapping>
         <servlet-name>LoadRows</servlet-name>
         <url-pattern>/xml/loadRows</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>RunReport</servlet-name>
+        <url-pattern>/xml/RunReport</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

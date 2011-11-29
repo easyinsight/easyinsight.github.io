@@ -14,6 +14,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import nu.xom.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,7 +35,7 @@ import java.util.Map;
 public class LoadRowsServlet extends APIServlet {
 
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn) throws Exception {
+    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
         Nodes baseRows = document.query("/rows");
         if (baseRows.size() == 0) {
             throw new ServiceRuntimeException("The root element of the request needs to be rows.");
