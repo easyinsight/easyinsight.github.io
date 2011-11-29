@@ -9,8 +9,8 @@ import com.easyinsight.core.Value;
  */
 public class GreaterThan extends Function {
     public Value evaluate() {
-        Value compare1 = getParameter(0);
-        Value compare2 = getParameter(1);
+        Value compare1 = minusQuotes(getParameter(0));
+        Value compare2 = minusQuotes(getParameter(1));
         if (compare1.toDouble() > compare2.toDouble()) {
             return minusQuotes(getParameter(2));
         } else {

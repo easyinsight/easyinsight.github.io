@@ -310,6 +310,7 @@ public class AnalysisService {
         SecurityUtil.authorizeInsight(reportID);
         Connection conn = Database.instance().getConnection();
         try {
+            new AnalysisStorage().clearCache(reportID);
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET TEMPORARY_REPORT = ? WHERE ANALYSIS_ID = ?");
             updateStmt.setBoolean(1, false);
             updateStmt.setLong(2, reportID);
@@ -345,6 +346,7 @@ public class AnalysisService {
         SecurityUtil.authorizeInsight(reportID);
         Connection conn = Database.instance().getConnection();
         try {
+            new AnalysisStorage().clearCache(reportID);
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET ACCOUNT_VISIBLE = ? WHERE ANALYSIS_ID = ?");
             updateStmt.setBoolean(1, false);
             updateStmt.setLong(2, reportID);

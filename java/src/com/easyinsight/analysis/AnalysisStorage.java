@@ -4,6 +4,10 @@ import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,9 +16,12 @@ import java.sql.SQLException;
 
 
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.util.RandomTextGenerator;
+import org.apache.jcs.JCS;
+import org.apache.jcs.access.exception.CacheException;
 import org.hibernate.Session;
 
 /**
@@ -23,6 +30,18 @@ import org.hibernate.Session;
  * Time: 6:37:10 PM
  */
 public class AnalysisStorage {
+
+    private JCS reportCache = getCache("reports");
+    //private Map<Long, byte[]> reportCache = new HashMap<Long, byte[]>();
+
+    private JCS getCache(String cacheName) {
+        try {
+            return JCS.getInstance(cacheName);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
 
     public ReportMetrics getRating(long analysisID, EIConnection conn) throws SQLException {
         double ratingAverage = 0;
@@ -49,8 +68,24 @@ public class AnalysisStorage {
         return new ReportMetrics(ratingCount, ratingAverage, myRating);
     }
 
+    private WSAnalysisDefinition fromCache(long reportID) {
+        if (reportCache != null) {
+            try {
+                byte[] bytes = (byte[]) reportCache.get(reportID);
+                if (bytes != null) {
+                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+                    return (WSAnalysisDefinition) ois.readObject();
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
+        }
+        return null;
+    }
+
     public WSAnalysisDefinition getAnalysisDefinition(long analysisID) {
-        WSAnalysisDefinition analysisDefinition = null;
+        WSAnalysisDefinition analysisDefinition = fromCache(analysisID);
+        if (analysisDefinition != null) return analysisDefinition;
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
@@ -66,6 +101,7 @@ public class AnalysisStorage {
         } finally {
             session.close();
         }
+        cacheReport(analysisDefinition);
         return analysisDefinition;
     }
 
@@ -89,7 +125,8 @@ public class AnalysisStorage {
     }
 
     public WSAnalysisDefinition getAnalysisDefinition(long analysisID, Connection conn) {
-        WSAnalysisDefinition analysisDefinition = null;
+        WSAnalysisDefinition analysisDefinition = fromCache(analysisID);
+        if (analysisDefinition != null) return analysisDefinition;
         Session session = Database.instance().createSession(conn);
         try {
             session.beginTransaction();
@@ -105,7 +142,22 @@ public class AnalysisStorage {
         } finally {
             session.close();
         }
+        cacheReport(analysisDefinition);
         return analysisDefinition;
+    }
+
+    private void cacheReport(WSAnalysisDefinition analysisDefinition) {
+        if (reportCache != null && analysisDefinition != null) {
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                oos.writeObject(analysisDefinition);
+                oos.flush();
+                reportCache.put(analysisDefinition.getAnalysisID(), baos.toByteArray());
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
+        }
     }
 
     public AnalysisDefinition getPersistableReport(long analysisID, Connection conn) {
@@ -142,7 +194,21 @@ public class AnalysisStorage {
         }
     }
 
+    public void clearCache(long reportID) {
+        if (reportCache != null) {
+            /*try {
+                reportCache.remove(reportID);
+            } catch (CacheException e) {
+            }*/
+            try {
+                reportCache.remove(reportID);
+            } catch (CacheException e) {
+            }
+        }
+    }
+
     public void saveAnalysis(AnalysisDefinition analysisDefinition, Session session) {
+        clearCache(analysisDefinition.getAnalysisID());
         if (analysisDefinition.getAnalysisID() != null && analysisDefinition.getAnalysisID() == 0) {
             analysisDefinition.setAnalysisID(null);
         }
@@ -385,6 +451,7 @@ public class AnalysisStorage {
             session.beginTransaction();
             session.delete(analysisDefinition);
             session.getTransaction().commit();
+            clearCache(analysisDefinition.getAnalysisID());
         } catch (Exception e) {
             
             session.getTransaction().rollback();
@@ -398,6 +465,7 @@ public class AnalysisStorage {
         Session session = Database.instance().createSession(conn);
         try {
             session.delete(analysisDefinition);
+            clearCache(analysisDefinition.getAnalysisID());
         } finally {
             session.close();
         }

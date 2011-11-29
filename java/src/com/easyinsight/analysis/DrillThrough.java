@@ -42,10 +42,10 @@ public class DrillThrough extends Link {
     @Override
     public void beforeSave() {
         super.beforeSave();
-        if (reportID == 0) {
+        if (reportID != null && reportID == 0) {
             reportID = null;
         }
-        if (dashboardID == 0) {
+        if (dashboardID != null && dashboardID == 0) {
             dashboardID = null;
         }
     }

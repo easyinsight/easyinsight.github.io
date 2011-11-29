@@ -9,19 +9,22 @@ import com.easyinsight.core.Value;
  */
 public class EqualTo extends Function {
 
-
-
     public Value evaluate() {
-        Value compare1 = params.get(0);
-        Value compare2 = minusQuotes(params.get(1));
+        Value compare1 = minusQuotes(getParameter(0));
+        Value compare2 = minusQuotes(getParameter(1));
         if (compare1.toString().equals(compare2.toString())) {
-            return minusQuotes(params.get(2));
+            return minusQuotes(getParameter(2));
         } else {
-            return minusQuotes(params.get(3));
+            return minusQuotes(getParameter(3));
         }
     }
 
+    @Override
+    public boolean onDemand() {
+        return true;
+    }
+
     public int getParameterCount() {
-        return 4;
+        return -1;
     }
 }
