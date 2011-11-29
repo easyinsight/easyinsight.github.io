@@ -146,12 +146,18 @@ public class Crosstab {
         for (int i = 0; i < columnSections.size(); i++) {
             double sum = 0;
             Section columnSection = columnSections.get(i);
+            AggregationFactory aggregationFactory = new AggregationFactory((AnalysisMeasure) crosstabDefinition.getMeasures().get(0), false);
+            Aggregation aggregation = aggregationFactory.getAggregation();
             for (int j = 0; j < rowSections.size(); j++) {
                 Section rowSection = rowSections.get(j);
                 Value value = intersectionMap.get(new Intersection(rowSection, columnSection));
                 if (value != null) {
-                    sum += value.toDouble();
+                    aggregation.addValue(value);
                 }
+            }
+            Double sumValue = aggregation.toDouble();
+            if (sumValue != null) {
+                sum = sumValue;
             }
             array[rowSections.size() + crosstabDefinition.getColumns().size() + 1][i + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
         }
@@ -159,12 +165,18 @@ public class Crosstab {
         for (int j = 0; j < rowSections.size(); j++) {
             Section rowSection = rowSections.get(j);
             double sum = 0;
+            AggregationFactory aggregationFactory = new AggregationFactory((AnalysisMeasure) crosstabDefinition.getMeasures().get(0), false);
+            Aggregation aggregation = aggregationFactory.getAggregation();
             for (int i = 0; i < columnSections.size(); i++) {
                 Section columnSection = columnSections.get(i);
                 Value value = intersectionMap.get(new Intersection(rowSection, columnSection));
                 if (value != null) {
-                    sum += value.toDouble();
+                    aggregation.addValue(value);
                 }
+            }
+            Double sumValue = aggregation.toDouble();
+            if (sumValue != null) {
+                sum = sumValue;
             }
             array[j + crosstabDefinition.getColumns().size() + 1][columnSections.size() + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
         }

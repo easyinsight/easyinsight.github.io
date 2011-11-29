@@ -35,11 +35,11 @@ public class AnalysisStorage {
     //private Map<Long, byte[]> reportCache = new HashMap<Long, byte[]>();
 
     private JCS getCache(String cacheName) {
-        try {
+        /*try {
             return JCS.getInstance(cacheName);
         } catch (Exception e) {
             LogClass.error(e);
-        }
+        }*/
         return null;
     }
 
