@@ -148,13 +148,17 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
+            ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
+            HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+            ZendeskUserCache zendeskUserCache = zendeskCompositeSource.getOrCreateUserCache(httpClient);
             if (lastRefreshDate == null) {
-                return getAllTickets(keys, (ZendeskCompositeSource) parentDefinition);
+                return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache);
             } else {
-                getUpdatedTickets(keys, (ZendeskCompositeSource) parentDefinition, lastRefreshDate, IDataStorage);
+                getUpdatedTickets(keys, zendeskCompositeSource, lastRefreshDate, IDataStorage, zendeskUserCache);
                 return null;
             }
         } catch (ReportException re) {
+            LogClass.error(re);
             throw re;
         } catch (Exception e) {
             LogClass.error(e);
@@ -162,19 +166,13 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         }
     }
 
-    private String getUserName(String userID, Map<String, String> userCache, ZendeskCompositeSource zendeskCompositeSource, HttpClient httpClient) throws InterruptedException {
-        String userName = userCache.get(userID);
-        if (userName == null) {
-            Document userDoc = runRestRequest(zendeskCompositeSource, httpClient, "/users/" + userID + ".xml", new Builder());
-            Nodes nameNodes = userDoc.query("/user/name/text()");
-            if (nameNodes.size() > 0) {
-                userName = nameNodes.get(0).getValue();
-            } else {
-                userName = "";
-            }
-            userCache.put(userID, userName);
+    private String getUserName(String userID, ZendeskUserCache zendeskUserCache, ZendeskCompositeSource zendeskCompositeSource) throws InterruptedException {
+        ZendeskUser zendeskUser = zendeskUserCache.getUsers().get(userID);
+        if (zendeskUser == null) {
+            return "";
+        } else {
+            return zendeskUser.getName();
         }
-        return userName;
     }
 
     @Override
@@ -182,7 +180,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         return false;
     }
 
-    private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, IDataStorage IDataStorage) throws Exception {
+    private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, IDataStorage IDataStorage,
+                                   ZendeskUserCache zendeskUserCache) throws Exception {
 
         HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
         Builder builder = new Builder();
@@ -193,7 +192,6 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         cal.setTime(lastUpdateDate);
         cal.add(Calendar.DAY_OF_YEAR, -1);
         String updateDate = updateFormat.format(cal.getTime());
-        Map<String, String> userCache = new HashMap<String, String>();
         Key noteKey = zendeskCompositeSource.getField(TICKET_ID).toBaseKey();
         boolean moreData;
         int page = 1;
@@ -209,7 +207,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 DataSet dataSet = new DataSet();
                 IRow row = dataSet.createRow();
                 Node ticketNode = ticketNodes.get(i);
-                String id = parseTicket(keys, zendeskCompositeSource, httpClient, dateFormat, userCache, row, ticketNode);
+                String id = parseTicket(keys, zendeskCompositeSource, httpClient, zendeskUserCache, row, ticketNode);
                 if (id != null) {
                     StringWhere userWhere = new StringWhere(noteKey, id);
                     IDataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
@@ -219,13 +217,12 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         } while (moreData);
     }
 
-    private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource) throws InterruptedException, ParseException {
+    private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, ZendeskUserCache userCache) throws InterruptedException, ParseException {
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
         Builder builder = new Builder();
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
-        Map<String, String> userCache = new HashMap<String, String>();
         boolean moreData;
         int page = 1;
         do {
@@ -240,17 +237,17 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             for (int i = 0; i < ticketNodes.size(); i++) {
                 IRow row = dataSet.createRow();
                 Node ticketNode = ticketNodes.get(i);
-                parseTicket(keys, zendeskCompositeSource, httpClient, dateFormat, userCache, row, ticketNode);
+                parseTicket(keys, zendeskCompositeSource, httpClient, userCache, row, ticketNode);
             }
             page++;
         } while (moreData);
         return dataSet;
     }
 
-    private String parseTicket(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, HttpClient httpClient, DateFormat dateFormat, Map<String, String> userCache, IRow row, Node ticketNode) throws ParseException, InterruptedException {
+    private String parseTicket(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, HttpClient httpClient, ZendeskUserCache userCache, IRow row, Node ticketNode) throws ParseException, InterruptedException {
         try {
             row.addValue(keys.get(ASSIGNED_AT), queryDate(ticketNode, "assigned-at/text()"));
-            row.addValue(keys.get(ASSIGNEE), queryUser(ticketNode, "assignee-id/text()", userCache, zendeskCompositeSource, httpClient));
+            row.addValue(keys.get(ASSIGNEE), queryUser(ticketNode, "assignee-id/text()", userCache, zendeskCompositeSource));
             row.addValue(keys.get(BASE_SCORE), queryField(ticketNode, "base-score/text()"));
             row.addValue(keys.get(SCORE), queryField(ticketNode, "score/text()"));
             row.addValue(keys.get(COUNT), 1);
@@ -265,8 +262,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             row.addValue(keys.get(ORGANIZATION_ID), queryField(ticketNode, "organization-id/text()"));
             String id = queryField(ticketNode, "nice-id/text()");
             row.addValue(keys.get(TICKET_ID), id);
-            row.addValue(keys.get(REQUESTER), queryUser(ticketNode, "requester-id/text()", userCache, zendeskCompositeSource, httpClient));
-            row.addValue(keys.get(SUBMITTER), queryUser(ticketNode, "submitter-id/text()", userCache, zendeskCompositeSource, httpClient));
+            row.addValue(keys.get(REQUESTER), queryUser(ticketNode, "requester-id/text()", userCache, zendeskCompositeSource));
+            row.addValue(keys.get(SUBMITTER), queryUser(ticketNode, "submitter-id/text()", userCache, zendeskCompositeSource));
             String tags = queryField(ticketNode, "current-tags/text()");
             if (tags != null) {
                 String[] tagElements = tags.split(" ");
@@ -385,11 +382,11 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         return TICKET_ID;
     }
 
-    protected Value queryUser(Node node, String target, Map<String, String> userCache, ZendeskCompositeSource zendeskCompositeSource, HttpClient client) throws InterruptedException {
+    protected Value queryUser(Node node, String target, ZendeskUserCache zendeskUserCache, ZendeskCompositeSource zendeskCompositeSource) throws InterruptedException {
         String value = queryField(node, target);
         if (value != null && !"".equals(value)) {
             try {
-                return new StringValue(getUserName(value, userCache, zendeskCompositeSource, client));
+                return new StringValue(getUserName(value, zendeskUserCache, zendeskCompositeSource));
             } catch (Exception e) {
                 return new EmptyValue();
             }

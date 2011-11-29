@@ -61,19 +61,17 @@ public class ZendeskUserSource extends ZendeskBaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
+
             DataSet dataSet = new DataSet();
             HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
-            Builder builder = new Builder();
-            Document doc = runRestRequest(zendeskCompositeSource, httpClient, "/users.xml", builder);
-            Nodes userNodes = doc.query("/users/user");
-            for (int i = 0; i < userNodes.size(); i++) {
-                Node userNode = userNodes.get(i);
+            ZendeskUserCache zendeskUserCache = zendeskCompositeSource.getOrCreateUserCache(httpClient);
+            for (ZendeskUser zendeskUser : zendeskUserCache.getUsers().values()) {
                 IRow row = dataSet.createRow();
-                row.addValue(keys.get(NAME), queryField(userNode, "name/text()"));
-                row.addValue(keys.get(ID), queryField(userNode, "id/text()"));
-                row.addValue(keys.get(ORGANIZATION_ID), queryField(userNode, "organization-id/text()"));
-                row.addValue(keys.get(ROLE), queryField(userNode, "roles/text()"));
-                row.addValue(keys.get(EMAIL), queryField(userNode, "email/text()"));
+                row.addValue(keys.get(NAME), zendeskUser.getName());
+                row.addValue(keys.get(ID), zendeskUser.getId());
+                row.addValue(keys.get(ORGANIZATION_ID), zendeskUser.getOrganizationID());
+                row.addValue(keys.get(ROLE), zendeskUser.getRole());
+                row.addValue(keys.get(EMAIL), zendeskUser.getEmail());
                 row.addValue(keys.get(COUNT), 1);
             }
             return dataSet;

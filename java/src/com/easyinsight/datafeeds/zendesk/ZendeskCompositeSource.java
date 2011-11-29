@@ -152,6 +152,16 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         return kpis;
     }
 
+    private transient ZendeskUserCache zendeskUserCache;
+
+    public ZendeskUserCache getOrCreateUserCache(HttpClient httpClient) throws InterruptedException {
+        if (zendeskUserCache == null) {
+            zendeskUserCache = new ZendeskUserCache();
+            zendeskUserCache.populate(httpClient, getUrl(), this);
+        }
+        return zendeskUserCache;
+    }
+
     public String getUrl() {
         if (url == null || "".equals(url)) {
             return url;
