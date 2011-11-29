@@ -26,7 +26,7 @@ public class NotIn extends Function {
                 }
             }
             if (value == null || "All".equals(value)) {
-                return getParameter(paramCount() - 1);
+                return new EmptyValue();
             }
             boolean found = false;
             for (int i = 1; i < paramCount() - 1; i++) {
@@ -36,7 +36,7 @@ public class NotIn extends Function {
                     break;
                 }
             }
-            if (!found) {
+            if (found) {
                 return getParameter(paramCount() - 1);
             }
         }
