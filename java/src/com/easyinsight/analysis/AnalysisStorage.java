@@ -195,20 +195,20 @@ public class AnalysisStorage {
     }
 
     public void clearCache(long reportID) {
-        if (reportCache != null) {
-            /*try {
-                reportCache.remove(reportID);
-            } catch (CacheException e) {
-            }*/
+        /*if (reportCache != null) {
             try {
                 reportCache.remove(reportID);
             } catch (CacheException e) {
             }
-        }
+            try {
+                reportCache.remove(reportID);
+            } catch (CacheException e) {
+            }
+        }*/
     }
 
     public void saveAnalysis(AnalysisDefinition analysisDefinition, Session session) {
-        clearCache(analysisDefinition.getAnalysisID());
+        //clearCache(analysisDefinition.getAnalysisID());
         if (analysisDefinition.getAnalysisID() != null && analysisDefinition.getAnalysisID() == 0) {
             analysisDefinition.setAnalysisID(null);
         }
@@ -465,7 +465,7 @@ public class AnalysisStorage {
         Session session = Database.instance().createSession(conn);
         try {
             session.delete(analysisDefinition);
-            clearCache(analysisDefinition.getAnalysisID());
+            //clearCache(analysisDefinition.getAnalysisID());
         } finally {
             session.close();
         }
