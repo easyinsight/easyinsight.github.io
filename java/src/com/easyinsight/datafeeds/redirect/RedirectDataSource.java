@@ -47,6 +47,10 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         return Account.PERSONAL;
     }
 
+    public boolean hasNewData(Date lastRefreshDate, FeedDefinition parent, EIConnection conn) throws Exception {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     @Override
     public int getDataSourceType() {
         return DataSourceInfo.LIVE;
