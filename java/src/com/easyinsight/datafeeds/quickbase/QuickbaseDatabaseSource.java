@@ -217,6 +217,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         httpRequest.setHeader("QUICKBASE-ACTION", "API_DoQuery");
         BasicHttpEntity entity = new BasicHttpEntity();
         String columns = "3";
+        System.out.println("looking for after " + lastRefreshDate.getTime());
         String query = ("{'2'.AF.'" + lastRefreshDate.getTime() + "'}");
         String requestBody = MessageFormat.format(REQUESTP, sessionTicket, applicationToken, columns, query);
         byte[] contentBytes = requestBody.getBytes();
@@ -228,9 +229,12 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         String string = client.execute(httpRequest, responseHandler);
         Document doc = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
         Nodes records = doc.query("/qdbapi/table/records/record");
+        System.out.println("checking...");
         if (records.size() > 0) {
+            System.out.println("found new record");
             return true;
         }
+        System.out.println("no new records");
         return false;
     }
 
