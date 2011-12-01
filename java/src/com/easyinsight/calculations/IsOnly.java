@@ -36,6 +36,25 @@ public class IsOnly extends Function {
             if (value != null && value.equals(matchValue)) {
                 return getParameter(2);
             }
+        } else {
+            AnalysisItem target = null;
+            for (AnalysisItem field : calculationMetadata.getDataSourceFields()) {
+                if (field.toDisplay().equals(fieldName)) {
+                    target = field;
+                    break;
+                }
+            }
+            DataSet dataSet = calculationMetadata.getDataSet();
+            if (dataSet != null) {
+                Set<Value> values = new HashSet<Value>();
+                for (IRow row : dataSet.getRows()) {
+                    values.add(row.getValue(target));
+                }
+                Value matchValue = minusQuotes(getParameter(1));
+                if (values.size() == 1 && values.contains(matchValue)) {
+                    return getParameter(2);
+                }
+            }
         }
         return new EmptyValue();
     }
