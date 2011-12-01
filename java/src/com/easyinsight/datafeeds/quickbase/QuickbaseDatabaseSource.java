@@ -217,9 +217,10 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         httpRequest.setHeader("QUICKBASE-ACTION", "API_DoQuery");
         BasicHttpEntity entity = new BasicHttpEntity();
         String columns = "3";
-        System.out.println("looking for after " + lastRefreshDate.getTime());
+        System.out.println("looking for after " + lastRefreshDate);
         String query = ("{'2'.AF.'" + lastRefreshDate.getTime() + "'}");
         String requestBody = MessageFormat.format(REQUESTP, sessionTicket, applicationToken, columns, query);
+        System.out.println(requestBody);
         byte[] contentBytes = requestBody.getBytes();
         entity.setContent(new ByteArrayInputStream(contentBytes));
         entity.setContentLength(contentBytes.length);
