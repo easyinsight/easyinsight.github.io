@@ -35,6 +35,10 @@ import javax.servlet.http.HttpServletRequest;
  */
 public abstract class ServerDataSourceDefinition extends FeedDefinition implements IServerDataSourceDefinition {
 
+    public boolean hasNewData(Date lastRefreshDate, FeedDefinition parent, EIConnection conn) {
+        return false;
+    }
+
     public void loadingProgress(int current, int total, String message, String callDataID) {
         if (callDataID != null) {
             DataSourceRefreshEvent info = new DataSourceRefreshEvent();
