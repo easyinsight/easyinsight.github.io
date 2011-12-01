@@ -26,6 +26,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -186,6 +187,50 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
     @Override
     protected String getUpdateKeyName() {
         return "beutk2zd6.3";
+    }
+
+    public boolean hasNewData(Date lastRefreshDate, FeedDefinition parent, EIConnection conn) {
+        QuickbaseCompositeSource quickbaseCompositeSource = (QuickbaseCompositeSource) parent;
+        if (databaseID.equals("beutk2zd6")) {
+            try {
+                return checkForNewData(quickbaseCompositeSource.getHost(), quickbaseCompositeSource.getSessionTicket(),
+                        quickbaseCompositeSource.getApplicationToken(), lastRefreshDate);
+            } catch (Exception e) {
+                try {
+                    quickbaseCompositeSource.exchangeTokens(conn, null, null);
+                    return checkForNewData(quickbaseCompositeSource.getHost(), quickbaseCompositeSource.getSessionTicket(),
+                        quickbaseCompositeSource.getApplicationToken(), lastRefreshDate);
+                } catch (Exception e1) {
+                    throw new RuntimeException(e1);
+                }
+            }
+        } else {
+            return false;
+        }
+    }
+
+    private boolean checkForNewData(String fullPath, String sessionTicket, String applicationToken, Date lastRefreshDate) throws IOException, ParsingException {
+        HttpPost httpRequest = new HttpPost(fullPath);
+        httpRequest.setHeader("Accept", "application/xml");
+        httpRequest.setHeader("Content-Type", "application/xml");
+        httpRequest.setHeader("QUICKBASE-ACTION", "API_DoQuery");
+        BasicHttpEntity entity = new BasicHttpEntity();
+        String columns = "3";
+        String query = ("{'2'.AF.'" + lastRefreshDate.getTime() + "'}");
+        String requestBody = MessageFormat.format(REQUESTP, sessionTicket, applicationToken, columns, query);
+        byte[] contentBytes = requestBody.getBytes();
+        entity.setContent(new ByteArrayInputStream(contentBytes));
+        entity.setContentLength(contentBytes.length);
+        httpRequest.setEntity(entity);
+        HttpClient client = new DefaultHttpClient();
+        ResponseHandler<String> responseHandler = new BasicResponseHandler();
+        String string = client.execute(httpRequest, responseHandler);
+        Document doc = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+        Nodes records = doc.query("/qdbapi/table/records/record");
+        if (records.size() > 0) {
+            return true;
+        }
+        return false;
     }
 
     private DataSet acsDataLogRetrieval(IDataStorage IDataStorage, EIConnection conn, QuickbaseCompositeSource quickbaseCompositeSource,

@@ -24,10 +24,10 @@ public class InvalidateData extends Function {
                 List<CompositeFeedNode> nodes = compositeFeedDefinition.getCompositeFeedNodes();
                 for (CompositeFeedNode node : nodes) {
                     FeedDefinition child = new FeedStorage().getFeedDefinitionData(node.getDataFeedID(), calculationMetadata.getConnection());
-                    blah(child);
+                    blah(child, dataSource);
                 }
             } else {
-                blah(dataSource);
+                blah(dataSource, null);
             }
             calculationMetadata.getConnection().commit();
         } catch (Exception e) {
@@ -41,17 +41,19 @@ public class InvalidateData extends Function {
         return new EmptyValue();
     }
 
-    private void blah(FeedDefinition dataSource) throws Exception {
+    private void blah(FeedDefinition dataSource, FeedDefinition parent) throws Exception {
         if (dataSource instanceof IServerDataSourceDefinition) {
             IServerDataSourceDefinition dataSourceDefinition = (IServerDataSourceDefinition) dataSource;
-            Date now = new Date();
-            boolean changed = dataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), calculationMetadata.getConnection(), null, null, dataSource.getLastRefreshStart());
-            dataSource.setVisible(true);
-            dataSource.setLastRefreshStart(now);
-            if (changed) {
-                new DataSourceInternalService().updateFeedDefinition(dataSource, calculationMetadata.getConnection(), true, true);
-            } else {
-                new FeedStorage().updateDataFeedConfiguration(dataSource, calculationMetadata.getConnection());
+            if (dataSource.getLastRefreshStart() == null || dataSourceDefinition.hasNewData(dataSource.getLastRefreshStart(), parent, calculationMetadata.getConnection())) {
+                Date now = new Date();
+                boolean changed = dataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), calculationMetadata.getConnection(), null, null, dataSource.getLastRefreshStart());
+                dataSource.setVisible(true);
+                dataSource.setLastRefreshStart(now);
+                if (changed) {
+                    new DataSourceInternalService().updateFeedDefinition(dataSource, calculationMetadata.getConnection(), true, true);
+                } else {
+                    new FeedStorage().updateDataFeedConfiguration(dataSource, calculationMetadata.getConnection());
+                }
             }
         }
     }

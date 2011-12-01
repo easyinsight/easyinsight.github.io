@@ -37,6 +37,15 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     private String password;
     private String sessionId;
 
+    public boolean hasNewData(Date lastRefreshDate, FeedDefinition parent, EIConnection conn) throws Exception {
+        List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn);
+        boolean hasNew = false;
+        for (IServerDataSourceDefinition source : sources) {
+            hasNew = hasNew || source.hasNewData(lastRefreshDate, parent, conn);
+        }
+        return hasNew;
+    }
+
     @Override
     public int getRequiredAccountTier() {
         return Account.BASIC;
@@ -207,6 +216,8 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     public String getSessionId() {
         return sessionId;
     }
+
+
 
     public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception {
         boolean changed = false;
