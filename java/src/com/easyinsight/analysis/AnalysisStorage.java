@@ -31,15 +31,15 @@ import org.hibernate.Session;
  */
 public class AnalysisStorage {
 
-    private JCS reportCache = getCache("reports");
+    private JCS reportCache = getCache("reportDefinitions");
     //private Map<Long, byte[]> reportCache = new HashMap<Long, byte[]>();
 
     private JCS getCache(String cacheName) {
-        /*try {
+        try {
             return JCS.getInstance(cacheName);
         } catch (Exception e) {
             LogClass.error(e);
-        }*/
+        }
         return null;
     }
 
@@ -195,7 +195,7 @@ public class AnalysisStorage {
     }
 
     public void clearCache(long reportID) {
-        /*if (reportCache != null) {
+        if (reportCache != null) {
             try {
                 reportCache.remove(reportID);
             } catch (CacheException e) {
@@ -204,11 +204,13 @@ public class AnalysisStorage {
                 reportCache.remove(reportID);
             } catch (CacheException e) {
             }
-        }*/
+        }
     }
 
     public void saveAnalysis(AnalysisDefinition analysisDefinition, Session session) {
-        //clearCache(analysisDefinition.getAnalysisID());
+        if (analysisDefinition.getAnalysisID() != null) {
+            clearCache(analysisDefinition.getAnalysisID());
+        }
         if (analysisDefinition.getAnalysisID() != null && analysisDefinition.getAnalysisID() == 0) {
             analysisDefinition.setAnalysisID(null);
         }
@@ -465,7 +467,9 @@ public class AnalysisStorage {
         Session session = Database.instance().createSession(conn);
         try {
             session.delete(analysisDefinition);
-            //clearCache(analysisDefinition.getAnalysisID());
+            if (analysisDefinition.getAnalysisID() != null) {
+                clearCache(analysisDefinition.getAnalysisID());
+            }
         } finally {
             session.close();
         }
