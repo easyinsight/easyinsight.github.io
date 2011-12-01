@@ -205,10 +205,10 @@ public class ReportCalculation {
 
     public void apply(FilterDefinition filterDefinition, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap, Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters) {
         try {
-            DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
+            //DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setFilterDefinition(filterDefinition);
-            calculationMetadata.setDataSet(dataSet);
+            //calculationMetadata.setDataSet(dataSet);
             calculationMetadata.setDataSourceFields(allFields);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
