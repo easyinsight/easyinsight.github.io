@@ -191,14 +191,15 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
     public boolean hasNewData(Date lastRefreshDate, FeedDefinition parent, EIConnection conn) {
         QuickbaseCompositeSource quickbaseCompositeSource = (QuickbaseCompositeSource) parent;
+        String fullPath = "https://" + quickbaseCompositeSource.getHost() + "/db/" + databaseID;
         if (databaseID.equals("beutk2zd6")) {
             try {
-                return checkForNewData(quickbaseCompositeSource.getHost(), quickbaseCompositeSource.getSessionTicket(),
+                return checkForNewData(fullPath, quickbaseCompositeSource.getSessionTicket(),
                         quickbaseCompositeSource.getApplicationToken(), lastRefreshDate);
             } catch (Exception e) {
                 try {
                     quickbaseCompositeSource.exchangeTokens(conn, null, null);
-                    return checkForNewData(quickbaseCompositeSource.getHost(), quickbaseCompositeSource.getSessionTicket(),
+                    return checkForNewData(fullPath, quickbaseCompositeSource.getSessionTicket(),
                         quickbaseCompositeSource.getApplicationToken(), lastRefreshDate);
                 } catch (Exception e1) {
                     throw new RuntimeException(e1);
