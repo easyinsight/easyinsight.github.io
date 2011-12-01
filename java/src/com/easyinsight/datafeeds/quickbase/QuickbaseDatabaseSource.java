@@ -195,12 +195,12 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         if (databaseID.equals("beutk2zd6")) {
             try {
                 return checkForNewData(fullPath, quickbaseCompositeSource.getSessionTicket(),
-                        quickbaseCompositeSource.getApplicationToken(), lastRefreshDate);
+                        quickbaseCompositeSource.getApplicationToken(), lastRefreshDate, quickbaseCompositeSource);
             } catch (Exception e) {
                 try {
                     quickbaseCompositeSource.exchangeTokens(conn, null, null);
                     return checkForNewData(fullPath, quickbaseCompositeSource.getSessionTicket(),
-                        quickbaseCompositeSource.getApplicationToken(), lastRefreshDate);
+                        quickbaseCompositeSource.getApplicationToken(), lastRefreshDate, quickbaseCompositeSource);
                 } catch (Exception e1) {
                     throw new RuntimeException(e1);
                 }
@@ -210,7 +210,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    private boolean checkForNewData(String fullPath, String sessionTicket, String applicationToken, Date lastRefreshDate) throws IOException, ParsingException {
+    private boolean checkForNewData(String fullPath, String sessionTicket, String applicationToken, Date lastRefreshDate, QuickbaseCompositeSource quickbaseCompositeSource) throws IOException, ParsingException {
         HttpPost httpRequest = new HttpPost(fullPath);
         httpRequest.setHeader("Accept", "application/xml");
         httpRequest.setHeader("Content-Type", "application/xml");
@@ -229,6 +229,14 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         ResponseHandler<String> responseHandler = new BasicResponseHandler();
         String string = client.execute(httpRequest, responseHandler);
         Document doc = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+        Nodes errors = doc.query("/qdbapi/errcode/text()");
+        if (errors.size() > 0) {
+            Node error = errors.get(0);
+            if (!"0".equals(error.getValue())) {
+                String errorDetail = doc.query("/qdbapi/errdetail/text()").get(0).getValue();
+                throw new ReportException(new DataSourceConnectivityReportFault(errorDetail, quickbaseCompositeSource));
+            }
+        }
         Nodes records = doc.query("/qdbapi/table/records/record");
         System.out.println("checking...");
         if (records.size() > 0) {
