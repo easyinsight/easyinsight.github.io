@@ -6,18 +6,22 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.reportviews {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.dashboard.DashboardEditorMetadata;
 import com.easyinsight.dashboard.DashboardElement;
 import com.easyinsight.dashboard.DashboardReport;
 import com.easyinsight.dashboard.DashboardStack;
 import com.easyinsight.dashboard.DashboardStackItem;
 import com.easyinsight.dashboard.IDashboardViewComponent;
+import com.easyinsight.dashboard.SizeInfo;
 import com.easyinsight.filter.FilterFactory;
 import com.easyinsight.filtering.FilterDefinition;
+import com.easyinsight.framework.User;
 import com.easyinsight.skin.ImageLoadEvent;
 import com.easyinsight.skin.ImageLoader;
 import com.easyinsight.util.AnalysisItemFilterTablet;
 import com.easyinsight.util.EIComboBox;
+import com.easyinsight.util.ExportWindow;
 import com.easyinsight.util.FilterChangeEvent;
 import com.easyinsight.util.FlatDateFilterTablet;
 import com.easyinsight.util.SingleValueFilterTablet;
@@ -29,10 +33,18 @@ import mx.collections.ArrayCollection;
 import mx.core.FlexGlobals;
 import mx.core.UIComponent;
 import mx.effects.Effect;
+import mx.effects.Sequence;
 import mx.events.FlexEvent;
 import mx.graphics.SolidColor;
+import mx.messaging.config.ServerConfig;
+import mx.states.AddItems;
+import mx.states.SetProperty;
+import mx.states.State;
+import mx.states.Transition;
 
 import org.flexlayouts.layouts.FlowLayout;
+
+import spark.components.Button;
 
 import spark.components.Group;
 import spark.components.HGroup;
@@ -48,14 +60,10 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
 
     public var dashboardEditorMetadata:DashboardEditorMetadata;
 
-    private var effect:Effect;
-
     public function DashboardStackMobileComponent() {
         super();
         this.percentWidth = 100;
         this.percentHeight = 100;
-        effect = new Fade();
-        effect.duration = 1000;
     }
 
     private function styleHeaderArea(headerArea:Group):Group {
@@ -68,6 +76,7 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
         }
         headerArea.percentWidth = 100;
         var headerBackgroundImageArea:Group = new Group();
+        headerBackgroundImageArea.percentWidth = 100;
         var headerBackgroundImage:Image = new Image();
         var headerbar:HGroup = new HGroup();
         if (dashboardStack.headerBackground != null) {
@@ -78,6 +87,14 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
                 headerBackgroundImage.source = event.bitmap;
             });
             headerBarLoader.load(dashboardStack.headerBackground.id, "https://www.easy-insight.com/app/messagebroker/amfsecure");
+            logoutButton = new Button();
+            logoutButton.height = 30;
+            logoutButton.label = "Log Out";
+            logoutButton.addEventListener(MouseEvent.CLICK, logout);
+            shareButton = new Button();
+            shareButton.label = "Share";
+            shareButton.height = 30;
+            shareButton.addEventListener(MouseEvent.CLICK, share);
         }
         headerbar.percentWidth = 100;
         headerbar.percentHeight = 100;
@@ -92,13 +109,35 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
         headerBackgroundImageArea.addElement(headerBackgroundImage);
         headerBackgroundImageArea.addElement(headerbar);
         headerArea.addElement(headerBackgroundImageArea);
+        if (logoutButton != null) {
+            headerBackgroundImageArea.addElement(shareButton);
+            headerBackgroundImageArea.addElement(logoutButton);
+        }
         return headerbar;
+    }
+
+    private var logoutButton:Button;
+    private var shareButton:Button;
+
+    private function share(event:MouseEvent):void {
+        var reports:ArrayCollection = reportCount();
+        if (reports.length == 1) {
+            var report:AnalysisDefinition = reports.getItemAt(0) as AnalysisDefinition;
+            var window:ExportWindow = new ExportWindow();
+            window.report = report;
+            window.open(this, true);
+        }
+    }
+
+    private function logout(event:MouseEvent):void {
+        dashboardEditorMetadata.dashboardView.dispatchEvent(new LogoutEvent());
     }
 
     private function createStackChildren(headerbar:Group):void {
         if (dashboardStack.selectionType == 'Buttons') {
             if (dashboardStack.gridItems.length > 1) {
                 var buttonBar:HGroup = new HGroup();
+                buttonBar.paddingBottom = 5;
                 for (var i:int = 0; i < dashboardStack.gridItems.length; i++) {
                     var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
                     var element:DashboardElement = stackItem.dashboardElement;
@@ -113,6 +152,7 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
                         }
                     }
                     var button:DashboardButton = new DashboardButton(i);
+                    button.height = 30;
                     button.label = label;
                     button.addEventListener(MouseEvent.CLICK, onChange);
                     buttonBar.addElement(button);
@@ -207,20 +247,79 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
                 }
             }
         }
-        activeChild = DashboardMobileFactory.createViewUIComponent(DashboardStackItem(dashboardStack.gridItems.getItemAt(0)).dashboardElement, dashboardEditorMetadata);
+        createComponents();
+        currentState = "0";
+        compIndex = 0;
+        /*activeChild = DashboardMobileFactory.createViewUIComponent(DashboardStackItem(dashboardStack.gridItems.getItemAt(0)).dashboardElement, dashboardEditorMetadata);
         if (dashboardStack.consolidateHeaderElements && activeChild is DashboardStackMobileComponent) {
             DashboardStackMobileComponent(activeChild).consolidateHeader = childFiltersBox;
         }
         addElement(activeChild as UIComponent);
         //UIComponent(activeChild).setStyle("removedEffect", effect);
         compIndex = getElementIndex(activeChild as UIComponent);
-        trace("comp index = " + compIndex);
+        trace("comp index = " + compIndex);*/
+    }
+
+    private function createComponents():void {
+        var states:Array = [];
+        var comps:Array = [];
+        for (var i:int = 0; i < dashboardStack.gridItems.length; i++) {
+            var state:State = new State();
+            var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
+            var element:DashboardElement = stackItem.dashboardElement;
+            var mobileComponent:IDashboardViewComponent = DashboardMobileFactory.createViewUIComponent(element, dashboardEditorMetadata);
+            comps.push(mobileComponent);
+            var filterContainer:Group = new Group();
+            if (dashboardStack.consolidateHeaderElements && mobileComponent is DashboardStackMobileComponent) {
+                DashboardStackMobileComponent(mobileComponent).consolidateHeader = filterContainer;
+            }
+            var setProp:SetProperty = new SetProperty(this, "activeChild", mobileComponent);
+            var addComp:AddItems = new AddItems();
+
+            addComp.items = mobileComponent;
+            addComp.destination = this;
+
+            var retrieveData:RetrieveDataAction = new RetrieveDataAction(mobileComponent);
+            state.name = String(i);
+            if (dashboardStack.consolidateHeaderElements) {
+                var addFilters:AddItems = new AddItems();
+                addFilters.items = filterContainer;
+                addFilters.destination = childFiltersBox;
+                state.overrides = [ setProp, addComp, addFilters, retrieveData ];
+            } else {
+                state.overrides = [ setProp, addComp, retrieveData ];
+            }
+            states.push(state);
+            /**/
+        }
+
+        this.states = states;
+
+        if (dashboardStack.gridItems.length > 1) {
+            var transition:Transition = new Transition();
+            transition.fromState = "0";
+            transition.toState = "1";
+            var sequence:Sequence = new Sequence();
+            var fadeOut:Fade = new Fade();
+            fadeOut.target = comps[0];
+            fadeOut.alphaFrom = 1;
+            fadeOut.alphaTo = 0;
+            fadeOut.duration = 500;
+            var fadeIn:Fade = new Fade();
+            fadeIn.alphaFrom = 0;
+            fadeIn.alphaTo = 1;
+            fadeIn.duration = 500;
+            fadeIn.target = comps[1];
+            sequence.addChild(fadeOut);
+            sequence.addChild(fadeIn);
+            transition.effect = sequence;
+            this.transitions = [ transition ];
+        }
     }
 
     private var dashboardFilterArea:Group;
 
     private function onUpdateComplete(event:FlexEvent):void {
-        trace("WHYYYYYYY " + UIComponent(event.currentTarget).width + " - " + UIComponent(event.currentTarget).height + " - " + UIComponent(event.currentTarget).measuredHeight + " - " + Group(event.currentTarget).contentHeight);
         var group:Group = Group(event.currentTarget);
         if (group.height != group.contentHeight) {
             group.height = group.contentHeight;
@@ -232,7 +331,7 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
         var application:UIComponent = FlexGlobals.topLevelApplication as UIComponent;
         if (headerHGroup != null) {
             var childFilters:Group = headerHGroup.getElementAt(1) as Group;
-            var filterArea:Group = childFilters.getElementAt(0) as Group;
+            var filterArea:Group = Group(childFilters.getElementAt(0)).getElementAt(0) as Group;
 
             var buttons:UIComponent = headerHGroup.getElementAt(2) as UIComponent;
             var buttonsWidth:int = buttons.width;
@@ -242,10 +341,11 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
             filterArea.width = application.width - buttonsWidth - 40;
             trace("setting to " + filterArea.contentHeight);
             filterArea.height = filterArea.contentHeight;
+            childFilters.height = filterArea.contentHeight;
             //filterArea.invalidateSize();
             //trace("argh = " + filterArea.measuredHeight + " - " + filterArea.contentHeight);
-            /*childFilters.validateSize();
-            headerHGroup.height = childFilters.height;*/
+            childFilters.validateSize();
+            headerHGroup.height = childFilters.height;
 
             trace("set child filters width to " + (application.width - buttonsWidth));
             trace("child's height = " + childFilters.getElementAt(0).height);
@@ -255,6 +355,16 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
                 dashboardFilterArea.width = application.width - 20;
                 dashboardFilterArea.height = dashboardFilterArea.contentHeight;
             }
+        }
+
+
+        if (shareButton != null) {
+            shareButton.y = 10;
+            shareButton.x = shareButton.parent.width - 175;
+        }
+        if (logoutButton != null) {
+            logoutButton.y = 10;
+            logoutButton.x = logoutButton.parent.width - 100;
         }
     }
 
@@ -273,7 +383,11 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
     private function onChange(event:Event):void {
         var button:DashboardButton = event.currentTarget as DashboardButton;
         var index:int = button.elementIndex;
-        removeElementAt(compIndex);
+        compIndex = index;
+        updateToIndex(index);
+        //activeChild.initialRetrieve();
+        //updateAdditionalFilters(filterMap);
+        /*removeElementAt(compIndex);
         activeChild = DashboardMobileFactory.createViewUIComponent(DashboardStackItem(dashboardStack.gridItems.getItemAt(index)).dashboardElement, dashboardEditorMetadata);
         if (childFiltersBox != null) {
             childFiltersBox.removeAllElements();
@@ -281,18 +395,28 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
                 DashboardStackMobileComponent(activeChild).consolidateHeader = childFiltersBox;
             }
         }
-        /*UIComponent(activeChild).setStyle("addedEffect", effect);
-        UIComponent(activeChild).setStyle("removedEffect", effect);*/
         addElementAt(activeChild as UIComponent, compIndex);
         updateAdditionalFilters(filterMap);
-        activeChild.initialRetrieve();
+        activeChild.initialRetrieve();*/
+    }
+
+    private function updateToIndex(index:int):void {
+        currentState = String(index);
     }
 
     private var filterMap:Object = new Object();
 
     public var elementID:String;
 
-    private var activeChild:IDashboardViewComponent;
+    private var _activeChild:IDashboardViewComponent;
+
+    public function get activeChild():IDashboardViewComponent {
+        return _activeChild;
+    }
+
+    public function set activeChild(value:IDashboardViewComponent):void {
+        _activeChild = value;
+    }
 
     private function onFilterChange(event:FilterChangeEvent):void {
         //filterMap[elementID] = transformContainer.getFilterDefinitions();
@@ -310,19 +434,33 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
                 }
             }
         }
-        activeChild.updateAdditionalFilters(this.filterMap);
+        if (activeChild != null) {
+            activeChild.updateAdditionalFilters(this.filterMap);
+        }
     }
 
     public function refresh():void {
-        activeChild.refresh();
+        if (activeChild != null) {
+            activeChild.refresh();
+        }
     }
 
     public function initialRetrieve():void {
-        activeChild.initialRetrieve();
+        if (activeChild != null) {
+            activeChild.initialRetrieve();
+        }
     }
 
     public function reportCount():ArrayCollection {
+        var activeChild:IDashboardViewComponent = IDashboardViewComponent(activeChild);
+        return activeChild.reportCount();
+    }
+
+    public function obtainPreferredSizeInfo():SizeInfo {
         return null;
+    }
+
+    public function toggleFilters(showFilters:Boolean):void {
     }
 }
 }
