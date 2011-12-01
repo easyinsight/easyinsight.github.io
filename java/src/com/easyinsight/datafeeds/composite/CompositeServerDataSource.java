@@ -41,7 +41,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn);
         boolean hasNew = false;
         for (IServerDataSourceDefinition source : sources) {
-            hasNew = hasNew || source.hasNewData(lastRefreshDate, parent, conn);
+            hasNew = hasNew || source.hasNewData(lastRefreshDate, this, conn);
         }
         return hasNew;
     }
