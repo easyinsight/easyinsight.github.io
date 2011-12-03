@@ -50,6 +50,8 @@ import mx.collections.ArrayCollection;
         public static const TREND:int = 35;
         public static const DIAGRAM:int = 36;
         public static const TREND_GRID:int = 37;
+        public static const YTD:int = 38;
+        public static const COMPARE_YEARS:int = 39;
 
 		public var dataFeedID:int;
         public var urlKey:String;
@@ -73,6 +75,7 @@ import mx.collections.ArrayCollection;
         public var reportStateID:int;
         public var authorName:String;
         public var description:String;
+        public var dataSourceFields:Boolean;
         public var solutionVisible:Boolean;
         public var temporaryReport:Boolean;
         public var fontName:String = "Tahoma";

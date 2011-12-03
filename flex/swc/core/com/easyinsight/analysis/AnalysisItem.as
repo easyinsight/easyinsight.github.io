@@ -45,6 +45,9 @@ import mx.formatters.Formatter;
 		}
 
         public function matches(analysisItem:AnalysisItem):Boolean {
+            if (analysisItemID != 0 && analysisItem.analysisItemID != 0 && analysisItemID == analysisItem.analysisItemID) {
+                return true;
+            }
             return qualifiedName() == analysisItem.qualifiedName() && getType() == analysisItem.getType();
         }
 
