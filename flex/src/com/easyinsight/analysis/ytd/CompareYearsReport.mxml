@@ -32,6 +32,7 @@
         import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.formatters.Formatter;
+        import mx.formatters.NumberBaseRoundType;
 
         [Bindable]
         private var dataColl:ArrayCollection;
@@ -115,6 +116,7 @@
 
             var pf:PercentageNumberFormatter = new PercentageNumberFormatter();
             pf.precision = 1;
+            pf.rounding = NumberBaseRoundType.NEAREST;
             for (var z:int = 0; z < dataSet.length; z++) {
                 var hasValue:Boolean = false;
                 var ytdValue:CompareYearsRow = dataSet.getItemAt(z) as CompareYearsRow;

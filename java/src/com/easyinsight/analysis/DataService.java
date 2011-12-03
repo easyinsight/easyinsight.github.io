@@ -563,6 +563,9 @@ public class DataService {
                 DateValue dateValue = (DateValue) year;
                 cal.setTime(dateValue.getDate());
                 int yearVal = cal.get(Calendar.YEAR);
+                if (yearVal < 2008) {
+                    continue;
+                }
                 years.add(yearVal);
                 
                 Map<AnalysisMeasure, Aggregation> yearMap = map.get(yearVal);

@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 /**
  * User: jamesboe
@@ -9,8 +10,8 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="date_level_wrapper")
-public class DateLevelWrapper {
-
+public class DateLevelWrapper implements Serializable
+{
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="date_level_wrapper_id")
