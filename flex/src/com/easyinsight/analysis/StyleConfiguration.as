@@ -26,6 +26,7 @@ import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
+import com.easyinsight.analysis.ytd.CompareYearsDefinition;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardElement;
 import com.easyinsight.dashboard.DashboardGrid;
@@ -259,6 +260,9 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Column Width", "columnWidth", VerticalListDefinition(report).columnWidth, report, 100, 400));
             items.addItem(new TextReportFormItem("Pattern Name", "patternName", VerticalListDefinition(report).patternName, report));
         }
+        if (report is CompareYearsDefinition) {
+            items.addItem(new TextReportFormItem("Pattern Name", "patternName", CompareYearsDefinition(report).patternName, report));
+        }
         if (report is CombinedVerticalListDefinition) {
             items.addItem(new NumericReportFormItem("Header Width", "headerWidth", CombinedVerticalListDefinition(report).headerWidth, report, 100, 400));
             items.addItem(new NumericReportFormItem("Column Width", "columnWidth", CombinedVerticalListDefinition(report).columnWidth, report, 100, 400));
@@ -267,6 +271,7 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
         items.addItem(new CheckBoxReportFormItem("Log Report", "logReport", report.logReport, report));
+        items.addItem(new CheckBoxReportFormItem("Data Source Fields", "dataSourceFields", report.dataSourceFields, report));
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];
         items.sort = sort;
