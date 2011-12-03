@@ -9,16 +9,11 @@ package com.easyinsight.framework {
 
 import com.easyinsight.analysis.charts.bubble.BubbleChartModule;
 import com.easyinsight.analysis.charts.plot.PlotChartModule;
-import com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartModule;
 import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartModule;
-import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartModule;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartModule;
-import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartModule;
-import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartModule;
-import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartModule;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartModule;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartModule;
 import com.easyinsight.analysis.crosstab.CrosstabModule;
@@ -33,14 +28,15 @@ import com.easyinsight.analysis.trend.TrendGridModule;
 import com.easyinsight.analysis.trend.TrendModule;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListModule;
 import com.easyinsight.analysis.verticallist.VerticalListModule;
+import com.easyinsight.analysis.ytd.CompareYearsReport;
+import com.easyinsight.analysis.ytd.YTDReport;
 
 import flash.events.Event;
 
 import flash.events.EventDispatcher;
 
 import mx.core.Container;
-
-import mx.modules.Module;
+import mx.core.UIComponent;
 
 public class ReportModuleLoader extends EventDispatcher {
 
@@ -55,7 +51,7 @@ public class ReportModuleLoader extends EventDispatcher {
     }
 
     public function create():Object {
-        var module:Module;
+        var module:UIComponent;
         switch (moduleName) {
             case "ListModule.swf":
                 module = new ListModule();
@@ -87,36 +83,36 @@ public class ReportModuleLoader extends EventDispatcher {
             case "StackedColumnChartModule.swf":
                 module = new StackedColumnChartModule();
                 break;
-            case "Column3DChartModule.swf":
+            /*case "Column3DChartModule.swf":
                 module = new Column3DChartModule();
-                break;
+                break;*/
             case "BarChartModule.swf":
                 module = new BarChartModule();
                 break;
             case "StackedBarChartModule.swf":
                 module = new StackedBarChartModule();
                 break;
-            case "Bar3DChartModule.swf":
+            /*case "Bar3DChartModule.swf":
                 module = new Bar3DChartModule();
-                break;
+                break;*/
             case "AreaChartModule.swf":
                 module = new AreaChartModule();
                 break;
-            case "Area3DChartModule.swf":
+            /*case "Area3DChartModule.swf":
                 module = new Area3DChartModule();
-                break;
+                break;*/
             case "LineChartModule.swf":
                 module = new LineChartModule();
                 break;
-            case "Line3DChartModule.swf":
+            /*case "Line3DChartModule.swf":
                 module = new Line3DChartModule();
-                break;
+                break;*/
             case "PieChartModule.swf":
                 module = new PieChartModule();
                 break;
-            case "Pie3DChartModule.swf":
+            /*case "Pie3DChartModule.swf":
                 module = new Pie3DChartModule();
-                break;
+                break;*/
             case "PlotChartModule.swf":
                 module = new PlotChartModule();
                 break;
@@ -134,6 +130,12 @@ public class ReportModuleLoader extends EventDispatcher {
                 break;
             case "DiagramModule.swf":
                 module = new DiagramModule();
+                break;
+            case "YTD.swf":
+                module = new YTDReport();
+                break;
+            case "CompareYears.swf":
+                module = new CompareYearsReport();
                 break;
         }
         return module;
