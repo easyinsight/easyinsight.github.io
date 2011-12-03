@@ -354,23 +354,6 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
     }
 
-    private class GatherItemVisitor extends CompositeFeedNodeShallowVisitor {
-        private List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-        private Connection conn;
-
-        private GatherItemVisitor(Connection conn) {
-            this.conn = conn;
-        }
-
-        @Override
-        protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException, CloneNotSupportedException {
-            List<AnalysisItem> analysisItemList = retrieveFields(compositeFeedNode.getDataFeedID(), conn);
-            for (AnalysisItem analysisItem : analysisItemList) {
-                fields.add(analysisItem);
-            }
-        }
-    }
-
     private class AnalysisItemVisitor extends CompositeFeedNodeShallowVisitor {
 
         private Map<Long, List<FeedNode>> nodeMap = new LinkedHashMap<Long, List<FeedNode>>();

@@ -85,7 +85,7 @@ public interface IServerDataSourceDefinition {
 
     Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition);
 
-    boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception;
+    boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) throws Exception;
 
     /*boolean migrations(EIConnection conn, FeedDefinition parentDefinition) throws Exception;
 

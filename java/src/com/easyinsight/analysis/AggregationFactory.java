@@ -36,7 +36,7 @@ public class AggregationFactory {
         return getAggregation(analysisMeasure.getQueryAggregation());
     }
 
-    private Aggregation getAggregation(int value) {
+    public Aggregation getAggregation(int value) {
         if (skip) {
             return new SumAggregation();
         }

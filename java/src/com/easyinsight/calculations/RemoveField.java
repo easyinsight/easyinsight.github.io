@@ -3,7 +3,9 @@ package com.easyinsight.calculations;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemFilterDefinition;
 import com.easyinsight.analysis.WSAnalysisDefinition;
+import com.easyinsight.analysis.definitions.WSCompareYearsDefinition;
 import com.easyinsight.analysis.definitions.WSVerticalListDefinition;
+import com.easyinsight.analysis.definitions.WSYTDDefinition;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 
@@ -26,7 +28,27 @@ public class RemoveField extends Function {
                     iter.remove();
                 }
             }
-        } else if (calculationMetadata.getFilterDefinition() != null && calculationMetadata.getFilterDefinition() instanceof AnalysisItemFilterDefinition) {
+        } else if (calculationMetadata.getReport() != null && calculationMetadata.getReport().getReportType() == WSAnalysisDefinition.YTD) {
+            WSYTDDefinition verticalListDefinition = (WSYTDDefinition) calculationMetadata.getReport();
+            String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
+            Iterator<AnalysisItem> iter = verticalListDefinition.getMeasures().iterator();
+            while (iter.hasNext()) {
+                AnalysisItem item = iter.next();
+                if (item.toDisplay().toLowerCase().equals(fieldName)) {
+                    iter.remove();
+                }
+            }
+        } else if (calculationMetadata.getReport() != null && calculationMetadata.getReport().getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
+            WSCompareYearsDefinition verticalListDefinition = (WSCompareYearsDefinition) calculationMetadata.getReport();
+            String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
+            Iterator<AnalysisItem> iter = verticalListDefinition.getMeasures().iterator();
+            while (iter.hasNext()) {
+                AnalysisItem item = iter.next();
+                if (item.toDisplay().toLowerCase().equals(fieldName)) {
+                    iter.remove();
+                }
+            }
+        }else if (calculationMetadata.getFilterDefinition() != null && calculationMetadata.getFilterDefinition() instanceof AnalysisItemFilterDefinition) {
             String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
             AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) calculationMetadata.getFilterDefinition();
             Iterator<AnalysisItem> iter = analysisItemFilterDefinition.getAvailableItems().iterator();

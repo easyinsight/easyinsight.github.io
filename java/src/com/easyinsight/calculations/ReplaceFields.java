@@ -3,10 +3,16 @@ package com.easyinsight.calculations;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.MaterializedFilterPatternDefinition;
 import com.easyinsight.analysis.ReaggregateAnalysisMeasure;
+import com.easyinsight.analysis.definitions.WSCompareYearsDefinition;
 import com.easyinsight.analysis.definitions.WSVerticalListDefinition;
+import com.easyinsight.analysis.definitions.WSYTDDefinition;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,25 +23,48 @@ import java.util.regex.Pattern;
  */
 public class ReplaceFields extends Function {
     public Value evaluate() {
-        WSVerticalListDefinition verticalListDefinition = (WSVerticalListDefinition) calculationMetadata.getReport();
+
         String fieldToReplace = minusQuotes(params.get(0)).toString();
+        List<AnalysisItem> measures;
+        if (calculationMetadata.getReport() instanceof WSVerticalListDefinition) {
+            WSVerticalListDefinition verticalListDefinition = (WSVerticalListDefinition) calculationMetadata.getReport();
+            measures = verticalListDefinition.getMeasures();
+        } else if (calculationMetadata.getReport() instanceof WSYTDDefinition) {
+            WSYTDDefinition verticalListDefinition = (WSYTDDefinition) calculationMetadata.getReport();
+            measures = verticalListDefinition.getMeasures();
+        } else if (calculationMetadata.getReport() instanceof WSCompareYearsDefinition) {
+            WSCompareYearsDefinition verticalListDefinition = (WSCompareYearsDefinition) calculationMetadata.getReport();
+            measures = verticalListDefinition.getMeasures();
+        } else {
+            throw new RuntimeException();
+        }
         AnalysisItem template = null;
-        for (AnalysisItem analysisItem : verticalListDefinition.getMeasures()) {
+        for (AnalysisItem analysisItem : measures) {
             if (analysisItem.toDisplay().toLowerCase().equals(fieldToReplace.toLowerCase())) {
                 template = analysisItem;
             }
         }
-        int index = verticalListDefinition.getMeasures().indexOf(template);
-        verticalListDefinition.getMeasures().remove(template);
+        int index = measures.indexOf(template);
+        measures.remove(template);
+        List<AnalysisItem> toAdd = new ArrayList<AnalysisItem>();
         for (int i = 1; i < params.size(); i++) {
             String patternString = minusQuotes(params.get(i)).toString();
             Pattern pattern = Pattern.compile(MaterializedFilterPatternDefinition.createWildcardPattern(patternString.toLowerCase()));
             for (AnalysisItem field : calculationMetadata.getDataSourceFields()) {
                 Matcher matcher = pattern.matcher(field.toDisplay().toLowerCase());
                 if (matcher.matches()) {
-                    verticalListDefinition.getMeasures().add(index, fromTemplate(template, field));
+                    toAdd.add(fromTemplate(template, field));
                 }
             }
+        }
+        Collections.sort(toAdd, new Comparator<AnalysisItem>() {
+
+            public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                return analysisItem1.toDisplay().compareTo(analysisItem.toDisplay());
+            }
+        });
+        for (AnalysisItem analysisItem : toAdd) {
+            measures.add(index, analysisItem);
         }
         return new EmptyValue();
     }

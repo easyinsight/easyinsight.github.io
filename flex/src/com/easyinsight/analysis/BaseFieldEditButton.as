@@ -164,11 +164,17 @@ public class BaseFieldEditButton extends UIComponent implements IListItemRendere
         dispatchEvent(new AnalysisItemDeleteEvent(analysisItemWrapper));
     }
 
+    private var _concreteFieldsEditable:Boolean;
+
+    public function set concreteFieldsEditable(value:Boolean):void {
+        _concreteFieldsEditable = value;
+    }
+
     [Bindable("dataChange")]
     public function set data(value:Object):void {
         this.analysisItemWrapper = value as AnalysisItemWrapper;
         if (analysisItemWrapper.isAnalysisItem()) {
-            editVisible = !analysisItemWrapper.analysisItem.concrete;
+            editVisible = !analysisItemWrapper.analysisItem.concrete || _concreteFieldsEditable;
             copyVisible = true;
             deleteVisible = !analysisItemWrapper.analysisItem.concrete;
         } else {

@@ -648,7 +648,7 @@ public class UserUploadService {
                             try {
                                 conn.setAutoCommit(false);
                                 Date now = new Date();
-                                boolean changed = dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, ((FeedDefinition) dataSource).getLastRefreshStart());
+                                boolean changed = dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, ((FeedDefinition) dataSource).getLastRefreshStart(), false);
                                 feedDefinition.setVisible(true);
                                 feedDefinition.setLastRefreshStart(now);
                                 if (changed) {
@@ -869,7 +869,7 @@ public class UserUploadService {
                         try {
                             conn.setAutoCommit(false);
                             Date now = new Date();
-                            boolean changed = serverDataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, dataSource.getLastRefreshStart());
+                            boolean changed = serverDataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, dataSource.getLastRefreshStart(), true);
                             dataSource.setVisible(true);
                             dataSource.setLastRefreshStart(now);
                             if (changed) {

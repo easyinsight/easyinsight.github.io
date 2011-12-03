@@ -143,11 +143,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            refreshData(accountID, now, conn, parentDefinition, callDataID, lastRefreshTime);
+            refreshData(accountID, now, conn, parentDefinition, callDataID, lastRefreshTime, fullRefresh);
             conn.commit();
             ReportCache.instance().flushResults(getDataFeedID());
             return new CredentialsResponse(true, getDataFeedID());
@@ -192,9 +192,9 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         return new MigrationResult(changed, keys);
     }
 
-    public String tempLoad(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, EIConnection conn) throws Exception {
+    public String tempLoad(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, EIConnection conn, boolean fullRefresh) throws Exception {
         TempStorage tempStorage = DataStorage.tempConnection(this, conn);
-        boolean insertTemp = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100;
+        boolean insertTemp = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh;
         String sql;
         if (insertTemp) {
             sql = tempStorage.defineTempInsertTable();
@@ -219,11 +219,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         return null;
     }
 
-    public void applyTempLoad(EIConnection conn, long accountID, FeedDefinition parentDefinition, Date lastRefreshTime, String tempTable) throws Exception {
+    public void applyTempLoad(EIConnection conn, long accountID, FeedDefinition parentDefinition, Date lastRefreshTime, String tempTable, boolean fullRefresh) throws Exception {
         DataStorage dataStorage = null;
         try {
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
-            boolean insert = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100;
+            boolean insert = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh;
             if (insert) {
                 dataStorage.truncate();
                 dataStorage.insertFromSelect(tempTable);
@@ -247,7 +247,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) throws Exception {
         boolean changed = false;
         DataStorage dataStorage = null;
         try {
@@ -277,7 +277,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             }
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
             System.out.println("Refreshing " + getDataFeedID() + " for account " + accountID + " at " + new Date());
-            if (clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100) {
+            if (clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh) {
                 dataStorage.truncate(); 
             }
             DataSet dataSet = getDataSet(keys, now, parentDefinition, dataStorage, conn, callDataID, lastRefreshTime);

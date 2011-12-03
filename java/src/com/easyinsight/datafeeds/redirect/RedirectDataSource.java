@@ -118,6 +118,10 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         redirectDataSourceID = rs.getLong(1);
     }
 
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) throws Exception {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) {
         throw new UnsupportedOperationException();
     }

@@ -1,0 +1,196 @@
+<?xml version="1.0"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:verticalllist="com.easyinsight.analysis.verticallist.*"
+           implements="com.easyinsight.analysis.IReportRenderer" verticalScrollPolicy="off" width="100%"
+           height="100%">
+    <mx:states>
+        <mx:State name="noData">
+            <mx:RemoveChild target="{dataGrid}"/>
+            <mx:AddChild relativeTo="{box}">
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:TextArea fontSize="22" text="We didn't find any data for the fields and filters that you specified in the report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="65" editable="false" selectable="false" focusEnabled="false"/>
+                </mx:Box>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.analysis.formatter.FormattingConfiguration;
+        import com.easyinsight.analysis.formatter.PercentageNumberFormatter;
+        import com.easyinsight.analysis.verticallist.VerticalListHeaderRenderer;
+        import com.easyinsight.analysis.verticallist.VerticalListRenderer;
+        import com.easyinsight.analysis.verticallist.VerticalListRowHeaderRenderer;
+        import com.easyinsight.filtering.FilterDefinition;
+        import com.easyinsight.filtering.MultiFlatDateFilterDefinition;
+
+        import flash.text.TextLineMetrics;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
+        import mx.formatters.Formatter;
+
+        [Bindable]
+        private var dataColl:ArrayCollection;
+
+        override protected function measure():void {
+            super.measure();
+            box.width = this.width;
+            box.height = this.height;
+        }
+
+        private function createColumn(field:String, header:String):AdvancedDataGridColumn {
+            var metrics:TextLineMetrics = dataGrid.measureText(field);
+            var intervalColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+            intervalColumn.headerText = header;
+            intervalColumn.dataField = field;
+            intervalColumn.width = metrics.width + metrics.x + metrics.x + 5;
+            var factory:ClassFactory = new ClassFactory(VerticalListRenderer);
+            factory.properties = { qualifiedName: field };
+            intervalColumn.itemRenderer = factory;
+            intervalColumn.sortable = false;
+            var headerFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
+            headerFactory.properties = { headerText: header };
+            intervalColumn.headerRenderer = headerFactory;
+            return intervalColumn;
+        }
+
+        private function applyMeasure(index:int, value:String, columns:ArrayCollection):String {
+            var column:AdvancedDataGridColumn = columns.getItemAt(index) as AdvancedDataGridColumn;
+            var width:int = column.width;
+            var metrics:TextLineMetrics = dataGrid.measureText(value);
+            var valueWidth:int = metrics.width + metrics.x + metrics.x;
+            if (valueWidth > width) {
+                column.width = valueWidth;
+            }
+            return value;
+        }
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+
+            if (dataSet.length == 0) {
+                currentState = "noData";
+                return;
+            }
+            var vert:CompareYearsDefinition = analysisDefinition as CompareYearsDefinition;
+            var dColl:ArrayCollection = new ArrayCollection();
+            var columns:ArrayCollection = new ArrayCollection();
+            var labelColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+            labelColumn.sortable = false;
+            labelColumn.itemRenderer = new ClassFactory(VerticalListRowHeaderRenderer);
+            var labelHeaderFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
+            labelHeaderFactory.properties = { headerText: "" };
+            labelColumn.headerRenderer = labelHeaderFactory;
+            labelColumn.width = vert.headerWidth;
+            labelColumn.dataField = "Label";
+            columns.addItem(labelColumn);
+            if (vert == null) {
+                return;
+            }
+            var underlines:Array = [];
+            
+            var filterString:String = null;
+            for each (var filter:FilterDefinition in analysisDefinition.filterDefinitions) {
+                if (filter.getType() == FilterDefinition.MULTI_FLAT_DATE) {
+                    filterString = MultiFlatDateFilterDefinition(filter).createLabel() + " ";
+                    break;
+                }
+            }
+
+            var timeIntervals:ArrayCollection = additionalProperties["headers"];
+            for each (var header:String in timeIntervals) {
+                var colHeader:String;
+                if (header.length == 4 && filterString != null) {
+                    colHeader = filterString + header;
+                } else {
+                    colHeader = header;
+                }
+                columns.addItem(createColumn(header, colHeader));
+            }
+
+
+
+            var pf:PercentageNumberFormatter = new PercentageNumberFormatter();
+            pf.precision = 1;
+            for (var z:int = 0; z < dataSet.length; z++) {
+                var hasValue:Boolean = false;
+                var ytdValue:CompareYearsRow = dataSet.getItemAt(z) as CompareYearsRow;
+                if (AnalysisMeasure(ytdValue.measure).underline) {
+                    underlines.push(z);
+                }
+                var obj:Object = new Object();
+                obj["baseMeasure"] = ytdValue.measure;
+                var formatter:Formatter = ytdValue.measure.getFormatter();
+                for (var key:String in ytdValue.results) {
+                    var compareYearResult:CompareYearsResults = ytdValue.results[key];
+                    var numValue:Number = compareYearResult.value.toNumber();
+                    if (!isNaN(numValue) && isFinite(numValue) && numValue != 0) {
+                        hasValue = true;
+                    }
+                    var result:String;
+                    var color:uint = 0;
+                    if (compareYearResult.percentChange) {
+                        result = pf.format(numValue);
+                        if (numValue < 0) {
+                            color = 0xAA0000;
+                        }
+                    } else {
+                        result = formatter.format(numValue);
+                    }
+                    obj[key] = result;
+                    obj[key + "color"] = color;
+                }
+                if (hasValue) {
+                    dColl.addItem(obj);
+                }
+            }
+            if (columns.length <= 1 || dColl.length == 0) {
+                currentState = "noData";
+                invalidateSize();
+            } else {
+                currentState = "";
+                var reportWidth:int = 1;
+                for each (var col:AdvancedDataGridColumn in columns) {
+                    reportWidth += (col.width + 1);
+                }
+                var endWidth:int = 0;
+                if (reportWidth < this.width) {
+                    var delta:int = (this.width - reportWidth);
+                    delta = Math.min(delta, 500);
+                    var perColumnAdd:int = (delta) / columns.length;
+                    for each (var colAdd:AdvancedDataGridColumn in columns) {
+                        colAdd.width += perColumnAdd;
+                        endWidth += colAdd.width;
+                    }
+                }
+                dataGrid.maxWidth = this.width;
+                if (endWidth > 0) {
+                    dataGrid.x = (this.width - endWidth) / 2;
+                }
+                dataGrid.columns = columns.toArray();
+                dataGrid.rowCount = dColl.length + 1;
+                dataGrid.rowsToUnderline = underlines;
+                dataGrid.dataProvider = dColl;
+                invalidateSize();
+            }
+        }
+
+        public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }
+
+        public function preserveValues():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:Canvas id="box" verticalScrollPolicy="auto" horizontalScrollPolicy="off" width="100%" height="100%">
+        <verticalllist:VerticalDataGrid id="dataGrid" headerColors="{[0x333333, 0x333333]}" fontSize="10" verticalScrollPolicy="off" variableRowHeight="false" horizontalGridLines="false" horizontalGridLineColor="#DDDDDD" verticalGridLines="false"
+                                        alternatingItemColors="{[0xFFFFFF, 0xFFFFFF]}" backgroundColor="#FFFFFF" borderStyle="none" selectionMode="none" horizontalScrollPolicy="auto">
+        </verticalllist:VerticalDataGrid>
+    </mx:Canvas>
+</mx:Canvas>

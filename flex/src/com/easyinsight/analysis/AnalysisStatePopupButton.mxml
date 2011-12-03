@@ -123,6 +123,8 @@
         <node label="Advanced" icon="">
             <node label="Vertical List" type="{AnalysisDefinition.VERTICAL_LIST}"/>
             <node label="Combined Vertical List" type="{AnalysisDefinition.COMBINED_VERTICAL_LIST}"/>
+            <node label="YTD" type="{AnalysisDefinition.YTD}"/>
+            <node label="Compare Years" type="{AnalysisDefinition.COMPARE_YEARS}"/>
         </node>
     </mx:XMLList>
     <mx:PopUpMenuButton id="p2" 

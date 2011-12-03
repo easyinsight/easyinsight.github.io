@@ -109,6 +109,7 @@ import com.easyinsight.google.ClearDBCompositeSource;
 import com.easyinsight.google.ClearDBDataSource;
 import com.easyinsight.google.GoogleSpreadsheetUploadContext;
 import com.easyinsight.google.QuickbaseCompositeSource;
+import com.easyinsight.google.QuickbaseDatabaseSource;
 import com.easyinsight.google.QuickbaseResponse;
 import com.easyinsight.google.Spreadsheet;
 import com.easyinsight.google.Worksheet;
@@ -281,6 +282,7 @@ public class TORegistry {
         var text:TextReportFieldExtension;
         var dext:DiagramReportFieldExtension;
         var joinOverride:JoinOverride;
+        var qds:QuickbaseDatabaseSource;
     }
 }
 }

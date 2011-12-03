@@ -104,6 +104,16 @@ public class AnalysisDefinitionFactory {
             VerticalListDefinitionState verticalListDefinitionState = new VerticalListDefinitionState();
             verticalListDefinitionState.setVerticalListID(verticalListDefinition.getVerticalListID());
             analysisDefinitionState = verticalListDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.YTD)) {
+            WSYTDDefinition ytdReport = (WSYTDDefinition) wsAnalysisDefinition;
+            YTDDefinitionState ytdDefinitionState = new YTDDefinitionState();
+            ytdDefinitionState.setYtdID(ytdReport.getYtdID());
+            analysisDefinitionState = ytdDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.COMPARE_YEARS)) {
+            WSCompareYearsDefinition ytdReport = (WSCompareYearsDefinition) wsAnalysisDefinition;
+            CompareYearsDefinitionState ytdDefinitionState = new CompareYearsDefinitionState();
+            ytdDefinitionState.setYtdID(ytdReport.getYtdID());
+            analysisDefinitionState = ytdDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.COMBINED_VERTICAL_LIST)) {
             WSCombinedVerticalListDefinition verticalListDefinition = (WSCombinedVerticalListDefinition) wsAnalysisDefinition;
             CombinedVerticalListDefinitionState verticalListDefinitionState = new CombinedVerticalListDefinitionState();

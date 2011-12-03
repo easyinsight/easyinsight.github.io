@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.Map;
 @Entity
 @Table(name="report_field_extension")
 @Inheritance(strategy= InheritanceType.JOINED)
-public class ReportFieldExtension implements Cloneable {
+public class ReportFieldExtension implements Cloneable, Serializable {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="report_field_extension_id")
     private long reportFieldExtensionID;

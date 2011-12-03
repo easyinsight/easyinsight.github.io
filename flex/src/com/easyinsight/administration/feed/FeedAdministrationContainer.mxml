@@ -71,6 +71,7 @@
 
         private function gotFeedDefinition():void {
             this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
+            concreteFieldsEditable = feedDefinition.concreteFieldsEditable;
             BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
             this.feedType = feedDefinition.getFeedType();
             this.pages = feedDefinition.createAdminPages();
@@ -181,6 +182,9 @@
             dispatchEvent(new AnalysisChangedEvent());
         }
 
+        [Bindable]
+        private var concreteFieldsEditable:Boolean = false;
+
         private function editCode():void {
             var window:MarmotScriptWindow = new MarmotScriptWindow();
             window.script = feedDefinition.marmotScript;
@@ -229,7 +233,7 @@
                     paddingLeft="10" paddingRight="10" resizeToContent="true" id="tabNav" enabled="{haveFeed}">
                     <mx:Box label="Fields" id="fieldsBox">
                         <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration" dataSourceID="{feedID}" disableControls="disableControls()"
-                                enableControls="enableControls()"/>
+                                enableControls="enableControls()" concreteFieldsEditable="{concreteFieldsEditable}"/>
                     </mx:Box>
                 </mx:TabNavigator>
             </mx:VBox>

@@ -1,8 +1,10 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.definitions.WSCombinedVerticalListDefinition;
-import com.easyinsight.analysis.definitions.WSKPIDefinition;
-import com.easyinsight.analysis.definitions.WSVerticalListDefinition;
+import com.easyinsight.analysis.definitions.*;
+import com.easyinsight.core.DateValue;
+import com.easyinsight.core.NumericValue;
+import com.easyinsight.core.StringValue;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -18,6 +20,8 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -473,6 +477,328 @@ public class DataService {
         return trendDataResults;
     }
 
+    private static class YTDStuff {
+        private List<Value> intervals;
+        List<YTDValue> values = new ArrayList<YTDValue>();
+
+        private YTDStuff(List<Value> intervals, List<YTDValue> values) {
+            this.intervals = intervals;
+            this.values = values;
+        }
+    }
+    
+    private static class YearStuff {
+        private List<String> headers;
+        private List<CompareYearsRow> rows;
+
+        private YearStuff(List<String> headers, List<CompareYearsRow> rows) {
+            this.headers = headers;
+            this.rows = rows;
+        }
+    }
+
+    public EmbeddedCompareYearsDataResults getEmbeddedCompareYearsResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
+                                                        List<FilterDefinition> drillthroughFilters) {
+        // get the core data
+        EIConnection conn = Database.instance().getConnection();
+        try {
+
+            WSCompareYearsDefinition wsytdDefinition = (WSCompareYearsDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+
+            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, customFilters, drillthroughFilters);
+            DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+            YearStuff ytdStuff = getYearStuff(wsytdDefinition, nowSet);
+            Map<String, Object> additionalProperties = new HashMap<String, Object>();
+            additionalProperties.put("headers", ytdStuff.headers);
+            EmbeddedCompareYearsDataResults ytdDataResults = new EmbeddedCompareYearsDataResults();
+            ytdDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+            ytdDataResults.setAdditionalProperties(additionalProperties);
+            ytdDataResults.setDataSet(ytdStuff.rows);
+            ytdDataResults.setDefinition(wsytdDefinition);
+            return ytdDataResults;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public CompareYearsDataResults getCompareYearsResults(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
+        // get the core data
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            WSCompareYearsDefinition wsytdDefinition = (WSCompareYearsDefinition) report;
+
+            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, report, conn);
+            DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+            YearStuff ytdStuff = getYearStuff(wsytdDefinition, nowSet);
+            Map<String, Object> additionalProperties = new HashMap<String, Object>();
+            additionalProperties.put("headers", ytdStuff.headers);
+            CompareYearsDataResults ytdDataResults = new CompareYearsDataResults();
+            ytdDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+            ytdDataResults.setAdditionalProperties(additionalProperties);
+            ytdDataResults.setDataSet(ytdStuff.rows);
+            return ytdDataResults;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+    
+    private YearStuff getYearStuff(WSCompareYearsDefinition yearsDefinition, DataSet nowSet) {
+        AnalysisItem timeDimension = yearsDefinition.getTimeDimension();
+        Collection<AnalysisMeasure> measures = new ArrayList<AnalysisMeasure>();
+        for (AnalysisItem analysisItem : yearsDefinition.getMeasures()) {
+            measures.add((AnalysisMeasure) analysisItem);
+        }
+        Map<Integer, Map<AnalysisMeasure, Aggregation>> map = new HashMap<Integer, Map<AnalysisMeasure, Aggregation>>();
+        Set<Integer> years = new HashSet<Integer>();
+        Calendar cal = Calendar.getInstance();
+        for (IRow row : nowSet.getRows()) {
+            Value year = row.getValue(timeDimension);
+            if (year.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) year;
+                cal.setTime(dateValue.getDate());
+                int yearVal = cal.get(Calendar.YEAR);
+                years.add(yearVal);
+                
+                Map<AnalysisMeasure, Aggregation> yearMap = map.get(yearVal);
+                if (yearMap == null) {
+                    yearMap = new HashMap<AnalysisMeasure, Aggregation>();
+                    map.put(yearVal, yearMap);
+                    for (AnalysisMeasure analysisMeasure : measures) {
+                        Aggregation aggregation = new AggregationFactory(analysisMeasure, false).getAggregation();
+                        yearMap.put(analysisMeasure, aggregation);
+                    }
+                }
+                for (AnalysisMeasure analysisMeasure : measures) {
+                    Aggregation aggregation = yearMap.get(analysisMeasure);
+                    aggregation.addValue(row.getValue(analysisMeasure));
+                }
+            }
+        }
+        List<Integer> sortedYears = new ArrayList<Integer>(years);
+        Collections.sort(sortedYears);
+        List<CompareYearsRow> rows = new ArrayList<CompareYearsRow>();
+        Set<PercentChangeItem> percentChangeItems = new HashSet<PercentChangeItem>();
+        for (AnalysisMeasure analysisMeasure : measures) {
+            CompareYearsRow compareYearsRow = new CompareYearsRow();
+            compareYearsRow.setMeasure(analysisMeasure);
+            for (int i = 0; i < sortedYears.size(); i++) {
+                Integer year = sortedYears.get(i);
+                Value yearValue = map.get(year).get(analysisMeasure).getValue();
+                String formattedYear = String.valueOf(year);
+                CompareYearsResult compareYearsResult = new CompareYearsResult();
+                compareYearsResult.setHeader(new StringValue(formattedYear));
+                compareYearsResult.setValue(yearValue);
+                compareYearsResult.setPercentChange(false);
+                compareYearsRow.getResults().put(formattedYear, compareYearsResult);
+                if (i > 0) {
+                    Integer previousYear = sortedYears.get(i - 1);
+                    Value previousYearValue = map.get(previousYear).get(analysisMeasure);
+                    Value change = new NumericValue((yearValue.toDouble() - previousYearValue.toDouble()) / previousYearValue.toDouble() * 100);
+                    CompareYearsResult percentChangeResult = new CompareYearsResult();
+                    String formattedChange = String.valueOf(previousYear).substring(2, 4) + "-" + formattedYear.substring(2, 4) + "%";
+                    percentChangeItems.add(new PercentChangeItem(formattedChange, Integer.parseInt(formattedYear)));
+                    percentChangeResult.setHeader(new StringValue(formattedChange));
+                    percentChangeResult.setPercentChange(true);
+                    percentChangeResult.setValue(change);
+                    compareYearsRow.getResults().put(formattedChange, percentChangeResult);
+                }
+            }
+            rows.add(compareYearsRow);
+        }
+        List<PercentChangeItem> sortablePercentChangeItemList = new ArrayList<PercentChangeItem>(percentChangeItems);
+        Collections.sort(sortablePercentChangeItemList);
+        List<String> headers = new ArrayList<String>();
+        for (Integer yearVal : sortedYears) {            
+            String formattedYear = String.valueOf(yearVal);
+            headers.add(formattedYear);
+        }
+        if (headers.size() > 2) {
+            headers.add(headers.size() - 1, sortablePercentChangeItemList.get(1).label);
+        }
+        if (headers.size() > 1) {
+            headers.add(sortablePercentChangeItemList.get(0).label);
+        }
+
+        return new YearStuff(headers, rows);
+    }
+    
+    private static class PercentChangeItem implements Comparable<PercentChangeItem>{
+        private String label;
+        private Integer tailYear;
+
+        private PercentChangeItem(String label, int tailYear) {
+            this.label = label;
+            this.tailYear = tailYear;
+        }
+
+        public int compareTo(PercentChangeItem percentChangeItem) {
+            return percentChangeItem.tailYear.compareTo(tailYear); 
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            PercentChangeItem that = (PercentChangeItem) o;
+
+            if (label != null ? !label.equals(that.label) : that.label != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return label != null ? label.hashCode() : 0;
+        }
+    }
+    
+    private YTDStuff getYTDStuff(WSYTDDefinition wsytdDefinition, DataSet nowSet, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+        AnalysisItem timeDimension = wsytdDefinition.getTimeDimension();
+        Collection<AnalysisMeasure> measures = new ArrayList<AnalysisMeasure>();
+        for (AnalysisItem analysisItem : wsytdDefinition.getMeasures()) {
+            measures.add((AnalysisMeasure) analysisItem);
+        }
+        Map<AnalysisMeasure, Aggregation> ytdMap = new HashMap<AnalysisMeasure, Aggregation>();
+        Map<AnalysisMeasure, Aggregation> averageMap = new HashMap<AnalysisMeasure, Aggregation>();
+
+        for (AnalysisMeasure measure : measures) {
+            AggregationFactory aggregationFactory = new AggregationFactory(measure, false);
+            ytdMap.put(measure, aggregationFactory.getAggregation());
+            averageMap.put(measure, aggregationFactory.getAggregation(AggregationTypes.AVERAGE));
+        }
+        Set<Value> timeIntervals = new HashSet<Value>();
+        Map<AnalysisMeasure, YTDValue> ytdValueMap = new HashMap<AnalysisMeasure, YTDValue>();
+        for (IRow row : nowSet.getRows()) {
+            Value dateValue = row.getValue(timeDimension);
+            timeIntervals.add(dateValue);
+            for (AnalysisMeasure measure : measures) {
+                Value measureValue = row.getValue(measure);
+                ytdMap.get(measure).addValue(measureValue);
+                averageMap.get(measure).addValue(measureValue);
+                YTDValue ytdValue = ytdValueMap.get(measure);
+                if (ytdValue == null) {
+                    ytdValue = new YTDValue();
+                    ytdValue.setAnalysisMeasure(measure);
+                    ytdValueMap.put(measure, ytdValue);
+                }
+                TimeIntervalValue timeIntervalValue = new TimeIntervalValue();
+                timeIntervalValue.setDateValue(dateValue);
+                timeIntervalValue.setValue(measureValue);
+                ytdValue.getTimeIntervalValues().add(timeIntervalValue);
+            }
+        }
+        for (AnalysisMeasure measure : measures) {
+            YTDValue ytdValue = ytdValueMap.get(measure);
+            ytdValue.setYtd(ytdMap.get(measure).getValue());
+            ytdValue.setAverage(averageMap.get(measure).getValue());
+        }
+        List<AnalysisItem> benchmarkMeasures = new ArrayList<AnalysisItem>();
+        for (AnalysisMeasure measure : measures) {
+            if (measure.getReportFieldExtension() != null && measure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
+                YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) measure.getReportFieldExtension();
+                if (ytdReportFieldExtension.getBenchmark() != null) {
+                    benchmarkMeasures.add(ytdReportFieldExtension.getBenchmark());
+                }
+            }
+        }
+        if (benchmarkMeasures.size() > 0) {
+            WSListDefinition benchmarkReport = new WSListDefinition();
+            benchmarkReport.setDataFeedID(wsytdDefinition.getDataFeedID());
+            benchmarkReport.setColumns(benchmarkMeasures);
+            benchmarkReport.setFilterDefinitions(new ArrayList<FilterDefinition>());
+            ReportRetrieval benchmarkRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, benchmarkReport, conn);
+            DataSet benchmarkSet = benchmarkRetrieval.getPipeline().toDataSet(benchmarkRetrieval.getDataSet());
+            IRow row = benchmarkSet.getRow(0);
+            for (AnalysisMeasure measure : measures) {
+                if (measure.getReportFieldExtension() != null && measure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
+                    YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) measure.getReportFieldExtension();
+                    if (ytdReportFieldExtension.getBenchmark() != null) {
+                        AnalysisMeasure benchmarkMeasure = (AnalysisMeasure) ytdReportFieldExtension.getBenchmark();
+                        YTDValue ytdValue = ytdValueMap.get(measure);
+                        Value benchmarkValue = row.getValue(benchmarkMeasure);
+                        Value average = ytdValue.getAverage();
+                        double variation = (average.toDouble() - benchmarkValue.toDouble()) / benchmarkValue.toDouble();
+                        ytdValue.setBenchmarkValue(benchmarkValue);
+                        ytdValue.setBenchmarkMeasure(benchmarkMeasure);
+                        ytdValue.setVariation(new NumericValue(variation));
+                    }
+                }
+            }
+        }
+        List<YTDValue> values = new ArrayList<YTDValue>();
+        for (AnalysisMeasure measure : measures) {
+            values.add(ytdValueMap.get(measure));
+        }
+
+
+        List<Value> intervals = new ArrayList<Value>(timeIntervals);
+        Collections.sort(intervals, new Comparator<Value>() {
+
+            public int compare(Value value, Value value1) {
+                return value.getSortValue().toDouble().compareTo(value1.getSortValue().toDouble());
+            }
+        });
+        return new YTDStuff(intervals, values);
+    }
+
+    public EmbeddedYTDDataResults getEmbeddedYTDResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
+                                                        List<FilterDefinition> drillthroughFilters) {
+        // get the core data
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            
+            WSYTDDefinition wsytdDefinition = (WSYTDDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+
+            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, customFilters, drillthroughFilters);
+            DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+            YTDStuff ytdStuff = getYTDStuff(wsytdDefinition, nowSet, insightRequestMetadata, conn);
+            Map<String, Object> additionalProperties = new HashMap<String, Object>();
+            additionalProperties.put("timeIntervals", ytdStuff.intervals);
+            EmbeddedYTDDataResults ytdDataResults = new EmbeddedYTDDataResults();
+            ytdDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+            ytdDataResults.setAdditionalProperties(additionalProperties);
+            ytdDataResults.setDataSet(ytdStuff.values);
+            ytdDataResults.setDefinition(wsytdDefinition);
+            return ytdDataResults;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public YTDDataResults getYTDResults(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
+        // get the core data
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            WSYTDDefinition wsytdDefinition = (WSYTDDefinition) report;
+            
+            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, report, conn);
+            DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+            YTDStuff ytdStuff = getYTDStuff(wsytdDefinition, nowSet, insightRequestMetadata, conn);
+            Map<String, Object> additionalProperties = new HashMap<String, Object>();
+            additionalProperties.put("timeIntervals", ytdStuff.intervals);
+            YTDDataResults ytdDataResults = new YTDDataResults();
+            ytdDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+            ytdDataResults.setAdditionalProperties(additionalProperties);
+            ytdDataResults.setDataSet(ytdStuff.values);
+            return ytdDataResults;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public TrendDataResults getTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -695,6 +1021,8 @@ public class DataService {
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
             insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
 
+            
+            
             /*
             if (insightRequestMetadata.getHierarchyOverrides() != null) {
                 for (AnalysisItemOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
@@ -765,6 +1093,7 @@ public class DataService {
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {
+                        LogClass.error(e);
                         throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of data source code " + line + ".", null));
                     }
                 }
@@ -775,6 +1104,30 @@ public class DataService {
             new ReportCalculation("copyfields(\"2010 Procedures\", \"2010 !0#\", \"9*-PT/OT*\")").apply(analysisDefinition, allFields);
             new ReportCalculation("replacecalculation(\"Procedures\", \"9*-*PT/OT*\")").apply(analysisDefinition, allFields);*/
             Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields);
+            if (analysisDefinition.isDataSourceFields()) {
+                Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+                for (AnalysisItem field : feed.getFields()) {
+                    map.put(field.toDisplay(), field);
+                }
+                for (AnalysisItem analysisItem : analysisItems) {
+                    if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                        AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+                        AnalysisItem field = map.get(analysisItem.toDisplay());
+                        if (field != null && field.hasType(AnalysisItemTypes.MEASURE)) {
+                            analysisItem.getFormattingConfiguration().setFormattingType(field.getFormattingConfiguration().getFormattingType());
+                            AnalysisMeasure sourceMeasure = (AnalysisMeasure) field;
+                            analysisMeasure.setPrecision(sourceMeasure.getPrecision());
+                            analysisMeasure.setUnderline(sourceMeasure.isUnderline());
+                            analysisMeasure.setMinPrecision(sourceMeasure.getMinPrecision());
+                            if (analysisItem.hasType(AnalysisItemTypes.CALCULATION) && field.hasType(AnalysisItemTypes.CALCULATION)) {
+                                AnalysisCalculation sourceCalculation = (AnalysisCalculation) field;
+                                AnalysisCalculation targetCalculation = (AnalysisCalculation) analysisItem;
+                                targetCalculation.setCalculationString(sourceCalculation.getCalculationString());
+                            }
+                        }
+                    }
+                }
+            }
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
             for (AnalysisItem analysisItem : analysisItems) {
                 if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {

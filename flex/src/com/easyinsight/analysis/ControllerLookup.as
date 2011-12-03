@@ -26,6 +26,8 @@ import com.easyinsight.analysis.trend.TrendController;
 import com.easyinsight.analysis.trend.TrendGridController;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListController;
 import com.easyinsight.analysis.verticallist.VerticalListController;
+import com.easyinsight.analysis.ytd.CompareYearsController;
+import com.easyinsight.analysis.ytd.YTDController;
 
 public class ControllerLookup {
 
@@ -115,6 +117,12 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.DIAGRAM:
                 controller = DiagramController;
+                break;
+            case AnalysisDefinition.YTD:
+                controller = YTDController;
+                break;
+            case AnalysisDefinition.COMPARE_YEARS:
+                controller = CompareYearsController;
                 break;
         }
         return controller;

@@ -219,7 +219,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
 
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) throws Exception {
         boolean changed = false;
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
@@ -238,13 +238,13 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
                 tempTables.put(serverDataSourceDefinition.getDataFeedID(),
                         serverDataSourceDefinition.tempLoad(keyMap.get(serverDataSourceDefinition.getDataFeedID()), now,
-                        this, callDataID, lastRefreshTime, conn));
+                        this, callDataID, lastRefreshTime, conn, fullRefresh));
             }
             conn.setAutoCommit(false);
             for (IServerDataSourceDefinition source : sources) {
                 ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
                 String tempTable = tempTables.get(serverDataSourceDefinition.getDataFeedID());
-                serverDataSourceDefinition.applyTempLoad(conn, accountID, this, lastRefreshTime, tempTable);
+                serverDataSourceDefinition.applyTempLoad(conn, accountID, this, lastRefreshTime, tempTable, fullRefresh);
             }
             refreshDone();
         } finally {

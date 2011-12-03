@@ -59,6 +59,15 @@ public class FeedDefinition implements Cloneable, Serializable {
     private long parentSourceID;
     private Date lastRefreshStart;
     private String marmotScript;
+    private boolean concreteFieldsEditable;
+
+    public boolean isConcreteFieldsEditable() {
+        return concreteFieldsEditable;
+    }
+
+    public void setConcreteFieldsEditable(boolean concreteFieldsEditable) {
+        this.concreteFieldsEditable = concreteFieldsEditable;
+    }
 
     public String getMarmotScript() {
         return marmotScript;

@@ -26,6 +26,8 @@ import com.easyinsight.analysis.trend.TrendEmbeddedController;
 import com.easyinsight.analysis.trend.TrendGridEmbeddedController;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListEmbeddedController;
 import com.easyinsight.analysis.verticallist.VerticalListEmbeddedController;
+import com.easyinsight.analysis.ytd.CompareYearsEmbeddedController;
+import com.easyinsight.analysis.ytd.YTDEmbeddedController;
 
 public class EmbeddedControllerLookup {
 
@@ -115,6 +117,12 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.DIAGRAM:
                 controller = DiagramEmbeddedController;
+                break;
+            case AnalysisDefinition.YTD:
+                controller = YTDEmbeddedController;
+                break;
+            case AnalysisDefinition.COMPARE_YEARS:
+                controller = CompareYearsEmbeddedController;
                 break;
         }
         return controller;

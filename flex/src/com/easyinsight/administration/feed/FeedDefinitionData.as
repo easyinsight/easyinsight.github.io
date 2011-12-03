@@ -34,6 +34,7 @@ package com.easyinsight.administration.feed
         public var folders:ArrayCollection = new ArrayCollection();
         public var lastRefreshStart:Date;
         public var marmotScript:String;
+        public var concreteFieldsEditable:Boolean;
 		
 		public function FeedDefinitionData()
 		{

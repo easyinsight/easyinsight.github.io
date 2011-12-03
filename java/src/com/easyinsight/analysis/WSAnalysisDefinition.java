@@ -61,6 +61,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int TREND = 35;
     public static final int DIAGRAM = 36;
     public static final int TREND_GRID = 37;
+    public static final int YTD = 38;
+    public static final int COMPARE_YEARS = 39;
 
     private String name;
     private String authorName;
@@ -90,10 +92,19 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String marmotScript;
     private String reportRunMarmotScript;
     private int folder;
+    private boolean dataSourceFields;
 
     private String fontName = "Tahoma";
     private int fontSize = 12;
     private double backgroundAlpha = 1;
+
+    public boolean isDataSourceFields() {
+        return dataSourceFields;
+    }
+
+    public void setDataSourceFields(boolean dataSourceFields) {
+        this.dataSourceFields = dataSourceFields;
+    }
 
     public boolean isLogReport() {
         return logReport;
@@ -540,6 +551,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         backgroundAlpha =  findNumberProperty(properties, "backgroundAlpha", 1);
         optimized =  findBooleanProperty(properties, "optimized", false);
         fullJoins =  findBooleanProperty(properties, "fullJoins", false);
+        dataSourceFields =  findBooleanProperty(properties, "dataSourceFields", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -550,6 +562,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportNumericProperty("backgroundAlpha", backgroundAlpha));
         properties.add(new ReportBooleanProperty("optimized", optimized));
         properties.add(new ReportBooleanProperty("fullJoins", fullJoins));
+        properties.add(new ReportBooleanProperty("dataSourceFields", dataSourceFields));
         return properties;
     }
 

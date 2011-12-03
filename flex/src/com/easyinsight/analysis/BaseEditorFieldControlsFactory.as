@@ -8,8 +8,13 @@ import mx.core.UIComponent;
 public class BaseEditorFieldControlsFactory extends UIComponent implements IFactory {
 
     private var _fields:ArrayCollection;
+    private var _concreteFieldsEditable:Boolean;
 
     public function BaseEditorFieldControlsFactory() {
+    }
+
+    public function set concreteFieldsEditable(value:Boolean):void {
+        _concreteFieldsEditable = value;
     }
 
     [Bindable(event="fieldsChanged")]
@@ -26,6 +31,7 @@ public class BaseEditorFieldControlsFactory extends UIComponent implements IFact
     public function newInstance():* {
         var controls:BaseFieldEditButton = new BaseFieldEditButton();
         controls.analysisItems = fields;
+        controls.concreteFieldsEditable = _concreteFieldsEditable;
         return controls;
     }
 }
