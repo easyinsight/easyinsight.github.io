@@ -481,7 +481,8 @@ public class DataService {
 
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, customFilters, drillthroughFilters);
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
-            YearStuff ytdStuff = YTDUtil.getYearStuff(wsytdDefinition, nowSet);
+            YearStuff ytdStuff = YTDUtil.getYearStuff(wsytdDefinition, nowSet, reportRetrievalNow.getPipeline().getPipelineData(),
+                    reportRetrievalNow.getPipeline().getPipelineData().getAllRequestedItems());
             Map<String, Object> additionalProperties = new HashMap<String, Object>();
             additionalProperties.put("headers", ytdStuff.getHeaders());
             EmbeddedCompareYearsDataResults ytdDataResults = new EmbeddedCompareYearsDataResults();
@@ -506,7 +507,8 @@ public class DataService {
 
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, report, conn);
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
-            YearStuff ytdStuff = YTDUtil.getYearStuff(wsytdDefinition, nowSet);
+            YearStuff ytdStuff = YTDUtil.getYearStuff(wsytdDefinition, nowSet, reportRetrievalNow.getPipeline().getPipelineData(),
+                    reportRetrievalNow.getPipeline().getPipelineData().getAllRequestedItems());
             Map<String, Object> additionalProperties = new HashMap<String, Object>();
             additionalProperties.put("headers", ytdStuff.getHeaders());
             CompareYearsDataResults ytdDataResults = new CompareYearsDataResults();

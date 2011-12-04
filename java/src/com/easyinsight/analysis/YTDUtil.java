@@ -19,7 +19,7 @@ import java.util.*;
  */
 public class YTDUtil {
 
-    public static YearStuff getYearStuff(WSCompareYearsDefinition yearsDefinition, DataSet nowSet) {
+    public static YearStuff getYearStuff(WSCompareYearsDefinition yearsDefinition, DataSet nowSet, PipelineData pipelineData, Set<AnalysisItem> reportItems) {
         AnalysisItem timeDimension = yearsDefinition.getTimeDimension();
         Collection<AnalysisMeasure> measures = new ArrayList<AnalysisMeasure>();
         for (AnalysisItem analysisItem : yearsDefinition.getMeasures()) {
@@ -51,6 +51,26 @@ public class YTDUtil {
                 for (AnalysisMeasure analysisMeasure : measures) {
                     Aggregation aggregation = yearMap.get(analysisMeasure);
                     aggregation.addValue(row.getValue(analysisMeasure));
+                }
+            }
+        }
+        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true);
+        components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false));
+        DataSet tempSet = new DataSet();
+        IRow tempRow = tempSet.createRow();
+        for (Map<AnalysisMeasure, Aggregation> aggMap : map.values()) {
+            for (Map.Entry<AnalysisMeasure, Aggregation> entry : aggMap.entrySet()) {
+                tempRow.addValue(entry.getKey().createAggregateKey(), entry.getValue().getValue());
+            }
+            for (IComponent component : components) {
+                component.apply(tempSet, pipelineData);
+            }
+            IRow tempRow1 = tempSet.getRow(0);
+            for (AnalysisMeasure measure : measures) {
+                if (measure.hasType(AnalysisItemTypes.CALCULATION) && measure.getAggregation() == AggregationTypes.AVERAGE) {
+                    Aggregation aggregation = new AggregationFactory(measure, false).getAggregation();
+                    aggregation.addValue(tempRow1.getValue(measure));
+                    aggMap.put(measure, aggregation);
                 }
             }
         }
@@ -175,7 +195,6 @@ public class YTDUtil {
             ytdValue.setAverage(averageMap.get(measure).getValue());
 
         }
-        List<IComponent> recalcComponents = new ArrayList<IComponent>();
         List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true);
         components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false));
         DataSet tempSet = new DataSet();
