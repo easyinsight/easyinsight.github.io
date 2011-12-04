@@ -130,7 +130,7 @@ public class TokenService {
                     requestToken = provider.retrieveRequestToken(consumer, "https://www.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
                 } else {
                     //requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
-                    requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    requestToken = provider.retrieveRequestToken(consumer, "https://localhost:4443/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
                 }
             } else {
                 requestToken = provider.retrieveRequestToken(consumer, OAuth.OUT_OF_BAND);
@@ -142,6 +142,7 @@ public class TokenService {
             }
             return new OAuthResponse(requestToken, true);
         } catch (OAuthCommunicationException oauthException) {
+            LogClass.error(oauthException);
             if (oauthException.getMessage().indexOf("302") != -1) {
                 return new OAuthResponse(false, OAuthResponse.BAD_HOST);
             } else {
