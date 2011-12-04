@@ -333,6 +333,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     masterCount++;
                     Elements childElements = record.getChildElements();
                     double hrOverride = 0;
+                    double hrWkOverride = 0;
                     double hrPatientFD = 0;
                     double hrWeekPerFD = 0;
                     for (int j = 0; j < childElements.size(); j++) {
@@ -347,6 +348,11 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                             if ("445".equals(fieldID)) {
                                 try {
                                     hrOverride = Double.parseDouble(value);
+                                } catch (NumberFormatException e) {
+                                }
+                            } else if ("446".equals(fieldID)) {
+                                try {
+                                    hrWkOverride = Double.parseDouble(value);
                                 } catch (NumberFormatException e) {
                                 }
                             } else if ("109".equals(fieldID)) {
@@ -371,6 +377,8 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     double hours;
                     if (hrOverride > 0) {
                         hours = hrOverride;
+                    } else if (hrWkOverride > 0) {
+                        hours = hrWkOverride;
                     } else if (hrPatientFD > 0) {
                         hours = hrPatientFD;
                     } else {
