@@ -276,6 +276,7 @@ public class YTDUtil {
             WSListDefinition benchmarkReport = new WSListDefinition();
             benchmarkReport.setDataFeedID(wsytdDefinition.getDataFeedID());
             benchmarkReport.setColumns(benchmarkMeasures);
+            benchmarkReport.setDataSourceFields(wsytdDefinition.isDataSourceFields());
             List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
             for (FilterDefinition filter : wsytdDefinition.getFilterDefinitions()) {
                 if (filter instanceof FlatDateFilter) {
