@@ -68,6 +68,7 @@ public class YTDUtil {
             IComponent component = iter.next();
             if (!(component instanceof CalculationComponent)) {
                 iter.remove();
+                continue;
             }
             CalculationComponent calculationComponent = (CalculationComponent) component;
             if (calculationComponent.getAnalysisCalculation().getAggregation() != AggregationTypes.AVERAGE) {
@@ -226,6 +227,7 @@ public class YTDUtil {
             IComponent component = iter.next();
             if (!(component instanceof CalculationComponent)) {
                 iter.remove();
+                continue;
             }
             CalculationComponent calculationComponent = (CalculationComponent) component;
             if (calculationComponent.getAnalysisCalculation().getAggregation() != AggregationTypes.AVERAGE) {
