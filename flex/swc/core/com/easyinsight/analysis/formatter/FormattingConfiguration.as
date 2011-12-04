@@ -46,6 +46,7 @@ import mx.formatters.NumberBaseRoundType;
 				case PERCENTAGE:
                     var percentageFormatter:PercentageNumberFormatter = new PercentageNumberFormatter();
                     percentageFormatter.precision = precision;
+                    percentageFormatter.minPrecision = minPrecision;
                     percentageFormatter.rounding = NumberBaseRoundType.NEAREST;
                     formatter = percentageFormatter;
                     break;
