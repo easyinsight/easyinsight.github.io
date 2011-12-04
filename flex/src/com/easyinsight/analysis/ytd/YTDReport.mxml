@@ -123,6 +123,9 @@
             for (var z:int = 0; z < dataSet.length; z++) {
                 var hasValue:Boolean = false;
                 var ytdValue:YTDValue = dataSet.getItemAt(z) as YTDValue;
+                if (ytdValue == null) {
+                    continue;
+                }
 
                 var obj:Object = new Object();
                 obj["baseMeasure"] = ytdValue.analysisMeasure;
