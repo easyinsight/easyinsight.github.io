@@ -900,6 +900,7 @@ public class DataService {
                             if (analysisItem.hasType(AnalysisItemTypes.CALCULATION) && field.hasType(AnalysisItemTypes.CALCULATION)) {
                                 AnalysisCalculation sourceCalculation = (AnalysisCalculation) field;
                                 AnalysisCalculation targetCalculation = (AnalysisCalculation) analysisItem;
+                                System.out.println("updating calculation to " + sourceCalculation.getCalculationString());
                                 targetCalculation.setCalculationString(sourceCalculation.getCalculationString());
                             }
                         }
