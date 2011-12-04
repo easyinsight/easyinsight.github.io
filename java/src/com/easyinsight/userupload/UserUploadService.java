@@ -869,7 +869,7 @@ public class UserUploadService {
                         try {
                             conn.setAutoCommit(false);
                             Date now = new Date();
-                            boolean changed = serverDataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, dataSource.getLastRefreshStart(), true);
+                            boolean changed = serverDataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, dataSource.getLastRefreshStart(), false);
                             dataSource.setVisible(true);
                             dataSource.setLastRefreshStart(now);
                             if (changed) {
