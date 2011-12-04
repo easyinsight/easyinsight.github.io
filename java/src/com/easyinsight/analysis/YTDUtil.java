@@ -216,8 +216,14 @@ public class YTDUtil {
         }
         for (AnalysisMeasure measure : measures) {
             YTDValue ytdValue = ytdValueMap.get(measure);
-            ytdValue.setYtd(ytdMap.get(measure).getValue());
-            ytdValue.setAverage(averageMap.get(measure).getValue());
+            if (ytdValue != null) {
+                if (ytdMap.get(measure) != null) {
+                    ytdValue.setYtd(ytdMap.get(measure).getValue());
+                }
+                if (averageMap.get(measure) != null) {
+                    ytdValue.setAverage(averageMap.get(measure).getValue());
+                }
+            }
 
         }
         List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true);
@@ -270,7 +276,13 @@ public class YTDUtil {
             WSListDefinition benchmarkReport = new WSListDefinition();
             benchmarkReport.setDataFeedID(wsytdDefinition.getDataFeedID());
             benchmarkReport.setColumns(benchmarkMeasures);
-            benchmarkReport.setFilterDefinitions(new ArrayList<FilterDefinition>());
+            List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+            for (FilterDefinition filter : wsytdDefinition.getFilterDefinitions()) {
+                if (filter instanceof FlatDateFilter) {
+                    filters.add(filter);
+                }
+            }
+            benchmarkReport.setFilterDefinitions(filters);
             DataSet benchmarkSet = DataService.listDataSet(benchmarkReport, insightRequestMetadata, conn);
             IRow row = benchmarkSet.getRow(0);
             for (AnalysisMeasure measure : realMeasures) {
