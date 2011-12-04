@@ -818,7 +818,7 @@ public class DataService {
                     Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
                     Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);
                     for (Map.Entry<String, AnalysisItem> entry : structureCopy.entrySet()) {
-                        if (entry.getValue().equals(filter.getField())) {
+                        if (entry.getValue().toDisplay().equals(filter.getField().toDisplay())) {
                             structure.put(entry.getKey(), analysisItemFilterDefinition.getTargetItem());
                         }
                     }
