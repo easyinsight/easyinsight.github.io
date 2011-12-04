@@ -281,7 +281,7 @@ public class YTDUtil {
                         YTDValue ytdValue = ytdValueMap.get(measure);
                         Value benchmarkValue = row.getValue(benchmarkMeasure);
                         Value average = ytdValue.getAverage();
-                        double variation = (average.toDouble() - benchmarkValue.toDouble()) / benchmarkValue.toDouble();
+                        double variation = (average.toDouble() - benchmarkValue.toDouble()) / benchmarkValue.toDouble() * 100;
                         ytdValue.setBenchmarkValue(benchmarkValue);
                         ytdValue.setBenchmarkMeasure(benchmarkMeasure);
                         ytdValue.setVariation(new NumericValue(variation));
