@@ -6,6 +6,7 @@ import com.easyinsight.calculations.CalcGraph;
 import com.easyinsight.core.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.pipeline.CalculationComponent;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.PipelineData;
 
@@ -62,6 +63,17 @@ public class YTDUtil {
         }
         List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true);
         components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false));
+        Iterator<IComponent> iter = components.iterator();
+        while (iter.hasNext()) {
+            IComponent component = iter.next();
+            if (!(component instanceof CalculationComponent)) {
+                iter.remove();
+            }
+            CalculationComponent calculationComponent = (CalculationComponent) component;
+            if (calculationComponent.getAnalysisCalculation().getAggregation() != AggregationTypes.AVERAGE) {
+                iter.remove();
+            }
+        }
         DataSet tempSet = new DataSet();
         IRow tempRow = tempSet.createRow();
         for (Map<AnalysisMeasure, Aggregation> aggMap : map.values()) {
@@ -209,6 +221,17 @@ public class YTDUtil {
         }
         List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true);
         components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false));
+        Iterator<IComponent> iter = components.iterator();
+        while (iter.hasNext()) {
+            IComponent component = iter.next();
+            if (!(component instanceof CalculationComponent)) {
+                iter.remove();
+            }
+            CalculationComponent calculationComponent = (CalculationComponent) component;
+            if (calculationComponent.getAnalysisCalculation().getAggregation() != AggregationTypes.AVERAGE) {
+                iter.remove();
+            }
+        }
         DataSet tempSet = new DataSet();
         IRow tempRow = tempSet.createRow();
         for (YTDValue copyValue : ytdValueMap.values()) {
