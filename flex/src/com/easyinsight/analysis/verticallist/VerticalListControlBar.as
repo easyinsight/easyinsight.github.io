@@ -55,16 +55,16 @@ public class VerticalListControlBar extends ReportControlBar implements IReportC
 
     override protected function createChildren():void {
         super.createChildren();
-        var measureLabel:Label = new Label();
-        measureLabel.text = "Measures:";
-        measureLabel.setStyle("fontSize", 14);
-        addChild(measureLabel);
-        addDropAreaGrouping(listViewGrouping);
         var columnGroupingLabel:Label = new Label();
         columnGroupingLabel.text = "Column:";
         columnGroupingLabel.setStyle("fontSize", 14);
         addChild(columnGroupingLabel);
         addDropAreaGrouping(columnGrouping);
+        var measureLabel:Label = new Label();
+        measureLabel.text = "Measures:";
+        measureLabel.setStyle("fontSize", 14);
+        addChild(measureLabel);
+        addDropAreaGrouping(listViewGrouping);
         var columns:ArrayCollection = listDefinition.measures;
         if (columns != null) {
             for (var i:int = 0; i < columns.length; i++) {
