@@ -117,12 +117,10 @@
             var pf:PercentageNumberFormatter = new PercentageNumberFormatter();
             pf.precision = 1;
             pf.rounding = NumberBaseRoundType.NEAREST;
+            var a:int = 0;
             for (var z:int = 0; z < dataSet.length; z++) {
                 var hasValue:Boolean = false;
                 var ytdValue:CompareYearsRow = dataSet.getItemAt(z) as CompareYearsRow;
-                if (AnalysisMeasure(ytdValue.measure).underline) {
-                    underlines.push(z);
-                }
                 var obj:Object = new Object();
                 obj["baseMeasure"] = ytdValue.measure;
                 var formatter:Formatter = ytdValue.measure.getFormatter();
@@ -147,6 +145,10 @@
                 }
                 if (hasValue) {
                     dColl.addItem(obj);
+                    if (AnalysisMeasure(ytdValue.measure).underline) {
+                        underlines.push(a);
+                    }
+                    a++;
                 }
             }
             if (columns.length <= 1 || dColl.length == 0) {

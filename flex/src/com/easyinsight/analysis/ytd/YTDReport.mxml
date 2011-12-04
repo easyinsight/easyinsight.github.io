@@ -118,13 +118,12 @@
                 variationConfig.formattingType = FormattingConfiguration.PERCENTAGE;
                 var variationFormatter:Formatter = variationConfig.getFormatter(1, 1);
             }
-            
+
+            var a:int = 0;
             for (var z:int = 0; z < dataSet.length; z++) {
                 var hasValue:Boolean = false;
                 var ytdValue:YTDValue = dataSet.getItemAt(z) as YTDValue;
-                if (ytdValue.analysisMeasure.underline) {
-                    underlines.push(z);
-                }
+
                 var obj:Object = new Object();
                 obj["baseMeasure"] = ytdValue.analysisMeasure;
                 var formatter:Formatter = ytdValue.analysisMeasure.getFormatter();
@@ -146,6 +145,10 @@
                     }
                     if (hasValue) {
                         dColl.addItem(obj);
+                        if (ytdValue.analysisMeasure.underline) {
+                            underlines.push(a);
+                        }
+                        a++;
                     }
                 }
             }
