@@ -1,6 +1,8 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.analysis.definitions.WSCompareYearsDefinition;
+import com.easyinsight.analysis.definitions.WSYTDDefinition;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
 
@@ -68,6 +70,22 @@ public abstract class Pipeline {
         }*/
 
         Set<AnalysisItem> allRequestedAnalysisItems = report.getAllAnalysisItems();
+        if (report instanceof WSYTDDefinition || report instanceof WSCompareYearsDefinition) {
+            for (AnalysisItem analysisItem : new HashSet<AnalysisItem>(allRequestedAnalysisItems)) {
+                if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
+                    if (analysisCalculation.getAggregation() == AggregationTypes.AVERAGE) {
+                        List<AnalysisItem> baseItems = analysisItem.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+                        allRequestedAnalysisItems.addAll(baseItems);
+                        List<AnalysisItem> linkItems = analysisItem.addLinkItems(allFields);
+                        allRequestedAnalysisItems.addAll(linkItems);
+                        if (analysisItem.isVirtual()) {
+                            allRequestedAnalysisItems.add(analysisItem);
+                        }
+                    }
+                }
+            }
+        }
         allRequestedAnalysisItems.remove(null);
 
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();

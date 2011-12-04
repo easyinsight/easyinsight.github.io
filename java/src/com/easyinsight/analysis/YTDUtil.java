@@ -22,8 +22,14 @@ public class YTDUtil {
     public static YearStuff getYearStuff(WSCompareYearsDefinition yearsDefinition, DataSet nowSet, PipelineData pipelineData, Set<AnalysisItem> reportItems) {
         AnalysisItem timeDimension = yearsDefinition.getTimeDimension();
         Collection<AnalysisMeasure> measures = new ArrayList<AnalysisMeasure>();
+        Collection<AnalysisMeasure> realMeasures = new ArrayList<AnalysisMeasure>();
+        for (AnalysisItem analysisItem : pipelineData.getAllRequestedItems()) {
+            if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                measures.add((AnalysisMeasure) analysisItem);
+            }
+        }
         for (AnalysisItem analysisItem : yearsDefinition.getMeasures()) {
-            measures.add((AnalysisMeasure) analysisItem);
+            realMeasures.add((AnalysisMeasure) analysisItem);
         }
         Map<Integer, Map<AnalysisMeasure, Aggregation>> map = new HashMap<Integer, Map<AnalysisMeasure, Aggregation>>();
         Set<Integer> years = new HashSet<Integer>();
@@ -66,7 +72,7 @@ public class YTDUtil {
                 component.apply(tempSet, pipelineData);
             }
             IRow tempRow1 = tempSet.getRow(0);
-            for (AnalysisMeasure measure : measures) {
+            for (AnalysisMeasure measure : realMeasures) {
                 if (measure.hasType(AnalysisItemTypes.CALCULATION) && measure.getAggregation() == AggregationTypes.AVERAGE) {
                     Aggregation aggregation = new AggregationFactory(measure, false).getAggregation();
                     aggregation.addValue(tempRow1.getValue(measure));
@@ -78,7 +84,7 @@ public class YTDUtil {
         Collections.sort(sortedYears);
         List<CompareYearsRow> rows = new ArrayList<CompareYearsRow>();
         Set<PercentChangeItem> percentChangeItems = new HashSet<PercentChangeItem>();
-        for (AnalysisMeasure analysisMeasure : measures) {
+        for (AnalysisMeasure analysisMeasure : realMeasures) {
             CompareYearsRow compareYearsRow = new CompareYearsRow();
             compareYearsRow.setMeasure(analysisMeasure);
             for (int i = 0; i < sortedYears.size(); i++) {
@@ -157,8 +163,14 @@ public class YTDUtil {
                                        PipelineData pipelineData, Set<AnalysisItem> reportItems) throws SQLException {
         AnalysisItem timeDimension = wsytdDefinition.getTimeDimension();
         Collection<AnalysisMeasure> measures = new ArrayList<AnalysisMeasure>();
+        Collection<AnalysisMeasure> realMeasures = new ArrayList<AnalysisMeasure>();
+        for (AnalysisItem analysisItem : pipelineData.getAllRequestedItems()) {
+            if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                measures.add((AnalysisMeasure) analysisItem);
+            }
+        }
         for (AnalysisItem analysisItem : wsytdDefinition.getMeasures()) {
-            measures.add((AnalysisMeasure) analysisItem);
+            realMeasures.add((AnalysisMeasure) analysisItem);
         }
         Map<AnalysisMeasure, Aggregation> ytdMap = new HashMap<AnalysisMeasure, Aggregation>();
         Map<AnalysisMeasure, Aggregation> averageMap = new HashMap<AnalysisMeasure, Aggregation>();
@@ -236,7 +248,7 @@ public class YTDUtil {
             benchmarkReport.setFilterDefinitions(new ArrayList<FilterDefinition>());
             DataSet benchmarkSet = DataService.listDataSet(benchmarkReport, insightRequestMetadata, conn);
             IRow row = benchmarkSet.getRow(0);
-            for (AnalysisMeasure measure : measures) {
+            for (AnalysisMeasure measure : realMeasures) {
                 if (measure.getReportFieldExtension() != null && measure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
                     YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) measure.getReportFieldExtension();
                     if (ytdReportFieldExtension.getBenchmark() != null) {
@@ -253,7 +265,7 @@ public class YTDUtil {
             }
         }
         List<YTDValue> values = new ArrayList<YTDValue>();
-        for (AnalysisMeasure measure : measures) {
+        for (AnalysisMeasure measure : realMeasures) {
             values.add(ytdValueMap.get(measure));
         }
 
