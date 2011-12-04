@@ -285,19 +285,23 @@ public class YTDUtil {
             }
             benchmarkReport.setFilterDefinitions(filters);
             DataSet benchmarkSet = DataService.listDataSet(benchmarkReport, insightRequestMetadata, conn);
-            IRow row = benchmarkSet.getRow(0);
-            for (AnalysisMeasure measure : realMeasures) {
-                if (measure.getReportFieldExtension() != null && measure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
-                    YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) measure.getReportFieldExtension();
-                    if (ytdReportFieldExtension.getBenchmark() != null) {
-                        AnalysisMeasure benchmarkMeasure = (AnalysisMeasure) ytdReportFieldExtension.getBenchmark();
-                        YTDValue ytdValue = ytdValueMap.get(measure);
-                        Value benchmarkValue = row.getValue(benchmarkMeasure);
-                        Value average = ytdValue.getAverage();
-                        double variation = (average.toDouble() - benchmarkValue.toDouble()) / benchmarkValue.toDouble() * 100;
-                        ytdValue.setBenchmarkValue(benchmarkValue);
-                        ytdValue.setBenchmarkMeasure(benchmarkMeasure);
-                        ytdValue.setVariation(new NumericValue(variation));
+            if (benchmarkSet.getRows().size() > 0) {
+                IRow row = benchmarkSet.getRow(0);
+                for (AnalysisMeasure measure : realMeasures) {
+                    if (measure.getReportFieldExtension() != null && measure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
+                        YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) measure.getReportFieldExtension();
+                        if (ytdReportFieldExtension.getBenchmark() != null) {
+                            AnalysisMeasure benchmarkMeasure = (AnalysisMeasure) ytdReportFieldExtension.getBenchmark();
+                            YTDValue ytdValue = ytdValueMap.get(measure);
+                            if (ytdValue != null) {
+                                Value benchmarkValue = row.getValue(benchmarkMeasure);
+                                Value average = ytdValue.getAverage();
+                                double variation = (average.toDouble() - benchmarkValue.toDouble()) / benchmarkValue.toDouble() * 100;
+                                ytdValue.setBenchmarkValue(benchmarkValue);
+                                ytdValue.setBenchmarkMeasure(benchmarkMeasure);
+                                ytdValue.setVariation(new NumericValue(variation));
+                            }
+                        }
                     }
                 }
             }
