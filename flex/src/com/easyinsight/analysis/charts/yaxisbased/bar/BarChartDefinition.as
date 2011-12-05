@@ -9,6 +9,7 @@ import com.easyinsight.analysis.charts.yaxisbased.YAxisDefinition;
 public class BarChartDefinition extends YAxisDefinition{
 
     public var chartColor:uint;
+    public var gradientColor:uint;
     public var useChartColor:Boolean;
     public var columnSort:String = ChartDefinition.SORT_UNSORTED;
 

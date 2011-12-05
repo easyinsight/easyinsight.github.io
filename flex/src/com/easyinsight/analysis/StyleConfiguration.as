@@ -207,6 +207,7 @@ public class StyleConfiguration {
                     report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
             items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", BarChartDefinition(report).useChartColor, report));
             items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", BarChartDefinition(report).chartColor, report));
+            items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", BarChartDefinition(report).gradientColor, report));
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", BarChartDefinition(report).columnSort, report,
                 [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                 ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));

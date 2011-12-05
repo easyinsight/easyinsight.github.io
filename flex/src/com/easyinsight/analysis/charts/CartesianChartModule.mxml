@@ -40,7 +40,7 @@
 
         protected var measureFormatter:Formatter;
 
-        private var dimensionFormatter:Formatter;
+        protected var dimensionFormatter:Formatter;
 
         private var chart:ChartBase;
 

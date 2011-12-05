@@ -12,8 +12,17 @@ import java.util.List;
 public class WSBarChartDefinition extends WSYAxisDefinition {
 
     private int chartColor;
+    private int gradientColor;
     private boolean useChartColor;
     private String columnSort;
+
+    public int getGradientColor() {
+        return gradientColor;
+    }
+
+    public void setGradientColor(int gradientColor) {
+        this.gradientColor = gradientColor;
+    }
 
     public String getColumnSort() {
         return columnSort;
@@ -51,6 +60,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         chartColor = (int) findNumberProperty(properties, "chartColor", 0);
+        gradientColor = (int) findNumberProperty(properties, "gradientColor", 0);
         useChartColor = findBooleanProperty(properties, "useChartColor", false);
         columnSort = findStringProperty(properties, "columnSort", "Unsorted");
     }
@@ -59,6 +69,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportNumericProperty("chartColor", chartColor));
+        properties.add(new ReportNumericProperty("gradientColor", gradientColor));
         properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
         properties.add(new ReportStringProperty("columnSort", columnSort));
         return properties;

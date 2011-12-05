@@ -39,6 +39,14 @@
             return new BarChart();
         }
 
+        override protected function useGradientColor():Boolean {
+            return BarChartDefinition(chartDef).gradientColor > 0;
+        }
+
+        override protected function getGradientColor():uint {
+            return BarChartDefinition(chartDef).gradientColor;
+        }
+
         override protected function useChartColor():Boolean {
             return BarChartDefinition(chartDef).useChartColor;
         }
@@ -87,7 +95,7 @@
             var xName:String = dataTransform.getAxis(CartesianTransform.VERTICAL_AXIS).displayName;
             if (xName != "")
                 dt += "<i>" + xName + ":</i> ";
-            dt += dataTransform.getAxis(CartesianTransform.VERTICAL_AXIS).formatForScreen(BarSeriesItem(hd.chartItem).yValue) + "\n";
+            dt += dimensionFormatter.format(BarSeriesItem(hd.chartItem).xValue) + "\n";
 
             var yName:String = dataTransform.getAxis(CartesianTransform.HORIZONTAL_AXIS).displayName;
 

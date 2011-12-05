@@ -42,16 +42,16 @@
             return ColumnChartDefinition(chartDef).gradientColor > 0;
         }
 
+        override protected function getGradientColor():uint {
+            return ColumnChartDefinition(chartDef).gradientColor;
+        }
+
         override protected function useChartColor():Boolean {
             return ColumnChartDefinition(chartDef).useChartColor;
         }
 
         override protected function getChartColor():uint {
             return ColumnChartDefinition(chartDef).chartColor;
-        }
-
-        override protected function getGradientColor():uint {
-            return ColumnChartDefinition(chartDef).gradientColor;
         }
 
         override protected function getColorScheme():String {
@@ -89,7 +89,7 @@
             var xName:String = dataTransform.getAxis(CartesianTransform.HORIZONTAL_AXIS).displayName;
             if (xName != "")
                 dt += "<i>" + xName + ":</i> ";
-            dt += dataTransform.getAxis(CartesianTransform.HORIZONTAL_AXIS).formatForScreen(ColumnSeriesItem(hd.chartItem).xValue) + "\n";
+            dt += dimensionFormatter.format(ColumnSeriesItem(hd.chartItem).xValue) + "\n";
 
             var yName:String = dataTransform.getAxis(CartesianTransform.VERTICAL_AXIS).displayName;
 

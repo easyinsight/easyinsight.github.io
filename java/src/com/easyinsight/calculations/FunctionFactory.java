@@ -69,6 +69,8 @@ public class FunctionFactory {
             return new Minimum();
         } else if (s.equals("max")) {
             return new Maximum();
+        } else if (s.equals("round")) {
+            return new Round();
         } else if (s.equals("substring")) {
             return new SubstringFunction();
         } else if (s.equals("concat")) {
