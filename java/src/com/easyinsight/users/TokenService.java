@@ -5,7 +5,7 @@ import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksCompositeSource;
 import com.easyinsight.datafeeds.harvest.HarvestCompositeSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
-import com.easyinsight.datafeeds.xero.XeroCompositeSource;
+//import com.easyinsight.datafeeds.xero.XeroCompositeSource;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.datafeeds.FeedType;
@@ -76,11 +76,6 @@ public class TokenService {
                 provider = new DefaultOAuthProvider(
                         "https://oauth.constantcontact.com/ws/oauth/request_token", "https://oauth.constantcontact.com/ws/oauth/access_token",
                         "https://oauth.constantcontact.com/ws/oauth/confirm_access");
-            } else if (type == FeedType.XERO_COMPOSITE.getType()) {
-                consumer = new DefaultOAuthConsumer(XeroCompositeSource.CONSUMER_KEY, XeroCompositeSource.CONSUMER_SECRET);
-                consumer.setMessageSigner(new HmacSha1MessageSigner());
-                provider = new DefaultOAuthProvider(
-                        XeroCompositeSource.REQUEST_TOKEN_URL, XeroCompositeSource.ACCESS_TOKEN_URL, XeroCompositeSource.AUTHORIZE_TOKEN_URL);
             } else if (type == FeedType.GOOGLE.getType()) {
                 consumer = new DefaultOAuthConsumer("www.easy-insight.com", "OG0zlkZFPIe7JdHfLB8qXXYv");
                 consumer.setMessageSigner(new HmacSha1MessageSigner());
