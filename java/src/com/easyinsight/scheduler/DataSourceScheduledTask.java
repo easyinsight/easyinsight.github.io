@@ -68,7 +68,16 @@ public class DataSourceScheduledTask extends ScheduledTask {
                     boolean accountAdmin = rs.getBoolean(5);
                     boolean guestUser = rs.getBoolean(6);
                     int firstDayOfWeek = rs.getInt(7);
-                    SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser, firstDayOfWeek);
+                    PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.persona_name FROM USER, PERSONA WHERE USER.PERSONA_ID = PERSONA.PERSONA_ID AND USER.USER_ID = ?");
+                    stmt.setLong(1, userID);
+                    ResultSet personaRS = stmt.executeQuery();
+
+                    String personaName = null;
+                    if (personaRS.next()) {
+                        personaName = personaRS.getString(1);
+                    }
+                    stmt.close();
+                    SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
                     try {
 
                         if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {

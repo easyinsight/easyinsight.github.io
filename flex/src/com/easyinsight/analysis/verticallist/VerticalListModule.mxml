@@ -57,11 +57,9 @@
             var headerWidth:int = 0;
             var columnWidths:Object = new Object();
             var underlines:Array = [];
+            var a:int = 0;
             for (var l:int = 0; l < vert.measures.length; l++) {
                 var measure:AnalysisMeasure = vert.measures.getItemAt(l) as AnalysisMeasure;
-                if (measure.underline) {
-                    underlines.push(l);
-                }
                 var formatter:Formatter = measure.getFormatter();
                 var obj:Object = new Object();
                 obj["Label"] = measure.display;
@@ -138,6 +136,10 @@
                 }
                 if (atLeastOneValue) {
                     dColl.addItem(obj);
+                    if (measure.underline) {
+                        underlines.push(a);
+                    }
+                    a++;
                 }
             }
             if (columns.length <= 1 || dColl.length <= 1) {

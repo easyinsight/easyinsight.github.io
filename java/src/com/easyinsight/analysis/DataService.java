@@ -387,6 +387,17 @@ public class DataService {
         return reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
     }
 
+    public static ExtendedDataSet extendedListDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
+        ReportRetrieval reportRetrieval;
+        try {
+            reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return new ExtendedDataSet(reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet()),
+                reportRetrieval.getPipeline().getPipelineData(), reportRetrieval.getPipeline().getPipelineData().getAllRequestedItems());
+    }
+
     public static DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata,
                                    EIConnection conn) {
         try {

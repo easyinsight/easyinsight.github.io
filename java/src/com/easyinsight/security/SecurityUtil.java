@@ -27,8 +27,8 @@ public class SecurityUtil {
     private static ISecurityProvider securityProvider;
     private static ThreadLocal<UserPrincipal> threadLocal = new ThreadLocal<UserPrincipal>();
 
-    public static void populateThreadLocal(String userName, long userID, long accountID, int accountType, boolean accountAdmin, boolean guestUser, int firstDayOfWeek) {
-        threadLocal.set(new UserPrincipal(userName, accountID, userID, accountType, accountAdmin, guestUser, null, firstDayOfWeek));
+    public static void populateThreadLocal(String userName, long userID, long accountID, int accountType, boolean accountAdmin, int firstDayOfWeek, String persona) {
+        threadLocal.set(new UserPrincipal(userName, accountID, userID, accountType, accountAdmin, firstDayOfWeek, persona));
     }
 
     public static void setSecurityProvider(ISecurityProvider securityProvider) {
@@ -44,13 +44,6 @@ public class SecurityUtil {
         if(userPrincipal == null)
             userPrincipal = threadLocal.get();
         return userPrincipal.getFirstDayOfWeek();
-    }
-
-    public static boolean isGuestUser() {
-        UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
-        if(userPrincipal == null)
-            userPrincipal = threadLocal.get();
-        return userPrincipal.isGuestUser();
     }
 
     public static boolean isAccountAdmin() {
@@ -749,5 +742,12 @@ public class SecurityUtil {
 
     public static void clearThreadLocal() {
         threadLocal.remove();
+    }
+
+    public static String getPersonaName() {
+        UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
+        if(userPrincipal == null)
+            userPrincipal = threadLocal.get();
+        return userPrincipal.getPersonaName();
     }
 }

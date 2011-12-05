@@ -30,6 +30,15 @@ public class ReportDelivery extends ScheduledDelivery {
     private boolean htmlEmail;
     private int timezoneOffset;
     private long senderID;
+    private boolean applyFilters;
+
+    public boolean isApplyFilters() {
+        return applyFilters;
+    }
+
+    public void setApplyFilters(boolean applyFilters) {
+        this.applyFilters = applyFilters;
+    }
 
     public long getSenderID() {
         return senderID;

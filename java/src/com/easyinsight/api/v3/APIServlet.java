@@ -63,7 +63,7 @@ public abstract class APIServlet extends HttpServlet {
         } else {
             try {
                 SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
-                        userResponse.getAccountType(), userResponse.isAccountAdmin(), userResponse.isGuestUser(), userResponse.getFirstDayOfWeek());
+                        userResponse.getAccountType(), userResponse.isAccountAdmin(), userResponse.getFirstDayOfWeek(), userResponse.getPersonaName());
                 EIConnection conn = Database.instance().getConnection();
                 ResponseInfo responseInfo;
                 try {
@@ -125,7 +125,7 @@ public abstract class APIServlet extends HttpServlet {
         } else {
             try {
                 SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
-                        userResponse.getAccountType(), userResponse.isAccountAdmin(), userResponse.isGuestUser(), userResponse.getFirstDayOfWeek());
+                        userResponse.getAccountType(), userResponse.isAccountAdmin(), userResponse.getFirstDayOfWeek(), userResponse.getPersonaName());
                 EIConnection conn = Database.instance().getConnection();
                 ResponseInfo responseInfo;
                 try {

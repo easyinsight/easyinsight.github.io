@@ -182,6 +182,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
             }
             if (calendar == null) {
                 calendar = Calendar.getInstance();
+                calendar.setFirstDayOfWeek(SecurityUtil.getFirstDayOfWeek());
             }
             calendar.setTimeInMillis(tempDate.getTime());
             if (dateLevel <= WEEK_LEVEL || dateLevel == QUARTER_OF_YEAR_LEVEL) {
@@ -236,7 +237,11 @@ public class AnalysisDateDimension extends AnalysisDimension {
 
                 finalDate = calendar.getTime();
                 //System.out.println("end date was " + finalDate);
-                resultValue = new DateValue(finalDate);
+                if (outputDateFormat != null && outputDateFormat.length() > 0) {
+                    resultValue = new StringValue(new SimpleDateFormat(outputDateFormat).format(calendar.getTime()), new DateValue(finalDate));
+                } else {
+                    resultValue = new DateValue(finalDate);
+                }
             } else {
                 switch (dateLevel) {
                     case QUARTER_OF_YEAR_FLAT:
@@ -323,6 +328,10 @@ public class AnalysisDateDimension extends AnalysisDimension {
 
                         break;
                     case WEEK_OF_YEAR_FLAT:
+                        if (outputDateFormat != null && outputDateFormat.length() > 0) {
+                            resultValue = new StringValue(new SimpleDateFormat(outputDateFormat).format(calendar.getTime()), new NumericValue(calendar.get(Calendar.WEEK_OF_YEAR)));
+                            break;
+                        }
                         resultValue = new NumericValue(calendar.get(Calendar.WEEK_OF_YEAR));
                         break;
                     default:

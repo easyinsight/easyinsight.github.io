@@ -640,10 +640,11 @@ public class UserUploadService {
                     final int accountType = SecurityUtil.getAccountTier();
                     final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                     final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
+                    final String personaName = SecurityUtil.getPersonaName();
                     new Thread(new Runnable() {
 
                         public void run() {
-                            SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
+                            SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
                             EIConnection conn = Database.instance().getConnection();
                             try {
                                 conn.setAutoCommit(false);
@@ -861,10 +862,11 @@ public class UserUploadService {
                 final int accountType = SecurityUtil.getAccountTier();
                 final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                 final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
+                final String personaName = SecurityUtil.getPersonaName();
                 new Thread(new Runnable() {
 
                     public void run() {
-                        SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
+                        SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
                         EIConnection conn = Database.instance().getConnection();
                         try {
                             conn.setAutoCommit(false);

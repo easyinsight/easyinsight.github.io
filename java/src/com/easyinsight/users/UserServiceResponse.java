@@ -6,8 +6,11 @@ import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.preferences.UISettingRetrieval;
 import com.easyinsight.preferences.UISettings;
+import com.easyinsight.security.SecurityUtil;
 import org.hibernate.Session;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
@@ -51,9 +54,10 @@ public class UserServiceResponse {
     private long fixedDashboardID;
     private ReportTypeOptions reportTypeOptions;
     private boolean subdomainEnabled;
+    private String personaName;
 
-    public static UserServiceResponse createResponseWithUISettings(User user, ApplicationSkin applicationSkin) {
-        return createResponse(user, applicationSkin);
+    public static UserServiceResponse createResponseWithUISettings(User user, ApplicationSkin applicationSkin, String personaName) {
+        return createResponse(user, applicationSkin, personaName);
     }
 
     public static UserServiceResponse createResponse(User user, Session session, EIConnection conn) throws SQLException {
@@ -65,10 +69,18 @@ public class UserServiceResponse {
         if (user.getPersonaID() != null) {
             user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
         }
-        return createResponse(user, applicationSkin);
+        PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.persona_name FROM USER, PERSONA WHERE USER.PERSONA_ID = PERSONA.PERSONA_ID AND USER.USER_ID = ?");
+        stmt.setLong(1, user.getUserID());
+        ResultSet rs = stmt.executeQuery();
+
+        String personaName = null;
+        if (rs.next()) {
+            personaName = rs.getString(1);
+        }
+        return createResponse(user, applicationSkin, personaName);
     }
 
-    private static UserServiceResponse createResponse(User user, ApplicationSkin applicationSkin)  {
+    private static UserServiceResponse createResponse(User user, ApplicationSkin applicationSkin, String personaName)  {
         Account account = user.getAccount();
         return new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
@@ -77,7 +89,7 @@ public class UserServiceResponse {
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
                                 account.getCurrencySymbol(), applicationSkin, account.getFirstDayOfWeek(),
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled());
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName);
     }
 
     public UserServiceResponse(boolean successful, String failureMessage) {
@@ -93,7 +105,7 @@ public class UserServiceResponse {
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
                                String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
-                               boolean subdomainEnabled) {
+                               boolean subdomainEnabled, String personaName) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -128,6 +140,15 @@ public class UserServiceResponse {
         this.fixedDashboardID = fixedDashboardID;
         this.reportTypeOptions = reportTypeOptions;
         this.subdomainEnabled = subdomainEnabled;
+        this.personaName = personaName;
+    }
+
+    public String getPersonaName() {
+        return personaName;
+    }
+
+    public void setPersonaName(String personaName) {
+        this.personaName = personaName;
     }
 
     public ReportTypeOptions getReportTypeOptions() {

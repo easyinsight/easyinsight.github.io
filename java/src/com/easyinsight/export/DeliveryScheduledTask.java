@@ -124,11 +124,20 @@ public class DeliveryScheduledTask extends ScheduledTask {
             int accountType = queryRS.getInt(2);
             boolean accountAdmin = queryRS.getBoolean(3);
             int firstDayOfWeek = queryRS.getInt(4);
-            String firstName = queryRS.getString(5);
-            String lastName = queryRS.getString(6);
             long accountID = queryRS.getLong(8);
 
-            SecurityUtil.populateThreadLocal(userName, ownerID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
+            PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.persona_name FROM USER, PERSONA WHERE USER.PERSONA_ID = PERSONA.PERSONA_ID AND USER.USER_ID = ?");
+            stmt.setLong(1, ownerID);
+            ResultSet personaRS = stmt.executeQuery();
+
+            String personaName = null;
+            if (personaRS.next()) {
+                personaName = personaRS.getString(1);
+            }
+
+            stmt.close();
+
+            SecurityUtil.populateThreadLocal(userName, ownerID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
             try {
 
                 List<AttachmentInfo> attachmentInfos = new ArrayList<AttachmentInfo>();
@@ -250,7 +259,16 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 int firstDayOfWeek = queryRS.getInt(4);
                 String firstName = queryRS.getString(5);
                 String lastName = queryRS.getString(6);
-                SecurityUtil.populateThreadLocal(userName, ownerID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
+                PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.persona_name FROM USER, PERSONA WHERE USER.PERSONA_ID = PERSONA.PERSONA_ID AND USER.USER_ID = ?");
+                stmt.setLong(1, ownerID);
+                ResultSet personaRS = stmt.executeQuery();
+
+                String personaName = null;
+                if (personaRS.next()) {
+                    personaName = personaRS.getString(1);
+                }
+                stmt.close();
+                SecurityUtil.populateThreadLocal(userName, ownerID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
                 try {
                     String scorecardHTML = ExportService.exportScorecard(scorecardID, insightRequestMetadata, conn);
                     sendNoAttachEmails(conn, scorecardHTML, activityID, subject, body, htmlEmail, ScheduledActivity.SCORECARD_DELIVERY);
@@ -301,7 +319,16 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 String firstName = queryRS.getString(7);
                 String lastName = queryRS.getString(8);
                 String email = queryRS.getString(9);
-                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
+                PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.persona_name FROM USER, PERSONA WHERE USER.PERSONA_ID = PERSONA.PERSONA_ID AND USER.USER_ID = ?");
+                stmt.setLong(1, userID);
+                ResultSet personaRS = stmt.executeQuery();
+
+                String personaName = null;
+                if (personaRS.next()) {
+                    personaName = personaRS.getString(1);
+                }
+                stmt.close();
+                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
 
                 try {
                     if (deliveryFormat == ReportDelivery.EXCEL) {
@@ -354,6 +381,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
             List<DataSet> dataSets = DataService.getEmbeddedVerticalDataSets((WSCombinedVerticalListDefinition) analysisDefinition,
                     insightRequestMetadata, conn);
             table = ExportService.combinedVerticalListToHTMLTable(analysisDefinition, dataSets, conn, insightRequestMetadata);
+        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.YTD) {
+            table = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
             DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
             table = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata);

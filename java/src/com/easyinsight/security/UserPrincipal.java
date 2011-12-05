@@ -1,7 +1,5 @@
 package com.easyinsight.security;
 
-import com.easyinsight.users.Scenario;
-
 import java.security.Principal;
 import java.io.Serializable;
 
@@ -17,20 +15,26 @@ public class UserPrincipal implements Principal, Serializable {
     private long userID;
     private int accountType;
     private boolean accountAdmin;
-    private boolean guestUser;
-    private Scenario scenario;
     private int firstDayOfWeek;
+    private String personaName;
 
-    public UserPrincipal(String userName, long accountID, long userID, int accountType, boolean accountAdmin, boolean guestUser, Scenario scenario,
-                         int firstDayOfWeek) {
+    public UserPrincipal(String userName, long accountID, long userID, int accountType, boolean accountAdmin, int firstDayOfWeek,
+                         String personaName) {
         this.userName = userName;
         this.accountID = accountID;
         this.userID = userID;
         this.accountType = accountType;
         this.accountAdmin = accountAdmin;
-        this.guestUser = guestUser;
-        this.scenario = scenario;
         this.firstDayOfWeek = firstDayOfWeek;
+        this.personaName = personaName;
+    }
+
+    public String getPersonaName() {
+        return personaName;
+    }
+
+    public void setPersonaName(String personaName) {
+        this.personaName = personaName;
     }
 
     public int getFirstDayOfWeek() {
@@ -39,18 +43,6 @@ public class UserPrincipal implements Principal, Serializable {
 
     public void setFirstDayOfWeek(int firstDayOfWeek) {
         this.firstDayOfWeek = firstDayOfWeek;
-    }
-
-    public boolean isGuestUser() {
-        return guestUser;
-    }
-
-    public Scenario getScenario() {
-        return scenario;
-    }
-
-    public void setScenario(Scenario scenario) {
-        this.scenario = scenario;
     }
 
     public void setAccountType(int accountType) {

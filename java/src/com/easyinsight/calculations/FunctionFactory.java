@@ -121,6 +121,8 @@ public class FunctionFactory {
             return new AggregateField();
         } else if (s.equals("notin")) {
             return new NotIn();
+        } else if (s.equals("persona")) {
+            return new PersonaEquals();
         } else {
             return null;
         }

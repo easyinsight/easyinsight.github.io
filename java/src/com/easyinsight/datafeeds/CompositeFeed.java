@@ -9,6 +9,9 @@ import com.easyinsight.core.DerivedKey;
 
 import com.easyinsight.analysis.*;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 import com.easyinsight.logging.LogClass;
@@ -716,5 +719,32 @@ public class CompositeFeed extends Feed {
 
     public List<CompositeFeedConnection> getConnections() {
         return connections;
+    }
+
+    @Override
+    public DataSourceInfo createSourceInfo(EIConnection conn) throws SQLException {
+        PreparedStatement typeStmt = conn.prepareStatement("SELECT FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+        Set<Long> validChildren = new HashSet<Long>();
+        for (CompositeFeedNode node : compositeFeedNodes) {
+            typeStmt.setLong(1, node.getDataFeedID());
+            ResultSet rs = typeStmt.executeQuery();
+            rs.next();
+            int type = rs.getInt(1);
+            if (type == FeedType.HIGHRISE_COMPOSITE.getType() || type == FeedType.QUICKBASE_COMPOSITE.getType() ||
+                    type == FeedType.BASECAMP_MASTER.getType() || type == FeedType.HARVEST_COMPOSITE.getType() ||
+                    type == FeedType.ZENDESK_COMPOSITE.getType() || type == FeedType.BATCHBOOK_COMPOSITE.getType()) {
+                validChildren.add(node.getDataFeedID());
+            }
+        }
+        DataSourceInfo dataSourceInfo;
+        if (validChildren.size() == 1) {
+            long child = validChildren.iterator().next();
+            Feed childFeed = FeedRegistry.instance().getFeed(child, conn);
+            dataSourceInfo = childFeed.createSourceInfo(conn);
+        } else {
+            dataSourceInfo = super.createSourceInfo(conn);
+        }
+        typeStmt.close();
+        return dataSourceInfo;
     }
 }

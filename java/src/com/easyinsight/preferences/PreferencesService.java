@@ -305,6 +305,7 @@ public class PreferencesService {
                     dls.setFilters(filters);
                     dlsList.add(dls);
                 }
+                getFilterStmt.close();
                 persona.setDataSourceDLS(dlsList);
             }
         } catch (Exception e) {
@@ -445,6 +446,7 @@ public class PreferencesService {
             dls.setFilters(filters);
             dlsList.add(dls);
         }
+        getFilterStmt.close();
         return dlsList;
     }
 
@@ -561,6 +563,7 @@ public class PreferencesService {
                 }
             }
         }
+        getExistingFilterStmt.close();
         return persona.getPersonaID();
     }
 
