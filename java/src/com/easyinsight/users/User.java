@@ -67,6 +67,12 @@ public class User {
     @Column(name="fixed_dashboard_id")
     private Long fixedDashboardID;
 
+    @Column(name="created_on")
+    private Date createdOn = new Date();
+
+    @Column(name="updated_on")
+    private Date updatedOn = new Date();
+
     @ManyToOne
     @JoinColumn (name="account_id")
     private Account account;
@@ -93,6 +99,22 @@ public class User {
         userTransferObject.setPersonaID(personaID != null ? personaID : 0);
         userTransferObject.setFixedDashboardID(fixedDashboardID != null ? fixedDashboardID : 0);
         return userTransferObject;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
+    }
+
+    public Date getUpdatedOn() {
+        return updatedOn;
+    }
+
+    public void setUpdatedOn(Date updatedOn) {
+        this.updatedOn = updatedOn;
     }
 
     public Long getFixedDashboardID() {

@@ -198,6 +198,7 @@ public class UserAccountAdminService {
                 }
             }
             user.update(userTransferObject);
+            user.setUpdatedOn(new Date());
             session.update(user);
             session.flush();
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM USER_DLS WHERE USER_ID = ?");
@@ -527,6 +528,7 @@ public class UserAccountAdminService {
                 user.setAccountAdmin(true);
 
                 account.setName(welcomeBackInfo.getAccountName());
+                user.setUpdatedOn(new Date());
                 session.update(user);
                 session.flush();
                 conn.commit();
@@ -667,6 +669,7 @@ public class UserAccountAdminService {
             User user = (User) userResults.get(0);
             user.setUserKey(accountAPISettings.getUserKey());
             user.setUserSecretKey(accountAPISettings.getUserSecretKey());
+            user.setUpdatedOn(new Date());
             session.update(user);
             session.update(account);
             session.getTransaction().commit();
@@ -711,6 +714,7 @@ public class UserAccountAdminService {
                 changed = true;
             }
             if (changed) {
+                user.setUpdatedOn(new Date());
                 session.update(user);
                 session.update(account);
             }

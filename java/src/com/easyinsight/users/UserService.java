@@ -762,6 +762,7 @@ public class UserService {
     private static class UserInfo {
         User user;
         ApplicationSkin settings;
+        String personaName;
     }
 
     public UserServiceResponse isSessionLoggedIn() {
@@ -771,9 +772,7 @@ public class UserService {
         } else {
             UserInfo userInfo = retrieveUser();
             User user = userInfo.user;
-            UserServiceResponse response = UserServiceResponse.createResponseWithUISettings(user, userInfo.settings);
-            response.setScenario(existing.getScenario());
-            return response;
+            return UserServiceResponse.createResponseWithUISettings(user, userInfo.settings, userInfo.personaName);
         }
     }
 
