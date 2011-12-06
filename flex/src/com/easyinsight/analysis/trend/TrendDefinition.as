@@ -39,7 +39,7 @@ public class TrendDefinition extends KPIDefinition {
     override public function populate(fields:ArrayCollection):void {
         measures = new ArrayCollection();
         for each (var field:AnalysisItem in fields) {
-            if (field.hasType(AnalysisItemTypes.MEASURE) && field.reportFieldExtension != null && field.reportFieldExtension is TrendReportFieldExtension) {
+            if (field != null && field.hasType(AnalysisItemTypes.MEASURE) && field.reportFieldExtension != null && field.reportFieldExtension is TrendReportFieldExtension) {
                 measures.addItem(field);
             }
         }

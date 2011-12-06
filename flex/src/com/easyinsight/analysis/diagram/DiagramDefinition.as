@@ -40,7 +40,7 @@ public class DiagramDefinition extends KPIDefinition {
     override public function populate(fields:ArrayCollection):void {
         measures = new ArrayCollection();
         for each (var field:AnalysisItem in fields) {
-            if (field.hasType(AnalysisItemTypes.MEASURE) && field.reportFieldExtension != null && field.reportFieldExtension is TrendReportFieldExtension) {
+            if (field != null && field.hasType(AnalysisItemTypes.MEASURE) && field.reportFieldExtension != null && field.reportFieldExtension is TrendReportFieldExtension) {
                 var diagramExt:DiagramReportFieldExtension = new DiagramReportFieldExtension();
                 diagramExt.date = TrendReportFieldExtension(field.reportFieldExtension).date;
                 diagramExt.highLow = TrendReportFieldExtension(field.reportFieldExtension).highLow;

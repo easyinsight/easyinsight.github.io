@@ -79,7 +79,7 @@ public class CompareYearsControlBar extends ReportControlBar implements IReportC
     }
 
     public function isDataValid():Boolean {
-        return listViewGrouping.getListColumns().length > 0;
+        return listViewGrouping.getListColumns().length > 0 && columnGrouping.getListColumns().length > 0;
     }
 
     public function createAnalysisDefinition():AnalysisDefinition {

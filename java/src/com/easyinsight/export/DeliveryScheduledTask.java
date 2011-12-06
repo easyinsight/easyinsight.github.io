@@ -383,6 +383,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
             table = ExportService.combinedVerticalListToHTMLTable(analysisDefinition, dataSets, conn, insightRequestMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.YTD) {
             table = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata);
+        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
+            table = ExportService.compareYearsToHTMLTable(analysisDefinition, conn, insightRequestMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
             DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
             table = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata);

@@ -23,8 +23,6 @@
         import com.easyinsight.analysis.verticallist.VerticalListRenderer;
         import com.easyinsight.analysis.verticallist.VerticalListRowHeaderRenderer;
 
-        import flash.text.TextLineMetrics;
-
         import mx.collections.ArrayCollection;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.formatters.Formatter;
@@ -83,14 +81,9 @@
             labelColumn.width = vert.headerWidth;
             labelColumn.dataField = "Label";
             columns.addItem(labelColumn);
-            var firstRows:Object = new Object();
             if (vert == null) {
                 return;
             }
-            var filters:Array = additionalProperties["labelFilters"];
-            var measures:ArrayCollection = vert.measures;
-            var headerWidth:int = 0;
-            var columnWidths:Object = new Object();
             var underlines:Array = [];
             
             var timeIntervals:ArrayCollection = additionalProperties["timeIntervals"];
@@ -134,7 +127,6 @@
                     for (var y:int = 0; y < ytdValue.timeIntervalValues.length; y++) {
                         var timeIntervalValue:TimeIntervalValue = ytdValue.timeIntervalValues.getItemAt(y) as TimeIntervalValue;
                         var label:String = timeIntervalValue.dateValue.toString();
-                        dataGrid.measureText(label);
                         if (timeIntervalValue.value.toNumber() != 0) {
                             hasValue = true;
                         }
