@@ -96,7 +96,7 @@ public abstract class HarvestBaseSource extends ServerDataSourceDefinition {
                     successful = true;
                 }
             } catch (IOException e) {
-                System.out.println("IOException " + e.getMessage());
+                e.printStackTrace();
                 retryCount++;
                 if (e.getMessage().contains("503")) {
                     try {
@@ -107,7 +107,7 @@ public abstract class HarvestBaseSource extends ServerDataSourceDefinition {
                     throw new RuntimeException(e);
                 }
             } catch (ParsingException e) {
-                System.out.println(e.getMessage());
+                e.printStackTrace();
                 retryCount++;
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
