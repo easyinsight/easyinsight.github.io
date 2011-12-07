@@ -4,6 +4,7 @@ import com.easyinsight.database.Database;
 import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Map;
  */
 @Entity
 @Table(name="diagram_report_link")
-public class DiagramLink implements Cloneable {
+public class DiagramLink implements Cloneable, Serializable {
 
     @Id @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="diagram_report_link_id")
