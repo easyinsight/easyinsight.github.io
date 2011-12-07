@@ -140,7 +140,7 @@
         <mx:Button label="Add User..." click="addUser()" enabled="{enableAdd}" fontSize="14" styleName="grayButton"/>
     </mx:HBox>
 
-    <mx:DataGrid dataProvider="{users}" rowHeight="28">
+    <mx:DataGrid dataProvider="{users}" rowHeight="28" height="100%">
         <mx:columns>
             <mx:DataGridColumn dataField="userName" headerText="User Name"
                                headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="200"/>
@@ -148,8 +148,6 @@
                                headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="200"/>
             <mx:DataGridColumn dataField="name" headerText="Last Name"
                                headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="200"/>
-            <mx:DataGridColumn dataField="userName" width="150" headerText=""
-                               itemRenderer="{personaFactory}"/>
             <mx:DataGridColumn dataField="userName" width="100" headerText=""
                                itemRenderer="{userButtonFactory}" sortable="false"/>
         </mx:columns>
