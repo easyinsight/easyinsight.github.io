@@ -16,27 +16,22 @@ import com.easyinsight.dashboard.IDashboardViewComponent;
 import com.easyinsight.dashboard.SizeInfo;
 import com.easyinsight.filter.FilterFactory;
 import com.easyinsight.filtering.FilterDefinition;
-import com.easyinsight.framework.User;
 import com.easyinsight.skin.ImageLoadEvent;
 import com.easyinsight.skin.ImageLoader;
-import com.easyinsight.util.AnalysisItemFilterTablet;
 import com.easyinsight.util.EIComboBox;
 import com.easyinsight.util.ExportWindow;
 import com.easyinsight.util.FilterChangeEvent;
-import com.easyinsight.util.FlatDateFilterTablet;
-import com.easyinsight.util.SingleValueFilterTablet;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
+import flash.geom.Point;
 
 import mx.collections.ArrayCollection;
 import mx.core.FlexGlobals;
 import mx.core.UIComponent;
-import mx.effects.Effect;
 import mx.effects.Sequence;
 import mx.events.FlexEvent;
 import mx.graphics.SolidColor;
-import mx.messaging.config.ServerConfig;
 import mx.states.AddItems;
 import mx.states.SetProperty;
 import mx.states.State;
@@ -120,10 +115,15 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
     private var shareButton:Button;
 
     private function share(event:MouseEvent):void {
+        var button:Button = event.currentTarget as Button;
         var reports:ArrayCollection = reportCount();
         if (reports.length == 1) {
             var report:AnalysisDefinition = reports.getItemAt(0) as AnalysisDefinition;
             var window:ExportWindow = new ExportWindow();
+            var point:Point = new Point(button.x, button.y);
+            var global:Point = button.parent.localToGlobal(point);
+            window.x = global.x - 200;
+            window.y = global.y + button.height;
             window.report = report;
             window.open(this, true);
         }
@@ -219,19 +219,32 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
             dashboardFilterArea = new Group();
             dashboardFilterArea.layout = new FlowLayout();
             dashboardFilterArea.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
-            for each (var filter:FilterDefinition in dashboardStack.filters) {
-                var filterComp:UIComponent = FilterFactory.createTabletFilter(filter, dashboardEditorMetadata.dataSourceID);
-                if (filterComp != null) {
-                    filterComp.addEventListener(FilterChangeEvent.FILTER_CHANGE, onFilterChange);
-                    dashboardFilterArea.addElement(filterComp);
+
+            var myFilterColl:ArrayCollection = new ArrayCollection();
+            for each (var filterDefinition:FilterDefinition in dashboardStack.filters) {
+                var existingFilter:FilterDefinition = stackFilterMap[filterDefinition.qualifiedName()];
+                var filterToUse:FilterDefinition;
+                if (existingFilter == null) {
+                    trace("could not find filter " + filterDefinition.qualifiedName());
+                    filterToUse = filterDefinition;
+                } else {
+                    trace("found existing filter " + filterDefinition.qualifiedName());
+                    filterToUse = existingFilter;
+                }
+                stackFilterMap[filterDefinition.qualifiedName()] = filterToUse;
+                myFilterColl.addItem(filterToUse);
+                var roleVisible:Boolean = dashboardEditorMetadata.role == 0 || dashboardEditorMetadata.role <= filterToUse.minimumRole;
+                if (filterToUse.showOnReportView && roleVisible) {
+                    var filterComp:UIComponent = FilterFactory.createTabletFilter(filterToUse, dashboardEditorMetadata.dataSourceID);
+                    if (filterComp != null) {
+                        filterComp.addEventListener(FilterChangeEvent.FILTER_CHANGE, onFilterChange);
+                        dashboardFilterArea.addElement(filterComp);
+                    }
                 }
             }
-            filterMap[elementID] = dashboardStack.filters;
+            filterMap[elementID] = myFilterColl;
             if (dashboardStack.consolidateHeaderElements) {
                 trace("consolidating headers on myself");
-                /*if (dashboardStack.filters != null && dashboardStack.filters.length > 1) {
-                    myFiltersBox.percentWidth = 100;
-                }*/
                 myFiltersBox.addElement(dashboardFilterArea);
             } else {
                 if (_consolidateHeader) {
@@ -250,15 +263,9 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
         createComponents();
         currentState = "0";
         compIndex = 0;
-        /*activeChild = DashboardMobileFactory.createViewUIComponent(DashboardStackItem(dashboardStack.gridItems.getItemAt(0)).dashboardElement, dashboardEditorMetadata);
-        if (dashboardStack.consolidateHeaderElements && activeChild is DashboardStackMobileComponent) {
-            DashboardStackMobileComponent(activeChild).consolidateHeader = childFiltersBox;
-        }
-        addElement(activeChild as UIComponent);
-        //UIComponent(activeChild).setStyle("removedEffect", effect);
-        compIndex = getElementIndex(activeChild as UIComponent);
-        trace("comp index = " + compIndex);*/
     }
+
+    public var stackFilterMap:Object = new Object();
 
     private function createComponents():void {
         var states:Array = [];
@@ -268,6 +275,9 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
             var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
             var element:DashboardElement = stackItem.dashboardElement;
             var mobileComponent:IDashboardViewComponent = DashboardMobileFactory.createViewUIComponent(element, dashboardEditorMetadata);
+            if (mobileComponent is DashboardStackMobileComponent) {
+                DashboardStackMobileComponent(mobileComponent).stackFilterMap = this.stackFilterMap;
+            }
             comps.push(mobileComponent);
             var filterContainer:Group = new Group();
             if (dashboardStack.consolidateHeaderElements && mobileComponent is DashboardStackMobileComponent) {
@@ -279,7 +289,7 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
             addComp.items = mobileComponent;
             addComp.destination = this;
 
-            var retrieveData:RetrieveDataAction = new RetrieveDataAction(mobileComponent);
+            var retrieveData:RetrieveDataAction = new RetrieveDataAction(mobileComponent, filterMap);
             state.name = String(i);
             if (dashboardStack.consolidateHeaderElements) {
                 var addFilters:AddItems = new AddItems();
@@ -295,7 +305,7 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
 
         this.states = states;
 
-        if (dashboardStack.gridItems.length > 1) {
+        /*if (dashboardStack.gridItems.length > 1) {
             var transition:Transition = new Transition();
             transition.fromState = "0";
             transition.toState = "1";
@@ -314,7 +324,7 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
             sequence.addChild(fadeIn);
             transition.effect = sequence;
             this.transitions = [ transition ];
-        }
+        }*/
     }
 
     private var dashboardFilterArea:Group;
@@ -337,8 +347,9 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
             var buttonsWidth:int = buttons.width;
             trace("buttons width = " + buttonsWidth + " and unscaled width = " + (application.width - 20));
 
-
-            filterArea.width = application.width - buttonsWidth - 40;
+            var width:int = getVisibleRect().width;
+            trace("visible rectangle width = " + width);
+            filterArea.width = width - buttonsWidth - 40;
             trace("setting to " + filterArea.contentHeight);
             filterArea.height = filterArea.contentHeight;
             childFilters.height = filterArea.contentHeight;
@@ -347,12 +358,12 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
             childFilters.validateSize();
             headerHGroup.height = childFilters.height;
 
-            trace("set child filters width to " + (application.width - buttonsWidth));
+            trace("set child filters width to " + (width - buttonsWidth));
             trace("child's height = " + childFilters.getElementAt(0).height);
 
         } else {
             if (dashboardFilterArea != null && !_consolidateHeader) {
-                dashboardFilterArea.width = application.width - 20;
+                dashboardFilterArea.width = getVisibleRect().width - 20;
                 dashboardFilterArea.height = dashboardFilterArea.contentHeight;
             }
         }
@@ -385,19 +396,6 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
         var index:int = button.elementIndex;
         compIndex = index;
         updateToIndex(index);
-        //activeChild.initialRetrieve();
-        //updateAdditionalFilters(filterMap);
-        /*removeElementAt(compIndex);
-        activeChild = DashboardMobileFactory.createViewUIComponent(DashboardStackItem(dashboardStack.gridItems.getItemAt(index)).dashboardElement, dashboardEditorMetadata);
-        if (childFiltersBox != null) {
-            childFiltersBox.removeAllElements();
-            if (dashboardStack.consolidateHeaderElements && activeChild is DashboardStackMobileComponent) {
-                DashboardStackMobileComponent(activeChild).consolidateHeader = childFiltersBox;
-            }
-        }
-        addElementAt(activeChild as UIComponent, compIndex);
-        updateAdditionalFilters(filterMap);
-        activeChild.initialRetrieve();*/
     }
 
     private function updateToIndex(index:int):void {
