@@ -125,6 +125,8 @@ public class FunctionFactory {
             return new NotIn();
         } else if (s.equals("persona")) {
             return new PersonaEquals();
+        } else if (s.equals("dateformat")) {
+            return new EIDateFormatFunction();
         } else {
             return null;
         }
