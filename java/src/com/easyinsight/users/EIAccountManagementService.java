@@ -120,7 +120,7 @@ public class EIAccountManagementService {
         }
     }
 
-    public void testDeliver(String htmlText) {
+    public void testDeliver(String htmlText, String subject) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -144,7 +144,7 @@ public class EIAccountManagementService {
             userRS.next();
             String emailAddress = userRS.getString(1);
             SendGridEmail sendGridEmail = new SendGridEmail();
-            sendGridEmail.sendEmail(SecurityUtil.getUserID(), emailAddress, "Newsletter Test", "What's New with Easy Insight", emailBody, conn);
+            sendGridEmail.sendEmail(SecurityUtil.getUserID(), emailAddress, "Newsletter Test", subject, emailBody, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -153,7 +153,7 @@ public class EIAccountManagementService {
         }
     }
 
-    public void sendNewsletter(String htmlText) {
+    public void sendNewsletter(String htmlText, String subject) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         SendGridEmail sendGridEmail = new SendGridEmail();
         EIConnection conn = Database.instance().getConnection();
@@ -182,7 +182,7 @@ public class EIAccountManagementService {
                 }
                 String emailBody = htmlText.replace("{0}", "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
                 try {
-                    sendGridEmail.sendEmail(userID, email, "Newsletter", "What's new with Easy Insight...", emailBody, conn);
+                    sendGridEmail.sendEmail(userID, email, "Newsletter", subject, emailBody, conn);
                 } catch (Exception e) {
                     LogClass.error(e);
                 }

@@ -5,12 +5,12 @@
 
         private function testSend():void {
             ProgressAlert.alert(this, "Sending test...", null, authAdminService.testDeliver);
-            authAdminService.testDeliver.send(newsletterEditor.text);
+            authAdminService.testDeliver.send(newsletterEditor.text, subjectInput.text);
         }
 
         private function deliver():void {
             ProgressAlert.alert(this, "Delivering newsletter...", null, authAdminService.sendNewsletter);
-            authAdminService.sendNewsletter.send(newsletterEditor.text);
+            authAdminService.sendNewsletter.send(newsletterEditor.text, subjectInput.text);
         }
 
         private function sentTest():void {
@@ -21,6 +21,7 @@
         <mx:method name="testDeliver" result="sentTest()"/>
         <mx:method name="sendNewsletter" result="sentTest()"/>
     </mx:RemoteObject>
+    <mx:TextInput id="subjectInput" width="600"/>
     <mx:TextArea id="newsletterEditor" width="600" height="500"/>
     <mx:HBox width="100%" horizontalAlign="center">
         <mx:Button label="Test Send" click="testSend()"/>
