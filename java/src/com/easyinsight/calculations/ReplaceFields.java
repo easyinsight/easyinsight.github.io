@@ -47,24 +47,26 @@ public class ReplaceFields extends Function {
         int index = measures.indexOf(template);
         measures.remove(template);
         List<AnalysisItem> toAdd = new ArrayList<AnalysisItem>();
-        for (int i = 1; i < params.size(); i++) {
-            String patternString = minusQuotes(params.get(i)).toString();
-            Pattern pattern = Pattern.compile(MaterializedFilterPatternDefinition.createWildcardPattern(patternString.toLowerCase()));
-            for (AnalysisItem field : calculationMetadata.getDataSourceFields()) {
-                Matcher matcher = pattern.matcher(field.toDisplay().toLowerCase());
-                if (matcher.matches()) {
-                    toAdd.add(fromTemplate(template, field));
+        if (template != null) {
+            for (int i = 1; i < params.size(); i++) {
+                String patternString = minusQuotes(params.get(i)).toString();
+                Pattern pattern = Pattern.compile(MaterializedFilterPatternDefinition.createWildcardPattern(patternString.toLowerCase()));
+                for (AnalysisItem field : calculationMetadata.getDataSourceFields()) {
+                    Matcher matcher = pattern.matcher(field.toDisplay().toLowerCase());
+                    if (matcher.matches()) {
+                        toAdd.add(fromTemplate(template, field));
+                    }
                 }
             }
-        }
-        Collections.sort(toAdd, new Comparator<AnalysisItem>() {
+            Collections.sort(toAdd, new Comparator<AnalysisItem>() {
 
-            public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
-                return analysisItem1.toDisplay().compareTo(analysisItem.toDisplay());
+                public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                    return analysisItem1.toDisplay().compareTo(analysisItem.toDisplay());
+                }
+            });
+            for (AnalysisItem analysisItem : toAdd) {
+                measures.add(index, analysisItem);
             }
-        });
-        for (AnalysisItem analysisItem : toAdd) {
-            measures.add(index, analysisItem);
         }
         return new EmptyValue();
     }
