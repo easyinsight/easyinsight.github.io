@@ -568,13 +568,13 @@
             <mx:Label text="{dataSourceName}" fontSize="20"/>
             <datasources:MyDataDataSourceDisplay dataSource="{dataSourceDescriptor}" visible="{realDataSource}"/>
             <mx:HBox>
-                <mx:Button label="New Report..." styleName="grayButton" icon="{crosstabIcon}" click="createReport()" visible="{realDataSource}"/>
-                <mx:Button label="New Dashboard..." styleName="grayButton" icon="{dashboardIcon}" click="createDashboard()" visible="{realDataSource}"/>
-                <mx:Button label="New Scorecard..." styleName="grayButton" icon="{scorecardIcon}" click="createScorecard()" visible="{realDataSource}"/>
+                <mx:Button label="New Report..." styleName="grayButton" icon="{crosstabIcon}" click="createReport()" visible="{realDataSource}" width="140"/>
+                <mx:Button label="New Dashboard..." styleName="grayButton" icon="{dashboardIcon}" click="createDashboard()" visible="{realDataSource}" width="140"/>
             </mx:HBox>
+            <mx:Button label="New Scorecard..." styleName="grayButton" icon="{scorecardIcon}" click="createScorecard()" visible="{realDataSource}" width="140"/>
         </mx:VBox>
         <mx:Spacer width="100%"/>
-        <mx:VBox paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10"
+        <mx:VBox paddingTop="10" paddingBottom="10" paddingLeft="0" paddingRight="0"
                  borderStyle="solid" cornerRadius="8" borderThickness="1" backgroundColor="#CCCCCC" visible="{admin}">
             <mx:LinkButton label="Configure the Data Source..." textDecoration="underline" fontSize="12" click="dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));" width="200"/>
             <mx:LinkButton label="New Lookup Table..." textDecoration="underline" width="200" fontSize="12" click="createLookupTable()"/>
