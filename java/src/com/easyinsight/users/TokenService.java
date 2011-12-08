@@ -77,17 +77,17 @@ public class TokenService {
                         "https://oauth.constantcontact.com/ws/oauth/request_token", "https://oauth.constantcontact.com/ws/oauth/access_token",
                         "https://oauth.constantcontact.com/ws/oauth/confirm_access");
             } else if (type == FeedType.GOOGLE.getType()) {
-                consumer = new DefaultOAuthConsumer("www.easy-insight.com", "OG0zlkZFPIe7JdHfLB8qXXYv");
+                consumer = new CommonsHttpOAuthConsumer("www.easy-insight.com", "OG0zlkZFPIe7JdHfLB8qXXYv");
                 consumer.setMessageSigner(new HmacSha1MessageSigner());
                 String scope = "https://spreadsheets.google.com/feeds/";
-                provider = new DefaultOAuthProvider(
+                provider = new CommonsHttpOAuthProvider(
                         "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
                         "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
             } else if (type == FeedType.GOOGLE_ANALYTICS.getType()) {
-                consumer = new DefaultOAuthConsumer("www.easy-insight.com", "OG0zlkZFPIe7JdHfLB8qXXYv");
+                consumer = new CommonsHttpOAuthConsumer("www.easy-insight.com", "OG0zlkZFPIe7JdHfLB8qXXYv");
                 consumer.setMessageSigner(new HmacSha1MessageSigner());
                 String scope = "https://www.google.com/analytics/feeds/";
-                provider = new DefaultOAuthProvider(
+                provider = new CommonsHttpOAuthProvider(
                         "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
                         "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
             } else if (type == FeedType.HARVEST_COMPOSITE.getType()) {
