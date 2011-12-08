@@ -82,6 +82,7 @@ public class UserServiceResponse {
 
     private static UserServiceResponse createResponse(User user, ApplicationSkin applicationSkin, String personaName)  {
         Account account = user.getAccount();
+        System.out.println("Log in from " + user.getUserID() + " - " + user.getEmail());
         return new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
