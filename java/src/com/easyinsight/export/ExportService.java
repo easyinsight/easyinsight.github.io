@@ -1687,6 +1687,7 @@ public class ExportService {
         @Override
         public void format(HSSFRow row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal) {
             HSSFCell cell = row.createCell(cellIndex);
+            cell.setCellStyle(cellStyle1);
             if (value.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) value;
                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
@@ -1731,6 +1732,7 @@ public class ExportService {
         @Override
         public void format(HSSFRow row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal) {
             HSSFCell cell = row.createCell(cellIndex);
+            cell.setCellStyle(cellStyle1);
             if (value.type() == Value.STRING) {
                 StringValue stringValue = (StringValue) value;
                 String string = stringValue.getValue();
