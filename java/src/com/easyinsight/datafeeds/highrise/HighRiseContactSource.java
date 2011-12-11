@@ -43,6 +43,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
 
     public static final String CONTACT_WORK_EMAIL = "Contact Work Email";
     public static final String CONTACT_HOME_EMAIL = "Contact Home Email";
+    public static final String CONTACT_OTHER_EMAIL = "Contact Other Email";
     public static final String CONTACT_MOBILE_PHONE = "Contact Mobile Phone";
     public static final String CONTACT_OFFICE_PHONE = "Contact Work Phone";
     public static final String CONTACT_HOME_PHONE = "Contact Home Phone";
@@ -60,7 +61,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(CONTACT_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, TITLE, CONTACT_ID, ZIP_CODE, BACKGROUND,
                 CONTACT_WORK_EMAIL, CONTACT_MOBILE_PHONE, CONTACT_OFFICE_PHONE, CONTACT_HOME_PHONE, CONTACT_FAX_PHONE, CONTACT_HOME_EMAIL,
-                CONTACT_STREET, CONTACT_CITY, CONTACT_STATE, CONTACT_COUNTRY);
+                CONTACT_STREET, CONTACT_CITY, CONTACT_STATE, CONTACT_COUNTRY, CONTACT_OTHER_EMAIL);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -73,6 +74,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_WORK_EMAIL), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_HOME_EMAIL), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_OTHER_EMAIL), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_MOBILE_PHONE), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_OFFICE_PHONE), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_FAX_PHONE), true));
@@ -94,6 +96,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                 if (key == null) {
                     key = new NamedKey(entry.getKey());
                 }
+                System.out.println("Key = " + entry.getKey() + " for " + entry.getValue());
                 analysisItems.add(new AnalysisDimension(key, "Contact " + entry.getValue()));
             }
         } catch (ReportException re) {
@@ -175,6 +178,8 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                             row.addValue(CONTACT_WORK_EMAIL, email);
                         } else if ("Home".equals(location)) {
                             row.addValue(CONTACT_HOME_EMAIL, email);
+                        } else if ("Other".equals(location)) {
+                            row.addValue(CONTACT_OTHER_EMAIL, email);
                         }
                     }
 
@@ -246,11 +251,11 @@ public class HighRiseContactSource extends HighRiseBaseSource {
 
     @Override
     public int getVersion() {
-        return 3;
+        return 4;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList(new HighRiseContact1To2(this), new HighRiseContact2To3(this));
+        return Arrays.asList(new HighRiseContact1To2(this), new HighRiseContact2To3(this), new HighRiseContact3To4(this));
     }
 }

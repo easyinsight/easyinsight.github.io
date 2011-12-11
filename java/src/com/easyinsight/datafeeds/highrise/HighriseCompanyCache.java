@@ -58,6 +58,7 @@ public class HighriseCompanyCache extends HighRiseBaseSource {
                     String state = "";
                     String country = "";
                     String tagString = "";
+                    String street = "";
 
                     Nodes contactDataNodes = companyNode.query("contact-data/addresses/address");
                     if (contactDataNodes.size() > 0) {
@@ -66,6 +67,7 @@ public class HighriseCompanyCache extends HighRiseBaseSource {
                         country = queryField(contactDataNode, "country/text()");
                         state = queryField(contactDataNode, "state/text()");
                         city = queryField(contactDataNode, "city/text()");
+                        street = queryField(contactDataNode, "street/text()");
                     }
                     Date createdAt = deadlineFormat.parse(queryField(companyNode, "created-at/text()"));
 
@@ -93,10 +95,49 @@ public class HighriseCompanyCache extends HighRiseBaseSource {
                             customFields.put(subjectFieldID, value);
                         }
                     }
+                    
+                    String workEmail = "";
+                    String homeEmail = "";
+                    String otherEmail = "";
+
+                    Nodes emailNodes = companyNode.query("contact-data/email-addresses/email-address");
+                    for (int j = 0; j < emailNodes.size(); j++) {
+                        Node emailNode = emailNodes.get(j);
+                        String location = queryField(emailNode, "location/text()");
+                        String email = queryField(emailNode, "address/text()");
+                        if ("Work".equals(location)) {
+                            workEmail = email;
+                        } else if ("Home".equals(location)) {
+                            homeEmail = email;
+                        } else if ("Other".equals(location)) {
+                            otherEmail = email;
+                        }
+                    }
+                    
+                    String mobilePhone = "";
+                    String workPhone = "";
+                    String faxPhone = "";
+                    String homePhone = "";
+
+                    Nodes phoneNodes = companyNode.query("contact-data/phone-numbers/phone-number");
+                    for (int j = 0; j < phoneNodes.size(); j++) {
+                        Node phoneNode = phoneNodes.get(j);
+                        String phoneNumber = queryField(phoneNode, "number/text()");
+                        String location = queryField(phoneNode, "location/text()");
+                        if ("Mobile".equals(location)) {
+                            mobilePhone = phoneNumber;
+                        } else if ("Work".equals(location)) {
+                            workPhone = phoneNumber;
+                        } else if ("Fax".equals(location)) {
+                            faxPhone = phoneNumber;
+                        } else if ("Home".equals(location)) {
+                            homePhone = phoneNumber;
+                        }
+                    }
 
 
                     companyList.add(new HighriseCompany(name, id, tagString, responsiblePartyName, createdAt, updatedAt, zip, background,
-                            country, state, city, customFields));
+                            country, state, city, street, workPhone, homePhone, mobilePhone, faxPhone, workEmail, homeEmail, otherEmail, customFields));
                     companyIDs.add(id);
                     companyCount++;
                 }

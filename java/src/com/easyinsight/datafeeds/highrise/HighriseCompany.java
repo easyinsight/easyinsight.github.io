@@ -21,10 +21,19 @@ public class HighriseCompany {
     private String state;
     private String country;
     private String city;
+    private String street;
+    private String officePhone;
+    private String homePhone;
+    private String mobilePhone;
+    private String faxPhone;
+    private String officeEmail;
+    private String homeEmail;
+    private String otherEmail;
     private Map<String, String> customFields;
 
     public HighriseCompany(String companyName, String companyID, String tags, String owner, Date createdAt, Date updatedAt, String zipCode, String background,
-                           String country, String state, String city, Map<String, String> customFields) {
+                           String country, String state, String city, String street, String officePhone, String homePhone, String mobilePhone, String faxPhone,
+                           String officeEmail, String homeEmail, String otherEmail, Map<String, String> customFields) {
         this.companyName = companyName;
         this.companyID = companyID;
         this.tags = tags;
@@ -36,7 +45,47 @@ public class HighriseCompany {
         this.country = country;
         this.state = state;
         this.city = city;
+        this.street = street;
+        this.officePhone = officePhone;
+        this.officeEmail = officeEmail;
+        this.homeEmail = homeEmail;
+        this.otherEmail = otherEmail;
+        this.homePhone = homePhone;
+        this.mobilePhone = mobilePhone;
+        this.faxPhone = faxPhone;
         this.customFields = customFields;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public String getOfficePhone() {
+        return officePhone;
+    }
+
+    public String getHomePhone() {
+        return homePhone;
+    }
+
+    public String getMobilePhone() {
+        return mobilePhone;
+    }
+
+    public String getFaxPhone() {
+        return faxPhone;
+    }
+
+    public String getOfficeEmail() {
+        return officeEmail;
+    }
+
+    public String getHomeEmail() {
+        return homeEmail;
+    }
+
+    public String getOtherEmail() {
+        return otherEmail;
     }
 
     public Map<String, String> getCustomFields() {

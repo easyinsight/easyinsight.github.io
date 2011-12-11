@@ -42,6 +42,15 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
     public static final String STATE = "Company State";
     public static final String CITY = "Company City";
 
+    public static final String COMPANY_WORK_EMAIL = "Company Work Email";
+    public static final String COMPANY_HOME_EMAIL = "Company Home Email";
+    public static final String COMPANY_OTHER_EMAIL = "Company Other Email";
+    public static final String COMPANY_MOBILE_PHONE = "Company Mobile Phone";
+    public static final String COMPANY_OFFICE_PHONE = "Company Work Phone";
+    public static final String COMPANY_HOME_PHONE = "Company Home Phone";
+    public static final String COMPANY_FAX_PHONE = "Company Fax Phone";
+    public static final String COMPANY_STREET = "Company Street";
+
     public HighRiseCompanySource() {
         setFeedName("Company");
     }
@@ -49,7 +58,8 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
     @NotNull
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(COMPANY_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, ZIP_CODE, BACKGROUND, UPDATED_AT,
-                COUNTRY, STATE, CITY);
+                COUNTRY, STATE, CITY, COMPANY_WORK_EMAIL, COMPANY_HOME_EMAIL, COMPANY_OTHER_EMAIL, COMPANY_MOBILE_PHONE,
+                COMPANY_OFFICE_PHONE, COMPANY_HOME_PHONE, COMPANY_FAX_PHONE, COMPANY_STREET);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -61,6 +71,14 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(COUNTRY), true));
         analysisItems.add(new AnalysisDimension(keys.get(STATE), true));
         analysisItems.add(new AnalysisDimension(keys.get(CITY), true));
+        analysisItems.add(new AnalysisDimension(keys.get(COMPANY_WORK_EMAIL), true));
+        analysisItems.add(new AnalysisDimension(keys.get(COMPANY_HOME_EMAIL), true));
+        analysisItems.add(new AnalysisDimension(keys.get(COMPANY_OTHER_EMAIL), true));
+        analysisItems.add(new AnalysisDimension(keys.get(COMPANY_FAX_PHONE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(COMPANY_MOBILE_PHONE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(COMPANY_HOME_PHONE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(COMPANY_OFFICE_PHONE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(COMPANY_STREET), true));
         analysisItems.add(new AnalysisList(keys.get(TAGS), true, ","));
         analysisItems.add(new AnalysisDimension(keys.get(OWNER), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
@@ -109,6 +127,14 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                 row.addValue(COUNTRY, highriseCompany.getCountry());
                 row.addValue(STATE, highriseCompany.getState());
                 row.addValue(CITY, highriseCompany.getCity());
+                row.addValue(COMPANY_STREET, highriseCompany.getStreet());
+                row.addValue(COMPANY_FAX_PHONE, highriseCompany.getFaxPhone());
+                row.addValue(COMPANY_HOME_EMAIL, highriseCompany.getHomeEmail());
+                row.addValue(COMPANY_WORK_EMAIL, highriseCompany.getOfficeEmail());
+                row.addValue(COMPANY_MOBILE_PHONE, highriseCompany.getMobilePhone());
+                row.addValue(COMPANY_OFFICE_PHONE, highriseCompany.getOfficePhone());
+                row.addValue(COMPANY_OTHER_EMAIL, highriseCompany.getOtherEmail());
+                row.addValue(COMPANY_HOME_PHONE, highriseCompany.getHomePhone());
                 row.addValue(CREATED_AT, new DateValue(highriseCompany.getCreatedAt()));
                 row.addValue(UPDATED_AT, new DateValue(highriseCompany.getUpdatedAt()));
                 row.addValue(TAGS, highriseCompany.getTags());
@@ -128,11 +154,12 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
 
     @Override
     public int getVersion() {
-        return 4;
+        return 5;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList(new HighRiseCompany1To2(this), new HighRiseCompany2To3(this), new HighRiseCompany3To4(this));
+        return Arrays.asList(new HighRiseCompany1To2(this), new HighRiseCompany2To3(this), new HighRiseCompany3To4(this),
+                new HighRiseCompany4To5(this));
     }
 }
