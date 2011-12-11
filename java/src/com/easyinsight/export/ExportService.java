@@ -1750,6 +1750,13 @@ public class ExportService {
                 }*/
                 HSSFRichTextString richText = new HSSFRichTextString(string);
                 cell.setCellValue(richText);
+            } else if (value.type() == Value.NUMBER) {
+                NumericValue numericValue = (NumericValue) value;
+                double doubleValue = numericValue.toDouble();
+                if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
+                    doubleValue = 0;
+                }
+                cell.setCellValue(doubleValue);
             }
         }
     }
