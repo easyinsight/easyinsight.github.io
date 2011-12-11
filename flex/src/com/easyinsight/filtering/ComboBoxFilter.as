@@ -22,8 +22,6 @@ import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
-import org.efflex.mx.viewStackEffects.Slide;
-
 public class ComboBoxFilter extends HBox implements IFilter {
     private var _filterDefinition:FilterValueDefinition;
     private var _feedID:int;
@@ -190,16 +188,12 @@ public class ComboBoxFilter extends HBox implements IFilter {
         loadingBox.setStyle("verticalAlign", "middle");
         var loadingBar:ProgressBar = new ProgressBar();
         loadingBar.width = 300;
-        var showEffect:Slide = new Slide();
-        showEffect.direction = "down";
         loadingBar.label = "";
         loadingBar.labelPlacement = "right";
         BindingUtils.bindProperty(loadingBar, "indeterminate", this, "valuesSet");
         loadingBar.indeterminate = true;
         loadingBox.addChild(loadingBar);
-        loadingBox.setStyle("hideEffect", showEffect);
         viewStack.addChild(loadingBox);
-        hbox.setStyle("showEffect", showEffect);
         viewStack.addChild(hbox);
         if (_filterDefinition == null || _filterDefinition.cachedValues == null) {
             dataService = new RemoteObject();
