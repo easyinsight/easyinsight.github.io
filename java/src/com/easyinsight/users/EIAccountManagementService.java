@@ -286,31 +286,6 @@ public class EIAccountManagementService {
         return user;
     }
 
-    public void eiActivateBizAccount(long accountID, UserTransferObject adminUser, boolean preserveConsultants) {
-        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
-        Session session = Database.instance().createSession();
-        try {
-            session.getTransaction().begin();
-            List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
-            Account account = (Account) results.get(0);
-            String password = RandomTextGenerator.generateText(12);
-            User user = createInitialUser(adminUser, password, account);
-            user.setAccount(account);
-            account.addUser(user);
-            session.save(user);
-            account.setAccountState(Account.ACTIVE);
-            session.update(account);
-            session.getTransaction().commit();
-            new AccountMemberInvitation().newProAccount(user.getEmail(), user.getUserName(), password);
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-    }
-
     public List<AccountAdminTO> getAccounts() {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         List<AccountAdminTO> accounts = new ArrayList<AccountAdminTO>();

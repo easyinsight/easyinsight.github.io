@@ -363,6 +363,9 @@ public class UserAccountAdminService {
                         account.addUser(user);
                     }
                 }
+                final String accountName = account.getName();
+                final String loginURL = "https://www.easy-insight.com/app";
+                final String adminEmail = admin.getEmail();
                 session.update(account);
                 session.getTransaction().commit();
                 for (Map.Entry<String, User> entry : userMap.entrySet()) {
@@ -373,7 +376,7 @@ public class UserAccountAdminService {
                     final String userName = entry.getValue().getUserName();
                     new Thread(new Runnable() {
                         public void run() {
-                            new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password);
+                            new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password, accountName, loginURL, adminEmail, "");
                         }
                     }).start();
                 }
@@ -387,7 +390,7 @@ public class UserAccountAdminService {
         }
     }
 
-    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList) {
+    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, boolean requirePasswordChange) {
         SecurityUtil.authorizeAccountAdmin();
         long accountID = SecurityUtil.getAccountID();
         UserCreationResponse userCreationResponse;
@@ -416,9 +419,24 @@ public class UserAccountAdminService {
                     final String userEmail = user.getEmail();
                     final String userName = user.getUserName();
                     final String password = RandomTextGenerator.generateText(12);
+                    final String accountName = account.getName();
+                    final String loginURL;
+                    if (account.isSubdomainEnabled()) {
+                        loginURL = "https://therapyworks.easy-insight.com/";
+                    } else {
+                        loginURL = "https://www.easy-insight.com/app";
+                    }
+                    final String adminEmail = admin.getEmail();
                     user.setPassword(PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256"));
                     user.setHashType("SHA-256");
+                    user.setInitialSetupDone(!requirePasswordChange);
                     account.addUser(user);
+                    final String sso;
+                    if (account.getExternalLogin() != null) {
+                        sso = account.getExternalLogin().toSSOMessage();
+                    } else {
+                        sso = "";
+                    }
                     user.setAccount(account);
                     session.update(account);
                     session.flush();
@@ -443,7 +461,7 @@ public class UserAccountAdminService {
                     conn.commit();
                     new Thread(new Runnable() {
                         public void run() {
-                            new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password);
+                            new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password, accountName, loginURL, adminEmail, sso);
                         }
                     }).start();
                     userCreationResponse = new UserCreationResponse(user.getUserID());

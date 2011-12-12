@@ -25,4 +25,6 @@ public abstract class ExternalLogin {
     }
 
     public abstract String login(String userName, String password);
+
+    public abstract String toSSOMessage();
 }

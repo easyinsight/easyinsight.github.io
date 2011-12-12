@@ -543,10 +543,13 @@ public class SecurityUtil {
                 long userID = userRS.getLong(1);
                 long accountID = userRS.getLong(2);
                 if (userID == SecurityUtil.getUserID()) {
-                    role = Roles.OWNER;
+                    role = Math.min(Roles.OWNER, role);
                 } else if (accountVisible && accountID == SecurityUtil.getAccountID()) {
-                    role = Roles.SHARER;
+                    role = Math.min(Roles.SHARER, role);
                 }
+            }
+            if (role != Roles.NONE) {
+                return role;
             }
             PreparedStatement groupQueryStmt = conn.prepareStatement("select group_to_user_join.binding_type from group_to_dashboard, group_to_user_join where " +
                         "group_to_user_join.group_id = group_to_dashboard.group_id and group_to_user_join.user_id = ? and group_to_dashboard.dashboard_id = ?");

@@ -155,7 +155,7 @@ public class UserService {
                 for (UserPersonaObject user : accountSetupData.getUsers()) {
                     user.setPersonaID(personaMap.get(user.getPersona()));
                 }
-                bulkCreateUser(accountSetupData.getUsers(), account, admin, conn);
+                //bulkCreateUser(accountSetupData.getUsers(), account, admin, conn);
                 session.update(account);
                 session.flush();
                 conn.commit();
@@ -175,7 +175,7 @@ public class UserService {
         }
     }
 
-    private void bulkCreateUser(List<UserPersonaObject> users, Account account, User admin, EIConnection conn) throws SQLException {
+    /*private void bulkCreateUser(List<UserPersonaObject> users, Account account, User admin, EIConnection conn) throws SQLException {
         for (UserTransferObject userTransferObject : users) {
             User user = userTransferObject.toUser();
             user.setAccount(account);
@@ -198,7 +198,7 @@ public class UserService {
                 }
             }
         }
-    }
+    }*/
 
     private boolean isProblem(AccountSetupData accountSetupData, EIConnection conn) throws SQLException {
         boolean problem = false;

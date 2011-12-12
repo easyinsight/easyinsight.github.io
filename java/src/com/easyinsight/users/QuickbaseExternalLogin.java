@@ -79,6 +79,11 @@ public class QuickbaseExternalLogin extends ExternalLogin {
         }
     }
 
+    @Override
+    public String toSSOMessage() {
+        return "<p>You may also log in with your Quickbase credentials.</p>";
+    }
+
     private Document executeRequest(String host, String path, String action, String requestBody) throws IOException, ParsingException {
         if (path == null) {
             path = "main";

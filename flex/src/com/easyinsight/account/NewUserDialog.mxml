@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="initHandlers()">
+    <util:states>
+        <mx:State name="initialCreate">
+            <mx:AddChild relativeTo="{baseInfoForm}">
+                <mx:FormItem label="Require Password Change:">
+                    <mx:CheckBox id="requirePasswordChangeCheckbox" selected="true"/>
+                </mx:FormItem>
+            </mx:AddChild>
+        </mx:State>
+    </util:states>
 	<mx:Metadata>
 		[Event(name="refreshAccount", type="com.easyinsight.account.RefreshAccountEvent")]
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserTransferObject;
         import com.easyinsight.preferences.Persona;
         import com.easyinsight.preferences.UserDLS;
@@ -82,6 +90,9 @@
         }
 
         private function initHandlers():void {
+            if (userID == 0) {
+                currentState = "initialCreate";
+            }
             BindingUtils.bindProperty(accountAdminCheckbox, "selected", this, "accountAdmin");
             validators = [ emailValidator, userNameValidator, fullNameValidator ];
             dashboardService.getDashboards.send();
@@ -129,7 +140,7 @@
                 user.accountAdmin = accountAdminCheckbox.selected;
                 if (userID == 0) {
                     ProgressAlert.alert(this, "Adding user to account...", null, creationService.addUserToAccount);
-                    creationService.addUserToAccount.send(user, dlsList);
+                    creationService.addUserToAccount.send(user, dlsList, requirePasswordChangeCheckbox.selected);
                 } else {
                     ProgressAlert.alert(this, "Updating user...", null, creationService.updateUser);
                     creationService.updateUser.send(user, dlsList);
@@ -187,6 +198,9 @@
             }
         }
 
+        [Bindable]
+        private var welcomeMessage:String;
+
         private var dlsVBox:VBox;
 
         [Bindable]
@@ -203,8 +217,8 @@
         <mx:method name="getPersonas" result="gotPersonas()"/>
         <mx:method name="getUserDLS" result="gotUserDLS()"/>
     </mx:RemoteObject>
-    <mx:TabNavigator id="tabNavigator">
-        <mx:Form label="Base Info">
+    <mx:TabNavigator id="tabNavigator" resizeToContent="true">
+        <mx:Form label="Base Info" id="baseInfoForm">
             <mx:FormItem label="User ID:" direction="horizontal">
                 <mx:TextInput id="userNameInput" text="{userName}" width="400"/>
             </mx:FormItem>

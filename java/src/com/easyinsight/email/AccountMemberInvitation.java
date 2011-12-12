@@ -13,50 +13,19 @@ import java.io.UnsupportedEncodingException;
  */
 public class AccountMemberInvitation {
 
-    private static String groupInviteText =
-            "You have been added as a member of an account administered by {0} {1} on Easy Insight. " +
-            "Your login information is the following:\r\n\r\n"+
-            "User Name: {2}\r\n" +
-            "Password: {3}\r\n\r\n" +
-            "You can access Easy Insight at http://www.easy-insight.com/app/\r\n" +
-            "Once you log in, you'll be prompted to change your password.";
+    public static final String newUserInviteText = "<p>{0} has invited you to the {1} Easy Insight account.</p><p>All you need to do get started is sign in at:</p><a href=\"{2}\">{2}</a><hr/><p>You can log with the following credentials:</p><p>User Name: {3}</p><p>Password: {4}</p>{5}<hr/><p>Have questions? Contact {0} at {6}</p>";
+    public static final String subjectText = "{0} has invited you to Easy Insight";
 
-    private static String newProAccountText =
-            "A new professional account for your organization has been created on Easy Insight.\r\nYou can access the application at\r\n\r\n" +
-            "http://www.easy-insight.com/app/#page=welcome\r\n\r\n"+
-            "Your administrator user credentials are:\r\n\r\n"+
-            "User Name: {0}\r\n"+
-            "Password:  {1}\r\n\r\n"+
-            "Once logged in, you can change your password through Account - Change my Password.\r\n" +
-            "Tutorials are available through the Help button on each application page to help you get started.\r\n\r\nWelcome to Easy Insight!";
-
-    /*private static String resetPasswordText =
-            "Your password with Easy Insight has been reset:\r\n\r\n" +
-            "Password:  {0}\r\n\r\n"+
-            "This email was sent from an automated account. Please do not reply to this address.";*/
-    private static String resetPasswordText =
+    private static final String resetPasswordText =
             "You are receiving this email because you have requested to reset your password.:\r\n\r\n" +
             "To reset your password, use the following link:  https://www.easy-insight.com/app/#resetPassword={0}\r\n\r\n"+
             "Or enter the value of {0} into Manually Enter Reset Key in the Forgot Password section of the login page on Easy Insight at https://www.easy-insight.com/app.\r\n\rn"+
             "This email was sent from an automated account. Please do not reply to this address.";
 
-    private static String remindUserNameText =
+    private static final String remindUserNameText =
             "Your user name with Easy Insight is below:\r\n\r\n" +
             "User Name:  {0}\r\n\r\n"+
             "This email was sent from an automated account. Please do not reply to this address.";
-
-    private static String newConsultantProAccountText =
-            "A new professional account for your organization has been created on Easy Insight.\r\nYou can access the application at\r\n\r\n" +
-            "http://www.easy-insight.com/app/#page=welcome\r\n\r\n"+
-            "Your administrator user credentials are:\r\n\r\n"+
-            "User Name: {0}\r\n"+
-            "Password:  {1}\r\n\r\n"+
-            "Once logged in, you can change your password through Account - Change my Password.\r\n" +
-            "Tutorials are available through the Help button on each application page to help you get started.\r\n\r\n" +
-            "Your account has been set up with one initial Easy Insight consultant user:\r\n\r\n"+
-            "Consultant: {3} {4}\r\n\r\n" +
-            "This consultant will be responsible for assisting you with data source, report, and goal creation,\r\n"+
-            "as well as any further questions or support issues you may have.\r\n\r\nWelcome to Easy Insight!";
 
     private static String welcomeEmailText =
              "Hi {0},\r\n\r\n"+
@@ -86,16 +55,6 @@ public class AccountMemberInvitation {
     private static String professionalAccountCreationText =
             "";
 
-    public void newProAccount(String to, String userName, String password) {
-        String body = MessageFormat.format(newProAccountText, userName, password);
-        String subject = "Easy Insight Account Creation";
-        try {
-            new SendGridEmail().sendEmail(to, subject, body, "donotreply@easy-insight.com", false, "Easy Insight");
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
 
     public void resetPassword(String to, String password) {
         String body = MessageFormat.format(resetPasswordText, password);
@@ -119,22 +78,11 @@ public class AccountMemberInvitation {
         }
     }
 
-    public void newProAccountWithConsultant(String to, String userName, String password, String consultant, String consultantEMail) {
-        String body = MessageFormat.format(newProAccountText, userName, password, consultant, consultantEMail);
-        String subject = "Easy Insight Account Creation";
+    public void sendAccountEmail(String to, String adminFirstName, String accountOwner, String userName, String password, String companyName, String loginURL, String adminEmail, String sso) {
+        String body = MessageFormat.format(newUserInviteText, (adminFirstName != null ? adminFirstName : "") + " " + accountOwner, companyName, loginURL, userName, password, sso, adminEmail);
+        String subject = MessageFormat.format(subjectText, (adminFirstName != null ? adminFirstName : "") + " " + accountOwner);
         try {
-            new SendGridEmail().sendEmail(to, subject, body, "donotreply@easy-insight.com", false, "Easy Insight");
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void sendAccountEmail(String to, String adminFirstName, String accountOwner, String userName, String password) {
-        String body = MessageFormat.format(groupInviteText, adminFirstName != null ? adminFirstName : "", accountOwner, userName, password);
-        String subject = "Easy Insight Account Creation";
-        try {
-            new SendGridEmail().sendEmail(to, subject, body, "support@easy-insight.com", false, "Easy Insight on behalf of " +
+            new SendGridEmail().sendEmail(to, subject, body, "support@easy-insight.com", true, "Easy Insight on behalf of " +
                     (adminFirstName == null ? accountOwner : adminFirstName + " " + accountOwner));
         } catch (Exception e) {
             LogClass.error(e);
