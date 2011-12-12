@@ -51,19 +51,20 @@
 <div style="width:1000px;margin:0 auto;">
     <div id="topBar">
         <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+
         <div class="signupHeadline">
-            <a href="https://www.easy-insight.com/app/">Customer Login</a>
-            <a href="/app/newaccount/">Pricing &amp; Signup</a>
-            <a href="/contactus.html">Contacts</a>
+            <a href="/app/">Customer Login</a>
+            <a href="/app/newaccount/">Free Trial</a>
         </div>
     </div>
     <div class="headline">
         <a class="inactive" href="/product.html">Features</a>
         <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/webanalytics.html">Solutions</a>
-        <a class="inactive" href="/customers.html">Customers</a>
+        <a class="inactive" href="/pricing.html">Pricing</a>
         <a class="inactive" href="/partners.html">Partners</a>
         <a class="inactive" href="/company.html">Company</a>
+        <a class="inactive" href="/contactus.html">Contact Us</a>
+        <div style="float:right;color: #FFEEEE;padding-right: 20px">1-720-285-8652</div>
     </div>
     <div id="contentHeaderStart"></div>
         <div id="midContent">

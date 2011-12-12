@@ -153,22 +153,23 @@
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
     <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
-    	<div id="topBar">
-        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
-        <div class="signupHeadline">
-            <a href="https://www.easy-insight.com/app/">Customer Login</a>
-            <a href="/app/newaccount/">Pricing &amp; Signup</a>
-            <a href="/contactus.html">Contacts</a>
+        <div id="topBar">
+            <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+
+            <div class="signupHeadline">
+                <a href="/app/">Customer Login</a>
+                <a href="/app/newaccount/">Free Trial</a>
+            </div>
         </div>
-    </div>
-    <div class="headline">
-        <a class="inactive" href="/product.html">Features</a>
-        <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/webanalytics.html">Solutions</a>
-        <a class="inactive" href="/customers.html">Customers</a>
-        <a class="inactive" href="/partners.html">Partners</a>
-        <a class="inactive" href="/company.html">Company</a>
-    </div>
+        <div class="headline">
+            <a class="inactive" href="/product.html">Features</a>
+            <a class="inactive" href="/data.html">Connections</a>
+            <a class="inactive" href="/pricing.html">Pricing</a>
+            <a class="inactive" href="/partners.html">Partners</a>
+            <a class="inactive" href="/company.html">Company</a>
+            <a class="inactive" href="/contactus.html">Contact Us</a>
+            <div style="float:right;color: #FFEEEE;padding-right: 20px">1-720-285-8652</div>
+        </div>
             <div style="width:100%;background-color:#FFFFFF">
                 <div style="width:100%;text-align:center"><h1 style="color:#FFFFFF;background-image:url(/images/banner-wide.jpg);background-repeat:repeat-y;padding:10px;">Billing</h1></div>
                 <p>Please input your billing information below. Your first billing cycle will start upon completion of any remaining trial time. Easy Insight does not offer any type of refund after billing.</p>
@@ -251,23 +252,52 @@
 
   </form>
 
-    <div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">
-            	<div style="float:right;padding-right:200px;">
-                    <span style="font-weight:bold;font-size:12px">Security and Privacy</span>
-                    <ul>
-                        <li><a href="/terms.html">Terms of Service</a></li>
-                        <li><a href="/privacy.html">Privacy Policy</a></li>
-                    </ul>
-                </div>
-                <div style="padding-left:180px;">
-					<span style="font-weight:bold;font-size:12px;">About</span>
-                    <ul>
-                        <li><a href="/company.html">Company Overview</a></li>
-                        <li><a href="/whoweare.html">Who We Are</a></li>
-                        <li><a href="/contactus.html">Contact Us</a></li>
-                    </ul>
-                </div>
-            </div>
+                <div id="footer" style="margin:0px;width:100%;height:60px">
+                    <div id="linkLine"
+                         style="margin:0px;padding:12px 0px;width:100%;text-align:left">
+                        <div style="float:left;padding-left:10px;">
+                            <a href="/documentation/toc.html">Documentation</a>
+                        </div>
+                        <div style="float:left;padding-left:40px;">
+                            |
+                        </div>
+                        <div style="float:left;padding-left:40px;">
+                            <a href="/pricing.html">Pricing</a>
+                        </div>
+                        <div style="float:left;padding-left:40px;">
+                            |
+                        </div>
+                        <div style="float:left;padding-left:40px;">
+                            <a href="/developers.html">Developers</a>
+                        </div>
+                        <div style="float:left;padding-left:35px;">
+                            |
+                        </div>
+                        <div style="float:left;padding-left:40px;">
+                            <a href="/privacy.html">Privacy Policy</a>
+                        </div>
+                        <div style="float:left;padding-left:40px;">
+                            |
+                        </div>
+                        <div style="float:left;padding-left:40px;">
+                            <a href="/terms.html">Terms of Service</a>
+                        </div>
+                        <div style="float:left;padding-left:40px;">
+                            |
+                        </div>
+                        <div style="float:left;padding-left:40px;">
+                            <a href="/partners.html">Partners</a>
+                        </div>
+                        <div style="float:left;padding-left:40px;">
+                            |
+                        </div>
+                        <div style="float:left;padding-left:40px;">
+                            <a href="/contactus.html">Contact Us</a>
+                        </div>
+                    </div>
+                    <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+                        Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+                    </div>
 	    </div>
         </div>
 </body>
