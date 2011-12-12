@@ -542,6 +542,10 @@ public class DataService {
         try {
             
             WSYTDDefinition wsytdDefinition = (WSYTDDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            if (wsytdDefinition.getTimeDimension() instanceof AnalysisDateDimension) {
+                AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
+                date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+            }
 
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, customFilters, drillthroughFilters);
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
@@ -555,6 +559,10 @@ public class DataService {
             ytdDataResults.setDataSet(ytdStuff.values);
             ytdDataResults.setDefinition(wsytdDefinition);
             return ytdDataResults;
+        } catch (ReportException dae) {
+            EmbeddedYTDDataResults embeddedDataResults = new EmbeddedYTDDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -568,6 +576,10 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             WSYTDDefinition wsytdDefinition = (WSYTDDefinition) report;
+            if (wsytdDefinition.getTimeDimension() instanceof AnalysisDateDimension) {
+                AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
+                date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+            }
             
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, report, conn);
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
@@ -869,6 +881,7 @@ public class DataService {
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {
+                        LogClass.error(e);
                         throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of report code " + line + ".", null));
                     }
                 }
@@ -887,11 +900,6 @@ public class DataService {
                     }
                 }
             }
-            //new ReportCalculation("replacefields(\"Procedures\", \"*PT/OT*\")").apply(analysisDefinition, allFields);
-            //new ReportCalculation("equals([Group Name], \"Atlantic Orthopedics\", addfield(\"Charges\"))").apply(analysisDefinition, allFields, feed, conn, dlsFilters);
-            /*new ReportCalculation("copyfields(\"2009 Procedures\", \"2009 !0#\", \"9*-PT/OT*\")").apply(analysisDefinition, allFields);
-            new ReportCalculation("copyfields(\"2010 Procedures\", \"2010 !0#\", \"9*-PT/OT*\")").apply(analysisDefinition, allFields);
-            new ReportCalculation("replacecalculation(\"Procedures\", \"9*-*PT/OT*\")").apply(analysisDefinition, allFields);*/
             Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields);
             if (analysisDefinition.isDataSourceFields()) {
                 Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
