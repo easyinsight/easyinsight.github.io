@@ -502,6 +502,10 @@ public class DataService {
             ytdDataResults.setDataSet(ytdStuff.getRows());
             ytdDataResults.setDefinition(wsytdDefinition);
             return ytdDataResults;
+        } catch (ReportException dae) {
+            EmbeddedCompareYearsDataResults embeddedDataResults = new EmbeddedCompareYearsDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -527,6 +531,10 @@ public class DataService {
             ytdDataResults.setAdditionalProperties(additionalProperties);
             ytdDataResults.setDataSet(ytdStuff.getRows());
             return ytdDataResults;
+        } catch (ReportException dae) {
+            CompareYearsDataResults embeddedDataResults = new CompareYearsDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -592,6 +600,10 @@ public class DataService {
             ytdDataResults.setAdditionalProperties(additionalProperties);
             ytdDataResults.setDataSet(ytdStuff.values);
             return ytdDataResults;
+        } catch (ReportException dae) {
+            YTDDataResults embeddedDataResults = new YTDDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
