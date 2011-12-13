@@ -73,10 +73,10 @@
                 Alert.show("You may only select one application from the list.");
                 return;
             }
-            if (appTokenInput.text == "") {
+            /*if (appTokenInput.text == "") {
                 Alert.show("You need to specify an application token with access to the applications you've selected.");
                 return;
-            }
+            }*/
             ProgressAlert.alert(this, "Creating the data source, may take a few minutes...", null, quickbaseService.createDataSource);
             quickbaseService.createDataSource.send(sessionTicket, appTokenInput.text, targetApps, host, accountVisibleCheckbox.selected,
                 userNameInput.text, passwordInput.text, cacheCheckbox.selected, saveCredentialsCheckbox.selected);
