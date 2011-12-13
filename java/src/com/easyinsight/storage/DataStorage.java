@@ -13,6 +13,7 @@ import com.easyinsight.core.*;
 import com.easyinsight.cache.Cache;
 import com.easyinsight.users.Account;
 
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.Date;
 import java.sql.*;
@@ -1092,8 +1093,9 @@ public class DataStorage implements IDataStorage {
                 StringValue stringValue = (StringValue) value;
                 string = stringValue.getValue();
             } else if (value.type() == Value.NUMBER) {
-                NumericValue numericValue = (NumericValue) value;
-                string = numericValue.toString();
+                NumberFormat nf = NumberFormat.getInstance();
+                nf.setGroupingUsed(false);
+                string = nf.format(value.toDouble());
             } else if (value.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) value;
                 string = dateValue.getDate().toString();
