@@ -28,7 +28,7 @@
                     response.sendRedirect("index.jsp");
                 } else {
                     com.easyinsight.security.SecurityUtil.populateThreadLocal((String) session.getAttribute("userName"), (Long) session.getAttribute("userID"),
-                             (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
+                            (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, (Integer) session.getAttribute("dayOfWeek"), null);
                     try {
                         java.util.List<DataSourceDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
                         Collections.sort(dataSources, new Comparator<EIDescriptor>() {

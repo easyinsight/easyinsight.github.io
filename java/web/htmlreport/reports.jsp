@@ -31,7 +31,7 @@
                     response.sendRedirect("index.jsp");
                 } else {
                     com.easyinsight.security.SecurityUtil.populateThreadLocal((String) session.getAttribute("userName"), (Long) session.getAttribute("userID"),
-                         (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
+                            (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, (Integer) session.getAttribute("dayOfWeek"), null);
                     try {
                         long dataSourceID = Long.parseLong(request.getParameter("dataSourceID"));
                         List<InsightDescriptor> reports = new AnalysisService().getInsightDescriptorsForDataSource(dataSourceID);
