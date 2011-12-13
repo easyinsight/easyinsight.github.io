@@ -1,7 +1,6 @@
 package com.easyinsight.datafeeds.quickbase;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
@@ -11,7 +10,6 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.CompositeReportPipeline;
 import com.easyinsight.pipeline.Pipeline;
-import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
@@ -473,11 +471,16 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         httpRequest.setHeader("QUICKBASE-ACTION", "API_DoQuery");
         BasicHttpEntity entity = new BasicHttpEntity();
         StringBuilder columnBuilder = new StringBuilder();
-        Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+        Map<String, Collection<AnalysisItem>> map = new HashMap<String, Collection<AnalysisItem>>();
         for (AnalysisItem analysisItem : getFields()) {
             if (analysisItem.getKey().indexed()) {
                 String fieldID = analysisItem.getKey().toBaseKey().toKeyString().split("\\.")[1];
-                map.put(fieldID, analysisItem);
+                Collection<AnalysisItem> items = map.get(fieldID);
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    map.put(fieldID, items);
+                }
+                items.add(analysisItem);
                 columnBuilder.append(fieldID).append(".");
             }
         }
@@ -528,12 +531,14 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         Element childElement = childElements.get(j);
                         if (childElement.getLocalName().equals("f")) {
                             String fieldID = childElement.getAttribute("id").getValue();
-                            AnalysisItem analysisItem = map.get(fieldID);
-                            String value = childElement.getValue();
-                            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
-                                row.addValue(analysisItem.createAggregateKey(), new Date(Long.parseLong(value)));
-                            } else {
-                                row.addValue(analysisItem.createAggregateKey(), value);
+                            Collection<AnalysisItem> items = map.get(fieldID);
+                            for (AnalysisItem analysisItem : items) {    
+                                String value = childElement.getValue();
+                                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
+                                    row.addValue(analysisItem.createAggregateKey(), new Date(Long.parseLong(value)));
+                                } else {
+                                    row.addValue(analysisItem.createAggregateKey(), value);
+                                }
                             }
                         }
                     }
@@ -543,10 +548,14 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             } while (count == 1000);
             Pipeline pipeline = new CompositeReportPipeline();
             WSListDefinition analysisDefinition = new WSListDefinition();
-            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(map.values()));
+            List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
+            for (Collection<AnalysisItem> columnList : map.values()) {
+                columns.addAll(columnList);
+            }
+            analysisDefinition.setColumns(columns);
             pipeline.setup(analysisDefinition, FeedRegistry.instance().getFeed(getDataFeedID(), conn), new InsightRequestMetadata());
             dataSet = pipeline.toDataSet(dataSet);
-            for (AnalysisItem analysisItem : map.values()) {
+            for (AnalysisItem analysisItem : columns) {
                 dataSet.getDataSetKeys().replaceKey(analysisItem.createAggregateKey(), analysisItem.getKey());
             }
             IDataStorage.insertData(dataSet);

@@ -124,12 +124,17 @@ public class QuickbaseFeed extends Feed {
         httpRequest.setHeader("QUICKBASE-ACTION", "API_DoQuery");
         BasicHttpEntity entity = new BasicHttpEntity();
         StringBuilder columnBuilder = new StringBuilder();
-        Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+        Map<String, Collection<AnalysisItem>> map = new HashMap<String, Collection<AnalysisItem>>();
         for (AnalysisItem analysisItem : analysisItems) {
             String[] tokens = analysisItem.getKey().toBaseKey().toKeyString().split("\\.");
             if (tokens.length > 1) {
                 String fieldID = tokens[1];
-                map.put(fieldID, analysisItem);
+                Collection<AnalysisItem> items = map.get(fieldID);
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    map.put(fieldID, items);
+                }
+                items.add(analysisItem);
                 columnBuilder.append(fieldID).append(".");
             }
         }
@@ -222,12 +227,14 @@ public class QuickbaseFeed extends Feed {
                     Element childElement = childElements.get(j);
                     if (childElement.getLocalName().equals("f")) {
                         String fieldID = childElement.getAttribute("id").getValue();
-                        AnalysisItem analysisItem = map.get(fieldID);
-                        String value = childElement.getValue();
-                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
-                            row.addValue(analysisItem.createAggregateKey(), new Date(Long.parseLong(value)));
-                        } else {
-                            row.addValue(analysisItem.createAggregateKey(), value);
+                        Collection<AnalysisItem> items = map.get(fieldID);
+                        for (AnalysisItem analysisItem : items) {
+                            String value = childElement.getValue();
+                            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
+                                row.addValue(analysisItem.createAggregateKey(), new Date(Long.parseLong(value)));
+                            } else {
+                                row.addValue(analysisItem.createAggregateKey(), value);
+                            }
                         }
                     }
                 }
