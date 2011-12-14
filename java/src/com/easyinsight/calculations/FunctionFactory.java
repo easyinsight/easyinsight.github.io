@@ -127,6 +127,8 @@ public class FunctionFactory {
             return new PersonaEquals();
         } else if (s.equals("dateformat")) {
             return new EIDateFormatFunction();
+        } else if (s.equals("indexof")) {
+            return new IndexOfFunction();
         } else {
             return null;
         }

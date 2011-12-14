@@ -16,18 +16,33 @@ public class SubstringFunction extends Function {
         /*if (substringValue.length() > 2 && substringValue.charAt(1) != '0') {
             substringValue = substringValue.trim();
         }*/
-        int startIndex = (int) ((Value) params.get(1)).toDouble().doubleValue();
-        int endIndex = (int) ((Value) params.get(2)).toDouble().doubleValue();
+        Value indexValue = params.get(1);
+        
         String string;
-        try {
-            string = substringValue.substring(startIndex, endIndex);
-        } catch (StringIndexOutOfBoundsException e) {
+        if (indexValue.type() == Value.NUMBER) {
+            int startIndex = (int) (indexValue).toDouble().doubleValue();
+            if (params.size() == 2) {
+                try {
+                    string = substringValue.substring(startIndex);
+                } catch (StringIndexOutOfBoundsException e) {
+                    string = "";
+                }
+            } else {
+                int endIndex = (int) (params.get(2)).toDouble().doubleValue();
+                try {
+                    string = substringValue.substring(startIndex, endIndex);
+                } catch (StringIndexOutOfBoundsException e) {
+                    string = "";
+                }
+            }
+        } else {
             string = "";
         }
+
         return new StringValue(string);
     }
 
     public int getParameterCount() {
-        return 3;
+        return -1;
     }
 }
