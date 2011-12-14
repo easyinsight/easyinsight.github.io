@@ -136,7 +136,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
             return new EmptyValue();
     }
 
-    private transient Calendar calendar = Calendar.getInstance();
+    private transient Calendar calendar;
 
     public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata, boolean timezoneShift) {
         if (cachedDateFormat == null) {
@@ -236,7 +236,6 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 }
 
                 finalDate = calendar.getTime();
-                //System.out.println("end date was " + finalDate);
                 if (outputDateFormat != null && outputDateFormat.length() > 0) {
                     resultValue = new StringValue(new SimpleDateFormat(outputDateFormat).format(calendar.getTime()), new DateValue(finalDate));
                 } else {
