@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Arrays;
 
@@ -43,6 +44,9 @@ public class SecurityUtil {
         UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
         if(userPrincipal == null)
             userPrincipal = threadLocal.get();
+        if (userPrincipal == null) {
+            return Calendar.SUNDAY;
+        }
         return userPrincipal.getFirstDayOfWeek();
     }
 
