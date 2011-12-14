@@ -126,17 +126,10 @@ public class HarvestExpenseSource extends HarvestBaseSource {
                     }
                 }
             }
-        } catch (ParsingException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        } catch (ParseException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            throw new RuntimeException(e);
+        } catch (ReportException re) {
+            // ignore
+            re.printStackTrace();
         } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             throw new RuntimeException(e);
         }
         return null;

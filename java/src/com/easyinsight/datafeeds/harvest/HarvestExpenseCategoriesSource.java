@@ -81,8 +81,10 @@ public class HarvestExpenseCategoriesSource extends HarvestBaseSource {
                     row.addValue(keys.get(UNIT_PRICE), Double.parseDouble(unitPrice));
                 row.addValue(keys.get(DEACTIVATED), deactivated);
             }
-        } catch (ParsingException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (ReportException re) {
+            // ignore
+            re.printStackTrace();
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return dataSet;
