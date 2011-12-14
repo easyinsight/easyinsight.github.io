@@ -13,6 +13,7 @@ import org.apache.commons.httpclient.auth.AuthScope;
 
 import java.io.IOException;
 
+import java.net.SocketException;
 import java.util.Map;
 
 /**
@@ -96,7 +97,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                 successful = true;
             } catch (IOException e) {
                 retryCount++;
-                if (e.getMessage().contains("503")) {
+                if (e.getMessage().contains("503") || e instanceof SocketException) {
                     try {
                         Thread.sleep(20000);
                     } catch (InterruptedException e1) {
