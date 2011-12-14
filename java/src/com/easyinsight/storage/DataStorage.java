@@ -729,7 +729,8 @@ public class DataStorage implements IDataStorage {
                     int type = keyMetadata.getType();
                     i = filterDefinition.populatePreparedStatement(queryStmt, i, type, insightRequestMetadata);
                 } else {
-                    LogClass.error(filterDefinition.getField().getAnalysisItemID() + " - " + filterDefinition.getField().toDisplay() + " was not found in the key metadata");
+                    int type = Value.STRING;
+                    i = filterDefinition.populatePreparedStatement(queryStmt, i, type, insightRequestMetadata);
                 }
             }
         }
