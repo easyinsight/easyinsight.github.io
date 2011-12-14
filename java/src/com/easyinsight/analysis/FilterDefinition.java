@@ -182,6 +182,9 @@ public class FilterDefinition implements Serializable, Cloneable {
             if (getField().getLookupTableID() != null && getField().getLookupTableID() > 0) {
                 return false;
             }
+            if (getField().isDerived()) {
+                return false;
+            }
             if (isTemplateFilter()) {
                 return false;
             }
