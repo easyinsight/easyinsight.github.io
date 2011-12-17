@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -227,7 +228,7 @@ public class DataService {
             ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, crosstabReport, conn, customFilters, null);
             Crosstab crosstab = new Crosstab();
             crosstab.crosstab(crosstabReport, reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet()));
-            CrosstabValue[][] values = crosstab.toTable(crosstabReport);
+            CrosstabValue[][] values = crosstab.toTable(crosstabReport, insightRequestMetadata, conn);
 
             List<CrosstabMapWrapper> resultData = new ArrayList<CrosstabMapWrapper>();
             for (int j = 0; j < (crosstab.getRowSections().size() + crosstabReport.getColumns().size()) + 2; j++) {
@@ -686,8 +687,10 @@ public class DataService {
             System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             Crosstab crosstab = new Crosstab();
+
+
             crosstab.crosstab(analysisDefinition, reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet()));
-            CrosstabValue[][] values = crosstab.toTable(analysisDefinition);
+            CrosstabValue[][] values = crosstab.toTable(analysisDefinition, insightRequestMetadata, conn);
 
             List<CrosstabMapWrapper> resultData = new ArrayList<CrosstabMapWrapper>();
             for (int j = 0; j < (crosstab.getRowSections().size() + analysisDefinition.getColumns().size()) + 2; j++) {

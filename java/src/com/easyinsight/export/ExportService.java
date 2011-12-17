@@ -356,7 +356,7 @@ public class ExportService {
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
         Crosstab crosstab = new Crosstab();
         crosstab.crosstab(crosstabDefinition, dataSet);
-        CrosstabValue[][] values = crosstab.toTable(crosstabDefinition);
+        CrosstabValue[][] values = crosstab.toTable(crosstabDefinition, insightRequestMetadata, conn);
         StringBuilder sb = new StringBuilder();
         AnalysisMeasure measure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
         sb.append("<table>\r\n");
@@ -556,7 +556,7 @@ public class ExportService {
         DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
         Crosstab crosstab = new Crosstab();
         crosstab.crosstab(crosstabDefinition, dataSet);
-        CrosstabValue[][] values = crosstab.toTable(crosstabDefinition);
+        CrosstabValue[][] values = crosstab.toTable(crosstabDefinition, insightRequestMetadata, conn);
         AnalysisMeasure measure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
         PdfPTable table = new PdfPTable(crosstab.getColumnSections().size() + crosstabDefinition.getRows().size() + 1);
         table.setSpacingBefore(20);
@@ -1304,7 +1304,7 @@ public class ExportService {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         Crosstab crosstab = new Crosstab();
         crosstab.crosstab(crosstabDefinition, dataSet);
-        CrosstabValue[][] values = crosstab.toTable(crosstabDefinition);
+        CrosstabValue[][] values = crosstab.toTable(crosstabDefinition, insightRequestMetadata, conn);
         AnalysisMeasure measure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
         NumericStyle measureStyle = (NumericStyle) createStyle(measure, workbook, exportMetadata);
         NumericStyle summaryStyle = (NumericStyle) createStyle(measure, workbook, exportMetadata);
