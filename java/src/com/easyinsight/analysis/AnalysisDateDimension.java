@@ -182,6 +182,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
             }
             if (calendar == null) {
                 calendar = Calendar.getInstance();
+                System.out.println("setting first day of week to " + SecurityUtil.getFirstDayOfWeek());
                 calendar.setFirstDayOfWeek(SecurityUtil.getFirstDayOfWeek());
             }
             calendar.setTimeInMillis(tempDate.getTime());
@@ -342,6 +343,24 @@ public class AnalysisDateDimension extends AnalysisDimension {
             resultValue = new EmptyValue();
         }
         return resultValue;
+    }
+
+    private transient AggregateDateKey cachedDateKey;
+
+    @Override
+    public AggregateKey createAggregateKey() {
+        // in case of filters, how do we do this...
+        if (cachedDateKey == null) {
+            cachedDateKey = new AggregateDateKey(getKey(), getType(), dateLevel, getFilters());
+        }
+        return cachedDateKey;
+    }
+
+    @Override
+    public AnalysisItem clone() throws CloneNotSupportedException {
+        AnalysisDateDimension measure = (AnalysisDateDimension) super.clone();
+        measure.cachedDateKey = null;
+        return measure;
     }
 
     public AnalysisItemResultMetadata createResultMetadata() {
