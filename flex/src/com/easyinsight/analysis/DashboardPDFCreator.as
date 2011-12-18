@@ -12,6 +12,8 @@ import flash.net.navigateToURL;
 import flash.utils.ByteArray;
 
 import mx.core.UIComponent;
+import mx.graphics.ImageSnapshot;
+import mx.graphics.codec.JPEGEncoder;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
@@ -31,13 +33,10 @@ public class DashboardPDFCreator {
     }
 
     public function exportReportToPDF(dashboard:Dashboard, parent:UIComponent, coreView:DisplayObject):void {
-        var jpgStream:ByteArray = null;
-        var jpgSource:BitmapData = new BitmapData(coreView.width, coreView.height);
-        jpgSource.draw(coreView);
-        var jpgEncoder:JPGEncoder = new JPGEncoder(85);
-        jpgStream = jpgEncoder.encode(jpgSource);
+        var snapshot:ImageSnapshot = ImageSnapshot.captureImage(coreView, 0, new JPEGEncoder(85));
+        var bytes:ByteArray = snapshot.data;
         ProgressAlert.alert(parent, "Generating the PDF...", null, upload.exportDashboardToPDF);
-        upload.exportDashboardToPDF.send(dashboard, jpgStream, coreView.width, coreView.height);
+        upload.exportDashboardToPDF.send(dashboard, bytes, coreView.width, coreView.height);
     }
 }
 }
