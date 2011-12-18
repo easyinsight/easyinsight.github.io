@@ -26,6 +26,10 @@ import mx.formatters.NumberFormatter;
 		override public function getType():int {
 			return super.getType() | AnalysisItemTypes.DATE;	
 		}
+
+        override protected function getQualifiedSuffix():String {
+            return getType() + ":" + dateLevel + ":" + display;
+        }
 		
 		override public function getFormatter():Formatter {
             var format:int;
