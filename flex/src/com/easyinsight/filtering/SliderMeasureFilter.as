@@ -203,8 +203,9 @@ public class SliderMeasureFilter extends HBox implements IFilter
                 } else if (_filterDefinition.endValueDefined) {
                     slider = createMaxSlider();
                 }
-
-                addChild(slider);
+                if (slider != null) {
+                    addChild(slider);
+                }
                 if (_filterDefinition.endValueDefined) {
                     var rightLabel:Label = new Label();
                     rightLabel.text = f.format(_filterDefinition.endValue);
