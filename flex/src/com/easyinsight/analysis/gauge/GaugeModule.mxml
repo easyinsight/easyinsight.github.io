@@ -38,7 +38,7 @@
 
                 if (width != gauge.width) {
 
-                    gauge.x = 10;
+                    gauge.x = (unscaledWidth - width) / 2;
                     gauge.width = width;
                 }
             }
