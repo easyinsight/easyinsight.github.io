@@ -18,7 +18,6 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
-import mx.containers.Box;
 import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
@@ -45,8 +44,6 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     public function DashboardStackViewComponent() {
         super();
-        this.percentWidth = 100;
-        this.percentHeight = 100;
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
@@ -74,7 +71,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         updateAdditionalFilters(filterMap);
 
         if (childFilterBox != null) {
-            childFilterBox.removeAllChildren();
+            if (childFilterBox.getChildAt(0) != null) {
+                childFilterBox.removeChildAt(0);
+            }
             childFilterBox.addChild(childFilters.getItemAt(targetIndex) as UIComponent);
         }
     }
@@ -92,18 +91,22 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     private var leftEffect:Effect;
     private var rightEffect:Effect;
 
-    protected var childFilterBox:Box;
+    protected var childFilterBox:UIComponent;
 
     protected override function createChildren():void {
         super.createChildren();
-        buildEffects();
+        if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
+            this.percentWidth = 100;
+            this.percentHeight = 100;
+        }
+
         if (dashboardStack.consolidateHeaderElements) {
             var headerHBox:HBox = new HBox();
             headerHBox.setStyle("verticalAlign", "middle");
             headerHBox.percentWidth = 100;
-            var myFiltersBox:HBox = new HBox();
+            var myFiltersBox:UIComponent = new UIComponent();
             //myFiltersBox.percentWidth = 100;
-            childFilterBox = new HBox();
+            childFilterBox = new UIComponent();
             childFilterBox.percentWidth = 100;
             buttonsBox = new HBox();
             headerHBox.addChild(myFiltersBox);
@@ -116,8 +119,11 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             addChild(headerArea);
         }
         viewStack = new ViewStack();
-        viewStack.percentHeight = 100;
-        viewStack.percentWidth = 100;
+        buildEffects();
+        if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
+            viewStack.percentWidth = 100;
+            viewStack.percentHeight = 100;
+        }
         viewChildren = new ArrayCollection();
         createStackContents();
         var transformContainer:TransformContainer = createTransformContainer();
@@ -157,15 +163,15 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         _consolidateHeader = value;
     }
 
-    private function styleHeaderArea(headerArea:Container):Container {
+    private function styleHeaderArea(headerArea:UIComponent):Container {
         headerArea.setStyle("backgroundColor", dashboardStack.headerBackgroundColor);
         headerArea.setStyle("backgroundAlpha", dashboardStack.headerBackgroundAlpha);
-        headerArea.setStyle("horizontalAlign", "center");
+        //headerArea.setStyle("horizontalAlign", "center");
         headerArea.percentWidth = 100;
-        var headerCentering:Box = new Box();
+        /*var headerCentering:Box = new Box();
         headerCentering.percentWidth = 100;
-        headerCentering.setStyle("horizontalAlign", "center");
-        var headerBackgroundImage:BackgroundImage = new BackgroundImage();
+        headerCentering.setStyle("horizontalAlign", "center");*/
+        headerBackgroundImage = new BackgroundImage();
         headerBackgroundImage.applyCenterScreenLogic = false;
         headerBackgroundImage.useBindings = false;
         var headerbar:HBox = new HBox();
@@ -184,8 +190,8 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         headerbar.setStyle("verticalAlign", "bottom");
         headerbar.setStyle("paddingBottom", 5);
         headerBackgroundImage.addChild(headerbar);
-        headerCentering.addChild(headerBackgroundImage);
-        headerArea.addChild(headerCentering);
+        //headerCentering.addChild(headerBackgroundImage);
+        headerArea.addChild(headerBackgroundImage);
         if (dashboardStack.headerBackground != null && dashboardEditorMetadata.fixedID) {
             shareButton = new Button();
             shareButton.label = "Share";
@@ -206,6 +212,8 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         }
         return headerbar;
     }
+    
+    private var headerBackgroundImage:BackgroundImage;
 
     private function share(event:MouseEvent):void {
         var reports:ArrayCollection = reportCount();
@@ -234,12 +242,13 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         if (shareButton != null) {
-            shareButton.y = 10;
-            shareButton.x = shareButton.parent.width - 175;
+            shareButton.move(shareButton.parent.width - 175, 10);
         }
         if (logoutButton != null) {
-            logoutButton.y = 10;
-            logoutButton.x = logoutButton.parent.width - 100;
+            logoutButton.move(logoutButton.parent.width - 100, 10);
+        }
+        if (headerBackgroundImage != null) {
+            headerBackgroundImage.move((headerBackgroundImage.parent.width - headerBackgroundImage.width) / 2, 0);
         }
     }
 

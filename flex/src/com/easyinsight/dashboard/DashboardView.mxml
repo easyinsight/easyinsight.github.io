@@ -23,7 +23,7 @@
                 </mx:Box>
             </mx:AddChild>
             <mx:AddChild relativeTo="{coreDashboardArea}" position="before">
-                <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
+                <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}" id="filterViewStack">
                     <mx:Box/>
                     <mx:VBox width="100%" horizontalAlign="center">
                         <filtering:TransformContainer id="transformContainer" filterEditable="false"
@@ -94,7 +94,7 @@
             addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(ReportNavigationEvent.TO_REPORT, onNavigation);
             var logoutItem:ContextMenuItem = new ContextMenuItem("Log Out");
-            logoutItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+            logoutItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
                 User.destroy();
                 CookieUtil.deleteCookie("eisession");
                 ServerConfig.getChannelSet(dashboardService.destination).logout();
@@ -113,8 +113,8 @@
             if (event.descriptor is InsightDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
             } else if (event.descriptor is DashboardDescriptor) {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(event.descriptor).id,
-                    initialFilters: event.filters})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
+                    initialFilters:event.filters})));
             }
         }
 
@@ -184,7 +184,7 @@
             dashboardEditorMetadata.dashboard = dashboard;
             dashboardEditorMetadata.dashboardView = this;
             rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
-            UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
+            UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent):void {
                 var filterMap:Object = new Object();
                 filterMap["master"] = dashboard.filters;
                 rootView.updateAdditionalFilters(filterMap);
@@ -358,6 +358,10 @@
             BrowserManager.getInstance().setFragment(feedFragmentString);
             BrowserManager.getInstance().setTitle("Easy Insight - " + dashboardName);
         }
+
+        [Bindable]
+        private var showLoading:Boolean;
+
         ]]></mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="getDashboardView" result="gotDashboard()"/>

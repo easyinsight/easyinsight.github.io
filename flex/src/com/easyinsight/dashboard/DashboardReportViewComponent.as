@@ -27,9 +27,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     private var report:AnalysisDefinition;
 
     public function DashboardReportViewComponent() {
-        super();
-        percentWidth = 100;
-        percentHeight = 100;
+        super();        
         //setStyle("cornerRadius", 10);
         setStyle("horizontalAlign", "center");
         setStyle("verticalAlign", "middle");
@@ -47,6 +45,13 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
     protected override function createChildren():void {
         super.createChildren();
+        if (dashboardEditorMetadata.dashboard.absoluteSizing) {
+            width = dashboardReport.preferredWidth;
+            height = dashboardReport.preferredHeight;
+        } else {
+            percentWidth = 100;
+            percentHeight = 100;
+        }
         if (dashboardEditorMetadata.borderThickness > 0) {
             setStyle("borderStyle", "inset");
             setStyle("borderThickness", 3);

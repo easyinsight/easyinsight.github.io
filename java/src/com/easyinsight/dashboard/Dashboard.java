@@ -46,6 +46,15 @@ public class Dashboard implements Cloneable {
     private int role;
     private String marmotScript;
     private int folder;
+    private boolean absoluteSizing;
+
+    public boolean isAbsoluteSizing() {
+        return absoluteSizing;
+    }
+
+    public void setAbsoluteSizing(boolean absoluteSizing) {
+        this.absoluteSizing = absoluteSizing;
+    }
 
     public int getFolder() {
         return folder;

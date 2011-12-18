@@ -136,6 +136,7 @@
             BrowserManager.getInstance().setFragment(feedFragmentString);
             var box:DashboardBox = new DashboardBox();
             rootView = box;
+            metadata.dashboard = _dashboard;
             box.dashboardEditorMetadata = metadata;
             box.element = _dashboard.rootElement;
             box.allowDelete = false;
@@ -167,6 +168,7 @@
             box.allowDelete = false;
             dashboardCanvas.addChild(box);
             _dashboard = new Dashboard();
+            metadata.dashboard = _dashboard;
             dataSourceID = event.dataSource.id;
             ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource);
             analysisService.getInsightDescriptorsForDataSource.send(dataSourceID);

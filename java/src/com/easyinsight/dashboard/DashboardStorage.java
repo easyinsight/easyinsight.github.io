@@ -133,8 +133,8 @@ public class DashboardStorage {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD (DASHBOARD_NAME, URL_KEY, " +
                     "ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE, UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, TEMPORARY_DASHBOARD," +
                     "PUBLIC_VISIBLE, border_color, border_thickness, background_color, padding," +
-                    "recommended_exchange, ytd_date, ytd_override, marmotscript, folder) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    "recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             insertStmt.setString(1, dashboard.getName());
             insertStmt.setString(2, dashboard.getUrlKey());
             insertStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -155,6 +155,7 @@ public class DashboardStorage {
             insertStmt.setBoolean(18, dashboard.isOverrideYTD());
             insertStmt.setString(19, dashboard.getMarmotScript());
             insertStmt.setInt(20, dashboard.getFolder());
+            insertStmt.setBoolean(21, dashboard.isAbsoluteSizing());
             insertStmt.execute();
             dashboard.setId(Database.instance().getAutoGenKey(insertStmt));
             insertStmt.close();
@@ -162,7 +163,7 @@ public class DashboardStorage {
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET DASHBOARD_NAME = ?," +
                     "URL_KEY = ?, ACCOUNT_VISIBLE = ?, UPDATE_DATE = ?, DESCRIPTION = ?, EXCHANGE_VISIBLE = ?, AUTHOR_NAME = ?, TEMPORARY_DASHBOARD = ?," +
                     "PUBLIC_VISIBLE = ?, border_color = ?, border_thickness = ?, background_color = ?, padding = ?," +
-                    "recommended_exchange = ?, ytd_date = ?, ytd_override = ?, marmotscript = ?, folder = ? WHERE DASHBOARD_ID = ?");
+                    "recommended_exchange = ?, ytd_date = ?, ytd_override = ?, marmotscript = ?, folder = ?, absolute_sizing = ? WHERE DASHBOARD_ID = ?");
             updateStmt.setString(1, dashboard.getName());
             updateStmt.setString(2, dashboard.getUrlKey());
             updateStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -181,7 +182,8 @@ public class DashboardStorage {
             updateStmt.setBoolean(16, dashboard.isOverrideYTD());
             updateStmt.setString(17, dashboard.getMarmotScript());
             updateStmt.setInt(18, dashboard.getFolder());
-            updateStmt.setLong(19, dashboard.getId());
+            updateStmt.setBoolean(19, dashboard.isAbsoluteSizing());
+            updateStmt.setLong(20, dashboard.getId());
             updateStmt.executeUpdate();
             updateStmt.close();
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ?");
@@ -239,7 +241,7 @@ public class DashboardStorage {
         Dashboard dashboard;
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, URL_KEY, ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE," +
                     "UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, temporary_dashboard, public_visible, border_color, border_thickness," +
-                "background_color, padding, recommended_exchange, ytd_date, ytd_override, marmotscript, folder FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                "background_color, padding, recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing FROM DASHBOARD WHERE DASHBOARD_ID = ?");
         queryStmt.setLong(1, dashboardID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -265,6 +267,7 @@ public class DashboardStorage {
             dashboard.setOverrideYTD(rs.getBoolean(18));
             dashboard.setMarmotScript(rs.getString(19));
             dashboard.setFolder(rs.getInt(20));
+            dashboard.setAbsoluteSizing(rs.getBoolean(21));
             PreparedStatement findElementsStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, ELEMENT_TYPE FROM " +
                     "DASHBOARD_ELEMENT, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ? AND DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID = DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID");
             findElementsStmt.setLong(1, dashboardID);

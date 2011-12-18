@@ -1,0 +1,1 @@
+alter table dashboard add absolute_sizing tinyint(4) not null default 0;

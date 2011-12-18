@@ -14,8 +14,6 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
 
     public function DashboardGridViewComponent() {
         super();
-        this.percentWidth = 100;
-        this.percentHeight = 100;
         setStyle("paddingLeft", 0);
         setStyle("paddingRight", 0);
         setStyle("paddingTop", 0);
@@ -28,13 +26,19 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
 
     protected override function createChildren():void {
         super.createChildren();
+        if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
+            this.percentWidth = 100;
+            this.percentHeight = 100;
+        }
         setStyle("backgroundColor", dashboardGrid.backgroundColor);
         setStyle("backgroundAlpha", dashboardGrid.backgroundAlpha);
         viewChildren = new ArrayCollection();
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
             var gridRow:GridRow = new GridRow();
-            gridRow.percentWidth = 100;
-            gridRow.percentHeight = 100;
+            if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
+                gridRow.percentWidth = 100;
+                gridRow.percentHeight = 100;
+            }
             gridRow.setStyle("paddingLeft", 0);
             gridRow.setStyle("paddingRight", 0);
             gridRow.setStyle("paddingTop", 0);

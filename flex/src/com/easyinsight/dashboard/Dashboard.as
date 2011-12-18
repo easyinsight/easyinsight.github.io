@@ -23,6 +23,7 @@ public class Dashboard {
     public var authorName:String;
     public var creationDate:Date;
     public var updateDate:Date;
+    public var absoluteSizing:Boolean;
 
     public var backgroundColor:uint = 0xCCCCCC;
     public var padding:int = 3;
