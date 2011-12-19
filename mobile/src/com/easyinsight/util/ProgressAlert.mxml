@@ -1,0 +1,153 @@
+<?xml version="1.0"?>
+<s:SkinnablePopUpContainer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    addedToStage="setupListeners()" skinClass="com.easyinsight.reportviews.ContextSkin">
+    <!--<mx:states>
+        <mx:State name="Done">
+            <mx:RemoveChild target="{progressBox}"/>
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:VBox horizontalAlign="center">
+                    <mx:Label text="{completeText}" fontWeight="bold" fontSize="14" fontFamily="Tahoma"/>
+                    <mx:Button label="OK" click="complete()"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="Failure">
+            <mx:RemoveChild target="{progressBox}"/>
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:VBox horizontalAlign="center">
+                    <mx:Label fontWeight="bold"
+                              text="Sorry, but we encountered the following error in trying to complete the operation:" fontSize="14" fontFamily="Tahoma"/>
+                    <mx:TextArea borderStyle="none" backgroundAlpha="0" text="{errorText}" width="400" height="200"/>
+                    <mx:Button label="Cancel" click="cancel()"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>-->
+    <fx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.core.UIComponent;
+        import mx.events.CloseEvent;
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+        import mx.rpc.remoting.Operation;
+
+        private function onKey(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ESCAPE) {
+                cancel();
+            } else if (event.keyCode == Keyboard.ENTER) {
+                if (currentState == "Done") {
+                    complete();
+                }
+            }
+        }
+
+        private function setupListeners():void {
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
+            stage.addEventListener(StageOrientationEvent.ORIENTATION_CHANGE, onOrientationChange);
+        }
+        
+        private function onOrientationChange(event:Event):void {
+            PopUpUtil.centerPopUp(this);
+        }
+
+        private var _progressText:String;
+        private var _completeText:String;
+        [Bindable]
+        private var errorText:String;
+
+        //private var _operation:Operation;
+
+        private var _operations:ArrayCollection;
+
+        private var opCount:int;
+
+        private var failed:Boolean;
+
+        private function cancel():void {
+            if (stage != null) {
+                stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+                stage.removeEventListener(StageOrientationEvent.ORIENTATION_CHANGE, onOrientationChange);
+            }
+            for each (var operation:Operation in _operations) {
+                operation.removeEventListener(ResultEvent.RESULT, onResult);
+                operation.removeEventListener(FaultEvent.FAULT, onFault);
+            }
+            this.close();
+        }
+
+        private function complete():void {
+            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+            stage.removeEventListener(StageOrientationEvent.ORIENTATION_CHANGE, onOrientationChange);
+            for each (var operation:Operation in _operations) {
+                operation.removeEventListener(ResultEvent.RESULT, onResult);
+                operation.removeEventListener(FaultEvent.FAULT, onFault);
+            }
+            this.close();
+            dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+        }
+
+        public function set operations(val:ArrayCollection):void {
+            for each (var operation:Operation in val) {
+                operation.addEventListener(ResultEvent.RESULT, onResult, false, 0, true);
+                operation.addEventListener(FaultEvent.FAULT, onFault, false, 0, true);
+            }
+            _operations = val;
+        }
+
+        [Bindable]
+        public function get completeText():String {
+            return _completeText;
+        }
+
+        public static function alert(parent:UIComponent, progressText:String, completeText:String, ... operations):ProgressAlert {
+            var alert:ProgressAlert = new ProgressAlert();
+            alert.progressText = progressText;
+            alert.completeText = completeText;
+            alert.operations = new ArrayCollection(operations);
+            alert.open(parent, true);
+            PopUpUtil.centerPopUp(alert);
+            return alert;
+        }
+
+        private function onResult(event:ResultEvent):void {
+            opCount++;
+            if (!failed && opCount == _operations.length) {
+                if (_completeText == null) {
+                    this.close();
+                } else {
+                    currentState = "Done";
+                }
+            }
+        }
+
+        private function onFault(event:FaultEvent):void {
+            failed = true;
+            errorText = event.fault.faultString + " - " + event.fault.faultDetail + " - " + event.statusCode + " - " + event.message.body;
+            currentState = "Failure";
+        }
+
+        public function set completeText(val:String):void {
+            _completeText = val;
+            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+        }
+
+        [Bindable]
+        public function get progressText():String {
+            return _progressText;
+        }
+
+        public function set progressText(val:String):void {
+            _progressText = val;
+            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+        }]]></fx:Script>
+    <s:VGroup id="coreBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle"
+             paddingBottom="20" paddingLeft="20" paddingRight="20" paddingTop="20">
+        <s:VGroup id="progressBox" horizontalAlign="center">
+            <s:Label text="{progressText}" fontWeight="bold" fontSize="14" fontFamily="Tahoma"/>
+            <s:BusyIndicator/>
+            <s:Button label="Cancel" click="cancel()" height="30"/>
+        </s:VGroup>
+    </s:VGroup>
+</s:SkinnablePopUpContainer>

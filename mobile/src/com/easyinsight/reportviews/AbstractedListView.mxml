@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<s:DataGrid xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    variableRowHeight="true">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.TextReportFieldExtension;
+        import com.easyinsight.analysis.Value;
+
+        import mx.collections.ArrayCollection;
+
+        import spark.components.gridClasses.GridColumn;
+
+        public function populateGrid(reportColumns:ArrayCollection, report:AnalysisDefinition, data:ArrayCollection):void {
+            var widthPool:int = this.parent.width;
+            var unfixedColumns:int = 0;
+            var columns:Array = [];
+            for each (var item:AnalysisItem in reportColumns) {
+                var column:AnalysisItemColumn = new AnalysisItemColumn(item, item.getFormatter());
+                var ext:TextReportFieldExtension = item.reportFieldExtension as TextReportFieldExtension;
+                if (ext != null) {
+                    column.width = ext.fixedWidth;
+                    widthPool -= ext.fixedWidth;
+                } else {
+                    unfixedColumns++;
+                }
+                var cf:ClassFactory = new ClassFactory(SparkAnalysisCellRenderer);
+                cf.properties = { analysisItem:item, report:report};
+                column.itemRenderer = cf;
+                column.dataField = item.qualifiedName();
+                column.labelFunction = blah;
+                column.headerText = item.display;
+                columns.push(column);
+            }
+            if (unfixedColumns > 0) {
+                var perColSize:int = 200;
+                var minSize:int = unfixedColumns * perColSize;
+                if (minSize < widthPool) {
+                    perColSize += (widthPool - minSize) / unfixedColumns;
+                }
+                widthPool += (perColSize) * unfixedColumns;
+                for each (var col:GridColumn in columns) {
+                    if (col.width == 0) {
+                        col.width = perColSize;
+                    }
+                }
+            }
+            width = widthPool;
+            this.columns = new ArrayCollection(columns);
+            dataProvider = data;
+        }
+
+        private static function blah(item:Object, column:GridColumn):String {
+            var aColumn:AnalysisItemColumn = column as AnalysisItemColumn;
+            var data:Value = item[aColumn.analysisItem.qualifiedName()];
+            return aColumn.itemFormatter.format(data.getValue());
+        }
+        ]]></fx:Script>
+</s:DataGrid>

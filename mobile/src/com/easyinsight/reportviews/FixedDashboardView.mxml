@@ -2,36 +2,86 @@
 <s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
     xmlns:mx="library://ns.adobe.com/flex/mx" viewActivate="onActivate()" actionBarVisible="false">
     <fx:Script><![CDATA[
+        import com.easyinsight.baseviews.MobileLoginComponent;
         import com.easyinsight.dashboard.Dashboard;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.dashboard.DashboardEditorMetadata;
         import com.easyinsight.dashboard.IDashboardViewComponent;
+        import com.easyinsight.framework.User;
+
+        import mx.controls.Alert;
 
         import mx.core.UIComponent;
 
         import mx.events.FlexEvent;
+        import mx.messaging.ChannelSet;
+        import mx.messaging.config.ServerConfig;
+        import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncToken;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+
+        import spark.components.Label;
+        import spark.components.Scroller;
 
         private var dashboardDescriptor:DashboardDescriptor;
 
         private function onActivate():void {
+            stage.autoOrients = false;
+            stage.setOrientation(StageOrientation.ROTATED_LEFT);
+            removeEventListener(LogoutEvent.LOGOUT, onLogout);
+            addEventListener(LogoutEvent.LOGOUT, onLogout);
             dashboardDescriptor = data as DashboardDescriptor;
             dashboardName = dashboardDescriptor.name;
+            loadingPopup.open(this);
             dashboardService.getDashboard.send(dashboardDescriptor.id);
+        }
+
+        private function onLogout(event:LogoutEvent):void {
+            User.destroy();
+            var cs:ChannelSet = ServerConfig.getChannelSet("dashboardService");
+            var token:AsyncToken = cs.logout();
+            token.addResponder(new AsyncResponder(logoutResultEvent, logoutFaultEvent));
+        }
+
+        private var loadingPopup:LoadingPopup = new LoadingPopup();
+
+        private function logoutResultEvent(event:ResultEvent, token:Object = null):void {
+            stage.autoOrients = true;
+            navigator.replaceView(MobileLoginComponent);
+        }
+
+        private static function logoutFaultEvent(event:FaultEvent, token:Object = null):void {
+            Alert.show(event.fault.faultString);
         }
 
         private var rootView:IDashboardViewComponent;
 
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            if (loadingPopup != null) {
+                loadingPopup.x = this.width / 2 - loadingPopup.width / 2;
+                loadingPopup.y = this.height / 2 - loadingPopup.height / 2;
+            }
+        }
+
         private function gotDashboard():void {
+            removeAllElements();
             var dashboard:Dashboard = dashboardService.getDashboard.lastResult as Dashboard;
             var metadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             metadata.dataSourceID = dashboard.dataSourceID;
+            metadata.dashboardView = this;
             metadata.role = dashboard.role;
+            metadata.dashboard = dashboard;
             rootView = DashboardMobileFactory.createViewUIComponent(dashboard.rootElement, metadata);
-            UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
+            UIComponent(rootView).visible = false;
+            UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent):void {
                 var filterMap:Object = new Object();
                 filterMap["master"] = dashboard.filters;
+                UIComponent(rootView).visible = true;
                 rootView.updateAdditionalFilters(filterMap);
                 rootView.initialRetrieve();
+                loadingPopup.close();
             });
             addElement(rootView as UIComponent);
         }
@@ -47,7 +97,4 @@
             <mx:method name="getDashboard" result="gotDashboard()"/>
         </mx:RemoteObject>
     </fx:Declarations>
-    <!--<s:Scroller id="scroller">
-        <s:Group id="group" width="1000" height="600"/>
-    </s:Scroller>-->
 </s:View>

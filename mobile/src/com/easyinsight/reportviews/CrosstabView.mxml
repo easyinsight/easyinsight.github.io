@@ -40,6 +40,8 @@
                         var text:String;
                         if (crosstabValue.header == null) {
                             text = measureFormatter.format(crosstabValue.value);
+                        } else if (crosstabValue.headerLabel) {
+                            text = String(crosstabValue.value.getValue());
                         } else {
                             text = crosstabValue.header.getFormatter().format(crosstabValue.value);
                         }
@@ -55,10 +57,6 @@
                     column.itemRenderer = factory;
                     columns.push(column);
                 }
-
-                //dataGrid.headerRows = crosstabDefinition.rows.length;
-                /*dataGrid.lockedColumnCount = crosstabDefinition.rows.length;
-                 dataGrid.lockedRowCount = crosstabDefinition.columns.length + 1;*/
                 this.columns = new ArrayCollection(columns);
                 var reportWidth:int = 1;
                 for each (var col:GridColumn in columns) {
@@ -74,13 +72,6 @@
                         endWidth += colAdd.width;
                     }
                 }
-                //dataGrid.maxWidth = this.width;
-                /*if (endWidth > 0) {
-                 dataGrid.x = (this.width - endWidth) / 2;
-                 } else {
-                 dataGrid.x = 0;
-                 }*/
-                //dataGrid.height = translated.length * 22 + 4;
                 this.height = translated.length * 20 + 4;
                 dataProvider = translated;
             }

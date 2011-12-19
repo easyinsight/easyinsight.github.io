@@ -1,8 +1,31 @@
 @namespace s "library://ns.adobe.com/flex/spark";
 @namespace util "com.easyinsight.util.*";
+@namespace diagram "com.anotherflexdev.diagrammer.*";
+
+s|ActionBar
+{
+    chromeColor: #000000;
+}
+
+global {
+    modalTransparency: 0.2;
+}
 
 util|FilterContainer {
     skinClass: ClassReference('com.easyinsight.util.FilterSkin')
+}
+
+diagram|Link {
+    bottomLineColor : #2C2C54;
+    lineColor : #FFFFFF;
+    lineThickness : 2;
+    selectionColor : #006000;
+    templateLineColor : #F0F0FF;
+    templateBottomLineColor : #008080;
+    labelFontFamily : 'Verdana';
+    labelFontColor : #1a1a1a;
+    labelFontSize : 11;
+    labelFontWeight : "normal";
 }
 
 s|Button {

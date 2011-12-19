@@ -185,7 +185,37 @@ declarations define DataGrid skin parts except <code>headerColumnSeparator</code
 
         <!--- @private -->
         <fx:Component id="rowSeparator">
-            <s:Rect width="0" height="0" visible="false"/>
+            <s:Line implements="spark.components.gridClasses.IGridVisualElement">
+                <fx:Script><![CDATA[
+                    import com.easyinsight.analysis.AnalysisMeasure;
+
+                    import spark.components.DataGrid;
+                    import spark.components.Grid;
+
+                    public function prepareGridVisualElement(grid:Grid, rowIndex:int, columnIndex:int):void
+                    {
+                        const dataGrid:DataGrid = grid.dataGrid;
+                        if (!dataGrid)
+                            return;
+
+                        if (rowIndex >= grid.dataProvider.length) {
+                            stroke = noLine;
+                        } else {
+                            var obj:Object = grid.dataProvider.getItemAt(rowIndex);
+                            var measure:AnalysisMeasure = obj["measure"] as AnalysisMeasure;
+                            if (measure.underline) {
+                                stroke = underline;
+                            } else {
+                                stroke = noLine;
+                            }
+                        }
+                    }
+                    ]]></fx:Script>
+                <fx:Declarations>
+                    <s:SolidColorStroke color="0x666666" weight="1" caps="square" id="underline"/>
+                    <s:SolidColorStroke color="0x666666" alpha="0" weight="1" caps="square" id="noLine"/>
+                </fx:Declarations>
+            </s:Line>            
         </fx:Component>
 
         <!--- @private -->

@@ -40,22 +40,14 @@
             var window:DatePickerWindow = new DatePickerWindow();
             window.date = lowDate;
             window.addEventListener(DateChoiceEvent.DATE_CHOICE, onLowDateChange, false, 0, true);
-            var point:Point = new Point(date1Label.x, date1Label.y);
-            var global:Point = localToGlobal(point);
-            window.x = global.x;
-            window.y = global.y + 20;
-            window.open(this, true);
+            window.open(date1Label, true);
         }
 
         private function editEndDate():void {
             var window:DatePickerWindow = new DatePickerWindow();
             window.date = highDate;
             window.addEventListener(DateChoiceEvent.DATE_CHOICE, onHighDateChange, false, 0, true);
-            var point:Point = new Point(date2Label.x, date2Label.y);
-            var global:Point = localToGlobal(point);
-            window.x = global.x;
-            window.y = global.y + 20;
-            window.open(this, true);
+            window.open(date2Label, true);
         }
 
         private function onLowDateChange(event:DateChoiceEvent):void {

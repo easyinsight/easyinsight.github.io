@@ -6,7 +6,7 @@
         <s:State name="disabled"/>
     </s:states>
     <s:HGroup verticalAlign="middle">
-        <s:Group id="toggleGroup"/>
-        <s:HGroup id="contentGroup" verticalAlign="middle"/>
+        <s:HGroup id="toggleGroup" verticalAlign="middle" height="25"/>
+        <s:HGroup id="contentGroup" verticalAlign="middle" height="25"/>
     </s:HGroup>
 </s:SparkSkin>

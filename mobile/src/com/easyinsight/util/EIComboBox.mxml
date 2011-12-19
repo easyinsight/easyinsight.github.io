@@ -96,11 +96,7 @@
             comboBoxPopUp.labelField = _labelField;
             comboBoxPopUp.labelFunction = _labelFunction;
             comboBoxPopUp.addEventListener(FilterChangeEvent.FILTER_CHANGE, onFilterChange, false, 0, true);
-            var point:Point = new Point(dropdownBox.x, dropdownBox.y);
-            var global:Point = localToGlobal(point);
-            comboBoxPopUp.x = global.x;
-            comboBoxPopUp.y = global.y + 20;
-            comboBoxPopUp.open(this, true);
+            comboBoxPopUp.open(dropdownBox, true);
         }
 
         private function onFilterChange(event:FilterChangeEvent):void {

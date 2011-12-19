@@ -5,6 +5,7 @@
         import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 
         import com.easyinsight.analysis.Value;
+        import com.easyinsight.filtering.FilterDefinition;
 
         import com.easyinsight.filtering.FilterValueDefinition;
 
@@ -24,7 +25,7 @@
 
         private function onActivate():void {
             filterInfo = data as FilterInfo;
-            filterName = filterInfo.filterDefinition.label;
+            filterName = FilterDefinition.getLabel(filterInfo.filterDefinition, filterInfo.filterDefinition.field);
             filterEnabled = filterInfo.filterDefinition.enabled;
             var translated:ArrayCollection = new ArrayCollection();
             for each (var obj:Object in FilterValueDefinition(filterInfo.filterDefinition).filteredValues) {

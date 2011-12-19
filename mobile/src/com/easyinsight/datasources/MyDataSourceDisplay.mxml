@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+     visible="{showData}" horizontalAlign="center" verticalAlign="middle" paddingTop="10" paddingBottom="5" width="100%">
+    <fx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+        import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.formatters.DateFormatter;
+
+        [Bindable]
+        private var lastDataTime:String;
+
+        private var _dataSource:DataSourceDescriptor;
+
+        private static function updateValue(date:Date):String {
+            var dateFormatter:DateFormatter = new DateFormatter();
+            if (User.getInstance() != null) {
+                switch (User.getInstance().dateFormat) {
+                    case 0:
+                        dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+                        break;
+                    case 1:
+                        dateFormatter.formatString = "YYYY-MM-DD HH:NN";
+                        break;
+                    case 2:
+                        dateFormatter.formatString = "DD-MM-YYYY HH:NN";
+                        break;
+                    case 3:
+                        dateFormatter.formatString = "DD/MM/YYYY HH:NN";
+                        break;
+                    case 4:
+                        dateFormatter.formatString = "DD.MM.YYYY HH:NN";
+                        break;
+                }
+            } else {
+                dateFormatter.formatString = "YYYY-MM-DD HH:NN";
+            }
+            return dateFormatter.format(date);
+        }
+
+        private function onClick(event:MouseEvent):void {
+            if (dataSource.dataSourceType == DataSourceType.STATIC ||
+                    dataSource.dataSourceType == DataSourceType.EMPTY) {
+                //fileData(dataSource);
+            } else {
+                refreshData();
+            }
+        }
+
+        private function refreshData():void {
+            var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
+            dsRefreshWindow.dataSourceID = dataSource.id;
+            dsRefreshWindow.addEventListener(DataSourceRefreshEvent.DATA_SOURCE_REFRESH, onRefresh, false, 0, true);
+            dsRefreshWindow.open(this, true);
+            PopUpUtil.centerPopUp(dsRefreshWindow);
+        }
+
+        private function onRefresh(event:DataSourceRefreshEvent):void {
+            updateString(event.newDateTime);
+        }
+
+        private function updateString(date:Date):void {
+            lastDataTime = updateValue(date);
+        }
+
+        public function get dataSource():DataSourceDescriptor {
+            return _dataSource;
+        }
+        
+        [Bindable]
+        private var showData:Boolean;
+
+        public function set dataSource(value:DataSourceDescriptor):void {
+            _dataSource = value;
+            if (DataSourceBehavior.pullDataSource(dataSource.dataSourceType)) {
+                if (dataSource.lastDataTime != null) {
+                    updateString(dataSource.lastDataTime);
+                }
+                showData = true;
+            } else {
+                showData = false;
+            }
+        }
+        ]]></fx:Script>
+    <s:HGroup>
+        <s:Label text="Last Data Time:"/>
+        <s:Label text="{lastDataTime}"/>
+    </s:HGroup>
+    <s:Button label="Refresh the Data Source" height="30" click="onClick(event)"/>
+</s:HGroup>

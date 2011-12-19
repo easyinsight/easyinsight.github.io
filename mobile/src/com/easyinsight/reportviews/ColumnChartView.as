@@ -43,6 +43,14 @@ public class ColumnChartView extends CartesianChartView {
         return ColumnChartDefinition(chartDef).measures;
     }
 
+    override protected function useGradientColor():Boolean {
+        return ColumnChartDefinition(chartDef).gradientColor > 0;
+    }
+
+    override protected function getGradientColor():uint {
+        return ColumnChartDefinition(chartDef).gradientColor;
+    }
+
     override protected function createChartObject():ChartBase {
         return new ColumnChart();
     }

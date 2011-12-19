@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<s:SkinnablePopUpContainer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-    creationComplete="onCreation()" skinClass="com.easyinsight.skin.PopupSkin">
+<s:Callout xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    creationComplete="onCreation()" horizontalPosition="start"
+    verticalPosition="after">
     <fx:Metadata>
         [Event(name="filterChange", type="com.easyinsight.util.FilterChangeEvent")]
     </fx:Metadata>
@@ -68,18 +69,8 @@
         }
 
         private function onMouseDown(event:MouseEvent):void {
-            //var point:Point = localToGlobal(new Point(event.localX, event.localY));
-            //trace("x = " + point.x + ", y= " + point.y);
-            trace("x = " + event.stageX + " , y= " + event.stageY);
             var result:Boolean = hitTestPoint(event.stageX, event.stageY);
             if (!result) {
-                trace("argh");
-                /*if (autoCompleteManager.hasDropdown(searchInput)) {
-                    var uiComp:UIComponent = autoCompleteManager.getDropdownForTarget(searchInput);
-                    var point:Point = new Point(event.stageX, event.stageY);
-                    var translatedPoint:Point = uiComp.contentToLocal(point);
-                    result = uiComp.hitTestPoint(translatedPoint.x, translatedPoint.y);
-                }*/
                 if (!result) {
                     stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
                     this.close();
@@ -89,4 +80,4 @@
         ]]></fx:Script>
     <s:List dataProvider="{_dataProvider}" itemRenderer="com.easyinsight.reportviews.FilterListEntry" maxHeight="400" width="300" id="list"
             labelField="{labelField}" labelFunction="{labelFunction}"/>
-</s:SkinnablePopUpContainer>
+</s:Callout>

@@ -3,6 +3,7 @@
           xmlns:util="com.easyinsight.util.*">
     <fx:Script><![CDATA[
         import com.easyinsight.filtering.DateLevelWrapper;
+        import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.MultiFlatDateFilterDefinition;
 
 
@@ -12,7 +13,7 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
-            filterName = filterInfo.filterDefinition.field.display + ":";
+            filterName = FilterDefinition.getLabel(filterInfo.filterDefinition, filterInfo.filterDefinition.field);
             populateLabel();
         }
 
@@ -95,11 +96,7 @@
             var window:MultiFMobileWindow = new MultiFMobileWindow();
             window.dateFilter = filterInfo.filterDefinition as MultiFlatDateFilterDefinition;
             window.addEventListener("updated", onWindowDone, false, 0, true);
-            var point:Point = new Point(dateLabel.x, dateLabel.y);
-            var global:Point = localToGlobal(point);
-            dateLabel.x = global.x;
-            dateLabel.y = global.y + 20;
-            window.open(this, true);
+            window.open(dateLabel, true);
         }
         ]]></fx:Script>
     <s:Label text="{filterName}"/>

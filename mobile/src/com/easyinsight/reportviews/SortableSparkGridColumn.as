@@ -12,9 +12,9 @@ public class SortableSparkGridColumn extends GridColumn {
 
     private var _reportIndex:int;
 
-    private var _sortValue:int;
+    private var _sortValue:Object;
 
-    public function SortableSparkGridColumn(reportIndex:int, sortValue:int) {
+    public function SortableSparkGridColumn(reportIndex:int, sortValue:Object) {
         _reportIndex = reportIndex;
         _sortValue = sortValue;
     }
@@ -24,7 +24,7 @@ public class SortableSparkGridColumn extends GridColumn {
         return _reportIndex;
     }
 
-    public function get sortValue():int {
+    public function get sortValue():Object {
         return _sortValue;
     }
 }

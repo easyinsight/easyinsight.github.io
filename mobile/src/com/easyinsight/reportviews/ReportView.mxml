@@ -2,13 +2,18 @@
 <s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
         viewActivate="onActivate()">
     <fx:Script><![CDATA[
+        import com.easyinsight.datasources.DataSourceRefreshEvent;
+        import com.easyinsight.datasources.DataSourceRefreshWindow;
         import com.easyinsight.filter.FilterFactory;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.report.ReportInfo;
+        import com.easyinsight.report.ReportNavigationEvent;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ActionReportLog;
         import com.easyinsight.util.ExportWindow;
         import com.easyinsight.util.FilterChangeEvent;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
@@ -26,6 +31,17 @@
             reportName = report.name;
             UserAudit.instance().log(new ActionReportLog(ActionReportLog.VIEW, report.id));
             createReportDisplay();
+            removeEventListener(ReportNavigationEvent.TO_REPORT, onReportNavigate);
+            addEventListener(ReportNavigationEvent.TO_REPORT, onReportNavigate);
+            stage.removeEventListener(StageOrientationEvent.ORIENTATION_CHANGE, onOrientationChange);
+            stage.addEventListener(StageOrientationEvent.ORIENTATION_CHANGE, onOrientationChange, false, 0, true);
+        }
+
+        private function onReportNavigate(event:ReportNavigationEvent):void {
+            var metadata:ReportMetadata = new ReportMetadata();
+            metadata.descriptor = InsightDescriptor(event.descriptor);
+            metadata.filters = event.filters;
+            navigator.pushView(ReportView, metadata);
         }
 
         private var report:InsightDescriptor;
@@ -57,6 +73,7 @@
                     layout.padding = 10;
                     filterGroup.layout = layout;
                     filterGroup.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+                    filterGroup.removeAllElements();
                     for each (var filter:FilterDefinition in reportFilters) {
                         if (filter.showOnReportView) {
                             var filterComp:UIComponent = FilterFactory.createTabletFilter(filter, report.dataFeedID);
@@ -68,19 +85,29 @@
                     }
                 }
             }
+            reportTarget.removeAllElements();
             reportTarget.addElement(component);
             reportComponent.addEventListener(ReportComponentEvent.GOT_DATA, onData);
+            ProgressAlert.alert(this, "Retrieving data...", null, reportComponent.operation());
             reportComponent.retrieveData(reportFilters);
         }
 
         private function refreshData():void {
-            busy = true;
+            var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
+            dsRefreshWindow.dataSourceID = report.dataFeedID;
+            dsRefreshWindow.addEventListener(DataSourceRefreshEvent.DATA_SOURCE_REFRESH, onRefresh, false, 0, true);
+            dsRefreshWindow.open(this, true);
+            PopUpUtil.centerPopUp(dsRefreshWindow);
+        }
+
+        private function onRefresh(event:Event):void {
+            ProgressAlert.alert(this, "Retrieving data...", null, reportComponent.operation());
             reportComponent.retrieveData(reportFilters);
         }
 
         private function createReportDisplay():void {
-            busy = true;
             var metadata:ReportMetadata = data as ReportMetadata;
+            ProgressAlert.alert(this, "Retrieving report metadata...", null, analysisService.getReportInfo);
             analysisService.getReportInfo.send(metadata.descriptor.id);
         }
 
@@ -91,12 +118,24 @@
                 filterGroup.width = application.width - 20;
                 filterGroup.height = filterGroup.contentHeight;
             }
+            scroller.width = FlexGlobals.topLevelApplication.width - 50;
+            scroller.height = FlexGlobals.topLevelApplication.height - 150;
+            trace("setting to " + scroller.width + " and " + scroller.height);
+            if (reportComponent != null && UIComponent(reportComponent.getReportView()).parent) {
+                //UIComponent(reportComponent.getReportView()).invalidateDisplayList();
+                UIComponent(reportComponent.getReportView()).validateNow();
+            }
+        }
+
+        private function onOrientationChange(event:Event):void {
+            trace("orientation change...");
+            invalidateDisplayList();
         }
 
         private var reportFilters:ArrayCollection;
 
         private function onFilterChange(event:FilterChangeEvent):void {
-            busy = true;
+            ProgressAlert.alert(this, "Retrieving data...", null, reportComponent.operation());
             reportComponent.retrieveData(reportFilters);
         }
 
@@ -112,7 +151,6 @@
         //private var filterGroup:Group;
 
         private function onData(event:ReportComponentEvent):void {
-            busy = false;
             var metadata:ReportMetadata = data as ReportMetadata;
             if (metadata.report == null) {
                 metadata.report = event.report;
@@ -143,25 +181,9 @@
         }
 
         private function exportReport():void {
-            /*
-                    var comboBoxPopUp:ComboBoxPopUp = new ComboBoxPopUp();
-            comboBoxPopUp.dataProvider = _dataProvider;
-            comboBoxPopUp.labelField = _labelField;
-            comboBoxPopUp.labelFunction = _labelFunction;
-            comboBoxPopUp.addEventListener(FilterChangeEvent.FILTER_CHANGE, onFilterChange, false, 0, true);
-            var point:Point = new Point(dropdownBox.x, dropdownBox.y);
-            var global:Point = localToGlobal(point);
-            comboBoxPopUp.x = global.x;
-            comboBoxPopUp.y = global.y + 20;
-            comboBoxPopUp.open(this, true);
-                    */
             var window:ExportWindow = new ExportWindow();
             window.report = reportComponent.actualReport;
-            var point:Point = new Point(exportButton.x, exportButton.y);
-            var global:Point = footerContainer.localToGlobal(point);
-            window.x = global.x;
-            window.y = global.y - 370;
-            window.open(this, true);
+            window.open(exportButton, true);
         }
 
         private function filter():void {
@@ -186,7 +208,7 @@
 
         private function toggleFilters():void {
             if (hasFilters) {
-                if (currentState == "") {
+                if (currentState == "" || currentState == "noFilters") {
                     if (hasData) {
                         currentState = "filters";
                     } else {
@@ -194,7 +216,7 @@
                     }
                 } else {
                     if (hasData) {
-                        currentState = "";
+                        currentState = "noFilters";
                     } else {
                         currentState = "noData";
                     }
@@ -206,8 +228,6 @@
         [Embed(source="../../../../assets/01-refresh2.png")]
         private var refreshIcon:Class;
 
-        [Bindable]
-        private var busy:Boolean;
 
         [Bindable]
         private var reportName:String;
@@ -221,53 +241,61 @@
         <s:Button label="Back" click="navigator.popView()"/>
     </s:navigationContent>
     <s:titleContent>
-        <s:Label text="{reportName}" color="#FFFFFF"/>
+        <s:Label text="{reportName}" color="#FFFFFF" textAlign="center" width="100%"/>
     </s:titleContent>
-    <s:actionContent>
-        <!--<s:Button icon="{gearIcon}" click="toggleMenu()"/>-->
-        <s:BusyIndicator visible="{busy}" id="busyIndicator" symbolColor="#FFFFFF"/>
-    </s:actionContent>
-    <!--<s:viewMenuItems>
-        <s:ViewMenuItem label="Filter" click="filter()" icon="{filterIcon}"  iconPlacement="left" />
-        <s:ViewMenuItem label="Export" click="exportReport()" icon="{exportIcon}" iconPlacement="left" />
-    </s:viewMenuItems>-->
     <s:states>
         <s:State name="filters"/>
+        <s:State name="noFilters"/>
         <s:State name="filtersNoData"/>
         <s:State name="noData"/>
     </s:states>
-    <s:VGroup id="vgroup" width="100%" height="100%" chromeColor="#FFFFFF">
+    <s:BorderContainer id="vgroup" width="100%" height="100%">
+        <s:layout>
+            <s:VerticalLayout/>
+        </s:layout>
+        <s:backgroundFill>
+            <s:SolidColor color="#F8F8F8" alpha="1"/>
+        </s:backgroundFill>
         <s:Group id="filterGroup" includeIn="filters, filtersNoData">
 
         </s:Group>
-        <s:BorderContainer id="reportTarget" width="100%" height="100%" borderAlpha="0" excludeFrom="noData">
+        <s:Group width="100%" height="100%">
             <s:layout>
-                <s:HorizontalLayout horizontalAlign="center"/>
+                <s:HorizontalLayout paddingLeft="10" paddingRight="10"/>
+            </s:layout>
+            <s:BorderContainer width="100%" height="100%" excludeFrom="noData" borderColor="#666666"
+                    cornerRadius="8" dropShadowVisible="true">
+                <s:layout>
+                    <s:HorizontalLayout horizontalAlign="center" paddingLeft="10" paddingRight="10" paddingTop="10"/>
+                </s:layout>
+                <s:backgroundFill>
+                    <s:SolidColor color="#FFFFFF" alpha="1"/>
+                </s:backgroundFill>
+                <s:Scroller id="scroller">
+                    <s:Group id="reportTarget"/>
+                </s:Scroller>
+            </s:BorderContainer>
+            <s:BorderContainer width="100%" height="100%" includeIn="noData">
+                <s:layout>
+                    <s:VerticalLayout horizontalAlign="center" verticalAlign="middle"/>
+                </s:layout>
+                <s:Label text="We didn't find any data for the fields and filters that you specified in the report."/>
+            </s:BorderContainer>
+        </s:Group>
+        <s:BorderContainer width="100%" height="50" id="footerContainer">
+            <s:layout>
+                <s:HorizontalLayout paddingTop="5" paddingBottom="5"/>
             </s:layout>
             <s:backgroundFill>
-                <s:SolidColor color="#FFFFFF" alpha="1"/>
-            </s:backgroundFill>
-        </s:BorderContainer>
-        <s:BorderContainer width="100%" height="100%" includeIn="noData">
-            <s:layout>
-                <s:VerticalLayout horizontalAlign="center" verticalAlign="middle"/>
-            </s:layout>
-            <s:Label text="We didn't find any data for the fields and filters that you specified in the report."/>
-        </s:BorderContainer>
-        <s:BorderContainer width="100%" height="48" id="footerContainer">
-            <s:layout>
-                <s:HorizontalLayout/>
-            </s:layout>
-            <s:backgroundFill>
-                <s:SolidColor color="#333333" alpha="1"/>
+                <s:SolidColor color="#000000" alpha="1"/>
             </s:backgroundFill>
             <s:Spacer width="100%"/>
-            <s:Button icon="{refreshIcon}" label="Refresh" width="130" click="refreshData()"/>
+            <s:Button icon="{refreshIcon}" label="Refresh" width="130" click="refreshData()" height="40"/>
             <s:Spacer width="100%"/>
-            <s:Button icon="{exportIcon}" label="Export" width="130" id="exportButton" click="exportReport()"/>
+            <s:Button icon="{exportIcon}" label="Export" width="130" id="exportButton" click="exportReport()" height="40"/>
             <s:Spacer width="100%"/>
-            <s:Button icon="{filterIcon}" label="Toggle Filters" width="130" click="toggleFilters()"/>
+            <s:Button icon="{filterIcon}" label="Toggle Filters" width="130" click="toggleFilters()" height="40"/>
             <s:Spacer width="100%"/>
         </s:BorderContainer>
-    </s:VGroup>
+    </s:BorderContainer>
 </s:View>

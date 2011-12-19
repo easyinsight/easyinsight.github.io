@@ -1,43 +1,44 @@
 <?xml version="1.0"?>
-<s:DataGrid xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-    implements="com.easyinsight.reportviews.IReportView" selectionMode="none" rowHeight="20" fontSize="10"
-        skinClass="com.easyinsight.reportviews.CustomDataGridSkin" chromeColor="#FFFFFF">
-    <!--
-    <mx:AdvancedDataGrid id="dataGrid" headerColors="{[0x333333, 0x333333]}" fontSize="10" verticalScrollPolicy="off" variableRowHeight="true" horizontalGridLines="false" horizontalGridLineColor="#DDDDDD" verticalGridLines="false"
-                alternatingItemColors="{[0xFFFFFF, 0xFFFFFF]}" backgroundColor="#FFFFFF" borderStyle="none" selectionMode="none">
-        </mx:AdvancedDataGrid> -->
+<s:Scroller xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+            implements="com.easyinsight.reportviews.IReportView">
     <fx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.Value;
         import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 
         import mx.collections.ArrayCollection;
+        import mx.core.FlexGlobals;
         import mx.formatters.Formatter;
 
-        import spark.collections.Sort;
-        import spark.collections.SortField;
+        import spark.components.gridClasses.GridColumn;
+
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            this.width = FlexGlobals.topLevelApplication.width;
+            this.height = FlexGlobals.topLevelApplication.height;
+        }
 
         public function renderReport(data:ArrayCollection, report:AnalysisDefinition, additionalProperties:Object):void {
             var vert:VerticalListDefinition = report as VerticalListDefinition;
             var dColl:ArrayCollection = new ArrayCollection();
-            var columns:ArrayCollection = new ArrayCollection();
+            var columns:Array = [];
             var labelColumn:SortableSparkGridColumn = new SortableSparkGridColumn(0, 0);
-            //var labelColumn:GridColumn = new GridColumn();
             labelColumn.sortable = false;
             labelColumn.width = 130;
             labelColumn.itemRenderer = new ClassFactory(SparkVerticalListRowHeaderRenderer);
-            var labelHeaderFactory:ClassFactory = new ClassFactory(SparkVerticalListHeaderRenderer);
-            //labelHeaderFactory.properties = { headerText: "" };
-            labelColumn.headerRenderer = labelHeaderFactory;
+            labelColumn.headerText = "";
             labelColumn.dataField = "Label";
-            columns.addItem(labelColumn);
+            columns.push(labelColumn);
+            var sortCriteria:int;
             var firstRow:Boolean = true;
             for each (var measure:AnalysisMeasure in vert.measures) {
                 var formatter:Formatter = measure.getFormatter();
                 var obj:Object = new Object();
                 obj["Label"] = measure.display;
                 obj["baseMeasure"] = measure;
+                obj["measure"] = measure;
                 var atLeastOneValue:Boolean = false;
                 for each (var row:Object in data) {
                     var columnValue:String;
@@ -52,7 +53,7 @@
                         continue;
                     }
                     var measureValue:Value = row[measure.qualifiedName()];
-                    if (measureValue.toNumber() != 0) {
+                    if (measureValue != null && measureValue.toNumber() != 0) {
                         atLeastOneValue = true;
                     }
                     var text:String;
@@ -65,11 +66,22 @@
                     obj[columnValue] = text;
                     obj[columnValue + "measure"] = measure;
                     if (firstRow) {
-                        var dataColumn:SortableSparkGridColumn = new SortableSparkGridColumn(1, val == null ? 0 : val.toSortValue().toNumber());
-                        //var dataColumn:GridColumn = new GridColumn();
-                        dataColumn.width = 73;
+                        var sortValue:Object;
+                        if (vert.column == null) {
+                            sortValue = 0;
+                        } else if (val != null) {
+                            if (vert.column.hasType(AnalysisItemTypes.DATE)) {
+                                sortCriteria = Array.NUMERIC;
+                                sortValue = val.toSortValue().toNumber();
+                            } else {
+                                sortCriteria = Array.CASEINSENSITIVE;
+                                sortValue = columnValue;
+                            }
+                        }
+                        var dataColumn:SortableSparkGridColumn = new SortableSparkGridColumn(1, sortValue);
                         dataColumn.headerText = columnValue;
                         dataColumn.dataField = columnValue;
+                        dataColumn.width = 0;
                         var factory:ClassFactory = new ClassFactory(SparkVerticalListRenderer);
                         factory.properties = { qualifiedName: columnValue };
                         dataColumn.itemRenderer = factory;
@@ -77,7 +89,7 @@
                         /*var headerFactory:ClassFactory = new ClassFactory(SparkVerticalListHeaderRenderer);
                          headerFactory.properties = { headerText: columnValue };*/
                         //dataColumn.headerRenderer = headerFactory;
-                        columns.addItem(dataColumn);
+                        columns.push(dataColumn);
                     }
                 }
                 if (firstRow) {
@@ -87,18 +99,19 @@
                     dColl.addItem(obj);
                 }
             }
-            /*if (columns.length <= 1) {
-             currentState = "noData";
-             } else {
-             currentState = "";
-             }*/
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("reportIndex"), new SortField("sortValue") ];
-            columns.sort = sort;
-            columns.refresh();
-            this.columns = columns;
-            //this.rowCount = dColl.length + 1;
-            this.dataProvider = dColl;
+            var perColSize:int = 100;
+            var minSize:int = (columns.length - 1) * perColSize + 130;
+            if (minSize < this.width) {
+                perColSize += (this.width - minSize) / (columns.length - 1);
+            }
+            for each (var col:GridColumn in columns) {
+                if (col.width == 0) {
+                    col.width = perColSize;
+                }
+            }
+            columns.sortOn(["reportIndex", "sortValue"], [Array.NUMERIC, sortCriteria]);
+            dataGrid.columns = new ArrayCollection(columns);
+            dataGrid.dataProvider = dColl;
             invalidateSize();
         }
 
@@ -106,4 +119,9 @@
             return true;
         }
         ]]></fx:Script>
-</s:DataGrid>
+    <s:Group>
+        <s:DataGrid
+        selectionMode="none" rowHeight="20" fontSize="10"
+        skinClass="com.easyinsight.reportviews.CustomDataGridSkin" chromeColor="#FFFFFF" id="dataGrid"/>
+    </s:Group>
+</s:Scroller>

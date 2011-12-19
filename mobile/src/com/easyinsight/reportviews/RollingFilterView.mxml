@@ -31,7 +31,7 @@
 
         private function onActivate():void {
             filterInfo = data as FilterInfo;
-            filterName = filterInfo.filterDefinition.label;
+            filterName = FilterDefinition.getLabel(filterInfo.filterDefinition, filterInfo.filterDefinition.field);
             filterEnabled = filterInfo.filterDefinition.enabled;
             radioGroup = new RadioButtonGroup();
             var factory:ClassFactory = new ClassFactory(FilterRadioButton);

@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<s:SkinnablePopUpContainer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-    creationComplete="onCreation()" skinClass="com.easyinsight.skin.ReversePopupSkin" height="350">
+<s:Callout xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    creationComplete="onCreation()" height="350" horizontalPosition="start"
+    verticalPosition="after">
     <fx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.framework.InsightRequestMetadata;
@@ -29,6 +30,7 @@
             }
             var metadata:InsightRequestMetadata = new InsightRequestMetadata();
             metadata.utcOffset = new Date().getTimezoneOffset();
+            ProgressAlert.alert(this, "Emailing the report...", null, excelService.emailReport);
             excelService.emailReport.send(_report, format, metadata, emailInput.text, subjectInput.text, messageArea.text);
         }
 
@@ -42,9 +44,6 @@
         }
 
         private function onMouseDown(event:MouseEvent):void {
-            //var point:Point = localToGlobal(new Point(event.localX, event.localY));
-            //trace("x = " + point.x + ", y= " + point.y);
-            trace("x = " + event.stageX + " , y= " + event.stageY);
             var result:Boolean = hitTestPoint(event.stageX, event.stageY);
             if (!result) {
                 if (!result) {
@@ -62,33 +61,16 @@
     </fx:Declarations>
     <s:BorderContainer>
         <s:layout>
-            <s:VerticalLayout paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" horizontalAlign="center"/>
+            <s:VerticalLayout paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="30" horizontalAlign="center"/>
         </s:layout>
         <s:backgroundFill>
             <s:SolidColor color="#FFFFFF" alpha="1"/>
         </s:backgroundFill>
-        <!--
-        <mx:Label text="What format do you want for the report?"/>
-    <mx:RadioButtonGroup id="typeGroup" selectedValue="html"/>
-    <mx:HBox>
-        <mx:RadioButton label="HTML" value="html" groupName="typeGroup"/>
-        <mx:RadioButton label="Excel" value="excel" groupName="typeGroup"/>
-    </mx:HBox>
-    <mx:Label text="Who will this email go to?"/>
-    <mx:TextInput id="emailInput" width="400"/>
-    <mx:Label text="What should the subject of the email be?"/>
-    <mx:TextInput id="subjectInput" text="Take a look at this report"  width="400"/>
-    <mx:Label text="Any message to include with the email?"/>
-    <mx:TextArea editable="true" borderStyle="solid" borderThickness="1"  width="400" id="messageArea" height="80"/>
-    <mx:HBox>
-        <util:SaveButton click="send()" label="Send"/>
-        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
-    </mx:HBox>
-        -->
         <s:Label text="What format do you want for the report?"/>
         <s:HGroup>
             <s:RadioButton label="HTML" value="html" groupName="typeGroup"/>
             <s:RadioButton label="Excel" value="excel" groupName="typeGroup"/>
+            <s:RadioButton label="PDF" value="pdf" groupName="typeGroup"/>
         </s:HGroup>
         <s:Label text="Who will this email go to?"/>
         <s:TextInput id="emailInput"/>
@@ -96,6 +78,6 @@
         <s:TextInput id="subjectInput" text="Take a look at this report"/>
         <s:Label text="Any message to include with the email?"/>
         <s:TextArea editable="true" id="messageArea" height="60"/>
-        <s:Button label="Send" click="send()"/>
+        <s:Button label="Send" click="send()" height="30"/>
     </s:BorderContainer>
-</s:SkinnablePopUpContainer>
+</s:Callout>

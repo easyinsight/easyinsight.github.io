@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<s:DataGrid xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+            implements="com.easyinsight.reportviews.IReportView" selectionMode="none" rowHeight="20" fontSize="10"
+            skinClass="com.easyinsight.reportviews.CustomDataGridSkin" chromeColor="#FFFFFF">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.analysis.formatter.FormattingConfiguration;
+        import com.easyinsight.analysis.ytd.TimeIntervalValue;
+        import com.easyinsight.analysis.ytd.YTDDefinition;
+        import com.easyinsight.analysis.ytd.YTDReportFieldExtension;
+        import com.easyinsight.analysis.ytd.YTDValue;
+
+        import mx.collections.ArrayCollection;
+        import mx.formatters.Formatter;
+
+        import spark.collections.Sort;
+        import spark.collections.SortField;
+        import spark.components.gridClasses.GridColumn;
+
+
+        private function createColumn(field:String):GridColumn {
+            var intervalColumn:GridColumn = new GridColumn();
+            intervalColumn.headerText = field;
+            intervalColumn.dataField = field;
+            var factory:ClassFactory = new ClassFactory(YTDVerticalListRenderer);
+            factory.properties = { qualifiedName: field };
+            intervalColumn.itemRenderer = factory;
+            intervalColumn.sortable = false;
+            return intervalColumn;
+        }
+
+        public function renderReport(dataSet:ArrayCollection, report:AnalysisDefinition, additionalProperties:Object):void {
+            var vert:YTDDefinition = report as YTDDefinition;
+            var dColl:ArrayCollection = new ArrayCollection();
+            var columns:ArrayCollection = new ArrayCollection();
+            var labelColumn:SortableSparkGridColumn = new SortableSparkGridColumn(0, 0);
+            //var labelColumn:GridColumn = new GridColumn();
+            labelColumn.sortable = false;
+            labelColumn.width = 130;
+            labelColumn.itemRenderer = new ClassFactory(SparkVerticalListRowHeaderRenderer);
+            var labelHeaderFactory:ClassFactory = new ClassFactory(SparkVerticalListHeaderRenderer);
+            //labelHeaderFactory.properties = { headerText: "" };
+            labelColumn.headerRenderer = labelHeaderFactory;
+            labelColumn.dataField = "Label";
+            columns.addItem(labelColumn);
+
+            var timeIntervals:ArrayCollection = additionalProperties["timeIntervals"];
+            for each (var interval:Value in timeIntervals) {
+                columns.addItem(createColumn(interval.toString()));
+            }
+
+            columns.addItem(createColumn("YTD"));
+            columns.addItem(createColumn("Average"));
+
+            var hasBenchmark:Boolean = false;
+            for each (var testMeasure:AnalysisMeasure in vert.measures) {
+                if (testMeasure.reportFieldExtension != null && testMeasure.reportFieldExtension is YTDReportFieldExtension) {
+                    if (YTDReportFieldExtension(testMeasure.reportFieldExtension).benchmark != null) {
+                        hasBenchmark = true;
+                        break;
+                    }
+                }
+            }
+
+            if (hasBenchmark) {
+                columns.addItem(createColumn("BK"));
+                columns.addItem(createColumn("Variation"));
+                var variationConfig:FormattingConfiguration = new FormattingConfiguration();
+                variationConfig.formattingType = FormattingConfiguration.PERCENTAGE;
+                var variationFormatter:Formatter = variationConfig.getFormatter(1, 1);
+            }
+
+            for (var z:int = 0; z < dataSet.length; z++) {
+                var hasValue:Boolean = false;
+                var ytdValue:YTDValue = dataSet.getItemAt(z) as YTDValue;
+                if (ytdValue == null) {
+                    continue;
+                }
+
+                var obj:Object = new Object();
+                obj["measure"] = ytdValue.analysisMeasure;
+                obj["baseMeasure"] = ytdValue.analysisMeasure;
+                var formatter:Formatter = ytdValue.analysisMeasure.getFormatter();
+                if (ytdValue.timeIntervalValues.length > 0) {
+                    for (var y:int = 0; y < ytdValue.timeIntervalValues.length; y++) {
+                        var timeIntervalValue:TimeIntervalValue = ytdValue.timeIntervalValues.getItemAt(y) as TimeIntervalValue;
+                        var label:String = timeIntervalValue.dateValue.toString();
+                        if (timeIntervalValue.value.toNumber() != 0) {
+                            hasValue = true;
+                        }
+                        obj[label] = formatter.format(timeIntervalValue.value);
+                    }
+                    obj["YTD"] = formatter.format(ytdValue.ytd);
+                    obj["Average"] = formatter.format(ytdValue.average);
+                    if (hasBenchmark && ytdValue.benchmarkMeasure != null) {
+                        obj["BK"] = ytdValue.benchmarkMeasure.getFormatter().format(ytdValue.benchmarkValue);
+                        obj["Variation"] = variationFormatter.format(ytdValue.variation);
+                    }
+                    if (hasValue) {
+                        dColl.addItem(obj);
+                    }
+                }
+            }
+            this.columns = columns;
+            //this.rowCount = dColl.length + 1;
+            this.dataProvider = dColl;
+            invalidateSize();
+        }
+
+        public function preserveValues():Boolean {
+            return true;
+        }
+        ]]></fx:Script>
+</s:DataGrid>
+

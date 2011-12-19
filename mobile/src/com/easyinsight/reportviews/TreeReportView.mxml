@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+          xmlns:reportviews="com.easyinsight.reportviews.*"
+          implements="com.easyinsight.reportviews.IReportView" creationComplete="addListeners()" width="100%">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisHierarchyItem;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.HierarchyLevel;
+        import com.easyinsight.analysis.tree.TreeDefinition;
+
+        import mx.collections.ArrayCollection;
+        import mx.events.ItemClickEvent;
+
+        import spark.layouts.VerticalLayout;
+
+        private function addListeners():void {
+            list.removeEventListener(ItemClickEvent.ITEM_CLICK, onItemClick);
+            list.addEventListener(ItemClickEvent.ITEM_CLICK, onItemClick);
+            stacksList.removeEventListener(ItemClickEvent.ITEM_CLICK, onItemClick);
+            stacksList.addEventListener(ItemClickEvent.ITEM_CLICK, onItemClick);
+        }
+
+        private var index:int = 0;
+        
+        private function stackItemClick(event:ItemClickEvent):void {
+            var index:int = event.index;
+            currentState = "listState";
+            if (index == 0) {
+                stacksGroup.visible = false;
+                stacks.removeAll();
+                treeLevels = topLevel;
+                this.index = 0;
+            } else {
+                for (var i:int = stacks.length; i > index; i++) {
+                    stacks.removeItemAt(i);
+                }
+                this.index = index;
+            }
+        }
+
+        private function onItemClick(event:ItemClickEvent):void {
+            var stackObj:Object = new Object();
+            stackObj.label = HierarchyLevel(hierarchy.hierarchyLevels.getItemAt(index)).analysisItem.display + ": " + event.item[HierarchyLevel(hierarchy.hierarchyLevels.getItemAt(index)).analysisItem.qualifiedName()];
+            stackObj.object = event.item;
+            stacks.addItem(stackObj);
+            index++;
+            if (index == (hierarchy.hierarchyLevels.length)) {
+                currentState = "gridState";
+                grid.populateGrid(report.items, report, event.item.children);
+            } else {
+                VerticalLayout(stacksList.layout).requestedRowCount = stacks.length;
+                stacksGroup.visible = true;
+                var treeLevel:Object = list.dataProvider.getItemAt(event.index) as Object;
+                treeLevels = treeLevel.children;
+
+                var labelField:String = HierarchyLevel(hierarchy.hierarchyLevels.getItemAt(index)).analysisItem.qualifiedName();
+                trace("setting label field to " + labelField);
+                list.labelField = labelField;
+            }
+        }
+
+        private var hierarchy:AnalysisHierarchyItem;
+
+        private var report:TreeDefinition;
+
+        private function handleLevel(level:HierarchyLevel, levels:ArrayCollection, row:Object, masterResult:Object, items:ArrayCollection):Object {
+            var value:Object = row[level.analysisItem.qualifiedName()];
+            var key:String = "val" + String(value);
+            var result:Object = masterResult[key];
+            var newResult:Boolean = false;
+            if (result == null) {
+                result = new Object();
+                masterResult[key] = result;
+                result.children = new ArrayCollection();
+                newResult = true;
+                result[level.analysisItem.qualifiedName()] = String(value);
+                trace("creating new result for " + key + " at level " + levels.getItemIndex(level) + ", assigned as " + String(value) + " to " + level.analysisItem.qualifiedName());
+                for each (var item:AnalysisItem in items) {
+                    result[item.qualifiedName()] = row[item.qualifiedName()];
+                }
+            }
+            var index:int = levels.getItemIndex(level);
+            if (index < (levels.length - 1)) {
+                var nextLevel:HierarchyLevel = levels.getItemAt(index + 1) as HierarchyLevel;
+                var returnResult:Object = handleLevel(nextLevel, levels, row, result, items);
+                if (returnResult != null) {
+                    /*for (var existingKey:String in result) {
+                        returnResult[existingKey] = result[existingKey];
+                    }*/
+                    if (key == "valStringer") {
+                        trace("adding child to Stringer");
+                    }
+                    result.children.addItem(returnResult);
+                }
+            } else {
+
+            }
+            if (newResult) {
+                return result;
+            } else {
+                return null;
+            }
+        }
+
+        public function renderReport(data:ArrayCollection, report:AnalysisDefinition, additionalProperties:Object):void {
+            var treeDefinition:TreeDefinition = report as TreeDefinition;
+            this.report = treeDefinition;
+            this.hierarchy = treeDefinition.hierarchy as AnalysisHierarchyItem;
+            var masterResult:Object = new Object();
+            for each (var obj:Object in data) {
+                handleLevel(HierarchyLevel(hierarchy.hierarchyLevels.getItemAt(0)), hierarchy.hierarchyLevels, obj, masterResult, treeDefinition.items);
+            }
+            trace("...");
+            var rows:ArrayCollection = new ArrayCollection();
+            list.labelField = HierarchyLevel(hierarchy.hierarchyLevels.getItemAt(0)).analysisItem.qualifiedName();
+            for (var key:String in masterResult) {
+                var rObj:Object = masterResult[key];
+                rows.addItem(rObj);
+            }
+            this.treeLevels = rows;
+            topLevel = treeLevels;
+        }
+        
+        private var topLevel:ArrayCollection;
+        
+        [Bindable]
+        private var treeLevels:ArrayCollection;
+        
+        [Bindable]
+        private var stacks:ArrayCollection = new ArrayCollection();
+
+        public function preserveValues():Boolean {
+            return false;
+        }
+        ]]></fx:Script>
+    <s:states>
+        <s:State name="listState"/>
+        <s:State name="gridState"/>
+    </s:states>
+    <s:HGroup verticalAlign="middle" id="stacksGroup" visible="false">
+        <s:Label text="Selected Levels:"/>
+        <s:List dataProvider="{stacks}" width="100%" id="stacksList"/>
+    </s:HGroup>
+    <s:List dataProvider="{treeLevels}" width="100%" itemRenderer="com.easyinsight.reportviews.TreeListRenderer" id="list" includeIn="listState"/>
+    <reportviews:AbstractedListView width="100%"  id="grid" includeIn="gridState"/>
+</s:VGroup>

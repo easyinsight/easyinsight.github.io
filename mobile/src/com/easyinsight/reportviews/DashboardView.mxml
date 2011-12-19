@@ -2,21 +2,46 @@
 <s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
     xmlns:mx="library://ns.adobe.com/flex/mx" viewActivate="onActivate()">
     <fx:Script><![CDATA[
+        import com.easyinsight.baseviews.MobileLoginComponent;
         import com.easyinsight.dashboard.Dashboard;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.dashboard.DashboardEditorMetadata;
         import com.easyinsight.dashboard.IDashboardViewComponent;
+        import com.easyinsight.framework.User;
 
         import mx.core.UIComponent;
 
         import mx.events.FlexEvent;
+        import mx.messaging.ChannelSet;
+        import mx.messaging.config.ServerConfig;
+        import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncToken;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
 
         private var dashboardDescriptor:DashboardDescriptor;
 
         private function onActivate():void {
+            removeEventListener(LogoutEvent.LOGOUT, onLogout);
+            addEventListener(LogoutEvent.LOGOUT, onLogout);
             dashboardDescriptor = data as DashboardDescriptor;
             dashboardName = dashboardDescriptor.name;
             dashboardService.getDashboard.send(dashboardDescriptor.id);
+        }
+
+        private function onLogout(event:LogoutEvent):void {
+            User.destroy();
+            var cs:ChannelSet = ServerConfig.getChannelSet("admin");
+            var token:AsyncToken = cs.logout();
+            token.addResponder(new AsyncResponder(logoutResultEvent, logoutFaultEvent));
+        }
+
+        private function logoutResultEvent(event:ResultEvent, token:Object = null):void {
+            navigator.replaceView(MobileLoginComponent);
+        }
+
+        private function logoutFaultEvent(event:FaultEvent, token:Object = null):void {
+            trace("Failed to log out with " + event.fault.faultString);
         }
 
         private var rootView:IDashboardViewComponent;
@@ -25,6 +50,7 @@
             var dashboard:Dashboard = dashboardService.getDashboard.lastResult as Dashboard;
             var metadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             metadata.dataSourceID = dashboard.dataSourceID;
+            metadata.dashboardView = this;
             metadata.role = dashboard.role;
             rootView = DashboardMobileFactory.createViewUIComponent(dashboard.rootElement, metadata);
             UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {

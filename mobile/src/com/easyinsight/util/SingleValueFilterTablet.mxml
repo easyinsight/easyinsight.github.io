@@ -4,6 +4,7 @@
     <fx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
         import com.easyinsight.analysis.Value;
+        import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.FilterValueDefinition;
 
         import mx.collections.ArrayCollection;
@@ -18,7 +19,7 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
-            filterName = filterInfo.filterDefinition.field.display + ":";
+            filterName = FilterDefinition.getLabel(filterInfo.filterDefinition, filterInfo.filterDefinition.field);
             var value:Object = FilterValueDefinition(filterInfo.filterDefinition).filteredValues.getItemAt(0);
             if (value is String) {
                 filterValue = value as String;
@@ -35,12 +36,20 @@
         }
 
         private function retrieveMetadata():void {
-            dataService.getAnalysisItemMetadata.send(filterInfo.dataSourceID, filterInfo.filterDefinition.field, 0, filterInfo.reportID, filterInfo.dashboardID);
+            if (FilterValueDefinition(filterInfo.filterDefinition).cachedValues != null) {
+                argh(FilterValueDefinition(filterInfo.filterDefinition).cachedValues as AnalysisDimensionResultMetadata);
+            } else {
+                dataService.getAnalysisItemMetadata.send(filterInfo.dataSourceID, filterInfo.filterDefinition.field, 0, filterInfo.reportID, filterInfo.dashboardID);
+            }
         }
 
         private function gotMetadata():void {
             var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
-                AnalysisDimensionResultMetadata;
+                    AnalysisDimensionResultMetadata;
+            argh(analysisDimensionResultMetadata);
+        }
+
+        private function argh(analysisDimensionResultMetadata:AnalysisDimensionResultMetadata):void {
             var strings:ArrayCollection = new ArrayCollection();
             if (analysisDimensionResultMetadata != null && analysisDimensionResultMetadata.values != null) {
                 for each (var value:Value in analysisDimensionResultMetadata.values) {

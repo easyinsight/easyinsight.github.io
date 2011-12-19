@@ -9,10 +9,13 @@ package com.easyinsight.reportviews {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.solutions.InsightDescriptor;
 
+import mx.collections.ArrayCollection;
+
 public class ReportMetadata {
 
     public var descriptor:InsightDescriptor;
     public var report:AnalysisDefinition;
+    public var filters:ArrayCollection;
 
     public function ReportMetadata() {
     }

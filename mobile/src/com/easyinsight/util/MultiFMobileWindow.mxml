@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
-<s:SkinnablePopUpContainer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-                           xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:util="com.easyinsight.util.*"
-                           creationComplete="onCreation()" skinClass="com.easyinsight.skin.PopupSkin">
+<s:Callout xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+                           xmlns:util="com.easyinsight.util.*"
+                           creationComplete="onCreation()" horizontalPosition="start"
+                           verticalPosition="after">
     <fx:Script><![CDATA[
         import com.easyinsight.filtering.DateLevelWrapper;
         import com.easyinsight.filtering.MultiFlatDateFilterDefinition;
@@ -88,12 +89,12 @@
         <s:State name="startDate"/>
         <s:State name="endDate"/>
     </s:states>
-    <s:VGroup includeIn="startDate">
+    <s:VGroup includeIn="startDate" paddingTop="10">
         <s:Label text="Please click on a start month." fontSize="14"/>
         <util:ItemClickList labelField="month" id="startList" dataProvider="{months}" width="100%" itemClick="startItem(event)"/>
     </s:VGroup>
-    <s:VGroup includeIn="endDate">
+    <s:VGroup includeIn="endDate" paddingTop="10">
         <s:Label text="Please click on an end month." fontSize="14"/>
         <util:ItemClickList labelField="month" id="endList" dataProvider="{months}" width="100%" itemClick="endItem(event)"/>
     </s:VGroup>
-</s:SkinnablePopUpContainer>
+</s:Callout>

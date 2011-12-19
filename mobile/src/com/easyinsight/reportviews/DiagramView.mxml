@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+         xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:diagrammer="com.anotherflexdev.diagrammer.*"
+         implements="com.easyinsight.reportviews.IReportView">
+    <fx:Script><![CDATA[
+        import com.anotherflexdev.diagrammer.Link;
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.TrendOutcome;
+        import com.easyinsight.analysis.diagram.DiagramDefinition;
+        import com.easyinsight.analysis.diagram.DiagramLink;
+        import com.easyinsight.analysis.diagram.DiagramReportFieldExtension;
+
+        import mx.collections.ArrayCollection;
+
+        private var diagramDef:DiagramDefinition;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, additionalProperties:Object):void {
+            if (dataSet.length > 0) {
+                var editor:Boolean = additionalProperties["reportEditor"];
+                diagramDef = analysisDefinition as DiagramDefinition;
+                diagram.removeAllElements();
+
+                var map:Object = new Object();
+                for (var i:int = 0; i < dataSet.length; i++) {
+                    var trendOutcome:TrendOutcome = dataSet.getItemAt(i) as TrendOutcome;
+                    trendOutcome.dataSourceID = diagramDef.dataFeedID;
+                    for each (var m:AnalysisMeasure in diagramDef.measures) {
+                        if (m.qualifiedName() == trendOutcome.measure.qualifiedName()) {
+                            trendOutcome.measure = m;
+                        }
+                    }
+                    var node:DiagramBaseNode = new DiagramBaseNode();
+                    node.editEnabled = editor;
+                    node.outcome = trendOutcome;
+                    node.x = DiagramReportFieldExtension(trendOutcome.measure.reportFieldExtension).x;
+                    node.y = DiagramReportFieldExtension(trendOutcome.measure.reportFieldExtension).y;
+                    diagram.addElement(node);
+                    map[trendOutcome.measure.qualifiedName()] = node;
+                }
+                var toRemove:Array = [];
+                for each (var dLink:DiagramLink in diagramDef.links) {
+                    var startNode:DiagramBaseNode = map[dLink.startItem.qualifiedName()];
+                    var endNode:DiagramBaseNode = map[dLink.endItem.qualifiedName()];
+                    if (startNode != null && endNode != null) {
+                        var link:Link = diagram.addLink(startNode, endNode);
+                        link.linkName = dLink.label;
+                    } else {
+                        toRemove.push(dLink);
+                    }
+                }
+                for each (var xLink:DiagramLink in toRemove) {
+                    diagramDef.links.removeItemAt(diagramDef.links.getItemIndex(xLink));
+                }
+            } else {
+                diagram.removeAllElements();
+            }
+        }
+
+        public function preserveValues():Boolean {
+            return false;
+        }
+        ]]></fx:Script>
+    <diagrammer:Diagram id="diagram" width="100%" height="100%"/>
+</s:Group>

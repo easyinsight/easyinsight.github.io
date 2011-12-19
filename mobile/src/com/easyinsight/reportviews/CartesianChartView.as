@@ -21,6 +21,9 @@ import mx.charts.chartClasses.IAxis;
 import mx.charts.chartClasses.Series;
 import mx.collections.ArrayCollection;
 import mx.formatters.Formatter;
+import mx.graphics.GradientEntry;
+import mx.graphics.LinearGradient;
+import mx.graphics.SolidColor;
 
 import spark.components.HGroup;
 
@@ -146,19 +149,32 @@ public class CartesianChartView extends HGroup implements IReportView {
         return 0;
     }
 
+    protected function getGradientColor():uint {
+        return 0;
+    }
+
+    protected function useGradientColor():Boolean {
+        return false;
+    }
+
     private function styleColumns(mySeries:Array):Array {
         var legendItems:Array = [];
         for (var j:int = 0; j < getMeasures().length; j++) {
             var measure:AnalysisMeasure = getMeasures().getItemAt(j) as AnalysisMeasure;
             var fills:Array;
             if (getMeasures().length == 1) {
-                if (useChartColor()) {
-                    fills = [getChartColor()];
+                if (useGradientColor()) {
+                    var gradient:LinearGradient = new LinearGradient();
+                    gradient.angle = 90;
+                    gradient.entries = [ new GradientEntry(getChartColor(), 0.0), new GradientEntry(getGradientColor(), 0.95)];
+                    fills = [ gradient ];
+                } else if (useChartColor()) {
+                    fills = [new SolidColor(getChartColor())];
                 } else {
-                    fills = FillProvider.getColors(getColorScheme(), [], getAngle());
+                    fills = FillProvider.getColors(getColorScheme(), getAngle());
                 }
             } else {
-                fills = [FillProvider.getColor(getColorScheme(), [], j, getAngle())];
+                fills = [FillProvider.getColor(getColorScheme(), j, getAngle())];
             }
             mySeries[j].setStyle("fills", fills);
 

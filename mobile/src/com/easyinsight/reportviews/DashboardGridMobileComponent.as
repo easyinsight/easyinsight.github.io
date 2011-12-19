@@ -10,6 +10,7 @@ import com.easyinsight.dashboard.DashboardEditorMetadata;
 import com.easyinsight.dashboard.DashboardGrid;
 import com.easyinsight.dashboard.DashboardGridItem;
 import com.easyinsight.dashboard.IDashboardViewComponent;
+import com.easyinsight.dashboard.SizeInfo;
 
 import mx.collections.ArrayCollection;
 
@@ -76,7 +77,18 @@ public class DashboardGridMobileComponent extends VGroup implements IDashboardVi
     }
 
     public function reportCount():ArrayCollection {
+        var reports:ArrayCollection = new ArrayCollection();
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            reports.addAll(comp.reportCount());
+        }
+        return reports;
+    }
+
+    public function obtainPreferredSizeInfo():SizeInfo {
         return null;
+    }
+
+    public function toggleFilters(showFilters:Boolean):void {
     }
 }
 }

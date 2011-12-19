@@ -4,6 +4,7 @@
     <fx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.filtering.AnalysisItemFilterDefinition;
+        import com.easyinsight.filtering.FilterDefinition;
 
         import mx.collections.ArrayCollection;
 
@@ -16,7 +17,7 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
-            filterName = filterInfo.filterDefinition.filterName + ":";
+            filterName = FilterDefinition.getLabel(filterInfo.filterDefinition, filterInfo.filterDefinition.field);
             filterValue = AnalysisItemFilterDefinition(filterInfo.filterDefinition).targetItem.display;
             fields = AnalysisItemFilterDefinition(filterInfo.filterDefinition).availableItems;
         }
@@ -33,5 +34,4 @@
     <s:Label text="{filterName}"/>
     <util:EIComboBox selectedValue="{filterValue}" id="dropdownBox" filterChange="onFilterChange(event)" labelField="display" dataProvider="{fields}"
             selectedProperty="display"/>
-    <!--<s:Button icon="{gearIcon}" click="configure()"/>-->
 </util:TabletFilterRenderer>

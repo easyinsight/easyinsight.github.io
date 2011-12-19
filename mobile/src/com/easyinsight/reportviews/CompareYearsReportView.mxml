@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<s:DataGrid xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+            implements="com.easyinsight.reportviews.IReportView" selectionMode="none" rowHeight="20" fontSize="10"
+            skinClass="com.easyinsight.reportviews.CustomDataGridSkin" chromeColor="#FFFFFF">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.analysis.formatter.FormattingConfiguration;
+        import com.easyinsight.analysis.formatter.PercentageNumberFormatter;
+        import com.easyinsight.analysis.ytd.CompareYearsDefinition;
+        import com.easyinsight.analysis.ytd.CompareYearsResults;
+        import com.easyinsight.analysis.ytd.CompareYearsRow;
+        import com.easyinsight.analysis.ytd.TimeIntervalValue;
+        import com.easyinsight.analysis.ytd.YTDDefinition;
+        import com.easyinsight.analysis.ytd.YTDReportFieldExtension;
+        import com.easyinsight.analysis.ytd.YTDValue;
+        import com.easyinsight.filtering.FilterDefinition;
+        import com.easyinsight.filtering.MultiFlatDateFilterDefinition;
+
+        import mx.collections.ArrayCollection;
+        import mx.formatters.Formatter;
+        import mx.formatters.NumberBaseRoundType;
+
+        import spark.collections.Sort;
+        import spark.collections.SortField;
+        import spark.components.gridClasses.GridColumn;
+
+
+        private function createColumn(field:String, header:String):GridColumn {
+            var intervalColumn:GridColumn = new GridColumn();
+            intervalColumn.headerText = header;
+            intervalColumn.dataField = field;
+            var factory:ClassFactory = new ClassFactory(YTDVerticalListRenderer);
+            factory.properties = { qualifiedName: field };
+            intervalColumn.itemRenderer = factory;
+            intervalColumn.sortable = false;
+            return intervalColumn;
+        }
+
+        public function renderReport(dataSet:ArrayCollection, report:AnalysisDefinition, additionalProperties:Object):void {
+            var vert:CompareYearsDefinition = report as CompareYearsDefinition;
+            var dColl:ArrayCollection = new ArrayCollection();
+            var columns:ArrayCollection = new ArrayCollection();
+            var labelColumn:SortableSparkGridColumn = new SortableSparkGridColumn(0, 0);
+            //var labelColumn:GridColumn = new GridColumn();
+            labelColumn.sortable = false;
+            labelColumn.width = 130;
+            labelColumn.itemRenderer = new ClassFactory(SparkVerticalListRowHeaderRenderer);
+            var labelHeaderFactory:ClassFactory = new ClassFactory(SparkVerticalListHeaderRenderer);
+            //labelHeaderFactory.properties = { headerText: "" };
+            labelColumn.headerRenderer = labelHeaderFactory;
+            labelColumn.dataField = "Label";
+            columns.addItem(labelColumn);
+
+            var filterString:String = null;
+            for each (var filter:FilterDefinition in report.filterDefinitions) {
+                if (filter.getType() == FilterDefinition.MULTI_FLAT_DATE) {
+                    filterString = MultiFlatDateFilterDefinition(filter).createLabel() + " ";
+                    break;
+                }
+            }
+
+            var timeIntervals:ArrayCollection = additionalProperties["headers"];
+            for each (var header:String in timeIntervals) {
+                var colHeader:String;
+                if (header.length == 4 && filterString != null) {
+                    colHeader = filterString + header;
+                } else {
+                    colHeader = header;
+                }
+                columns.addItem(createColumn(header, colHeader));
+            }
+
+
+
+            var pf:PercentageNumberFormatter = new PercentageNumberFormatter();
+            pf.precision = 1;
+            pf.rounding = NumberBaseRoundType.NEAREST;
+            var a:int = 0;
+            for (var z:int = 0; z < dataSet.length; z++) {
+                var hasValue:Boolean = false;
+                var ytdValue:CompareYearsRow = dataSet.getItemAt(z) as CompareYearsRow;
+                var obj:Object = new Object();
+                obj["baseMeasure"] = ytdValue.measure;
+                obj["measure"] = ytdValue.measure;
+                var formatter:Formatter = ytdValue.measure.getFormatter();
+                for (var key:String in ytdValue.results) {
+                    var compareYearResult:CompareYearsResults = ytdValue.results[key];
+                    var numValue:Number = compareYearResult.value.toNumber();
+                    if (!isNaN(numValue) && isFinite(numValue) && numValue != 0) {
+                        hasValue = true;
+                    }
+                    var result:String;
+                    var color:uint = 0;
+                    if (compareYearResult.percentChange) {
+                        result = pf.format(numValue);
+                        if (numValue < 0) {
+                            color = 0xAA0000;
+                        }
+                    } else {
+                        result = formatter.format(numValue);
+                    }
+                    obj[key] = result;
+                    obj[key + "color"] = color;
+                }
+                if (hasValue) {
+                    dColl.addItem(obj);
+                }
+            }
+            this.columns = columns;
+            //this.rowCount = dColl.length + 1;
+            this.dataProvider = dColl;
+            invalidateSize();
+        }
+
+        public function preserveValues():Boolean {
+            return true;
+        }
+        ]]></fx:Script>
+</s:DataGrid>
+

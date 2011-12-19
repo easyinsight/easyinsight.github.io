@@ -24,18 +24,15 @@ import com.easyinsight.util.FilterChangeEvent;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
-import flash.geom.Point;
 
 import mx.collections.ArrayCollection;
 import mx.core.FlexGlobals;
 import mx.core.UIComponent;
-import mx.effects.Sequence;
 import mx.events.FlexEvent;
 import mx.graphics.SolidColor;
 import mx.states.AddItems;
 import mx.states.SetProperty;
 import mx.states.State;
-import mx.states.Transition;
 
 import org.flexlayouts.layouts.FlowLayout;
 
@@ -46,7 +43,6 @@ import spark.components.HGroup;
 import spark.components.Image;
 
 import spark.components.VGroup;
-import spark.effects.Fade;
 import spark.primitives.Rect;
 
 public class DashboardStackMobileComponent extends VGroup implements IDashboardViewComponent {
@@ -120,12 +116,8 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
         if (reports.length == 1) {
             var report:AnalysisDefinition = reports.getItemAt(0) as AnalysisDefinition;
             var window:ExportWindow = new ExportWindow();
-            var point:Point = new Point(button.x, button.y);
-            var global:Point = button.parent.localToGlobal(point);
-            window.x = global.x - 200;
-            window.y = global.y + button.height;
             window.report = report;
-            window.open(this, true);
+            window.open(button, true);
         }
     }
 
@@ -197,8 +189,8 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
             headerHGroup.percentWidth = 100;
             childFiltersBox = new HGroup();
             childFiltersBox.percentWidth = 100;
-            var myFiltersBox:HGroup = new HGroup();
-            headerHGroup.addElement(myFiltersBox);
+            /*var myFiltersBox:HGroup = new HGroup();
+            headerHGroup.addElement(myFiltersBox);*/
             headerHGroup.addElement(childFiltersBox);
             var buttonsBox:HGroup = new HGroup();
             headerHGroup.addElement(buttonsBox);
@@ -244,8 +236,8 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
             }
             filterMap[elementID] = myFilterColl;
             if (dashboardStack.consolidateHeaderElements) {
-                trace("consolidating headers on myself");
-                myFiltersBox.addElement(dashboardFilterArea);
+                //myFiltersBox.addElement(dashboardFilterArea);
+                childFiltersBox.addElement(dashboardFilterArea);
             } else {
                 if (_consolidateHeader) {
                     //dashboardFilterArea.width = 800;
@@ -340,10 +332,10 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         var application:UIComponent = FlexGlobals.topLevelApplication as UIComponent;
         if (headerHGroup != null) {
-            var childFilters:Group = headerHGroup.getElementAt(1) as Group;
+            var childFilters:Group = headerHGroup.getElementAt(0) as Group;
             var filterArea:Group = Group(childFilters.getElementAt(0)).getElementAt(0) as Group;
 
-            var buttons:UIComponent = headerHGroup.getElementAt(2) as UIComponent;
+            var buttons:UIComponent = headerHGroup.getElementAt(1) as UIComponent;
             var buttonsWidth:int = buttons.width;
             trace("buttons width = " + buttonsWidth + " and unscaled width = " + (application.width - 20));
 
@@ -353,8 +345,6 @@ public class DashboardStackMobileComponent extends VGroup implements IDashboardV
             trace("setting to " + filterArea.contentHeight);
             filterArea.height = filterArea.contentHeight;
             childFilters.height = filterArea.contentHeight;
-            //filterArea.invalidateSize();
-            //trace("argh = " + filterArea.measuredHeight + " - " + filterArea.contentHeight);
             childFilters.validateSize();
             headerHGroup.height = childFilters.height;
 

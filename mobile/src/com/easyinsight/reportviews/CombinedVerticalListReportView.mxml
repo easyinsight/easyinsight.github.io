@@ -5,8 +5,10 @@
     <fx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.TextValueExtension;
         import com.easyinsight.analysis.Value;
         import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
+        import com.easyinsight.analysis.verticallist.EmbeddedDataWrapper;
         import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 
         import mx.collections.ArrayCollection;
@@ -32,26 +34,34 @@
             if (vert == null) {
                 return;
             }
-            var measures:ArrayCollection = VerticalListDefinition(vert.reports.getItemAt(0)).measures;
+            var measures:ArrayCollection = VerticalListDefinition(EmbeddedDataWrapper(data.getItemAt(i)).report).measures;
             for each (var measure:AnalysisMeasure in measures) {
 
                 var obj:Object = new Object();
                 obj["Label"] = measure.display;
                 obj["baseMeasure"] = measure;
 
+                var atLeastOneValue:Boolean = false;
+
                 for (var i:int = 0; i < vert.reports.length; i++) {
-                    var report:VerticalListDefinition = vert.reports.getItemAt(i) as VerticalListDefinition;
+                    var embeddedData:EmbeddedDataWrapper = data.getItemAt(i) as EmbeddedDataWrapper;
+                    var report:VerticalListDefinition = embeddedData.report as VerticalListDefinition;
                     var applyMeasure:AnalysisMeasure;
                     for each (var testMeasure:AnalysisMeasure in report.measures) {
                         if (testMeasure.display == measure.display) {
                             applyMeasure = testMeasure;
+                            applyMeasure.underline = measure.underline;
                             break;
                         }
                     }
 
+                    if (applyMeasure == null) {
+                        continue;
+                    }
+
                     var formatter:Formatter = applyMeasure.getFormatter();
 
-                    var reportData:ArrayCollection = data.getItemAt(i) as ArrayCollection;
+                    var reportData:ArrayCollection = embeddedData.dataSet;
                     for each (var row:Object in reportData) {
                         var columnValue:String;
                         var val:Value;
@@ -65,18 +75,27 @@
                             continue;
                         }
                         var measureValue:Value = row[applyMeasure.qualifiedName()];
+                        if (measureValue != null && measureValue.toNumber() != 0) {
+                            atLeastOneValue = true;
+                        }
                         var text:String;
+                        var color:uint = 0;
                         if (measureValue != null) {
                             var num:Number = measureValue.toNumber();
                             text = formatter.format(num);
+                            if (measureValue.valueExtension != null) {
+                                var ext:TextValueExtension = measureValue.valueExtension as TextValueExtension;
+                                color = ext.color;
+                            }
                         } else {
                             text = "";
                         }
                         obj[columnValue] = text;
+                        obj[columnValue + "color"] = color;
                         obj[columnValue + "measure"] = applyMeasure;
                         if (firstRow) {
                             var dataColumn:SortableSparkGridColumn = new SortableSparkGridColumn(i + 1, val == null ? 0 : val.toSortValue().toNumber());
-                            dataColumn.width = 76;
+                            //dataColumn.width = 76;
                             dataColumn.headerText = columnValue.toString();
                             dataColumn.dataField = columnValue.toString();
                             var factory:ClassFactory = new ClassFactory(SparkVerticalListRenderer);
@@ -94,7 +113,9 @@
                 if (firstRow) {
                     firstRow = false;
                 }
-                dColl.addItem(obj);
+                if (!vert.removeEmptyRows || atLeastOneValue) {
+                    dColl.addItem(obj);
+                }
             }
             /*if (columns.length == 1) {
              currentState = "noData";

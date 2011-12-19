@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<util:FilterContainer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-                      xmlns:util="com.easyinsight.util.*">
+<util:FilterContainer xmlns:fx="http://ns.adobe.com/mxml/2009"
+                      xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()" height="25">
     <fx:Script><![CDATA[
         import com.easyinsight.reportviews.FilterInfo;
 
@@ -21,33 +21,28 @@
             dispatchEvent(new Event("filterEnabledChanged"));
             filterInfo.filterDefinition.enabled = value;
             if (!_initializing) {
+                trace("sending filter enabled event when we really shouldn't be");
                 dispatchEvent(new FilterChangeEvent(null));
             }
         }
 
         private var _initializing:Boolean = true;
 
-        override protected function createChildren():void {
-            super.createChildren();
-            filterEnabled = filterInfo.filterDefinition.enabled;
-            trace("toggle = " + filterInfo.filterDefinition.toggleEnabled);
+        private function onCreation():void {
+
             if (!filterInfo.filterDefinition.toggleEnabled) {
                 var toggleCheckbox:CheckBox = new CheckBox();
                 BindingUtils.bindProperty(toggleCheckbox, "selected", this, "filterEnabled");
                 BindingUtils.bindProperty(this, "filterEnabled", toggleCheckbox, "selected");
                 toggleGroup.addElement(toggleCheckbox);
             }
-            /*if (filterInfo.filterDefinition.toggleEnabled) {
-                removeElement(checkbox);
-            }*/
-            trace("updated to " + currentState);
             _initializing = false;
         }
 
         override protected function commitProperties():void {
             super.commitProperties();
             if (_initializing) {
-
+                filterEnabled = filterInfo.filterDefinition.enabled;
             }
             _initializing = false;
         }

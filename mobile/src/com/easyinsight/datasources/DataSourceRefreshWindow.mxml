@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<s:SkinnablePopUpContainer xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="setupListeners()" skinClass="com.easyinsight.reportviews.ContextSkin">
+        <fx:Script><![CDATA[
+            import com.easyinsight.administration.feed.CallData;
+            import com.easyinsight.administration.feed.CredentialsResponse;
+            import com.easyinsight.analysis.ReportFault;
+            import com.easyinsight.customupload.ProblemDataEvent;
+            import com.easyinsight.scorecard.DataSourceAsyncEvent;
+
+            import com.easyinsight.util.PopUpUtil;
+
+            import mx.controls.Alert;
+            import mx.core.UIComponent;
+            import mx.managers.PopUpManager;
+            import mx.rpc.events.FaultEvent;
+            import mx.rpc.events.ResultEvent;
+
+            private var lastMessage:Date;
+            private var _dataSourceID:int;
+
+            [Bindable]
+            private var asyncLabel:String = "Synchronizing with the data source...";
+
+            private function setupListeners():void {
+                uploadService.refreshData.send(_dataSourceID);
+            }
+
+            public function set dataSourceID(value:int):void {
+                _dataSourceID = value;
+            }
+
+            [Bindable]
+            private var index:int;
+
+            [Bindable]
+            private var errorText:String;
+
+            private function onResult(event:ResultEvent):void {
+                var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
+                if (!response.successful) {
+                    if (response.reportFault != null) {
+                        /*var window:UIComponent = response.reportFault.createFaultWindow();
+                        window.addEventListener(ProblemDataEvent.PROBLEM_RESOLVED, onProblem, false, 0, true);
+                        window.addEventListener(Event.CANCEL, onCancel, false, 0, true);
+                        PopUpManager.addPopUp(window, this, true);
+                        PopUpUtil.centerPopUp(window);*/
+                    } else {
+                        Alert.show(response.failureMessage);
+                        this.close();
+                    }
+                } else {
+                    if (response.callDataID != null) {
+                        callDataID = response.callDataID;
+                        timer = new Timer(5000, 0);
+                        timer.addEventListener(TimerEvent.TIMER, onTimer);
+                        timer.start();
+                    } else {
+                        this.close();
+                    }
+                }
+
+            }
+
+            private var callDataID:String;
+
+            private function onTimer(event:TimerEvent):void {
+                asyncService.getCallData.send(callDataID);
+            }
+
+            private function gotCallData():void {
+                var callData:CallData = asyncService.getCallData.lastResult as CallData;
+                if (callData == null) {
+                    /*timer.stop();
+                     Alert.show("Something went wrong in trying to retrieve data. Please run again.");
+                     PopUpManager.removePopUp(this);*/
+                    return;
+                }
+                if (callData.status == CallData.DONE) {
+                    timer.stop();
+                    var newDate:Date = callData.result as Date;
+                    dispatchEvent(new DataSourceRefreshEvent(newDate));
+                    this.close();
+                } else if (callData.status == CallData.FAILED) {
+                    timer.stop();
+                    if (callData.result is String) {
+                        Alert.show(String(callData.statusMessage));
+                        this.close();
+                    } else if (callData.result is ReportFault) {
+                        /*var window:UIComponent = ReportFault(callData.result).createFaultWindow();
+                        window.addEventListener(ProblemDataEvent.PROBLEM_RESOLVED, onProblem, false, 0, true);
+                        window.addEventListener(Event.CANCEL, onCancel, false, 0, true);
+                        PopUpManager.addPopUp(window, this, true);
+                        PopUpUtil.centerPopUp(window);*/
+                    } else {
+                        Alert.show("Something went wrong in trying to retrieve data. Please double check your configuration information.");
+                        this.close();
+                    }
+                } else if (callData.status == CallData.RUNNING) {
+                    if (callData.result != null) {
+                        var scorecardEvent:DataSourceAsyncEvent = callData.result as DataSourceAsyncEvent;
+                        asyncLabel = scorecardEvent.dataSourceName;
+                    }
+                }
+            }
+
+            private var timer:Timer;
+
+            private function onCancel(event:Event):void {
+                this.close();
+            }
+
+            private function closeWindow():void {
+                if (timer != null) { timer.stop() }
+                this.close();
+            }
+
+            private function onProblem(event:ProblemDataEvent):void {
+                uploadService.refreshData.send(_dataSourceID);
+            }
+
+            private function onFault(event:FaultEvent):void {
+                errorText = event.fault.faultString;
+                index = 1;
+            }
+            ]]></fx:Script>
+    <fx:Declarations>
+        <s:RemoteObject destination="userUpload" id="uploadService">
+            <s:method name="refreshData" result="onResult(event)" fault="onFault(event)"/>
+        </s:RemoteObject>
+        <s:RemoteObject destination="asyncService" id="asyncService">
+            <s:method name="getCallData" result="gotCallData()" fault="onFault(event)"/>
+        </s:RemoteObject>
+    </fx:Declarations>
+    <s:Group width="500">
+        <s:VGroup horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="30" width="100%">
+            <s:BusyIndicator id="progressBar"/>
+            <s:Label maxWidth="400" text="{asyncLabel}" fontSize="14"/>
+            <s:Button label="Cancel" click="closeWindow()"/>
+        </s:VGroup>        
+    </s:Group>
+</s:SkinnablePopUpContainer>

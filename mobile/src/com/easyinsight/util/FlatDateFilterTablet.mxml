@@ -3,6 +3,7 @@
           xmlns:util="com.easyinsight.util.*" xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="retrieveMetadata()">
     <fx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDateDimensionResultMetadata;
+        import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.FlatDateFilterDefinition;
 
         import mx.collections.ArrayCollection;
@@ -15,7 +16,7 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
-            filterName = filterInfo.filterDefinition.field.display + ":";
+            filterName = FilterDefinition.getLabel(filterInfo.filterDefinition, filterInfo.filterDefinition.field);
             filterValue = String(FlatDateFilterDefinition(filterInfo.filterDefinition).value);
         }
 
@@ -26,16 +27,24 @@
         }
 
         private function retrieveMetadata():void {
-            dataService.getAnalysisItemMetadata.send(filterInfo.dataSourceID, filterInfo.filterDefinition.field, 0, filterInfo.reportID, filterInfo.dashboardID);
+            if (FlatDateFilterDefinition(filterInfo.filterDefinition).cachedValues) {
+                processMetadata(FlatDateFilterDefinition(filterInfo.filterDefinition).cachedValues as AnalysisDateDimensionResultMetadata);
+            } else {
+                dataService.getAnalysisItemMetadata.send(filterInfo.dataSourceID, filterInfo.filterDefinition.field, 0, filterInfo.reportID, filterInfo.dashboardID);
+            }
         }
 
         private function gotMetadata():void {
             var dateMetadata:AnalysisDateDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisDateDimensionResultMetadata;
-			var lowDate:Date = dateMetadata.earliestDate;
+            processMetadata(dateMetadata);
+        }
+
+        private function processMetadata(dateMetadata:AnalysisDateDimensionResultMetadata):void {
+            var lowDate:Date = dateMetadata.earliestDate;
             if (lowDate == null) {
                 lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
             }
-			var highDate:Date = dateMetadata.latestDate;
+            var highDate:Date = dateMetadata.latestDate;
             if (highDate == null) {
                 highDate = new Date();
             }

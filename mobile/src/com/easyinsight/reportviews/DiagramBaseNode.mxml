@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<diagrammer:BaseNode xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+                     xmlns:diagrammer="com.anotherflexdev.diagrammer.*">
+    <fx:Script><![CDATA[
+        import com.easyinsight.analysis.TrendOutcome;
+        import com.easyinsight.analysis.diagram.DiagramReportFieldExtension;
+        import com.easyinsight.analysis.formatter.PercentageNumberFormatter;
+        import com.easyinsight.kpi.KPIOutcome;
+
+        private var _outcome:TrendOutcome;
+
+        [Bindable]
+        private var outcomeValue:String;
+
+        [Bindable]
+        private var percentChange:String;
+
+        [Bindable]
+        private var trendImage:Class;
+
+        public static function iconForKPI(kpi:TrendOutcome):Class {
+        var trendImage:Class;
+        switch (kpi.outcome) {
+            case KPIOutcome.EXCEEDING_GOAL:
+            case KPIOutcome.POSITIVE:
+                if (kpi.direction == KPIOutcome.UP_DIRECTION) {
+                    trendImage = positiveUpIcon;
+                } else {
+                    trendImage = positiveDownIcon;
+                }
+                break;
+            case KPIOutcome.NEGATIVE:
+                if (kpi.direction == KPIOutcome.UP_DIRECTION) {
+                    trendImage = negativeUpIcon;
+                } else {
+                    trendImage = negativeDownIcon;
+                }
+                break;
+            case KPIOutcome.NEUTRAL:
+                if (kpi.direction == KPIOutcome.UP_DIRECTION) {
+                    trendImage = neutralUpIcon;
+                } else if (kpi.direction == KPIOutcome.DOWN_DIRECTION) {
+                    trendImage = neutralDownIcon;
+                } else {
+                    trendImage = neutralIcon;
+                }
+                break;
+            case KPIOutcome.NO_DATA:
+            default:
+                trendImage = neutralIcon;
+                break;
+        }
+        return trendImage;
+    }
+
+        public function get outcome():TrendOutcome {
+            return _outcome;
+        }
+
+        [Bindable]
+    [Embed(source="../../../../assets/32x32/arrow2_up_green.png")]
+    private static var positiveUpIcon:Class;
+
+    [Bindable]
+    [Embed(source="../../../../assets/32x32/arrow2_down_green.png")]
+    private static var positiveDownIcon:Class;
+
+    [Bindable]
+    [Embed(source="../../../../assets/32x32/arrow2_up_red.png")]
+    private static var negativeUpIcon:Class;
+
+    [Bindable]
+    [Embed(source="../../../../assets/32x32/arrow2_down_red.png")]
+    private static var negativeDownIcon:Class;
+
+    [Bindable]
+    [Embed(source="../../../../assets/32x32/bullet_ball_blue.png")]
+    private static var neutralIcon:Class;
+
+    [Bindable]
+    [Embed(source="../../../../assets/32x32/arrow2_up_blue.png")]
+    private static var neutralUpIcon:Class;
+
+    [Bindable]
+    [Embed(source="../../../../assets/32x32/arrow2_down_blue.png")]
+    private static var neutralDownIcon:Class;
+
+        public function set outcome(value:TrendOutcome):void {
+            _outcome = value;
+            this.nodeName = _outcome.measure.display;
+            outcomeValue = _outcome.measure.getFormatter().format(_outcome.now.getValue());
+            var now:Number = _outcome.now.getValue() as Number;
+            var previous:Number = _outcome.historical.getValue() as Number;
+            var formatter:PercentageNumberFormatter = new PercentageNumberFormatter();
+            formatter.precision = 2;
+            var change:Number = (now - previous) / previous * 100;
+            percentChange = formatter.format(change);
+            trendImage = iconForKPI(value);
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            var ext:DiagramReportFieldExtension = DiagramReportFieldExtension(_outcome.measure.reportFieldExtension);
+            if (ext.iconImage != null) {
+                //iconImage.load(Constants.instance().prefix + "/app/assets/icons/32x32/" + ext.iconImage);
+            }
+        }
+        ]]></fx:Script>
+    <s:BorderContainer cornerRadius="5" borderAlpha="1" borderColor="0x333333"
+            borderStyle="solid" borderWeight="1" height="52" width="100%">
+        <s:layout>
+            <s:BasicLayout/>
+        </s:layout>
+        <s:backgroundFill>
+            <s:SolidColor color="#f8f8ff" alpha=".8"/>
+        </s:backgroundFill>
+
+        <s:Image id="iconImage" y="5"/>
+        <s:Label text="{outcomeValue}" x="30" width="100%" textAlign="center" fontSize="14"/>
+        <s:HGroup verticalAlign="middle" x="30" y="17" width="100%" horizontalAlign="center">
+            <s:Label text="{percentChange}"/>
+            <s:Image source="{trendImage}"/>
+        </s:HGroup>
+    </s:BorderContainer>
+    <diagrammer:lblNodeName>
+		<s:Label y="51" text="{nodeName}"  left="1" right="1" textAlign="center" fontFamily="Lucida Grande"/>
+	</diagrammer:lblNodeName>
+</diagrammer:BaseNode>
