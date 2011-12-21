@@ -118,12 +118,12 @@
             </s:backgroundFill>
             <s:Image source="@Embed('../../../../assets/logo.jpg')"/>
             <s:HGroup width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5">
-                <s:Label text="Email:" width="300" textAlign="right"/>
-                <s:TextInput id="emailInput" width="300" autoCapitalize="none" autoCorrect="false"/>
+                <s:Label text="Email:" width="100%" textAlign="right"/>
+                <s:TextInput id="emailInput" width="100%" autoCapitalize="none" autoCorrect="false"/>
             </s:HGroup>
             <s:HGroup width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5">
-                <s:Label text="Password:" width="300" textAlign="right"/>
-                <s:TextInput id="passwordInput" displayAsPassword="true" width="300" returnKeyLabel="go" keyDown="onKey(event)"/>
+                <s:Label text="Password:" width="100%" textAlign="right"/>
+                <s:TextInput id="passwordInput" displayAsPassword="true" width="100%" returnKeyLabel="go" keyDown="onKey(event)"/>
             </s:HGroup>
             <s:HGroup>
                 <s:Button label="Log In" click="login()" height="30"/>
