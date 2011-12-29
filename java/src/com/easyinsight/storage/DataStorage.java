@@ -667,6 +667,7 @@ public class DataStorage implements IDataStorage {
                             int month = dataRS.getInt(i++);
                             int year = dataRS.getInt(i++);
                             Calendar cal = Calendar.getInstance();
+                            cal.set(Calendar.DAY_OF_MONTH, 2);
                             cal.set(Calendar.MONTH, month - 1);
                             cal.set(Calendar.YEAR, year);
                             row.addValue(aggregateKey, new DateValue(cal.getTime()));
