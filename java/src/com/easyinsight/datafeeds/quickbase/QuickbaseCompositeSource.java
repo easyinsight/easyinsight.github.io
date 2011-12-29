@@ -45,6 +45,11 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     private boolean supportIndex;
     private boolean preserveCredentials;
 
+    @Override
+    public boolean fullNightlyRefresh() {
+        return true;
+    }
+
     public boolean isPreserveCredentials() {
         return preserveCredentials;
     }
@@ -79,7 +84,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
 
     @Override
     public boolean checkDateTime(String name, Key key) {
-        return false;
+        return true;
     }
 
     @Override
