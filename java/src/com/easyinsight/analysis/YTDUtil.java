@@ -197,21 +197,23 @@ public class YTDUtil {
         Map<AnalysisMeasure, YTDValue> ytdValueMap = new HashMap<AnalysisMeasure, YTDValue>();
         for (IRow row : nowSet.getRows()) {
             Value dateValue = row.getValue(timeDimension);
-            timeIntervals.add(dateValue);
-            for (AnalysisMeasure measure : measures) {
-                Value measureValue = row.getValue(measure);
-                ytdMap.get(measure).addValue(measureValue);
-                averageMap.get(measure).addValue(measureValue);
-                YTDValue ytdValue = ytdValueMap.get(measure);
-                if (ytdValue == null) {
-                    ytdValue = new YTDValue();
-                    ytdValue.setAnalysisMeasure(measure);
-                    ytdValueMap.put(measure, ytdValue);
+            if (dateValue.type() != Value.EMPTY) {
+                timeIntervals.add(dateValue);
+                for (AnalysisMeasure measure : measures) {
+                    Value measureValue = row.getValue(measure);
+                    ytdMap.get(measure).addValue(measureValue);
+                    averageMap.get(measure).addValue(measureValue);
+                    YTDValue ytdValue = ytdValueMap.get(measure);
+                    if (ytdValue == null) {
+                        ytdValue = new YTDValue();
+                        ytdValue.setAnalysisMeasure(measure);
+                        ytdValueMap.put(measure, ytdValue);
+                    }
+                    TimeIntervalValue timeIntervalValue = new TimeIntervalValue();
+                    timeIntervalValue.setDateValue(dateValue);
+                    timeIntervalValue.setValue(measureValue);
+                    ytdValue.getTimeIntervalValues().add(timeIntervalValue);
                 }
-                TimeIntervalValue timeIntervalValue = new TimeIntervalValue();
-                timeIntervalValue.setDateValue(dateValue);
-                timeIntervalValue.setValue(measureValue);
-                ytdValue.getTimeIntervalValues().add(timeIntervalValue);
             }
         }
         for (AnalysisMeasure measure : measures) {
