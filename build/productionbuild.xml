@@ -9,6 +9,7 @@
     <taskdef name="UpdateDB" classname="com.easyinsight.database.ant.DatabaseUpdateTask"/>
     <taskdef name="StartStaging" classname="com.easyinsight.watchdog.updatetask.StartStagingTask" />
     <taskdef name="UpdateStaging" classname="com.easyinsight.watchdog.updatetask.UpdateStagingTask" />
+    <taskdef name="DownloadStaging" classname="com.easyinsight.watchdog.updatetask.DownloadStagingTask" />
     <taskdef name="StopStaging" classname="com.easyinsight.watchdog.updatetask.ShutdownStagingTask" />
 
     <taskdef name="StartLarge" classname="com.easyinsight.watchdog.updatetask.StartLargeTask" />
@@ -407,9 +408,9 @@
         </sequential>
     </macrodef>
 
-    <target name="modules1" depends="report.area3dchart, report.areachart, report.bar3dchart, report.bubblechart"/>
-    <target name="modules2" depends="report.column3dchart, report.linechart, report.line3dchart, report.list"/>
-    <target name="modules3" depends="report.pie3dchart, report.piechart, report.plotchart"/>
+    <target name="modules1" depends="report.areachart, report.bubblechart"/>
+    <target name="modules2" depends="report.linechart, report.list"/>
+    <target name="modules3" depends="report.piechart, report.plotchart"/>
     <target name="modules4" depends="report.crosstab, report.tree, report.treemap, app.embeddeddashboard"/>
     <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail"/>
     <target name="modules7" depends="perspective.kpiwindow,perspective.datasourceadmin"/>
@@ -422,6 +423,10 @@
 
     <target name="app.embeddedreport">
         <buildSWF mainMXML="EmbeddedInsight.mxml" swfName="EmbeddedInsight" buildFile="embedded-insight.xml"/>
+    </target>
+
+    <target name="app.embeddedlist">
+        <buildSWF mainMXML="EmbeddedList.mxml" swfName="EmbeddedList" buildFile="embedded-list.xml"/>
     </target>
 
     <target name="app.embeddeddashboard">
