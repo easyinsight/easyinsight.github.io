@@ -57,6 +57,10 @@
         <StopStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
 
+    <target name="downloadStagingInstances">
+        <DownloadStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
+    </target>
+
     <target name="shutdownLargeInstances">
         <StopLarge userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
