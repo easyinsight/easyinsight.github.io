@@ -107,6 +107,10 @@ public class HarvestProjectSource extends HarvestBaseSource {
                 String notes = queryField(curProject, "notes/text()");
                 String budgetBy = queryField(curProject, "budget-by/text()");
                 String budget = queryField(curProject, "budget/text()");
+                if (budget == null) {
+                    budget = queryField(curProject, "cost-budget/text()");
+                }
+
                 String latestRecord = queryField(curProject, "hint-latest-record-at/text()");
                 String earliestRecord = queryField(curProject, "hint-earliest-record-at/text()");
                 IRow row = ds.createRow();
