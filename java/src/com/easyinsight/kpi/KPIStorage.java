@@ -411,7 +411,6 @@ public class KPIStorage {
                 List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, rs.getLong(1)).list();
                 if (results.size() > 0) {
                     FilterDefinition filter = (FilterDefinition) results.get(0);
-                    filter.getField().afterLoad();
                     filter.afterLoad();
                     filters.add(filter);
                 }
