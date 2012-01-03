@@ -29,6 +29,7 @@ public class FunctionFactory {
         if (aggregationMap.containsKey(s)) {
             return new CastFunction(aggregationMap.get(s), s);
         }
+        s = s.toLowerCase();
         if (s.equals("ln")) {
             return new NaturalLog();
         } else if (s.equals("firstvalue")) {
@@ -129,6 +130,20 @@ public class FunctionFactory {
             return new EIDateFormatFunction();
         } else if (s.equals("indexof")) {
             return new IndexOfFunction();
+        } else if (s.equals("year")) {
+            return new Year();
+        } else if (s.equals("dayofmonth")) {
+            return new DayOfMonth();
+        } else if (s.equals("dayofweek")) {
+            return new DayOfWeek();
+        } else if (s.equals("dayofyear")) {
+            return new DayOfYear();
+        } else if (s.equals("daysinmonth")) {
+            return new DaysInMonth();
+        } else if (s.equals("month")) {
+            return new Month();
+        } else if (s.equals("weekofyear")) {
+            return new WeekOfYear();
         } else {
             return null;
         }
