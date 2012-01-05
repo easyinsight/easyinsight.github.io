@@ -34,7 +34,6 @@ public class InvalidateData extends Function {
             if (!calculationMetadata.getConnection().getAutoCommit()) {
                 calculationMetadata.getConnection().rollback();
             }
-            throw new RuntimeException(e);
         } finally {
             calculationMetadata.getConnection().setAutoCommit(true);
         }
