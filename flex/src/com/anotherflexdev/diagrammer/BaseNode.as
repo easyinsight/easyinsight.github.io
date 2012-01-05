@@ -341,5 +341,9 @@ import flash.events.KeyboardEvent;
         public function set editEnabled(value:Boolean):void {
             _editEnabled = value;
         }
+
+        public function get editEnabled():Boolean {
+            return _editEnabled;
+        }
     }
 }
