@@ -270,7 +270,9 @@ public class TempStorage implements IDataStorage {
                 string = numericValue.toString();
             } else if (value.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) value;
-                string = dateValue.getDate().toString();
+                if (dateValue.getDate() != null) {
+                    string = dateValue.getDate().toString();
+                }
             }
             if (string == null) {
                 insertStmt.setNull(i++, Types.VARCHAR);

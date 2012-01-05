@@ -29,6 +29,21 @@ public class DerivedKey extends Key {
         return feedID == dataSourceID || parentKey.hasDataSource(dataSourceID);
     }
 
+    @Override
+    public boolean matchesOrContains(Key key) {
+        if (key instanceof NamedKey) {
+            return parentKey.matchesOrContains(key);
+        } else if (key instanceof DerivedKey) {
+            DerivedKey derivedKey = (DerivedKey) key;
+            if (derivedKey.feedID == this.feedID) {
+                return parentKey.matchesOrContains(((DerivedKey) key).getParentKey());
+            } else {
+                return parentKey.matchesOrContains(key);
+            }
+        }
+        return false;
+    }
+
     public Key getParentKey() {
         return parentKey;
     }

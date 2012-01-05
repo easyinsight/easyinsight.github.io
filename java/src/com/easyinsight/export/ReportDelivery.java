@@ -1,14 +1,14 @@
 package com.easyinsight.export;
 
+import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import org.hibernate.Session;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -30,14 +30,33 @@ public class ReportDelivery extends ScheduledDelivery {
     private boolean htmlEmail;
     private int timezoneOffset;
     private long senderID;
-    private boolean applyFilters;
+    private long dataSourceID;
+    private String deliveryLabel;
 
-    public boolean isApplyFilters() {
-        return applyFilters;
+    private List<FilterDefinition> customFilters;
+
+    public String getDeliveryLabel() {
+        return deliveryLabel;
     }
 
-    public void setApplyFilters(boolean applyFilters) {
-        this.applyFilters = applyFilters;
+    public void setDeliveryLabel(String deliveryLabel) {
+        this.deliveryLabel = deliveryLabel;
+    }
+
+    public long getDataSourceID() {
+        return dataSourceID;
+    }
+
+    public void setDataSourceID(long dataSourceID) {
+        this.dataSourceID = dataSourceID;
+    }
+
+    public List<FilterDefinition> getCustomFilters() {
+        return customFilters;
+    }
+
+    public void setCustomFilters(List<FilterDefinition> customFilters) {
+        this.customFilters = customFilters;
     }
 
     public long getSenderID() {
@@ -117,7 +136,7 @@ public class ReportDelivery extends ScheduledDelivery {
         clearStmt.executeUpdate();
         clearStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY (REPORT_ID, delivery_format, subject, body, " +
-                "SCHEDULED_ACCOUNT_ACTIVITY_ID, html_email, timezone_offset, sender_user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                "SCHEDULED_ACCOUNT_ACTIVITY_ID, html_email, timezone_offset, sender_user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, reportID);
         insertStmt.setInt(2, reportFormat);
         insertStmt.setString(3, subject);
@@ -131,12 +150,29 @@ public class ReportDelivery extends ScheduledDelivery {
             insertStmt.setNull(8, Types.BIGINT);
         }
         insertStmt.execute();
+        long deliveryID = Database.instance().getAutoGenKey(insertStmt);
         insertStmt.close();
+        PreparedStatement insertFilterStmt = conn.prepareStatement("INSERT INTO DELIVERY_TO_FILTER_DEFINITION (REPORT_DELIVERY_ID, FILTER_ID) VALUES (?, ?)");
+        Session session = Database.instance().createSession(conn);
+        try {
+            for (FilterDefinition customFilter : customFilters) {
+                customFilter.beforeSave(session);
+                session.saveOrUpdate(customFilter);
+                session.flush();
+                insertFilterStmt.setLong(1, deliveryID);
+                insertFilterStmt.setLong(2, customFilter.getFilterID());
+                insertFilterStmt.execute();
+            }
+        } finally {
+            session.close();
+        }
+        insertFilterStmt.close();
     }
 
     protected void customLoad(EIConnection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, ANALYSIS.TITLE, timezone_offset, SENDER_USER_ID FROM " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, ANALYSIS.TITLE, " +
+                "timezone_offset, SENDER_USER_ID, REPORT_DELIVERY_ID, ANALYSIS.DATA_FEED_ID FROM " +
                 "REPORT_DELIVERY, ANALYSIS WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ? AND REPORT_DELIVERY.REPORT_ID = ANALYSIS.ANALYSIS_ID");
         queryStmt.setLong(1, getScheduledActivityID());
@@ -152,6 +188,26 @@ public class ReportDelivery extends ScheduledDelivery {
             long senderID = rs.getLong(8);
             if (!rs.wasNull()) {
                 this.senderID = senderID;
+            }
+            customFilters = new ArrayList<FilterDefinition>();
+            long reportDeliveryID = rs.getLong(9);
+            dataSourceID = rs.getLong(10);
+            Session session = Database.instance().createSession(conn);
+            try {
+                PreparedStatement filterStmt = conn.prepareStatement("SELECT FILTER_ID FROM DELIVERY_TO_FILTER_DEFINITION WHERE REPORT_DELIVERY_ID = ?");
+                filterStmt.setLong(1, reportDeliveryID);
+                ResultSet filterRS = filterStmt.executeQuery();
+                while (filterRS.next()) {
+                    long filterID = filterRS.getLong(1);
+                    List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
+                    if (results.size() > 0) {
+                        FilterDefinition filter = (FilterDefinition) results.get(0);
+                        filter.afterLoad();
+                        customFilters.add(filter);
+                    }
+                }
+            }  finally {
+                session.close();
             }
             queryStmt.close();
         } else {

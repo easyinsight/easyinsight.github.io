@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
  * Time: 12:04 AM
  */
 public class EmbeddedYTDDataResults extends EmbeddedResults {
-    private List<YTDValue> dataSet;
+    private List<YTDValue> dataSet = new ArrayList<YTDValue>();
 
     public List<YTDValue> getDataSet() {
         return dataSet;

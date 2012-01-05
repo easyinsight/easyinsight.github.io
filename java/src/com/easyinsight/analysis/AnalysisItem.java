@@ -397,6 +397,18 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             reportFieldExtension.updateIDs(replacementMap);
         }
     }
+    
+    private AnalysisItem findMatch(Key key, Collection<AnalysisItem> analysisItems) {
+        if (key instanceof DerivedKey) {
+            for (AnalysisItem analysisItem : analysisItems) {
+                Key analysisItemKey = analysisItem.getKey();
+                if (analysisItemKey.matchesOrContains(key)) {
+                    return analysisItem;
+                }
+            }
+        }
+        return null;
+    }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
@@ -409,19 +421,16 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (getLookupTableID() != null && getLookupTableID() > 0 && includeFilters) {
             LookupTable lookupTable = new FeedService().getLookupTable(getLookupTableID());
             if (lookupTable != null) {
-                items.addAll(lookupTable.getSourceField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
+                Key key = lookupTable.getSourceField().getKey();
+                AnalysisItem analysisItem = findMatch(key, allItems);
+                if (analysisItem != null) {
+                    items.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
+                }
             }
         }
         if (reportFieldExtension != null) {
             items.addAll(reportFieldExtension.getAnalysisItems(getEverything));
         }
-        /*if (getMarmotScript() != null && !"".equals(getMarmotScript().trim())) {
-            StringTokenizer toker = new StringTokenizer(getMarmotScript(), "\r\n");
-            while (toker.hasMoreTokens()) {
-                String line = toker.nextToken();
-                items.addAll(ReportCalculation.getAnalysisItems(line, allItems, keyMap, displayMap, insightItems, getEverything, includeFilters, criteria));
-            }
-        }*/
         return items;
     }
 

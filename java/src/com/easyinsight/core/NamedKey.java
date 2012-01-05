@@ -27,6 +27,11 @@ public class NamedKey extends Key {
         this.name = name;
     }
 
+    @Override
+    public boolean matchesOrContains(Key key) {
+        return name.equals(key.toKeyString());
+    }
+
     public boolean hasDataSource(long dataSourceID) {
         return false;
     }

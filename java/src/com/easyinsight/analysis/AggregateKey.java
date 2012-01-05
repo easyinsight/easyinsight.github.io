@@ -23,6 +23,14 @@ public class AggregateKey extends NamedKey {
         this.filters = filters;
     }
 
+    @Override
+    public String internalString() {
+        if (key == null) {
+            return super.internalString();
+        }
+        return key.internalString();
+    }
+
     public Key underlyingKey() {
         return key;
     }

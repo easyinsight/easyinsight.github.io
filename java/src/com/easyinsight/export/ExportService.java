@@ -300,7 +300,8 @@ public class ExportService {
         toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata), conn);
     }
 
-    public void emailReport(WSAnalysisDefinition analysisDefinition, int format, InsightRequestMetadata insightRequestMetadata, String email, String subject, String body) {
+    public void emailReport(WSAnalysisDefinition analysisDefinition, int format, InsightRequestMetadata insightRequestMetadata, String email, String subject, String body,
+                            byte[] pdfBytes, int width, int height) {
         if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
@@ -338,11 +339,17 @@ public class ExportService {
                 String htmlBody = body + html;
                 new SendGridEmail().sendNoAttachmentEmail(email, subject, htmlBody, true, "reports@easy-insight.com", "Easy Insight");
             } else if (format == ReportDelivery.PDF) {
-                byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
-                new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, name + ".pdf", false, "reports@easy-insight.com", "Easy Insight",
+                byte[] result;
+                if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
+                    analysisDefinition.updateMetadata();
+                    result = toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
+                } else {
+                    result = toImagePDF(pdfBytes, width, height);
+                }
+                new SendGridEmail().sendAttachmentEmail(email, subject, body, result, name + ".pdf", false, "reports@easy-insight.com", "Easy Insight",
                         "application/pdf");
             }
-
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

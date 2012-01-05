@@ -60,6 +60,15 @@ public class FeedDefinition implements Cloneable, Serializable {
     private Date lastRefreshStart;
     private String marmotScript;
     private boolean concreteFieldsEditable;
+    private DataSourceInfo dataSourceInfo;
+
+    public DataSourceInfo getDataSourceInfo() {
+        return dataSourceInfo;
+    }
+
+    public void setDataSourceInfo(DataSourceInfo dataSourceInfo) {
+        this.dataSourceInfo = dataSourceInfo;
+    }
 
     public boolean isConcreteFieldsEditable() {
         return concreteFieldsEditable;
@@ -603,40 +612,6 @@ public class FeedDefinition implements Cloneable, Serializable {
         
     }
 
-    public DataSet adjustDates(DataSet dataSet) {
-
-        long latestDate = 0;
-        for (IRow row : dataSet.getRows()) {
-            for (Value value : row.getValues().values()) {
-                if (value.type() == Value.DATE) {
-                    DateValue dateValue = (DateValue) value;
-                    if (dateValue.getDate() == null) {
-                        continue;
-                    }
-                    if (latestDate == 0 || dateValue.getDate().getTime() > latestDate) {
-                        latestDate = dateValue.getDate().getTime();
-                    }
-                }
-            }
-        }
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, -1);
-        long offset = cal.getTime().getTime() - latestDate;
-        for (IRow row : dataSet.getRows()) {
-            for (Value value : row.getValues().values()) {
-                if (value.type() == Value.DATE) {
-                    DateValue dateValue = (DateValue) value;
-                    if (dateValue.getDate() == null) {
-                        continue;
-                    }
-                    dateValue.setDate(new Date(dateValue.getDate().getTime() + offset));
-                }
-            }
-        }
-
-        return dataSet;
-    }
-
     public boolean checkDateTime(String name, Key key) {
         return true;
     }
@@ -668,5 +643,9 @@ public class FeedDefinition implements Cloneable, Serializable {
                 }
             }
         }
+    }
+
+    public boolean fullNightlyRefresh() {
+        return false;
     }
 }

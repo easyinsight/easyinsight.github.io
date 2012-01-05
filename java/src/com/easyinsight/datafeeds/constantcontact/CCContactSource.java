@@ -11,11 +11,32 @@ import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import nu.xom.*;
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
+import oauth.signpost.commonshttp3.CommonsHttp3OAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
+import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
+import oauth.signpost.signature.HmacSha1MessageSigner;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -141,19 +162,53 @@ public class CCContactSource extends ConstantContactBaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
-            if (lastRefreshDate == null) {
-                cleanRetrieval(parentDefinition, ccSource, IDataStorage);
-            } else {
-                incrementalRetrieval(parentDefinition, ccSource, lastRefreshDate, IDataStorage);
+            ContactListCache cache = ccSource.getOrCreateContactListCache();
+            cache.getOrCreateContactLists(ccSource);
+            Set<Contact> contacts = cache.getContacts();
+            DataSet ds = new DataSet();
+            for (Contact contact : contacts) {
+                IRow row = ds.createRow();
+                row.addValue(CONTACT_EMAIL, contact.getEmail());
+                row.addValue(CONTACT_ID, contact.getEmail());
+                row.addValue(CONTACT_WORK_PHONE, contact.getWorkPhone());
+                row.addValue(CONTACT_HOME_PHONE, contact.getHomePhone());
+                row.addValue(CONTACT_CITY, contact.getCity());
+                row.addValue(CONTACT_STATE, contact.getState());
+                row.addValue(CONTACT_COUNTRY, contact.getCountry());
+                row.addValue(CONTACT_POSTAL, contact.getPostal());
+                row.addValue(keys.get(CONTACT_CREATED_ON), contact.getCreatedOn());
+                row.addValue(keys.get(CONTACT_UPDATED_ON), contact.getUpdatedOn());
+                row.addValue(CONTACT_COMPANY, contact.getCompany());
+                row.addValue(CONTACT_JOB_TITLE, contact.getTitle());
+                row.addValue(CONTACT_NAME, contact.getName());
+                row.addValue(keys.get(CONTACT_OPT_IN_DATE), contact.getCreatedOn());
+                row.addValue(CONTACT_OPT_IN_SOURCE, contact.getSource());
+                row.addValue(CONTACT_LAST_NAME, contact.getLastName());
+                row.addValue(CONTACT_CUSTOM_FIELD1, contact.getCustomField1());
+                row.addValue(CONTACT_CUSTOM_FIELD2, contact.getCustomField2());
+                row.addValue(CONTACT_CUSTOM_FIELD3, contact.getCustomField3());
+                row.addValue(CONTACT_CUSTOM_FIELD4, contact.getCustomField4());
+                row.addValue(CONTACT_CUSTOM_FIELD5, contact.getCustomField5());
+                row.addValue(CONTACT_CUSTOM_FIELD6, contact.getCustomField6());
+                row.addValue(CONTACT_CUSTOM_FIELD7, contact.getCustomField7());
+                row.addValue(CONTACT_CUSTOM_FIELD8, contact.getCustomField8());
+                row.addValue(CONTACT_CUSTOM_FIELD9, contact.getCustomField9());
+                row.addValue(CONTACT_CUSTOM_FIELD10, contact.getCustomField10());
+                row.addValue(CONTACT_CUSTOM_FIELD11, contact.getCustomField11());
+                row.addValue(CONTACT_CUSTOM_FIELD12, contact.getCustomField12());
+                row.addValue(CONTACT_CUSTOM_FIELD13, contact.getCustomField13());
+                row.addValue(CONTACT_CUSTOM_FIELD14, contact.getCustomField14());
+                row.addValue(CONTACT_CUSTOM_FIELD15, contact.getCustomField15());
+                row.addValue(CONTACT_COUNT, 1);
             }
-            return null;
+            return ds;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     protected boolean clearsData(FeedDefinition parentSource) {
-        return false;
+        return true;
     }
 
     @Override
@@ -340,5 +395,88 @@ public class CCContactSource extends ConstantContactBaseSource {
         IDataStorage.insertData(dataSet);
         System.out.println("Finished retrieving contacts...");
         return null;
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        // get contact lists
+
+        Document doc = startBulkUpload("5");
+        String id = doc.query("/entry/id/text()").get(0).getValue();
+
+        System.out.println(id);
+
+        id = id.replace("http://", "https://");
+        
+        boolean found = false;
+
+        OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
+        consumer.setMessageSigner(new HmacSha1MessageSigner());
+        consumer.setTokenWithSecret("01d2d931-2df6-4cb8-88ca-e9f4c90c8bea", "ZKiEPe1wkLtIjmwpUHelXWKP3rE6gkVMaMqi");
+        HttpGet httpRequest = new HttpGet(id);
+        httpRequest.setHeader("Accept", "application/xml");
+        httpRequest.setHeader("Content-Type", "application/xml");
+        consumer.sign(httpRequest);
+
+        org.apache.http.client.HttpClient client = new DefaultHttpClient();
+        ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
+            public String handleResponse(final HttpResponse response)
+                    throws IOException {
+                StatusLine statusLine = response.getStatusLine();
+                if (statusLine.getStatusCode() >= 300) {
+                    throw new HttpResponseException(statusLine.getStatusCode(),
+                            statusLine.getReasonPhrase());
+                }
+
+                HttpEntity entity = response.getEntity();
+                return entity == null ? null : EntityUtils.toString(entity, "UTF-8");
+            }
+        };
+        
+        do {
+            String string = client.execute(httpRequest, responseHandler);
+            string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
+            string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
+            string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
+            Document result = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+            String status = result.query("/entry/content/Activity/Status/text()").get(0).getValue();
+            System.out.println(status);
+            if ("COMPLETE".equals(status)) {
+                found = true;
+            } else {
+                Thread.sleep(5000);
+            }
+        } while (!found);
+
+        HttpGet getFile = new HttpGet(id + ".csv");
+        consumer.sign(getFile);
+
+        String file = client.execute(getFile, responseHandler);
+
+        System.out.println(file);
+    }
+
+    private static Document startBulkUpload(String listID) throws OAuthMessageSignerException, OAuthExpectationFailedException, OAuthCommunicationException, IOException, ParsingException {
+        org.apache.commons.httpclient.HttpClient client = new org.apache.commons.httpclient.HttpClient();
+
+        OAuthConsumer consumer = new CommonsHttp3OAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
+        consumer.setMessageSigner(new HmacSha1MessageSigner());
+        consumer.setTokenWithSecret("01d2d931-2df6-4cb8-88ca-e9f4c90c8bea", "ZKiEPe1wkLtIjmwpUHelXWKP3rE6gkVMaMqi");
+
+        PostMethod postMethod = new PostMethod("https://api.constantcontact.com/ws/customers/jboe99/activities");
+        postMethod.setRequestHeader("Accept", "application/xml");
+        postMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        String ops = "activityType=EXPORT_CONTACTS&fileType=CSV&exportOptDate=true&exportOptSource=true&exportListName=true&sortBy=DATE_DESC&columns=EMAIL%20ADDRESS&columns=FIRST%20NAME&listId="+
+                URLEncoder.encode("http://api.constantcontact.com/ws/customers/jboe99/lists/" + listID, "UTF-8");
+        RequestEntity requestEntity = new StringRequestEntity(ops, "application/x-www-form-urlencoded", "UTF-8");
+        postMethod.setRequestEntity(requestEntity);
+        consumer.sign(postMethod);
+        client.executeMethod(postMethod);
+        String string = postMethod.getResponseBodyAsString();
+        System.out.println(string);
+        string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
+        string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
+        string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
+        return new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
     }
 }

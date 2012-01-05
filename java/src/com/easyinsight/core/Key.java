@@ -37,7 +37,11 @@ public class Key implements Comparable<Key>, Serializable, Cloneable {
 
     public boolean indexed() { throw new UnsupportedOperationException(); }
 
-    public String toKeyString() { throw new UnsupportedOperationException(); }
+    public String toKeyString() {
+        throw new UnsupportedOperationException();
+    }
+    
+    public boolean matchesOrContains(Key key) { throw new UnsupportedOperationException(); };
 
     public String internalString() { throw new UnsupportedOperationException(); }
 

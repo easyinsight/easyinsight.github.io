@@ -2,6 +2,7 @@ package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSCombinedVerticalListDefinition;
+import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.email.SendGridEmail;
@@ -9,6 +10,7 @@ import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import com.itextpdf.text.DocumentException;
+import org.hibernate.Session;
 
 import javax.mail.MessagingException;
 import javax.persistence.Column;
@@ -278,10 +280,32 @@ public class DeliveryScheduledTask extends ScheduledTask {
             }
         }
     }
+    
+    private List<FilterDefinition> getCustomFilters(long reportDeliveryID, EIConnection conn) throws SQLException {
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        Session session = Database.instance().createSession(conn);
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT FILTER_ID FROM DELIVERY_TO_FILTER_DEFINITION WHERE REPORT_DELIVERY_ID = ?");
+            queryStmt.setLong(1, reportDeliveryID);
+            ResultSet filterRS = queryStmt.executeQuery();
+            while (filterRS.next()) {
+                long filterID = filterRS.getLong(1);
+                List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
+                if (results.size() > 0) {
+                    FilterDefinition filter = (FilterDefinition) results.get(0);
+                    filter.afterLoad();
+                    filters.add(filter);
+                }
+            }
+        } finally {
+            session.close();
+        }
+        return filters;
+    }
 
     private void reportDelivery(EIConnection conn) throws SQLException, IOException, MessagingException, DocumentException {
 
-        PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, REPORT_DELIVERY_ID, TIMEZONE_OFFSET, SENDER_USER_ID FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+        PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, REPORT_DELIVERY_ID, TIMEZONE_OFFSET, SENDER_USER_ID, REPORT_DELIVERY_ID FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         getInfoStmt.setLong(1, activityID);
         ResultSet deliveryInfoRS = getInfoStmt.executeQuery();
         if (deliveryInfoRS.next()) {
@@ -292,6 +316,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
             final boolean htmlEmail = deliveryInfoRS.getBoolean(5);
             int timezoneOffset = deliveryInfoRS.getInt(7);
             final long senderID = deliveryInfoRS.getLong(8);
+
+            List<FilterDefinition> customFilters = getCustomFilters(deliveryInfoRS.getLong(9), conn);
+
             PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT USER_ID FROM user_to_analysis where analysis_id = ?");
 
             findOwnerStmt.setLong(1, reportID);
@@ -334,6 +361,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     if (deliveryFormat == ReportDelivery.EXCEL) {
                         WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
                         analysisDefinition.updateMetadata();
+                        updateReportWithCustomFilters(analysisDefinition, customFilters);
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                         insightRequestMetadata.setUtcOffset(timezoneOffset);
                         byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata);
@@ -370,6 +398,37 @@ public class DeliveryScheduledTask extends ScheduledTask {
             queryStmt.close();
         }
         getInfoStmt.close();
+    }
+
+    private void updateReportWithCustomFilters(WSAnalysisDefinition analysisDefinition, List<FilterDefinition> customFilters) {
+        if (analysisDefinition.getFilterDefinitions() != null) {
+            List<FilterDefinition> replacements = new ArrayList<FilterDefinition>();
+            Iterator<FilterDefinition> filterIter = analysisDefinition.getFilterDefinitions().iterator();
+            while (filterIter.hasNext()) {
+                FilterDefinition filterDefinition = filterIter.next();
+                FilterDefinition matchedCustomFilter = null;
+                for (FilterDefinition customFilter : customFilters) {
+                    if (customFilter.getClass().equals(filterDefinition.getClass())) {
+                        if (customFilter.getFilterName() != null && !"".equals(customFilter.getFilterName()) &&
+                                filterDefinition.getFilterName() != null && !"".equals(filterDefinition.getFilterName())) {
+                            if (customFilter.getFilterName().equals(filterDefinition.getFilterName())) {
+                                matchedCustomFilter = customFilter;
+                                break;
+                            }
+                        }
+                        if (customFilter.getField() != null && filterDefinition.getField() != null && customFilter.getField().equals(filterDefinition.getField())) {
+                            matchedCustomFilter = customFilter;
+                            break;
+                        }
+                    }
+                }
+                if (matchedCustomFilter != null) {
+                    replacements.add(matchedCustomFilter);
+                    filterIter.remove();
+                }
+            }
+            analysisDefinition.getFilterDefinitions().addAll(replacements);
+        }
     }
 
     private String createHTMLTable(EIConnection conn, WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) throws SQLException {
@@ -411,6 +470,14 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
     }
 
+    public static void main(String[] args) {
+        String blah = "Send this to [UserName]";
+        Map<String, String> props = new HashMap<String, String>();
+        props.put("UserName", "James Boe");
+        String result = URLPattern.updateString(blah, null, props, new ArrayList<AnalysisItem>()).toString();
+        System.out.println(result);
+    }
+
     public static void sendEmails(EIConnection conn, byte[] bytes, String attachmentName, long accountID, String encoding, long activityID) throws SQLException, MessagingException, UnsupportedEncodingException {
         PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, REPORT_DELIVERY_ID FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         getInfoStmt.setLong(1, activityID);
@@ -418,6 +485,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         deliveryInfoRS.next();
         String subjectLine = deliveryInfoRS.getString(3);
         String body = deliveryInfoRS.getString(4);
+        
         boolean htmlEmail = deliveryInfoRS.getBoolean(5);
         long deliveryID = deliveryInfoRS.getLong(6);
         getInfoStmt.close();
@@ -459,10 +527,17 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
         emailQueryStmt.close();
 
+        Map<String, String> baseProps = new HashMap<String, String>();
+        
         PreparedStatement deliveryAuditStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY_AUDIT (ACCOUNT_ID," +
                 "REPORT_DELIVERY_ID, SUCCESSFUL, MESSAGE, TARGET_EMAIL, SEND_DATE) VALUES (?, ?, ?, ?, ?, ?)");
         for (UserInfo userInfo : userStubs) {
-            new SendGridEmail().sendAttachmentEmail(userInfo.email, subjectLine, body, bytes, attachmentName, htmlEmail, senderEmail, senderName, encoding);
+            Map<String, String> userProps = new HashMap<String, String>(baseProps);
+            userProps.put("Email", userInfo.email);
+            userProps.put("Name", userInfo.firstName + " " + userInfo.lastName);
+            String subjectToUse = URLPattern.updateString(subjectLine, null, userProps, new ArrayList<AnalysisItem>()).toString();
+            String bodyToUse = URLPattern.updateString(body, null, userProps, new ArrayList<AnalysisItem>()).toString();
+            new SendGridEmail().sendAttachmentEmail(userInfo.email, subjectToUse, bodyToUse, bytes, attachmentName, htmlEmail, senderEmail, senderName, encoding);
             deliveryAuditStmt.setLong(1, accountID);
             deliveryAuditStmt.setLong(2, deliveryID);
             deliveryAuditStmt.setBoolean(3, true);
@@ -472,7 +547,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
             deliveryAuditStmt.execute();
         }
         for (String email : emails) {
-            new SendGridEmail().sendAttachmentEmail(email, subjectLine, body, bytes, attachmentName, htmlEmail, senderEmail, senderName, encoding);
+            Map<String, String> userProps = new HashMap<String, String>(baseProps);
+            userProps.put("Email", email);
+            String subjectToUse = URLPattern.updateString(subjectLine, null, userProps, new ArrayList<AnalysisItem>()).toString();
+            String bodyToUse = URLPattern.updateString(body, null, userProps, new ArrayList<AnalysisItem>()).toString();
+            new SendGridEmail().sendAttachmentEmail(email, subjectToUse, bodyToUse, bytes, attachmentName, htmlEmail, senderEmail, senderName, encoding);
             deliveryAuditStmt.setLong(1, accountID);
             deliveryAuditStmt.setLong(2, deliveryID);
             deliveryAuditStmt.setBoolean(3, true);

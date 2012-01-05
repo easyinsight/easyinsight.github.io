@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
  * Time: 12:04 AM
  */
 public class EmbeddedCompareYearsDataResults extends EmbeddedResults {
-    private List<CompareYearsRow> dataSet;
+    private List<CompareYearsRow> dataSet = new ArrayList<CompareYearsRow>();
 
     public List<CompareYearsRow> getDataSet() {
         return dataSet;

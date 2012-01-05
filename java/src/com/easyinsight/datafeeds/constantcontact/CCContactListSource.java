@@ -7,7 +7,6 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
-import nu.xom.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -58,39 +57,15 @@ public class CCContactListSource extends ConstantContactBaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
+            List<ContactList> contactLists = ccSource.getOrCreateContactListCache().getOrCreateContactLists(ccSource);
             DataSet dataSet = new DataSet();
-            Document doc = query("https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/lists", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-            boolean hasMoreData;
-            do {
-                hasMoreData = false;
-                Nodes nodes = doc.query("/feed/entry");
-                for (int i = 0; i < nodes.size(); i++) {
-
-                    IRow row = dataSet.createRow();
-                    Node node = nodes.get(i);
-                    String idString = node.query("id/text()").get(0).getValue();
-                    String id = idString.split("/")[7];
-                    String name = node.query("content/ContactList/Name/text()").get(0).getValue();
-                    String shortName = node.query("content/ContactList/ShortName/text()").get(0).getValue();
-                    row.addValue(CONTACT_LIST_ID, id);
-                    row.addValue(CONTACT_LIST_NAME, name);
-                    row.addValue(CONTACT_LIST_SHORT_NAME, shortName);
-                    row.addValue(CONTACT_LIST_COUNT, 1);
-                }
-
-                Nodes links = doc.query("/feed/link");
-
-                for (int i = 0; i < links.size(); i++) {
-                    Element link = (Element) links.get(i);
-                    Attribute attribute = link.getAttribute("rel");
-                    if (attribute != null && "next".equals(attribute.getValue())) {
-                        String linkURL = link.getAttribute("href").getValue();
-                        hasMoreData = true;
-                        doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-                        break;
-                    }
-                }
-            } while (hasMoreData);
+            for (ContactList contactList : contactLists) {
+                IRow row = dataSet.createRow();
+                row.addValue(CONTACT_LIST_ID, contactList.getId());
+                row.addValue(CONTACT_LIST_NAME, contactList.getName());
+                row.addValue(CONTACT_LIST_SHORT_NAME, contactList.getShortName());
+                row.addValue(CONTACT_LIST_COUNT, 1);
+            }
             return dataSet;
         } catch (Exception e) {
             throw new RuntimeException(e);

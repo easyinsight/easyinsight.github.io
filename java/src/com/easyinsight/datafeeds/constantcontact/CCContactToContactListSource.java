@@ -49,60 +49,21 @@ public class CCContactToContactListSource extends ConstantContactBaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
-            DataSet dataSet = new DataSet();
+            List<ContactList> contactLists = ccSource.getOrCreateContactListCache().getOrCreateContactLists(ccSource);
             System.out.println("Started retrieving contact list members...");
-            Document listDoc = query("https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/lists", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-            boolean hasMoreData;
-            do {
-                hasMoreData = false;
-                Nodes lists = listDoc.query("/feed/entry/id/text()");
-                for (int i = 0; i < lists.size(); i++) {
-                    Node listNode = lists.get(i);
-                    String id = listNode.getValue().split("/")[7];
-                    String url = "https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/lists/" + id + "/members";
-                    Document doc = query(url, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-                    boolean hasMoreContacts;
-                    do {
-                        hasMoreContacts = false;
-                        Nodes subscribers = doc.query("/feed/entry/id/text()");
-                        for (int j = 0; j < subscribers.size(); j++) {
-                            IRow row = dataSet.createRow();
-                            Node subscriber = subscribers.get(j);
-                            String contactID = subscriber.getValue().split("/")[7];
-                            row.addValue(CONTACT_ID, contactID);
-                            row.addValue(CONTACT_LIST_ID, id);
-                        }
-                        Nodes links = doc.query("/feed/link");
-
-                        for (int j = 0; j < links.size(); j++) {
-                            Element link = (Element) links.get(j);
-                            Attribute attribute = link.getAttribute("rel");
-                            if (attribute != null && "next".equals(attribute.getValue())) {
-                                String linkURL = link.getAttribute("href").getValue();
-                                hasMoreContacts = true;
-                                doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-                                break;
-                            }
-                        }
-                    } while (hasMoreContacts);
+            DataSet dataSet = new DataSet();
+            for (ContactList contactList : contactLists) {
+                for (String userEmail : contactList.getUsers()) {
+                    IRow row = dataSet.createRow();
+                    row.addValue(CONTACT_ID, userEmail);
+                    row.addValue(CONTACT_LIST_ID, contactList.getId());
                 }
-                Nodes links = listDoc.query("/feed/link");
+            }
+            
 
-                for (int i = 0; i < links.size(); i++) {
-                    Element link = (Element) links.get(i);
-                    Attribute attribute = link.getAttribute("rel");
-                    if (attribute != null && "next".equals(attribute.getValue())) {
-                        String linkURL = link.getAttribute("href").getValue();
-                        hasMoreData = true;
-                        listDoc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-                        break;
-                    }
-                }
-                IDataStorage.insertData(dataSet);
-                dataSet = new DataSet();
-            } while (hasMoreData);
+
             System.out.println("Finished retrieving contact list members");
-            return null;
+            return dataSet;
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {

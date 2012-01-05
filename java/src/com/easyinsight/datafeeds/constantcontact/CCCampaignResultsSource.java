@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * User: jamesboe
@@ -93,156 +94,138 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, final IDataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
-            DataSet dataSet = new DataSet();
-            System.out.println("Started retrieving campaign results...");
-            Document doc = query("https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-            boolean hasMoreCampaigns;
-            do {
-                hasMoreCampaigns = false;
-                Nodes nodes = doc.query("/feed/entry");
-                for (int i = 0; i < nodes.size(); i++) {
-                    Node node = nodes.get(i);
-                    String idString = node.query("id/text()").get(0).getValue();
-                    String id = idString.split("/")[7];
-                    String name = node.query("content/Campaign/Name/text()").get(0).getValue();
-                    System.out.println("campaign name = " + name);
-                    String dateString = queryField(node, "content/Campaign/Date/text()");
-                    if (dateString != null) {
-                        Date date = DATE_FORMAT.parse(dateString);
+            final ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
+
+            List<Campaign> campaigns = ccSource.getOrCreateCampaignCache().getOrCreateCampaigns(ccSource);
+
+            final CountDownLatch latch = new CountDownLatch(campaigns.size());
+
+            BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
+
+            ThreadPoolExecutor tpe = new ThreadPoolExecutor(2, 5, 5000, TimeUnit.MILLISECONDS, queue);
+            
+            for (final Campaign campaign : campaigns) {
+                tpe.execute(new Runnable() {
+
+                    public void run() {
+                        DataSet dataSet = new DataSet();
+                        Date date = campaign.getDate();
                         long time = date.getTime();
                         long delta = System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 90;
                         if (time < delta) {
-                            continue;
+                        } else {
+                            try {
+                                String eventsURL = "https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns/" + campaign.getId() + "/events/?pageSize=200";
+                                System.out.println(eventsURL);
+                                System.out.println("campaign name = " + campaign.getName());
+                                Document eventsDoc = query(eventsURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+                                Nodes eventNodes = eventsDoc.query("/service/workspace/collection");
+                                for (int j = 0; j < eventNodes.size(); j++) {
+                                    Element eventElement = (Element) eventNodes.get(j);
+                                    Attribute attribute = eventElement.getAttribute("href");
+
+                                    Document eventDetailDoc = query("https://api.constantcontact.com" + attribute.getValue(), ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+                                    boolean hasMoreEvents;
+                                    do {
+                                        hasMoreEvents = false;
+                                        Nodes sendNodes = eventDetailDoc.query("/feed/entry/content/SentEvent");
+                                        for (int k = 0; k < sendNodes.size(); k++) {
+                                            Node sendNode = sendNodes.get(k);
+
+                                            IRow row = dataSet.createRow();
+                                            String contactID = sendNode.query("Contact/EmailAddress/text()").get(0).getValue();
+                                            row.addValue(CONTACT_ID, contactID);
+                                            row.addValue(CAMPAIGN_ID, campaign.getId());
+                                            row.addValue(SENT_COUNT, 1);
+                                            row.addValue(EVENT_DATE, sendNode.query("EventTime/text()").get(0).getValue());
+                                        }
+
+                                        Nodes bounceNodes = eventDetailDoc.query("/feed/entry/content/BounceEvent");
+                                        for (int k = 0; k < bounceNodes.size(); k++) {
+                                            Node sendNode = bounceNodes.get(k);
+
+                                            IRow row = dataSet.createRow();
+                                            String contactID = sendNode.query("Contact/EmailAddress/text()").get(0).getValue();
+                                            row.addValue(CONTACT_ID, contactID);
+                                            row.addValue(CAMPAIGN_ID, campaign.getId());
+                                            row.addValue(BOUNCE_COUNT, 1);
+                                            row.addValue(EVENT_DATE, sendNode.query("EventTime/text()").get(0).getValue());
+                                        }
+
+                                        Nodes openNodes = eventDetailDoc.query("/feed/entry/content/OpenEvent");
+                                        for (int k = 0; k < openNodes.size(); k++) {
+                                            Node sendNode = openNodes.get(k);
+                                            String contactID = sendNode.query("Contact/EmailAddress/text()").get(0).getValue();
+                                            IRow row = dataSet.createRow();
+                                            row.addValue(CONTACT_ID, contactID);
+                                            row.addValue(CAMPAIGN_ID, campaign.getId());
+                                            row.addValue(OPEN_COUNT, 1);
+                                            row.addValue(EVENT_DATE, sendNode.query("EventTime/text()").get(0).getValue());
+                                        }
+
+                                        Nodes clickNodes = eventDetailDoc.query("/feed/entry/content/ClickEvent");
+                                        for (int k = 0; k < clickNodes.size(); k++) {
+                                            Node sendNode = clickNodes.get(k);
+                                            String contactID = sendNode.query("Contact/EmailAddress/text()").get(0).getValue();
+                                            IRow row = dataSet.createRow();
+                                            row.addValue(CONTACT_ID, contactID);
+                                            row.addValue(CAMPAIGN_ID, campaign.getId());
+                                            row.addValue(CLICK_COUNT, 1);
+                                            row.addValue(EVENT_DATE, sendNode.query("EventTime/text()").get(0).getValue());
+                                        }
+
+                                        Nodes forwardNodes = eventDetailDoc.query("/feed/entry/content/ForwardEvent");
+                                        for (int k = 0; k < forwardNodes.size(); k++) {
+                                            Node sendNode = forwardNodes.get(k);
+                                            String contactID = sendNode.query("Contact/EmailAddress/text()").get(0).getValue();
+                                            IRow row = dataSet.createRow();
+                                            row.addValue(CONTACT_ID, contactID);
+                                            row.addValue(CAMPAIGN_ID, campaign.getId());
+                                            row.addValue(FORWARD_COUNT, 1);
+                                            row.addValue(EVENT_DATE, sendNode.query("EventTime/text()").get(0).getValue());
+                                        }
+
+                                        Nodes optOutNodes = eventDetailDoc.query("/feed/entry/content/OptOutEvent");
+                                        for (int k = 0; k < optOutNodes.size(); k++) {
+                                            Node sendNode = optOutNodes.get(k);
+
+                                            IRow row = dataSet.createRow();
+                                            String contactID = sendNode.query("Contact/EmailAddress/text()").get(0).getValue();
+                                            row.addValue(CONTACT_ID, contactID);
+                                            row.addValue(CAMPAIGN_ID, campaign.getId());
+                                            row.addValue(OPT_OUT_COUNT, 1);
+                                            row.addValue(EVENT_DATE, sendNode.query("EventTime/text()").get(0).getValue());
+                                        }
+
+                                        Nodes links = eventDetailDoc.query("/feed/link");
+                                        for (int k = 0; k < links.size(); k++) {
+                                            Element link = (Element) links.get(k);
+                                            Attribute relAttribute = link.getAttribute("rel");
+                                            if (relAttribute != null && "next".equals(relAttribute.getValue())) {
+                                                String linkURL = link.getAttribute("href").getValue();
+                                                hasMoreEvents = true;
+                                                eventDetailDoc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+                                                break;
+                                            }
+                                        }
+                                    } while (hasMoreEvents);
+                                }
+                                dataStorage.insertData(dataSet);
+                            } catch (Exception e) {
+                                LogClass.error(e);
+                                //LogClass.info(e.getMessage());
+                            }
+
                         }
+                        latch.countDown();
                     }
+                });
+            }
 
-                    try {
-                        String eventsURL = "https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns/" + id + "/events/?pageSize=200";
-                        System.out.println(eventsURL);
-                        Document eventsDoc = query(eventsURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-                        Nodes eventNodes = eventsDoc.query("/service/workspace/collection");
-                        for (int j = 0; j < eventNodes.size(); j++) {
-                            Element eventElement = (Element) eventNodes.get(j);
-                            Attribute attribute = eventElement.getAttribute("href");
-
-                            Document eventDetailDoc = query("https://api.constantcontact.com" + attribute.getValue(), ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-                            boolean hasMoreEvents;
-                            do {
-                                hasMoreEvents = false;
-                                Nodes sendNodes = eventDetailDoc.query("/feed/entry/content/SentEvent");
-                                for (int k = 0; k < sendNodes.size(); k++) {
-                                    Node sendNode = sendNodes.get(k);
-                                    Element contact = (Element) sendNode.query("Contact").get(0);
-                                    String contactIDString = contact.getAttribute("id").getValue();
-                                    IRow row = dataSet.createRow();
-                                    String contactID = contactIDString.split("/")[7];
-                                    row.addValue(CONTACT_ID, contactID);
-                                    row.addValue(CAMPAIGN_ID, id);
-                                    row.addValue(SENT_COUNT, 1);
-                                    row.addValue(EVENT_DATE, sendNode.query("EventTime/text()").get(0).getValue());
-                                }
-
-                                Nodes bounceNodes = eventDetailDoc.query("/feed/entry/content/BounceEvent");
-                                for (int k = 0; k < bounceNodes.size(); k++) {
-                                    Node sendNode = bounceNodes.get(k);
-                                    Element contact = (Element) sendNode.query("Contact").get(0);
-                                    String contactIDString = contact.getAttribute("id").getValue();
-                                    IRow row = dataSet.createRow();
-                                    String contactID = contactIDString.split("/")[7];
-                                    row.addValue(CONTACT_ID, contactID);
-                                    row.addValue(CAMPAIGN_ID, id);
-                                    row.addValue(BOUNCE_COUNT, 1);
-                                    row.addValue(EVENT_DATE, sendNode.query("EventTime/text()").get(0).getValue());
-                                }
-
-                                Nodes openNodes = eventDetailDoc.query("/feed/entry/content/OpenEvent");
-                                for (int k = 0; k < openNodes.size(); k++) {
-                                    Node sendNode = openNodes.get(k);
-                                    Element contact = (Element) sendNode.query("Contact").get(0);
-                                    String contactIDString = contact.getAttribute("id").getValue();
-                                    IRow row = dataSet.createRow();
-                                    String contactID = contactIDString.split("/")[7];
-                                    row.addValue(CONTACT_ID, contactID);
-                                    row.addValue(CAMPAIGN_ID, id);
-                                    row.addValue(OPEN_COUNT, 1);
-                                    row.addValue(EVENT_DATE, sendNode.query("EventTime/text()").get(0).getValue());
-                                }
-
-                                Nodes clickNodes = eventDetailDoc.query("/feed/entry/content/ClickEvent");
-                                for (int k = 0; k < clickNodes.size(); k++) {
-                                    Node sendNode = clickNodes.get(k);
-                                    Element contact = (Element) sendNode.query("Contact").get(0);
-                                    String contactIDString = contact.getAttribute("id").getValue();
-                                    IRow row = dataSet.createRow();
-                                    String contactID = contactIDString.split("/")[7];
-                                    row.addValue(CONTACT_ID, contactID);
-                                    row.addValue(CAMPAIGN_ID, id);
-                                    row.addValue(CLICK_COUNT, 1);
-                                    row.addValue(EVENT_DATE, sendNode.query("EventTime/text()").get(0).getValue());
-                                }
-
-                                Nodes forwardNodes = eventDetailDoc.query("/feed/entry/content/ForwardEvent");
-                                for (int k = 0; k < forwardNodes.size(); k++) {
-                                    Node sendNode = forwardNodes.get(k);
-                                    Element contact = (Element) sendNode.query("Contact").get(0);
-                                    String contactIDString = contact.getAttribute("id").getValue();
-                                    IRow row = dataSet.createRow();
-                                    String contactID = contactIDString.split("/")[7];
-                                    row.addValue(CONTACT_ID, contactID);
-                                    row.addValue(CAMPAIGN_ID, id);
-                                    row.addValue(FORWARD_COUNT, 1);
-                                    row.addValue(EVENT_DATE, sendNode.query("EventTime/text()").get(0).getValue());
-                                }
-
-                                Nodes optOutNodes = eventDetailDoc.query("/feed/entry/content/OptOutEvent");
-                                for (int k = 0; k < optOutNodes.size(); k++) {
-                                    Node sendNode = optOutNodes.get(k);
-                                    Element contact = (Element) sendNode.query("Contact").get(0);
-                                    String contactIDString = contact.getAttribute("id").getValue();
-                                    IRow row = dataSet.createRow();
-                                    String contactID = contactIDString.split("/")[7];
-                                    row.addValue(CONTACT_ID, contactID);
-                                    row.addValue(CAMPAIGN_ID, id);
-                                    row.addValue(OPT_OUT_COUNT, 1);
-                                    row.addValue(EVENT_DATE, sendNode.query("EventTime/text()").get(0).getValue());
-                                }
-
-                                Nodes links = eventDetailDoc.query("/feed/link");
-                                for (int k = 0; k < links.size(); k++) {
-                                    Element link = (Element) links.get(k);
-                                    Attribute relAttribute = link.getAttribute("rel");
-                                    if (relAttribute != null && "next".equals(relAttribute.getValue())) {
-                                        String linkURL = link.getAttribute("href").getValue();
-                                        hasMoreEvents = true;
-                                        eventDetailDoc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-                                        break;
-                                    }
-                                }
-                            } while (hasMoreEvents);
-                        }
-                    } catch (Exception e) {
-                        LogClass.info(e.getMessage());
-                    }
-
-                }
-                Nodes links = doc.query("/feed/link");
-
-                for (int i = 0; i < links.size(); i++) {
-                    Element link = (Element) links.get(i);
-                    Attribute attribute = link.getAttribute("rel");
-                    if (attribute != null && "next".equals(attribute.getValue())) {
-                        String linkURL = link.getAttribute("href").getValue();
-                        hasMoreCampaigns = true;
-                        doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-                        break;
-                    }
-                }
-                IDataStorage.insertData(dataSet);
-                dataSet = new DataSet();
-            } while (hasMoreCampaigns);
+            latch.await();
+            tpe.shutdown();
             return null;
         } catch (Exception e) {
             throw new RuntimeException(e);

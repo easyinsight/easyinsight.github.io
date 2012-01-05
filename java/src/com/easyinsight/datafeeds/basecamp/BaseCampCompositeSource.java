@@ -78,8 +78,13 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         }
     }
 
+    @Override
+    public boolean fullNightlyRefresh() {
+        return true;
+    }
+
     public boolean isIncrementalRefresh() {
-        return false;
+        return incrementalRefresh;
     }
 
     public void setIncrementalRefresh(boolean incrementalRefresh) {
@@ -431,8 +436,10 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
                 BaseCampTodoSource.MILESTONE_CREATED_ON.equals(name) || BaseCampTodoSource.DEADLINE.equals(name) ||
                 BaseCampTodoSource.CREATEDDATE.equals(name) || BaseCampTodoSource.COMPLETEDDATE.equals(name) ||
                 BaseCampTodoSource.DUEON.equals(name)) {
+            System.out.println("Correct");
             return false;
         }
+        System.out.println("Incorrect");
         return true;
     }
 

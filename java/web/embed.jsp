@@ -1,4 +1,5 @@
 <%@ page import="com.easyinsight.users.UserService" %>
+<%@ page import="com.easyinsight.analysis.WSAnalysisDefinition" %>
 <html lang="en">
 
 <head>
@@ -10,6 +11,13 @@
         System.out.println("REPORT ID = " + reportID);
     String dataSourceID = request.getParameter("dataSourceID");
     String reportType = request.getParameter("reportType");
+        int type = Integer.parseInt(reportType);
+        String swf;
+        if (type == WSAnalysisDefinition.LIST) {
+            swf = "EmbeddedList";
+        } else {
+            swf = "EmbeddedInsight";
+        }
     String reportName = request.getParameter("reportName");
     String showToolbar = request.getParameter("showToolbar");
         String showFilters = request.getParameter("showFilters");
@@ -79,10 +87,10 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 		"width", "<%=width%>",
 		"height", "<%=height%>",
 		"align", "middle",
-		"id", "EmbeddedInsight",
+		"id", "<%=swf%>",
 		"quality", "high",
 		"bgcolor", "#ffffff",
-		"name", "EmbeddedInsight",
+		"name", "<%=swf%>",
 		"allowScriptAccess","sameDomain",
 		"type", "application/x-shockwave-flash",
 		"pluginspage", "http://www.adobe.com/go/getflashplayer",
@@ -92,14 +100,14 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 	// if we've detected an acceptable version
 	// embed the Flash Content SWF when all tests are passed
 	AC_FL_RunContent(
-			"src", "<%=versionDir%>/EmbeddedInsight",
+			"src", "<%=versionDir%>/<%=swf%>",
 			"width", "<%=width%>",
 			"height", "<%=height%>",
 			"align", "middle",
-			"id", "EmbeddedInsight",
+			"id", "<%=swf%>",
 			"quality", "high",
 			"bgcolor", "#ffffff",
-			"name", "EmbeddedInsight",
+			"name", "<%=swf%>",
             "flashvars", "<%=flashVars%>",
 			"allowScriptAccess","sameDomain",
 			"type", "application/x-shockwave-flash",
@@ -117,15 +125,15 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 </script>
 <noscript>
   	<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
-			id="EmbeddedInsight" width="100%" height="100%"
+			id="<%=swf%>" width="100%" height="100%"
 			codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
-			<param name="movie" value="EmbeddedInsight.swf" />
+			<param name="movie" value="<%=swf%>.swf" />
 			<param name="quality" value="high" />
 			<param name="bgcolor" value="#ffffff" />
 			<param name="allowScriptAccess" value="sameDomain" />
             <param name="allowFullScreen" value="true" />
-			<embed src="<%= versionDir%>/EmbeddedInsight.swf" quality="high" bgcolor="#ffffff"
-				width="<%=width%>" height="<%=height%>" name="EmbeddedInsight" align="middle"
+			<embed src="<%= versionDir%>/<%=swf%>.swf" quality="high" bgcolor="#ffffff"
+				width="<%=width%>" height="<%=height%>" name="<%=swf%>" align="middle"
 				play="true"
 				loop="false"
 				quality="high"

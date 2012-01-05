@@ -157,7 +157,6 @@ public class AnalysisService {
                             break;
                         }
                     } else {
-
                         if (connection.getSourceItem().getKey().toKeyString().equals(item.getKey().toKeyString())) {
                             analysisItem = item;
                             break;
@@ -586,6 +585,22 @@ public class AnalysisService {
         } finally {
             session.close();
             Database.closeConnection(conn);
+        }
+    }
+
+    public List<FilterDefinition> getFilters(long reportID) {
+        try {
+            List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+            SecurityUtil.authorizeInsight(reportID);
+            WSAnalysisDefinition report = analysisStorage.getAnalysisDefinition(reportID);
+            for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
+                FilterDefinition clone = filterDefinition.clone();
+                filters.add(clone);
+            }
+            return filters;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
         }
     }
 

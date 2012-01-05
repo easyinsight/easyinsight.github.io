@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
  * Time: 12:04 AM
  */
 public class EmbeddedTrendDataResults extends EmbeddedResults {
-    private List<TrendOutcome> trendOutcomes;
+    private List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
 
     public List<TrendOutcome> getTrendOutcomes() {
         return trendOutcomes;

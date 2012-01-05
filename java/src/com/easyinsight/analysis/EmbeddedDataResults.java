@@ -1,8 +1,8 @@
 package com.easyinsight.analysis;
 
 public class EmbeddedDataResults extends EmbeddedResults {
-    private AnalysisItem[] headers;
-    private ListRow[] rows;
+    private AnalysisItem[] headers = new AnalysisItem[0];
+    private ListRow[] rows = new ListRow[0];
 
     public EmbeddedDataResults() {
     }

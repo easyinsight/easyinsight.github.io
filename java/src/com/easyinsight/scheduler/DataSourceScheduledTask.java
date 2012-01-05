@@ -82,7 +82,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
 
                         if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
                             try {
-                                boolean result = dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null, null, ((FeedDefinition) dataSource).getLastRefreshStart(), false);
+                                boolean result = dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null, null, ((FeedDefinition) dataSource).getLastRefreshStart(), true);
                                 ((FeedDefinition)dataSource).setLastRefreshStart(now);
                                 if (result) {
                                     new DataSourceInternalService().updateFeedDefinition((FeedDefinition) dataSource, conn, true, true);

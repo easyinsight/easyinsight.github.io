@@ -200,10 +200,6 @@ public class AnalysisStorage {
                 reportCache.remove(reportID);
             } catch (CacheException e) {
             }
-            try {
-                reportCache.remove(reportID);
-            } catch (CacheException e) {
-            }
         }
     }
 

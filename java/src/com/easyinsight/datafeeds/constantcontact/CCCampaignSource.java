@@ -8,7 +8,6 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
-import nu.xom.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -60,51 +59,15 @@ public class CCCampaignSource extends ConstantContactBaseSource {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
             DataSet dataSet = new DataSet();
-            Document doc = query("https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-            boolean hasMoreData;
-            do {
-                hasMoreData = false;
-                Nodes nodes = doc.query("/feed/entry");
-                for (int i = 0; i < nodes.size(); i++) {
-
-                    Node node = nodes.get(i);
-                    Date date = null;
-                    String dateString = queryField(node, "content/Campaign/Date/text()");
-                    if (dateString != null) {
-                        date = DATE_FORMAT.parse(dateString);
-                        long time = date.getTime();
-                        
-                        long delta = System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 90;
-                        if (time < delta) {
-                            continue;
-                        }
-
-                    }
-                    IRow row = dataSet.createRow();
-                    String idString = node.query("id/text()").get(0).getValue();
-                    String id = idString.split("/")[7];
-                    String name = node.query("content/Campaign/Name/text()").get(0).getValue();
-                    String status = node.query("content/Campaign/Status/text()").get(0).getValue();
-                    row.addValue(CAMPAIGN_ID, id);
-                    row.addValue(CAMPAIGN_NAME, name);
-                    row.addValue(CAMPAIGN_STATUS, status);
-                    row.addValue(CAMPAIGN_DATE, new DateValue(date));
-                    row.addValue(CAMPAIGN_STATUS, status);
-                    row.addValue(CAMPAIGN_COUNT, 1);
-                }
-                Nodes links = doc.query("/feed/link");
-
-                for (int i = 0; i < links.size(); i++) {
-                    Element link = (Element) links.get(i);
-                    Attribute attribute = link.getAttribute("rel");
-                    if (attribute != null && "next".equals(attribute.getValue())) {
-                        String linkURL = link.getAttribute("href").getValue();
-                        hasMoreData = true;
-                        doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-                        break;
-                    }
-                }
-            } while (hasMoreData);
+            List<Campaign> campaigns = ccSource.getOrCreateCampaignCache().getOrCreateCampaigns(ccSource);
+            for (Campaign campaign : campaigns) {
+                IRow row = dataSet.createRow();
+                row.addValue(CAMPAIGN_ID, campaign.getId());
+                row.addValue(CAMPAIGN_NAME, campaign.getName());
+                row.addValue(CAMPAIGN_STATUS, campaign.getStatus());
+                row.addValue(CAMPAIGN_DATE, new DateValue(campaign.getDate()));
+                row.addValue(CAMPAIGN_COUNT, 1);
+            }
             return dataSet;
         } catch (Exception e) {
             throw new RuntimeException(e);

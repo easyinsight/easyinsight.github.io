@@ -13,7 +13,7 @@ import java.io.Serializable;
 public class NumericValue extends Value implements Serializable {
 
     private Double value;
-    private Aggregation aggregation;
+    private transient Aggregation aggregation;
     private static final long serialVersionUID = -9170406442789546755L;
 
 

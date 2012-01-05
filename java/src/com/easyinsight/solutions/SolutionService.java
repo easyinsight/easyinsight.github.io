@@ -600,9 +600,10 @@ public class SolutionService {
         Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
         List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
         for (AnalysisDefinition child : reports) {
-
-            //Map<Key, Key> keyReplacementMap = createKeyReplacementMap(targetDataSource, sourceDataSource);
             AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child);
+            if (child.getAnalysisID() != reportID) {
+                copyReport.setFolder(EIDescriptor.OTHER_VIEW);
+            }
             reportReplacementMap.put(child.getAnalysisID(), copyReport);
             reportList.add(copyReport);
         }

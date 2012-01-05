@@ -1,7 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
-import com.easyinsight.core.Value;
+import com.easyinsight.core.Key;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -90,7 +90,21 @@ public class DataService {
             List<LookupTable> lookupTables = new ArrayList<LookupTable>();
             for (AnalysisItem field : feedItems) {
                 if (field.getLookupTableID() != null && field.getLookupTableID() > 0) {
-                    lookupTables.add(new FeedService().getLookupTable(field.getLookupTableID(), conn));
+                    LookupTable lookupTable = new FeedService().getLookupTable(field.getLookupTableID(), conn);
+                    if (lookupTable != null) {
+                        if (lookupTable.getDataSourceID() != feedID) {
+                            AnalysisItem sourceItem = lookupTable.getSourceField();
+
+                            for (AnalysisItem dataSourceField : feedMetadata.getFields()) {
+                                Key key = dataSourceField.getKey();
+                                if (key.matchesOrContains(sourceItem.getKey())) {
+                                    lookupTable.setSourceField(dataSourceField);
+                                    break;
+                                }
+                            }
+                        }
+                        lookupTables.add(lookupTable);
+                    }
                 }
             }
             WSListDefinition tempList = new WSListDefinition();

@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.Key;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -30,15 +31,26 @@ public class URLPattern {
         return results;
     }
 
-    public static String getURL(String pattern, IRow row, Map<String, String> dataSourceProperties, Collection<AnalysisItem> fields) {
+    public static String getURL(String pattern, @Nullable IRow row, Map<String, String> dataSourceProperties, Collection<AnalysisItem> fields) {
+        StringBuilder sb = updateString(pattern, row, dataSourceProperties, fields);
+        String urlString = sb.toString();
+        if (!urlString.startsWith("http")) {
+            urlString = "http://" + urlString;
+        }
+        return urlString;
+    }
+
+    public static StringBuilder updateString(String pattern, @Nullable IRow row, Map<String, String> dataSourceProperties, Collection<AnalysisItem> fields) {
         Map<String, Key> values = new HashMap<String, Key>();
         Map<String, Key> keyMap = new HashMap<String, Key>();
         for (AnalysisItem field : fields) {
             values.put(field.toDisplay(), field.createAggregateKey());
         }
-        for(Key k : row.getKeys()) {
-            if (k != null) {
-                keyMap.put(k.toKeyString(), k);
+        if (row != null) {
+            for(Key k : row.getKeys()) {
+                if (k != null) {
+                    keyMap.put(k.toKeyString(), k);
+                }
             }
         }
         Matcher m = keyPattern.matcher(pattern);
@@ -70,11 +82,7 @@ public class URLPattern {
             if(i < fragments.length)
                 sb.append(fragments[i++]);
         }
-        String urlString = sb.toString();
-        if (!urlString.startsWith("http")) {
-            urlString = "http://" + urlString;
-        }
-        return urlString;
+        return sb;
     }
 
 }

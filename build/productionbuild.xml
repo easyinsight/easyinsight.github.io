@@ -412,14 +412,14 @@
         </sequential>
     </macrodef>
 
-    <target name="modules1" depends="report.area3dchart, report.areachart, report.bar3dchart, report.bubblechart"/>
-    <target name="modules2" depends="report.column3dchart, report.linechart, report.line3dchart, report.list"/>
-    <target name="modules3" depends="report.pie3dchart, report.piechart, report.plotchart"/>
+    <target name="modules1" depends="report.areachart, report.bubblechart"/>
+    <target name="modules2" depends="report.linechart, report.list"/>
+    <target name="modules3" depends="report.piechart, report.plotchart"/>
     <target name="modules4" depends="report.crosstab, report.tree, report.treemap, app.embeddeddashboard"/>
     <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail"/>
     <target name="modules7" depends="perspective.kpiwindow,perspective.datasourceadmin"/>
     <target name="modules8" depends="report.heatmap, report.gantt, report.form"/>
-    <target name="apps" depends="compileFlexOptimized, app.embeddedreport, app.selenium, app.admin"/>
+    <target name="apps" depends="compileFlexOptimized, app.embeddedreport, app.selenium, app.admin, app.embeddedlist"/>
 
     <target name="compileFlexOptimized">
         <buildSWF mainMXML="PrimaryWorkspace.mxml" swfName="PrimaryWorkspace" buildFile="core-optimized-config.xml"/>

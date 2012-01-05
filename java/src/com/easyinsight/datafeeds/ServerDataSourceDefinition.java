@@ -203,7 +203,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
         tempStorage.createTable(sql);
         System.out.println("Refreshing " + getDataFeedID() + " - " + getFeedName() + " at " + new Date());
-        DataSet dataSet = getDataSet(keys, now, parentDefinition, tempStorage, conn, callDataID, lastRefreshTime);
+        DataSet dataSet = getDataSet(keys, now, parentDefinition, tempStorage, conn, callDataID, fullRefresh ? null : lastRefreshTime);
         if (dataSet != null) {
             tempStorage.insertData(dataSet);
         }
@@ -223,6 +223,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         DataStorage dataStorage = null;
         try {
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
+            if (parentDefinition == null) {
+                fullRefresh = fullRefresh && fullNightlyRefresh();
+            } else {
+                fullRefresh = fullRefresh && parentDefinition.fullNightlyRefresh();
+            }
             boolean insert = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh;
             if (insert) {
                 dataStorage.truncate();

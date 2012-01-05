@@ -81,6 +81,29 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
         this.pin = pin;
     }
 
+    private ContactListCache contactListCache;
+    private CampaignCache campaignCache;
+
+    public ContactListCache getOrCreateContactListCache() {
+        if (contactListCache == null) {
+            contactListCache = new ContactListCache();
+        }
+        return contactListCache;
+    }
+
+    public CampaignCache getOrCreateCampaignCache() {
+        if (campaignCache == null) {
+            campaignCache = new CampaignCache();
+        }
+        return campaignCache;
+    }
+
+    @Override
+    protected void refreshDone() {
+        super.refreshDone();
+        contactListCache = null;
+    }
+
     @Override
     public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
         ConstantContactCompositeSource constantContactCompositeSource = (ConstantContactCompositeSource) super.clone(conn);

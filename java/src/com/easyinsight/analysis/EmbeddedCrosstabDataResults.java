@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
  * Time: 12:04 AM
  */
 public class EmbeddedCrosstabDataResults extends EmbeddedResults {
-    private List<CrosstabMapWrapper> dataSet;
+    private List<CrosstabMapWrapper> dataSet = new ArrayList<CrosstabMapWrapper>();
     private int columnCount;
 
     public List<CrosstabMapWrapper> getDataSet() {
