@@ -1,9 +1,8 @@
 package com.easyinsight.calculations;
 
+import com.easyinsight.calculations.generated.CalculationsLexer;
 import org.antlr.runtime.tree.*;
 import org.antlr.runtime.Token;
-
-import com.easyinsight.calculations.generated.*;
 
 public class NodeFactory extends CommonTreeAdaptor {
 
