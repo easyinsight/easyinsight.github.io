@@ -77,11 +77,14 @@ fragment LowerCase
 fragment UpperCase
 	:	'A'..'Z';
 	
+fragment InternationalCharacters
+	:	'\u0100'..'\uFFFF';
+	
 fragment Character
-	:	LowerCase | UpperCase;
+	:	LowerCase | UpperCase | InternationalCharacters;
 	
 fragment BracketedVariable
-	:	OpenBrace (Character | Digit) (Character | Digit | VariableSpecialChars | VariableWhitespace)* CloseBrace;
+	:	OpenBrace (Character | Digit | VariableSpecialChars) (Character | Digit | VariableSpecialChars | VariableWhitespace)* CloseBrace;
 
 fragment NoBracketsVariable
 	:	(Character | Digit) (Character | Digit | VariableWhitespace)*;

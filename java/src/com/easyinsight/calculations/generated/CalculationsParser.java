@@ -1,14 +1,17 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g 2011-09-19 16:14:47
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g 2012-01-05 12:05:10
 package com.easyinsight.calculations.generated;
 
 import org.antlr.runtime.*;
+import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
 
 
 import org.antlr.runtime.tree.*;
 
 public class CalculationsParser extends Parser {
     public static final String[] tokenNames = new String[] {
-        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "FuncEval", "OpenParen", "CloseParen", "Add", "Subtract", "Multiply", "Divide", "Comma", "Dot", "Exp", "OpenBrace", "CloseBrace", "Quote", "Variable", "Decimal", "String", "UInteger", "Integer", "BracketedVariable", "NoBracketsVariable", "Character", "Digit", "VariableWhitespace", "SpecialChars", "Whitespace", "HideWhiteSpace", "LowerCase", "UpperCase", "VariableSpecialChars", "NoBracketSpecialChars"
+        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "FuncEval", "OpenParen", "CloseParen", "Add", "Subtract", "Multiply", "Divide", "Comma", "Dot", "Exp", "OpenBrace", "CloseBrace", "Quote", "Variable", "Decimal", "String", "UInteger", "Integer", "BracketedVariable", "NoBracketsVariable", "Character", "Digit", "VariableWhitespace", "SpecialChars", "Whitespace", "HideWhiteSpace", "LowerCase", "UpperCase", "InternationalCharacters", "VariableSpecialChars", "NoBracketSpecialChars"
     };
     public static final int OpenBrace=14;
     public static final int CloseBrace=15;
@@ -36,11 +39,12 @@ public class CalculationsParser extends Parser {
     public static final int String=19;
     public static final int Whitespace=28;
     public static final int UInteger=20;
-    public static final int VariableSpecialChars=32;
+    public static final int VariableSpecialChars=33;
     public static final int Comma=11;
     public static final int SpecialChars=27;
+    public static final int InternationalCharacters=32;
     public static final int Integer=21;
-    public static final int NoBracketSpecialChars=33;
+    public static final int NoBracketSpecialChars=34;
 
     // delegates
     // delegators
