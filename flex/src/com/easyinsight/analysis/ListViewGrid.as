@@ -6,6 +6,7 @@ import flash.utils.Dictionary;
 
 import mx.collections.ArrayCollection;
 import mx.controls.AdvancedDataGrid;
+import mx.controls.listClasses.ListRowInfo;
 
 public class ListViewGrid extends AdvancedDataGrid {
 
@@ -56,6 +57,28 @@ public class ListViewGrid extends AdvancedDataGrid {
         {
             displayWidth = unscaledWidth - viewMetrics.right - viewMetrics.left;
         }
+        var trueHeight:int = 0;
+        if (dataProvider && rowInfo) {
+            for (var i:int = 0; i < dataProvider.length && i < rowInfo.length; i++) {
+                var info:ListRowInfo = rowInfo[i];
+                trueHeight += info.height;
+            }
+        }
+        /*if (trueHeight != 0) {
+            this.height = trueHeight;
+        }*/
+        //
+    }
+    
+    public function recalculateHeight():int {
+        var trueHeight:int = headerHeight;
+        if (dataProvider && rowInfo) {
+            for (var i:int = 0; i < dataProvider.length && i < rowInfo.length; i++) {
+                var info:ListRowInfo = rowInfo[i];
+                trueHeight += info.height;
+            }
+        }
+        return trueHeight;
     }
 
 

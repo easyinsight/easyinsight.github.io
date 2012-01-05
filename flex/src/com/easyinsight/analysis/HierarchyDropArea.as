@@ -18,14 +18,18 @@ package com.easyinsight.analysis
 		}
 		
 		override protected function getNoDataLabel():String {
-			return "Drop Hierarchy Here";
+			return "Drag Hierarchy Here";
 		}
 
-        override protected function accept(analysisItem:AnalysisItem):Boolean {
+        override public function accept(analysisItem:AnalysisItem):Boolean {
             if (analysisItem == null) {
                 return false;
             }
             return analysisItem.hasType(AnalysisItemTypes.HIERARCHY);
+        }
+
+        override public function recommend(analysisItem:AnalysisItem):Boolean {
+            return accept(analysisItem);
         }
 
         override public function customEditor():Class {

@@ -1,16 +1,11 @@
 package com.easyinsight.analysis {
 import com.easyinsight.analysis.charts.bubble.BubbleChartController;
 import com.easyinsight.analysis.charts.plot.PlotChartController;
-import com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartController;
 import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartController;
-import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartController;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartController;
-import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartController;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartController;
 import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartController;
-import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartController;
 import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartController;
-import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartController;
 import com.easyinsight.analysis.crosstab.CrosstabController;
@@ -52,33 +47,33 @@ public class ControllerLookup {
             case AnalysisDefinition.COLUMN:
                 controller = ColumnChartController;
                 break;
-            case AnalysisDefinition.COLUMN3D:
+            /*case AnalysisDefinition.COLUMN3D:
                 controller = Column3DChartController;
-                break;
+                break;*/
             case AnalysisDefinition.BAR:
                 controller = BarChartController;
                 break;
-            case AnalysisDefinition.BAR3D:
+            /*case AnalysisDefinition.BAR3D:
                 controller = Bar3DChartController;
-                break;
+                break;*/
             case AnalysisDefinition.PIE:
                 controller = PieChartController;
                 break;
-            case AnalysisDefinition.PIE3D:
+            /*case AnalysisDefinition.PIE3D:
                 controller = Pie3DChartController;
-                break;
+                break;*/
             case AnalysisDefinition.LINE:
                 controller = LineChartController;
                 break;
-            case AnalysisDefinition.LINE3D:
+            /*case AnalysisDefinition.LINE3D:
                 controller = Line3DChartController;
-                break;
+                break;*/
             case AnalysisDefinition.AREA:
                 controller = AreaChartController;
                 break;
-            case AnalysisDefinition.AREA3D:
+            /*case AnalysisDefinition.AREA3D:
                 controller = Area3DChartController;
-                break;
+                break;*/
             case AnalysisDefinition.PLOT:
                 controller = PlotChartController;
                 break;

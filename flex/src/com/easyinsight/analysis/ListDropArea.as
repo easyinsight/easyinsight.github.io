@@ -14,7 +14,7 @@ package com.easyinsight.analysis
 		}
 		
 		override protected function getNoDataLabel():String {
-			return "Drop Field Here";
+			return "Drag Field Here";
 		}
 	}
 }

@@ -7,14 +7,18 @@
  */
 package com.easyinsight.analysis.ytd {
 import com.easyinsight.analysis.AnalysisChangedEvent;
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
+import com.easyinsight.analysis.DateDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
+import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 
@@ -31,12 +35,12 @@ public class CompareYearsControlBar extends ReportControlBar implements IReportC
         super();
         listViewGrouping = new ListDropAreaGrouping();
         listViewGrouping.unlimited = true;
-        listViewGrouping.dropAreaType = ListDropArea;
+        listViewGrouping.dropAreaType = MeasureDropArea;
         listViewGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         columnGrouping = new ListDropAreaGrouping();
         columnGrouping.unlimited = false;
         columnGrouping.maxElements = 1;
-        columnGrouping.dropAreaType = ListDropArea;
+        columnGrouping.dropAreaType = DateDropArea;
         columnGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         setStyle("verticalAlign", "middle");
     }
@@ -88,6 +92,7 @@ public class CompareYearsControlBar extends ReportControlBar implements IReportC
             listDefinition.timeDimension = null;
         } else {
             listDefinition.timeDimension = columnGrouping.getListColumns()[0];
+            AnalysisDateDimension(listDefinition.timeDimension).dateLevel = AnalysisItemTypes.YEAR_LEVEL;
         }
         return listDefinition;
     }

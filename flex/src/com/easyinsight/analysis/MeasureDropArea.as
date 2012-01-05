@@ -14,14 +14,18 @@ package com.easyinsight.analysis
 		}
 		
 		override protected function getNoDataLabel():String {
-			return "Drop Measure Here";
+			return "Drag Metric Here";
 		}
 
-        override protected function accept(analysisItem:AnalysisItem):Boolean {
+        override public function accept(analysisItem:AnalysisItem):Boolean {
             if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING) || analysisItem.hasType(AnalysisItemTypes.DATE)) {
                 return false;
             }
             return true;
+        }
+
+        override public function recommend(analysisItem:AnalysisItem):Boolean {
+            return (analysisItem.hasType(AnalysisItemTypes.MEASURE));
         }
 
         override public function set analysisItem(analysisItem:AnalysisItem):void {

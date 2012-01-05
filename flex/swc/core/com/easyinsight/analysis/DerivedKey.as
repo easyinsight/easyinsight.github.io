@@ -21,7 +21,7 @@ package com.easyinsight.analysis
         }
 
         override public function internalString():String {
-            return feedID + "-" + parentKey.createString();
+            return feedID + "-" + parentKey.internalString();
         }
 	}
 }

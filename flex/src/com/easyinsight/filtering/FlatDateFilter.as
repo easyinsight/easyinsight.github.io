@@ -4,6 +4,7 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisItem;
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -47,14 +48,7 @@ import mx.rpc.events.ResultEvent;
     public function set dashboardID(value:int):void {
         _dashboardID = value;
     }
-		
-		[Bindable]
-        [Embed(source="../../../../assets/navigate_cross.png")]
-        public var deleteIcon:Class;
-        
-        [Bindable]
-        [Embed(source="../../../../assets/pencil.png")]
-        public var editIcon:Class;
+
 		
 		public function FlatDateFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
 			super();
@@ -148,14 +142,14 @@ import mx.rpc.events.ResultEvent;
             if (_filterEditable) {
                 var editButton:Button = new Button();
                 editButton.addEventListener(MouseEvent.CLICK, edit);
-                editButton.setStyle("icon", editIcon);
+                editButton.setStyle("icon", ImageConstants.EDIT_ICON);
                 editButton.toolTip = "Edit";
                 addChild(editButton);
 
 
                 var deleteButton:Button = new Button();
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-                deleteButton.setStyle("icon", deleteIcon);
+                deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
                 if (_filterDefinition.intrinsic) {
                     deleteButton.enabled = false;
                     deleteButton.toolTip = "This filter is an intrinsic part of the data source and cannot be deleted.";

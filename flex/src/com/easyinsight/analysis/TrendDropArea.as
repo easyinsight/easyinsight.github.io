@@ -1,6 +1,6 @@
 package com.easyinsight.analysis {
 
-public class TrendDropArea extends DropArea {
+public class TrendDropArea extends MeasureDropArea {
 
     public function TrendDropArea() {
         super();
@@ -11,7 +11,7 @@ public class TrendDropArea extends DropArea {
     }
 
     override protected function getNoDataLabel():String {
-        return "Drop Measure Here";
+        return "Drag Metric Here";
     }
 
     override public function set analysisItem(analysisItem:AnalysisItem):void {

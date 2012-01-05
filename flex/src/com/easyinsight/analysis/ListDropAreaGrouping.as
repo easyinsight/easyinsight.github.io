@@ -20,12 +20,18 @@ public class ListDropAreaGrouping extends FlowBox {
     private var _analysisItems:ArrayCollection;
     private var _dataSourceID:int;
     private var _report:AnalysisDefinition;
+    private var _message:String;
 
     private var iHateActionScript:ListDropArea;
 
-    public function ListDropAreaGrouping() {
+    public function ListDropAreaGrouping(message:String = null) {
         super();
+        this._message = message;
         addEventListener(FlexEvent.UPDATE_COMPLETE, adapterFlowBoxUpdateCompleteHandler);
+    }
+
+    public function get message():String {
+        return _message;
     }
 
     public function set report(value:AnalysisDefinition):void {
@@ -36,9 +42,9 @@ public class ListDropAreaGrouping extends FlowBox {
         _dataSourceID = value;
     }
 
-    public function highlight():void {
+    public function highlight(analysisItem:AnalysisItem):void {
         for each (var area:DropArea in dropAreas) {
-            area.highlight();
+            area.highlight(analysisItem);
         }
     }
 

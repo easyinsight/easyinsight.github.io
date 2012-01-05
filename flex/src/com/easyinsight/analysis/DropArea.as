@@ -1,8 +1,7 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.commands.CommandEvent;
-
-import com.easyinsight.util.PopUpUtil;
+import com.easyinsight.skin.ImageConstants;
 
 import flash.display.Bitmap;
 import flash.display.BitmapData;
@@ -17,7 +16,6 @@ import flash.ui.Keyboard;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.controls.AdvancedDataGrid;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.DataGrid;
 import mx.controls.Image;
@@ -36,9 +34,7 @@ public class DropArea extends HBox
 {
     private var _analysisItem:AnalysisItem;
 
-    [Bindable]
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
 
     private var editButton:Button;
     private var deleteButton:Button;
@@ -75,7 +71,7 @@ public class DropArea extends HBox
         addChildAction.target = editButton;
         var addDeleteButton:AddChild = new AddChild();
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         deleteButton.toolTip = "Clear This Field";
         addDeleteButton.relativeTo = this;
@@ -84,8 +80,9 @@ public class DropArea extends HBox
         states = [ configured ];
 
         this.setStyle("borderStyle", "solid");
-        this.setStyle("borderThickness", 1);
+        this.setStyle("borderThickness", 2);
         setStyle("verticalAlign", "middle");
+        setStyle("borderColor", 0xB7BABC);
         setStyle("backgroundColor", 0xFFFFFF);
         var deleteContextItem:ContextMenuItem = new ContextMenuItem("Delete Field", true);
         deleteContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDelete);
@@ -96,12 +93,16 @@ public class DropArea extends HBox
         _report = value;
     }
 
-    public function highlight():void {
-        //setStyle("borderColor", "0x0000FF");
+    public function highlight(analysisItem:AnalysisItem):void {
+        if (recommend(analysisItem)) {
+            setStyle("borderColor", 0x00AA00);
+            setStyle("backgroundColor", 0xBBFFBB);
+        }
     }
 
     public function normal():void {
-       // setStyle("borderColor", 0xB7BABC);
+        setStyle("borderColor", 0xB7BABC);
+        setStyle("backgroundColor", 0xFFFFFF);
     }
 
     private function createNoDataLabel():UIComponent {
@@ -144,7 +145,6 @@ public class DropArea extends HBox
         analysisItemEditor.analysisItem = this.analysisItem;
         analysisItemEditor.initialWindow = initialWindow;
         if (_report != null) {
-            //Alert.show("have a report at drop area");
             analysisItemEditor.reportType = _report.reportType;
         }
         if (startX > 0) {
@@ -197,7 +197,7 @@ public class DropArea extends HBox
         return null;
     }
 
-    protected function dragEnterHandler(event:DragEvent):void {
+    public function dragEnterHandler(event:DragEvent):void {
         var analysisItem:AnalysisItem = null;
         var okay:Boolean = true;
         if (event.dragInitiator is DataGrid) {
@@ -221,12 +221,16 @@ public class DropArea extends HBox
             }
         }
         if (okay && accept(analysisItem)) {
-            setStyle("borderColor", "green");
+            //setStyle("borderColor", "green");
             DragManager.acceptDragDrop(event.currentTarget as IUIComponent);
         }
     }
 
-    protected function accept(analysisItem:AnalysisItem):Boolean {
+    public function accept(analysisItem:AnalysisItem):Boolean {
+        return true;
+    }
+
+    public function recommend(analysisItem:AnalysisItem):Boolean {
         return true;
     }
 
@@ -259,9 +263,9 @@ public class DropArea extends HBox
         DragManager.doDrag(this, dragSource, event, image);
     }
 
-    protected function dragDropHandler(event:DragEvent):void {
+    public function dragDropHandler(event:DragEvent):void {
         //setStyle("borderThickness", 0);
-        setStyle("borderColor", 0xB7BABC);
+        //setStyle("borderColor", 0xB7BABC);
         if (event.dragInitiator is DataGrid) {
             var initialList:DataGrid = event.dragInitiator as DataGrid;
             var newAnalysisItem:AnalysisItemWrapper = initialList.selectedItem as AnalysisItemWrapper;
@@ -300,7 +304,7 @@ public class DropArea extends HBox
     }
 
     protected function dragExitHandler(event:DragEvent):void {
-        setStyle("borderColor", 0xB7BABC);
+        //setStyle("borderColor", 0xB7BABC);
     }
 }
 }

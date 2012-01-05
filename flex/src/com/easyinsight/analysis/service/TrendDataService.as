@@ -33,7 +33,7 @@ public class TrendDataService extends EventDispatcher implements IReportDataServ
         var obj:Object = new Object();
         obj["reportEditor"] = true;
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, listData.trendOutcomes, listData.dataSourceInfo, obj, listData.auditMessages,
-                listData.reportFault, false, 0, 0, listData.suggestions));
+                listData.reportFault, false, 0, 0, listData.suggestions, listData.trendOutcomes != null && listData.trendOutcomes.length > 0));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

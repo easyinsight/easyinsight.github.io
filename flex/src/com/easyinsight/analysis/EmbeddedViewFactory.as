@@ -14,19 +14,17 @@ import com.easyinsight.report.ReportNavigationEvent;
 import com.easyinsight.report.ReportSetupEvent;
 import com.easyinsight.util.EIErrorEvent;
 
-import flash.display.DisplayObject;
 import flash.events.Event;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-import mx.containers.Box;
 import mx.containers.Canvas;
-import mx.containers.VBox;
-import mx.controls.ProgressBar;
+import mx.controls.Alert;
+import mx.core.UIComponent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
-public class EmbeddedViewFactory extends VBox implements IRetrievable {
+public class EmbeddedViewFactory extends Canvas implements IRetrievable {
 
     private var _reportID:int;
     private var _dataSourceID:int;
@@ -86,6 +84,7 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
     }
 
     private function onError(event:EIErrorEvent):void {
+        Alert.show("server error");
         stackTrace = event.error.getStackTrace();
         overlayIndex = 3;
     }
@@ -99,37 +98,41 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
         _dataService.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
         _dataService.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, retrievalFault);
         _dataService.addEventListener(EIErrorEvent.ERROR, onError);
-        var canvas:Canvas = new Canvas();
-        canvas.percentHeight = 100;
-        canvas.percentWidth = 100;
-        var box:Box = new Box();
-        BindingUtils.bindProperty(box, "visible", this, "showLoading");
-        box.percentWidth = 100;
-        box.percentHeight = 100;
-        box.setStyle("horizontalAlign", "center");
-        box.setStyle("verticalAlign", "middle");
-        var screen:Canvas = new Canvas();
-        screen.percentHeight = 100;
-        screen.percentWidth = 100;
-        screen.setStyle("backgroundColor", 0x000000);
-        screen.setStyle("backgroundAlpha", .1);
-        BindingUtils.bindProperty(screen, "visible", this, "showLoading");
+        canvas = new Canvas();
+        canvas.setStyle("borderStyle", "solid");
+        canvas.setStyle("borderThickness", 1);
+        canvas.setStyle("cornerRadius", 8);
+        canvas.setStyle("dropShadowEnabled", true);
+        canvas.setStyle("backgroundAlpha", 1);
+        canvas.setStyle("backgroundColor", 0xFFFFFF);
+        canvas.x = 10;
         reportCanvas = new ReportCanvas();
+        reportCanvas.x = 10;
+        reportCanvas.y = 10;
         BindingUtils.bindProperty(reportCanvas, "loading", this, "loading");
         BindingUtils.bindProperty(reportCanvas, "overlayIndex", this, "overlayIndex");
-        BindingUtils.bindProperty(reportCanvas, "stackTrace", this, "overlayIndex");
-        reportCanvas.percentHeight = 100;
-        reportCanvas.percentWidth = 100;
-        var progressBar:ProgressBar = new ProgressBar();
-        BindingUtils.bindProperty(progressBar, "indeterminate", this, "showLoading");
-        progressBar.label = "Loading the report...";
-        progressBar.setStyle("fontSize", 18);
-        box.addChild(progressBar);
+        BindingUtils.bindProperty(reportCanvas, "stackTrace", this, "stackTrace");
         canvas.addChild(reportCanvas);
-        canvas.addChild(screen);
-        canvas.addChild(box);
         addChild(canvas);
+        noData = new NoData();
         loadReportRenderer();
+    }
+    
+    private var canvas:Canvas;
+    
+    private var noData:NoData;
+    
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        canvas.width = unscaledWidth - 20;
+        canvas.height = unscaledHeight - 10;
+        reportCanvas.width = unscaledWidth - 40;
+        reportCanvas.height = unscaledHeight - 40;
+        if (currentComponent != null && (currentComponent.height != reportCanvas.height || currentComponent.width != reportCanvas.width)) {
+            currentComponent.height = reportCanvas.height;
+            currentComponent.width = reportCanvas.width;
+            currentComponent.invalidateDisplayList();
+        }
     }
 
     private var _dashboardID:int;
@@ -194,6 +197,7 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
     }
 
      private function retrievalFault(event:ReportRetrievalFault):void {
+         Alert.show("report retrieval fault");
         overlayIndex = 2;
         dispatchEvent(event);
     }
@@ -217,6 +221,31 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
         var info:ReportInfo = analysisService.getReportInfo.lastResult as ReportInfo;
         report = info.report;
         dispatchEvent(new ReportSetupEvent(info));
+    }
+
+    private var currentComponent:UIComponent;
+
+    private function showReport():void {
+        if (!UIComponent(_reportRenderer).parent) {
+            if (currentComponent) {
+                reportCanvas.removeChild(currentComponent);
+            }
+            currentComponent = _reportRenderer as UIComponent;
+            currentComponent.height = reportCanvas.height;
+            currentComponent.width = reportCanvas.width;
+            reportCanvas.addChildAt(currentComponent, 0);
+            invalidateDisplayList();
+        }
+    }
+
+    private function showNoData():void {
+        if (!noData.parent) {
+            if (currentComponent) {
+                reportCanvas.removeChild(currentComponent);
+            }
+            currentComponent = noData;
+            reportCanvas.addChildAt(noData, 0);
+        }
     }
 
     public function refresh():void {
@@ -281,14 +310,20 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
             event.reportFault.popup(this, onProblem);
         } else {
             event.additionalProperties.prefix = Constants.instance().prefix;
+            overlayIndex = 0;
             try {
                 _report = event.analysisDefinition;
-                _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, new Object(), event.additionalProperties);
+                if (event.hasData) {
+                    showReport();
+                    _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, new Object(), event.additionalProperties);
+                } else {
+                    showNoData();
+                }
                 dispatchEvent(event);
             } catch(e:Error) {
-                dispatchEvent(new EIErrorEvent(e));
+                stackTrace = e.getStackTrace();
+                overlayIndex = 3;
             }
-            overlayIndex = 0;
         }
 
     }
@@ -348,8 +383,9 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
         _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
         _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
         _reportRenderer.addEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, onItemChange, false, 0, true);
+        UIComponent(_reportRenderer).percentWidth = 100;
+        UIComponent(_reportRenderer).percentHeight = 100;
         _dataService.preserveValues = _reportRenderer.preserveValues();
-        reportCanvas.reportBox.addChild(_reportRenderer as DisplayObject);
         if (pendingRequest) {
             pendingRequest = false;
             refresh();
@@ -365,7 +401,9 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
 
     private function onReportWindow(event:ReportWindowEvent):void {
         var window:ReportEventProcessor = ReportEventProcessor.fromEvent(event, this);
-        window.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
+        window.addEventListener(ReportNavigationEvent.TO_REPORT, function(event:ReportNavigationEvent):void {
+            dispatchEvent(event);
+        }, false, 0, true);
     }
 
     private function toReport(event:ReportNavigationEvent):void {
@@ -378,10 +416,6 @@ public class EmbeddedViewFactory extends VBox implements IRetrievable {
 
     private function drilldown(event:HierarchyDrilldownEvent):void {
 
-    }
-
-    private function customChangeFromControlBar(event:CustomChangeEvent):void {
-        _reportRenderer.onCustomChangeEvent(event);
     }
 
     public function updateExportMetadata():void {

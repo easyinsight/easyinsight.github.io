@@ -42,7 +42,7 @@ public class EmbeddedCompareYearsService extends EventDispatcher implements IEmb
         var listData:EmbeddedCompareYearsResult = dataRemoteSource.getEmbeddedCompareYearsResults.lastResult as EmbeddedCompareYearsResult;
 
         dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, listData.dataSet, listData.definition, listData.dataSourceAccessible,
-                listData.reportFault, listData.dataSourceInfo, listData.additionalProperties));
+                listData.reportFault, listData.dataSourceInfo, listData.additionalProperties, listData.dataSet.length > 0));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

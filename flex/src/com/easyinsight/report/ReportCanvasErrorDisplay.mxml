@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<mx:ViewStack xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" selectedIndex="{index}" width="100%" height="100%">
+    <mx:Script><![CDATA[
+
+        [Bindable]
+        private var index:int = 0;
+
+        private var _stackTrace:String;
+        
+        [Bindable]
+        private var showTrace:Boolean;
+
+        [Bindable(event="stackTraceChanged")]
+        public function get stackTrace():String {
+            return _stackTrace;
+        }
+
+        public function set stackTrace(value:String):void {
+            if (_stackTrace == value) return;
+            showTrace = value != null && value != "";
+            _stackTrace = value;
+            dispatchEvent(new Event("stackTraceChanged"));
+        }
+        ]]></mx:Script>
+    <mx:Box width="100%" height="100%" horizontalAlign="center"
+            verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+        <mx:VBox paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
+                 backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
+                 cornerRadius="10" horizontalAlign="center">
+            <util:AutoSizeTextArea
+                    text="We're sorry, but something went wrong in retrieving data for this report. You may want to edit the report, see if any fields are missing from the report drop areas, and adjust from there."
+                    visible="true" fontSize="18" width="400"
+                    editable="false" backgroundAlpha="0" verticalScrollPolicy="off"/>
+            <mx:Button label="See Error Details" click="index = 1" visible="{showTrace}"/>
+        </mx:VBox>
+    </mx:Box>
+    <mx:Box width="100%" height="100%" horizontalAlign="center"
+            verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+        <mx:VBox paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
+                 backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
+                 cornerRadius="10" horizontalAlign="center">
+            <mx:TextArea text="{stackTrace}" visible="true" fontSize="12" width="500"
+                         editable="false" backgroundAlpha="0" height="300"/>
+            <mx:Button label="Hide Error Details" click="index = 0"/>
+        </mx:VBox>
+    </mx:Box>
+</mx:ViewStack>

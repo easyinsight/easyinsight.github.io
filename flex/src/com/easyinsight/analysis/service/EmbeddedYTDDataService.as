@@ -41,7 +41,7 @@ public class EmbeddedYTDDataService extends EventDispatcher implements IEmbedded
         var listData:EmbeddedYTDResults = dataRemoteSource.getEmbeddedYTDResults.lastResult as EmbeddedYTDResults;
 
         dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, listData.dataSet, listData.definition, listData.dataSourceAccessible,
-                listData.reportFault, listData.dataSourceInfo, listData.additionalProperties));
+                listData.reportFault, listData.dataSourceInfo, listData.additionalProperties, listData.dataSet.length > 0));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

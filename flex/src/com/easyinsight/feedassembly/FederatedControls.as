@@ -6,6 +6,8 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.feedassembly {
+import com.easyinsight.skin.ImageConstants;
+
 import flash.events.MouseEvent;
 
 import mx.containers.HBox;
@@ -13,8 +15,7 @@ import mx.controls.Button;
 
 public class FederatedControls extends HBox {
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
 
     private var deleteButton:Button;
 
@@ -23,7 +24,7 @@ public class FederatedControls extends HBox {
     public function FederatedControls() {
         super();
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         deleteButton.toolTip = "Delete";
         setStyle("horizontalAlign", "center");

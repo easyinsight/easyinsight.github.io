@@ -1,6 +1,7 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.AnalysisItemDeleteEvent;
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
@@ -35,13 +36,9 @@ public class ReportEditorFieldControls extends UIComponent implements IListItemR
 		[Embed(source="../../../../assets/copy.png")]
         public var copyIcon:Class;
 
-        [Bindable]
-		[Embed(source="../../../../assets/pencil.png")]
-        public var editIcon:Class;
 
-        [Bindable]
-		[Embed(source="../../../../assets/navigate_cross.png")]
-        public var deleteIcon:Class;
+
+
 
     private var _showDelete:Boolean;
     private var _showCopy:Boolean;
@@ -110,7 +107,7 @@ public class ReportEditorFieldControls extends UIComponent implements IListItemR
 		override protected function createChildren():void {
             if (editButton == null) {
 				editButton = new Button();
-				editButton.setStyle("icon", editIcon);
+				editButton.setStyle("icon", ImageConstants.EDIT_ICON);
 				editButton.toolTip = "Edit...";
                 BindingUtils.bindProperty(editButton, "visible", this, "showEdit");
                 editButton.addEventListener(MouseEvent.CLICK, editItem);
@@ -127,7 +124,7 @@ public class ReportEditorFieldControls extends UIComponent implements IListItemR
 
             if (deleteButton == null) {
                 deleteButton = new Button();
-                deleteButton.setStyle("icon", deleteIcon);
+                deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
                 BindingUtils.bindProperty(deleteButton, "visible", this, "showDelete");
                 deleteButton.toolTip = "Delete Field";
 

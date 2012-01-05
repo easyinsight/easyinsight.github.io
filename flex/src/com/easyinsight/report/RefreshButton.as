@@ -39,7 +39,7 @@ public class RefreshButton extends Button {
     }
 
     private function onClick(event:MouseEvent):void {
-        if (User.getInstance() != null && (_dataSource.type == DataSourceInfo.STORED_PULL || _dataSource.type == DataSourceInfo.COMPOSITE_PULL)) {
+        if (_dataSource != null && User.getInstance() != null && (_dataSource.type == DataSourceInfo.STORED_PULL || _dataSource.type == DataSourceInfo.COMPOSITE_PULL)) {
             var window:DataSourceDisplay = new DataSourceDisplay();
             var p:Point = new Point(this.x, this.y);
             var g:Point = parent.localToGlobal(p);

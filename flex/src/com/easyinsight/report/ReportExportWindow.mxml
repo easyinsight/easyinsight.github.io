@@ -9,7 +9,6 @@
         import com.easyinsight.analysis.PNGCreator;
         import com.easyinsight.schedule.ReportDelivery;
         import com.easyinsight.schedule.ReportDeliveryScheduleWindow;
-        import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.PopUpManager;
 
@@ -98,6 +97,7 @@
         private function email():void {
             var window:EmailReportWindow = new EmailReportWindow();
             window.report = _report;
+            window.coreView = _coreView;
             window.x = this.x;
             window.y = this.y;
             PopUpManager.addPopUp(window, this, true);

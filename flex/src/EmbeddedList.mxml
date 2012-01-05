@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:framework="com.easyinsight.framework.*"
+                creationComplete="handleFlashVars()" xmlns:dashboard="com.easyinsight.dashboard.*"
+                paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
+                bottom="0" paddingBottom="0" backgroundColor="#FFFFFF">
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.account.Account;
+        import com.easyinsight.analysis.DefaultMenuFactory;
+        import com.easyinsight.analysis.InsightResponse;
+        import com.easyinsight.analysis.PopupMenuFactory;
+        import com.easyinsight.framework.BasicInfo;
+        import com.easyinsight.framework.Constants;
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.TORegistry2;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.report.EmbedReportContextMenuFactory;
+        import com.easyinsight.util.UserAudit;
+
+        [Bindable]
+        private var urlKey:String;
+
+        [Bindable]
+        private var reportType:int;
+
+        [Bindable]
+        private var dataSourceID:int;
+
+        [Bindable]
+        private var reportName:String;
+
+
+        private var _showToolbar:Boolean;
+
+        [Bindable("showToolbarChanged")]
+        public function get showToolbar():Boolean {
+            return _showToolbar;
+        }
+
+        public function set showToolbar(value:Boolean):void {
+            if (_showToolbar == value) return;
+            _showToolbar = value;
+            dispatchEvent(new Event("showToolbarChanged"));
+        }
+
+        [Bindable]
+        private var showFilters:Boolean;
+
+        [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf", fontName="Lucida Grande", fontStyle="normal")]
+        private var myNormalLucida:Class;
+
+        private function handleFlashVars():void {
+            Font.registerFont(myNormalLucida);
+            Constants.setup();
+            UserAudit.initialize();
+            PopupMenuFactory.menuFactory = new DefaultMenuFactory();
+            PopupMenuFactory.reportFactory = new EmbedReportContextMenuFactory();
+            this.urlKey = String(Application.application.parameters.analysisID);
+            this.reportType = int(Application.application.parameters.reportType);
+            this.dataSourceID = int(Application.application.parameters.dataSourceID);
+            this.reportName = String(Application.application.parameters.reportName);
+
+            this.showToolbar = int(Application.application.parameters.showToolbar) == 1;
+
+
+            this.showFilters = int(Application.application.parameters.showFilters) == 1;
+
+
+            var showFiltersMenu:ContextMenuItem = new ContextMenuItem("Toggle Filters");
+            var showToolbarMenu:ContextMenuItem = new ContextMenuItem("Toggle Toolbar");
+
+            // yay binding closure hack
+            var s = this;
+
+            showFiltersMenu.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
+                s.showFilters = !s.showFilters;
+            });
+
+
+            showToolbarMenu.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
+                s.showToolbar = !s.showToolbar;
+            });
+
+            var menu:ContextMenu = new ContextMenu();
+            menu.hideBuiltInItems();
+            menu.customItems = [ showFiltersMenu, showToolbarMenu ];
+            this.contextMenu = menu;
+            // session check
+            userService.getBuildPath.send();
+        }
+
+        private function gotBuildPath():void {
+            var basicInfo:BasicInfo = userService.getBuildPath.lastResult as BasicInfo;
+            Constants.instance().buildPath = basicInfo.version;
+            Constants.instance().prefix = basicInfo.prefix;
+            userService.isSessionLoggedIn.send();
+        }
+
+        private function dependancies():void {
+            TORegistry2.registerTypes();
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
+
+        private function sessionCheck():void {
+            var authResult:UserServiceResponse = userService.isSessionLoggedIn.lastResult as UserServiceResponse;
+            if (authResult != null) {
+                if (authResult.accountState == Account.DELINQUENT) {
+                    //toLogin(1);
+                } else {
+                    quietLogin(authResult, false);
+                    //toMain();
+                }
+            } else {
+                analysisService.openAnalysisIfPossible.send(urlKey);
+
+            }
+        }
+
+        private function gotReportInfo():void {
+            var info:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
+            if (info.status == InsightResponse.SUCCESS) {
+                stackIndex = 2;
+            } else {
+                stackIndex = 1;
+            }
+        }
+
+        private function login(event:LoginEvent):void {
+            quietLogin(event.authResponse, true);
+        }
+
+        private function quietLogin(authResponse:UserServiceResponse, navigate:Boolean):void {
+            User.initializeUser(authResponse);
+            User.getInstance().userName = authResponse.userName;
+            stackIndex = 2;
+        }
+
+        private function setup():void {
+            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loginEvent);
+            User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
+        }
+
+        private function loginEvent(event:LoginEvent):void {
+            stackIndex = 2;
+        }
+        ]]>
+	</mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="openAnalysisIfPossible" result="gotReportInfo()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="userService" destination="login">
+        <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
+        <mx:method name="getBuildPath" result="gotBuildPath()"/>
+    </mx:RemoteObject>
+    <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
+    <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
+        <mx:Box/>
+        <framework:LoginComponent loginEvent2="stackIndex = 2"/>
+        <dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
+                                      dataSourceID="{dataSourceID}" reportType="{reportType}"
+                                      showToolbar="{showToolbar}"
+                                        showFilters="{showFilters}" />
+    </mx:ViewStack>
+</mx:Application>

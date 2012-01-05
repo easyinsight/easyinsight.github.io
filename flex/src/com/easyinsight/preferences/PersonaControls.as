@@ -1,4 +1,5 @@
 package com.easyinsight.preferences {
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
@@ -9,13 +10,6 @@ import mx.managers.PopUpManager;
 
 public class PersonaControls extends HBox {
 
-    [Bindable]
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
-
-    [Bindable]
-    [Embed(source="../../../../assets/pencil.png")]
-    private var editIcon:Class;
 
     private var editButton:Button;
     private var deleteButton:Button;
@@ -25,11 +19,11 @@ public class PersonaControls extends HBox {
     public function PersonaControls() {
         super();
         editButton = new Button();
-        editButton.setStyle("icon", editIcon);
+        editButton.setStyle("icon", ImageConstants.EDIT_ICON);
         editButton.toolTip = "Edit Persona...";
         editButton.addEventListener(MouseEvent.CLICK, onEdit);
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.toolTip = "Delete Persona";
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         percentWidth = 100;

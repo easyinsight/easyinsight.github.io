@@ -16,8 +16,7 @@ import mx.containers.HBox;
 
 public class DeliveryFormatSelection extends HBox {
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
 
     private var comboBox:SmartComboBox;
 

@@ -3,6 +3,7 @@ import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.ReportModuleLoader;
+import com.easyinsight.report.ReportCanvas;
 
 import com.easyinsight.report.ReportEventProcessor;
 
@@ -18,8 +19,11 @@ import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.Canvas;
 import mx.containers.VBox;
-import mx.controls.ProgressBar;
-import mx.core.Container;
+import mx.controls.Alert;
+import mx.core.IUIComponent;
+import mx.core.UIComponent;
+import mx.events.DragEvent;
+import mx.managers.DragManager;
 
 public class DataViewFactory extends VBox implements IRetrievable {
 
@@ -74,12 +78,20 @@ public class DataViewFactory extends VBox implements IRetrievable {
         dispatchEvent(new Event("reportSelectableChanged"));
     }
 
-    public function highlightDropAreas():void {
-        _controlBar.highlight();
+    public function highlightDropAreas(analysisItem:AnalysisItem):void {
+        _controlBar.highlight(analysisItem);
+        reportCanvas.highlight();
+        /*if (notConfigured.parent) {
+            notConfigured.highlight(analysisItem);
+        } else {
+
+        }*/
     }
 
     public function revertDropAreas():void {
         _controlBar.normal();
+        //notConfigured.normal();
+        reportCanvas.normal();
     }
 
     public function set adHocMode(value:Boolean):void {
@@ -164,12 +176,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
         box2.setStyle("paddingRight", 5);
         box2.setStyle("paddingBottom", 5);
         box2.setStyle("paddingTop", 5);
-        box2.setStyle("backgroundAlpha", 1);
-        box2.setStyle("backgroundColor", 0xF8F8F8);
-        box2.setStyle("cornerRadius", 5);
-        box2.setStyle("borderStyle", "solid");
-        box2.setStyle("borderThickness", 0);
-        box2.setStyle("borderColor", "0xFFFFFF");
         box2.percentWidth = 100;
         addChild(box2);
         box2.addChild(_controlBar as DisplayObject);
@@ -183,50 +189,91 @@ public class DataViewFactory extends VBox implements IRetrievable {
         canvas.setStyle("backgroundColor", 0xFFFFFF);
         canvas.percentHeight = 100;
         canvas.percentWidth = 100;
-        var box:Box = new Box();
-        BindingUtils.bindProperty(box, "visible", this, "showLoading");
-        box.percentWidth = 100;
-        box.percentHeight = 100;
-        box.setStyle("horizontalAlign", "center");
-        box.setStyle("verticalAlign", "middle");
-        var screen:Canvas = new Canvas();
-        screen.percentHeight = 100;
-        screen.percentWidth = 100;
-        screen.setStyle("backgroundColor", 0x000000);
-        screen.setStyle("backgroundAlpha", .1);
-        BindingUtils.bindProperty(screen, "visible", this, "showLoading");
-        var rContent:Box = new Box();
-        rContent.percentHeight = 100;
-        rContent.percentWidth = 100;
-        rContent.setStyle("paddingLeft", 5);
-        rContent.setStyle("paddingRight", 5);
-        rContent.setStyle("paddingBottom", 5);
-        rContent.setStyle("paddingTop", 5);
-
-        reportCanvas = new Box();
-        reportCanvas.setStyle("backgroundAlpha", 1);
-        reportCanvas.setStyle("backgroundColor", 0xFFFFFF);
-        reportCanvas.percentWidth = 100;
-        reportCanvas.percentHeight = 100;
-        rContent.addChild(reportCanvas);
-        var progressBar:ProgressBar = new ProgressBar();
-        BindingUtils.bindProperty(progressBar, "indeterminate", this, "showLoading");
-        progressBar.label = "Loading the report...";
-        progressBar.setStyle("fontSize", 18);
-        box.addChild(progressBar);
-        canvas.addChild(rContent);
-        canvas.addChild(screen);
-        canvas.addChild(box);
+        reportCanvas = new ReportCanvas();
+        reportCanvas.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
+        reportCanvas.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
+        reportCanvas.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
+        BindingUtils.bindProperty(reportCanvas, "loading", this, "showLoading");
+        BindingUtils.bindProperty(reportCanvas, "overlayIndex", this, "overlayIndex");
+        BindingUtils.bindProperty(reportCanvas, "stackTrace", this, "stackTrace");
+        reportCanvas.x = 10;
+        reportCanvas.y = 10;
+        canvas.addChild(reportCanvas);
         addChild(canvas);
+        noData = new NoData();
+        currentComponent = noData;
+        reportCanvas.addChildAt(noData, 0);
+        notConfigured = new NotConfigured();
+        //notConfigured.controlBar = _controlBar;
         loadReportRenderer();
     }
 
+    private static function dragEnterHandler(event:DragEvent):void {
+        var newItem:AnalysisItemWrapper = event.dragSource.dataForFormat("treeDataGridItems")[0];
+        if (newItem.isAnalysisItem()) {
+            DragManager.acceptDragDrop(IUIComponent(event.currentTarget));
+        }
+    }
+
+    private function dragDropHandler(event:DragEvent):void {
+        event.preventDefault();
+        var newItem:AnalysisItemWrapper = event.dragSource.dataForFormat("treeDataGridItems")[0];
+        if (newItem.isAnalysisItem()) {
+            _controlBar.addItem(newItem.analysisItem);
+        }
+    }
+
+    protected static function dragOverHandler(event:DragEvent):void {
+        DragManager.showFeedback(DragManager.MOVE);
+    }
+
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        reportCanvas.width = canvas.width - 20;
+        reportCanvas.height = canvas.height - 20;
+        if (currentComponent.height != reportCanvas.height || currentComponent.width != reportCanvas.width) {
+            currentComponent.height = reportCanvas.height;
+            currentComponent.width = reportCanvas.width;
+            currentComponent.invalidateDisplayList();
+        }
+
+    }
+
+    private var noData:NoData;
+    
+    private var notConfigured:NotConfigured;
+
     private var canvas:Canvas;
 
-    private var reportCanvas:Container;
+    private var reportCanvas:ReportCanvas;
 
     private var _showLoading:Boolean = false;
+    
+    private var _stackTrace:String;
 
+    private var _overlayIndex:int;
+
+    [Bindable(event="stackTraceChanged")]
+    public function get stackTrace():String {
+        return _stackTrace;
+    }
+
+    public function set stackTrace(value:String):void {
+        if (_stackTrace == value) return;
+        _stackTrace = value;
+        dispatchEvent(new Event("stackTraceChanged"));
+    }
+
+    [Bindable(event="overlayIndexChanged")]
+    public function get overlayIndex():int {
+        return _overlayIndex;
+    }
+
+    public function set overlayIndex(value:int):void {
+        if (_overlayIndex == value) return;
+        _overlayIndex = value;
+        dispatchEvent(new Event("overlayIndexChanged"));
+    }
 
     [Bindable(event="showLoadingChanged")]
     public function get showLoading():Boolean {
@@ -251,11 +298,14 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _reportRenderer.removeEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
             _reportRenderer.removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
             _reportRenderer.removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
-            reportCanvas.removeChild(_reportRenderer as DisplayObject);
+            if (UIComponent(_reportRenderer).parent) {
+                reportCanvas.removeChild(_reportRenderer as DisplayObject);
+            }
         }
     }
 
     private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
+        if (event.type == DataServiceLoadingEvent.LOADING_STARTED) overlayIndex = 1;
         showLoading = (event.type == DataServiceLoadingEvent.LOADING_STARTED);
         dispatchEvent(event);
     }
@@ -265,7 +315,13 @@ public class DataViewFactory extends VBox implements IRetrievable {
             refresh();
         } else {
             _analysisDefinition = _controlBar.createAnalysisDefinition();
-            _reportRenderer.renderReport(_lastData, _analysisDefinition, new Object(), _lastProperties);
+            if (_hasData) {
+                showReport();
+                _reportRenderer.renderReport(_lastData, _analysisDefinition, new Object(), _lastProperties);
+            } else {
+                showNoData();
+            }
+
         }
     }
 
@@ -274,7 +330,12 @@ public class DataViewFactory extends VBox implements IRetrievable {
             refresh();
         } else {
             _analysisDefinition = _controlBar.createAnalysisDefinition();
-            _reportRenderer.renderReport(_lastData, _analysisDefinition, new Object(), _lastProperties);
+            if (_hasData) {
+                showReport();
+                _reportRenderer.renderReport(_lastData, _analysisDefinition, new Object(), _lastProperties);
+            } else {
+                showNoData();
+            }
         }
     }
 
@@ -288,7 +349,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
                     _analysisDefinition.createDefaultLimits();
                     _dataService.retrieveData(_analysisDefinition, false);
                 } else {
-                    _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object(), null);
+                    showNotConfigured();
                 }
             }
         }
@@ -309,7 +370,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
                 _analysisDefinition.createDefaultLimits();
                 _dataService.retrieveData(_analysisDefinition, false);
             } else {
-                _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object(), null);
+                showNotConfigured();
             }
         }
     }
@@ -318,7 +379,44 @@ public class DataViewFactory extends VBox implements IRetrievable {
         return _controlBar.isDataValid();
     }
 
+    private var currentComponent:UIComponent;
+
+    private function showReport():void {
+        if (!UIComponent(_reportRenderer).parent) {
+            if (currentComponent) {
+                reportCanvas.removeChild(currentComponent);
+            }
+            currentComponent = _reportRenderer as UIComponent;
+            currentComponent.height = reportCanvas.height;
+            currentComponent.width = reportCanvas.width;
+            reportCanvas.addChildAt(currentComponent, 0);
+            invalidateDisplayList();
+        }
+    }
+
+    private function showNoData():void {
+        if (!noData.parent) {
+            if (currentComponent) {
+                reportCanvas.removeChild(currentComponent);
+            }
+            currentComponent = noData;
+            reportCanvas.addChildAt(noData, 0);
+        }
+    }
+
+    private function showNotConfigured():void {
+        if (!notConfigured.parent) {
+            if (currentComponent) {
+                reportCanvas.removeChild(currentComponent);
+            }
+            currentComponent = notConfigured;
+            reportCanvas.addChildAt(notConfigured, 0);
+        }
+    }
+
     private var _lastProperties:Object;
+    
+    private var _hasData:Boolean;
 
     private function gotData(event:DataServiceEvent):void {
         dispatchEvent(event);
@@ -328,7 +426,19 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _controlBar.onDataReceipt(event);
             _lastData = event.dataSet;
             _lastProperties = event.additionalProperties;
-            _reportRenderer.renderReport(event.dataSet, _analysisDefinition, new Object(), event.additionalProperties);
+            _hasData = event.hasData;
+            overlayIndex = 0;
+            try {
+                if (event.hasData) {
+                    showReport();
+                    _reportRenderer.renderReport(event.dataSet, _analysisDefinition, new Object(), event.additionalProperties);
+                } else {
+                    showNoData();
+                }
+            } catch (e:Error) {
+                stackTrace = e.getStackTrace();
+                overlayIndex = 3;
+            }
         }
     }
 
@@ -367,7 +477,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
                 reportSelectable = false;
             }
             _dataService.preserveValues = _reportRenderer.preserveValues();
-            reportCanvas.addChild(_reportRenderer as DisplayObject);
+            //reportCanvas.addChild(_reportRenderer as DisplayObject);
             if (pendingRequest) {
                 pendingRequest = false;
                 refresh();
@@ -450,6 +560,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.canSaveDirectly = source.canSaveDirectly;
         target.description = source.description;
         target.marketplaceVisible = source.marketplaceVisible;
+        target.accountVisible = source.accountVisible;
         target.solutionVisible = source.solutionVisible;
         target.publiclyVisible = source.publiclyVisible;
         target.temporaryReport = source.temporaryReport;
@@ -462,6 +573,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.marmotScript = source.marmotScript;
         target.reportRunMarmotScript = source.reportRunMarmotScript;
         target.joinOverrides = source.joinOverrides;
+        target.folder = source.folder;
     }
 
     public function createNewDefinition():AnalysisDefinition {

@@ -1,8 +1,9 @@
 package com.easyinsight.groups
 {
 	import com.easyinsight.administration.feed.UserLinkEvent;
-	
-	import flash.events.MouseEvent;
+import com.easyinsight.skin.ImageConstants;
+
+import flash.events.MouseEvent;
 	
 	import mx.containers.HBox;
 	import mx.controls.Button;
@@ -12,9 +13,7 @@ package com.easyinsight.groups
 		private var userStub:GroupUser;
 		private var button:Button;
 		
-		[Bindable]
-        [Embed(source="../../../../assets/navigate_cross.png")]
-        public var deleteIcon:Class;
+
 		
 		public function GroupUserIcons()
 		{
@@ -27,7 +26,7 @@ package com.easyinsight.groups
 			if (button == null) {
 				button = new Button();
 				button.toolTip = "Delete";
-				button.setStyle("icon", deleteIcon);
+				button.setStyle("icon", ImageConstants.DELETE_ICON);
 				button.addEventListener(MouseEvent.CLICK, deleteUser);
 			}
 			addChild(button);

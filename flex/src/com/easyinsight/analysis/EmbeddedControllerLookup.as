@@ -1,16 +1,11 @@
 package com.easyinsight.analysis {
 import com.easyinsight.analysis.charts.bubble.BubbleChartEmbeddedController;
 import com.easyinsight.analysis.charts.plot.PlotChartEmbeddedController;
-import com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartEmbeddedController;
 import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartEmbeddedController;
-import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartEmbeddedController;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartEmbeddedController;
-import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartEmbeddedController;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartEmbeddedController;
 import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartEmbeddedController;
-import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartEmbeddedController;
 import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartEmbeddedController;
-import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartEmbeddedController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartEmbeddedController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartEmbeddedController;
 import com.easyinsight.analysis.crosstab.CrosstabEmbeddedController;
@@ -49,35 +44,20 @@ public class EmbeddedControllerLookup {
             case AnalysisDefinition.STACKED_COLUMN:
                 controller = StackedColumnChartEmbeddedController;
                 break;
-            case AnalysisDefinition.COLUMN3D:
-                controller = Column3DChartEmbeddedController;
-                break;
             case AnalysisDefinition.BAR:
                 controller = BarChartEmbeddedController;
                 break;
             case AnalysisDefinition.STACKED_BAR:
                 controller = StackedBarChartEmbeddedController;
                 break;
-            case AnalysisDefinition.BAR3D:
-                controller = Bar3DChartEmbeddedController;
-                break;
             case AnalysisDefinition.PIE:
                 controller = PieChartEmbeddedController;
-                break;
-            case AnalysisDefinition.PIE3D:
-                controller = Pie3DChartEmbeddedController;
                 break;
             case AnalysisDefinition.LINE:
                 controller = LineChartEmbeddedController;
                 break;
-            case AnalysisDefinition.LINE3D:
-                controller = Line3DChartEmbeddedController;
-                break;
             case AnalysisDefinition.AREA:
                 controller = AreaChartEmbeddedController;
-                break;
-            case AnalysisDefinition.AREA3D:
-                controller = Area3DChartEmbeddedController;
                 break;
             case AnalysisDefinition.PLOT:
                 controller = PlotChartEmbeddedController;

@@ -36,6 +36,8 @@
                     dateFields.addItem(analysisItemWrapper.analysisItem);
                 }
             }
+            var noComp:Object = { display: "[ No Comparison ]"};
+            dateFields.addItemAt(noComp, 0);
             rowCount = Math.min(15, dateFields.length);
             this.dateFields = dateFields;
         }

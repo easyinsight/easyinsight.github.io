@@ -14,6 +14,9 @@
         import com.easyinsight.framework.Constants;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.TORegistry;
+        //import com.easyinsight.framework.TORegistry2;
+
+        //import com.easyinsight.framework.TORegistry;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
         import com.easyinsight.report.EmbedReportContextMenuFactory;

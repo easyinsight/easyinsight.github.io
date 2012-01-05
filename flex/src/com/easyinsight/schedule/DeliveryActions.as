@@ -6,6 +6,8 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.schedule {
+import com.easyinsight.skin.ImageConstants;
+
 import flash.events.MouseEvent;
 
 import mx.containers.HBox;
@@ -13,8 +15,7 @@ import mx.controls.Button;
 
 public class DeliveryActions extends HBox {
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
 
     private var deleteButton:Button;
 
@@ -24,7 +25,7 @@ public class DeliveryActions extends HBox {
         setStyle("horizontalAlign", "center");
         this.percentWidth = 100;
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
     }
 

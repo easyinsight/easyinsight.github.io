@@ -7,6 +7,7 @@
  */
 package com.easyinsight.analysis.verticallist {
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -16,14 +17,13 @@ import mx.controls.Button;
 
 public class CombinedVerticalListControls extends HBox {
 
-    [Embed(source="../../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
 
     private var deleteButton:Button;
 
     public function CombinedVerticalListControls() {
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, onClick);
         deleteButton.toolTip = "Remove Report...";
         percentWidth = 100;

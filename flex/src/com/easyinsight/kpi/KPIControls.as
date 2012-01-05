@@ -1,5 +1,6 @@
 package com.easyinsight.kpi {
 
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
@@ -17,13 +18,7 @@ public class KPIControls extends HBox {
     private var deleteButton:Button;
     private var copyButton:Button;
 
-    [Bindable]
-    [Embed(source="../../../../assets/pencil.png")]
-    private var editIcon:Class;
 
-    [Bindable]
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
 
     [Bindable]
     [Embed(source="../../../../assets/copy.png")]
@@ -34,7 +29,7 @@ public class KPIControls extends HBox {
     public function KPIControls() {
         super();
         editButton = new Button();
-        editButton.setStyle("icon", editIcon);
+        editButton.setStyle("icon", ImageConstants.EDIT_ICON);
         editButton.addEventListener(MouseEvent.CLICK, onEdit);
         addChild(editButton);
         copyButton = new Button();
@@ -42,7 +37,7 @@ public class KPIControls extends HBox {
         copyButton.addEventListener(MouseEvent.CLICK, onCopy);
         addChild(copyButton);
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         addChild(deleteButton);
         setStyle("horizontalAlign", "center");

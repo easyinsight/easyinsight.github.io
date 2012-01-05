@@ -1,4 +1,5 @@
 package com.easyinsight.datasources {
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
@@ -9,11 +10,9 @@ import mx.managers.PopUpManager;
 
 public class HighriseTokenControls extends HBox {
 
-    [Embed(source="../../../../assets/pencil.png")]
-    private var editIcon:Class;
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
+
 
     private var editButton:Button;
     private var deleteButton:Button;
@@ -29,12 +28,12 @@ public class HighriseTokenControls extends HBox {
     protected override function createChildren():void {
         super.createChildren();
         editButton = new Button();
-        editButton.setStyle("icon", editIcon);
+        editButton.setStyle("icon", ImageConstants.EDIT_ICON);
         editButton.toolTip = "Edit this token...";
         editButton.addEventListener(MouseEvent.CLICK, onEdit);
         addChild(editButton);
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.toolTip = "Delete this token...";
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         addChild(deleteButton);

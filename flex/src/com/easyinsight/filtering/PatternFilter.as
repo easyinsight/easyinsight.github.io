@@ -1,6 +1,7 @@
 package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.skin.ImageConstants;
 
 import com.easyinsight.util.PopUpUtil;
 
@@ -25,16 +26,8 @@ import mx.controls.Label;
 		private var editButton:Button;
 		private var labelText:Label;
 		private var dataService:RemoteObject;		
-		private var _analysisItems:ArrayCollection; 
-		                                            
-		[Bindable]
-        [Embed(source="../../../../assets/navigate_cross.png")]
-        public var deleteIcon:Class;
-        
-        [Bindable]
-        [Embed(source="../../../../assets/pencil.png")]
-        public var editIcon:Class;
-		
+		private var _analysisItems:ArrayCollection;
+
 		public function PatternFilter(feedID:int, analysisItem:AnalysisItem) {
 			super();
 			_analysisItem = analysisItem;
@@ -99,14 +92,14 @@ import mx.controls.Label;
                 if (editButton == null) {
                     editButton = new Button();
                     editButton.addEventListener(MouseEvent.CLICK, edit);
-                    editButton.setStyle("icon", editIcon);
+                    editButton.setStyle("icon", ImageConstants.EDIT_ICON);
                     editButton.toolTip = "Edit";
                 }
                 addChild(editButton);
                 if (deleteButton == null) {
                     deleteButton = new Button();
                     deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-                    deleteButton.setStyle("icon", deleteIcon);
+                    deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
                     deleteButton.toolTip = "Delete";
                 }
                 addChild(deleteButton);

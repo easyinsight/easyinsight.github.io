@@ -3,8 +3,6 @@
         creationComplete="setup()" implements="com.easyinsight.filtering.IFilterDetailEditor">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisItemWrapper;
-        import com.easyinsight.code.MarmotScriptEvent;
-        import com.easyinsight.code.MarmotScriptWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -56,18 +54,6 @@
                 allFields.addItem(wrapper.analysisItem);
             }
         }
-
-        private function editCode():void {
-            var window:MarmotScriptWindow = new MarmotScriptWindow();
-            window.script = analysisItemFilter.marmotScript;
-            window.addEventListener(MarmotScriptEvent.SAVE_SCRIPT, onScript, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function onScript(event:MarmotScriptEvent):void {
-            analysisItemFilter.marmotScript = event.script;
-        }
         ]]></mx:Script>
     <mx:Button label="Add Field..." click="addField()"/>
     <mx:DataGrid dataProvider="{filterFields}">
@@ -76,5 +62,4 @@
             <util:EIDataGridColumn headerText="" itemRenderer="com.easyinsight.filtering.AnalysisItemFilterControls" width="50"/>
         </mx:columns>
     </mx:DataGrid>
-    <mx:Button label="Edit Code..." click="editCode()"/>
 </mx:VBox>

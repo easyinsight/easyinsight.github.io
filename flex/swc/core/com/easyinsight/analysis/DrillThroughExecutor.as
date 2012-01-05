@@ -9,6 +9,7 @@ import flash.events.EventDispatcher;
 
 import mx.controls.Alert;
 import mx.core.Application;
+import mx.core.UIComponent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
@@ -29,7 +30,7 @@ public class DrillThroughExecutor extends EventDispatcher {
 
     public function send():void {
         if (drillThrough.reportID > 0) {
-            ProgressAlert.alert(Application.application as DisplayObject, "Retrieving report information...", null, analysisService.openAnalysisIfPossibleByID);
+            ProgressAlert.alert(Application.application as UIComponent, "Retrieving report information...", null, analysisService.openAnalysisIfPossibleByID);
             analysisService.openAnalysisIfPossibleByID.send(drillThrough.reportID);
         } else {
             var dd:DashboardDescriptor = new DashboardDescriptor();

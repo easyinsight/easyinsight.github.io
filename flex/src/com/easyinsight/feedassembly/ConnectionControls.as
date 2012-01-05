@@ -7,6 +7,7 @@
  */
 package com.easyinsight.feedassembly {
 
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
@@ -19,11 +20,9 @@ import mx.managers.PopUpManager;
 
 public class ConnectionControls extends HBox {
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
 
-    [Embed(source="../../../../assets/pencil.png")]
-    private var editIcon:Class;
+
+
 
     private var deleteButton:Button;
     private var editButton:Button;
@@ -32,11 +31,11 @@ public class ConnectionControls extends HBox {
 
     public function ConnectionControls() {
         editButton = new Button();
-        editButton.setStyle("icon", editIcon);
+        editButton.setStyle("icon", ImageConstants.EDIT_ICON);
         editButton.toolTip = "Edit this connection...";
         editButton.addEventListener(MouseEvent.CLICK, onEdit);
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.toolTip = "Remove this connection";
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         setStyle("horizontalAlign", "center");

@@ -1,6 +1,7 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.AnalysisItemDeleteEvent;
+import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -31,17 +32,11 @@ public class BaseFieldEditButton extends UIComponent implements IListItemRendere
         _analysisItems = value;
     }
 
-    [Bindable]
-    [Embed(source="../../../../assets/pencil.png")]
-    public var editIcon:Class;
+
 
     [Bindable]
     [Embed(source="../../../../assets/copy.png")]
     public var copyIcon:Class;
-
-    [Bindable]
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    public var deleteIcon:Class;
 
     private var analysisService:RemoteObject;
 
@@ -95,7 +90,7 @@ public class BaseFieldEditButton extends UIComponent implements IListItemRendere
     override protected function createChildren():void {
         if (button == null) {
             button = new Button();
-            button.setStyle("icon", editIcon);
+            button.setStyle("icon", ImageConstants.EDIT_ICON);
             button.toolTip = "Edit Field";
             BindingUtils.bindProperty(button, "visible", this, "editVisible");
             button.addEventListener(MouseEvent.CLICK, editItem);
@@ -111,7 +106,7 @@ public class BaseFieldEditButton extends UIComponent implements IListItemRendere
         addChild(copyButton);
         if (deleteButton == null) {
             deleteButton = new Button();
-            deleteButton.setStyle("icon", deleteIcon);
+            deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
             deleteButton.toolTip = "Delete Field";
             deleteButton.addEventListener(MouseEvent.CLICK, deleteItem);
             BindingUtils.bindProperty(deleteButton, "visible", this, "deleteVisible");

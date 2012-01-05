@@ -3,6 +3,7 @@ import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 import com.easyinsight.analysis.AnalysisItem;
 
 import com.easyinsight.analysis.Value;
+import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -10,19 +11,18 @@ import flash.utils.Dictionary;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-import mx.containers.HBox;
-import mx.containers.ViewStack;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.ComboBox;
 import mx.controls.Label;
 import mx.controls.ProgressBar;
+import mx.core.UIComponent;
 import mx.events.DropdownEvent;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
-public class ComboBoxFilter extends HBox implements IFilter {
+public class ComboBoxFilter extends UIComponent implements IFilter {
     private var _filterDefinition:FilterValueDefinition;
     private var _feedID:int;
     private var dataService:RemoteObject;
@@ -58,23 +58,13 @@ public class ComboBoxFilter extends HBox implements IFilter {
         dispatchEvent(new Event("filterEnabledChanged"));
     }
 
-    [Bindable]
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    public var deleteIcon:Class;
-
-    [Bindable]
-    [Embed(source="../../../../assets/pencil.png")]
-    public var editIcon:Class;
-
     public function ComboBoxFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
         super();
         this._feedID = feedID;
         this._analysisItem = analysisItem;
         this.reportID = reportID;
         this.dashboardID = dashboardID;
-        setStyle("verticalAlign", "middle");
-
-
+        this.height = 23;
     }
 
     private var _filterEditable:Boolean = true;
@@ -104,7 +94,7 @@ public class ComboBoxFilter extends HBox implements IFilter {
         if (event.filterDefinition != this.filterDefinition || !FilterValueDefinition(event.filterDefinition).singleValue || FilterValueDefinition(event.filterDefinition).autoComplete) {
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
         } else {
-            viewStack.selectedIndex = 0;
+            //viewStack.selectedIndex = 0;
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
@@ -118,8 +108,10 @@ public class ComboBoxFilter extends HBox implements IFilter {
         comboBox.enabled = checkbox.selected;
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
-
-    private var viewStack:ViewStack;
+    
+    private var checkbox:CheckBox;
+    
+    private var filterLabel:Label;
 
     override protected function createChildren():void {
         super.createChildren();
@@ -135,24 +127,21 @@ public class ComboBoxFilter extends HBox implements IFilter {
             _filterDefinition.toggleEnabled = true;
         }
 
-        viewStack = new ViewStack();
-        viewStack.resizeToContent = true;
-
-        var hbox:HBox = new HBox();
+        /*var hbox:HBox = new HBox();
         hbox.percentHeight = 100;
-        hbox.setStyle("verticalAlign", "middle");
+        hbox.setStyle("verticalAlign", "middle");*/
 
         if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
-            var checkbox:CheckBox = new CheckBox();
+            checkbox = new CheckBox();
             checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
             checkbox.toolTip = "Click to disable this filter.";
             checkbox.addEventListener(Event.CHANGE, onChange);
-            addChild(checkbox);
+            //addChild(checkbox);
         }
 
-        var label:Label = new Label();
-        label.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
-        addChild(label);
+        filterLabel = new Label();
+        filterLabel.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+        //addChild(label);
 
         if (comboBox == null) {
             comboBox = new ComboBox();
@@ -160,41 +149,45 @@ public class ComboBoxFilter extends HBox implements IFilter {
             comboBox.addEventListener(DropdownEvent.CLOSE, filterValueChanged);
             comboBox.enabled = false;
         }
-        hbox.addChild(comboBox);
+        //hbox.addChild(comboBox);
 
-        addChild(viewStack);
+        //addChild(viewStack);
 
         if (_filterEditable) {
             if (editButton == null) {
                 editButton = new Button();
                 editButton.addEventListener(MouseEvent.CLICK, edit);
-                editButton.setStyle("icon", editIcon);
+                editButton.setStyle("icon", ImageConstants.EDIT_ICON);
                 editButton.toolTip = "Edit";
             }
-            hbox.addChild(editButton);
+            //hbox.addChild(editButton);
             if (deleteButton == null) {
                 deleteButton = new Button();
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-                deleteButton.setStyle("icon", deleteIcon);
+                deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
                 deleteButton.toolTip = "Delete";
                 deleteButton.enabled = false;
             }
-            hbox.addChild(deleteButton);
+            //hbox.addChild(deleteButton);
         }
 
 
-        var loadingBox:HBox = new HBox();
+        /*var loadingBox:HBox = new HBox();
         loadingBox.height = 23;
-        loadingBox.setStyle("verticalAlign", "middle");
-        var loadingBar:ProgressBar = new ProgressBar();
-        loadingBar.width = 300;
-        loadingBar.label = "";
-        loadingBar.labelPlacement = "right";
-        BindingUtils.bindProperty(loadingBar, "indeterminate", this, "valuesSet");
-        loadingBar.indeterminate = true;
-        loadingBox.addChild(loadingBar);
-        viewStack.addChild(loadingBox);
-        viewStack.addChild(hbox);
+        loadingBox.setStyle("verticalAlign", "middle");*/
+        if (_filterDefinition.cachedValues) {
+            valuesSet = false;
+            invalidateDisplayList();
+        } else {
+            loadingBar = new ProgressBar();
+            loadingBar.height = 23;
+            loadingBar.width = 300;
+            loadingBar.label = "";
+            loadingBar.labelPlacement = "right";
+            BindingUtils.bindProperty(loadingBar, "indeterminate", this, "valuesSet");
+            loadingBar.indeterminate = true;
+            addChild(loadingBar);
+        }
         if (_filterDefinition == null || _filterDefinition.cachedValues == null) {
             dataService = new RemoteObject();
             dataService.destination = "data";
@@ -202,6 +195,61 @@ public class ComboBoxFilter extends HBox implements IFilter {
             dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID);
         } else {
             processMetadata(_filterDefinition.cachedValues as AnalysisDimensionResultMetadata);
+        }
+    }
+    
+    private var loadingBar:ProgressBar;
+
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        if (valuesSet) {
+            
+        } else {
+            if (loadingBar) {
+                removeChild(loadingBar);
+                loadingBar = null;
+            }
+            if (!filterLabel.parent) {
+                if (checkbox) {
+                    addChild(checkbox);
+                }
+                addChild(filterLabel);
+                addChild(comboBox);
+                if (editButton) {
+                    addChild(editButton);
+                }
+                if (deleteButton) {
+                    addChild(deleteButton);
+                }
+            }
+            var xPos:int = 0;
+            if (checkbox) {
+                xPos += checkbox.measuredWidth + 8;
+                checkbox.y = (this.height - checkbox.height) / 2;
+                checkbox.setActualSize(checkbox.measuredWidth, checkbox.measuredHeight);
+            }
+            filterLabel.x = xPos;
+            filterLabel.y = (this.height - filterLabel.height) / 2;
+            filterLabel.setActualSize(filterLabel.measuredWidth, filterLabel.measuredHeight);            
+            xPos += filterLabel.measuredWidth + 8;
+            comboBox.x = xPos;
+            comboBox.y = (this.height - comboBox.height) / 2;
+            comboBox.setActualSize(comboBox.measuredWidth, comboBox.measuredHeight);
+            xPos += comboBox.measuredWidth;
+            if (editButton) {
+                xPos += 8;
+                editButton.x = xPos;
+                editButton.y = (this.height - editButton.height) / 2;
+                editButton.setActualSize(editButton.measuredWidth, editButton.measuredHeight);
+                xPos += editButton.measuredWidth + 8;
+            }
+            if (deleteButton) {
+                deleteButton.x = xPos;
+                deleteButton.y = (this.height - deleteButton.height) / 2;
+                deleteButton.setActualSize(deleteButton.measuredWidth, deleteButton.measuredHeight);
+                xPos += deleteButton.measuredWidth;
+            }
+            this.width = xPos;
         }
     }
 
@@ -309,7 +357,8 @@ public class ComboBoxFilter extends HBox implements IFilter {
             deleteButton.enabled = true;
         }
         valuesSet = false;
-        viewStack.selectedIndex = 1;
+        invalidateDisplayList();
+        //viewStack.selectedIndex = 1;
         if (!_loadingFromReport) {
             if (newFilter) {
                 dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));

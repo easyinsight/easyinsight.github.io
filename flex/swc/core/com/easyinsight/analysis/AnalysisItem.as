@@ -104,6 +104,19 @@ import mx.formatters.Formatter;
         public function getSortFunction():Function {
             return null;
         }
+        
+        public function defaultLink():Link {
+            var defaultLink:Link = null;
+            if (links != null && links.length > 0) {
+                for each (var link:Link in links) {
+                    if (link.defaultLink) {
+                        defaultLink = link;
+                        break;
+                    }
+                }
+            }
+            return defaultLink;
+        }
 	}
 
 

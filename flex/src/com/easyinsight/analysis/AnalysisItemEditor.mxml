@@ -199,6 +199,7 @@
             this.key = analysisItem.key;
             this.hidden = analysisItem.hidden;
             this.fieldTooltip = analysisItem.tooltip;
+            fieldKeyString = analysisItem.key.toBaseKey().createString();
         }
 
         private function indexOfType(option:String):int {
@@ -362,6 +363,9 @@
             aggIndex = index;
             return aggregationBox.dataProvider.getItemAt(0) as String;
         }
+        
+        [Bindable]
+        private var fieldKeyString:String;
 
         private function toggleClick(event:ItemClickEvent):void {
             var string:String = event.item as String;
@@ -386,6 +390,9 @@
     <mx:Form id="coreForm">
         <mx:FormItem label="Field Name: " direction="horizontal" id="fieldNameText">
             <mx:TextInput id="fieldNameInput" text="{displayName}" editable="{_fieldNameEditable}" width="250"/>
+        </mx:FormItem>
+        <mx:FormItem label="Field Key: " direction="horizontal">
+            <mx:Text fontWeight="normal" text="{fieldKeyString}" width="250" fontFamily="Lucida Grande"/>
         </mx:FormItem>
         <mx:FormItem label="Hidden: " direction="horizontal" id="hiddenText">
             <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>

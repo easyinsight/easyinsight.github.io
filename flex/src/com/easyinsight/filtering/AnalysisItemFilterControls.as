@@ -7,6 +7,7 @@
  */
 package com.easyinsight.filtering {
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.skin.ImageConstants;
 
 import flash.events.MouseEvent;
 
@@ -15,8 +16,7 @@ import mx.controls.Button;
 
 public class AnalysisItemFilterControls extends HBox {
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
 
     private var deleteButton:Button;
 
@@ -26,7 +26,7 @@ public class AnalysisItemFilterControls extends HBox {
         setStyle("horizontalAlign", "center");
         this.percentWidth = 100;
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.toolTip = "Remove Field...";
         deleteButton.addEventListener(MouseEvent.CLICK, onClick);
     }

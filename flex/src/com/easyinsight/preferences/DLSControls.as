@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.preferences {
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
@@ -18,11 +19,7 @@ public class DLSControls extends HBox {
 
     private var dls:DataSourceDLS;
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
 
-    [Embed(source="../../../../assets/pencil.png")]
-    private var editIcon:Class;
 
     private var editButton:Button;
     private var deleteButton:Button;
@@ -31,11 +28,11 @@ public class DLSControls extends HBox {
         setStyle("horizontalAlign", "center");
         this.percentWidth = 100;
         editButton = new Button();
-        editButton.setStyle("icon", editIcon);
+        editButton.setStyle("icon", ImageConstants.EDIT_ICON);
         editButton.toolTip = "Edit...";
         editButton.addEventListener(MouseEvent.CLICK, onEdit);
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.toolTip = "Delete";
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
     }

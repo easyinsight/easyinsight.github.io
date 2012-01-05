@@ -81,9 +81,14 @@
                     dateFields.addItem(analysisItemWrapper.analysisItem);
                 }
             }
+            var noComp:Object = { display: "[ No Comparison ]"};
+            dateFields.addItemAt(noComp, 0);
+            rowCount = Math.min(15, dateFields.length);
             this.dateFields = dateFields;
         }
 
+        [Bindable]
+        private var rowCount:int;
 
         [Bindable]
         private var highGood:String = "0";
@@ -99,7 +104,8 @@
             <mx:RadioButton group="{highGroup}" label="Neither" value="2"/>
         </mx:FormItem>
         <mx:FormItem label="Date:">
-            <util:SmartComboBox dataProvider="{dateFields}" id="dateComboBox" labelField="display" selectedValue="{selectedValue}" selectedProperty="display"/>
+            <util:SmartComboBox dataProvider="{dateFields}" id="dateComboBox" labelField="display" selectedValue="{selectedValue}" selectedProperty="display"
+                    rowCount="{rowCount}"/>
         </mx:FormItem>
         <mx:FormItem label="Icon:">
             <mx:Box borderStyle="solid" borderThickness="1" click="assignIcon()" width="40" height="40" horizontalAlign="center" verticalAlign="middle"

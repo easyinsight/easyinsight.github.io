@@ -1,5 +1,6 @@
 package com.easyinsight.schedule {
 import com.easyinsight.administration.sharing.UserStub;
+import com.easyinsight.skin.ImageConstants;
 
 import flash.events.MouseEvent;
 
@@ -12,8 +13,7 @@ public class RecipientControls extends UIComponent implements IListItemRenderer 
 
     private var obj:Object;
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
 
     private var deleteButton:Button;
     
@@ -25,7 +25,7 @@ public class RecipientControls extends UIComponent implements IListItemRenderer 
         super.createChildren();
         if (deleteButton == null) {
             deleteButton = new Button();
-            deleteButton.setStyle("icon", deleteIcon);
+            deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
             deleteButton.toolTip = "Delete scheduled activity";
             deleteButton.addEventListener(MouseEvent.CLICK, deleteActivity);
         }

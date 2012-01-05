@@ -6,6 +6,8 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.groups {
+import com.easyinsight.skin.ImageConstants;
+
 import flash.events.MouseEvent;
 
 import mx.containers.HBox;
@@ -16,20 +18,14 @@ public class GroupSummaryActions extends HBox {
     private var editButton:Button;
     private var deleteButton:Button;
 
-    [Embed(source="../../../../assets/pencil.png")]
-    private var editIcon:Class;
-
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
-
     private var group:GroupDescriptor;
 
     public function GroupSummaryActions() {
         editButton = new Button();
-        editButton.setStyle("icon", editIcon);
+        editButton.setStyle("icon", ImageConstants.EDIT_ICON);
         editButton.addEventListener(MouseEvent.CLICK, onEdit);
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         setStyle("horizontalAlign", "center");
     }

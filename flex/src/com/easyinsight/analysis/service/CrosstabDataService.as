@@ -35,7 +35,7 @@ public class CrosstabDataService extends EventDispatcher implements IReportDataS
         var props:Object = new Object();
         props["columnCount"] = listData.columnCount;
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, listData.dataSet, listData.dataSourceInfo, props, listData.auditMessages,
-                listData.reportFault, false, 0, 0, listData.suggestions));
+                listData.reportFault, false, 0, 0, listData.suggestions, listData.dataSet != null && listData.dataSet.length > 3));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

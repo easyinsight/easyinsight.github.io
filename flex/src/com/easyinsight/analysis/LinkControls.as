@@ -1,4 +1,5 @@
 package com.easyinsight.analysis {
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
@@ -9,13 +10,9 @@ import mx.managers.PopUpManager;
 
 public class LinkControls extends HBox{
 
-    [Bindable]
-    [Embed(source="../../../../assets/pencil.png")]
-    private var editIcon:Class;
 
-    [Bindable]
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
+
 
     private var editButton:Button;
     private var deleteButton:Button;
@@ -46,14 +43,14 @@ public class LinkControls extends HBox{
         super.createChildren();
         if (editButton == null) {
             editButton = new Button();
-            editButton.setStyle("icon", editIcon);
+            editButton.setStyle("icon", ImageConstants.EDIT_ICON);
             editButton.toolTip = "Edit...";
             editButton.addEventListener(MouseEvent.CLICK, onEdit);
         }
         addChild(editButton);
         if (deleteButton == null) {
             deleteButton = new Button();
-            deleteButton.setStyle("icon", deleteIcon);
+            deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
             deleteButton.toolTip = "Delete";
             deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         }

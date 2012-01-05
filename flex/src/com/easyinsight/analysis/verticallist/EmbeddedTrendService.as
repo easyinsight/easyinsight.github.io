@@ -45,7 +45,7 @@ public class EmbeddedTrendService extends EmbeddedDataService implements IEmbedd
         var obj:Object = new Object();
         obj["reportEditor"] = false;
         dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, results.trendOutcomes, results.definition, results.dataSourceAccessible,
-                results.reportFault, results.dataSourceInfo, obj));
+                results.reportFault, results.dataSourceInfo, obj, results.trendOutcomes.length > 0));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 }

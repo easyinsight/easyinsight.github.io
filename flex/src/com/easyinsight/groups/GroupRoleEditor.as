@@ -19,9 +19,7 @@ import mx.collections.ArrayCollection;
 		[Bindable]
 		private var roles:ArrayCollection = new ArrayCollection();
 		
-		[Bindable]
-        [Embed(source="../../../../assets/navigate_cross.png")]
-        public var deleteIcon:Class;
+
 		
 		public function GroupRoleEditor()
 		{

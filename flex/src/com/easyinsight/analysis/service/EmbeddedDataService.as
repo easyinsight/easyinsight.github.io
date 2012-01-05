@@ -38,6 +38,7 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
     protected function translate(listData:EmbeddedDataResults):ArrayCollection {
         var headers:ArrayCollection = new ArrayCollection(listData.headers);
             var data:Array = [];
+        if (listData.rows) {
             for (var i:int = 0; i < listData.rows.length; i++) {
                 var row:Object = listData.rows[i];
                 var values:Array = row.values as Array;
@@ -60,16 +61,14 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
                 }
                 data.push(endObject);
             }
+        }
         return new ArrayCollection(data);
     }
 
     private function processListData(event:ResultEvent):void {
         var listData:EmbeddedDataResults = dataRemoteSource.getEmbeddedResults.lastResult as EmbeddedDataResults;
-        if (listData.reportFault == null) {
-
-        }
         dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, translate(listData), listData.definition, listData.dataSourceAccessible,
-                listData.reportFault, listData.dataSourceInfo, listData.additionalProperties));
+                listData.reportFault, listData.dataSourceInfo, listData.additionalProperties, listData.rows != null && listData.rows.length > 0));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

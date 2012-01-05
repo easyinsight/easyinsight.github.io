@@ -1,6 +1,7 @@
 package com.easyinsight.datasources {
-import com.easyinsight.customupload.BaseCampDataSourceCreation;
 import com.easyinsight.customupload.HarvestDataSourceCreation;
+
+import mx.collections.ArrayCollection;
 
 
 [Bindable]
@@ -20,6 +21,11 @@ public class HarvestDataSource extends CompositeServerDataSource {
 
     override public function getFeedType():int {
         return DataSourceType.HARVEST_COMPOSITE;
+    }
+
+    override public function createAdminPages():ArrayCollection {
+        var pages:ArrayCollection = new ArrayCollection();
+        return pages;
     }
 
     override public function configClass():Class {

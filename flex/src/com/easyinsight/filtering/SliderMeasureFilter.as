@@ -1,6 +1,7 @@
 package com.easyinsight.filtering
 {
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -35,13 +36,6 @@ public class SliderMeasureFilter extends HBox implements IFilter
     private var highInput:Label;
 
     private var _analysisItems:ArrayCollection;
-
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    public var deleteIcon:Class;
-
-    [Bindable]
-    [Embed(source="../../../../assets/pencil.png")]
-    public var editIcon:Class;
 
     public function SliderMeasureFilter(feedID:int, analysisItem:AnalysisItem) {
         super();
@@ -155,12 +149,12 @@ public class SliderMeasureFilter extends HBox implements IFilter
 
                 var editButton:Button = new Button();
                 editButton.addEventListener(MouseEvent.CLICK, edit);
-                editButton.setStyle("icon", editIcon);
+                editButton.setStyle("icon", ImageConstants.EDIT_ICON);
                 editButton.toolTip = "Edit";
                 box.addChild(editButton);
                 var deleteButton:Button = new Button();
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-                deleteButton.setStyle("icon", deleteIcon);
+                deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
                 deleteButton.toolTip = "Delete";
                 box.addChild(deleteButton);
 
@@ -174,12 +168,12 @@ public class SliderMeasureFilter extends HBox implements IFilter
                 defaultBox.addChild(editLabel);
                 var editDefault:Button = new Button();
                 editDefault.addEventListener(MouseEvent.CLICK, edit);
-                editDefault.setStyle("icon", editIcon);
+                editDefault.setStyle("icon", ImageConstants.EDIT_ICON);
                 editDefault.toolTip = "Edit";
                 defaultBox.addChild(editDefault);
                 var deleteDefault:Button = new Button();
                 deleteDefault.addEventListener(MouseEvent.CLICK, deleteSelf);
-                deleteDefault.setStyle("icon", deleteIcon);
+                deleteDefault.setStyle("icon", ImageConstants.DELETE_ICON);
                 deleteDefault.toolTip = "Delete";
                 defaultBox.addChild(deleteDefault);
 

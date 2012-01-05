@@ -1,11 +1,13 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                    xmlns:schedule="com.easyinsight.schedule.*"
+                    xmlns:schedule="com.easyinsight.schedule.*" xmlns:filtering="com.easyinsight.filtering.*"
                     creationComplete="setup()" title="Report Email Delivery">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
         import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.SavePromptWindow;
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.framework.User;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -30,6 +32,14 @@
                 analysisService.getInsightDescriptors.send();
             }
             shareService.getUserStubs.send(false);
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
+        }
+
+        private var commandProcessor:CommandProcessor;
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
         }
 
         private function deleteRecipient(event:RecipientEvent):void {
@@ -65,10 +75,24 @@
                 subjectLine = _activity.subject;
                 fromUserID = _activity.senderID;
                 formatValue = String(_activity.reportFormat);
+                dataSourceID = _activity.dataSourceID;
+                if (_activity.customFilters.length == 0) {
+                    analysisService.getFilters.send(reportID);
+                } else {
+                    filterDefinitions = _activity.customFilters;
+                    customFilters = true;
+                }
             } else {
+                if (_fixedReportID != 0) {
+                    dataSourceID = _fixedReportDataSourceID;
+                    analysisService.getFilters.send(_fixedReportID);
+                }
                 fromUserID = User.getInstance().userID;
             }
         }
+
+        [Bindable]
+        private var customFilters:Boolean;
 
         private var newActivity:Boolean;
 
@@ -93,7 +117,7 @@
                 window.prompt = "You must define at least one recipient.";
                 window.defineOption("Add Recipient", PromptEvent.PROMPT_SAVE);
                 window.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
-                window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                window.addEventListener(PromptEvent.PROMPT_SAVE, function (event:PromptEvent):void {
                     addRecipient();
                 }, false, 0, true);
                 PopUpManager.addPopUp(window, this, true);
@@ -121,6 +145,7 @@
                 _activity.senderID = fromComboBox.selectedItem.userID;
                 _activity.body = bodyTextInput.text;
                 _activity.subject = subjectInput.text;
+                _activity.customFilters = customizeFiltersCheckbox.selected ? transformContainer.getFilterDefinitions() : new ArrayCollection();
                 var utcOffset:int = new Date().getTimezoneOffset();
                 ProgressAlert.alert(this, "Saving...", null, exportService.addOrUpdateSchedule);
                 exportService.addOrUpdateSchedule.send(_activity, utcOffset);
@@ -175,6 +200,13 @@
 
         private var _fixedReportID:int;
 
+        private var _fixedReportDataSourceID:int;
+
+
+        public function set fixedReportDataSourceID(value:int):void {
+            _fixedReportDataSourceID = value;
+        }
+
         private var _fixedReportName:String;
 
         private var _fixedReportURLKey:String;
@@ -208,6 +240,24 @@
             this.users = users;
         }
 
+        private function onReportChange():void {
+            ProgressAlert.alert(this, "Retrieving report information...", null, analysisService.getFilters);
+            dataSourceID = reportComboBox.selectedItem.dataFeedID;
+            analysisService.getFilters.send(reportComboBox.selectedItem.id);
+        }
+
+        [Bindable]
+        private var dataSourceID:int;
+
+        private function gotReport():void {
+            var filters:ArrayCollection = analysisService.getFilters.lastResult as ArrayCollection;
+            transformContainer.reset();
+            filterDefinitions = filters;
+        }
+
+        [Bindable]
+        private var filterDefinitions:ArrayCollection;
+
         [Bindable]
         private var users:ArrayCollection;
 
@@ -228,17 +278,18 @@
     </mx:RemoteObject>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptors" result="gotReports()"/>
+        <mx:method name="getFilters" result="gotReport()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="shareService" destination="share">
-		<mx:method name="getUserStubs" result="gotUserStubs()"/>
-	</mx:RemoteObject>
-    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-        <mx:HBox>
-            <mx:VBox>
+        <mx:method name="getUserStubs" result="gotUserStubs()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" backgroundColor="#FFFFFF">
+        <mx:TabNavigator creationPolicy="all" width="600" height="500">
+            <mx:VBox label="Report" paddingLeft="10" paddingTop="10">
                 <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" id="form">
                     <mx:FormItem label="Report:" id="reportComboBoxItem">
                         <util:SmartComboBox dataProvider="{reports}" selectedValue="{reportID}" selectedProperty="id"
-                                            id="reportComboBox" labelField="name"/>
+                                            id="reportComboBox" labelField="name" change="onReportChange()"/>
                     </mx:FormItem>
                     <mx:FormItem label="Output Format:">
                         <util:SmartComboBox id="outputFormatBox" selectedValue="{formatValue}" selectedProperty="data"
@@ -255,12 +306,25 @@
                             </util:dataProvider>
                         </util:SmartComboBox>
                     </mx:FormItem>
-
                 </mx:Form>
+            </mx:VBox>
+            <mx:VBox label="Filters" paddingLeft="10" paddingRight="10">
+                <mx:Label text="Do you want to customize any of the filters used for report delivery?" fontSize="14" width="100%" textAlign="center"/>
+                <mx:HBox verticalAlign="middle" width="100%">
+                    <mx:CheckBox label="Yes, Customize Filters" id="customizeFiltersCheckbox" selected="{customFilters}"/>
+                    <mx:Spacer width="100%"/>
+                    <util:SaveButton label="Reset Filters" fontSize="12" click="analysisService.getFilters.send(reportComboBox.selectedItem.id)"/>
+                </mx:HBox>
+                <filtering:TransformContainer existingFilters="{filterDefinitions}" id="transformContainer"
+                                              feedID="{dataSourceID}" enabled="{customizeFiltersCheckbox.selected}"/>
+            </mx:VBox>
+            <mx:VBox label="Scheduling and Recipients" paddingLeft="10" paddingRight="10">
+                <mx:Label text="When and where should the emails go?" fontSize="14" width="100%" textAlign="center"/>
                 <schedule:ScheduleConfiguration activity="{activity}" id="scheduleConfiguration"/>
                 <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
                     <mx:FormItem label="Send From:">
-                        <util:SmartComboBox dataProvider="{users}" selectedValue="{fromUserID}" selectedProperty="userID" id="fromComboBox" labelField="displayName"/>
+                        <util:SmartComboBox dataProvider="{users}" selectedValue="{fromUserID}"
+                                            selectedProperty="userID" id="fromComboBox" labelField="displayName"/>
                     </mx:FormItem>
                     <mx:FormItem label="Recipients:">
                         <mx:VBox>
@@ -268,7 +332,7 @@
                             <mx:DataGrid dataProvider="{recipients}" rowHeight="28">
                                 <mx:columns>
                                     <util:EIDataGridColumn headerText="User" dataField="displayName" width="300"
-                                            itemRenderer="com.easyinsight.schedule.RecipientRenderer"/>
+                                                           itemRenderer="com.easyinsight.schedule.RecipientRenderer"/>
                                     <util:EIDataGridColumn headerText="" dataField="displayName"
                                                            itemRenderer="com.easyinsight.schedule.RecipientControls"
                                                            width="50"
@@ -279,8 +343,8 @@
                     </mx:FormItem>
                 </mx:Form>
             </mx:VBox>
-            <mx:VBox horizontalAlign="center">
-                <mx:Label text="How do you want to set up the report email?"/>
+            <mx:VBox label="Email Setup" horizontalAlign="center">
+                <mx:Label text="How do you want to set up the report email?" fontSize="14"/>
                 <mx:HBox>
                     <mx:CheckBox label="HTML Email" selected="{htmlEmail}" id="htmlEmailCheckbox"/>
                     <mx:Button toolTip="Insert Report Link" click="insertReportLink()"
@@ -296,7 +360,7 @@
                     </mx:FormItem>
                 </mx:Form>
             </mx:VBox>
-        </mx:HBox>
+        </mx:TabNavigator>
         <mx:HBox width="100%" horizontalAlign="center">
             <util:SaveButton label="Save" click="save()"/>
             <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

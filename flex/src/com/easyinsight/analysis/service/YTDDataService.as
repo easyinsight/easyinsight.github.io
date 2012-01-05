@@ -43,7 +43,7 @@ public class YTDDataService extends EventDispatcher implements IReportDataServic
     private function processListData(event:ResultEvent):void {
         var listData:YTDDataResults = dataRemoteSource.getYTDResults.lastResult as YTDDataResults;
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, listData.dataSet, listData.dataSourceInfo, listData.additionalProperties, listData.auditMessages,
-                listData.reportFault, false, 0, 0, listData.suggestions));
+                listData.reportFault, false, 0, 0, listData.suggestions, listData.dataSet != null && listData.dataSet.length > 0));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

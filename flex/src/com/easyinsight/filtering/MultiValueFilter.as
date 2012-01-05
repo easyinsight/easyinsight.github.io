@@ -2,6 +2,7 @@ package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 	import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
@@ -34,15 +35,7 @@ import mx.controls.Label;
     public function set loadingFromReport(value:Boolean):void {
         _loadingFromReport = value;
     }
-		
-		[Bindable]
-        [Embed(source="../../../../assets/navigate_cross.png")]
-        public var deleteIcon:Class;
-        
-        [Bindable]
-        [Embed(source="../../../../assets/pencil.png")]
-        public var editIcon:Class;
-		
+
 		public function MultiValueFilter(feedID:int, analysisItem:AnalysisItem) {
 			super();
 			_analysisItem = analysisItem;
@@ -104,7 +97,7 @@ import mx.controls.Label;
             if (editButton == null) {
                 editButton = new Button();
                 editButton.addEventListener(MouseEvent.CLICK, edit);
-                editButton.setStyle("icon", editIcon);
+                editButton.setStyle("icon", ImageConstants.EDIT_ICON);
                 editButton.toolTip = "Edit";
             }
             addChild(editButton);
@@ -112,7 +105,7 @@ import mx.controls.Label;
                 if (deleteButton == null) {
                     deleteButton = new Button();
                     deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-                    deleteButton.setStyle("icon", deleteIcon);
+                    deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
                     deleteButton.toolTip = "Delete";
                     deleteButton.enabled = false;
                 }

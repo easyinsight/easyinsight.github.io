@@ -1,4 +1,6 @@
 package com.easyinsight.schedule {
+import mx.collections.ArrayCollection;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.export.ReportDelivery")]
 public class ReportDelivery extends ScheduledDelivery {
@@ -16,6 +18,9 @@ public class ReportDelivery extends ScheduledDelivery {
     public var htmlEmail:Boolean;
     public var timezoneOffset:int;
     public var senderID:int;
+    public var customFilters:ArrayCollection;
+    public var dataSourceID:int;
+    public var deliveryLabel:String;
 
     public function ReportDelivery() {
         super();

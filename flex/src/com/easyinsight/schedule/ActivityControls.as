@@ -1,4 +1,5 @@
 package com.easyinsight.schedule {
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
 
@@ -17,11 +18,7 @@ public class ActivityControls extends UIComponent implements IListItemRenderer {
 
     private var activity:ScheduledActivity;
 
-    [Embed(source="../../../../assets/pencil.png")]
-    private var editIcon:Class;
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
 
     private var editButton:Button;
 
@@ -37,14 +34,14 @@ public class ActivityControls extends UIComponent implements IListItemRenderer {
         super.createChildren();
         if (editButton == null) {
             editButton = new Button();
-            editButton.setStyle("icon", editIcon);
+            editButton.setStyle("icon", ImageConstants.EDIT_ICON);
             editButton.toolTip = "Edit scheduled activity...";
             editButton.addEventListener(MouseEvent.CLICK, editActivity);
         }
         addChild(editButton);
         if (deleteButton == null) {
             deleteButton = new Button();
-            deleteButton.setStyle("icon", deleteIcon);
+            deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
             deleteButton.toolTip = "Delete scheduled activity";
             deleteButton.addEventListener(MouseEvent.CLICK, deleteActivity);
         }

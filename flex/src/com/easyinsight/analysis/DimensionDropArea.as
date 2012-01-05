@@ -13,7 +13,16 @@ package com.easyinsight.analysis
 		}
 		
 		override protected function getNoDataLabel():String {
-			return "Drop Dimension Here";
+			return "Drag Grouping Here";
 		}
-	}
+
+
+        override public function accept(analysisItem:AnalysisItem):Boolean {
+            return !analysisItem.hasType(AnalysisItemTypes.MEASURE);
+        }
+
+        override public function recommend(analysisItem:AnalysisItem):Boolean {
+            return accept(analysisItem);
+        }
+    }
 }

@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.feedassembly {
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.FeedSelectionEvent;
 
@@ -16,8 +17,7 @@ import mx.controls.Button;
 
 public class DataSourceControls extends HBox {
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
 
     private var deleteButton:Button;
 
@@ -25,7 +25,7 @@ public class DataSourceControls extends HBox {
 
     public function DataSourceControls() {
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.toolTip = "Remove this data source";
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         setStyle("horizontalAlign", "center");

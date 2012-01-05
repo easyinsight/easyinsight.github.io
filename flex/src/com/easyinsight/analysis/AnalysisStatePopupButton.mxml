@@ -85,28 +85,13 @@
         	<node label="Tree" type="{AnalysisDefinition.TREE}"/>
         </node>
         <node label="Chart" icon="">
-        	<node label="Column">
-                <node label="2D Column" type="{AnalysisDefinition.COLUMN}"/>
-                <node label="3D Column" type="{AnalysisDefinition.COLUMN3D}"/>
-                <node label="Stacked Column" type="{AnalysisDefinition.STACKED_COLUMN}"/>
-            </node>
-        	<node label="Bar" icon="">
-                <node label="2D Bar" type="{AnalysisDefinition.BAR}"/>
-                <node label="3D Bar" type="{AnalysisDefinition.BAR3D}"/>
-                <node label="Stacked Bar" type="{AnalysisDefinition.STACKED_BAR}"/>
-            </node>
-            <node label="Line" icon="">
-                <node label="2D Line" type="{AnalysisDefinition.LINE}"/>
-                <node label="3D Line" type="{AnalysisDefinition.LINE3D}"/>
-            </node>
-            <node label="Pie" icon="">
-                <node label="2D Pie" type="{AnalysisDefinition.PIE}"/>
-                <node label="3D Pie" type="{AnalysisDefinition.PIE3D}"/>
-            </node>
-            <node label="Area" icon="">
-                <node label="2D Area" type="{AnalysisDefinition.AREA}"/>
-                <node label="3D Area" type="{AnalysisDefinition.AREA3D}"/>
-            </node>
+            <node label="Column" type="{AnalysisDefinition.COLUMN}"/>
+            <node label="Stacked Column" type="{AnalysisDefinition.STACKED_COLUMN}"/>
+            <node label="Bar" type="{AnalysisDefinition.BAR}"/>
+            <node label="Stacked Bar" type="{AnalysisDefinition.STACKED_BAR}"/>
+            <node label="Line" type="{AnalysisDefinition.LINE}"/>
+            <node label="Pie" type="{AnalysisDefinition.PIE}"/>
+            <node label="Area" type="{AnalysisDefinition.AREA}"/>
         	<node label="Plot" type="{AnalysisDefinition.PLOT}"/>
         	<node label="Bubble" type="{AnalysisDefinition.BUBBLE}"/>
         </node>
@@ -115,7 +100,7 @@
         	<node label="Trend Grid" type="{AnalysisDefinition.TREND_GRID}"/>
             <node label="Diagram" type="{AnalysisDefinition.DIAGRAM}"/>
         </node>
-        <node label="Google Map" type="{AnalysisDefinition.HEATMAP}"/>
+        <node label="Map" type="{AnalysisDefinition.HEATMAP}"/>
         <node label="Tree Map" type="{AnalysisDefinition.TREEMAP}"/>
         <node label="Gauge" type="{AnalysisDefinition.GAUGE}"/>
         <node label="Gantt" type="{AnalysisDefinition.GANTT}"/>

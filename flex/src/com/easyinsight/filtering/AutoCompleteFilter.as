@@ -3,6 +3,7 @@ import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 import com.easyinsight.analysis.AnalysisItem;
 
 import com.easyinsight.analysis.Value;
+import com.easyinsight.skin.ImageConstants;
 
 import com.easyinsight.util.AutoCompleteManager;
 
@@ -25,8 +26,6 @@ import mx.controls.TextInput;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
-
-import org.efflex.mx.viewStackEffects.Slide;
 
 public class AutoCompleteFilter extends HBox implements IFilter {
     private var _filterDefinition:FilterValueDefinition;
@@ -66,15 +65,6 @@ public class AutoCompleteFilter extends HBox implements IFilter {
         dispatchEvent(new Event("filterEnabledChanged"));
     }
 
-
-
-    [Bindable]
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    public var deleteIcon:Class;
-
-    [Bindable]
-    [Embed(source="../../../../assets/pencil.png")]
-    public var editIcon:Class;
 
     public function AutoCompleteFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
         super();
@@ -164,14 +154,14 @@ public class AutoCompleteFilter extends HBox implements IFilter {
             if (editButton == null) {
                 editButton = new Button();
                 editButton.addEventListener(MouseEvent.CLICK, edit);
-                editButton.setStyle("icon", editIcon);
+                editButton.setStyle("icon", ImageConstants.EDIT_ICON);
                 editButton.toolTip = "Edit";
             }
             hbox.addChild(editButton);
             if (deleteButton == null) {
                 deleteButton = new Button();
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-                deleteButton.setStyle("icon", deleteIcon);
+                deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
                 deleteButton.toolTip = "Delete";
                 deleteButton.enabled = false;
             }
@@ -184,16 +174,12 @@ public class AutoCompleteFilter extends HBox implements IFilter {
         loadingBox.setStyle("verticalAlign", "middle");
         var loadingBar:ProgressBar = new ProgressBar();
         loadingBar.width = 300;
-        var showEffect:Slide = new Slide();
-        showEffect.direction = "down";
         loadingBar.label = "";
         loadingBar.labelPlacement = "right";
         BindingUtils.bindProperty(loadingBar, "indeterminate", this, "valuesSet");
         loadingBar.indeterminate = true;
         loadingBox.addChild(loadingBar);
-        loadingBox.setStyle("hideEffect", showEffect);
         viewStack.addChild(loadingBox);
-        hbox.setStyle("showEffect", showEffect);
         viewStack.addChild(hbox);
         dataService = new RemoteObject();
         dataService.destination = "data";

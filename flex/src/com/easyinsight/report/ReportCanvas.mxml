@@ -1,7 +1,9 @@
 <?xml version="1.0" ?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%">
-
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" verticalScrollPolicy="off">
     <mx:Script><![CDATA[
+
+        import mx.core.UIComponent;
+
         private var _overlayIndex:int;
 
         private var _loading:Boolean;
@@ -18,6 +20,70 @@
             _stackTrace = value;
             dispatchEvent(new Event("stackTraceChanged"));
         }
+        
+        private var borderFill:UIComponent;
+        
+        private var dragComp:UIComponent;
+
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            if (highlighted) {
+                
+                if (!this.dragComp) {
+                    var screen:Shape = new Shape();
+                    screen.graphics.beginFill(0x00FF00, .1);
+                    screen.graphics.drawRect(0, 0, this.width, this.height);
+                    screen.graphics.endFill();
+                    dragComp = new UIComponent();
+                    dragComp.mouseChildren = false;
+                    dragComp.mouseEnabled = false;
+                    dragComp.addChild(screen);
+                }
+
+                if (!this.dragComp.parent) {
+                    addChild(dragComp);
+                }
+                
+                if (!this.borderFill) {
+                    var borderShape:Shape = new Shape();
+                    borderShape.graphics.lineStyle(2, 0x00AA00, 1);
+                    borderShape.graphics.moveTo(0, 0);
+                    borderShape.graphics.lineTo(unscaledWidth, 0);
+                    borderShape.graphics.lineTo(unscaledWidth, unscaledHeight);
+                    borderShape.graphics.lineTo(0, unscaledHeight);
+                    borderShape.graphics.lineTo(0, 0);
+                    this.borderFill = new UIComponent();
+                    this.borderFill.mouseChildren = false;
+                    this.borderFill.mouseEnabled = false;
+                    this.borderFill.addChild(borderShape);
+                }
+                
+                if (!this.borderFill.parent) {
+                    addChild(this.borderFill);
+                }
+                
+                
+            } else if (!highlighted) {
+                if (this.borderFill && this.borderFill.parent) {
+                    removeChild(this.borderFill);
+                }
+                if (this.dragComp && this.dragComp.parent) {
+                    removeChild(this.dragComp);
+                }
+            }
+        }
+
+        private var highlighted:Boolean = false;
+
+        public function highlight():void {
+            highlighted = true;
+            invalidateDisplayList();
+        }
+
+        public function normal():void {
+            highlighted = false;
+            invalidateDisplayList();
+        }
 
         [Bindable(event="overlayIndexChanged")]
         public function get overlayIndex():int {
@@ -26,9 +92,28 @@
 
         public function set overlayIndex(value:int):void {
             if (_overlayIndex == value) return;
+            if (overlay != null && overlay.parent) {
+                removeChild(overlay);
+                overlay = null;
+            }
             _overlayIndex = value;
+            if (overlayIndex == 1) {
+                overlay = new ReportCanvasProgressBar();
+            } else if (overlayIndex == 2) {
+                overlay = new SomethingWentWrong();
+            } else if (overlayIndex == 3) {
+                overlay = new ReportCanvasErrorDisplay();
+                ReportCanvasErrorDisplay(overlay).stackTrace = stackTrace;
+            }
+            if (overlay) {
+                addChild(overlay);
+            }
+            invalidateDisplayList();
             dispatchEvent(new Event("overlayIndexChanged"));
         }
+
+        private var overlay:UIComponent;
+
 
         [Bindable(event="loadingChanged")]
         public function get loading():Boolean {
@@ -37,50 +122,12 @@
 
         public function set loading(value:Boolean):void {
             if (_loading == value) return;
+            if (!value && overlay && overlay.parent && overlayIndex == 1) {
+                removeChild(overlay);
+                overlay = null;
+            }
             _loading = value;
             dispatchEvent(new Event("loadingChanged"));
-        }]]></mx:Script>
-
-    <mx:Canvas width="100%" height="100%" id="reportBox"/>
-    <mx:ViewStack width="100%" height="100%" selectedIndex="{overlayIndex}" resizeToContent="true">
-        <mx:Box/>
-        <mx:Box width="100%" height="100%" id="loadingLayer" visible="{loading}"
-                horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
-            <mx:ProgressBar indeterminate="{overlayIndex == 1}" label="Loading the report..." visible="true"
-                            fontSize="20"/>
-        </mx:Box>
-        <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
-                verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
-            <mx:Box paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
-                    backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
-                    cornerRadius="10">
-                <util:AutoSizeTextArea
-                        text="We're sorry, but something went wrong in retrieving data for this report. We've logged the error on our servers and our engineers will fix it as soon as possible."
-                        visible="true" fontSize="18" width="400"
-                        editable="false" backgroundAlpha="0"/>
-            </mx:Box>
-        </mx:Box>
-        <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
-                verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
-            <mx:VBox paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
-                     backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
-                     cornerRadius="10">
-                <util:AutoSizeTextArea
-                        text="We're sorry, but something went wrong in retrieving data for this report. You may want to edit the report, see if any fields are missing from the report drop areas, and adjust from there."
-                        visible="true" fontSize="18" width="400"
-                        editable="false" backgroundAlpha="0"/>
-                <mx:Button label="See Error Details" click="overlayIndex = 4"/>
-            </mx:VBox>
-        </mx:Box>
-        <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
-                verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
-            <mx:VBox paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
-                     backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
-                     cornerRadius="10">
-                <mx:TextArea text="{stackTrace}" visible="true" fontSize="12" width="500"
-                             editable="false" backgroundAlpha="0" height="300"/>
-                <mx:Button label="Hide Error Details" click="overlayIndex = 3"/>
-            </mx:VBox>
-        </mx:Box>
-    </mx:ViewStack>
+        }
+        ]]></mx:Script>
 </mx:Canvas>

@@ -66,6 +66,7 @@ public class TransformContainer extends HBox
     }
 
     public function reset():void {
+        blah = false;
         filterMap = new Dictionary();
         filterDefinitions = new ArrayCollection();
         _filterDefinitions = new ArrayCollection();

@@ -1,16 +1,17 @@
 package com.easyinsight.solutions
 {
 
-	
-	import flash.events.MouseEvent;
+
+import com.easyinsight.skin.ImageConstants;
+
+import flash.events.MouseEvent;
 	
 	import mx.containers.HBox;
 	import mx.controls.Button;
 
 	public class SolutionFeedIcons extends HBox
 	{
-		[Embed(source="../../../../assets/navigate_cross.png")]
-        public var refreshIcon:Class;
+
         
         private var feedDescriptor:DataSourceDescriptor;
         
@@ -20,7 +21,7 @@ package com.easyinsight.solutions
 		{
 			super();
 			deleteButton = new Button();
-			deleteButton.setStyle("icon", refreshIcon);
+			deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
 			deleteButton.toolTip = "Delete";
 			deleteButton.addEventListener(MouseEvent.CLICK, deleteCalled);
 			addChild(deleteButton);

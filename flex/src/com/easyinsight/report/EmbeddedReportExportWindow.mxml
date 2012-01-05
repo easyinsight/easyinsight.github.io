@@ -2,13 +2,9 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-        import com.easyinsight.analysis.EmbedReportWindow;
         import com.easyinsight.analysis.ExcelCreator;
         import com.easyinsight.analysis.PDFCreator;
         import com.easyinsight.analysis.PNGCreator;
-        import com.easyinsight.schedule.ReportDelivery;
-        import com.easyinsight.schedule.ReportDeliveryScheduleWindow;
-        import mx.controls.Alert;
 
         import mx.managers.PopUpManager;
 
@@ -52,51 +48,7 @@
             new PDFCreator().exportReportToPDF(_report, this, _coreView);
             PopUpManager.removePopUp(this);
         }
-
-
-        private function url():void {
-            //var escapedName:String = _reportName.replace(/[ @\"&*#$%^~]/g, "-");
-            var url:String = "https://www.easy-insight.com/app/#reportID=" + _report.urlKey;
-            var urlWindow:URLWindow = new URLWindow();
-            urlWindow.x = this.x;
-            urlWindow.y = this.y;
-            urlWindow.url = url;
-            PopUpManager.addPopUp(urlWindow, this, true);
-            PopUpManager.removePopUp(this);
-        }
-
-        private function embed():void {
-            var embedReportWindow:EmbedReportWindow = new EmbedReportWindow();
-            embedReportWindow.reportName = _reportName;
-            embedReportWindow.urlKey = _report.urlKey;
-            embedReportWindow.dataSourceID = _dataSourceID;
-            embedReportWindow.reportType = _reportType;
-            embedReportWindow.x = this.x;
-            embedReportWindow.y = this.y;
-            PopUpManager.addPopUp(embedReportWindow, this, true);
-            PopUpManager.removePopUp(this);
-        }
-
-        private function email():void {
-            exportService.getReportDelivery.send(_report.analysisID, new Date().getTimezoneOffset());
-        }
-
-        private function gotReportDelivery():void {
-            var delivery:ReportDelivery = exportService.getReportDelivery.lastResult as ReportDelivery;
-            var window:ReportDeliveryScheduleWindow = new ReportDeliveryScheduleWindow();
-            window.fixedReportID = _report.analysisID;
-            window.fixedReportName = _reportName;
-            window.fixedReportURLKey = _report.urlKey;
-            window.activity = delivery;
-            window.x = this.x;
-            window.y = this.y;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpManager.removePopUp(this);
-        }
         ]]></mx:Script>
-    <mx:RemoteObject id="exportService" destination="exportService">
-        <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
-    </mx:RemoteObject>
     <mx:VBox paddingTop="10" paddingLeft="10" paddingBottom="10" paddingRight="10" horizontalAlign="center">
         <mx:Label text="Click any of the options below to export the report:" fontSize="14"/>
         <mx:Grid>

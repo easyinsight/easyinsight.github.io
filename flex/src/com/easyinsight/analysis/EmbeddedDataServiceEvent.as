@@ -16,9 +16,10 @@ public class EmbeddedDataServiceEvent extends Event {
     public var reportAuthor:String;
     public var dataSourceInfo:DataSourceInfo;
     public var additionalProperties:Object;
+    public var hasData:Boolean;
 
     public function EmbeddedDataServiceEvent(type:String, dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, dataSourceAccessible:Boolean,
-            reportFault:ReportFault, dataSourceInfo:DataSourceInfo, additionalProperties:Object) {
+            reportFault:ReportFault, dataSourceInfo:DataSourceInfo, additionalProperties:Object, hasData:Boolean) {
         super(type);
         this.dataSet = dataSet;
         this.analysisDefinition = analysisDefinition;
@@ -26,11 +27,12 @@ public class EmbeddedDataServiceEvent extends Event {
         this.reportFault = reportFault;
         this.dataSourceInfo = dataSourceInfo;
         this.additionalProperties = additionalProperties;
+        this.hasData = hasData;
     }
 
     override public function clone():Event {
         return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, dataSourceAccessible,
-                reportFault, dataSourceInfo, additionalProperties);
+                reportFault, dataSourceInfo, additionalProperties, hasData);
     }
 }
 }

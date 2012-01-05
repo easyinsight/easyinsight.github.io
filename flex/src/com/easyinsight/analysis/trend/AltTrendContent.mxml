@@ -3,6 +3,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.TrendOutcome;
+        import com.easyinsight.analysis.TrendReportFieldExtension;
 
         import mx.collections.ArrayCollection;
         import mx.formatters.Formatter;
@@ -23,9 +24,17 @@
                 }
                 for each (var updateOutcome:TrendOutcome in trends) {
                     updateOutcome.leftTextWidth = width + 10;
-                    var r:AltTrendRenderer = new AltTrendRenderer();
-                    r.data = updateOutcome;
-                    vbox.addChild(r);
+                    if (updateOutcome.measure.reportFieldExtension != null && updateOutcome.measure.reportFieldExtension is TrendReportFieldExtension &&
+                            TrendReportFieldExtension(updateOutcome.measure.reportFieldExtension).date) {
+                        var r:AltTrendRenderer = new AltTrendRenderer();
+                        r.data = updateOutcome;
+                        vbox.addChild(r);
+                    } else {
+                        var singleNumber:BigNumberTrendRenderer = new BigNumberTrendRenderer();
+                        singleNumber.data = updateOutcome;
+                        vbox.addChild(singleNumber);
+                    }
+
                 }
                 /*list.rowCount = trends.length;
                 list.dataProvider = trends;*/

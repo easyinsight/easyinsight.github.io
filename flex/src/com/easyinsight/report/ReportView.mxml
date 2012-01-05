@@ -21,6 +21,7 @@
         import com.easyinsight.customupload.ProblemDataEvent;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.datasources.DataSourceInfo;
+        import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.HierarchyOverride;
@@ -271,6 +272,12 @@
             }
         }
 
+        private var _breadCrumbs:Array;
+
+        public function set breadCrumbs(value:Array):void {
+            _breadCrumbs = value;
+        }
+
         [Bindable]
         private var filterTooltip:String = "Hide Filters";
 
@@ -346,11 +353,21 @@
 
         private function reportNavigation(event:ReportNavigationEvent):void {
             if (_reportNavHandler == null) {
+                if (_breadCrumbs == null) {
+                    _breadCrumbs = [];
+                }
+                var desc:InsightDescriptor = new InsightDescriptor();
+                desc.id = report.analysisID;
+                desc.name = report.name;
+                desc.dataFeedID = report.dataFeedID;
+                desc.reportType = report.reportType;
+                desc.urlKey = report.urlKey;
+                _breadCrumbs.push(new BreadCrumb(desc, transformContainer.getFilterDefinitions()));
                 if (event.descriptor is InsightDescriptor) {
-                    dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
+                    dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, null, null, 0, _breadCrumbs)));
                 } else if (event.descriptor is DashboardDescriptor) {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(event.descriptor).id,
-                        initialFilters: event.filters})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
+                        initialFilters:event.filters, breadCrumbs: _breadCrumbs})));
                 }
             } else {
                 _reportNavHandler.call(null, event);
@@ -376,8 +393,8 @@
                 viewFactory.reportID = _reportID;
                 viewFactory.dataSourceID = _dataSourceID;
                 BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
-                viewFactory.drillthroughFilters = _parameterFilters;
-                reportCanvas.reportBox.addChild(viewFactory);
+                //viewFactory.drillthroughFilters = _parameterFilters;
+                screenTarget.addChild(viewFactory);
                 viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
                 viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
                 viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
@@ -393,8 +410,24 @@
                 if (_reportID != 0 && exchangeItem == null) {
                     UserAudit.instance().log(new ActionReportLog(ActionReportLog.VIEW, _reportID));
                 }
+                if (_breadCrumbs != null && _breadCrumbs.length > 0) {
+                    var backButton:Button = new Button();
+                    var crumb:BreadCrumb = _breadCrumbs[_breadCrumbs.length - 1] as BreadCrumb;
+                    backButton.styleName = "grayButton";
+                    backButton.label = "Back to " + crumb.eiDescriptor.name;
+                    backButton.addEventListener(MouseEvent.CLICK, function (event:MouseEvent):void {
+                        _breadCrumbs.pop();
+                        if (crumb.eiDescriptor is InsightDescriptor) {
+                            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), crumb.filters, null, null, 0, _breadCrumbs)));
+                        } else {
+                            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:crumb.eiDescriptor.id,
+                                initialFilters:crumb.filters, breadCrumbs: _breadCrumbs})));
+                        }
+                    });
+                    breadCrumbBox.addChild(backButton);
+                }
                 viewFactory.setup();
-            } catch(e:Error) {
+            } catch (e:Error) {
                 Alert.show(e.message);
             }
         }
@@ -403,11 +436,11 @@
             report = event.reportInfo.report;
 
             var editItem:ContextMenuItem = new ContextMenuItem("Edit " + report.name);
-            editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+            editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
                 toReportEditor();
             });
             var exportItem:ContextMenuItem = new ContextMenuItem("Export " + report.name);
-            exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+            exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
                 exportExcel();
             });
             var menu:ContextMenu = new ContextMenu();
@@ -427,8 +460,24 @@
                 showReportEditor = false;
             }
             if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
-                filterDefinitions = report.filterDefinitions;
-                viewFactory.filterDefinitions = filterDefinitions;
+
+                var fObj:Object = new Object();
+                if (_parameterFilters != null) {
+                    for each (var eFilter:FilterDefinition in _parameterFilters) {
+                        fObj[eFilter.qualifiedName()] = eFilter;
+                    }
+                }
+                var toUse:ArrayCollection = new ArrayCollection();
+                for each (var filter:FilterDefinition in report.filterDefinitions) {
+                    var existing:FilterDefinition = fObj[filter.qualifiedName()];
+                    if (existing) {
+                        toUse.addItem(existing);
+                    } else {
+                        toUse.addItem(filter);
+                    }
+                }
+                viewFactory.filterDefinitions = toUse;
+                filterDefinitions = toUse;
                 filterIndex = 1;
             } else {
                 if (leftButtonBar.contains(filterButton)) {
@@ -559,6 +608,7 @@
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
     </mx:HBox>
     <mx:HBox width="100%" horizontalAlign="center" paddingTop="5" paddingBottom="5" verticalAlign="middle">
+        <mx:HBox id="breadCrumbBox"/>
         <mx:Label text="{reportName}" fontSize="24" maxWidth="600" color="#000000"/>
         <mx:LinkButton label="{reportInfoLabel}" textDecoration="underline" fontSize="14" visible="{showReportInfoButton}" click="toggleReportInfo()"/>
     </mx:HBox>
@@ -577,12 +627,7 @@
                                           reportView="true" reportID="{_reportID}"/>
         </mx:VBox>
     </mx:ViewStack>
-    <mx:Box width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10">
-        <mx:VBox width="100%" height="100%" styleName="screenContent">
-            <report:ReportCanvas id="reportCanvas" stackTrace="{stackTrace}" overlayIndex="{overlayIndex}"
-                                 loading="false"/>
-        </mx:VBox>
-    </mx:Box>
+    <mx:Canvas id="screenTarget" width="100%" height="100%"/>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="keepReport" result="confirmedKeep()"/>
     </mx:RemoteObject>

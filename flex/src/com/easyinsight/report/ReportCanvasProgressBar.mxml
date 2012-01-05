@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+        horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+    <mx:ProgressBar indeterminate="true" label="Loading the report..." visible="true"
+                    fontSize="20"/>
+</mx:Box>

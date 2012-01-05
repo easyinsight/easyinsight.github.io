@@ -3,6 +3,7 @@ package com.easyinsight.groups
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.listing.*;
 import com.easyinsight.scorecard.ScorecardDescriptor;
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
@@ -17,8 +18,7 @@ public class GroupAdminMyDataIconControls extends HBox
 {
     private var obj:Object;
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    public var deleteIcon:Class;
+
 
     private var deleteButton:Button;
 
@@ -29,7 +29,7 @@ public class GroupAdminMyDataIconControls extends HBox
     {
         super();
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         BindingUtils.bindProperty(deleteButton, "toolTip", this, "deleteTooltip");
         BindingUtils.bindProperty(deleteButton, "visible", this, "deleteVisible");
         deleteButton.addEventListener(MouseEvent.CLICK, deleteCalled);

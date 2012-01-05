@@ -104,6 +104,7 @@
         private function email():void {
             _dataView.updateExportMetadata();
             var window:EmailReportWindow = new EmailReportWindow();
+            window.coreView = _dataView.getCoreView();
             window.report = _analysisDefinition;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
@@ -124,6 +125,7 @@
             window.fixedReportID = analysisDefinition.analysisID;
             window.fixedReportName = analysisDefinition.name;
             window.fixedReportURLKey = analysisDefinition.urlKey;
+            window.fixedReportDataSourceID = analysisDefinition.dataFeedID;
             window.activity = delivery;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);

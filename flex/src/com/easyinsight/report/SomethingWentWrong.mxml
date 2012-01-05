@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<mx:Box width="100%" height="100%" xmlns:mx="http://www.adobe.com/2006/mxml"
+        horizontalAlign="center"
+        verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1" xmlns:util="com.easyinsight.util.*">
+    <mx:Box paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
+            backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
+            cornerRadius="10">
+        <util:AutoSizeTextArea
+                text="We're sorry, but something went wrong in retrieving data for this report. We've logged the error on our servers and our engineers will fix it as soon as possible."
+                visible="true" fontSize="18" width="400"
+                editable="false" backgroundAlpha="0"/>
+    </mx:Box>
+</mx:Box>

@@ -6,6 +6,8 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.filtering {
+import com.easyinsight.skin.ImageConstants;
+
 import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
@@ -33,14 +35,13 @@ public class OrFilterCanvas extends HBox implements IFilter {
         dispatchEvent(event);
     }
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
 
     override protected function createChildren():void {
         super.createChildren();
         addChild(orContainer);
         var deleteButton:Button = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         addChild(deleteButton);
     }

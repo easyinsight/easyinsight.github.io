@@ -57,7 +57,7 @@ public class EmbeddedCrosstabService extends EmbeddedDataService implements IEmb
         var props:Object = new Object();
         props["columnCount"] = results.columnCount;
         dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, results.dataSet, results.definition, results.dataSourceAccessible,
-                results.reportFault, results.dataSourceInfo, props));
+                results.reportFault, results.dataSourceInfo, props, results.dataSet.length > 3));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 }
