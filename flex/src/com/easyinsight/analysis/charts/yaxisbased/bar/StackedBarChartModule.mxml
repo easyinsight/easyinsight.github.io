@@ -13,10 +13,13 @@
 
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.ChartDefinition;
+        import com.easyinsight.analysis.ClickUtil;
 
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
+        import com.easyinsight.analysis.Link;
         import com.easyinsight.analysis.SortFunctionFactory;
+        import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.xaxisbased.column.ContextMenuBoxItemRenderer;
 
 
@@ -24,6 +27,7 @@
 
 
         import mx.binding.utils.BindingUtils;
+        import mx.charts.AxisRenderer;
 
         import mx.charts.BarChart;
         import mx.charts.CategoryAxis;
@@ -32,6 +36,7 @@
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
+        import mx.charts.events.ChartItemEvent;
         import mx.charts.series.BarSeries;
         import mx.charts.series.BarSet;
         import mx.charts.series.items.BarSeriesItem;
@@ -92,6 +97,7 @@
                 // define the chart itself
 
                 barChart = new BarChart();
+                barChart.backgroundElements = ChartUtil.gridLine("vertical");
                 barChart.percentHeight = 100;
                 barChart.percentWidth = 100;
                 barChart.showDataTips = true;
@@ -104,12 +110,20 @@
                 //xAxis.categoryField = xField;
                 yAxis.labelFunction = renderDimensionAxis;
                 yAxis.title = yAxisTitle;
+                var verticalAxisRenderer:AxisRenderer = new AxisRenderer();
+                verticalAxisRenderer.setStyle("axisStroke", ChartUtil.axisStroke());
+                verticalAxisRenderer.axis = yAxis;
+                barChart.verticalAxisRenderer = verticalAxisRenderer;
                 barChart.verticalAxis = yAxis;
                 // define the Y axis
 
                 xAxis = new LinearAxis();
                 xAxis.title = xAxisTitle;
                 xAxis.labelFunction = renderAxis;
+                var horizontalAxisRenderer:AxisRenderer = new AxisRenderer();
+                horizontalAxisRenderer.setStyle("axisStroke", ChartUtil.axisStroke());
+                horizontalAxisRenderer.axis = xAxis;
+                barChart.horizontalAxisRenderer = horizontalAxisRenderer;
                 barChart.horizontalAxis = xAxis;
 
                 // create the data series
@@ -188,7 +202,7 @@
                 barChart.setStyle("fontFamily", "Lucida Grande");
                 barChart.setStyle("fontSize", barChartDef.fontSize);
 
-                if (barChartDef.showLegend) {
+                if (barChartDef.showLegend && uniques.length > 1) {
                     currentState = "";
                 } else {
                     currentState = "hideLegend";
@@ -220,6 +234,8 @@
 
                 barSet.series = mySeries;
                 barChart.series = [ barSet ];
+
+                this.defaultLink = ChartUtil.setup(barChartDef.stackItem, barChart, onChartClick);
 
                 measureFormatter = barChartDef.measures.getItemAt(0).getFormatter();
                 dimensionFormatter = barChartDef.yaxis.getFormatter();
@@ -266,6 +282,14 @@
             graphData = dataSet;
         }
 
+        private var defaultLink:Link;
+
+        private function onChartClick(event:ChartItemEvent):void {
+            var series:BarSeries = event.hitData.chartItem.element as BarSeries;
+            var key:String = series.yField;
+            ClickUtil.doStuff(defaultLink, event.hitData.item, barChartDef.stackItem, this, key);
+        }
+
         private function customFill(element:ChartItem, index:Number):IFill {
             return FillProvider.getColor(barChartDef.colorScheme, index);
         }
@@ -287,29 +311,5 @@
     <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
     <mx:Canvas width="100%" height="100%" backgroundAlpha="1" backgroundColor="#FFFFFF">
         <mx:HBox width="100%" height="100%" id="canvas"/>
-        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
-                      mouseEnabled="false">
-            <mx:HBox width="100%" height="100%"/>
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
-                    backgroundAlpha=".1">
-                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
-                        verticalAlign="middle"
-                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
-                    <mx:TextArea fontSize="22"
-                                 text="You haven't set up a report yet. Drag one Grouping and one Measure into the labeled areas above the canvas to create a report."
-                                 borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
-                </mx:Box>
-            </mx:Box>
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
-                    backgroundAlpha=".1">
-                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
-                        verticalAlign="middle"
-                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
-                    <mx:TextArea fontSize="22"
-                                 text="We didn't find any data for the fields and filters that you specified in the report."
-                                 borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
-                </mx:Box>
-            </mx:Box>
-        </mx:ViewStack>
     </mx:Canvas>
 </mx:Module>

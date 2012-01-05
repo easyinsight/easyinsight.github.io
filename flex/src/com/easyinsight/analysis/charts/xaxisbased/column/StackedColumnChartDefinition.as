@@ -71,6 +71,12 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
                 xVal = "(No Value)";
             }
 
+            var measureValue:Value = object[measures.getItemAt(0).qualifiedName()];
+            
+            if (measureValue.type() == Value.EMPTY || measureValue.toNumber() == 0) {
+                continue;
+            }
+
             var newObject:Object = map[xVal];
             if (newObject == null) {
                 newObject = new Object();
@@ -89,7 +95,8 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
                 }
             }
             newObject[stackItem.qualifiedName()] = dimensionValue;
-            newObject[dimensionValue] = object[measures.getItemAt(0).qualifiedName()];
+            
+            newObject[dimensionValue] = measureValue;
             if (!uniques.contains(dimensionValue)) {
                 uniques.addItem(dimensionValue);
             }

@@ -1,4 +1,6 @@
 package com.easyinsight.analysis.range {
+import com.easyinsight.skin.ImageConstants;
+
 import flash.events.MouseEvent;
 
 import mx.containers.HBox;
@@ -18,9 +20,7 @@ public class RangeRowEditor extends HBox {
 
     private var rangeOption:RangeOption;
 
-    [Bindable]
-    [Embed(source="../../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
 
     public function RangeRowEditor() {
         super();
@@ -35,7 +35,7 @@ public class RangeRowEditor extends HBox {
         maxValidator.property = "text";
         maxValidator.source = maxValueInput;
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         validators = [ minValidator, maxValidator ];
     }

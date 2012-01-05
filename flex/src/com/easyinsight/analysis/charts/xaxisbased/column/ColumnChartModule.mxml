@@ -11,6 +11,8 @@
 
         import com.easyinsight.analysis.SortFunctionFactory;
 
+        import mx.charts.AxisRenderer;
+
         import mx.charts.CategoryAxis;
         import mx.charts.ChartItem;
         import mx.charts.ColumnChart;
@@ -100,11 +102,17 @@
             return dt;
         }
 
-        override protected function assignDimensionAxis(axis:CategoryAxis, chart:ChartBase):void {
+        override protected function direction():String {
+            return "horizontal";
+        }
+
+        override protected function assignDimensionAxis(axis:CategoryAxis, chart:ChartBase, axisRenderer:AxisRenderer):void {
+            CartesianChart(chart).horizontalAxisRenderer = axisRenderer;
             CartesianChart(chart).horizontalAxis = axis;
         }
 
-        override protected function assignMeasureAxis(axis:LinearAxis, chart:ChartBase):void {
+        override protected function assignMeasureAxis(axis:LinearAxis, chart:ChartBase, axisRenderer:AxisRenderer):void {
+            CartesianChart(chart).verticalAxisRenderer = axisRenderer;
             CartesianChart(chart).verticalAxis = axis;
         }
 

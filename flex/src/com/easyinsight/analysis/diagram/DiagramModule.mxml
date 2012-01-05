@@ -13,7 +13,6 @@
         import com.easyinsight.analysis.TrendOutcome;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
 
         private var diagramDef:DiagramDefinition;
 
@@ -33,7 +32,13 @@
                             trendOutcome.measure = m;
                         }
                     }
-                    var node:DiagramBaseNode = new DiagramBaseNode();
+                    var node:DiagramNode;
+                    if (trendOutcome.measure.reportFieldExtension != null && trendOutcome.measure.reportFieldExtension is DiagramReportFieldExtension &&
+                            DiagramReportFieldExtension(trendOutcome.measure.reportFieldExtension).date) {
+                        node = new DiagramBaseNode();
+                    } else {
+                        node = new DiagramNoTrendBaseNode();
+                    }
                     node.editEnabled = editor;
                     node.outcome = trendOutcome;
                     node.x = DiagramReportFieldExtension(trendOutcome.measure.reportFieldExtension).x;
@@ -43,8 +48,8 @@
                 }
                 var toRemove:Array = [];
                 for each (var dLink:DiagramLink in diagramDef.links) {
-                    var startNode:DiagramBaseNode = map[dLink.startItem.qualifiedName()];
-                    var endNode:DiagramBaseNode = map[dLink.endItem.qualifiedName()];
+                    var startNode:DiagramNode = map[dLink.startItem.qualifiedName()];
+                    var endNode:DiagramNode = map[dLink.endItem.qualifiedName()];
                     if (startNode != null && endNode != null) {
                         var link:Link = diagram.addLink(startNode, endNode);
                         link.linkName = dLink.label;
@@ -63,8 +68,8 @@
 
         private function onLinkAdd(event:LinkEvent):void {
             var link:Link = event.link;
-            var from:DiagramBaseNode = link.fromNode as DiagramBaseNode;
-            var to:DiagramBaseNode = link.toNode as DiagramBaseNode;
+            var from:DiagramNode = link.fromNode as DiagramNode;
+            var to:DiagramNode = link.toNode as DiagramNode;
             var dLink:DiagramLink = new DiagramLink();
             dLink.startItem = from.outcome.measure;
             dLink.endItem = to.outcome.measure;
@@ -73,8 +78,8 @@
 
         private function onLinkRemove(event:LinkEvent):void {
             var link:Link = event.link;
-            var from:DiagramBaseNode = link.fromNode as DiagramBaseNode;
-            var to:DiagramBaseNode = link.toNode as DiagramBaseNode;
+            var from:DiagramNode = link.fromNode as DiagramNode;
+            var to:DiagramNode = link.toNode as DiagramNode;
             var target:DiagramLink = null;
             for each (var dLink:DiagramLink in diagramDef.links) {
                 if (dLink.startItem.qualifiedName() == from.outcome.measure.qualifiedName() &&
@@ -87,8 +92,8 @@
 
         private function onLabel(event:LabelLinkEvent):void {
             var link:Link = event.link;
-            var from:DiagramBaseNode = link.fromNode as DiagramBaseNode;
-            var to:DiagramBaseNode = link.toNode as DiagramBaseNode;
+            var from:DiagramNode = link.fromNode as DiagramNode;
+            var to:DiagramNode = link.toNode as DiagramNode;
             var target:DiagramLink = null;
             for each (var dLink:DiagramLink in diagramDef.links) {
                 if (dLink.startItem.qualifiedName() == from.outcome.measure.qualifiedName() &&
@@ -100,7 +105,7 @@
         }
 
         private function onNodeRemoved(event:NodeEvent):void {
-            var node:DiagramBaseNode = event.node as DiagramBaseNode;
+            var node:DiagramNode = event.node as DiagramNode;
             dispatchEvent(new ReportRendererEvent(ReportRendererEvent.REMOVE_ITEM, node.outcome.measure));
         }
 

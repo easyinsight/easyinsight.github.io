@@ -5,16 +5,13 @@
         import com.easyinsight.analysis.ClickUtil;
         import com.easyinsight.analysis.Link;
         import com.easyinsight.analysis.TrendOutcome;
-        import com.easyinsight.analysis.formatter.PercentageNumberFormatter;
         import com.easyinsight.analysis.list.ListDefinition;
-        import com.easyinsight.analysis.trend.TrendStatusRenderer;
         import com.easyinsight.framework.Constants;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.ReportEditorAnalyzeSource;
         import com.easyinsight.pseudocontext.StandardContextWindow;
 
         import mx.collections.ArrayCollection;
-
         import mx.events.MoveEvent;
 
         private var _outcome:TrendOutcome;
@@ -22,11 +19,7 @@
         [Bindable]
         private var outcomeValue:String;
 
-        [Bindable]
-        private var percentChange:String;
 
-        [Bindable]
-        private var trendImage:Class;
 
         override public function get outcome():TrendOutcome {
             return _outcome;
@@ -63,13 +56,7 @@
             }
             outcomeValue = _outcome.measure.getFormatter().format(_outcome.now.getValue());
             var now:Number = _outcome.now.getValue() as Number;
-            var previous:Number = _outcome.historical.getValue() as Number;
-            var formatter:PercentageNumberFormatter = new PercentageNumberFormatter();
-            formatter.precision = 2;
-            var change:Number = (now - previous) / previous * 100;
-            percentChange = formatter.format(change);
-            trendImage = TrendStatusRenderer.iconForKPI(value);
-            var exploreOption:ContextMenuItem = new ContextMenuItem("Analyze the trend...");
+            var exploreOption:ContextMenuItem = new ContextMenuItem("Analyze the metric...");
             exploreOption.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, analyzeData);
             new StandardContextWindow(_outcome.measure, passThrough, this, _outcome, true, _outcome.measure.filters, _outcome.measure.getFormatter().format(_outcome.now), [exploreOption]);
         }
@@ -108,11 +95,7 @@
     <mx:Canvas borderStyle="solid" borderThickness="1" borderColor="0x333333" width="100%" height="52" cornerRadius="5" backgroundColor="0xf8f8ff"
             horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundAlpha=".8" id="canvas">
         <mx:Image id="iconImage" y="5"/>
-        <mx:Label text="{outcomeValue}" x="30" width="100%" textAlign="center" fontSize="14"/>
-        <mx:HBox verticalAlign="middle" x="30" y="17" width="100%" horizontalAlign="center" visible="{showStatus}">
-            <mx:Label text="{percentChange}"/>
-            <mx:Image source="{trendImage}"/>
-        </mx:HBox>
+        <mx:Label text="{outcomeValue}" x="30" y="15" width="100%" textAlign="center" fontSize="14"/>
     </mx:Canvas>
     <diagram:lblNodeName>
 		<mx:Text y="51" text="{nodeName}" selectable="false" left="1" right="1" textAlign="center" fontFamily="Lucida Grande"/>

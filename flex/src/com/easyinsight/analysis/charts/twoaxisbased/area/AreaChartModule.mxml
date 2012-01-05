@@ -6,18 +6,6 @@
             <mx:RemoveChild target="{legend}"/>
         </mx:State>
     </mx:states>
-    <!--<mx:Style>
-        .axisTitles {
-            fontSize: 14;
-            fontFamily: "Tahoma";
-        }
-
-        CartesianChart {
-            axisTitleStyleName:axisTitles;
-            fontFamily: "Tahoma";
-            fontSize: 14;
-        }
-    </mx:Style>-->
     <mx:Script><![CDATA[
 
         import com.easyinsight.analysis.AnalysisDateDimension;
@@ -27,21 +15,21 @@
         import com.easyinsight.analysis.AnalysisMeasure;
 
         import com.easyinsight.analysis.CustomChangeEvent;
-        import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.analysis.charts.ChartUtil;
+        import com.easyinsight.analysis.charts.EILegend;
 
         import com.easyinsight.pseudocontext.PseudoContextWindow;
+
+        import mx.charts.AxisRenderer;
 
         import mx.charts.CategoryAxis;
         import mx.charts.DateTimeAxis;
         import mx.charts.HitData;
-        import mx.charts.Legend;
         import mx.charts.AreaChart;
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.events.ChartItemEvent;
-        import mx.charts.renderers.CircleItemRenderer;
         import mx.charts.series.AreaSeries;
-        import mx.charts.series.AreaSet;
         import mx.charts.series.items.AreaSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
@@ -58,7 +46,7 @@
         private var measureItem:AnalysisItem;
 
         [Bindable]
-        private var legend:Legend;
+        private var legend:EILegend;
 
         private var def:AreaChartDefinition;
 
@@ -87,13 +75,10 @@
                 areaChart = new AreaChart();
                 areaChart.percentHeight = 100;
                 areaChart.percentWidth = 100;
-                //areaChart.dataProvider = chartData;
-                areaChart.selectionMode = "multiple";
             }
             hbox.addChild(areaChart);
             if (legend == null) {
-                legend = new Legend();
-                legend.direction = "vertical";
+                legend = new EILegend();
                 legend.percentHeight = 100;
             }
             hbox.addChild(legend);
@@ -124,20 +109,30 @@
             areaChart = new AreaChart();
             areaChart.setStyle("fontFamily", areaChartDef.getFont());
             areaChart.setStyle("fontSize", areaChartDef.fontSize);
+            areaChart.addEventListener("legendDataChanged", function(event:Event):void {
+                legend.dataProvider = areaChart.legendData;
+            });
             areaChart.showDataTips = true;
             areaChart.dataTipFunction = dataTipFunction;
             areaChart.percentHeight = 100;
             areaChart.percentWidth = 100;
-            //areaChart.dataProvider = chartData;
+            areaChart.backgroundElements = ChartUtil.gridLine("horizontal");
             areaChart.type = areaChartDef.stackingType;
-            //areaChart.selectionMode = "multiple";
             var verticalAxis:LinearAxis = new LinearAxis();
             verticalAxis.baseAtZero = areaChartDef.baseAtZero == "true";
             if (!areaChartDef.multiMeasure && areaChartDef.measure != null) {
                 verticalAxis.title = areaChartDef.measure.display;
             } else {
-                verticalAxis.title = "Measures";
+                if (areaChartDef.measures.length == 1) {
+                    verticalAxis.title = AnalysisItem(areaChartDef.measures.getItemAt(0)).display;
+                } else {
+                    verticalAxis.title = "Measures";
+                }
             }
+            var hAxisRenderer:AxisRenderer = new AxisRenderer();
+            hAxisRenderer.setStyle("axisStroke", ChartUtil.axisStroke());
+            hAxisRenderer.axis = verticalAxis;
+            areaChart.verticalAxisRenderer = hAxisRenderer;
             areaChart.verticalAxis = verticalAxis;
 
             if (dataSet.length > 0) {
@@ -219,46 +214,36 @@
                     categoryAxis.title = xAxisDimension.display;
                     xAxis = categoryAxis;
                 }
-
+                var vAxisRenderer:AxisRenderer = new AxisRenderer();
+                vAxisRenderer.setStyle("axisStroke", ChartUtil.axisStroke());
+                vAxisRenderer.axis = xAxis;
+                areaChart.horizontalAxisRenderer = vAxisRenderer;
                 areaChart.horizontalAxis = xAxis;
 
                 var mySeries:Array = new Array();
-                var analysisMeasure:AnalysisMeasure = areaChartDef.measure as AnalysisMeasure;
                 var uniques:ArrayCollection = new ArrayCollection();
 
                 var seriesData:Object = new Object();
-                var points:ArrayCollection = areaChartDef.populateData(dataSet, seriesData, uniques);
-                areaChart.dataProvider = points;
+                areaChart.dataProvider = areaChartDef.populateData(dataSet, seriesData, uniques);
                 for (var i:int = 0; i < uniques.length; i++) {
                     var key:String = uniques.getItemAt(i) as String;
                     var uniqueLineSeries:AreaSeries = new AreaSeries();
                     uniqueLineSeries.setStyle("form", areaChartDef.form);
-                    //uniqueLineSeries.setStyle("itemRenderer", new ClassFactory(CircleItemRenderer));
                     uniqueLineSeries.xField = areaChartDef.xaxis.qualifiedName();
                     if (key == null || key == "") {
                         key = "[ No Value ]";
                     }
                     uniqueLineSeries.yField = key;
-                    uniqueLineSeries.setStyle("areaStroke", strokes[i % 6]);
-                    uniqueLineSeries.setStyle("areaFill", fills[i % 6]);
+                    uniqueLineSeries.setStyle("areaStroke", strokes[i % strokes.length]);
+                    uniqueLineSeries.setStyle("areaFill", fills[i % fills.length]);
                     uniqueLineSeries.displayName = key;
-                    //uniqueLineSeries.dataProvider = seriesData[key];
                     mySeries.push(uniqueLineSeries);
                 }
-                /*areaSet.type = "100%";
-                areaSet.series = mySeries;*/
 
                 areaChart.series = mySeries;
             }
 
-            legend.dataProvider = areaChart;
-            legend.direction = "vertical";
             hbox.addChildAt(areaChart, 0);
-        }
-
-
-        public function createFilterRawData():FilterRawData {
-            return null;
         }
 
         public function updateExportMetadata():void {
@@ -277,6 +262,15 @@
         <mx:SolidColor color="0xd86068" alpha=".9"/>
         <mx:SolidColor color="0x5d9942" alpha=".9"/>
         <mx:SolidColor color="0x7a4c6c" alpha=".9"/>
+        <mx:SolidColor color="0x61B796" alpha=".9"/>
+        <mx:SolidColor color="0x3a93e8" alpha=".9"/>
+        <mx:SolidColor color="0xAB3032" alpha=".9"/>
+        <mx:SolidColor color="0x377026" alpha=".9"/>
+        <mx:SolidColor color="0x8e3160" alpha=".9"/>
+        <mx:SolidColor color="0x5a46cc" alpha=".9"/>
+        <mx:SolidColor color="0xBBC417" alpha=".9"/>
+        <mx:SolidColor color="0x2921B8" alpha=".9"/>
+        <mx:SolidColor color="0xB57C99" alpha=".9"/>
     </mx:Array>
 
     <!-- Define custom Strokes. -->
@@ -287,6 +281,16 @@
         <mx:Stroke color="0xd86068" weight="2"/>
         <mx:Stroke color="0x5d9942" weight="2"/>
         <mx:Stroke color="0x7a4c6c" weight="2"/>
+        <mx:Stroke color="0x61B796" weight="2"/>
+        <mx:Stroke color="0x3a93e8" weight="2"/>
+        <mx:Stroke color="0xAB3032" weight="2"/>
+        <mx:Stroke color="0x377026" weight="2"/>
+        <mx:Stroke color="0x8e3160" weight="2"/>
+        <mx:Stroke color="0x5a46cc" weight="2"/>
+        <mx:Stroke color="0x7a4c6c" weight="2"/>
+        <mx:Stroke color="0xBBC417" weight="2"/>
+        <mx:Stroke color="0x2921B8" weight="2"/>
+        <mx:Stroke color="0xB57C99" weight="2"/>
     </mx:Array>
     <mx:HBox width="100%" height="100%" id="hbox"/>
 </mx:Module>

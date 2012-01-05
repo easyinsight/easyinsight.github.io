@@ -10,13 +10,26 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.ChartDefinition;
+        import com.easyinsight.analysis.ClickUtil;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.DrillThrough;
+        import com.easyinsight.analysis.DrillThroughEvent;
+        import com.easyinsight.analysis.DrillThroughExecutor;
         import com.easyinsight.analysis.FillProvider;
+        import com.easyinsight.analysis.Link;
+        import com.easyinsight.analysis.ReportWindowEvent;
+        import com.easyinsight.analysis.URLLink;
         import com.easyinsight.analysis.Value;
         import com.easyinsight.analysis.charts.xaxisbased.column.ContextMenuBoxItemRenderer;
         import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.filtering.FilterValueDefinition;
+        import com.easyinsight.report.ReportNavigationEvent;
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.charts.AxisRenderer;
 
         import mx.charts.CategoryAxis;
         import mx.charts.ChartItem;
@@ -26,7 +39,10 @@
         import mx.charts.chartClasses.ChartBase;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
+        import mx.charts.events.ChartEvent;
+        import mx.charts.events.ChartItemEvent;
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.formatters.Formatter;
         import mx.graphics.GradientEntry;
         import mx.graphics.LinearGradient;
@@ -61,6 +77,14 @@
             return null;
         }
 
+        private function onChartClick(event:ChartItemEvent):void {
+            ClickUtil.doStuff(defaultLink, event.hitData.item, dimensionAxisItem, this);
+        }
+
+        protected function direction():String {
+            return null;
+        }
+
         private function createChart():void {
             if (chart == null) {
 
@@ -72,6 +96,7 @@
                 chart.showDataTips = true;
                 chart.cacheAsBitmap = true;
                 chart.dataProvider = graphData;
+                chart.backgroundElements = ChartUtil.gridLine(direction());
                 chart.dataTipFunction = formatDataTip;
 
                 // define the X axis
@@ -79,7 +104,10 @@
                 dimensionAxis = new CategoryAxis();
                 dimensionAxis.labelFunction = renderDimensionAxis;
                 dimensionAxis.dataProvider = graphData;
-                assignDimensionAxis(dimensionAxis, chart);
+                var dAxisRenderer:AxisRenderer = new AxisRenderer();
+                dAxisRenderer.setStyle("axisStroke", ChartUtil.axisStroke());
+                dAxisRenderer.axis = dimensionAxis;
+                assignDimensionAxis(dimensionAxis, chart, dAxisRenderer);
 
                 // define the Y axis
 
@@ -99,11 +127,11 @@
             }
         }
 
-        protected function assignDimensionAxis(axis:CategoryAxis, chart:ChartBase):void {
+        protected function assignDimensionAxis(axis:CategoryAxis, chart:ChartBase, axisRenderer:AxisRenderer):void {
 
         }
 
-        protected function assignMeasureAxis(axis:LinearAxis, chart:ChartBase):void {
+        protected function assignMeasureAxis(axis:LinearAxis, chart:ChartBase, axisRenderer:AxisRenderer):void {
 
         }
 
@@ -159,6 +187,8 @@
 
         }
 
+        private var defaultLink:Link;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             chartDef = analysisDefinition as ChartDefinition;
 
@@ -177,6 +207,8 @@
                 measureFormatter = firstMeasure.getFormatter();
 
                 dimensionAxisItem = getDimensionItem();
+                
+                this.defaultLink = ChartUtil.setup(dimensionAxisItem, chart, onChartClick);
 
                 dimensionFormatter = dimensionAxisItem.getFormatter();
                 dimensionAxis.categoryField = dimensionAxisItem.qualifiedName();
@@ -196,7 +228,10 @@
 
                 measureAxis.title = firstMeasure.display;
 
-                assignMeasureAxis(measureAxis, chart);
+                var mAxisRenderer:AxisRenderer = new AxisRenderer();
+                mAxisRenderer.setStyle("axisStroke", ChartUtil.axisStroke());
+                mAxisRenderer.axis = measureAxis;
+                assignMeasureAxis(measureAxis, chart, mAxisRenderer);
 
                 chart.dataProvider = dataSet;
                 dimensionAxis.dataProvider = dataSet;
@@ -293,29 +328,5 @@
 
         -->
         <mx:HBox width="100%" height="100%" id="canvas"/>
-        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
-                      mouseEnabled="false">
-            <mx:Canvas width="100%" height="100%"/>
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
-                    backgroundAlpha=".1">
-                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
-                        verticalAlign="middle"
-                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
-                    <mx:TextArea fontSize="22"
-                                 text="You haven't set up a report yet. Drag one Grouping and one Measure into the labeled areas above the canvas to create a report."
-                                 borderStyle="none" backgroundAlpha="0" width="500" height="95" editable="false" selectable="false" focusEnabled="false"/>
-                </mx:Box>
-            </mx:Box>
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
-                    backgroundAlpha=".1">
-                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
-                        verticalAlign="middle"
-                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
-                    <mx:TextArea fontSize="22"
-                                 text="We didn't find any data for the fields and filters that you specified in the report."
-                                 borderStyle="none" backgroundAlpha="0" width="500" height="65" editable="false" selectable="false" focusEnabled="false"/>
-                </mx:Box>
-            </mx:Box>
-        </mx:ViewStack>
     </mx:Canvas>
 </mx:Module>

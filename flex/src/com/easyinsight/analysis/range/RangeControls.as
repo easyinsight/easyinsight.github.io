@@ -1,4 +1,6 @@
 package com.easyinsight.analysis.range {
+import com.easyinsight.skin.ImageConstants;
+
 import flash.events.MouseEvent;
 
 import mx.containers.HBox;
@@ -6,9 +8,7 @@ import mx.controls.Button;
 
 public class RangeControls extends HBox {
 
-    [Bindable]
-    [Embed(source="../../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
 
     private var deleteButton:Button;
 
@@ -17,7 +17,7 @@ public class RangeControls extends HBox {
     public function RangeControls() {
         super();
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(RangeEvent.DELETE_RANGE, onDelete);
     }
 

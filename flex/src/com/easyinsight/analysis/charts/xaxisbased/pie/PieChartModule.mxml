@@ -24,8 +24,11 @@
         import com.easyinsight.analysis.AnalysisDefinition;
 
         import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.ClickUtil;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
+        import com.easyinsight.analysis.Link;
+        import com.easyinsight.analysis.charts.ChartUtil;
 
         //import com.easyinsight.pseudocontext.PseudoContextWindow;
 
@@ -82,6 +85,7 @@
                 } else {
                     pieSeries.setStyle("fills", FillProvider.createRadialGradients());
                 }
+                this.defaultLink = ChartUtil.setup(pieChartDef.xaxis, pieChart, onChartClick);
                 this.measureFormatter = pieChartDef.measures.getItemAt(0).getFormatter();
                 measureName = pieChartDef.measures.getItemAt(0).qualifiedName();
                 dimension = pieChartDef.xaxis.qualifiedName();
@@ -139,6 +143,12 @@
         public function preserveValues():Boolean {
             return false;
         }
+        
+        private var defaultLink:Link;
+
+        private function onChartClick(event:ChartItemEvent):void {
+            ClickUtil.doStuff(defaultLink, event.hitData.item, pieChartDef.xaxis, this);
+        }
 
         [Bindable]
         private var labelPosition:String;
@@ -163,30 +173,5 @@
             </mx:PieChart>
             <mx:Legend id="legend" dataProvider="{pieChart}" height="100%" legendItemClass="com.easyinsight.analysis.charts.EILegendItem"/>
         </mx:HBox>
-
-        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
-                      mouseEnabled="false">
-            <mx:Canvas width="100%" height="100%"/>
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
-                    backgroundAlpha=".1">
-                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
-                        verticalAlign="middle"
-                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
-                    <mx:TextArea fontSize="22"
-                                 text="You haven't set up a report yet. Drag one Grouping and one Measure into the labeled areas above the canvas to create a report."
-                                 borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
-                </mx:Box>
-            </mx:Box>
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
-                    backgroundAlpha=".1">
-                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
-                        verticalAlign="middle"
-                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
-                    <mx:TextArea fontSize="22"
-                                 text="We didn't find any data for the fields and filters that you specified in the report."
-                                 borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
-                </mx:Box>
-            </mx:Box>
-        </mx:ViewStack>
     </mx:Canvas>
 </mx:Module>

@@ -16,14 +16,19 @@
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.ClickUtil;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.Link;
+        import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.filtering.FilterRawData;
 
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
         import mx.charts.ChartItem;
         import mx.charts.chartClasses.IAxis;
+        import mx.charts.chartClasses.Series;
         import mx.charts.events.ChartItemEvent;
+        import mx.charts.series.items.BubbleSeriesItem;
         import mx.formatters.Formatter;
         import mx.charts.HitData;
         import mx.collections.ArrayCollection;
@@ -63,6 +68,7 @@
             var plotChartDef:BubbleChartDefinition = analysisDefinition as BubbleChartDefinition;
             if (dataSet.length > 0) {
                 this.bubbleChart = plotChartDef;
+                this.defaultLink = ChartUtil.setup(plotChartDef.dimension, plotChart, onChartClick);
                 plotChart.setStyle("fontFamily", plotChartDef.getFont());
                 plotChart.setStyle("backgroundAlpha", plotChartDef.backgroundAlpha);
                 measure1 = plotChartDef.xaxisMeasure.qualifiedName();
@@ -79,8 +85,24 @@
             graphData = dataSet;
         }
 
-        private function dtFunc(hd:HitData):String {
-            return hd.item[dimension];
+        private var defaultLink:Link;
+
+        private function onChartClick(event:ChartItemEvent):void {
+            ClickUtil.doStuff(defaultLink, event.hitData.item, bubbleChart.dimension, this);
+        }
+
+
+        protected function formatDataTip(hd:HitData):String {
+            var dt:String = "";
+            dt += "<b>" + hd.item[bubbleChart.dimension.qualifiedName()] + "</b><BR/>";
+
+            dt += "<i>" + bubbleChart.xaxisMeasure.display + ":</i> ";
+            dt += measure1Formatter.format(BubbleSeriesItem(hd.chartItem).xValue) + "\n";
+
+            dt += "<i>" + bubbleChart.yaxisMeasure.display + ":</i> ";
+            dt += measure2Formatter.format(BubbleSeriesItem(hd.chartItem).yValue) + "\n";
+
+            return dt;
         }
 
         public function createFilterRawData():FilterRawData {
@@ -158,13 +180,13 @@
     <mx:SolidColor id="sc1" color="blue" alpha=".3"/>
     <mx:Stroke id="stroke1" color="blue" weight="1"/>
 
-	<mx:BubbleChart id="plotChart" dataProvider="{graphData}" width="100%" height="100%" showDataTips="true" dataTipFunction="dtFunc"
-		selectionMode="multiple" itemClick="onClick(event)">
+	<mx:BubbleChart id="plotChart" dataProvider="{graphData}" width="100%" height="100%" showDataTips="true" dataTipFunction="formatDataTip"
+		selectionMode="multiple" itemClick="onClick(event)" backgroundElements="{ChartUtil.gridLine('both')}">
 		<mx:horizontalAxis>
 			<mx:LinearAxis labelFunction="renderXAxis" baseAtZero="false" title="{measure1Name}" id="xAxis"/>
 		</mx:horizontalAxis>
 		<mx:horizontalAxisRenderers>
-			<mx:AxisRenderer axis="{xAxis}">
+			<mx:AxisRenderer axis="{xAxis}" axisStroke="{ChartUtil.axisStroke()}">
 
 			</mx:AxisRenderer>
 		</mx:horizontalAxisRenderers>
@@ -172,7 +194,7 @@
 			<mx:LinearAxis labelFunction="renderYAxis" baseAtZero="false" title="{measure2Name}" id="yAxis"/>
 		</mx:verticalAxis>
 		<mx:verticalAxisRenderers>
-			<mx:AxisRenderer axis="{yAxis}">
+			<mx:AxisRenderer axis="{yAxis}" axisStroke="{ChartUtil.axisStroke()}">
 
 			</mx:AxisRenderer>
 		</mx:verticalAxisRenderers>

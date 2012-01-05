@@ -67,6 +67,26 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
         }
     }
 
+    override public function highlight(analysisItem:AnalysisItem):void {
+        super.highlight(analysisItem);
+        if (stack.selectedIndex == 0) {
+            yAxisGrouping.highlight(analysisItem);
+            measureGrouping.highlight(analysisItem);
+        } else {
+            measuresGrouping.highlight(analysisItem);
+        }
+    }
+
+    override public function normal():void {
+        super.normal();
+        if (stack.selectedIndex == 0) {
+            yAxisGrouping.normal();
+            measureGrouping.normal();
+        } else {
+            measuresGrouping.normal();
+        }
+    }
+
     override protected function createChildren():void {
         super.createChildren();
 
@@ -196,12 +216,20 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
     }
 
     public function addItem(analysisItem:AnalysisItem):void {
-        if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-            measureGrouping.addAnalysisItem(analysisItem);
-        } else if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
-            xAxisGrouping.addAnalysisItem(analysisItem);
-        } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-            yAxisGrouping.addAnalysisItem(analysisItem);
+        if (xAxisDefinition.multiMeasure) {
+            if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                measuresGrouping.addAnalysisItem(analysisItem);
+            } else {
+                xAxisGrouping.addAnalysisItem(analysisItem);
+            }
+        } else {
+            if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                measureGrouping.addAnalysisItem(analysisItem);
+            } else if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                xAxisGrouping.addAnalysisItem(analysisItem);
+            } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                yAxisGrouping.addAnalysisItem(analysisItem);
+            }
         }
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
