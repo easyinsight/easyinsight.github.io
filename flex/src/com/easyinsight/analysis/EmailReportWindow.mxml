@@ -1,9 +1,12 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
+        import com.adobe.images.JPGEncoder;
         import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.schedule.ReportDelivery;
         import com.easyinsight.util.ProgressAlert;
+
+        import mx.core.UIComponent;
 
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
@@ -14,6 +17,12 @@
             _report = value;
         }
 
+        private var _coreView:DisplayObject;
+
+        public function set coreView(value:DisplayObject):void {
+            _coreView = value;
+        }
+
         private function send():void {
             var results:Array = Validator.validateAll([ emailValidator ]);
             if (results.length > 0) {
@@ -22,6 +31,7 @@
                 return;
             }
             var format:int;
+            var jpgStream:ByteArray = null;
             switch (typeGroup.selectedValue) {
                 case "html":
                     format = ReportDelivery.HTML;
@@ -31,12 +41,22 @@
                     break;
                 case "pdf":
                     format = ReportDelivery.PDF;
+                    if (_report.reportType == AnalysisDefinition.LIST ||
+                            _report.reportType == AnalysisDefinition.TREE ||
+                            _report.reportType == AnalysisDefinition.CROSSTAB) {
+                        // server will generate the actual PDF table
+                    } else {
+                        var jpgSource:BitmapData = new BitmapData(_coreView.width, _coreView.height);
+                        jpgSource.draw(_coreView);
+                        var jpgEncoder:JPGEncoder = new JPGEncoder(85);
+                        jpgStream = jpgEncoder.encode(jpgSource);
+                    }
                     break;
             }
             var metadata:InsightRequestMetadata = new InsightRequestMetadata();
             metadata.utcOffset = new Date().getTimezoneOffset();
             ProgressAlert.alert(this, "Delivering email...", null, excelService.emailReport);
-            excelService.emailReport.send(_report, format, metadata, emailInput.text, subjectInput.text, messageArea.text);
+            excelService.emailReport.send(_report, format, metadata, emailInput.text, subjectInput.text, messageArea.text, jpgStream, _coreView.width, _coreView.height);
         }
 
         private function emailed():void {
@@ -51,7 +71,7 @@
     <mx:HBox>
         <mx:RadioButton label="HTML" value="html" groupName="typeGroup"/>
         <mx:RadioButton label="Excel" value="excel" groupName="typeGroup"/>
-        <!--<mx:RadioButton label="PDF" value="pdf" groupName="typeGroup"/>-->
+        <mx:RadioButton label="PDF" value="pdf" groupName="typeGroup"/>
     </mx:HBox>
     <mx:Label text="Who will this email go to?"/>
     <mx:TextInput id="emailInput" width="400"/>

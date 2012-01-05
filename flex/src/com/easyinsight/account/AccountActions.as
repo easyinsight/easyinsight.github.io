@@ -1,4 +1,5 @@
 package com.easyinsight.account {
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
@@ -9,11 +10,9 @@ public class AccountActions extends HBox{
 
     private var editAccountButton:Button;
 
-    [Embed(source="../../../../assets/pencil.png")]
-    private var editIcon:Class;
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
+
 
     private var editButton:Button;
     private var deleteButton:Button;
@@ -23,10 +22,10 @@ public class AccountActions extends HBox{
     public function AccountActions() {
         super();
         editButton = new Button();
-        editButton.setStyle("icon", editIcon);
+        editButton.setStyle("icon", ImageConstants.EDIT_ICON);
         editButton.addEventListener(MouseEvent.CLICK, onEdit);
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         this.setStyle("horizontalAlign", "center");
         this.percentWidth = 100;

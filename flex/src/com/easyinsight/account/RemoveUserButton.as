@@ -1,5 +1,6 @@
 package com.easyinsight.account {
 import com.easyinsight.framework.UserTransferObject;
+import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -9,8 +10,7 @@ import mx.controls.Button;
 
 public class RemoveUserButton extends HBox{
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    public var deleteIcon:Class;
+
 
     private var user:UserTransferObject;
 
@@ -19,7 +19,7 @@ public class RemoveUserButton extends HBox{
     public function RemoveUserButton() {
         super();
         deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, removeUser);
         setStyle("horizontalAlign", "center");
         percentWidth = 100;

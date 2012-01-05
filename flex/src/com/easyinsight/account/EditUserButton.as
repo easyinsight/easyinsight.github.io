@@ -1,6 +1,7 @@
 package com.easyinsight.account
 {
 import com.easyinsight.framework.User;
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.display.DisplayObject;
@@ -15,13 +16,7 @@ import mx.containers.HBox;
 	public class EditUserButton extends HBox
 	{
 
-        [Bindable]
-        [Embed(source="../../../../assets/navigate_cross.png")]
-        private var deleteIcon:Class;
 
-        [Bindable]
-        [Embed(source="../../../../assets/pencil.png")]
-        public var editIcon:Class;
 
         private var user:UserTransferObject;
         private var editButton:Button;
@@ -39,11 +34,11 @@ import mx.containers.HBox;
             setStyle("horizontalAlign", "center");
             editButton = new Button();
             editButton.toolTip = "Edit...";
-            editButton.setStyle("icon", editIcon);
+            editButton.setStyle("icon", ImageConstants.EDIT_ICON);
             editButton.addEventListener(MouseEvent.CLICK, onEdit);
             deleteButton = new Button();
             deleteButton.toolTip = "Delete";
-            deleteButton.setStyle("icon", deleteIcon);
+            deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
             deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
 		}
 
