@@ -38,6 +38,7 @@
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.ChartBase;
         import mx.charts.chartClasses.IAxis;
+        import mx.charts.chartClasses.IAxisRenderer;
         import mx.charts.chartClasses.Series;
         import mx.charts.events.ChartEvent;
         import mx.charts.events.ChartItemEvent;
@@ -106,6 +107,7 @@
                 dimensionAxis.dataProvider = graphData;
                 var dAxisRenderer:AxisRenderer = new AxisRenderer();
                 dAxisRenderer.setStyle("minorTickPlacement", "none");
+
                 dAxisRenderer.setStyle("tickPlacement", "none");
                 dAxisRenderer.setStyle("axisStroke", ChartUtil.axisStroke());
                 dAxisRenderer.axis = dimensionAxis;
@@ -116,6 +118,11 @@
                 measureAxis = new LinearAxis();
                 measureAxis.title = "Blah";
                 measureAxis.labelFunction = renderAxis;
+
+                var mAxisRenderer:AxisRenderer = new AxisRenderer();
+                mAxisRenderer.setStyle("axisStroke", ChartUtil.axisStroke());
+                mAxisRenderer.axis = measureAxis;
+                assignMeasureAxis(measureAxis, chart, mAxisRenderer);
 
                 // create the data series
                 canvas.addChild(chart);
@@ -129,11 +136,11 @@
             }
         }
 
-        protected function assignDimensionAxis(axis:CategoryAxis, chart:ChartBase, axisRenderer:AxisRenderer):void {
+        protected function assignDimensionAxis(axis:CategoryAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
 
         }
 
-        protected function assignMeasureAxis(axis:LinearAxis, chart:ChartBase, axisRenderer:AxisRenderer):void {
+        protected function assignMeasureAxis(axis:LinearAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
 
         }
 
@@ -230,10 +237,7 @@
 
                 measureAxis.title = firstMeasure.display;
 
-                var mAxisRenderer:AxisRenderer = new AxisRenderer();
-                mAxisRenderer.setStyle("axisStroke", ChartUtil.axisStroke());
-                mAxisRenderer.axis = measureAxis;
-                assignMeasureAxis(measureAxis, chart, mAxisRenderer);
+
 
                 chart.dataProvider = dataSet;
                 dimensionAxis.dataProvider = dataSet;

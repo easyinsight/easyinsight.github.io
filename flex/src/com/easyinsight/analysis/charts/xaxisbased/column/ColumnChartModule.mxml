@@ -22,6 +22,7 @@
         import mx.charts.chartClasses.CartesianTransform;
         import mx.charts.chartClasses.ChartBase;
         import mx.charts.chartClasses.DataTransform;
+        import mx.charts.chartClasses.IAxisRenderer;
         import mx.charts.chartClasses.Series;
         import mx.charts.series.ColumnSeries;
         import mx.charts.series.items.ColumnSeriesItem;
@@ -106,14 +107,15 @@
             return "horizontal";
         }
 
-        override protected function assignDimensionAxis(axis:CategoryAxis, chart:ChartBase, axisRenderer:AxisRenderer):void {
-            CartesianChart(chart).horizontalAxisRenderer = axisRenderer;
+        override protected function assignDimensionAxis(axis:CategoryAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
+
             CartesianChart(chart).horizontalAxis = axis;
+            CartesianChart(chart).horizontalAxisRenderer = axisRenderer;
         }
 
-        override protected function assignMeasureAxis(axis:LinearAxis, chart:ChartBase, axisRenderer:AxisRenderer):void {
-            CartesianChart(chart).verticalAxisRenderer = axisRenderer;
+        override protected function assignMeasureAxis(axis:LinearAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
             CartesianChart(chart).verticalAxis = axis;
+            CartesianChart(chart).verticalAxisRenderer = axisRenderer;
         }
 
         override protected function createSeries(measure:AnalysisMeasure, dataSet:ArrayCollection, xField:String, measureNumber:int):Series {
