@@ -31,7 +31,7 @@ public class ChartUtil {
     }
     
     public static function axisStroke():Stroke {
-        return new Stroke(0x0, 2, 1);
+        return new Stroke(0x666666, 2, 1);
     }
 
     public static function setup(dimensionAxisItem:AnalysisItem,  chart:ChartBase, onChartClick:Function):Link {

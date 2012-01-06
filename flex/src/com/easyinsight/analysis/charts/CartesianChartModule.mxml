@@ -105,6 +105,8 @@
                 dimensionAxis.labelFunction = renderDimensionAxis;
                 dimensionAxis.dataProvider = graphData;
                 var dAxisRenderer:AxisRenderer = new AxisRenderer();
+                dAxisRenderer.setStyle("minorTickPlacement", "none");
+                dAxisRenderer.setStyle("tickPlacement", "none");
                 dAxisRenderer.setStyle("axisStroke", ChartUtil.axisStroke());
                 dAxisRenderer.axis = dimensionAxis;
                 assignDimensionAxis(dimensionAxis, chart, dAxisRenderer);
