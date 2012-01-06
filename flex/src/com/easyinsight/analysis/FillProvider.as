@@ -65,6 +65,23 @@ public class FillProvider {
         lg(0xffffff, 0xB57C99, angle)];
     }
 
+    public static function createRadialGradients2():Array {
+        return [ cg(0xa6bc59, 0xa6bc59)  // green
+            , cg(0x597197, 0x597197), // blue
+            cg(0xd6ab2a, 0xd6ab2a), // yellow
+            cg(0xd86068, 0xd86068),               // red
+            cg(0x5d9942, 0x5d9942),  // green
+            cg(0x7a4c6c, 0x7a4c6c),           // purple
+            cg(0x889949, 0x889949), // green
+            cg(0x38517A, 0x38517A), // dark blue
+
+            cg(0xBC8F08, 0xBC8F08), // yellow
+            cg(0x944248, 0x944248), // red
+            cg(0x447030, 0x447030), // dark green
+            cg(0x56354C, 0x56354C) // dark purple
+        ];
+    }
+
     public static function createRadialGradients():Array {
         return [ cg(0xf9fbf5, 0xa6bc59)  // green
             , cg(0xf1f3f7, 0x597197), // blue
