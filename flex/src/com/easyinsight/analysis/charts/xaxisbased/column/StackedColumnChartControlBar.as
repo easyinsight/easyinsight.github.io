@@ -131,7 +131,13 @@ public class StackedColumnChartControlBar extends ReportControlBar implements IR
         if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             measureGrouping.addAnalysisItem(analysisItem);
         } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-            xAxisGrouping.addAnalysisItem(analysisItem);
+            if (xAxisGrouping.getListColumns().length == 0) {
+                xAxisGrouping.addAnalysisItem(analysisItem);
+            } else if (stackGrouping.getListColumns().length == 0) {
+                stackGrouping.addAnalysisItem(analysisItem);
+            } else {
+                xAxisGrouping.addAnalysisItem(analysisItem);
+            }
         }
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
