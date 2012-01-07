@@ -156,7 +156,11 @@
         }
 
         private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {
-            return measureFormatter.format(labelValue);
+            if (measureFormatter != null) {
+                return measureFormatter.format(labelValue);
+            } else {
+                return String(labelValue);
+            }
         }
 
         private function renderDimensionAxis(item:Object, prevValue:Object, axis:CategoryAxis, categoryItem:Object):String {
@@ -202,11 +206,7 @@
                 barChart.setStyle("fontFamily", "Lucida Grande");
                 barChart.setStyle("fontSize", barChartDef.fontSize);
 
-                if (barChartDef.showLegend && uniques.length > 1) {
-                    currentState = "";
-                } else {
-                    currentState = "hideLegend";
-                }
+
 
                 var mySeries:Array = new Array();
 
@@ -230,6 +230,12 @@
                     uniqueLineSeries.xField = key;
                     uniqueLineSeries.displayName = key;
                     mySeries.push(uniqueLineSeries);
+                }
+
+                if (barChartDef.showLegend && uniques.length > 1) {
+                    currentState = "";
+                } else {
+                    currentState = "hideLegend";
                 }
 
                 barSet.series = mySeries;
