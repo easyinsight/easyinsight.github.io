@@ -22,6 +22,9 @@
         [Bindable]
         public var availableFields:ArrayCollection;
 
+        [Bindable]
+        public var advancedAvailable:Boolean = true;
+
         private function newFieldFilter():void {
             dispatchEvent(new NewFilterEvent(NewFilterEvent.FIELD_FILTER, AnalysisItemWrapper(fieldBox.selectedItem).analysisItem));
             this.close();
@@ -72,7 +75,7 @@
         <mx:RadioButtonGroup id="typeGroup" change="updateStack()" selectedValue="fieldFilter"/>
         <mx:HBox id="optionsBox">
             <mx:RadioButton label="Create a Filter on a Field" groupName="typeGroup" value="fieldFilter"/>
-            <mx:LinkButton label="Show Advanced Options" click="toAdvanced()" textDecoration="underline" id="advancedOptionsButton"/>
+            <mx:LinkButton label="Show Advanced Options" click="toAdvanced()" textDecoration="underline" id="advancedOptionsButton" visible="{advancedAvailable}"/>
         </mx:HBox>
         <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
             <mx:VBox>

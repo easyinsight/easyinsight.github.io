@@ -35,16 +35,29 @@ public class OrFilterCanvas extends HBox implements IFilter {
         dispatchEvent(event);
     }
 
-
+    private function onAdd(event:MouseEvent):void {
+        orContainer.addNewFilter(false);
+    }
+    
+    [Embed(source="../../../../assets/add.png")]
+    private var addIcon:Class;
 
     override protected function createChildren():void {
         super.createChildren();
         addChild(orContainer);
-        var deleteButton:Button = new Button();
-        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
-        deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
-        addChild(deleteButton);
+        if (_filterEditable) {
+            var addButton:Button = new Button();
+            addButton.setStyle("icon", addIcon);
+            addButton.addEventListener(MouseEvent.CLICK, onAdd);
+            addChild(addButton);
+            var deleteButton:Button = new Button();
+            deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
+            deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
+            addChild(deleteButton);
+        }
     }
+
+    private var _filterEditable:Boolean = false;
 
     private function onDelete(event:MouseEvent):void {
         dispatchEvent(new FilterDeletionEvent(this));
@@ -64,6 +77,7 @@ public class OrFilterCanvas extends HBox implements IFilter {
     }
 
     public function set filterEditable(editable:Boolean):void {
+        _filterEditable = editable;
         orContainer.filterEditable = editable;
     }
 

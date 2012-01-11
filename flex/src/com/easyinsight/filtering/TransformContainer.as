@@ -285,9 +285,10 @@ public class TransformContainer extends HBox
         showingFeedback = false;
     }
 
-    public function addNewFilter():void {
+    public function addNewFilter(advancedAvailable:Boolean = true):void {
         var window:NewFilterWindow = new NewFilterWindow();
         window.availableFields = this._analysisItems;
+        window.advancedAvailable = advancedAvailable;
         window.addEventListener(NewFilterEvent.NEW_FILTER, onFilterCreation, false, 0, true);
         PopUpManager.addPopUp(window, this, true);
         PopUpUtil.centerPopUp(window);

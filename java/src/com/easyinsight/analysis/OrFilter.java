@@ -52,7 +52,11 @@ public class OrFilter extends FilterDefinition {
         OrFilter orFilter = (OrFilter) super.clone();
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         for (FilterDefinition filter : this.filters) {
-            filters.add(filter.clone());
+            FilterDefinition clonedFilter = filter.clone();
+            filters.add(clonedFilter);
+            if (clonedFilter.getField() != null) {
+                clonedFilter.setField(clonedFilter.getField().clone());
+            }
         }
         orFilter.setFilters(filters);
         return orFilter;
