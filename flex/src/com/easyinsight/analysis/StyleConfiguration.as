@@ -87,6 +87,7 @@ public class StyleConfiguration {
         }
         if (dashboardElement is DashboardReport) {
             items.addItem(new CheckBoxReportFormItem("Show Label", "showLabel", DashboardReport(dashboardElement).showLabel, dashboardElement));
+            items.addItem(new CheckBoxReportFormItem("Auto Calculate Height", "autoCalculateHeight", DashboardReport(dashboardElement).autoCalculateHeight, dashboardElement));
         }
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];
@@ -271,6 +272,7 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("Hide Empty Rows", "removeEmptyRows", CombinedVerticalListDefinition(report).removeEmptyRows, report));
         }
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
+        items.addItem(new CheckBoxReportFormItem("Filter Optimization", "lookupTableOptimization", report.lookupTableOptimization, report));
         items.addItem(new ImageReportFormItem("Header Image", "headerImage", report.headerImage, report));
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
         items.addItem(new CheckBoxReportFormItem("Log Report", "logReport", report.logReport, report));

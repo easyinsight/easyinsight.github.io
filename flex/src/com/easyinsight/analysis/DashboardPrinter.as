@@ -1,39 +1,33 @@
 package com.easyinsight.analysis {
 import com.adobe.images.JPGEncoder;
-import com.adobe.images.JPGEncoder;
 import com.easyinsight.dashboard.Dashboard;
-import com.easyinsight.framework.InsightRequestMetadata;
-
 import com.easyinsight.util.ProgressAlert;
 
 import flash.display.Bitmap;
-import flash.display.BitmapData;
 
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
+import flash.display.Sprite;
 import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
+import flash.printing.PrintJob;
+import flash.printing.PrintJobOptions;
+import flash.printing.PrintJobOrientation;
 import flash.utils.ByteArray;
 
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
-import mx.controls.Image;
-
 import mx.core.UIComponent;
-import mx.graphics.ImageSnapshot;
-import mx.graphics.codec.JPEGEncoder;
-import mx.graphics.codec.PNGEncoder;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
-public class DashboardPDFCreator {
+public class DashboardPrinter {
 
     private var upload:RemoteObject;
 
-    public function DashboardPDFCreator() {
+    public function DashboardPrinter() {
         upload = new RemoteObject();
         upload.destination = "exportService";
         upload.exportDashboardToPDF.addEventListener(ResultEvent.RESULT, gotExcelID);
@@ -44,25 +38,20 @@ public class DashboardPDFCreator {
         navigateToURL(url, "_blank");
     }
 
-    public function exportReportToPDF(dashboard:Dashboard, parent:UIComponent, coreView:DisplayObject, landscape:Boolean):void {
+    public function exportReportToPDF(dashboard:Dashboard, parent:UIComponent, coreView:DisplayObject):void {
 
-        var pageWidth:int;
-        var pageHeight:int;
+        var printJob:PrintJob = new PrintJob();
+        printJob.start();
 
-        if (landscape) {
-            pageWidth = Math.min(770, coreView.width);
-            pageHeight = 523;
-        } else {
-            pageWidth = Math.min(523, coreView.width);
-            pageHeight = 770;
-        }
+        var pageWidth:int = Math.min(printJob.pageWidth, coreView.width);
+        var pageHeight:int = printJob.pageHeight;
 
 
 
         var pageList:ArrayCollection = new ArrayCollection();
 
 
-        var encoder:PNGEncoder = new PNGEncoder();
+        var encoder:JPGEncoder = new JPGEncoder(95);
 
         var master:BitmapData = new BitmapData(coreView.width, coreView.height);
         master.draw(coreView);
@@ -72,32 +61,39 @@ public class DashboardPDFCreator {
         var scaleHeight:int = pageHeight / scale;
 
         var pages:int = Math.ceil(coreView.height / scaleHeight);
+
+        var options:PrintJobOptions = new PrintJobOptions(true);
         
         for (var i:int = 0; i < pages; i++) {
             var bdPage:BitmapData;
             var bytes:ByteArray;
+            var result:BitmapData;
             if (scale < 1) {
                 var copyWidth:int = pageWidth / scale;
                 var copyHeight:int = pageHeight / scale;
                 bdPage = new BitmapData(copyWidth, copyHeight);
                 bdPage.copyPixels(master, new Rectangle(0, i * copyHeight, copyWidth, copyHeight), new Point(0, 0));
-                var data:BitmapData = resizeImage(bdPage, pageWidth, pageHeight);
-                bytes = encoder.encode(data);
+                result = resizeImage(bdPage, pageWidth, pageHeight);
             } else {
                 bdPage = new BitmapData(pageWidth, pageHeight);
                 bdPage.copyPixels(master, new Rectangle(0, i * pageHeight, pageWidth, pageHeight), new Point(0, 0));
-                bytes = encoder.encode(bdPage);
+                result = bdPage;
             }
-
-            var page:Page = new Page();
-            page.bytes = bytes;
-            page.width = pageWidth;
-            page.height = pageHeight;
-            pageList.addItem(page);
+            var bm:Bitmap = new Bitmap(result);
+            var tmp:Sprite = new Sprite();
+            tmp.addChild(bm);
+            printJob.addPage(tmp, null, options);
         }
 
-        ProgressAlert.alert(parent, "Generating the PDF...", null, upload.exportDashboardToPDF);
-        upload.exportDashboardToPDF.send(dashboard, pageList, landscape);
+
+        printJob.send();
+
+        //var bd:BitmapData = new BitmapData(coreView.width, coreView.height);
+
+        /*var snapshot:ImageSnapshot = ImageSnapshot.captureImage(coreView, 0, new JPEGEncoder(85));
+        var bytes:ByteArray = snapshot.data;*/
+        /*ProgressAlert.alert(parent, "Generating the PDF...", null, upload.exportDashboardToPDF);
+        upload.exportDashboardToPDF.send(dashboard, pageList);*/
     }
 
     private static const IDEAL_RESIZE_PERCENT:Number = .5;

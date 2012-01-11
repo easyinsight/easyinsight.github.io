@@ -1,9 +1,12 @@
 package com.easyinsight.dashboard {
 
+import com.easyinsight.analysis.list.SizeOverrideEvent;
+
 import mx.collections.ArrayCollection;
 import mx.containers.Grid;
 import mx.containers.GridItem;
 import mx.containers.GridRow;
+import mx.controls.Alert;
 import mx.core.UIComponent;
 
 public class DashboardGridViewComponent extends Grid implements IDashboardViewComponent {
@@ -20,25 +23,51 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
         setStyle("paddingBottom", 0);
         setStyle("horizontalGap", 0);
         setStyle("verticalGap", 0);
+        verticalScrollPolicy = "off";
+        horizontalScrollPolicy = "off";
+        addEventListener(SizeOverrideEvent.SIZE_OVERRIDE, onSizeOverride);
+    }
+    
+    private function onSizeOverride(event:SizeOverrideEvent):void {
+        for (var i:int = 0; i < dashboardGrid.rows; i++) {
+            var gridRow:GridRow = getChildAt(i) as GridRow;
+            for (var j:int = 0; j < dashboardGrid.columns; j++) {
+                var e:DashboardGridItem = findItem(i, j);
+                var gridItem:GridItem = gridRow.getChildAt(j) as GridItem;
+                var childSizeInfo:SizeInfo = IDashboardViewComponent(gridItem.getChildAt(0)).obtainPreferredSizeInfo();
+                if (childSizeInfo.preferredWidth != 0) {
+                    gridItem.width = childSizeInfo.preferredWidth + dashboardGrid.paddingLeft + dashboardGrid.paddingRight;
+                } else {
+                    gridItem.percentWidth = 100;
+                }
+                if (childSizeInfo.preferredHeight != 0) {
+                    gridItem.height = childSizeInfo.preferredHeight + dashboardGrid.paddingTop + dashboardGrid.paddingBottom;
+                } else {
+                    gridItem.percentHeight = 100;
+                }
+            }
+        }
     }
 
     private var viewChildren:ArrayCollection;
 
     protected override function createChildren():void {
         super.createChildren();
-        if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
+        /*if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
             this.percentWidth = 100;
             this.percentHeight = 100;
-        }
+        }*/
         setStyle("backgroundColor", dashboardGrid.backgroundColor);
         setStyle("backgroundAlpha", dashboardGrid.backgroundAlpha);
         viewChildren = new ArrayCollection();
+        var gridAbsoluteWidth:Boolean = false;
+        var gridAbsoluteHeight:Boolean = false;
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
             var gridRow:GridRow = new GridRow();
-            if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
+            /*if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
                 gridRow.percentWidth = 100;
                 gridRow.percentHeight = 100;
-            }
+            }*/
             gridRow.setStyle("paddingLeft", 0);
             gridRow.setStyle("paddingRight", 0);
             gridRow.setStyle("paddingTop", 0);
@@ -47,20 +76,18 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
             for (var j:int = 0; j < dashboardGrid.columns; j++) {
                 var e:DashboardGridItem = findItem(i, j);
                 var gridItem:GridItem = new GridItem();
-                /*gridItem.setStyle("paddingLeft", dashboardGrid.paddingLeft);
-                gridItem.setStyle("paddingRight", dashboardGrid.paddingRight);
-                gridItem.setStyle("paddingTop", dashboardGrid.paddingTop);
-                gridItem.setStyle("paddingBottom", dashboardGrid.paddingBottom);*/
 
                 var child:UIComponent = DashboardElementFactory.createViewUIComponent(e.dashboardElement, dashboardEditorMetadata);
                 var childSizeInfo:SizeInfo = IDashboardViewComponent(child).obtainPreferredSizeInfo();
                 if (childSizeInfo.preferredWidth != 0) {
                     gridItem.width = childSizeInfo.preferredWidth + dashboardGrid.paddingLeft + dashboardGrid.paddingRight;
+                    gridAbsoluteWidth = true;
                 } else {
                     gridItem.percentWidth = 100;
                 }
                 if (childSizeInfo.preferredHeight != 0) {
                     gridItem.height = childSizeInfo.preferredHeight + dashboardGrid.paddingTop + dashboardGrid.paddingBottom;
+                    gridAbsoluteHeight = true;
                 } else {
                     gridItem.percentHeight = 100;
                 }
@@ -76,6 +103,19 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
                 gridItem.addChild(child);
                 gridRow.addChild(gridItem);
             }
+            
+            if (!gridAbsoluteWidth) {
+                gridRow.percentWidth = 100;
+            }
+            if (!gridAbsoluteHeight) {
+                gridRow.percentHeight = 100;
+            }
+        }
+        if (!gridAbsoluteWidth) {
+            percentWidth = 100;
+        }
+        if (!gridAbsoluteHeight) {
+            percentHeight = 100;
         }
     }
 

@@ -4,6 +4,9 @@
         import com.easyinsight.analysis.DashboardPDFCreator;
         import com.easyinsight.analysis.EmbedDashboardWindow;
         import com.easyinsight.report.URLWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.core.UIComponent;
 
         import mx.managers.PopUpManager;
 
@@ -27,9 +30,23 @@
             _dashboard = value;
         }
 
+        private var _fitToScreen:Boolean = true;
+
+        public function set fitToScreen(value:Boolean):void {
+            _fitToScreen = value;
+        }
+
         private function pdf():void {
-            new DashboardPDFCreator().exportReportToPDF(_dashboard, this, _coreView);
-            PopUpManager.removePopUp(this);
+            if (_fitToScreen) {
+                new DashboardPDFCreator().exportReportToPDF(_dashboard, this, UIComponent(_coreView), true);
+                PopUpManager.removePopUp(this);
+            } else {
+                var window:PrintableDashboardWindow = new PrintableDashboardWindow();
+                window.dashboard = _dashboard;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+                PopUpManager.removePopUp(this);
+            }
         }
 
         private function url():void {
@@ -50,6 +67,10 @@
             embedReportWindow.y = this.y;
             PopUpManager.addPopUp(embedReportWindow, this, true);
             PopUpManager.removePopUp(this);
+        }
+
+        private function printable():void {
+
         }
         ]]></mx:Script>
     <mx:VBox paddingTop="10" paddingLeft="10" paddingBottom="10" paddingRight="10" horizontalAlign="center">

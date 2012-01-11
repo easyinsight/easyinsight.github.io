@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*"
+         xmlns:util="com.easyinsight.util.*" creationComplete="setup()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+
+        private function setup():void {
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
+
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (dataSourceID != 0) {
+                if (reportID != 0 && (customFilters == null || customFilters.length == 0)) {
+                    ProgressAlert.alert(this, "Retrieving report information...", null, analysisService.getFilters);
+                    analysisService.getFilters.send(reportID);
+                } else if (reportID != 0) {
+                    filterDefinitions = customFilters;
+                    customFiltersExist = true;
+                }
+            }
+        }
+
+        [Bindable]
+        private var customFiltersExist:Boolean = false;
+
+        private var commandProcessor:CommandProcessor;
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
+        }
+
+        private var _customFilters:ArrayCollection;
+
+        [Bindable(event="customFiltersChanged")]
+        public function get customFilters():ArrayCollection {
+            return _customFilters;
+        }
+
+        public function set customFilters(value:ArrayCollection):void {
+            if (_customFilters == value) return;
+            _customFilters = value;
+            dispatchEvent(new Event("customFiltersChanged"));
+        }
+
+        private var _filterDefinitions:ArrayCollection;
+
+        private var _dataSourceID:int;
+
+        private var _reportID:int;
+
+        private function gotReport():void {
+            var filters:ArrayCollection = analysisService.getFilters.lastResult as ArrayCollection;
+            transformContainer.reset();
+            filterDefinitions = filters;
+        }
+
+        [Bindable(event="filterDefinitionsChanged")]
+        public function get filterDefinitions():ArrayCollection {
+            return _filterDefinitions;
+        }
+
+        public function set filterDefinitions(value:ArrayCollection):void {
+            if (_filterDefinitions == value) return;
+            _filterDefinitions = value;
+            dispatchEvent(new Event("filterDefinitionsChanged"));
+        }
+
+        [Bindable(event="dataSourceIDChanged")]
+        public function get dataSourceID():int {
+            return _dataSourceID;
+        }
+
+        public function set dataSourceID(value:int):void {
+            if (_dataSourceID == value) return;
+            _dataSourceID = value;
+            invalidateProperties();
+            dispatchEvent(new Event("dataSourceIDChanged"));
+        }
+
+        [Bindable(event="reportIDChanged")]
+        public function get reportID():int {
+            return _reportID;
+        }
+
+        public function set reportID(value:int):void {
+            if (_reportID == value) return;
+            /*if (value != 0) {
+                ProgressAlert.alert(this, "Retrieving report information...", null, analysisService.getFilters);
+                analysisService.getFilters.send(value);
+            }*/
+            _reportID = value;
+            invalidateProperties();
+            dispatchEvent(new Event("reportIDChanged"));
+        }
+
+        public function save(activity:IDeliverable):void {
+            activity.setFilters(customizeFiltersCheckbox.selected ? transformContainer.getFilterDefinitions() : new ArrayCollection());
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="getFilters" result="gotReport()"/>
+    </mx:RemoteObject>
+    <mx:Label text="Do you want to customize any of the filters used for report delivery?" fontSize="14" width="100%" textAlign="center"/>
+    <mx:HBox verticalAlign="middle" width="100%">
+        <mx:CheckBox label="Yes, Customize Filters" id="customizeFiltersCheckbox" selected="{customFiltersExist}"/>
+        <mx:Spacer width="100%"/>
+        <util:SaveButton label="Reset Filters" fontSize="12" click="analysisService.getFilters.send(reportID)"/>
+    </mx:HBox>
+    <filtering:TransformContainer existingFilters="{filterDefinitions}" id="transformContainer"
+                                  feedID="{dataSourceID}" enabled="{customizeFiltersCheckbox.selected}"/>
+</mx:VBox>

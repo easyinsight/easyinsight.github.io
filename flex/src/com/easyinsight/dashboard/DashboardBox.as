@@ -1,6 +1,7 @@
 package com.easyinsight.dashboard {
 import com.easyinsight.dashboard.DashboardElementFactory;
 import com.easyinsight.scorecard.ScorecardDescriptor;
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.display.DisplayObject;
@@ -24,11 +25,8 @@ import mx.managers.DragManager;
 
 public class DashboardBox extends VBox implements IDashboardViewComponent {
 
-    [Embed(source="../../../../assets/pencil.png")]
-    private var editIcon:Class;
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    private var deleteIcon:Class;
+
 
     private var _allowDelete:Boolean = true;
 
@@ -92,11 +90,11 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         topBox.height = 30;
         topBox.percentWidth = 100;
         var editButton:Button = new Button();
-        editButton.setStyle("icon", editIcon);
+        editButton.setStyle("icon", ImageConstants.EDIT_ICON);
         editButton.addEventListener(MouseEvent.CLICK, onEdit);
         BindingUtils.bindProperty(editButton, "visible", this, "buttonsVisible");
         var deleteButton:Button = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         deleteButton.enabled = _allowDelete;
         BindingUtils.bindProperty(deleteButton, "visible", this, "buttonsVisible");

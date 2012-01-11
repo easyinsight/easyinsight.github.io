@@ -22,6 +22,15 @@ public class DashboardReport extends DashboardElement {
     private InsightDescriptor report;
     private boolean showLabel;
     private int labelPlacement;
+    private boolean autoCalculateHeight;
+
+    public boolean isAutoCalculateHeight() {
+        return autoCalculateHeight;
+    }
+
+    public void setAutoCalculateHeight(boolean autoCalculateHeight) {
+        this.autoCalculateHeight = autoCalculateHeight;
+    }
 
     public boolean isShowLabel() {
         return showLabel;
@@ -55,12 +64,13 @@ public class DashboardReport extends DashboardElement {
     @Override
     public long save(EIConnection conn) throws SQLException {
         long id = super.save(conn);
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_REPORT (DASHBOARD_ELEMENT_ID, REPORT_ID, LABEL_PLACEMENT, SHOW_LABEL) " +
-                "VALUES (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_REPORT (DASHBOARD_ELEMENT_ID, REPORT_ID, LABEL_PLACEMENT, SHOW_LABEL, auto_calculate_height) " +
+                "VALUES (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, getElementID());
         insertStmt.setLong(2, report.getId());
         insertStmt.setInt(3, labelPlacement);
         insertStmt.setBoolean(4, showLabel);
+        insertStmt.setBoolean(5, autoCalculateHeight);
         insertStmt.execute();
         insertStmt.close();
         return id;
@@ -92,7 +102,8 @@ public class DashboardReport extends DashboardElement {
     public static DashboardElement loadReport(long elementID, EIConnection conn) throws SQLException {
         DashboardReport dashboardReport = null;
         PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.title, analysis.data_feed_id, analysis.report_type, analysis.analysis_id, analysis.url_key, " +
-                "dashboard_report.label_placement, dashboard_report.show_label, dashboard_element.preferred_width, dashboard_element.preferred_height from " +
+                "dashboard_report.label_placement, dashboard_report.show_label, dashboard_element.preferred_width, dashboard_element.preferred_height," +
+                "dashboard_report.auto_calculate_height from " +
                 "analysis, dashboard_report, dashboard_element where dashboard_report.dashboard_element_id = dashboard_element.dashboard_element_id and " +
                 "dashboard_report.report_id = analysis.analysis_id and dashboard_element.dashboard_element_id = ?");
         queryStmt.setLong(1, elementID);
@@ -104,6 +115,7 @@ public class DashboardReport extends DashboardElement {
             dashboardReport.setShowLabel(rs.getBoolean(7));
             dashboardReport.setPreferredWidth(rs.getInt(8));
             dashboardReport.setPreferredHeight(rs.getInt(9));
+            dashboardReport.setAutoCalculateHeight(rs.getBoolean(10));
             dashboardReport.loadElement(elementID, conn);
         }
         queryStmt.close();

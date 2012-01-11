@@ -259,10 +259,12 @@
         }
 
         private function analysisClosed(event:AnalysisCloseEvent):void {
-            try {
+            //try {
                 fullScreenPage.cleanup();
                 removeListeners(dataAnalysis);
-                coreVBox.removeChild(dataAnalysis);
+                if (dataAnalysis.parent == coreVBox) {
+                    coreVBox.removeChild(dataAnalysis);
+                }
                 fullScreenPage = null;
                 dataAnalysis = null;
                 coreVBox.addChild(headerBar);
@@ -273,13 +275,13 @@
                 } else {
                     this.perspective.gotFocus();
                 }
-            } catch(e:Error) {
+            /*} catch(e:Error) {
                 Alert.show(e.message);
-            }
+            }*/
         }
 
         public function changePerspective(event:ListingChangeEvent):void {
-            try {
+            //try {
                 if (event.perspective != null) {
                     if (this.perspective != null) {
                         var existingDispatcher:EventDispatcher = this.perspective as EventDispatcher;
@@ -318,9 +320,9 @@
                     var dispatcher:EventDispatcher = perspective as EventDispatcher;
                     addListeners(dispatcher);
                 }
-            } catch(e:Error) {
+            /*} catch(e:Error) {
                 Alert.show(e.message);
-            }
+            }*/
         }
 
         private function getCurrentPerspective():IPerspective {

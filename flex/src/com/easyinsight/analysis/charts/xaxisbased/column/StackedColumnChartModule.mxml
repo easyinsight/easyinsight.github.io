@@ -306,7 +306,7 @@
         private function onChartClick(event:ChartItemEvent):void {
             var series:ColumnSeries = event.hitData.chartItem.element as ColumnSeries;
             var key:String = series.yField;
-            ClickUtil.doStuff(defaultLink, event.hitData.item, columnChartDef.stackItem, this, key);
+            ClickUtil.doStuff(defaultLink, event.hitData.item, columnChartDef.stackItem, this, key, columnChart);
         }
 
         private function customFill(element:ChartItem, index:Number):IFill {

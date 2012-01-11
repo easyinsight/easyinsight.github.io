@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:dashboard="com.easyinsight.dashboard.*"
+                    backgroundColor="#FFFFFF" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.DashboardPDFCreator;
+
+        import mx.collections.ArrayCollection;
+        import mx.core.UIComponent;
+        import mx.managers.PopUpManager;
+
+        private var _dashboard:Dashboard;
+
+        [Bindable]
+        private var _dashboardID:int;
+
+        [Bindable(event="dashboardChanged")]
+        public function get dashboard():Dashboard {
+            return _dashboard;
+        }
+
+        public function set dashboard(value:Dashboard):void {
+            if (_dashboard == value) return;
+            _dashboard = value;
+            dispatchEvent(new Event("dashboardChanged"));
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            dataSourceID = dashboard.dataSourceID;
+            _dashboardID = dashboard.id;
+            rootView = dashboardRenderer.createDashboard();
+        }
+
+        private var rootView:IDashboardViewComponent;
+
+        [Bindable]
+        private var filterIndex:int;
+
+        [Bindable]
+        private var _initialFilters:ArrayCollection;
+
+        [Bindable]
+        private var dataSourceID:int;
+
+        [Bindable]
+        private var _fixedID:Boolean;
+
+
+        public function set initialFilters(value:ArrayCollection):void {
+            _initialFilters = value;
+        }
+
+        public function set fixedID(value:Boolean):void {
+            _fixedID = value;
+        }
+
+        private function onChange():void {
+            dashboardRenderer.width = (int(String(scaleBox.selectedItem).substring(0, 3)) / 100) * baseWidth;
+            dashboardRenderer.refreshData();
+        }
+
+        private var baseWidth:int = 790;
+
+        private var landscape:Boolean = true;
+
+        private function onModeChange():void {
+            if (modeBox.selectedItem == "Landscape") {
+                landscape = true;
+            } else {
+                landscape = false;
+            }
+            if (landscape) {
+                baseWidth = 790;
+            } else {
+                baseWidth = 543;
+            }
+            dashboardRenderer.width = (int(String(scaleBox.selectedItem).substring(0, 3)) / 100) * baseWidth;
+            dashboardRenderer.refreshData();
+        }
+
+        private function exportToPDF():void {
+            new DashboardPDFCreator().exportReportToPDF(_dashboard, this, UIComponent(rootView), landscape);
+        }
+
+        private function toggleFilters():void {
+            dashboardRenderer.toggleFilters();
+        }
+        ]]></mx:Script>
+    <mx:VBox>
+        <mx:HBox paddingTop="5" paddingBottom="5" backgroundColor="0" paddingLeft="5" width="100%" verticalAlign="middle">
+            <mx:Button label="Close" click="PopUpManager.removePopUp(this)" styleName="grayButton"/>
+            <mx:Label text="Scale:" color="#FFFFFF"/>
+            <mx:ComboBox id="scaleBox" change="onChange()" rowCount="10">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>100%</mx:String>
+                            <mx:String>110%</mx:String>
+                            <mx:String>120%</mx:String>
+                            <mx:String>130%</mx:String>
+                            <mx:String>140%</mx:String>
+                            <mx:String>150%</mx:String>
+                            <mx:String>160%</mx:String>
+                            <mx:String>170%</mx:String>
+                            <mx:String>180%</mx:String>
+                            <mx:String>190%</mx:String>
+                            <mx:String>200%</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
+            <mx:Label text="Orientation:" color="#FFFFFF"/>
+            <mx:ComboBox id="modeBox" change="onModeChange()">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>Landscape</mx:String>
+                            <mx:String>Portrait</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
+            <mx:Button label="Toggle Filters" click="toggleFilters()" styleName="grayButton"/>
+            <mx:Button label="Export to PDF" click="exportToPDF()" styleName="grayButton"/>
+        </mx:HBox>
+        <dashboard:DashboardRenderer id="dashboardRenderer" dashboard="{dashboard}" dashboardID="{_dashboardID}"
+                                 dataSourceID="{dataSourceID}" initialFilters="{_initialFilters}" filterIndex="{filterIndex}"
+                                 fixedID="{_fixedID}" width="790" height="523"/>
+    </mx:VBox>
+</util:EITitleWindow>

@@ -4,18 +4,6 @@
          width="100%" height="100%" creationComplete="initStuff()" paddingLeft="0" paddingBottom="0" paddingRight="0"
          paddingTop="0"
          borderStyle="solid" borderThickness="1">
-    <mx:states>
-        <mx:State name="Loading">
-            <mx:AddChild relativeTo="{coreVBox}">
-                <mx:Canvas width="100%" height="100%" backgroundAlpha=".1" backgroundColor="0x444444"/>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{coreVBox}">
-                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-                    <mx:ProgressBar indeterminate="true"/>
-                </mx:Box>
-            </mx:AddChild>
-        </mx:State>
-    </mx:states>
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -189,10 +177,8 @@
 
         private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
             if (event.type == DataServiceLoadingEvent.LOADING_STARTED) {
-                currentState = "Loading";
                 dataViewFactory.enabled = false;
             } else {
-                currentState = "";
                 dataViewFactory.enabled = true;
                 if (_snapshotOnLoad) {
 

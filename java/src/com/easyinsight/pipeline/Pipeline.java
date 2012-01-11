@@ -24,8 +24,21 @@ public abstract class Pipeline {
         if (report.getAddedItems() != null) {
             allFields.addAll(report.getAddedItems());
         }
-        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource);
-        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems());
+        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource, null);
+        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems(), insightRequestMetadata);
+        if (report.hasCustomResultsBridge()) {
+            resultsBridge = report.getCustomResultsBridge();
+        }
+        return this;
+    }
+
+    public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, Set<AnalysisItem> reportItems) {
+        List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(dataSource.getFields());
+        if (report.getAddedItems() != null) {
+            allFields.addAll(report.getAddedItems());
+        }
+        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource, reportItems);
+        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems(), insightRequestMetadata);
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
         }
@@ -33,8 +46,8 @@ public abstract class Pipeline {
     }
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allFields) {
-        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource);
-        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems());
+        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource, null);
+        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems(), insightRequestMetadata);
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
         }
@@ -42,8 +55,8 @@ public abstract class Pipeline {
     }
 
     public Pipeline setup(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allItems) {
-        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allItems, null);
-        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems());
+        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allItems, null, null);
+        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems(), insightRequestMetadata);
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
         }
@@ -54,22 +67,21 @@ public abstract class Pipeline {
         return pipelineData;
     }
 
-    public Pipeline setup(Set<AnalysisItem> analysisItems, List<AnalysisItem> allFields) {
+    public Pipeline setup(Set<AnalysisItem> analysisItems, List<AnalysisItem> allFields, InsightRequestMetadata insightRequestMetadata) {
         pipelineData = new PipelineData(null, analysisItems, null, allFields, new HashMap<String, String>(), analysisItems);
-        components = generatePipelineCommands(analysisItems, analysisItems, new ArrayList<FilterDefinition>(), null, allFields);
+        components = generatePipelineCommands(analysisItems, analysisItems, new ArrayList<FilterDefinition>(), null, allFields, insightRequestMetadata);
         return this;
     }
 
-    protected abstract List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems);
+    protected abstract List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems, InsightRequestMetadata insightRequestMetadata);
          
-    private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allFields, Feed dataSource) {
+    private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allFields, Feed dataSource,
+                                                  Set<AnalysisItem> allRequestedAnalysisItems) {
 
-        /*List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(allItems);
-        if (report.getAddedItems() != null) {
-            allFields.addAll(report.getAddedItems());
-        }*/
 
-        Set<AnalysisItem> allRequestedAnalysisItems = report.getAllAnalysisItems();
+        if (allRequestedAnalysisItems == null) {
+            allRequestedAnalysisItems = report.getAllAnalysisItems();
+        } 
         if (report instanceof WSYTDDefinition || report instanceof WSCompareYearsDefinition) {
             for (AnalysisItem analysisItem : new HashSet<AnalysisItem>(allRequestedAnalysisItems)) {
                 if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
@@ -151,15 +163,7 @@ public abstract class Pipeline {
 
     public DataSet toDataSet(DataSet dataSet) {
         for (IComponent component : components) {
-            //System.out.println(component.getClass().getName() + " - " + dataSet);
-            long startTime = System.currentTimeMillis();
             dataSet = component.apply(dataSet, pipelineData);
-            long endTime = System.currentTimeMillis();
-            //if (pipelineData.getReport() != null) {
-             //   if (pipelineData.getReport().isLogReport()) {
-                    //System.out.println(dataSet.getRows().size() + " - " + component.getClass().getName() + " - " + (endTime - startTime));
-             //   }
-           // }
         }
         return dataSet;
     }
@@ -172,7 +176,7 @@ public abstract class Pipeline {
 
     public DataResults toList(DataSet dataSet) {
         for (IComponent component : components) {
-            //System.out.println(component.getClass().getName() + " - " + dataSet);
+            System.out.println(component.getClass() + " - " + dataSet);
             long startTime = System.currentTimeMillis();
             dataSet = component.apply(dataSet, pipelineData);
             long endTime = System.currentTimeMillis();

@@ -84,7 +84,6 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
     }
 
     private function onError(event:EIErrorEvent):void {
-        Alert.show("server error");
         stackTrace = event.error.getStackTrace();
         overlayIndex = 3;
     }
@@ -99,13 +98,16 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         _dataService.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, retrievalFault);
         _dataService.addEventListener(EIErrorEvent.ERROR, onError);
         canvas = new Canvas();
-        canvas.setStyle("borderStyle", "solid");
-        canvas.setStyle("borderThickness", 1);
-        canvas.setStyle("cornerRadius", 8);
-        canvas.setStyle("dropShadowEnabled", true);
+        if (_styleCanvas) {
+            canvas.setStyle("borderStyle", "solid");
+            canvas.setStyle("borderThickness", 1);
+            canvas.setStyle("cornerRadius", 8);
+            canvas.setStyle("dropShadowEnabled", true);
+        }
         canvas.setStyle("backgroundAlpha", 1);
         canvas.setStyle("backgroundColor", 0xFFFFFF);
         canvas.x = 10;
+        canvas.y = 5;
         reportCanvas = new ReportCanvas();
         reportCanvas.x = 10;
         reportCanvas.y = 10;
@@ -117,7 +119,13 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         noData = new NoData();
         loadReportRenderer();
     }
-    
+
+    private var _styleCanvas:Boolean = true;
+
+    public function set styleCanvas(value:Boolean):void {
+        _styleCanvas = value;
+    }
+
     private var canvas:Canvas;
     
     private var noData:NoData;
@@ -305,10 +313,17 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, false, drillthroughFilters, _noCache, overrides);
     }
 
+    private var _usePreferredHeight:Boolean = false;
+
+    public function set usePreferredHeight(value:Boolean):void {
+        _usePreferredHeight = value;
+    }
+
     public function gotData(event:EmbeddedDataServiceEvent):void {
         if (event.reportFault != null) {
             event.reportFault.popup(this, onProblem);
         } else {
+            event.additionalProperties.preferredSize = _usePreferredHeight;
             event.additionalProperties.prefix = Constants.instance().prefix;
             overlayIndex = 0;
             try {

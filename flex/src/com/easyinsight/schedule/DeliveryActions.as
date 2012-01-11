@@ -16,7 +16,7 @@ import mx.controls.Button;
 public class DeliveryActions extends HBox {
 
 
-
+    private var editButton:Button;
     private var deleteButton:Button;
 
     private var deliveryInfo:DeliveryInfo;
@@ -24,9 +24,16 @@ public class DeliveryActions extends HBox {
     public function DeliveryActions() {
         setStyle("horizontalAlign", "center");
         this.percentWidth = 100;
+        editButton = new Button();
+        editButton.setStyle("icon", ImageConstants.EDIT_ICON);
+        editButton.addEventListener(MouseEvent.CLICK, onEdit);
         deleteButton = new Button();
         deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
+    }
+
+    private function onEdit(event:MouseEvent):void {
+        dispatchEvent(new DeliveryInfoEvent(DeliveryInfoEvent.EDIT, deliveryInfo));
     }
 
     override public function set data(val:Object):void {
@@ -43,6 +50,7 @@ public class DeliveryActions extends HBox {
 
     override protected function createChildren():void {
         super.createChildren();
+        addChild(editButton);
         addChild(deleteButton);
     }
 }

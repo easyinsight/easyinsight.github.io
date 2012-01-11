@@ -23,6 +23,10 @@ public class ListViewGrid extends AdvancedDataGrid {
         itemRendererToFactoryMap = new Dictionary(false);
     }
 
+    public function blah():int {
+        return measureHeightOfItems(-1, dataProvider.length);
+    }
+
     override protected function mouseMoveHandler(event:MouseEvent):void {
         try {
             super.mouseMoveHandler(event);

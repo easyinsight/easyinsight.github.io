@@ -12,6 +12,7 @@ public class DashboardReport extends DashboardElement {
     public var report:InsightDescriptor;
     public var labelPlacement:int;
     public var showLabel:Boolean;
+    public var autoCalculateHeight:Boolean;
 
     public function DashboardReport() {
         super();

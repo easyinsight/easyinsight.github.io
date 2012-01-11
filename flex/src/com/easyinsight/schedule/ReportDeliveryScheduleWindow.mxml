@@ -1,16 +1,16 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                    xmlns:schedule="com.easyinsight.schedule.*" xmlns:filtering="com.easyinsight.filtering.*"
+                    xmlns:schedule="com.easyinsight.schedule.*"
                     creationComplete="setup()" title="Report Email Delivery">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
         import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.SavePromptWindow;
-        import com.easyinsight.commands.CommandEvent;
-        import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.framework.User;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
+
+        import mx.binding.utils.BindingUtils;
 
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
@@ -23,8 +23,19 @@
 
         private var _activity:ReportDelivery;
 
-        [Bindable]
-        private var reportID:int;
+
+        private var _reportID:int;
+
+        [Bindable(event="reportIDChanged")]
+        public function get reportID():int {
+            return _reportID;
+        }
+
+        public function set reportID(value:int):void {
+            if (_reportID == value) return;
+            _reportID = value;
+            dispatchEvent(new Event("reportIDChanged"));
+        }
 
         private function setup():void {
             addEventListener(RecipientEvent.DELETE_RECIPIENT, deleteRecipient);
@@ -32,14 +43,8 @@
                 analysisService.getInsightDescriptors.send();
             }
             shareService.getUserStubs.send(false);
-            commandProcessor = new CommandProcessor();
-            addEventListener(CommandEvent.COMMAND, onCommand);
-        }
-
-        private var commandProcessor:CommandProcessor;
-
-        private function onCommand(event:CommandEvent):void {
-            commandProcessor.addCommand(event.command);
+            BindingUtils.bindProperty(this, "reportID", deliveryConfiguration, "reportID");
+            BindingUtils.bindProperty(this, "dataSourceID", deliveryConfiguration, "dataSourceID");
         }
 
         private function deleteRecipient(event:RecipientEvent):void {
@@ -70,18 +75,14 @@
                 for each (var email:String in _activity.emails) {
                     recipients.addItem(email);
                 }
+                deliveryLabel = _activity.deliveryLabel;
                 reportID = _activity.reportID;
                 body = _activity.body;
                 subjectLine = _activity.subject;
                 fromUserID = _activity.senderID;
                 formatValue = String(_activity.reportFormat);
                 dataSourceID = _activity.dataSourceID;
-                if (_activity.customFilters.length == 0) {
-                    analysisService.getFilters.send(reportID);
-                } else {
-                    filterDefinitions = _activity.customFilters;
-                    customFilters = true;
-                }
+                customFilters = _activity.customFilters;
             } else {
                 if (_fixedReportID != 0) {
                     dataSourceID = _fixedReportDataSourceID;
@@ -92,7 +93,7 @@
         }
 
         [Bindable]
-        private var customFilters:Boolean;
+        private var customFilters:ArrayCollection;
 
         private var newActivity:Boolean;
 
@@ -132,20 +133,19 @@
 
                 _activity.users = users;
                 _activity.emails = emails;
-                _activity.reportFormat = int(outputFormatBox.selectedItem.data);
+                deliveryConfiguration.save(_activity);
+                filterConfiguration.save(_activity);
 
                 _activity.htmlEmail = htmlEmailCheckbox.selected;
                 if (_fixedReportID > 0) {
                     _activity.reportID = _fixedReportID;
                     _activity.reportName = _fixedReportName;
                 } else {
-                    _activity.reportName = reportComboBox.selectedItem.name;
-                    _activity.reportID = reportComboBox.selectedItem.id;
+                    _activity.reportID = reportID;
                 }
                 _activity.senderID = fromComboBox.selectedItem.userID;
                 _activity.body = bodyTextInput.text;
                 _activity.subject = subjectInput.text;
-                _activity.customFilters = customizeFiltersCheckbox.selected ? transformContainer.getFilterDefinitions() : new ArrayCollection();
                 var utcOffset:int = new Date().getTimezoneOffset();
                 ProgressAlert.alert(this, "Saving...", null, exportService.addOrUpdateSchedule);
                 exportService.addOrUpdateSchedule.send(_activity, utcOffset);
@@ -169,7 +169,7 @@
             if (_fixedReportURLKey != null) {
                 key = _fixedReportURLKey;
             } else {
-                key = reportComboBox.selectedItem.urlKey;
+                key = deliveryConfiguration.getUrlKey();
             }
             var url:String = "<a href=\"https://www.easy-insight.com/app/#reportID=" + key + "\">View the Report in Easy Insight</a>";
             bodyTextInput.insertTextAtCursor(url);
@@ -213,10 +213,11 @@
 
         protected override function createChildren():void {
             super.createChildren();
-            if (_fixedReportID > 0) {
-                form.removeChild(reportComboBoxItem);
-            }
+            reportChangeable = _fixedReportID == 0;
         }
+
+        [Bindable]
+        private var reportChangeable:Boolean;
 
         public function set fixedReportID(value:int):void {
             _fixedReportID = value;
@@ -240,19 +241,18 @@
             this.users = users;
         }
 
-        private function onReportChange():void {
-            ProgressAlert.alert(this, "Retrieving report information...", null, analysisService.getFilters);
-            dataSourceID = reportComboBox.selectedItem.dataFeedID;
-            analysisService.getFilters.send(reportComboBox.selectedItem.id);
+
+        private var _dataSourceID:int;
+
+        [Bindable(event="dataSourceIDChanged")]
+        public function get dataSourceID():int {
+            return _dataSourceID;
         }
 
-        [Bindable]
-        private var dataSourceID:int;
-
-        private function gotReport():void {
-            var filters:ArrayCollection = analysisService.getFilters.lastResult as ArrayCollection;
-            transformContainer.reset();
-            filterDefinitions = filters;
+        public function set dataSourceID(value:int):void {
+            if (_dataSourceID == value) return;
+            _dataSourceID = value;
+            dispatchEvent(new Event("dataSourceIDChanged"));
         }
 
         [Bindable]
@@ -272,13 +272,15 @@
 
         [Bindable]
         private var formatValue:String;
+
+        [Bindable]
+        private var deliveryLabel:String;
         ]]></mx:Script>
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="addOrUpdateSchedule" result="saved()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptors" result="gotReports()"/>
-        <mx:method name="getFilters" result="gotReport()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="shareService" destination="share">
         <mx:method name="getUserStubs" result="gotUserStubs()"/>
@@ -286,38 +288,11 @@
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" backgroundColor="#FFFFFF">
         <mx:TabNavigator creationPolicy="all" width="600" height="500">
             <mx:VBox label="Report" paddingLeft="10" paddingTop="10">
-                <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" id="form">
-                    <mx:FormItem label="Report:" id="reportComboBoxItem">
-                        <util:SmartComboBox dataProvider="{reports}" selectedValue="{reportID}" selectedProperty="id"
-                                            id="reportComboBox" labelField="name" change="onReportChange()"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Output Format:">
-                        <util:SmartComboBox id="outputFormatBox" selectedValue="{formatValue}" selectedProperty="data"
-                                            labelField="label">
-                            <util:dataProvider>
-                                <mx:ArrayCollection>
-                                    <mx:Array>
-                                        <mx:Object label="Excel" data="1"/>
-                                        <mx:Object label="PNG" data="2"/>
-                                        <mx:Object label="PDF" data="3"/>
-                                        <mx:Object label="HTML Table" data="4"/>
-                                    </mx:Array>
-                                </mx:ArrayCollection>
-                            </util:dataProvider>
-                        </util:SmartComboBox>
-                    </mx:FormItem>
-                </mx:Form>
+                <schedule:ReportDeliveryConfiguration id="deliveryConfiguration" reportChangeable="{reportChangeable}"
+                        reports="{reports}" reportID="{reportID}" formatValue="{formatValue}" deliveryLabel="{deliveryLabel}"/>
             </mx:VBox>
-            <mx:VBox label="Filters" paddingLeft="10" paddingRight="10">
-                <mx:Label text="Do you want to customize any of the filters used for report delivery?" fontSize="14" width="100%" textAlign="center"/>
-                <mx:HBox verticalAlign="middle" width="100%">
-                    <mx:CheckBox label="Yes, Customize Filters" id="customizeFiltersCheckbox" selected="{customFilters}"/>
-                    <mx:Spacer width="100%"/>
-                    <util:SaveButton label="Reset Filters" fontSize="12" click="analysisService.getFilters.send(reportComboBox.selectedItem.id)"/>
-                </mx:HBox>
-                <filtering:TransformContainer existingFilters="{filterDefinitions}" id="transformContainer"
-                                              feedID="{dataSourceID}" enabled="{customizeFiltersCheckbox.selected}"/>
-            </mx:VBox>
+            <schedule:FilterDeliveryConfiguration label="Filters" paddingLeft="10" paddingRight="10" id="filterConfiguration"
+                    customFilters="{customFilters}" reportID="{reportID}" dataSourceID="{dataSourceID}"/>
             <mx:VBox label="Scheduling and Recipients" paddingLeft="10" paddingRight="10">
                 <mx:Label text="When and where should the emails go?" fontSize="14" width="100%" textAlign="center"/>
                 <schedule:ScheduleConfiguration activity="{activity}" id="scheduleConfiguration"/>

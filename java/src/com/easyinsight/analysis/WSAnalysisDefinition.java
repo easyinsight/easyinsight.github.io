@@ -93,10 +93,20 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String reportRunMarmotScript;
     private int folder;
     private boolean dataSourceFields;
+    private boolean lookupTableOptimization;
 
+    private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
     private int fontSize = 12;
     private double backgroundAlpha = 1;
+
+    public boolean isLookupTableOptimization() {
+        return lookupTableOptimization;
+    }
+
+    public void setLookupTableOptimization(boolean lookupTableOptimization) {
+        this.lookupTableOptimization = lookupTableOptimization;
+    }
 
     public boolean isDataSourceFields() {
         return dataSourceFields;
@@ -552,6 +562,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
         optimized =  findBooleanProperty(properties, "optimized", false);
         fullJoins =  findBooleanProperty(properties, "fullJoins", false);
         dataSourceFields =  findBooleanProperty(properties, "dataSourceFields", false);
+        headerImage =  findImage(properties, "headerImage", null);
+        lookupTableOptimization =  findBooleanProperty(properties, "lookupTableOptimization", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -563,6 +575,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("optimized", optimized));
         properties.add(new ReportBooleanProperty("fullJoins", fullJoins));
         properties.add(new ReportBooleanProperty("dataSourceFields", dataSourceFields));
+        properties.add(new ReportBooleanProperty("lookupTableOptimization", lookupTableOptimization));
+        if (headerImage != null) {
+            properties.add(new ReportImageProperty("headerImage", headerImage));
+        }
         return properties;
     }
 
@@ -604,7 +620,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return defaultValue;
     }
 
-    protected ImageDescriptor findImage(List<ReportProperty> properties, String property, ImageDescriptor defaultValue) {
+    protected ImageDescriptor findImage(List<ReportProperty> properties, String property, @Nullable ImageDescriptor defaultValue) {
         for (ReportProperty reportProperty : properties) {
             if (reportProperty.getPropertyName().equals(property)) {
                 ReportImageProperty reportImageProperty = (ReportImageProperty) reportProperty;

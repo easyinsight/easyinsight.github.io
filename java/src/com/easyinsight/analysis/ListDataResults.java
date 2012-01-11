@@ -7,9 +7,9 @@ import java.util.Map;
 import java.io.Serializable;
 
 public class ListDataResults extends DataResults implements Serializable {
-    private AnalysisItem[] headers;
+    private AnalysisItem[] headers = new AnalysisItem[0];
     private AnalysisItemResultMetadata[] headerMetadata;
-    private ListRow[] rows;
+    private ListRow[] rows = new ListRow[0];
     private boolean limitedResults;
     private int limitResults;
     private int maxResults;

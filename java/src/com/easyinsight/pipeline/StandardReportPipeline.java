@@ -15,7 +15,7 @@ import java.util.*;
  */
 public class StandardReportPipeline extends Pipeline {
 
-    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems) {
+    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems, InsightRequestMetadata insightRequestMetadata) {
 
         List<IComponent> components = new ArrayList<IComponent>();
 
@@ -70,7 +70,9 @@ public class StandardReportPipeline extends Pipeline {
 
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null, false));
+                if (!insightRequestMetadata.isLookupTableAggregate() || !filterDefinition.validForQuery()) {
+                    components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null, false));
+                }
             }
         }
 

@@ -15,10 +15,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.pipeline.AltCompositeReportPipeline;
-import com.easyinsight.pipeline.CleanupComponent;
-import com.easyinsight.pipeline.CompositeReportPipeline;
-import com.easyinsight.pipeline.Pipeline;
+import com.easyinsight.pipeline.*;
 import org.apache.jcs.JCS;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.DijkstraShortestPath;
@@ -215,7 +212,22 @@ public class CompositeFeed extends Feed {
 
         if (neededNodes.size() == 1) {
             QueryStateNode queryStateNode = neededNodes.values().iterator().next();
-            return queryStateNode.produceDataSet(insightRequestMetadata);
+            DataSet dataSet = queryStateNode.produceDataSet(insightRequestMetadata);
+            if (insightRequestMetadata.isLookupTableAggregate()) {
+                CompositeReportFinishPipeline pipeline = new CompositeReportFinishPipeline();
+                WSListDefinition analysisDefinition = new WSListDefinition();
+                Set<AnalysisItem> items = new HashSet<AnalysisItem>();
+                for (AnalysisItem analysisItem : analysisItems) {
+                    if (insightRequestMetadata.getReportItems().contains(analysisItem)) {
+                        items.add(analysisItem);
+                    }
+                }
+                analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
+                pipeline.setup(analysisDefinition, this, insightRequestMetadata, items);
+                return pipeline.toDataSet(dataSet);
+            } else {
+                return dataSet;
+            }
         }
 
         if (neededNodes.size() == 0) {
@@ -527,11 +539,25 @@ public class CompositeFeed extends Feed {
         }
         dataSet.setAudits(auditStrings);
         if (!insightRequestMetadata.isOptimized()) {
-            CompositeReportPipeline pipeline = new CompositeReportPipeline();
-            WSListDefinition analysisDefinition = new WSListDefinition();
-            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
-            pipeline.setup(analysisDefinition, this, insightRequestMetadata);
-            return pipeline.toDataSet(dataSet);
+            if (insightRequestMetadata.isLookupTableAggregate()) {
+                CompositeReportFinishPipeline pipeline = new CompositeReportFinishPipeline();
+                WSListDefinition analysisDefinition = new WSListDefinition();
+                Set<AnalysisItem> items = new HashSet<AnalysisItem>();
+                for (AnalysisItem analysisItem : analysisItems) {
+                    if (insightRequestMetadata.getReportItems().contains(analysisItem)) {
+                        items.add(analysisItem);
+                    }
+                }
+                analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
+                pipeline.setup(analysisDefinition, this, insightRequestMetadata, items);
+                return pipeline.toDataSet(dataSet);
+            } else {
+                CompositeReportPipeline pipeline = new CompositeReportPipeline();
+                WSListDefinition analysisDefinition = new WSListDefinition();
+                analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
+                pipeline.setup(analysisDefinition, this, insightRequestMetadata);
+                return pipeline.toDataSet(dataSet);
+            }
         } else {
             return dataSet;
         }
@@ -695,7 +721,7 @@ public class CompositeFeed extends Feed {
             }
             /*WSListDefinition analysisDefinition = new WSListDefinition();
             analysisDefinition.setColumns(new ArrayList<AnalysisItem>(queryData.neededItems));*/
-            pipeline.setup(queryData.neededItems, feed.getFields());
+            pipeline.setup(queryData.neededItems, feed.getFields(), insightRequestMetadata);
             originalDataSet = pipeline.toDataSet(dataSet);
             return originalDataSet;
         }

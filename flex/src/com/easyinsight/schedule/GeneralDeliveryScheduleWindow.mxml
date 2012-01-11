@@ -22,6 +22,7 @@
         private function setup():void {
             addEventListener(RecipientEvent.DELETE_RECIPIENT, deleteRecipient);
             addEventListener(DeliveryInfoEvent.REMOVE, onDelete);
+            addEventListener(DeliveryInfoEvent.EDIT, onEdit);
             shareService.getUserStubs.send(false);
         }
 
@@ -56,6 +57,7 @@
                 body = _activity.body;
                 deliveryInfos = _activity.deliveryInfos;
                 subjectLine = _activity.subject;
+                customLabel = _activity.deliveryLabel;
                 fromUserID = _activity.senderID;
             } else {
                 fromUserID = User.getInstance().userID;
@@ -102,6 +104,7 @@
                 _activity.emails = emails;
                 _activity.deliveryInfos = deliveryInfos;
                 _activity.htmlEmail = htmlEmailCheckbox.selected;
+                _activity.deliveryLabel = customLabelInput.text;
 
                 _activity.senderID = fromComboBox.selectedItem.userID;
                 _activity.body = bodyTextInput.text;
@@ -180,10 +183,21 @@
 
         private function onNewDeliveryInfo(event:DeliveryInfoEvent):void {
             deliveryInfos.addItem(event.deliveryInfo);
+            var window:ReportDeliveryWindow = new ReportDeliveryWindow();
+            window.deliveryInfo = event.deliveryInfo;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onDelete(event:DeliveryInfoEvent):void {
             deliveryInfos.removeItemAt(deliveryInfos.getItemIndex(event.deliveryInfo));
+        }
+
+        private function onEdit(event:DeliveryInfoEvent):void {
+            var window:ReportDeliveryWindow = new ReportDeliveryWindow();
+            window.deliveryInfo = event.deliveryInfo;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function addScorecard():void {
@@ -192,6 +206,9 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
+        [Bindable]
+        private var customLabel:String;
         ]]></mx:Script>
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="addOrUpdateSchedule" result="saved()"/>
@@ -205,17 +222,20 @@
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" backgroundColor="#FFFFFF">
         <mx:TabNavigator creationPolicy="all" width="600" height="500">
             <mx:VBox label="Reports and Scorecards" paddingLeft="10" paddingTop="10">
+                <mx:Form>
+                    <mx:FormItem label="Custom Label:">
+                        <mx:TextInput id="customLabelInput" text="{customLabel}" width="300"/>
+                    </mx:FormItem>
+                </mx:Form>
                 <mx:HBox>
                     <util:SaveButton label="Add Report..." click="addReport()"/>
                     <util:SaveButton label="Add Scorecard..." click="addScorecard()"/>
                 </mx:HBox>
-                <mx:DataGrid dataProvider="{deliveryInfos}">
+                <mx:DataGrid dataProvider="{deliveryInfos}" rowHeight="28">
                     <mx:columns>
-                        <util:EIDataGridColumn headerText="Name" dataField="name" width="300"/>
-                        <util:EIDataGridColumn headerText="Format" sortable="false" itemRenderer="com.easyinsight.schedule.DeliveryFormatSelection"
-                                width="150"/>
+                        <util:EIDataGridColumn headerText="Name" dataField="display" width="300"/>
                         <util:EIDataGridColumn headerText="" sortable="false" itemRenderer="com.easyinsight.schedule.DeliveryActions"
-                                width="50"/>
+                                width="100"/>
                     </mx:columns>
                 </mx:DataGrid>
             </mx:VBox>

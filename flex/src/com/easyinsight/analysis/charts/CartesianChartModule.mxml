@@ -79,7 +79,7 @@
         }
 
         private function onChartClick(event:ChartItemEvent):void {
-            ClickUtil.doStuff(defaultLink, event.hitData.item, dimensionAxisItem, this);
+            ClickUtil.doStuff(defaultLink, event.hitData.item, dimensionAxisItem, this, null, chart);
         }
 
         protected function direction():String {

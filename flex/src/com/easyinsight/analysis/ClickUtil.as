@@ -13,6 +13,8 @@ import com.easyinsight.solutions.InsightDescriptor;
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
 
+import mx.charts.chartClasses.ChartBase;
+
 import mx.collections.ArrayCollection;
 import mx.core.UIComponent;
 
@@ -51,9 +53,12 @@ public class ClickUtil {
         }
     }
 
-    public static function doStuff(defaultLink:Link,  data:Object, analysisItem:AnalysisItem, parent:UIComponent, altKey:String = null):void {
+    public static function doStuff(defaultLink:Link,  data:Object, analysisItem:AnalysisItem, parent:UIComponent, altKey:String = null, chart:ChartBase = null):void {
         var c:ClickUtil = new ClickUtil(defaultLink, data,  analysisItem, parent, altKey);
         c.argh();
+        if (chart != null) {
+            chart.clearSelection();
+        }
     }
 
     private function onDrill(event:DrillThroughEvent):void {

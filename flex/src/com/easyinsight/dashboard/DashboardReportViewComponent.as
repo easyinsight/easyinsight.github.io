@@ -5,6 +5,7 @@ import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IEmbeddedReportController;
 import com.easyinsight.analysis.PopupMenuFactory;
+import com.easyinsight.analysis.list.SizeOverrideEvent;
 import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.filtering.TransformContainer;
 import com.easyinsight.filtering.TransformsUpdatedEvent;
@@ -40,16 +41,29 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
-        return new SizeInfo(dashboardReport.preferredWidth, dashboardReport.preferredHeight);
+        return new SizeInfo(dashboardReport.preferredWidth, alteredHeight == -1 ? dashboardReport.preferredHeight : alteredHeight);
     }
+    
+    private var alteredHeight:int = -1;
 
     protected override function createChildren():void {
         super.createChildren();
-        if (dashboardEditorMetadata.dashboard.absoluteSizing) {
+        /*if (dashboardEditorMetadata.dashboard.absoluteSizing) {
             width = dashboardReport.preferredWidth;
             height = dashboardReport.preferredHeight;
         } else {
             percentWidth = 100;
+            percentHeight = 100;
+        }*/
+        var sizeInfo:SizeInfo = obtainPreferredSizeInfo();
+        if (sizeInfo.preferredWidth > 0) {
+            width = dashboardReport.preferredWidth;
+        } else {
+            percentWidth = 100;
+        }
+        if (sizeInfo.preferredHeight > 0) {
+            height = dashboardReport.preferredHeight;
+        } else {
             percentHeight = 100;
         }
         if (dashboardEditorMetadata.borderThickness > 0) {
@@ -60,6 +74,8 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(dashboardReport.report.reportType);
         var controller:IEmbeddedReportController = new controllerClass();
         viewFactory = controller.createEmbeddedView();
+        viewFactory.styleCanvas = dashboardEditorMetadata.borderThickness > 0;
+        viewFactory.usePreferredHeight = dashboardReport.autoCalculateHeight;
         viewFactory.reportID = dashboardReport.report.id;
         viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
         viewFactory.dashboardID = dashboardEditorMetadata.dashboardID;
@@ -76,6 +92,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
         viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onReportSetup);
         viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, onData);
+        viewFactory.addEventListener(SizeOverrideEvent.SIZE_OVERRIDE, sizeOverride);
         viewFactory.setup();
         if (dashboardEditorMetadata.fixedID) {
             viewFactory.contextMenu = new EmbedReportContextMenuFactory().createReportContextMenu(dashboardReport.report, viewFactory, this);
@@ -85,6 +102,15 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
     }
 
+    private function sizeOverride(event:SizeOverrideEvent):void {
+        event.stopPropagation();
+        if (event.height != -1) {
+            var h:int = event.height + (this.transformContainer ? this.transformContainer.height : 0) + 20;
+            this.height = h;
+            alteredHeight = h;
+            dispatchEvent(new SizeOverrideEvent(-1, h));
+        }
+    }
 
 
     private var filterMap:Object = new Object();

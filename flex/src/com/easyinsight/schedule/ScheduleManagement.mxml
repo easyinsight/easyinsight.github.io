@@ -8,6 +8,8 @@
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.events.CloseEvent;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
@@ -24,10 +26,15 @@
             this.activities.addItemAt(event.activity, index);
         }
 
-        private function deleteActivity(event:ScheduleActivityEvent):void {
-            //this.activities.removeItemAt(activities.getItemIndex(event.activity));
-
-            exportService.deleteSchedule.send(event.activity.scheduledActivityID);
+        private function deleteActivity(scheduleEvent:ScheduleActivityEvent):void {
+            var ref:ScheduleManagement = this;
+            Alert.show("Are you sure you want to delete this scheduled activity? You will not be able to undo this operation.", "Alert",
+                    Alert.OK | Alert.CANCEL, this, function(event:CloseEvent):void {
+                        if (event.detail == Alert.OK) {
+                            ProgressAlert.alert(ref, "Deleting...", null, exportService.deleteSchedule);
+                            exportService.deleteSchedule.send(scheduleEvent.activity.scheduledActivityID);
+                        }
+                    }, null, Alert.CANCEL);
         }
 
         private function newActivity(event:ScheduleActivityEvent):void {
@@ -88,6 +95,7 @@
 
         private function deleted():void {
             var utcOffset:int = new Date().getTimezoneOffset();
+            ProgressAlert.alert(this, "Refreshing...", null, exportService.getScheduledActivities, exportService.getRefreshableDataSources);
             exportService.getScheduledActivities.send(utcOffset);
             exportService.getRefreshableDataSources.send(null);
         }

@@ -45,8 +45,6 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     public function DashboardStackViewComponent() {
         super();
-        this.percentWidth = 100;
-        this.percentHeight = 100;
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
@@ -116,8 +114,16 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             addChild(headerArea);
         }
         viewStack = new ViewStack();
-        viewStack.percentHeight = 100;
-        viewStack.percentWidth = 100;
+        if (dashboardEditorMetadata.dashboard.absoluteSizing) {
+
+        } else {
+            this.percentWidth = 100;
+            this.percentHeight = 100;
+            viewStack.percentHeight = 100;
+            viewStack.percentWidth = 100;
+        }
+        /*viewStack.percentHeight = 100;
+        viewStack.percentWidth = 100;*/
         viewChildren = new ArrayCollection();
         createStackContents();
         var transformContainer:TransformContainer = createTransformContainer();

@@ -13,6 +13,7 @@ public class DeliveryInfoEvent extends Event {
     public static const ADD_REPORT:String = "addReport";
     public static const ADD_SCORECARD:String = "addScorecard";
     public static const REMOVE:String = "removeDeliveryInfo";
+    public static const EDIT:String = "editDeliveryInfo";
 
     public var deliveryInfo:DeliveryInfo;
 

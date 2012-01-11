@@ -7,6 +7,8 @@
         import com.easyinsight.analysis.ExcelCreator;
         import com.easyinsight.dashboard.Dashboard;
 
+        import mx.core.UIComponent;
+
         import mx.managers.PopUpManager;
 
         private var _reportType:int;
@@ -39,7 +41,7 @@
         }
 
         private function pdf():void {
-            new DashboardPDFCreator().exportReportToPDF(_dashboard, this, _coreView);
+            new DashboardPDFCreator().exportReportToPDF(_dashboard, this, UIComponent(_coreView), true);
             PopUpManager.removePopUp(this);
         }
 

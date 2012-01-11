@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,24 @@ public class InsightRequestMetadata implements Serializable {
     private List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
     private boolean optimized;
     private boolean traverseAllJoins;
+    private Collection<AnalysisItem> reportItems;
+    private boolean lookupTableAggregate;
+
+    public boolean isLookupTableAggregate() {
+        return lookupTableAggregate;
+    }
+
+    public void setLookupTableAggregate(boolean lookupTableAggregate) {
+        this.lookupTableAggregate = lookupTableAggregate;
+    }
+
+    public Collection<AnalysisItem> getReportItems() {
+        return reportItems;
+    }
+
+    public void setReportItems(Collection<AnalysisItem> reportItems) {
+        this.reportItems = reportItems;
+    }
 
     public boolean isTraverseAllJoins() {
         return traverseAllJoins;

@@ -77,7 +77,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
             int timezoneOffset = deliveryInfoRS.getInt(4);
             long id = deliveryInfoRS.getLong(5);
             long ownerID = deliveryInfoRS.getLong(6);
-            PreparedStatement getReportStmt = conn.prepareStatement("SELECT REPORT_ID, TITLE, DELIVERY_INDEX, DELIVERY_FORMAT FROM DELIVERY_TO_REPORT, ANALYSIS WHERE GENERAL_DELIVERY_ID = ? AND " +
+            PreparedStatement getReportStmt = conn.prepareStatement("SELECT REPORT_ID, TITLE, DELIVERY_INDEX, DELIVERY_FORMAT," +
+                    "DELIVERY_TO_REPORT_ID, DELIVERY_LABEL FROM DELIVERY_TO_REPORT, ANALYSIS WHERE GENERAL_DELIVERY_ID = ? AND " +
                     "delivery_to_report.report_id = analysis.analysis_id");
             getReportStmt.setLong(1, id);
             List<DeliveryInfo> infos = new ArrayList<DeliveryInfo>();
@@ -88,7 +89,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 deliveryInfo.setName(reports.getString(2));
                 deliveryInfo.setIndex(reports.getInt(3));
                 deliveryInfo.setFormat(reports.getInt(4));
+                deliveryInfo.setLabel(reports.getString(6));
                 deliveryInfo.setType(DeliveryInfo.REPORT);
+                deliveryInfo.setFilters(getCustomFiltersForMultipleDelivery(reports.getLong(5), conn));
                 infos.add(deliveryInfo);
             }
             PreparedStatement getScorecardStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD_NAME, DELIVERY_INDEX, DELIVERY_FORMAT FROM delivery_to_scorecard, scorecard WHERE GENERAL_DELIVERY_ID = ? AND " +
@@ -204,12 +207,20 @@ public class DeliveryScheduledTask extends ScheduledTask {
         if (deliveryInfo.getFormat() == ReportDelivery.EXCEL) {
             WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
             analysisDefinition.updateMetadata();
+            if (deliveryInfo.getLabel() != null && !"".equals(deliveryInfo.getLabel())) {
+                analysisDefinition.setName(deliveryInfo.getLabel());
+            }
+            updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
             byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata);
             attachmentInfos.add(new AttachmentInfo(bytes, deliveryInfo.getName() + ".xls", "application/xls"));
         } else if (deliveryInfo.getFormat() == ReportDelivery.HTML_TABLE) {
             if (deliveryInfo.getType() == DeliveryInfo.REPORT) {
                 WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
                 analysisDefinition.updateMetadata();
+                if (deliveryInfo.getLabel() != null && !"".equals(deliveryInfo.getLabel())) {
+                    analysisDefinition.setName(deliveryInfo.getLabel());
+                }
+                updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
                 String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata);
                 body += table;
             } else if (deliveryInfo.getType() == DeliveryInfo.SCORECARD) {
@@ -303,6 +314,28 @@ public class DeliveryScheduledTask extends ScheduledTask {
         return filters;
     }
 
+    private List<FilterDefinition> getCustomFiltersForMultipleDelivery(long reportDeliveryID, EIConnection conn) throws SQLException {
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        Session session = Database.instance().createSession(conn);
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT FILTER_ID FROM delivery_to_report_to_filter WHERE delivery_to_report_id = ?");
+            queryStmt.setLong(1, reportDeliveryID);
+            ResultSet filterRS = queryStmt.executeQuery();
+            while (filterRS.next()) {
+                long filterID = filterRS.getLong(1);
+                List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
+                if (results.size() > 0) {
+                    FilterDefinition filter = (FilterDefinition) results.get(0);
+                    filter.afterLoad();
+                    filters.add(filter);
+                }
+            }
+        } finally {
+            session.close();
+        }
+        return filters;
+    }
+
     private void reportDelivery(EIConnection conn) throws SQLException, IOException, MessagingException, DocumentException {
 
         PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, REPORT_DELIVERY_ID, TIMEZONE_OFFSET, SENDER_USER_ID, REPORT_DELIVERY_ID FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
@@ -370,6 +403,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     } else if (deliveryFormat == ReportDelivery.HTML_TABLE) {
                         WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
                         analysisDefinition.updateMetadata();
+                        updateReportWithCustomFilters(analysisDefinition, customFilters);
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                         insightRequestMetadata.setUtcOffset(timezoneOffset);
                         String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata);
@@ -382,6 +416,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                                 analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB ||
                                 analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID) {
                             analysisDefinition.updateMetadata();
+                            updateReportWithCustomFilters(analysisDefinition, customFilters);
                             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                             insightRequestMetadata.setUtcOffset(timezoneOffset);
                             byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata);

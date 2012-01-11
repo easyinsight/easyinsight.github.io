@@ -1,8 +1,11 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataResults;
 import com.easyinsight.analysis.IRow;
+import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.EmptyValue;
+import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupPair;
@@ -27,14 +30,32 @@ public class LookupTableComponent implements IComponent {
         }
     }
 
+    private AnalysisItem findMatch(Key key, Collection<AnalysisItem> reportItems, Collection<AnalysisItem> analysisItems) {
+        for (AnalysisItem analysisItem : reportItems) {
+            Key analysisItemKey = analysisItem.getKey();
+            if (analysisItemKey.matchesOrContains(key)) {
+                return analysisItem;
+            }
+        }
+        for (AnalysisItem analysisItem : analysisItems) {
+            Key analysisItemKey = analysisItem.getKey();
+            if (analysisItemKey.matchesOrContains(key)) {
+                return analysisItem;
+            }
+        }
+        return null;
+    }
+
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
+        AnalysisItem sourceField = findMatch(lookupTable.getSourceField().getKey(), pipelineData.getReportItems(), pipelineData.getAllItems());
+        AnalysisItem targetField = findMatch(lookupTable.getTargetField().getKey(), pipelineData.getReportItems(), pipelineData.getAllItems());
         for (IRow row : dataSet.getRows()) {
-            Value sourceValue = row.getValue(lookupTable.getSourceField().createAggregateKey());
+            Value sourceValue = row.getValue(sourceField.createAggregateKey());
             Value targetValue = lookupMap.get(sourceValue.toString());
             if (targetValue == null) {
                 targetValue = new EmptyValue();
             }
-            row.addValue(lookupTable.getTargetField().createAggregateKey(), targetValue);
+            row.addValue(targetField.createAggregateKey(), targetValue);
         }
         return dataSet;
     }

@@ -1,5 +1,9 @@
 package com.easyinsight.export;
 
+import com.easyinsight.analysis.FilterDefinition;
+
+import java.util.List;
+
 /**
  * User: jamesboe
  * Date: 6/3/11
@@ -12,9 +16,36 @@ public class DeliveryInfo {
 
     private String name;
     private long id;
+    private long dataSourceID;
+    private String label;
+    private List<FilterDefinition> filters;
     private int type;
     private int index;
     private int format;
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public long getDataSourceID() {
+        return dataSourceID;
+    }
+
+    public void setDataSourceID(long dataSourceID) {
+        this.dataSourceID = dataSourceID;
+    }
+
+    public List<FilterDefinition> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(List<FilterDefinition> filters) {
+        this.filters = filters;
+    }
 
     public int getFormat() {
         return format;

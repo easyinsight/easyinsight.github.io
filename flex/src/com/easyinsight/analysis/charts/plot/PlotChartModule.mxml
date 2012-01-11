@@ -151,7 +151,7 @@
         private var defaultLink:Link;
 
         private function onChartClick(event:ChartItemEvent):void {
-            ClickUtil.doStuff(defaultLink, event.hitData.item, plotChartDef.dimension, this);
+            ClickUtil.doStuff(defaultLink, event.hitData.item, plotChartDef.dimension, this, null, plotChart);
         }
 
         private function dtFunc(hd:HitData):String {

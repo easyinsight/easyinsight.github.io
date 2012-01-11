@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<mx:Form xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        private var _reports:ArrayCollection;
+
+        private var _reportID:int;
+
+        private var _formatValue:String;
+
+        private var _reportChangeable:Boolean = true;
+
+        [Bindable(event="reportChangeableChanged")]
+        public function get reportChangeable():Boolean {
+            return _reportChangeable;
+        }
+
+        public function set reportChangeable(value:Boolean):void {
+            if (_reportChangeable == value) return;
+            _reportChangeable = value;
+            dispatchEvent(new Event("reportChangeableChanged"));
+            invalidateProperties();
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (!_reportChangeable && reportComboBoxItem.parent) {
+                removeChild(reportComboBoxItem);
+            }
+        }
+
+        public function getUrlKey():String {
+            return reportComboBox.selectedItem.urlKey;
+        }
+
+        [Bindable(event="reportsChanged")]
+        public function get reports():ArrayCollection {
+            return _reports;
+        }
+
+        public function set reports(value:ArrayCollection):void {
+            if (_reports == value) return;
+            _reports = value;
+            dispatchEvent(new Event("reportsChanged"));
+        }
+
+        [Bindable(event="reportIDChanged")]
+        public function get reportID():int {
+            return _reportID;
+        }
+
+        public function set reportID(value:int):void {
+            if (_reportID == value) return;
+            _reportID = value;
+            dispatchEvent(new Event("reportIDChanged"));
+        }
+
+        [Bindable(event="formatValueChanged")]
+        public function get formatValue():String {
+            return _formatValue;
+        }
+
+        public function set formatValue(value:String):void {
+            if (_formatValue == value) return;
+            _formatValue = value;
+            dispatchEvent(new Event("formatValueChanged"));
+        }
+
+        private function onReportChange():void {
+            dataSourceID = reportComboBox.selectedItem.dataFeedID;
+            reportID = reportComboBox.selectedItem.id;
+        }
+
+        private var _dataSourceID:int;
+
+        [Bindable(event="dataSourceIDChanged")]
+        public function get dataSourceID():int {
+            return _dataSourceID;
+        }
+
+        public function set dataSourceID(value:int):void {
+            if (_dataSourceID == value) return;
+            _dataSourceID = value;
+            dispatchEvent(new Event("dataSourceIDChanged"));
+        }
+
+        public function save(activity:IDeliverable):void {
+            activity.setFormat(int(outputFormatBox.selectedItem.data));
+            if (reportChangeable) {
+                activity.setName(reportComboBox.selectedItem.name);
+            }
+            activity.setLabel(deliveryLabelInput.text);
+        }
+
+        private var _deliveryLabel:String;
+
+        [Bindable(event="deliveryLabelChanged")]
+        public function get deliveryLabel():String {
+            return _deliveryLabel;
+        }
+
+        public function set deliveryLabel(value:String):void {
+            if (_deliveryLabel == value) return;
+            _deliveryLabel = value;
+            dispatchEvent(new Event("deliveryLabelChanged"));
+        }
+        ]]></mx:Script>
+    <mx:FormItem label="Report:" id="reportComboBoxItem">
+        <util:SmartComboBox dataProvider="{reports}" selectedValue="{reportID}" selectedProperty="id"
+                            id="reportComboBox" labelField="name" change="onReportChange()"/>
+    </mx:FormItem>
+    <mx:FormItem label="Custom Delivery Label:">
+        <mx:TextInput id="deliveryLabelInput" text="{deliveryLabel}" width="300"/>
+    </mx:FormItem>
+    <mx:FormItem label="Output Format:">
+        <util:SmartComboBox id="outputFormatBox" selectedValue="{formatValue}" selectedProperty="data"
+                            labelField="label">
+            <util:dataProvider>
+                <mx:ArrayCollection>
+                    <mx:Array>
+                        <mx:Object label="Excel" data="1"/>
+                        <mx:Object label="PNG" data="2"/>
+                        <mx:Object label="PDF" data="3"/>
+                        <mx:Object label="HTML Table" data="4"/>
+                    </mx:Array>
+                </mx:ArrayCollection>
+            </util:dataProvider>
+        </util:SmartComboBox>
+    </mx:FormItem>
+</mx:Form>

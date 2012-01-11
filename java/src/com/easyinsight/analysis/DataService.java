@@ -970,6 +970,8 @@ public class DataService {
                 }
             }
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
+            insightRequestMetadata.setLookupTableAggregate(analysisDefinition.isLookupTableOptimization());
+            insightRequestMetadata.setReportItems(analysisDefinition.getAllAnalysisItems());
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
             timeshift(validQueryItems, filters, feed);
             dataSet = retrieveDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);

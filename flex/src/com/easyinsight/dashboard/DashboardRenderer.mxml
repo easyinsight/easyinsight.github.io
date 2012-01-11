@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*" width="100%"
+         height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" horizontalScrollPolicy="off">
+    <mx:AddChild position="before">
+        <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}" id="filterViewStack">
+            <mx:Box/>
+            <mx:VBox width="100%" horizontalAlign="center">
+                <filtering:TransformContainer id="transformContainer" filterEditable="false"
+                                              existingFilters="{filterDefinitions}"
+                                              width="100%" feedID="{dataSourceID}"
+                                              reportView="true" dashboardID="{_dashboardID}" updatedTransforms="transformsUpdated(event)"/>
+            </mx:VBox>
+        </mx:ViewStack>
+    </mx:AddChild>
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.core.Container;
+        import mx.core.UIComponent;
+        import mx.events.FlexEvent;
+
+        private var _dashboard:Dashboard;
+        private var rootView:IDashboardViewComponent;
+
+        private var filterDefinitions:ArrayCollection;
+        private var _dataSourceID:int;
+        private var _filterIndex:int;
+        private var _dashboardID:int;
+        private var _initialFilters:ArrayCollection;
+        private var _fixedID:Boolean;
+
+        [Bindable]
+        private var showingFilters:Boolean = true;
+
+        public function set fixedID(value:Boolean):void {
+            _fixedID = value;
+        }
+
+        private function transformsUpdated(event:Event):void {
+            var filterMap:Object = new Object();
+            if (transformContainer != null) {
+                filterMap["master"] = transformContainer.getFilterDefinitions();
+            }
+            rootView.updateAdditionalFilters(filterMap);
+            rootView.refresh();
+        }
+
+        public function createDashboard(width:int = 0, height:int = 0):IDashboardViewComponent {
+            var primary:VBox = new VBox();
+            primary.percentHeight = 100;
+            primary.percentWidth = 100;
+            primary.setStyle("verticalGap", 0);
+            primary.setStyle("horizontalAlign", "center");
+
+            if (!_fixedID) {
+                dashboardStyleArea.setStyle("paddingLeft", dashboard.padding);
+                dashboardStyleArea.setStyle("paddingRight", dashboard.padding);
+                dashboardStyleArea.setStyle("paddingTop", dashboard.padding);
+                dashboardStyleArea.setStyle("paddingBottom", dashboard.padding);
+            } else {
+                setStyle("paddingLeft", 0);
+                setStyle("paddingRight", 0);
+                setStyle("paddingBottom", 0);
+            }
+
+            dashboardStyleArea.setStyle("backgroundColor", dashboard.backgroundColor);
+
+            if (dashboard.backgroundColor == 0xFFFFFF) {
+                setStyle("backgroundColor", 0xFFFFFF);
+            }
+
+            dashboardStyleArea.setStyle("borderThickness", dashboard.borderThickness);
+            if (dashboard.borderThickness > 0) {
+                dashboardStyleArea.setStyle("cornerRadius", 8);
+                dashboardStyleArea.setStyle("borderStyle", "solid");
+                dashboardStyleArea.setStyle("borderColor", dashboard.borderColor);
+                dashboardStyleArea.setStyle("dropShadowEnabled", true);
+            }
+            var filterDefinitions:ArrayCollection = dashboard.filters;
+            if (_initialFilters != null) {
+                filterDefinitions.addAll(_initialFilters);
+            }
+            this.filterDefinitions = filterDefinitions;
+            filterIndex = (dashboard.filters != null && dashboard.filters.length > 0) ? 1 : 0;
+            var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
+            dashboardEditorMetadata.dataSourceID = dataSourceID;
+            dashboardEditorMetadata.role = dashboard.role;
+            dashboardEditorMetadata.fixedID = _fixedID > 0;
+            dashboardEditorMetadata.borderColor = dashboard.borderColor;
+            dashboardEditorMetadata.borderThickness = dashboard.borderThickness;
+            dashboardEditorMetadata.dashboard = dashboard;
+            dashboardEditorMetadata.dashboardView = this;
+            rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
+            Container(rootView).verticalScrollPolicy = "off";
+            Container(rootView).horizontalScrollPolicy = "off";
+            Container(dashboardStyleArea).horizontalScrollPolicy = "off";
+            UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent):void {
+                var filterMap:Object = new Object();
+                filterMap["master"] = dashboard.filters;
+                rootView.updateAdditionalFilters(filterMap);
+                rootView.initialRetrieve();
+            });
+            dashboardCanvas.addChild(rootView as UIComponent);
+            loadingBox.parent.removeChild(loadingBox);
+            return rootView;
+        }
+
+        public function refreshData():void {
+            rootView.refresh();
+        }
+
+        public function toggleFilters():void {
+            showingFilters = !showingFilters;
+            filterIndex = filterIndex == 1 ? 0 : 1;
+            rootView.toggleFilters(showingFilters);
+        }
+
+        public function getFilterDefinitions():ArrayCollection {
+            return transformContainer.getFilterDefinitions();
+        }
+
+        [Bindable(event="dashboardChanged")]
+        public function get dashboard():Dashboard {
+            return _dashboard;
+        }
+
+        public function set dashboard(value:Dashboard):void {
+            if (_dashboard == value) return;
+            _dashboard = value;
+            dispatchEvent(new Event("dashboardChanged"));
+        }
+
+        [Bindable(event="dataSourceIDChanged")]
+        public function get dataSourceID():int {
+            return _dataSourceID;
+        }
+
+        public function set dataSourceID(value:int):void {
+            if (_dataSourceID == value) return;
+            _dataSourceID = value;
+            dispatchEvent(new Event("dataSourceIDChanged"));
+        }
+
+        [Bindable(event="filterIndexChanged")]
+        public function get filterIndex():int {
+            return _filterIndex;
+        }
+
+        public function set filterIndex(value:int):void {
+            if (_filterIndex == value) return;
+            _filterIndex = value;
+            dispatchEvent(new Event("filterIndexChanged"));
+        }
+
+        [Bindable(event="dashboardIDChanged")]
+        public function get dashboardID():int {
+            return _dashboardID;
+        }
+
+        public function set dashboardID(value:int):void {
+            if (_dashboardID == value) return;
+            _dashboardID = value;
+            dispatchEvent(new Event("dashboardIDChanged"));
+        }
+
+        public function set initialFilters(value:ArrayCollection):void {
+            _initialFilters = value;
+        }
+        ]]></mx:Script>
+    <mx:VBox width="100%" height="100%" backgroundAlpha="1" borderColor="0" id="dashboardStyleArea">
+        <mx:Canvas width="100%" height="100%" horizontalScrollPolicy="off">
+            <mx:Canvas id="dashboardCanvas" width="100%" height="100%" horizontalScrollPolicy="off"/>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" id="loadingBox">
+                <mx:ProgressBar indeterminate="true" label="Loading the dashboard..."/>
+            </mx:Box>
+        </mx:Canvas>
+    </mx:VBox>
+</mx:VBox>

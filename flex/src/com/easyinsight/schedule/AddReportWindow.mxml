@@ -50,6 +50,7 @@
             var info:DeliveryInfo = new DeliveryInfo();
             info.type = DeliveryInfo.REPORT;
             info.id = descriptor.id;
+            info.dataSourceID = descriptor.dataFeedID;
             info.name = descriptor.name;
             dispatchEvent(new DeliveryInfoEvent(DeliveryInfoEvent.ADD_REPORT, info));
             PopUpManager.removePopUp(this);

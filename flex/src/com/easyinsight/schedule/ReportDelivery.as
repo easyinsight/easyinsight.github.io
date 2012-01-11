@@ -3,7 +3,7 @@ import mx.collections.ArrayCollection;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.export.ReportDelivery")]
-public class ReportDelivery extends ScheduledDelivery {
+public class ReportDelivery extends ScheduledDelivery implements IDeliverable {
 
     public static const EXCEL:int = 1;
     public static const PNG:int = 2;
@@ -28,6 +28,9 @@ public class ReportDelivery extends ScheduledDelivery {
 
 
     override public function get activityDisplay():String {
+        if (deliveryLabel != null && deliveryLabel != "") {
+            return deliveryLabel;
+        }
         var type:String;
         switch (reportFormat) {
             case 1:
@@ -44,6 +47,22 @@ public class ReportDelivery extends ScheduledDelivery {
                 break;
         }
         return "Email " + reportName + type;
+    }
+
+    public function setFormat(format:int):void {
+        this.reportFormat = format;
+    }
+
+    public function setFilters(filters:ArrayCollection):void {
+        this.customFilters = filters;
+    }
+
+    public function setName(name:String):void {
+        this.reportName = name;
+    }
+
+    public function setLabel(label:String):void {
+        this.deliveryLabel = label;
     }
 }
 }

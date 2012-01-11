@@ -15,13 +15,19 @@ package com.easyinsight.analysis
 		public function ListViewHeaderRenderer()
 		{
 			super();
-            setStyle("fontSize", 13);
+            //setStyle("fontSize", 13);
             setStyle("fontFamily", "Lucida Grande");
 		}
 
         public function set eiColor(value:uint):void {
             _eiColor = value;
         }
+
+        /*override protected function createInFontContext(classObj:Class):Object {
+            var text:Object = super.createInFontContext(classObj);
+            trace("argh");
+            return text;
+        }*/
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
 			super.updateDisplayList(unscaledWidth, unscaledHeight);

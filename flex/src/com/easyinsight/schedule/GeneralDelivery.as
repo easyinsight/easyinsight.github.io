@@ -11,6 +11,7 @@ public class GeneralDelivery extends ScheduledDelivery {
     public var timezoneOffset:int;
     public var senderID:int;
     public var deliveryInfos:ArrayCollection;
+    public var deliveryLabel:String;
 
     public function GeneralDelivery() {
         super();
@@ -18,6 +19,9 @@ public class GeneralDelivery extends ScheduledDelivery {
 
 
     override public function get activityDisplay():String {
+        if (deliveryLabel != null && deliveryLabel != "") {
+            return deliveryLabel;
+        }
         return "Email multiple scorecards and reports";
     }
 }
