@@ -16,8 +16,6 @@ import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
 import com.easyinsight.datafeeds.harvest.*;
 import com.easyinsight.datafeeds.highrise.*;
-import com.easyinsight.datafeeds.kashoo.KashooBusinessSource;
-import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.marketo.MarketoDataSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
@@ -32,17 +30,10 @@ import com.easyinsight.datafeeds.sample.SampleDataSource;
 import com.easyinsight.datafeeds.sample.SampleProductDataSource;
 import com.easyinsight.datafeeds.sample.SampleSalesDataSource;
 import com.easyinsight.datafeeds.sendgrid.SendGridDataSource;
-import com.easyinsight.datafeeds.solve360.Solve360ActivitiesSource;
-import com.easyinsight.datafeeds.solve360.Solve360CompositeSource;
-import com.easyinsight.datafeeds.solve360.Solve360ContactsSource;
-import com.easyinsight.datafeeds.solve360.Solve360OpportunitiesSource;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
 import com.easyinsight.datafeeds.wholefoods.WholeFoodsSource;
-import com.easyinsight.datafeeds.xero.XeroAccountSource;
-import com.easyinsight.datafeeds.xero.XeroBankTransactionSource;
-import com.easyinsight.datafeeds.xero.XeroCompositeSource;
 import com.easyinsight.datafeeds.zendesk.*;
 
 import java.util.HashMap;
@@ -187,15 +178,15 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.SAMPLE_CUSTOMER, SampleCustomerDataSource.class);
         registerType(FeedType.SAMPLE_PRODUCT, SampleProductDataSource.class);
         registerType(FeedType.SAMPLE_SALES, SampleSalesDataSource.class);
-        registerType(FeedType.KASHOO_COMPOSITE, KashooCompositeSource.class);
-        registerType(FeedType.KASHOO_BUSINESSES, KashooBusinessSource.class);
-        registerType(FeedType.SOLVE360_COMPOSITE, Solve360CompositeSource.class);
+        /*registerType(FeedType.KASHOO_COMPOSITE, KashooCompositeSource.class);
+        registerType(FeedType.KASHOO_BUSINESSES, KashooBusinessSource.class);*/
+        /*registerType(FeedType.SOLVE360_COMPOSITE, Solve360CompositeSource.class);
         registerType(FeedType.SOLVE360_CONTACTS, Solve360ContactsSource.class);
         registerType(FeedType.SOLVE360_OPPORTUNITIES, Solve360OpportunitiesSource.class);
         registerType(FeedType.SOLVE360_ACTIVITIES, Solve360ActivitiesSource.class);
         registerType(FeedType.XERO_COMPOSITE, XeroCompositeSource.class);
         registerType(FeedType.XERO_ACCOUNTS, XeroAccountSource.class);
-        registerType(FeedType.XERO_BANK_TRANSACTIONS, XeroBankTransactionSource.class);
+        registerType(FeedType.XERO_BANK_TRANSACTIONS, XeroBankTransactionSource.class);*/
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
