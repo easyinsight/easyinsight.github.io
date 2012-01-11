@@ -111,6 +111,7 @@ public class FeedType {
     public static final FeedType HARVEST_CONTACTS = new FeedType(103);
     public static final FeedType HARVEST_TASKS = new FeedType(104);
     public static final FeedType HARVEST_TASK_ASSIGNMENTS = new FeedType(105);
+
     public static final FeedType HARVEST_USERS = new FeedType(106);
     public static final FeedType AMAZON_EC2 = new FeedType(107);
     public static final FeedType AMAZON_EBS = new FeedType(108);
@@ -129,9 +130,19 @@ public class FeedType {
     public static final FeedType KASHOO_COMPOSITE = new FeedType(120);
     public static final FeedType KASHOO_BUSINESSES = new FeedType(121);
 
+    public static final FeedType SOLVE360_COMPOSITE = new FeedType(122);
+    public static final FeedType SOLVE360_CONTACTS = new FeedType(123);
+    public static final FeedType SOLVE360_OPPORTUNITIES = new FeedType(124);
+    public static final FeedType SOLVE360_ACTIVITIES = new FeedType(125);
+
+    public static final FeedType XERO_COMPOSITE = new FeedType(126);
+    public static final FeedType XERO_ACCOUNTS = new FeedType(127);
+    public static final FeedType XERO_BANK_TRANSACTIONS = new FeedType(128);
+    public static final FeedType XERO_INVOICES = new FeedType(129);
+
+    public static final FeedType HARVEST_USER_ASSIGNMENTS = new FeedType(130);
+
     private int type;
-
-
 
     public FeedType() {
     }
