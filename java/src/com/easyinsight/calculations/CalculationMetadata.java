@@ -2,6 +2,7 @@ package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.EIConnection;
@@ -22,6 +23,15 @@ public class CalculationMetadata {
     private Dashboard dashboard;
     private EIConnection connection;
     private Collection<FilterDefinition> filters;
+    private InsightRequestMetadata insightRequestMetadata;
+
+    public InsightRequestMetadata getInsightRequestMetadata() {
+        return insightRequestMetadata;
+    }
+
+    public void setInsightRequestMetadata(InsightRequestMetadata insightRequestMetadata) {
+        this.insightRequestMetadata = insightRequestMetadata;
+    }
 
     public Collection<FilterDefinition> getFilters() {
         return filters;

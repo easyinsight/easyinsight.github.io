@@ -15,9 +15,10 @@ import java.util.*;
  * Time: 12:40 PM
  */
 public class CalculationLogic {
-    public void calculate(String code, WSAnalysisDefinition report, Collection<AnalysisItem> allItems) {
+    public void calculate(String code, WSAnalysisDefinition report, Collection<AnalysisItem> allItems, InsightRequestMetadata insightRequestMetadata) {
         CalculationMetadata calculationMetadata = new CalculationMetadata();
         calculationMetadata.setReport(report);
+        calculationMetadata.setInsightRequestMetadata(insightRequestMetadata);
         CalculationTreeNode calculationTreeNode;
         ICalculationTreeVisitor visitor;
         CalculationsParser.expr_return ret;
