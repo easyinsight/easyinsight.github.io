@@ -63,7 +63,7 @@ public class HarvestTaskAssignmentSource extends HarvestBaseSource {
         HttpClient client = getHttpClient(source.getUsername(), source.getPassword());
         Builder builder = new Builder();
         try {
-            Document projects = source.getOrRetrieveProjects(client, builder);
+            Document projects = source.getOrRetrieveProjects(client, builder, false);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);

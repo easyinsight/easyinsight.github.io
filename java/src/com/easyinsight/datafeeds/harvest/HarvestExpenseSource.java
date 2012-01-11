@@ -13,7 +13,6 @@ import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.text.DateFormat;
@@ -95,7 +94,7 @@ public class HarvestExpenseSource extends HarvestBaseSource {
         HttpClient client = getHttpClient(source.getUsername(), source.getPassword());
         Builder builder = new Builder();
         try {
-            Document projects = source.getOrRetrieveProjects(client, builder);
+            Document projects = source.getOrRetrieveProjects(client, builder, false);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
