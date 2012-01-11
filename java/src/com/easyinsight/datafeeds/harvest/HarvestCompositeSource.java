@@ -2,8 +2,10 @@ package com.easyinsight.datafeeds.harvest;
 
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.analysis.*;
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -16,6 +18,8 @@ import net.smartam.leeloo.client.OAuthClient;
 import net.smartam.leeloo.client.URLConnectionClient;
 import net.smartam.leeloo.client.request.OAuthClientRequest;
 import net.smartam.leeloo.client.response.OAuthJSONAccessTokenResponse;
+import net.smartam.leeloo.common.exception.OAuthProblemException;
+import net.smartam.leeloo.common.exception.OAuthSystemException;
 import net.smartam.leeloo.common.message.types.GrantType;
 import nu.xom.Builder;
 import nu.xom.Document;
@@ -69,11 +73,21 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
         this.refreshToken = refreshToken;
     }
 
-    public Document getOrRetrieveProjects(HttpClient client, Builder builder) throws ParsingException {
+    public Document getOrRetrieveProjects(HttpClient client, Builder builder, boolean logRequest) throws ParsingException {
         if(projects == null) {
-            projects = runRestRequest("/projects", client, builder, getUrl(), true, this, false);
+            projects = runRestRequest("/projects", client, builder, getUrl(), true, this, true);
         }
         return projects;
+    }
+
+    @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new Harvest1To2(this));
     }
 
     public String getUsername() {
@@ -149,6 +163,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.HARVEST_CONTACTS);
         types.add(FeedType.HARVEST_TASKS);
         types.add(FeedType.HARVEST_TASK_ASSIGNMENTS);
+        types.add(FeedType.HARVEST_USER_ASSIGNMENTS);
         types.add(FeedType.HARVEST_USERS);
         types.add(FeedType.HARVEST_EXPENSES);
         types.add(FeedType.HARVEST_EXPENSE_CATEGORIES);
@@ -162,24 +177,37 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
             if (httpRequest != null) {
                 String code = httpRequest.getParameter("code");
                 if (code != null) {
-                    OAuthClientRequest request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
+                    OAuthClientRequest request;
+                    if (ConfigLoader.instance().isProduction()) {
+                        request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
+                                    setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(CONSUMER_KEY).
+                                    setClientSecret(SECRET_KEY).
+                                    setRedirectURI("https://www.easy-insight.com/app/oauth").
+                                    setCode(code).buildBodyMessage();
+                    } else {
+                        request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
                                 setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(CONSUMER_KEY).
                                 setClientSecret(SECRET_KEY).
-                                setRedirectURI("https://www.easy-insight.com/app/oauth").
+                                setRedirectURI("https://staging.easy-insight.com/app/oauth").
                                 setCode(code).buildBodyMessage();
+                    }
                     OAuthClient client = new OAuthClient(new URLConnectionClient());
                     OAuthJSONAccessTokenResponse response = client.accessToken(request);
                     accessToken = response.getAccessToken();
                     refreshToken = response.getRefreshToken();
                 }
             } else if (refreshToken != null && !"".equals(refreshToken)) {
-                OAuthClientRequest request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
-                                setGrantType(GrantType.REFRESH_TOKEN).setClientId(CONSUMER_KEY).
-                                setClientSecret(SECRET_KEY).setRefreshToken(refreshToken).buildBodyMessage();
+                try {
+                    OAuthClientRequest request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
+                                    setGrantType(GrantType.REFRESH_TOKEN).setClientId(CONSUMER_KEY).
+                                    setClientSecret(SECRET_KEY).setRefreshToken(refreshToken).buildBodyMessage();
                     OAuthClient client = new OAuthClient(new URLConnectionClient());
                     OAuthJSONAccessTokenResponse response = client.accessToken(request);
                     accessToken = response.getAccessToken();
                     refreshToken = response.getRefreshToken();
+                } catch (OAuthProblemException e) {
+                    // no joy on refresh token
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -195,6 +223,8 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.HARVEST_PROJECT, FeedType.HARVEST_TASK_ASSIGNMENTS, HarvestProjectSource.PROJECT_ID, HarvestTaskAssignmentSource.PROJECT_ID),
                 new ChildConnection(FeedType.HARVEST_TASKS, FeedType.HARVEST_TASK_ASSIGNMENTS, HarvestTaskSource.ID,  HarvestTaskAssignmentSource.TASK_ID),
                 new ChildConnection(FeedType.HARVEST_USERS, FeedType.HARVEST_TIME, HarvestUserSource.USER_ID,  HarvestTimeSource.USER_ID),
+                new ChildConnection(FeedType.HARVEST_USER_ASSIGNMENTS, FeedType.HARVEST_USERS, HarvestUserAssignmentSource.USER_ID,  HarvestUserSource.USER_ID),
+                new ChildConnection(FeedType.HARVEST_USER_ASSIGNMENTS, FeedType.HARVEST_PROJECT, HarvestUserAssignmentSource.PROJECT_ID,  HarvestProjectSource.PROJECT_ID),
                 new ChildConnection(FeedType.HARVEST_PROJECT, FeedType.HARVEST_EXPENSES, HarvestProjectSource.PROJECT_ID, HarvestExpenseSource.PROJECT_ID),
                 new ChildConnection(FeedType.HARVEST_USERS,  FeedType.HARVEST_EXPENSES, HarvestUserSource.USER_ID, HarvestExpenseSource.USER_ID),
                 new ChildConnection(FeedType.HARVEST_EXPENSE_CATEGORIES, FeedType.HARVEST_EXPENSES, HarvestExpenseCategoriesSource.ID, HarvestExpenseSource.EXPENSE_CATEGORY_ID),
