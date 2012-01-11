@@ -87,7 +87,7 @@ public class OAuthServlet extends HttpServlet {
                     if (ConfigLoader.instance().isProduction()) {
                         redirectURL = "https://www.easy-insight.com/app/#connectionConfig="+feedDefinition.getApiKey();
                     } else {
-                        redirectURL = "https://localhost:4443/app/#connectionConfig="+feedDefinition.getApiKey();
+                        redirectURL = "https://staging.easy-insight.com/app/#connectionConfig="+feedDefinition.getApiKey();
                     }
                 } else {
                     if (ConfigLoader.instance().isProduction()) {
