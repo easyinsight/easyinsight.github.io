@@ -15,7 +15,7 @@ import java.util.Set;
  */
 public class ACSPipeline extends Pipeline {
     @Override
-    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems) {
+    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems, InsightRequestMetadata insightRequestMetadata) {
         List<IComponent> components = new ArrayList<IComponent>();
 
         /*for (AnalysisItem analysisItem : allNeededAnalysisItems) {
