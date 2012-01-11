@@ -228,7 +228,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             } else {
                 fullRefresh = fullRefresh && parentDefinition.fullNightlyRefresh();
             }
-            boolean insert = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh;
+            boolean insert = clearsData(this) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh;
             if (insert) {
                 dataStorage.truncate();
                 dataStorage.insertFromSelect(tempTable);
