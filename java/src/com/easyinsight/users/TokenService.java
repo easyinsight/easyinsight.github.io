@@ -92,11 +92,20 @@ public class TokenService {
                         "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
             } else if (type == FeedType.HARVEST_COMPOSITE.getType()) {
                 HarvestCompositeSource harvestCompositeSource = (HarvestCompositeSource) dataSource;
-                OAuthClientRequest request = OAuthClientRequest
-                    .authorizationLocation(harvestCompositeSource.getUrl() + "/oauth2/authorize")
-                    .setClientId("7wBqPVAr2om0aWwNbHjFHQ==")
-                    .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
-                    .buildQueryMessage();
+                OAuthClientRequest request;
+                if (ConfigLoader.instance().isProduction()) {
+                    request = OAuthClientRequest
+                        .authorizationLocation(harvestCompositeSource.getUrl() + "/oauth2/authorize")
+                        .setClientId("7wBqPVAr2om0aWwNbHjFHQ==")
+                        .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
+                        .buildQueryMessage();
+                } else {
+                    request = OAuthClientRequest
+                            .authorizationLocation(harvestCompositeSource.getUrl() + "/oauth2/authorize")
+                            .setClientId("7wBqPVAr2om0aWwNbHjFHQ==")
+                            .setRedirectURI("https://staging.easy-insight.com/app/oauth").setResponseType("code")
+                            .buildQueryMessage();
+                }
                 FlexContext.getHttpRequest().getSession().setAttribute("redirectTarget", redirectType);
                 FlexContext.getHttpRequest().getSession().setAttribute("dataSourceID", dataSource.getApiKey());
                 return new OAuthResponse(request.getLocationUri(), true);
