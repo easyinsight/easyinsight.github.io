@@ -233,15 +233,15 @@
                         }
                         if (myLookupTable != null) {
                             var found:Boolean = false;
-                            for each (var lookupTest:AnalysisItem in analysisItems) {
-                                if (lookupTest.key.internalString() == myLookupTable.sourceField.key.internalString()) {
+                            for each (var lookupTest:AnalysisItem in treeDef.items) {
+                                if (lookupTest.key.toBaseKey().keyID == myLookupTable.sourceField.key.toBaseKey().keyID) {
                                     found = true;
                                     break;
                                 }
                             }
                             if (!found) {
                                 for each (var hierLevel:HierarchyLevel in hierarchy.hierarchyLevels) {
-                                    if (hierLevel.analysisItem.key.internalString() == myLookupTable.sourceField.key.internalString()) {
+                                    if (hierLevel.analysisItem.key.toBaseKey().keyID == myLookupTable.sourceField.key.toBaseKey().keyID) {
                                         found = true;
                                         break;
                                     }
