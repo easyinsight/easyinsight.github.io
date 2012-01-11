@@ -194,6 +194,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
 
     public String tempLoad(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, EIConnection conn, boolean fullRefresh) throws Exception {
         TempStorage tempStorage = DataStorage.tempConnection(this, conn);
+        if (parentDefinition == null) {
+            fullRefresh = fullRefresh && fullNightlyRefresh();
+        } else {
+            fullRefresh = fullRefresh && parentDefinition.fullNightlyRefresh();
+        }
         boolean insertTemp = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh;
         String sql;
         if (insertTemp) {
@@ -228,7 +233,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             } else {
                 fullRefresh = fullRefresh && parentDefinition.fullNightlyRefresh();
             }
-            boolean insert = clearsData(this) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh;
+            boolean insert = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh;
             if (insert) {
                 dataStorage.truncate();
                 dataStorage.insertFromSelect(tempTable);
