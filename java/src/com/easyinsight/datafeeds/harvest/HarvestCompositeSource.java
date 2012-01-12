@@ -334,12 +334,12 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
 
             try {
                 client.executeMethod(restMethod);
-                if (logRequest) {
+                /*if (logRequest) {
                     System.out.println(restMethod.getResponseBodyAsString());
-                }
+                }*/
                 doc = builder.build(restMethod.getResponseBodyAsStream());
                 String statusLine = restMethod.getStatusLine().toString();
-                System.out.println(statusLine);
+                //System.out.println(statusLine);
                 if(statusLine.indexOf("503") != -1) {
                     retryCount++;
                     Header retryHeader = restMethod.getResponseHeader("Retry-After");
