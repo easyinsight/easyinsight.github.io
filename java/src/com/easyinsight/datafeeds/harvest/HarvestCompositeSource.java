@@ -203,8 +203,10 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
                                     setClientSecret(SECRET_KEY).setRefreshToken(refreshToken).buildBodyMessage();
                     OAuthClient client = new OAuthClient(new URLConnectionClient());
                     OAuthJSONAccessTokenResponse response = client.accessToken(request);
+
                     accessToken = response.getAccessToken();
                     refreshToken = response.getRefreshToken();
+                    System.out.println("updated access token to " + accessToken + " and refresh token to " + refreshToken);
                 } catch (OAuthProblemException e) {
                     // no joy on refresh token
                 }
