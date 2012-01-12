@@ -196,24 +196,40 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
                     accessToken = response.getAccessToken();
                     refreshToken = response.getRefreshToken();
                 }
-            } else if (refreshToken != null && !"".equals(refreshToken)) {
+            } /*else if (refreshToken != null && !"".equals(refreshToken)) {
                 try {
-                    OAuthClientRequest request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
-                                    setGrantType(GrantType.REFRESH_TOKEN).setClientId(CONSUMER_KEY).
-                                    setClientSecret(SECRET_KEY).setRefreshToken(refreshToken).buildBodyMessage();
-                    OAuthClient client = new OAuthClient(new URLConnectionClient());
-                    OAuthJSONAccessTokenResponse response = client.accessToken(request);
-
-                    accessToken = response.getAccessToken();
-                    refreshToken = response.getRefreshToken();
-                    System.out.println("updated access token to " + accessToken + " and refresh token to " + refreshToken);
+                    refreshTokenInfo();
                 } catch (OAuthProblemException e) {
                     // no joy on refresh token
                 }
-            }
+            }*/
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected void beforeRefresh(Date lastRefreshTime) {
+        super.beforeRefresh(lastRefreshTime); 
+        if (lastRefreshTime != null) {
+            try {
+                refreshTokenInfo();
+            } catch (Exception e) {
+                throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), this));
+            }
+        }
+    }
+
+    public void refreshTokenInfo() throws OAuthSystemException, OAuthProblemException {
+        OAuthClientRequest request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
+                        setGrantType(GrantType.REFRESH_TOKEN).setClientId(CONSUMER_KEY).
+                        setClientSecret(SECRET_KEY).setRefreshToken(refreshToken).buildBodyMessage();
+        OAuthClient client = new OAuthClient(new URLConnectionClient());
+        OAuthJSONAccessTokenResponse response = client.accessToken(request);
+
+        accessToken = response.getAccessToken();
+        refreshToken = response.getRefreshToken();
+        System.out.println("updated access token to " + accessToken + " and refresh token to " + refreshToken);
     }
 
     @Override

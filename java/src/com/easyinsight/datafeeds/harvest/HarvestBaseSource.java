@@ -59,7 +59,7 @@ public abstract class HarvestBaseSource extends ServerDataSourceDefinition {
             Thread.sleep(250);
         } catch (InterruptedException e) {
         }*/
-        System.out.println(target);
+        /*System.out.println(target);*/
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
         boolean successful = false;
@@ -69,9 +69,10 @@ public abstract class HarvestBaseSource extends ServerDataSourceDefinition {
 
             try {
                 client.executeMethod(restMethod);
-                if (logRequest) {
+                /*if (logRequest) {
                     System.out.println(restMethod.getResponseBodyAsString());
-                }
+                }*/
+
                 doc = builder.build(restMethod.getResponseBodyAsStream());
                 String statusLine = restMethod.getStatusLine().toString();
                 System.out.println(statusLine);
@@ -96,6 +97,7 @@ public abstract class HarvestBaseSource extends ServerDataSourceDefinition {
                     successful = true;
                 }
             } catch (IOException e) {
+
                 e.printStackTrace();
                 retryCount++;
                 if (e.getMessage().contains("503")) {
