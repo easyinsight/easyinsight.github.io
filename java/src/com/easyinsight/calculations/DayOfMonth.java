@@ -32,9 +32,9 @@ public class DayOfMonth extends Function {
             int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
             String string;
             if (time > 0) {
-                string = "GMT-"+Math.abs(time);
-            } else if (time < 0) {
                 string = "GMT+"+Math.abs(time);
+            } else if (time < 0) {
+                string = "GMT-"+Math.abs(time);
             } else {
                 string = "GMT";
             }
