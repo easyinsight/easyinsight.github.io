@@ -28,7 +28,6 @@ public class DayOfMonth extends Function {
         }
         if (startDate != null) {
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(startDate);
             int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
             String string;
             if (time > 0) {
@@ -38,8 +37,10 @@ public class DayOfMonth extends Function {
             } else {
                 string = "GMT";
             }
+            System.out.println("using " + string);
             TimeZone timeZone = TimeZone.getTimeZone(string);
             calendar.setTimeZone(timeZone);
+            calendar.setTimeInMillis(startDate.getTime());
             return new NumericValue(calendar.get(Calendar.DAY_OF_MONTH));
         } else {
             return new EmptyValue();
