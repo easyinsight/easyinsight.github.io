@@ -217,12 +217,15 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return sessionId;
     }
 
+    protected void beforeRefresh(Date lastRefreshTime) {
 
+    }
 
     public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) throws Exception {
         boolean changed = false;
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
+            beforeRefresh(lastRefreshTime);
             List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn);
             Map<Long, Map<String, Key>> keyMap = new HashMap<Long, Map<String, Key>>();
             for (IServerDataSourceDefinition source : sources) {
