@@ -838,6 +838,7 @@
             window.allFields = wrappers;
             window.startIndex = index;
             window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, function(event:ReportPreferencesEvent):void {
+                dispatchEvent(new AnalysisChangedEvent());
                 if (event.refreshData) {
                     dataView.forceRetrieve();
                 } else {

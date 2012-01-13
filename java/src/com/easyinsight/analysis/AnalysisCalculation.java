@@ -143,7 +143,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
             }
         }
 
-        if (getFilters() != null && getFilters().size() > 0) {
+        /*if (getFilters() != null && getFilters().size() > 0) {
             List<AnalysisItem> copyItems = new ArrayList<AnalysisItem>();
             for (AnalysisItem analysisItem : analysisItemList) {
                 if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && !analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
@@ -159,9 +159,22 @@ public class AnalysisCalculation extends AnalysisMeasure {
                 }
             }
             analysisItemList = copyItems;
-        }
+        }*/
         
         return analysisItemList;
+    }
+
+    protected List<AnalysisItem> measureFilters(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
+        List<AnalysisItem> items;
+        if (criteria == CleanupComponent.AGGREGATE_CALCULATIONS && !this.isApplyBeforeAggregation()) {
+            items = new ArrayList<AnalysisItem>();
+            for (FilterDefinition filterDefinition : getFilters()) {
+                items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
+            }
+        } else {
+            items = super.measureFilters(allItems, insightItems, getEverything, includeFilters, criteria);
+        }
+        return items;
     }
 
     private CalculationTreeNode evalString(String s) {

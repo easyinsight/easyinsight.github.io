@@ -594,14 +594,28 @@ public class DataStorage implements IDataStorage {
             insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setNow(new Date());
         }
+        reportItems = new ArrayList<AnalysisItem>(reportItems);
         boolean countDistinct = false;
+        Set<String> keyStrings = new HashSet<String>();
+
+        for (Key key : this.keys.keySet()) {
+            keyStrings.add(key.toSQL());
+        }
+
         if (keys == null) {
             keys = new HashMap<Key, KeyMetadata>();
-            for (AnalysisItem analysisItem : reportItems) {
+            Iterator<AnalysisItem> iter = reportItems.iterator();
+            while (iter.hasNext()) {
+                AnalysisItem analysisItem = iter.next();
                 if (analysisItem.isDerived()) {
+                    iter.remove();
                     continue;
                 }
                 Key key = analysisItem.createAggregateKey(false);
+                if (!keyStrings.contains(key.toSQL())) {
+                    iter.remove();
+                    continue;
+                }
                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                     keys.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
                 } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
@@ -619,7 +633,10 @@ public class DataStorage implements IDataStorage {
                 }
             }
         }
-        filters = eligibleFilters(filters);
+        if (reportItems.isEmpty()) {
+            return new DataSet();
+        }
+        filters = eligibleFilters(filters, keyStrings);
         StringBuilder queryBuilder = new StringBuilder();
         StringBuilder selectBuilder = new StringBuilder();
         StringBuilder fromBuilder = new StringBuilder();
@@ -642,11 +659,16 @@ public class DataStorage implements IDataStorage {
     }
 
     @NotNull
-    private Collection<FilterDefinition> eligibleFilters(@Nullable Collection<FilterDefinition> filters) {
+    private Collection<FilterDefinition> eligibleFilters(@Nullable Collection<FilterDefinition> filters, Set<String> keyStrings) {
         Collection<FilterDefinition> eligibleFilters = new ArrayList<FilterDefinition>();
         if (filters != null) {
             for (FilterDefinition filterDefinition : filters) {
                 if (filterDefinition.isApplyBeforeAggregation() && filterDefinition.validForQuery()) {
+                    if (filterDefinition.getField() != null) {
+                        if (!keyStrings.contains(filterDefinition.getField().getKey().toSQL())) {
+                            continue;
+                        }
+                    }
                     eligibleFilters.add(filterDefinition);
                 }
             }
@@ -805,6 +827,7 @@ public class DataStorage implements IDataStorage {
             if (analysisItem.isDerived()) {
                 throw new RuntimeException("Attempt made to query derived analysis item " + analysisItem.toDisplay() + " of class " + analysisItem.getClass().getName());
             }
+            
             String columnName = analysisItem.toKeySQL();
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && aggregateQuery) {
                 AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;

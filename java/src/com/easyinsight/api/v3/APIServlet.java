@@ -218,6 +218,7 @@ public abstract class APIServlet extends HttpServlet {
                     for (AnalysisItem previousItem : previousItems) {
                         if (newItem.getKey().equals(previousItem.getKey()) && newItem.getType() == previousItem.getType()) {
                             // matched the item...
+                            newItem.setKey(previousItem.getKey());
                             newKey = false;
                         }
                     }

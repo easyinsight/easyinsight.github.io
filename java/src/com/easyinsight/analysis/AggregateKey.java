@@ -24,6 +24,11 @@ public class AggregateKey extends NamedKey {
     }
 
     @Override
+    public String toSQL() {
+        return key.toSQL();
+    }
+
+    @Override
     public String internalString() {
         if (key == null) {
             return super.internalString();

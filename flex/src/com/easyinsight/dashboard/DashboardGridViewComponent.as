@@ -57,11 +57,25 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
             this.percentWidth = 100;
             this.percentHeight = 100;
         }*/
+        var gridAbsoluteWidth:Boolean = false;
+        var gridAbsoluteHeight:Boolean = false;
+        for (var i1:int = 0; i1 < dashboardGrid.rows; i1++) {
+            for (var j1:int = 0; j1 < dashboardGrid.columns; j1++) {
+                var e1:DashboardGridItem = findItem(i1, j1);
+                var child1:UIComponent = DashboardElementFactory.createViewUIComponent(e1.dashboardElement, dashboardEditorMetadata);
+                var childSizeInfo1:SizeInfo = IDashboardViewComponent(child1).obtainPreferredSizeInfo();
+                if (childSizeInfo1.preferredWidth != 0) {
+                    gridAbsoluteWidth = true;
+                }
+                if (childSizeInfo1.preferredHeight != 0) {
+                    gridAbsoluteHeight = true;
+                }
+            }
+        }
         setStyle("backgroundColor", dashboardGrid.backgroundColor);
         setStyle("backgroundAlpha", dashboardGrid.backgroundAlpha);
         viewChildren = new ArrayCollection();
-        var gridAbsoluteWidth:Boolean = false;
-        var gridAbsoluteHeight:Boolean = false;
+
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
             var gridRow:GridRow = new GridRow();
             /*if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
@@ -79,18 +93,31 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
 
                 var child:UIComponent = DashboardElementFactory.createViewUIComponent(e.dashboardElement, dashboardEditorMetadata);
                 var childSizeInfo:SizeInfo = IDashboardViewComponent(child).obtainPreferredSizeInfo();
-                if (childSizeInfo.preferredWidth != 0) {
+                if (gridAbsoluteWidth) {
+
+                } else {
+                    gridItem.percentWidth = 100;
+                }
+                /*if (childSizeInfo.preferredWidth != 0) {
                     gridItem.width = childSizeInfo.preferredWidth + dashboardGrid.paddingLeft + dashboardGrid.paddingRight;
                     gridAbsoluteWidth = true;
                 } else {
                     gridItem.percentWidth = 100;
+                }*/
+                if (gridAbsoluteHeight) {
+                    if (childSizeInfo.preferredHeight == 0) {
+                        gridRow.height = 400;
+                        childSizeInfo.preferredHeight = 400;
+                    }
+                } else {
+                    gridItem.percentHeight = 100; 
                 }
-                if (childSizeInfo.preferredHeight != 0) {
+                /*if (childSizeInfo.preferredHeight != 0) {
                     gridItem.height = childSizeInfo.preferredHeight + dashboardGrid.paddingTop + dashboardGrid.paddingBottom;
                     gridAbsoluteHeight = true;
                 } else {
                     gridItem.percentHeight = 100;
-                }
+                }*/
 
                 if (e.dashboardElement is DashboardReport) {
                     gridItem.setStyle("paddingLeft", 3);

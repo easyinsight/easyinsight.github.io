@@ -29,6 +29,7 @@
             info.type = DeliveryInfo.SCORECARD;
             info.id = descriptor.id;
             info.name = descriptor.name;
+            info.format = 4;
             dispatchEvent(new DeliveryInfoEvent(DeliveryInfoEvent.ADD_SCORECARD, info));
             PopUpManager.removePopUp(this);
         }

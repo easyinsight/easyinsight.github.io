@@ -230,7 +230,7 @@
         <mx:HBox>
             <mx:VBox>
                 <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" id="form">
-                    <mx:FormItem label="Report:" id="reportComboBoxItem">
+                    <mx:FormItem label="Scorecard:" id="reportComboBoxItem">
                         <util:SmartComboBox dataProvider="{scorecards}" selectedValue="{scorecardID}" selectedProperty="id"
                                             id="reportComboBox" labelField="name"/>
                     </mx:FormItem>

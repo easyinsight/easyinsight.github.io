@@ -369,6 +369,9 @@ public class ExportService {
         String headerCell = "background: #333333; color: #FFFFFF;" + tdStyle + "left";
         String summaryCell = "background: #555555; color: #FFFFFF;" + tdStyle + "right";
         String dataCell = tdStyle + "right";
+        if (analysisDefinition.getName() != null) {
+            sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(analysisDefinition.getName()).append("</h0>").append("</div>");
+        }
         sb.append("<table style=\"").append(tableStyle).append("\">\r\n");
         for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size() + 2); j++) {
             if (j < crosstabDefinition.getColumns().size()) {
@@ -726,7 +729,7 @@ public class ExportService {
                 valueString = numberFormat.format(doubleValue);
             }
         } else if (headerItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && value.type() == Value.DATE) {
-            AnalysisDateDimension dateDim = new AnalysisDateDimension();
+            AnalysisDateDimension dateDim = (AnalysisDateDimension) headerItem;
             DateFormat sdf = null;
             if (dateDim.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
                 sdf = new SimpleDateFormat("yyyy");
@@ -1082,7 +1085,7 @@ public class ExportService {
         StringBuilder sb = new StringBuilder();
         
         if (listDefinition.getName() != null) {
-            sb.append("<div style=\"text-align:center\">").append(listDefinition.getName()).append("</div>");
+            sb.append("<div style=\""+headerLabelStyle+"\">").append("<h0>").append(listDefinition.getName()).append("</h0></div>");
         }
         sb.append("<table style=\""+tableStyle+"\">");
         sb.append("<tr style=\""+headerTRStyle+"\">");
@@ -1143,6 +1146,9 @@ public class ExportService {
         YearStuff ytdStuff = YTDUtil.getYearStuff(verticalList, dataSet.getDataSet(), dataSet.getPipelineData(), dataSet.getReportItems());
 
         StringBuilder sb = new StringBuilder();
+        if (report.getName() != null) {
+            sb.append("<div style=\""+headerLabelStyle+"\">").append("<h0>").append(report.getName()).append("</h0></div>");
+        }
         sb.append("<table>");
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<td></td>");
@@ -1188,7 +1194,11 @@ public class ExportService {
                 }
             }
         }
+
         StringBuilder sb = new StringBuilder();
+        if (listDefinition.getName() != null) {
+            sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(listDefinition.getName()).append("</h0>").append("</div>");
+        }
         sb.append("<table>");
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<td></td>");
@@ -1999,7 +2009,7 @@ public class ExportService {
         return new ExportMetadata(dateFormat, currencySymbol, cal);
     }
 
-    private static final String headerLabelStyle = "text-align:center";
+    private static final String headerLabelStyle = "text-align:center;padding-top:15px;padding-bottom:15px;font-size:14px";
     private static final String tableStyle = "font-size:12px;font-family:Lucida Grande,serif;border-collapse:collapse;border-style:solid;border-width:1px;border-spacing:0;border-color:#000000";
     private static final String thStyle = "border-style:solid;padding:6px;border-width:1px;border-color:#000000";
     private static final String headerTRStyle = "background-color:#EEEEEE";
@@ -2026,9 +2036,9 @@ public class ExportService {
 
 
         if (report.getName() != null) {
-            sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h1>").append(report.getName()).append("</h1>").append("</div>");
+            sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(report.getName()).append("</h0>").append("</div>");
         }
-        sb.append("<table ").append(tableStyle).append(">");
+        sb.append("<table style=\"").append(tableStyle).append("\">");
         sb.append("<tr style=\"").append(headerTRStyle).append("\">");
         Map<AnalysisItem, URLLink> linkMap = new HashMap<AnalysisItem, URLLink>();
         for (AnalysisItem analysisItem : items) {
@@ -2216,40 +2226,40 @@ public class ExportService {
             }
         }
         StringBuilder sb = new StringBuilder();
-        String style = "style=\"width:100%;font-size:12px;font-family:\"Lucida Sans Unicode\", \"Lucida Grande\", Sans-Serif,serif;border-collapse:collapse;text-align:left\"";
-        sb.append("<table ").append(style).append(">");
-        sb.append("<thead>");
-        sb.append("<tr style=\"\">");
-        sb.append("<th style=\"font-size: 14px;font-weight: normal;padding: 10px 8px;color: #039\"></td>");
-        sb.append("<th style=\"font-size: 14px;font-weight: normal;padding: 10px 8px;color: #039\">KPI Name</td>");
-        sb.append("<th style=\"font-size: 14px;font-weight: normal;padding: 10px 8px;color: #039\">Latest Value</td>");
-        sb.append("<th style=\"font-size: 14px;font-weight: normal;padding: 10px 8px;color: #039\">Time</td>");
-        sb.append("<th style=\"font-size: 14px;font-weight: normal;padding: 10px 8px;color: #039\">% Change</td>");
+        if (scorecard.getName() != null) {
+            sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(scorecard.getName()).append("</h0>").append("</div>");
+        }
+        sb.append("<table style=\"").append(tableStyle).append("\">");
+        sb.append("<tr style=\""+headerTRStyle+"\">");
+        sb.append("<th style=\""+thStyle+"\"></th>");
+        sb.append("<th style=\""+thStyle+"\">KPI Name</th>");
+        sb.append("<th style=\""+thStyle+"\">Latest Value</th>");
+        sb.append("<th style=\""+thStyle+"\">Time</th>");
+        sb.append("<th style=\""+thStyle+"\">% Change</th>");
         NumberFormat nf = NumberFormat.getNumberInstance();
         nf.setMaximumFractionDigits(2);
         sb.append("</tr>");
-        sb.append("</thead>");
         int i = 1;
         for (KPI kpi : scorecard.getKpis()) {
             sb.append("<tr>");
-            String tdStyle = "padding: 8px;color: #669;";
-            if (i % 2 == 1) {
+            //String tdStyle = "padding: 8px;color: #669;";
+            /*if (i % 2 == 1) {
                 tdStyle += "background: #e8edff;";
-            }
-            sb.append("<td style=\"").append(tdStyle).append("text-align:center\">");
+            }*/
+            sb.append("<td style=\"").append(tdStyle).append("center\">");
             sb.append("<img src=\"http://www.easy-insight.com/icons/16x16/").append(kpi.getIconImage()).append("\"/>");
             sb.append("</td>");
-            sb.append("<td style=\"").append(tdStyle).append("\">");
+            sb.append("<td style=\"").append(tdStyle).append("left\">");
             sb.append(kpi.getName());
             sb.append("</td>");
-            sb.append("<td style=\"").append(tdStyle).append("\">");
+            sb.append("<td style=\"").append(tdStyle).append("right\">");
             sb.append(createValue(0, kpi.getAnalysisMeasure(), new NumericValue(kpi.getKpiOutcome().getOutcomeValue()), exportMetadata.cal, exportMetadata.currencySymbol));
             sb.append("</td>");
-            sb.append("<td style=\"").append(tdStyle).append("\">");
+            sb.append("<td style=\"").append(tdStyle).append("right\">");
             sb.append(kpi.getDayWindow());
             sb.append(" days");
             sb.append("</td>");
-            sb.append("<td style=\"").append(tdStyle).append("\">");
+            sb.append("<td style=\"").append(tdStyle).append("right\">");
             String percent;
             if (kpi.getKpiOutcome() != null) {
                 Double percentChange = kpi.getKpiOutcome().getPercentChange();
@@ -2267,6 +2277,7 @@ public class ExportService {
             i++;
         }
         sb.append("</table>");
+        System.out.println(sb.toString());
         return sb.toString();
     }
 }

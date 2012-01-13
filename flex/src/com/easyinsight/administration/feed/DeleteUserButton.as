@@ -1,6 +1,8 @@
 package com.easyinsight.administration.feed
 {
 
+import com.easyinsight.skin.ImageConstants;
+
 import flash.events.MouseEvent;
 	
 	import mx.containers.HBox;
@@ -10,10 +12,6 @@ import flash.events.MouseEvent;
 	{
 		private var feedConsumer:FeedConsumer;
 		private var button:Button;
-		
-		[Bindable]
-        [Embed(source="../../../../../assets/navigate_cross.png")]
-        public var deleteIcon:Class;
 		
 		public function DeleteUserButton()
 		{
@@ -26,7 +24,7 @@ import flash.events.MouseEvent;
 			if (button == null) {
 				button = new Button();
 				button.toolTip = "Delete";
-				button.setStyle("icon", deleteIcon);
+				button.setStyle("icon", ImageConstants.DELETE_ICON);
 				button.addEventListener(MouseEvent.CLICK, deleteUser);
 
 			}

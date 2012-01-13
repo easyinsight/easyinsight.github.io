@@ -183,10 +183,12 @@
 
         private function onNewDeliveryInfo(event:DeliveryInfoEvent):void {
             deliveryInfos.addItem(event.deliveryInfo);
-            var window:ReportDeliveryWindow = new ReportDeliveryWindow();
-            window.deliveryInfo = event.deliveryInfo;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+            if (event.deliveryInfo.type == DeliveryInfo.REPORT) {
+                var window:ReportDeliveryWindow = new ReportDeliveryWindow();
+                window.deliveryInfo = event.deliveryInfo;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
         }
 
         private function onDelete(event:DeliveryInfoEvent):void {

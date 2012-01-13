@@ -109,7 +109,13 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 FeedDefinition sourceFeed = new FeedStorage().getFeedDefinitionData(source.getDataFeedID(), conn);
                 FeedDefinition targetFeed = new FeedStorage().getFeedDefinitionData(target.getDataFeedID(), conn);
                 Key sourceKey = findKey(sourceDataSourceField, sourceFeed);
+                if (sourceKey == null) {
+                    throw new ServiceRuntimeException("We couldn't find a field by the name of " + sourceKey + " in " + sourceDataSource + ".");
+                }
                 Key targetKey = findKey(targetDataSourceField, targetFeed);
+                if (targetKey == null) {
+                    throw new ServiceRuntimeException("We couldn't find a field by the name of " + targetKey + " in " + targetDataSource + ".");
+                }
                 compositeConnections.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(),
                         sourceKey, targetKey, sourceFeed.getFeedName(), targetFeed.getFeedName(), false, false, false, false));
             }
@@ -119,8 +125,13 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
 
             compositeFeedDefinition.populateFields(conn);
 
-            long feedID = new FeedStorage().addFeedDefinitionData(compositeFeedDefinition, conn);
-            DataStorage.liveDataSource(feedID, conn);
+            if (compositeFeedDefinition.getDataFeedID() == 0) {
+                long feedID = new FeedStorage().addFeedDefinitionData(compositeFeedDefinition, conn);
+                DataStorage.liveDataSource(feedID, conn);    
+            } else {
+                new FeedStorage().updateDataFeedConfiguration(compositeFeedDefinition, conn);
+            }
+            
             return new ResponseInfo(ResponseInfo.ALL_GOOD, "<dataSourceKey>" + compositeFeedDefinition.getApiKey() + "</dataSourceKey>");
         } finally {
             if (dataStorage != null) {

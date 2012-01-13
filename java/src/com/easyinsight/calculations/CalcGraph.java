@@ -100,6 +100,19 @@ public class CalcGraph {
                     components.add(new ReaggregateComponent((ReaggregateAnalysisMeasure) calcNode));
                 }
             }
+            FieldFilterComponent fieldFilterComponent = new FieldFilterComponent();
+            components.add(fieldFilterComponent);
+            for (AnalysisItem calcNode : allOtherItems) {
+                if (calcNode.getFilters() != null && calcNode.getFilters().size() > 0) {
+                    for (FilterDefinition filterDefinition : calcNode.getFilters()) {
+                        if (filterDefinition.getField() != null) {
+                            fieldFilterComponent.addFilterPair(calcNode, filterDefinition);
+                        } else {
+                            components.addAll(filterDefinition.createComponents(false, new FieldFilterProcessor(calcNode), calcNode, true));
+                        }
+                    }
+                }
+            }
         }
         return components;
     }

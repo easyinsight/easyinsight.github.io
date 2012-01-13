@@ -212,6 +212,8 @@
         private function onScript(event:MarmotScriptEvent):void {
             analysisDefinition.marmotScript = event.script;
             analysisDefinition.reportRunMarmotScript = event.afterScript;
+            dispatchEvent(new AnalysisChangedEvent());
+            dataView.refresh();
         }
         ]]></mx:Script>
     <mx:Button id="calculationButton" toolTip="Create Calculation"
