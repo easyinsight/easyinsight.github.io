@@ -100,6 +100,7 @@
         private function save():void {
             var subjectResults:Array = Validator.validateAll([subjectValidator]);
             if (subjectResults.length > 0) {
+                tabNavigator.selectedIndex = 3;
                 subjectInput.setFocus();
                 subjectInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
                 return;
@@ -286,7 +287,7 @@
         <mx:method name="getUserStubs" result="gotUserStubs()"/>
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" backgroundColor="#FFFFFF">
-        <mx:TabNavigator creationPolicy="all" width="600" height="500">
+        <mx:TabNavigator creationPolicy="all" width="600" height="500" id="tabNavigator">
             <mx:VBox label="Report" paddingLeft="10" paddingTop="10">
                 <schedule:ReportDeliveryConfiguration id="deliveryConfiguration" reportChangeable="{reportChangeable}"
                         reports="{reports}" reportID="{reportID}" formatValue="{formatValue}" deliveryLabel="{deliveryLabel}"/>

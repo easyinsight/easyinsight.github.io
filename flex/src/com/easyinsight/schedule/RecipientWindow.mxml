@@ -92,7 +92,7 @@
             </mx:HBox>
             <mx:VBox>
                 <mx:TextArea text="You'll need to upgrade to a Plus or higher account in order to send to generic email addresses. If you want to send to another user, first add that user to your Easy Insight account." borderStyle="none"
-                        backgroundAlpha="0" editable="false" selectable="false" width="400"/>
+                        backgroundAlpha="0" editable="false" selectable="false" width="400" height="75"/>
             </mx:VBox>
             <mx:HBox>
                 <mx:Label text="Enter the email address:"/>
