@@ -176,7 +176,7 @@ public abstract class Pipeline {
 
     public DataResults toList(DataSet dataSet) {
         for (IComponent component : components) {
-            System.out.println(component.getClass() + " - " + dataSet);
+           // System.out.println(component.getClass() + " - " + dataSet);
             long startTime = System.currentTimeMillis();
             dataSet = component.apply(dataSet, pipelineData);
             long endTime = System.currentTimeMillis();
