@@ -89,6 +89,11 @@
             return hierarchyAdmin.validate();
         }
 
+        public function higlight():void {
+        }
+
+        public function normal():void {
+        }
         ]]></mx:Script>
 
     <mx:VBox horizontalAlign="center" width="220" height="300">

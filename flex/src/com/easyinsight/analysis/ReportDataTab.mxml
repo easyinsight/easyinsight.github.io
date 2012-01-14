@@ -114,6 +114,12 @@
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
             PopUpManager.addPopUp(window, this);
             PopUpUtil.centerPopUp(window);
+            dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_OPENED, window));
+            window.addEventListener(Event.CLOSE, onClose, false, 0, true);
+        }
+
+        private function onClose(event:Event):void {
+            dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_CLOSED, event.currentTarget as AnalysisItemEditWindow));
         }
 
         private function createCalculatedGrouping():void {
@@ -124,6 +130,8 @@
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
             PopUpManager.addPopUp(window, this);
             PopUpUtil.centerPopUp(window);
+            dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_OPENED, window));
+            window.addEventListener(Event.CLOSE, onClose, false, 0, true);
         }
 
         private function createCalculatedDate():void {
@@ -134,6 +142,8 @@
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
             PopUpManager.addPopUp(window, this);
             PopUpUtil.centerPopUp(window);
+            dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_OPENED, window));
+            window.addEventListener(Event.CLOSE, onClose, false, 0, true);
         }
 
         private function onNewItem(event:AnalysisItemEditEvent):void {

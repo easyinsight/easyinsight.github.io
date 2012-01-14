@@ -132,7 +132,6 @@
         import mx.events.ItemClickEvent;
 
 
-
         [Bindable]
         private var measureObjects:ArrayCollection;
         [Bindable]
@@ -363,7 +362,7 @@
             aggIndex = index;
             return aggregationBox.dataProvider.getItemAt(0) as String;
         }
-        
+
         [Bindable]
         private var fieldKeyString:String;
 
@@ -376,6 +375,11 @@
         [Bindable]
         private var fieldTooltip:String;
 
+        public function higlight():void {
+        }
+
+        public function normal():void {
+        }
         ]]>
     </mx:Script>
     <mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick(event)" buttonWidth="100">

@@ -57,12 +57,6 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
         return FeedType.BASECAMP_TIME;
     }
 
-    @Override
-    protected boolean clearsData(FeedDefinition parentSource) {
-        BaseCampCompositeSource source = (BaseCampCompositeSource) parentSource;
-        return !source.isIncrementalRefresh();
-    }
-
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         BaseCampCompositeSource baseCampCompositeSource = (BaseCampCompositeSource) parentDefinition;
         String url = baseCampCompositeSource.getUrl();
@@ -95,13 +89,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                 if (lastRefreshDate == null) {
                     lastRefreshDate = new Date(1);
                 }
-                long delta = lastRefreshDate.getTime() - projectChangedAt.getTime();
 
-                long daysSinceChange = delta / (60 * 60 * 1000 * 24);
-
-                if (baseCampCompositeSource.isIncrementalRefresh() && daysSinceChange > 2) {
-                    continue;
-                }
                 loadingProgress(i, projectNodes.size(), "Synchronizing with time tracking data of " + projectName + "...", callDataID);
                 String projectStatus = queryField(curProject, "status/text()");
                 if ("template".equals(projectStatus)) {

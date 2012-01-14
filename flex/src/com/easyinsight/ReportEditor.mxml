@@ -31,6 +31,7 @@
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AnalysisItemCopyEvent;
         import com.easyinsight.analysis.AnalysisItemEditEvent;
+        import com.easyinsight.analysis.AnalysisItemEditWindow;
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypeRenderer;
         import com.easyinsight.analysis.AnalysisUtil;
@@ -39,6 +40,7 @@
         import com.easyinsight.analysis.DataServiceEvent;
         import com.easyinsight.analysis.FeedNode;
         import com.easyinsight.analysis.FieldDoubleClickEvent;
+        import com.easyinsight.analysis.FieldEditorEvent;
         import com.easyinsight.analysis.GenericDefinitionEditWindow;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
@@ -275,6 +277,16 @@
             loadController(controller, shareDataSourceSettings);
         }
 
+        private function onFieldEditorOpen(event:FieldEditorEvent):void {
+            editWindow = event.editor;
+        }
+
+        private function onFieldEditorClose(event:FieldEditorEvent):void {
+            editWindow = null;
+        }
+
+        private var editWindow:AnalysisItemEditWindow;
+
 
         [Bindable(event="analysisDefinitionChanged")]
         public function get analysisDefinition():AnalysisDefinition {
@@ -491,6 +503,8 @@
                 uiConfig();
                 rendererFactory = new ClassFactory(AvailableFieldRenderer);
                 commandProcessor = new CommandProcessor();
+                addEventListener(FieldEditorEvent.FIELD_EDITOR_OPENED, onFieldEditorOpen);
+                addEventListener(FieldEditorEvent.FIELD_EDITOR_CLOSED, onFieldEditorClose);
                 addEventListener(ReportPropertiesEvent.REPORT_PROPERTIES, onReportPropertiesEvent);
                 addEventListener(ReportEditorFieldEvent.ITEM_ADD_TO_REPORT, addFieldToReport);
                 addEventListener(ReportEditorFieldEvent.ITEM_COPY, fieldEventHandler.copyField);
@@ -768,19 +782,31 @@
 
         private function onDragComplete(event:DragEvent):void {
             event.preventDefault();
-            dataView.revertDropAreas();
+            if (editWindow == null) {
+                dataView.revertDropAreas();
+            } else {
+                editWindow.normal();
+            }
         }
 
         private function onDragStart(event:DragEvent):void {
             var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
             var wrapper:AnalysisItemWrapper = analysisItemLabel.selectedItem as AnalysisItemWrapper;
             if (wrapper.analysisItem) {
-                dataView.highlightDropAreas(wrapper.analysisItem);
+                if (editWindow == null) {
+                    dataView.highlightDropAreas(wrapper.analysisItem);
+                } else {
+                    editWindow.highlight();
+                }
             }
         }
 
         private function onDragEnd():void {
-            dataView.revertDropAreas();
+            if (editWindow == null) {
+                dataView.revertDropAreas();
+            } else {
+                editWindow.normal();
+            }
         }
 
         private function iconFunction(item:Object):Class {

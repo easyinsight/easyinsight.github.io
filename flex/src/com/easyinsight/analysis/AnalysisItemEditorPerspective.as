@@ -26,5 +26,11 @@ public class AnalysisItemEditorPerspective extends ModulePerspective implements 
     public function validate():Boolean {
         return true;
     }
+
+    public function higlight():void {
+    }
+
+    public function normal():void {
+    }
 }
 }

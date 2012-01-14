@@ -205,6 +205,7 @@
         }
 
         private function cancel():void {
+            dispatchEvent(new Event(Event.CLOSE));
             this.close();
         }
 
@@ -225,6 +226,7 @@
             }
             dispatchEvent(new AnalysisItemEditEvent(event.analysisItem, _originalWrapper, true));
             editor.removeEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
+            dispatchEvent(new Event(Event.CLOSE));
             PopUpManager.removePopUp(this);
         }
 
@@ -259,6 +261,14 @@
 
         [Bindable]
         private var linkFactory:ClassFactory;
+
+        public function highlight():void {
+            editor.higlight();
+        }
+
+        public function normal():void {
+            editor.normal();
+        }
         ]]>
     </mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" id="primaryBox">

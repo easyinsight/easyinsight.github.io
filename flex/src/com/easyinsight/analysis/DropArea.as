@@ -157,7 +157,13 @@ public class DropArea extends HBox
             analysisItemEditor.y = g.y;
         }
         PopUpManager.addPopUp(analysisItemEditor, UIComponent(Application.application));
+        dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_OPENED, analysisItemEditor));
         analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
+        analysisItemEditor.addEventListener(Event.CLOSE, onClose, false, 0, true);
+    }
+    
+    private function onClose(event:Event):void {
+        dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_CLOSED, event.currentTarget as AnalysisItemEditWindow));
     }
 
     public var startX:int;

@@ -126,38 +126,44 @@
 		]]>
 	</mx:Script>
 	<mx:VBox id="coreBox">
-        <mx:Form>
-            <mx:FormItem label="Row Level:">
-                <mx:CheckBox selected="{beforeAgg}" id="aggregationCheckbox"/>
-            </mx:FormItem>
-            <mx:FormItem label="Show on Report View:">
-                <mx:CheckBox label="Show On Report View:" selected="{showOnReportView}" id="reportViewCheckbox"/>
-            </mx:FormItem>
-            <mx:FormItem label="Filter Name:">
-                <mx:TextInput id="filterNameInput" text="{filterName}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Parameter Filter:">
-                <mx:CheckBox id="parameterFilterCheckbox" selected="{parameterFilter}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Hide Toggle:">
-                <mx:CheckBox id="toggleCheckbox" selected="{toggle}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Required Role:">
-                <util:SmartComboBox id="roleComboBox" selectedProperty="data" selectedValue="{role}">
-                    <util:dataProvider>
-                        <mx:ArrayCollection>
-                            <mx:Array>
-                                <mx:Object label="None" data="4"/>
-                                <mx:Object label="Owner" data="1"/>
-                                <mx:Object label="Editor" data="2"/>
-                                <mx:Object label="Viewer" data="3"/>
-                            </mx:Array>
-                        </mx:ArrayCollection>
-                    </util:dataProvider>
-                </util:SmartComboBox>
-            </mx:FormItem>
-        </mx:Form>
+        <mx:HBox>
+            <mx:Form>
+                <mx:FormItem label="Row Level:">
+                    <mx:CheckBox selected="{beforeAgg}" id="aggregationCheckbox"/>
+                </mx:FormItem>
+                <mx:FormItem label="Show on Report View:">
+                    <mx:CheckBox selected="{showOnReportView}" id="reportViewCheckbox"/>
+                </mx:FormItem>
+                <mx:FormItem label="Filter Name:">
+                    <mx:TextInput id="filterNameInput" text="{filterName}"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Form>
+                <mx:FormItem label="Parameter Filter:">
+                    <mx:CheckBox id="parameterFilterCheckbox" selected="{parameterFilter}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Hide Toggle:">
+                    <mx:CheckBox id="toggleCheckbox" selected="{toggle}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Required Role:">
+                    <util:SmartComboBox id="roleComboBox" selectedProperty="data" selectedValue="{role}">
+                        <util:dataProvider>
+                            <mx:ArrayCollection>
+                                <mx:Array>
+                                    <mx:Object label="None" data="4"/>
+                                    <mx:Object label="Owner" data="1"/>
+                                    <mx:Object label="Editor" data="2"/>
+                                    <mx:Object label="Viewer" data="3"/>
+                                </mx:Array>
+                            </mx:ArrayCollection>
+                        </util:dataProvider>
+                    </util:SmartComboBox>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:HBox>
+        <mx:HRule width="100%"/>
         <mx:Box id="filterDetailBox"/>
+        <mx:HRule width="100%"/>
 		<mx:HBox width="100%" horizontalAlign="center">
 			<util:SaveButton label="Save" click="save()"/>
 			<util:CancelButton label="Cancel" click="cancel()"/>

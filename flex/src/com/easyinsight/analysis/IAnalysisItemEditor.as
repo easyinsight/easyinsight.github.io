@@ -9,5 +9,7 @@ public interface IAnalysisItemEditor {
     function set dataSourceID(dataSourceID:int):void;
     function save(dataSourceID:int):void;
     function validate():Boolean;
+    function higlight():void;
+    function normal():void;
 }
 }
