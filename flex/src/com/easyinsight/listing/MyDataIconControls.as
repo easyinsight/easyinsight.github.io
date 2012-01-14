@@ -11,6 +11,7 @@ import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.scorecard.ScorecardDescriptor;
+import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.events.Event;
@@ -27,14 +28,11 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     private var obj:Object;
 
 
-    [Embed(source="../../../../assets/pencil.png")]
-    public var adminIcon:Class;
 
     [Embed(source="../../../../assets/media_play_green.png")]
     public var playIcon:Class;
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    public var deleteIcon:Class;
+
 
     private var adminButton:Button;
     private var analyzeButton:Button;
@@ -84,7 +82,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         if (_showAdmin) {
             if (adminButton == null) {
                 adminButton = new Button();
-                adminButton.setStyle("icon", adminIcon);
+                adminButton.setStyle("icon", ImageConstants.EDIT_ICON);
                 BindingUtils.bindProperty(adminButton, "toolTip", this, "adminTooltip");
                 BindingUtils.bindProperty(adminButton, "visible", this, "adminVisible");
                 adminButton.addEventListener(MouseEvent.CLICK, adminCalled);
@@ -95,7 +93,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         if (_showDelete) {
             if (deleteButton == null) {
                 deleteButton = new Button();
-                deleteButton.setStyle("icon", deleteIcon);
+                deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
                 BindingUtils.bindProperty(deleteButton, "toolTip", this, "deleteTooltip");
                 BindingUtils.bindProperty(deleteButton, "visible", this, "deleteVisible");
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteCalled);
