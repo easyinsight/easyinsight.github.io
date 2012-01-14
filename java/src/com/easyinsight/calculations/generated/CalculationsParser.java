@@ -1,5 +1,5 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g 2012-01-05 12:05:10
-package com.easyinsight.calculations.generated;
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g 2012-01-13 21:50:10
+ package com.easyinsight.calculations.generated; 
 
 import org.antlr.runtime.*;
 import java.util.Stack;
@@ -924,7 +924,7 @@ public class CalculationsParser extends Parser {
 
 
             // AST REWRITE
-            // elements: expr, expr, Variable
+            // elements: expr, Variable, expr
             // token labels: 
             // rule labels: retval
             // token list labels: 

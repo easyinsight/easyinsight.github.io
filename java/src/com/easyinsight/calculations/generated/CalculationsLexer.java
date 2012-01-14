@@ -1,5 +1,5 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g 2012-01-05 12:05:10
-package com.easyinsight.calculations.generated;
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g 2012-01-13 21:50:10
+ package com.easyinsight.calculations.generated; 
 
 import org.antlr.runtime.*;
 import java.util.Stack;
@@ -409,7 +409,7 @@ public class CalculationsLexer extends Lexer {
             if ( (LA4_0=='[') ) {
                 alt4=1;
             }
-            else if ( ((LA4_0>='0' && LA4_0<='9')||(LA4_0>='A' && LA4_0<='Z')||(LA4_0>='a' && LA4_0<='z')||(LA4_0>='\u0100' && LA4_0<='\uFFFF')) ) {
+            else if ( ((LA4_0>='0' && LA4_0<='9')||(LA4_0>='A' && LA4_0<='Z')||(LA4_0>='a' && LA4_0<='z')||(LA4_0>='\u0100' && LA4_0<='\uFFFE')) ) {
                 alt4=2;
             }
             else {
@@ -458,7 +458,7 @@ public class CalculationsLexer extends Lexer {
                 int alt5=2;
                 int LA5_0 = input.LA(1);
 
-                if ( (LA5_0=='\t'||(LA5_0>=' ' && LA5_0<='!')||(LA5_0>='#' && LA5_0<='Z')||LA5_0=='\\'||(LA5_0>='^' && LA5_0<='~')||(LA5_0>='\u0100' && LA5_0<='\uFFFF')) ) {
+                if ( (LA5_0=='\t'||(LA5_0>=' ' && LA5_0<='!')||(LA5_0>='#' && LA5_0<='Z')||LA5_0=='\\'||(LA5_0>='^' && LA5_0<='~')||(LA5_0>='\u0100' && LA5_0<='\uFFFE')) ) {
                     alt5=1;
                 }
 
@@ -467,7 +467,7 @@ public class CalculationsLexer extends Lexer {
             	case 1 :
             	    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             	    {
-            	    if ( input.LA(1)=='\t'||(input.LA(1)>=' ' && input.LA(1)<='!')||(input.LA(1)>='#' && input.LA(1)<='Z')||input.LA(1)=='\\'||(input.LA(1)>='^' && input.LA(1)<='~')||(input.LA(1)>='\u0100' && input.LA(1)<='\uFFFF') ) {
+            	    if ( input.LA(1)=='\t'||(input.LA(1)>=' ' && input.LA(1)<='!')||(input.LA(1)>='#' && input.LA(1)<='Z')||input.LA(1)=='\\'||(input.LA(1)>='^' && input.LA(1)<='~')||(input.LA(1)>='\u0100' && input.LA(1)<='\uFFFE') ) {
             	        input.consume();
 
             	    }
@@ -733,10 +733,10 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "InternationalCharacters"
     public final void mInternationalCharacters() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:81:2: ( '\\u0100' .. '\\uFFFF' )
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:81:4: '\\u0100' .. '\\uFFFF'
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:81:2: ( '\\u0100' .. '\\uFFFE' )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:81:4: '\\u0100' .. '\\uFFFE'
             {
-            matchRange('\u0100','\uFFFF'); 
+            matchRange('\u0100','\uFFFE'); 
 
             }
 
@@ -752,7 +752,7 @@ public class CalculationsLexer extends Lexer {
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:84:2: ( LowerCase | UpperCase | InternationalCharacters )
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             {
-            if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z')||(input.LA(1)>='\u0100' && input.LA(1)<='\uFFFF') ) {
+            if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z')||(input.LA(1)>='\u0100' && input.LA(1)<='\uFFFE') ) {
                 input.consume();
 
             }
@@ -777,7 +777,7 @@ public class CalculationsLexer extends Lexer {
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:87:4: OpenBrace ( Character | Digit | VariableSpecialChars ) ( Character | Digit | VariableSpecialChars | VariableWhitespace )* CloseBrace
             {
             mOpenBrace(); 
-            if ( (input.LA(1)>='!' && input.LA(1)<='Z')||input.LA(1)=='\\'||(input.LA(1)>='^' && input.LA(1)<='~')||(input.LA(1)>='\u0100' && input.LA(1)<='\uFFFF') ) {
+            if ( (input.LA(1)>='!' && input.LA(1)<='Z')||input.LA(1)=='\\'||(input.LA(1)>='^' && input.LA(1)<='~')||(input.LA(1)>='\u0100' && input.LA(1)<='\uFFFE') ) {
                 input.consume();
 
             }
@@ -792,7 +792,7 @@ public class CalculationsLexer extends Lexer {
                 int alt9=2;
                 int LA9_0 = input.LA(1);
 
-                if ( (LA9_0=='\t'||(LA9_0>=' ' && LA9_0<='Z')||LA9_0=='\\'||(LA9_0>='^' && LA9_0<='~')||(LA9_0>='\u0100' && LA9_0<='\uFFFF')) ) {
+                if ( (LA9_0=='\t'||(LA9_0>=' ' && LA9_0<='Z')||LA9_0=='\\'||(LA9_0>='^' && LA9_0<='~')||(LA9_0>='\u0100' && LA9_0<='\uFFFE')) ) {
                     alt9=1;
                 }
 
@@ -801,7 +801,7 @@ public class CalculationsLexer extends Lexer {
             	case 1 :
             	    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             	    {
-            	    if ( input.LA(1)=='\t'||(input.LA(1)>=' ' && input.LA(1)<='Z')||input.LA(1)=='\\'||(input.LA(1)>='^' && input.LA(1)<='~')||(input.LA(1)>='\u0100' && input.LA(1)<='\uFFFF') ) {
+            	    if ( input.LA(1)=='\t'||(input.LA(1)>=' ' && input.LA(1)<='Z')||input.LA(1)=='\\'||(input.LA(1)>='^' && input.LA(1)<='~')||(input.LA(1)>='\u0100' && input.LA(1)<='\uFFFE') ) {
             	        input.consume();
 
             	    }
@@ -835,7 +835,7 @@ public class CalculationsLexer extends Lexer {
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:90:2: ( ( Character | Digit ) ( Character | Digit | VariableWhitespace )* )
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:90:4: ( Character | Digit ) ( Character | Digit | VariableWhitespace )*
             {
-            if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z')||(input.LA(1)>='\u0100' && input.LA(1)<='\uFFFF') ) {
+            if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z')||(input.LA(1)>='\u0100' && input.LA(1)<='\uFFFE') ) {
                 input.consume();
 
             }
@@ -850,7 +850,7 @@ public class CalculationsLexer extends Lexer {
                 int alt10=2;
                 int LA10_0 = input.LA(1);
 
-                if ( (LA10_0=='\t'||LA10_0==' '||(LA10_0>='0' && LA10_0<='9')||(LA10_0>='A' && LA10_0<='Z')||(LA10_0>='a' && LA10_0<='z')||(LA10_0>='\u0100' && LA10_0<='\uFFFF')) ) {
+                if ( (LA10_0=='\t'||LA10_0==' '||(LA10_0>='0' && LA10_0<='9')||(LA10_0>='A' && LA10_0<='Z')||(LA10_0>='a' && LA10_0<='z')||(LA10_0>='\u0100' && LA10_0<='\uFFFE')) ) {
                     alt10=1;
                 }
 
@@ -859,7 +859,7 @@ public class CalculationsLexer extends Lexer {
             	case 1 :
             	    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             	    {
-            	    if ( input.LA(1)=='\t'||input.LA(1)==' '||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z')||(input.LA(1)>='\u0100' && input.LA(1)<='\uFFFF') ) {
+            	    if ( input.LA(1)=='\t'||input.LA(1)==' '||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z')||(input.LA(1)>='\u0100' && input.LA(1)<='\uFFFE') ) {
             	        input.consume();
 
             	    }
@@ -1081,8 +1081,8 @@ public class CalculationsLexer extends Lexer {
     static final String DFA11_minS =
         "\1\11\7\uffff\1\60\1\uffff\1\41\1\uffff\2\11\7\uffff\1\53\2\11";
     static final String DFA11_maxS =
-        "\1\uffff\7\uffff\1\71\1\uffff\1\uffff\1\uffff\2\uffff\7\uffff\1"+
-        "\71\2\uffff";
+        "\1\ufffe\7\uffff\1\71\1\uffff\1\ufffe\1\uffff\2\ufffe\7\uffff\1"+
+        "\71\2\ufffe";
     static final String DFA11_acceptS =
         "\1\uffff\1\1\1\2\1\3\1\4\1\5\1\6\1\7\1\uffff\1\11\1\uffff\1\13\2"+
         "\uffff\1\16\1\20\1\10\1\15\1\12\1\17\1\14\3\uffff";
@@ -1091,7 +1091,7 @@ public class CalculationsLexer extends Lexer {
     static final String[] DFA11_transitionS = {
             "\2\17\1\uffff\2\17\22\uffff\1\17\1\uffff\1\14\5\uffff\1\1\1"+
             "\2\1\5\1\3\1\7\1\4\1\10\1\6\12\15\7\uffff\32\16\1\12\1\uffff"+
-            "\1\13\1\11\2\uffff\32\16\u0085\uffff\uff00\16",
+            "\1\13\1\11\2\uffff\32\16\u0085\uffff\ufeff\16",
             "",
             "",
             "",
@@ -1101,12 +1101,12 @@ public class CalculationsLexer extends Lexer {
             "",
             "\12\21",
             "",
-            "\72\16\1\uffff\1\16\1\uffff\41\16\u0081\uffff\uff00\16",
+            "\72\16\1\uffff\1\16\1\uffff\41\16\u0081\uffff\ufeff\16",
             "",
             "\1\23\26\uffff\73\23\1\uffff\1\23\1\uffff\41\23\u0081\uffff"+
-            "\uff00\23",
+            "\ufeff\23",
             "\1\16\26\uffff\1\16\17\uffff\12\26\7\uffff\4\16\1\25\25\16"+
-            "\6\uffff\32\16\u0085\uffff\uff00\16",
+            "\6\uffff\32\16\u0085\uffff\ufeff\16",
             "",
             "",
             "",
@@ -1116,9 +1116,9 @@ public class CalculationsLexer extends Lexer {
             "",
             "\1\21\1\uffff\1\21\2\uffff\12\27",
             "\1\16\26\uffff\1\16\17\uffff\12\26\7\uffff\4\16\1\25\25\16"+
-            "\6\uffff\32\16\u0085\uffff\uff00\16",
+            "\6\uffff\32\16\u0085\uffff\ufeff\16",
             "\1\16\26\uffff\1\16\17\uffff\12\27\7\uffff\32\16\6\uffff\32"+
-            "\16\u0085\uffff\uff00\16"
+            "\16\u0085\uffff\ufeff\16"
     };
 
     static final short[] DFA11_eot = DFA.unpackEncodedString(DFA11_eotS);

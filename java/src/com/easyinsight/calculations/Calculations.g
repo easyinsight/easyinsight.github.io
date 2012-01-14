@@ -78,7 +78,7 @@ fragment UpperCase
 	:	'A'..'Z';
 	
 fragment InternationalCharacters
-	:	'\u0100'..'\uFFFF';
+	:	'\u0100'..'\uFFFE';
 	
 fragment Character
 	:	LowerCase | UpperCase | InternationalCharacters;
