@@ -183,7 +183,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                                 } catch (ParseException e) {
                                     milestoneDeadline = altFormat.parse(milestoneDl);
                                 }
-                            } else {
+                            } else if (milestoneDl != null) {
                                 try {
                                     milestoneDeadline = deadlineFormat.parse(milestoneDl);
                                 } catch (ParseException e) {
