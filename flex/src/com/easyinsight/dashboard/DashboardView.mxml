@@ -79,6 +79,7 @@
                 //addChildAt(dashboardHeader, 0);
                 nameContainer.includeInLayout = true;
                 //addChildAt(nameContainer, 1);
+                box.visible = true;
                 box.includeInLayout = true;
                 //addChildAt(box, 2);
             }
@@ -136,6 +137,19 @@
 
         private function gotDashboard():void {
             dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
+            if (dashboard.borderThickness == 0 && exchangeItem == null) {
+                nameContainer.includeInLayout = false;
+                box.includeInLayout = false;
+            }
+            if (dashboard.backgroundColor == 0xFFFFFF) {
+                setStyle("backgroundColor", 0xFFFFFF);
+            }
+            if (_fixedID) {
+                setStyle("paddingLeft", 0);
+                setStyle("paddingTop", 0);
+                setStyle("paddingRight", 0);
+                setStyle("paddingBottom", 0);
+            }
             dataSource = dashboard.dataSourceInfo;
             dashboardName = dashboard.name;
             description = dashboard.description;
@@ -324,10 +338,10 @@
         <mx:Label text="{dashboardName}" fontSize="24" maxWidth="600" color="#000000"/>
         <mx:LinkButton label="{reportInfoLabel}" textDecoration="underline" fontSize="14" visible="{showReportInfoButton}" click="toggleReportInfo()"/>
     </mx:HBox>
-    <mx:Box width="100%" styleName="descriptionContainer" id="box" visible="false">
+    <mx:Box width="100%" styleName="descriptionContainer" id="box" visible="false" includeInLayout="false">
         <report:DefaultDescriptionArea previousReportLabel="{previousReportLabel}" previousReportAvailable="{previousReportAvailable}"
                                    nextReportAvailable="{nextReportAvailable}" nextReportLabel="{nextReportLabel}" showAdd="{_showAddBar}" description="{description}"
-                                   previousReport="toPreviousReport()" nextReport="toNextReport()" saveToAccount="saveReport()" includeInLayout="false"/>
+                                   previousReport="toPreviousReport()" nextReport="toNextReport()" saveToAccount="saveReport()"/>
     </mx:Box>
     <!--<mx:Box width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" id="coreDashboardArea" horizontalScrollPolicy="off">
         <mx:VBox width="100%" height="100%" backgroundAlpha="1" borderColor="0" id="dashboardStyleArea" borderStyle="solid" borderThickness="1">

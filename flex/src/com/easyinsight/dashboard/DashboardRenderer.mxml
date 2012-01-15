@@ -49,6 +49,8 @@
                 dashboardStyleArea.setStyle("paddingTop", dashboard.padding);
                 dashboardStyleArea.setStyle("paddingBottom", dashboard.padding);
             } else {
+                removeChild(filterViewStack);
+                setStyle("paddingTop", 0);
                 setStyle("paddingLeft", 0);
                 setStyle("paddingRight", 0);
                 setStyle("paddingBottom", 0);
