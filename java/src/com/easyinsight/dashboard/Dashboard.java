@@ -9,6 +9,7 @@ import com.easyinsight.email.UserStub;
 import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.util.RandomTextGenerator;
 
 
 import java.util.*;
@@ -131,7 +132,7 @@ public class Dashboard implements Cloneable {
     public Dashboard clone() throws CloneNotSupportedException {
         Dashboard dashboard = (Dashboard) super.clone();
         dashboard.setId(0);
-        dashboard.setUrlKey(null);
+        dashboard.setUrlKey(RandomTextGenerator.generateText(20));
         dashboard.setRootElement(rootElement.clone());
         return dashboard;
     }
@@ -352,4 +353,8 @@ public class Dashboard implements Cloneable {
     public static void main(String[] args) {
         System.out.println(Integer.parseInt("CCCCCC", 16));
     }
+
+    /*public void updateIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
+        getRootElement().updateReportIDs(reportReplacementMap);
+    }*/
 }
