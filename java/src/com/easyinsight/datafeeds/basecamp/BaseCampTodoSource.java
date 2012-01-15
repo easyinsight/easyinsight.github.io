@@ -140,8 +140,6 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     continue;
                 }
 
-                System.out.println("Project " + projectName + " last updated at " + projectChangedAt + " while our last refresh = " + lastRefreshDate);
-
                 String announcement = queryField(curProject, "announcement/text()"); 
                 loadingProgress(i, projectNodes.size(), "Synchronizing with todo items of " + projectName + "...", callDataID);
                 String projectStatus = queryField(curProject, "status/text()");
@@ -177,15 +175,23 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                         if (startAtString != null) {
                             startDate = deadlineFormat.parse(startAtString);
                         }
-                        Date milestoneDeadline;
-                        if (milestoneDl != null && "Milestone".equals(type)) {
-                            try {
-                                milestoneDeadline = deadlineFormat.parse(milestoneDl);
-                            } catch (ParseException e) {
-                                milestoneDeadline = altFormat.parse(milestoneDl);
+                        Date milestoneDeadline = null;
+                        try {
+                            if (milestoneDl != null && "Milestone".equals(type)) {
+                                try {
+                                    milestoneDeadline = deadlineFormat.parse(milestoneDl);
+                                } catch (ParseException e) {
+                                    milestoneDeadline = altFormat.parse(milestoneDl);
+                                }
+                            } else {
+                                try {
+                                    milestoneDeadline = deadlineFormat.parse(milestoneDl);
+                                } catch (ParseException e) {
+                                    milestoneDeadline = deadlineTimeFormat.parse(milestoneDl);
+                                }
                             }
-                        } else {
-                            milestoneDeadline = deadlineTimeFormat.parse(milestoneDl);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
                         }
                         String milestoneCreatedOnString = queryField(milestoneNode, "created-on/text()");
                         Date milestoneCreatedOn = deadlineFormat.parse(milestoneCreatedOnString);
