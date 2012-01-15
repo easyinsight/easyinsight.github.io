@@ -131,6 +131,7 @@ public class Dashboard implements Cloneable {
     public Dashboard clone() throws CloneNotSupportedException {
         Dashboard dashboard = (Dashboard) super.clone();
         dashboard.setId(0);
+        dashboard.setUrlKey(null);
         dashboard.setRootElement(rootElement.clone());
         return dashboard;
     }
