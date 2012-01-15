@@ -2093,7 +2093,6 @@ public class ExportService {
                             TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
                             if (textValueExtension.getColor() != 0) {
                                 String hexString = "#" + Integer.toHexString(textValueExtension.getColor());
-                                System.out.println(hexString);
                                 styleString.append(";color:").append(hexString);
                             }
                         }
@@ -2116,7 +2115,6 @@ public class ExportService {
             sb.append("</tr>");
         }
         sb.append("</table>");
-        System.out.println(sb.toString());
         return sb.toString();
     }
 
@@ -2277,7 +2275,6 @@ public class ExportService {
             i++;
         }
         sb.append("</table>");
-        System.out.println(sb.toString());
         return sb.toString();
     }
 }
