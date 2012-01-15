@@ -70,7 +70,7 @@
     <mx:ViewStack resizeToContent="true" selectedIndex="{index}" addedToStage="PopUpUtil.centerPopUp(this)">
         <mx:VBox horizontalAlign="center">
             <mx:Label text="Oops, something went wrong!" fontSize="20"/>
-            <mx:Button label="Show Error Details" fontSize="12" click="toDetail()" visible="{}"/>
+            <mx:Button label="Show Error Details" fontSize="12" click="toDetail()"/>
             <mx:HBox width="100%" horizontalAlign="center">
                 <mx:Button label="Close" fontSize="14" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
