@@ -74,6 +74,7 @@
             });
             if (!_fixedID) {
                 //Alert.show("normal dashboard, no?");
+                dashboardHeader.visible = true;
                 dashboardHeader.includeInLayout = true;
                 //addChildAt(dashboardHeader, 0);
                 nameContainer.includeInLayout = true;
@@ -317,7 +318,7 @@
         <mx:method name="getDashboardView" result="gotDashboard()"/>
         <mx:method name="keepDashboard" result="keptDashboard()"/>
     </mx:RemoteObject>
-    <dashboard:DashboardSlimHeader id="dashboardHeader" dataSource="{dataSource}" viewFactory="{rootView}" includeInLayout="false"/>
+    <dashboard:DashboardSlimHeader id="dashboardHeader" dataSource="{dataSource}" viewFactory="{rootView}" includeInLayout="false" visible="false"/>
     <mx:HBox width="100%" horizontalAlign="center" paddingTop="5" paddingBottom="5" verticalAlign="middle" id="nameContainer" includeInLayout="false">
         <mx:HBox id="breadCrumbBox"/>
         <mx:Label text="{dashboardName}" fontSize="24" maxWidth="600" color="#000000"/>
