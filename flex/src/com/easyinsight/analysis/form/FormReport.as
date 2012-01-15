@@ -26,6 +26,10 @@ public class FormReport extends AnalysisDefinition {
         this.formID = FormReport(savedDef).formID;
     }
 
+    override public function supportsEmbeddedFonts():Boolean {
+        return true;
+    }
+
     override public function getFields():ArrayCollection {
         return columns;
     }

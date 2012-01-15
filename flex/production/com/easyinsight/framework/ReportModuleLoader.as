@@ -16,6 +16,7 @@ import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartModule;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartModule;
 import com.easyinsight.analysis.crosstab.CrosstabModule;
 import com.easyinsight.analysis.diagram.DiagramModule;
+import com.easyinsight.analysis.form.FormModule;
 import com.easyinsight.analysis.gauge.GaugeModule;
 import com.easyinsight.analysis.list.ListModule;
 import com.easyinsight.analysis.tree.TreeModule;
@@ -62,7 +63,8 @@ public class ReportModuleLoader extends EventDispatcher {
                 _reportRendererModule == "TrendGridModule.swf" || _reportRendererModule == "DiagramModule.swf" ||
                 _reportRendererModule == "TrendModule.swf" || _reportRendererModule == "GaugeModule.swf" ||
                 _reportRendererModule == "LineChartModule.swf" || _reportRendererModule == "AreaChartModule.swf" ||
-                _reportRendererModule == "YTD.swf" || _reportRendererModule == "CompareYears.swf") {
+                _reportRendererModule == "YTD.swf" || _reportRendererModule == "CompareYears.swf" ||
+                _reportRendererModule == "FormModule.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
@@ -127,6 +129,8 @@ public class ReportModuleLoader extends EventDispatcher {
                 return new CompareYearsReport();
             } else if (moduleName == "YTD.swf") {
                 return new YTDReport();
+            } else if (moduleName == "FormModule.swf") {
+                return new FormModule();
             }
         }
         return moduleInfo.factory.create();
