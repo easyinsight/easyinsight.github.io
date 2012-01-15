@@ -1,17 +1,6 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*" width="100%"
          height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" horizontalScrollPolicy="off">
-    <mx:AddChild position="before">
-        <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}" id="filterViewStack">
-            <mx:Box/>
-            <mx:VBox width="100%" horizontalAlign="center">
-                <filtering:TransformContainer id="transformContainer" filterEditable="false"
-                                              existingFilters="{filterDefinitions}"
-                                              width="100%" feedID="{dataSourceID}"
-                                              reportView="true" dashboardID="{_dashboardID}" updatedTransforms="transformsUpdated(event)"/>
-            </mx:VBox>
-        </mx:ViewStack>
-    </mx:AddChild>
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
@@ -22,9 +11,11 @@
         private var _dashboard:Dashboard;
         private var rootView:IDashboardViewComponent;
 
+        [Bindable]
         private var filterDefinitions:ArrayCollection;
         private var _dataSourceID:int;
         private var _filterIndex:int;
+        [Bindable]
         private var _dashboardID:int;
         private var _initialFilters:ArrayCollection;
         private var _fixedID:Boolean;
@@ -81,7 +72,9 @@
                 filterDefinitions.addAll(_initialFilters);
             }
             this.filterDefinitions = filterDefinitions;
+
             filterIndex = (dashboard.filters != null && dashboard.filters.length > 0) ? 1 : 0;
+
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = dataSourceID;
             dashboardEditorMetadata.role = dashboard.role;
@@ -167,6 +160,15 @@
             _initialFilters = value;
         }
         ]]></mx:Script>
+    <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}" id="filterViewStack">
+        <mx:Box/>
+
+            <filtering:TransformContainer id="transformContainer" filterEditable="false"
+                                          existingFilters="{filterDefinitions}"
+                                          width="100%" feedID="{dataSourceID}"
+                                          reportView="true" dashboardID="{_dashboardID}" updatedTransforms="transformsUpdated(event)"/>
+
+    </mx:ViewStack>
     <mx:VBox width="100%" height="100%" backgroundAlpha="1" borderColor="0" id="dashboardStyleArea">
         <mx:Canvas width="100%" height="100%" horizontalScrollPolicy="off">
             <mx:Canvas id="dashboardCanvas" width="100%" height="100%" horizontalScrollPolicy="off"/>

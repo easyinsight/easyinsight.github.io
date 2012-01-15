@@ -37,6 +37,7 @@ public class ActionDashboardLog extends ActionLog {
 
     public ActionDashboardLog(DashboardDescriptor dashboardDescriptor, int actionType, Date actionDate) {
         this.dashboardDescriptor = dashboardDescriptor;
+        dashboardID = dashboardDescriptor.getId();
         setActionType(actionType);
         setActionDate(actionDate);
     }
@@ -55,6 +56,26 @@ public class ActionDashboardLog extends ActionLog {
 
     public void setDashboardID(long dashboardID) {
         this.dashboardID = dashboardID;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        ActionDashboardLog that = (ActionDashboardLog) o;
+
+        if (dashboardID != that.dashboardID) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (int) (dashboardID ^ (dashboardID >>> 32));
+        return result;
     }
 }
 

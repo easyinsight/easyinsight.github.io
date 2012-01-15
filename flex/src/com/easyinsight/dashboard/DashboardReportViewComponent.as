@@ -16,6 +16,7 @@ import flash.events.Event;
 
 import mx.collections.ArrayCollection;
 import mx.containers.VBox;
+import mx.controls.Alert;
 import mx.controls.Label;
 
 public class DashboardReportViewComponent extends VBox implements IDashboardViewComponent  {
@@ -176,6 +177,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         var filterDefinitions:ArrayCollection = event.reportInfo.report.filterDefinitions;
         //viewFactory.filterDefinitions = filterDefinitions;
         if (event.reportInfo.report.filterDefinitions.length > 0) {
+
             var parentFilters:ArrayCollection = createAdditionalFilters(filterMap);
             transformContainer = new TransformContainer();
             /*transformContainer.setStyle("borderStyle", dashboardStack.filterBorderStyle);
@@ -187,7 +189,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             for each (var filterDefinition:FilterDefinition in filterDefinitions) {
                 var exists:Boolean = false;
                 for each (var existing:FilterDefinition in parentFilters) {
-                    if (existing.getType() == filterDefinition.getType()) {
+                    if (existing.qualifiedName() == filterDefinition.qualifiedName()) {
                         exists = true;
                     }
                 }
@@ -197,6 +199,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                 myFilterColl.addItem(filterDefinition);
             }
             if (myFilterColl.length > 0) {
+
                 hasFilters = true;
                 transformContainer.existingFilters = myFilterColl;
                 filterMap[elementID] = myFilterColl;

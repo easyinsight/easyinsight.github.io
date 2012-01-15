@@ -93,7 +93,7 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
 
                 var child:UIComponent = DashboardElementFactory.createViewUIComponent(e.dashboardElement, dashboardEditorMetadata);
                 var childSizeInfo:SizeInfo = IDashboardViewComponent(child).obtainPreferredSizeInfo();
-                if (gridAbsoluteWidth) {
+                if (childSizeInfo.preferredWidth > 0) {
 
                 } else {
                     gridItem.percentWidth = 100;
@@ -130,17 +130,19 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
                 gridItem.addChild(child);
                 gridRow.addChild(gridItem);
             }
-            
-            if (!gridAbsoluteWidth) {
-                gridRow.percentWidth = 100;
-            }
+
+            gridRow.percentWidth = 100;
+            /*if (!gridAbsoluteWidth) {
+
+            }*/
             if (!gridAbsoluteHeight) {
                 gridRow.percentHeight = 100;
             }
         }
-        if (!gridAbsoluteWidth) {
-            percentWidth = 100;
-        }
+        percentWidth = 100;
+        /*if (!gridAbsoluteWidth) {
+
+        }*/
         if (!gridAbsoluteHeight) {
             percentHeight = 100;
         }
