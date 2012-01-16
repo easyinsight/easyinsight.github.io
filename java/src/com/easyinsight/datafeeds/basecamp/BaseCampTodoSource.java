@@ -385,10 +385,8 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     }
                 }
                 if (!source.isIncrementalRefresh() || lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
-                    System.out.println("doing insert");
                     IDataStorage.insertData(ds);
                 } else {
-                    System.out.println("doing update");
                     StringWhere stringWhere = new StringWhere(keys.get(PROJECTID), projectIdToRetrieve);
                     IDataStorage.updateData(ds, Arrays.asList((IWhere) stringWhere));
                 }

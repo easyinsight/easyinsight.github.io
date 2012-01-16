@@ -39,7 +39,6 @@ public class CopyFields extends Function {
                 Matcher matcher = pattern.matcher(field.toDisplay().toLowerCase());
                 if (matcher.matches()) {
                     AnalysisItem newField = fromTemplate(template, field, copyString);
-                    System.out.println("Added new field " + newField.toDisplay());
                     newFields.add(newField);
                 }
             }

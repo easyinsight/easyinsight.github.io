@@ -453,8 +453,6 @@ public class DataStorage implements IDataStorage {
 
         if (newFieldsFound || !fieldMigrations.isEmpty()) {
 
-            System.out.println("*** ACTUALLY MIGRATING");
-
             int previousVersion = metadata.getVersion();
             this.version = previousVersion + 1;
             this.metadata.setVersion(this.version);

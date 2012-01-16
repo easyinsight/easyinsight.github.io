@@ -38,7 +38,6 @@ public class ReplaceCalculation extends Function {
                     //String hackName = copyCalc.toDisplay().replaceAll("/", "t").replaceAll("-", "d");
                     String hackName = copyCalc.toDisplay();
                     String newCalculationString = baseString.replaceAll(template.toDisplay(), hackName);
-                    System.out.println(newCalculationString);
                     copyCalc.setCalculationString(newCalculationString);
                     verticalListDefinition.getMeasures().add(copyCalc);
                 }

@@ -436,10 +436,8 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
                 BaseCampTodoSource.MILESTONE_CREATED_ON.equals(name) || BaseCampTodoSource.DEADLINE.equals(name) ||
                 BaseCampTodoSource.CREATEDDATE.equals(name) || BaseCampTodoSource.COMPLETEDDATE.equals(name) ||
                 BaseCampTodoSource.DUEON.equals(name)) {
-            System.out.println("Correct");
             return false;
         }
-        System.out.println("Incorrect");
         return true;
     }
 

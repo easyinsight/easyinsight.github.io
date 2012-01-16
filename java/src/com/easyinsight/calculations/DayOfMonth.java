@@ -37,7 +37,6 @@ public class DayOfMonth extends Function {
             } else {
                 string = "GMT";
             }
-            System.out.println("using " + string);
             TimeZone timeZone = TimeZone.getTimeZone(string);
             calendar.setTimeZone(timeZone);
             calendar.setTimeInMillis(startDate.getTime());

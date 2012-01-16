@@ -494,7 +494,7 @@ public class SolutionService {
             Dashboard target = new DashboardStorage().getDashboard(dashboardDescriptor.getId());
             FeedDefinition sourceDataSource = new FeedStorage().getFeedDefinitionData(source.getDataSourceID());
             FeedDefinition targetDataSource = new FeedStorage().getFeedDefinitionData(target.getDataSourceID());
-            analyze(source.allItems(sourceDataSource.getFields()), target.allItems(targetDataSource.getFields()));
+            //analyze(source.allItems(sourceDataSource.getFields()), target.allItems(targetDataSource.getFields()));
         } catch (Exception e) {
             LogClass.error(e);
         }
@@ -740,7 +740,7 @@ public class SolutionService {
         return keys;
     }
     
-    private void analyze(List<EIDescriptor> originalDescriptors, List<EIDescriptor> newDescriptors) {
+    /*private void analyze(List<EIDescriptor> originalDescriptors, List<EIDescriptor> newDescriptors) {
         boolean collide = false;
         Map<String, EIDescriptor> map = new HashMap<String, EIDescriptor>();
         for (EIDescriptor descriptor : originalDescriptors) {
@@ -758,7 +758,7 @@ public class SolutionService {
         } else {
             System.out.println("No collisions");
         }
-    }
+    }*/
 
     private Map<Long, Long> createDataSourceReplacementMap(FeedDefinition localDefinition, FeedDefinition sourceDefinition, EIConnection conn) throws SQLException {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID = ?");

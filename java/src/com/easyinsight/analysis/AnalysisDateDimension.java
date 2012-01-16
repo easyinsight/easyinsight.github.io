@@ -182,7 +182,6 @@ public class AnalysisDateDimension extends AnalysisDimension {
             }
             if (calendar == null) {
                 calendar = Calendar.getInstance();
-                System.out.println("setting first day of week to " + SecurityUtil.getFirstDayOfWeek());
                 calendar.setFirstDayOfWeek(SecurityUtil.getFirstDayOfWeek());
             }
             calendar.setTimeInMillis(tempDate.getTime());
