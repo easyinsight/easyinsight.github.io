@@ -2,6 +2,8 @@ package com.easyinsight.core;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: James Boe
@@ -23,6 +25,12 @@ public class Key implements Comparable<Key>, Serializable, Cloneable {
 
     public boolean hasDataSource(long dataSourceID) {
         return false;
+    }
+    
+    public List<EIDescriptor> getDescriptors() {
+        List<EIDescriptor> descriptors = new ArrayList<EIDescriptor>();
+        descriptors.add(new KeyDescriptor(this));
+        return descriptors;
     }
 
     public long getKeyID() {

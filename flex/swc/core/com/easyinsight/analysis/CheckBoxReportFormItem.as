@@ -7,9 +7,13 @@ import mx.controls.CheckBox;
 public class CheckBoxReportFormItem extends ReportFormItem {
 
     private var checkBox:CheckBox;
+    
+    private var modifierFunction:Function;
 
-    public function CheckBoxReportFormItem(label:String, property:String, value:Object, report:Object, enabledProperty:String = null, reloadOnChange:Boolean = false) {
+    public function CheckBoxReportFormItem(label:String, property:String, value:Object, report:Object, enabledProperty:String = null, reloadOnChange:Boolean = false,
+            modifierFunction:Function = null) {
         super(label, property, value, report, enabledProperty, reloadOnChange);
+        this.modifierFunction = modifierFunction;
     }
 
     protected override function createChildren():void {
@@ -24,6 +28,9 @@ public class CheckBoxReportFormItem extends ReportFormItem {
             });
         }
         addChild(checkBox);
+        if (modifierFunction) {
+            this.enabled = modifierFunction.call(this, report);
+        }
     }
 
     override protected function getValue():Object {
