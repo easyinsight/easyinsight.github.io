@@ -7,6 +7,7 @@ import com.easyinsight.core.Value;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * User: jamesboe
@@ -26,9 +27,20 @@ public class Year extends Function {
             }
         }
         if (startDate != null) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(startDate);
-            return new NumericValue(cal.get(Calendar.YEAR));
+            Calendar calendar = Calendar.getInstance();
+            int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
+            String string;
+            if (time > 0) {
+                string = "GMT-"+Math.abs(time);
+            } else if (time < 0) {
+                string = "GMT+"+Math.abs(time);
+            } else {
+                string = "GMT";
+            }
+            TimeZone timeZone = TimeZone.getTimeZone(string);
+            calendar.setTimeZone(timeZone);
+            calendar.setTimeInMillis(startDate.getTime());
+            return new NumericValue(calendar.get(Calendar.YEAR));
         } else {
             return new EmptyValue();
         }

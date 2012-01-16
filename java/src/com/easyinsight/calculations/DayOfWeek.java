@@ -8,6 +8,7 @@ import com.easyinsight.security.SecurityUtil;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * User: jamesboe
@@ -27,10 +28,21 @@ public class DayOfWeek extends Function {
             }
         }
         if (startDate != null) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(startDate);
-            cal.setFirstDayOfWeek(SecurityUtil.getFirstDayOfWeek());
-            return new NumericValue(cal.get(Calendar.DAY_OF_WEEK));
+            Calendar calendar = Calendar.getInstance();
+            int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
+            String string;
+            if (time > 0) {
+                string = "GMT-"+Math.abs(time);
+            } else if (time < 0) {
+                string = "GMT+"+Math.abs(time);
+            } else {
+                string = "GMT";
+            }
+            TimeZone timeZone = TimeZone.getTimeZone(string);
+            calendar.setTimeZone(timeZone);
+            calendar.setTimeInMillis(startDate.getTime());
+            calendar.setFirstDayOfWeek(SecurityUtil.getFirstDayOfWeek());
+            return new NumericValue(calendar.get(Calendar.DAY_OF_WEEK));
         } else {
             return new EmptyValue();
         }
