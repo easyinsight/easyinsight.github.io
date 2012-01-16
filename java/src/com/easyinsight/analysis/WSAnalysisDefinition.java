@@ -1,6 +1,9 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSKPIDefinition;
+import com.easyinsight.core.AnalysisItemDescriptor;
+import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.core.FilterDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
@@ -652,5 +655,32 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public List<Intention> createIntentions(List<AnalysisItem> fields, int type) throws SQLException {
         return new ArrayList<Intention>();
+    }
+
+    public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {
+        List<EIDescriptor> allItems = new ArrayList<EIDescriptor>();
+        Set<AnalysisItem> items = getColumnItems(dataSourceItems);
+        for (AnalysisItem analysisItem : items) {
+            allItems.add(new AnalysisItemDescriptor(analysisItem));
+            if (analysisItem.getFilters() != null) {
+                for (FilterDefinition filterDefinition : analysisItem.getFilters()) {
+                    allItems.add(new FilterDescriptor(filterDefinition));
+                }
+            }
+            allItems.addAll(analysisItem.getKey().getDescriptors());
+        }
+        for (AnalysisItem addedItem : getAddedItems()) {
+            allItems.add(new AnalysisItemDescriptor(addedItem));
+            if (addedItem.getFilters() != null) {
+                for (FilterDefinition filterDefinition : addedItem.getFilters()) {
+                    allItems.add(new FilterDescriptor(filterDefinition));
+                }
+            }
+            allItems.addAll(addedItem.getKey().getDescriptors());
+        }
+        for (FilterDefinition filterDefinition : getFilterDefinitions()) {
+            allItems.add(new FilterDescriptor(filterDefinition));
+        }
+        return allItems;
     }
 }

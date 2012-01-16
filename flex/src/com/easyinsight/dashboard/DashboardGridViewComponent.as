@@ -6,7 +6,6 @@ import mx.collections.ArrayCollection;
 import mx.containers.Grid;
 import mx.containers.GridItem;
 import mx.containers.GridRow;
-import mx.controls.Alert;
 import mx.core.UIComponent;
 
 public class DashboardGridViewComponent extends Grid implements IDashboardViewComponent {
@@ -53,11 +52,6 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
 
     protected override function createChildren():void {
         super.createChildren();
-        /*if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
-            this.percentWidth = 100;
-            this.percentHeight = 100;
-        }*/
-        var gridAbsoluteWidth:Boolean = false;
         var gridAbsoluteHeight:Boolean = false;
         for (var i1:int = 0; i1 < dashboardGrid.rows; i1++) {
             for (var j1:int = 0; j1 < dashboardGrid.columns; j1++) {
@@ -65,9 +59,9 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
                 var child1:UIComponent = DashboardElementFactory.createViewUIComponent(e1.dashboardElement, dashboardEditorMetadata);
                 var childSizeInfo1:SizeInfo = IDashboardViewComponent(child1).obtainPreferredSizeInfo();
                 if (childSizeInfo1.preferredWidth != 0) {
-                    gridAbsoluteWidth = true;
+
                 }
-                if (childSizeInfo1.preferredHeight != 0) {
+                if (childSizeInfo1.preferredHeight != 0 || childSizeInfo1.autoCalcHeight) {
                     gridAbsoluteHeight = true;
                 }
             }
@@ -78,10 +72,6 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
 
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
             var gridRow:GridRow = new GridRow();
-            /*if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
-                gridRow.percentWidth = 100;
-                gridRow.percentHeight = 100;
-            }*/
             gridRow.setStyle("paddingLeft", 0);
             gridRow.setStyle("paddingRight", 0);
             gridRow.setStyle("paddingTop", 0);
@@ -93,31 +83,17 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
 
                 var child:UIComponent = DashboardElementFactory.createViewUIComponent(e.dashboardElement, dashboardEditorMetadata);
                 var childSizeInfo:SizeInfo = IDashboardViewComponent(child).obtainPreferredSizeInfo();
-                if (childSizeInfo.preferredWidth > 0) {
-
-                } else {
+                if (childSizeInfo.preferredWidth == 0) {
                     gridItem.percentWidth = 100;
                 }
-                /*if (childSizeInfo.preferredWidth != 0) {
-                    gridItem.width = childSizeInfo.preferredWidth + dashboardGrid.paddingLeft + dashboardGrid.paddingRight;
-                    gridAbsoluteWidth = true;
-                } else {
-                    gridItem.percentWidth = 100;
-                }*/
                 if (gridAbsoluteHeight) {
-                    if (childSizeInfo.preferredHeight == 0) {
+                    if (childSizeInfo.preferredHeight == 0 && !childSizeInfo.autoCalcHeight) {
                         gridRow.height = 400;
                         childSizeInfo.preferredHeight = 400;
                     }
                 } else {
                     gridItem.percentHeight = 100; 
                 }
-                /*if (childSizeInfo.preferredHeight != 0) {
-                    gridItem.height = childSizeInfo.preferredHeight + dashboardGrid.paddingTop + dashboardGrid.paddingBottom;
-                    gridAbsoluteHeight = true;
-                } else {
-                    gridItem.percentHeight = 100;
-                }*/
 
                 if (e.dashboardElement is DashboardReport) {
                     gridItem.setStyle("paddingLeft", 3);
@@ -132,17 +108,11 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
             }
 
             gridRow.percentWidth = 100;
-            /*if (!gridAbsoluteWidth) {
-
-            }*/
             if (!gridAbsoluteHeight) {
                 gridRow.percentHeight = 100;
             }
         }
         percentWidth = 100;
-        /*if (!gridAbsoluteWidth) {
-
-        }*/
         if (!gridAbsoluteHeight) {
             percentHeight = 100;
         }

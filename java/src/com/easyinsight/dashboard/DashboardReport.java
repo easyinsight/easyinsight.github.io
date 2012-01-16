@@ -1,6 +1,9 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisStorage;
+import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.scorecard.Scorecard;
@@ -9,9 +12,7 @@ import com.easyinsight.security.Roles;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -124,5 +125,12 @@ public class DashboardReport extends DashboardElement {
 
     public void visit(IDashboardVisitor dashboardVisitor) {
         dashboardVisitor.accept(this);
+    }
+
+    public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {
+        List<EIDescriptor> descs = new ArrayList<EIDescriptor>();
+        descs.add(report);
+        descs.addAll(new AnalysisStorage().getAnalysisDefinition(report.getId()).allItems(dataSourceItems));
+        return descs;
     }
 }

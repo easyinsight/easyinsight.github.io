@@ -48,10 +48,6 @@ public class StyleConfiguration {
         items.addItem(new NumericReportFormItem("Border Thickness", "borderThickness", dashboard.borderThickness, dashboard, 0, 100));
         items.addItem(new ColorReportFormItem("Border Color", "borderColor",  dashboard.borderColor, dashboard));
         items.addItem(new ColorReportFormItem("Background Color", "backgroundColor",  dashboard.backgroundColor, dashboard));
-        /*items.addItem(new ComboBoxReportFormItem("YTD Month", "ytdMonth", dashboard.ytdMonth, dashboard, ["January", "February",
-            "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]));
-        items.addItem(new CheckBoxReportFormItem("YTD Override", "overrideYTD", dashboard.overrideYTD, dashboard));*/
-        items.addItem(new CheckBoxReportFormItem("Absolute Sizing", "absoluteSizing", dashboard.absoluteSizing, dashboard));
         return items;
     }
 
@@ -87,7 +83,10 @@ public class StyleConfiguration {
         }
         if (dashboardElement is DashboardReport) {
             items.addItem(new CheckBoxReportFormItem("Show Label", "showLabel", DashboardReport(dashboardElement).showLabel, dashboardElement));
-            items.addItem(new CheckBoxReportFormItem("Auto Calculate Height", "autoCalculateHeight", DashboardReport(dashboardElement).autoCalculateHeight, dashboardElement));
+            items.addItem(new CheckBoxReportFormItem("Auto Calculate Height", "autoCalculateHeight", DashboardReport(dashboardElement).autoCalculateHeight, dashboardElement, null,
+            false, function(dashboardReport:DashboardReport):Boolean {
+                        return dashboardReport.report.reportType == AnalysisDefinition.LIST;
+                    }));
         }
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];

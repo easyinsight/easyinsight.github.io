@@ -20,6 +20,9 @@ public abstract class EIDescriptor {
     public static final int SCORECARD = 9;
     public static final int LOOKUP_TABLE = 10;
     public static final int DASHBOARD = 11;
+    public static final int ANALYSIS_ITEM = 12;
+    public static final int FILTER = 13;
+    public static final int KEY = 14;
 
     public static final int MAIN_VIEW = 1;
     public static final int OTHER_VIEW = 2;

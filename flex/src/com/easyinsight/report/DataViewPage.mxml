@@ -38,7 +38,22 @@
             _reportIndex = value;
         }
 
+        public var originalExchangeItem:EIDescriptor;
+
         public function gotFocus():void {
+        }
+
+        protected function keepEntity():void {
+            solutionService.keepEntity.send(originalExchangeItem != null ? originalExchangeItem.id : myID(),
+                    originalExchangeItem != null ? originalExchangeItem.getType() : myType(), exchangeItem.id);
+        }
+
+        protected function myID():int {
+            return 0;
+        }
+
+        protected function myType():int {
+            return 0;
         }
 
         [Bindable]
@@ -85,6 +100,15 @@
             }
         }
 
+
+        public function get reportList():ArrayCollection {
+            return _reportList;
+        }
+
+        public function get reportIndex():int {
+            return _reportIndex;
+        }
+
         private var targetItem:ExchangeItem;
 
         public function toPreviousReport():void {
@@ -126,6 +150,10 @@
             solutionService.determineDataSourceForEntity.send(targetItem.descriptor);
         }
 
+        protected function keptEntity():void {
+
+        }
+
         private function installed():void {
 
             var desc:EIDescriptor = solutionService.installEntity.lastResult as EIDescriptor;
@@ -134,7 +162,7 @@
                 source = new ReportAnalyzeSource(InsightDescriptor(desc),
                         null, targetItem);
             } else {
-                source = new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: desc.id, exchangeItem: exchangeItem});
+                source = new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:desc.id, exchangeItem:exchangeItem});
             }
             source.properties.reportList = _reportList;
             source.properties.reportIndex = _reportList.getItemIndex(targetItem);
@@ -143,6 +171,7 @@
         ]]></mx:Script>
     <mx:RemoteObject id="solutionService" destination="solutionService">
         <mx:method name="installEntity" result="installed()"/>
+        <mx:method name="keepEntity" result="keptEntity()"/>
         <mx:method name="determineDataSourceForEntity" result="determined()"/>
     </mx:RemoteObject>
 </mx:VBox>

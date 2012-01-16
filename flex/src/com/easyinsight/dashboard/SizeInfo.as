@@ -10,10 +10,12 @@ public class SizeInfo {
 
     public var preferredWidth:int;
     public var preferredHeight:int;
+    public var autoCalcHeight:Boolean;
 
-    public function SizeInfo(preferredWidth:int = 0, preferredHeight:int = 0) {
+    public function SizeInfo(preferredWidth:int = 0, preferredHeight:int = 0, autoCalcHeight:Boolean = false) {
         this.preferredWidth = preferredWidth;
         this.preferredHeight = preferredHeight;
+        this.autoCalcHeight = autoCalcHeight;
     }
 }
 }

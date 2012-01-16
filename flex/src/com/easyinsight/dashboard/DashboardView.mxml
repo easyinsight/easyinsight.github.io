@@ -7,6 +7,7 @@
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.list.SizeOverrideEvent;
         import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.report.BreadCrumb;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.CookieUtil;
@@ -101,8 +102,13 @@
                 dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, null, null, 0, _breadCrumbs)));
             } else if (event.descriptor is DashboardDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
-                    initialFilters:event.filters, breadCrumbs: _breadCrumbs})));
+                    initialFilters:event.filters, breadCrumbs: _breadCrumbs, exchangeItem:exchangeItem, reportList: reportList, reportIndex: reportIndex,
+                originalExchangeItem: originalExchangeItem  != null ? originalExchangeItem : dashboardDesc })));
             }
+        }
+
+        override protected function myType():int {
+            return EIDescriptor.DASHBOARD;
         }
 
         [Bindable]
@@ -161,10 +167,13 @@
                 dashboardHeader.dashboard = dashboard;
                 dashboardHeader.generateState(description, exchangeItem, this);
             }
-            if (_dashboardID != 0 && exchangeItem == null) {
+            if (_dashboardID != 0 && exchangeItem == null && _breadCrumbs == null) {
                 UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.VIEW, _dashboardID));
             }
             generateState();
+
+            var desc:DashboardDescriptor = new DashboardDescriptor();
+            desc.id = dashboard.id;
 
             /*if (_fixedID) {
              primary.removeChild(topDisplay);
@@ -180,7 +189,8 @@
                         dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), crumb.filters, null, null, 0, _breadCrumbs)));
                     } else {
                         dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:crumb.eiDescriptor.id,
-                            initialFilters:crumb.filters, breadCrumbs: _breadCrumbs})));
+                            initialFilters:crumb.filters, breadCrumbs: _breadCrumbs, exchangeItem:exchangeItem, reportList: reportList, reportIndex: reportIndex,
+                            originalExchangeItem: originalExchangeItem  != null ? originalExchangeItem : desc })));
                     }
                 });
                 breadCrumbBox.addChild(backButton);
@@ -202,7 +212,6 @@
         private var dashboard:Dashboard;
 
         public function close():void {
-
             dispatchEvent(new AnalysisCloseEvent());
         }
 
@@ -218,7 +227,11 @@
             }
         }
 
-        private function keptDashboard():void {
+        override protected function myID():int {
+            return dashboard.id;
+        }
+
+        override protected function keptEntity():void {
             exchangeItem = null;
             _showAddBar = false;
             generateState();
@@ -228,9 +241,11 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        public function saveReport():void {
-            dashboardService.keepDashboard.send(dashboard.id, exchangeItem.id);
-        }
+
+
+        /*public function saveReport():void {
+            dashboardService.keepDashboard.send(originalExchangeItem != null ? dashboardExchangeID : dashboard.id, exchangeItem.id);
+        }*/
 
         [Bindable]
         private var filterIndex:int = 0;
@@ -330,7 +345,6 @@
         ]]></mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="getDashboardView" result="gotDashboard()"/>
-        <mx:method name="keepDashboard" result="keptDashboard()"/>
     </mx:RemoteObject>
     <dashboard:DashboardSlimHeader id="dashboardHeader" dataSource="{dataSource}" viewFactory="{rootView}" includeInLayout="false" visible="false"/>
     <mx:HBox width="100%" horizontalAlign="center" paddingTop="5" paddingBottom="5" verticalAlign="middle" id="nameContainer" includeInLayout="false">
@@ -341,7 +355,7 @@
     <mx:Box width="100%" styleName="descriptionContainer" id="box" visible="false" includeInLayout="false">
         <report:DefaultDescriptionArea previousReportLabel="{previousReportLabel}" previousReportAvailable="{previousReportAvailable}"
                                    nextReportAvailable="{nextReportAvailable}" nextReportLabel="{nextReportLabel}" showAdd="{_showAddBar}" description="{description}"
-                                   previousReport="toPreviousReport()" nextReport="toNextReport()" saveToAccount="saveReport()"/>
+                                   previousReport="toPreviousReport()" nextReport="toNextReport()" saveToAccount="keepEntity()"/>
     </mx:Box>
     <!--<mx:Box width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" id="coreDashboardArea" horizontalScrollPolicy="off">
         <mx:VBox width="100%" height="100%" backgroundAlpha="1" borderColor="0" id="dashboardStyleArea" borderStyle="solid" borderThickness="1">

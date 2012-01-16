@@ -30,6 +30,7 @@
         import com.easyinsight.genredata.AnalyzeEvent;
 
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
+        import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ActionReportLog;
         import com.easyinsight.util.EIErrorEvent;
@@ -50,7 +51,7 @@
             viewFactory.refresh();
         }
 
-        private function confirmedKeep():void {
+        override protected function keptEntity():void {
             _showAddBar = false;
             generateState();
             var window:ReportAddedWindow = new ReportAddedWindow();
@@ -364,18 +365,24 @@
                 desc.urlKey = report.urlKey;
                 _breadCrumbs.push(new BreadCrumb(desc, transformContainer.getFilterDefinitions()));
                 if (event.descriptor is InsightDescriptor) {
-                    dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, null, null, 0, _breadCrumbs)));
+                    dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, exchangeItem, reportList, reportIndex, _breadCrumbs,
+                            originalExchangeItem != null ? originalExchangeItem : desc)));
                 } else if (event.descriptor is DashboardDescriptor) {
                     dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
-                        initialFilters:event.filters, breadCrumbs: _breadCrumbs})));
+                        initialFilters:event.filters, exchangeItem:exchangeItem, reportList: reportList, reportIndex: reportIndex,
+                        breadCrumbs:_breadCrumbs, originalExchangeItem: originalExchangeItem  != null ? originalExchangeItem : desc})));
                 }
             } else {
                 _reportNavHandler.call(null, event);
             }
         }
 
-        private function saveReport():void {
-            analysisService.keepReport.send(_reportID, exchangeItem.id);
+        override protected function myID():int {
+            return report.analysisID;
+        }
+
+        override protected function myType():int {
+            return EIDescriptor.REPORT;
         }
 
         private function toExchange(event:MouseEvent):void {
@@ -405,6 +412,9 @@
 
                 loading = true;
 
+                var desc:InsightDescriptor = new InsightDescriptor();
+                desc.id = _reportID;
+
                 // if filters were passed in
                 overlayIndex = 0;
                 if (_reportID != 0 && exchangeItem == null) {
@@ -421,7 +431,9 @@
                             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), crumb.filters, null, null, 0, _breadCrumbs)));
                         } else {
                             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:crumb.eiDescriptor.id,
-                                initialFilters:crumb.filters, breadCrumbs: _breadCrumbs})));
+                                initialFilters:crumb.filters,
+                                exchangeItem:exchangeItem, reportList: reportList, reportIndex: reportIndex,
+                                breadCrumbs:_breadCrumbs, originalExchangeItem: originalExchangeItem  != null ? originalExchangeItem : desc})));
                         }
                     });
                     breadCrumbBox.addChild(backButton);
@@ -435,18 +447,20 @@
         private function onSetup(event:ReportSetupEvent):void {
             report = event.reportInfo.report;
 
-            var editItem:ContextMenuItem = new ContextMenuItem("Edit " + report.name);
-            editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-                toReportEditor();
-            });
-            var exportItem:ContextMenuItem = new ContextMenuItem("Export " + report.name);
-            exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-                exportExcel();
-            });
-            var menu:ContextMenu = new ContextMenu();
-            menu.hideBuiltInItems();
-            menu.customItems = [ editItem, exportItem ];
-            viewFactory.contextMenu = menu;
+            if (exchangeItem == null) {
+                var editItem:ContextMenuItem = new ContextMenuItem("Edit " + report.name);
+                editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
+                    toReportEditor();
+                });
+                var exportItem:ContextMenuItem = new ContextMenuItem("Export " + report.name);
+                exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
+                    exportExcel();
+                });
+                var menu:ContextMenu = new ContextMenu();
+                menu.hideBuiltInItems();
+                menu.customItems = [ editItem, exportItem ];
+                viewFactory.contextMenu = menu;
+            }
 
             reportName = report.name;
             description = report.description;
@@ -616,7 +630,7 @@
     <mx:Box width="100%" styleName="descriptionContainer" id="box" visible="false">
         <report:DefaultDescriptionArea previousReportLabel="{previousReportLabel}" previousReportAvailable="{previousReportAvailable}"
                 nextReportAvailable="{nextReportAvailable}" nextReportLabel="{nextReportLabel}" showAdd="{_showAddBar}" description="{description}"
-                previousReport="toPreviousReport()" nextReport="toNextReport()" saveToAccount="saveReport()"/>
+                previousReport="toPreviousReport()" nextReport="toNextReport()" saveToAccount="keepEntity()"/>
     </mx:Box>
     <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
         <mx:Box/>
@@ -628,7 +642,4 @@
         </mx:VBox>
     </mx:ViewStack>
     <mx:Canvas id="screenTarget" width="100%" height="100%"/>
-    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
-        <mx:method name="keepReport" result="confirmedKeep()"/>
-    </mx:RemoteObject>
 </report:DataViewPage>

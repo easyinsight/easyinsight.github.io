@@ -1,5 +1,9 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.dashboard.Dashboard;
+import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.pipeline.CleanupComponent;
@@ -599,24 +603,28 @@ public class AnalysisDefinition implements Cloneable {
         return reports;
     }
 
-    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
+    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap, Map<Long, Dashboard> dashboardReplacementMap) {
         analysisDefinitionState.updateReportIDs(reportReplacementMap);
         for (AnalysisItem analysisItem : reportStructure.values()) {
             for (Link link : analysisItem.getLinks()) {
-                link.updateReportIDs(reportReplacementMap);    
+                link.updateReportIDs(reportReplacementMap, dashboardReplacementMap);
             }
         }
     }
 
-    public Set<Long> containedReportIDs() {
-        Set<Long> drillIDs = new HashSet<Long>();
+    public Set<EIDescriptor> containedReportIDs() {
+        Set<EIDescriptor> drillIDs = new HashSet<EIDescriptor>();
         for (AnalysisItem analysisItem : reportStructure.values()) {
             List<Link> links = analysisItem.getLinks();
             if (links != null) {
                 for (Link link : links) {
                     if (link instanceof DrillThrough) {
                         DrillThrough drillThrough = (DrillThrough) link;
-                        drillIDs.add(drillThrough.getReportID());
+                        if (drillThrough.getReportID() != null && drillThrough.getReportID() > 0) {
+                            drillIDs.add(new InsightDescriptor(drillThrough.getReportID(), null, 0, 0, null, 0, false));
+                        } else if (drillThrough.getDashboardID() != null && drillThrough.getDashboardID() > 0) {
+                            drillIDs.add(new DashboardDescriptor(null, drillThrough.getDashboardID(), null, 0, 0, null, false));
+                        }
                     }
                 }
             }

@@ -114,8 +114,11 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             addChild(headerArea);
         }
         viewStack = new ViewStack();
-        if (dashboardEditorMetadata.dashboard.absoluteSizing) {
-
+        if (dashboardStack.preferredHeight > 0) {
+            this.height = dashboardStack.preferredHeight;
+            this.percentWidth = 100;
+            viewStack.percentHeight = 100;
+            viewStack.percentWidth = 100;
         } else {
             this.percentWidth = 100;
             this.percentHeight = 100;

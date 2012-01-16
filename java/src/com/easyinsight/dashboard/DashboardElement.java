@@ -1,7 +1,9 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.preferences.ImageDescriptor;
@@ -12,10 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -280,4 +279,8 @@ public abstract class DashboardElement implements Cloneable {
     public abstract void updateScorecardIDs(Map<Long, Scorecard> scorecardReplacementMap);
 
     public abstract void visit(IDashboardVisitor dashboardVisitor);
+
+    public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {
+        return new ArrayList<EIDescriptor>();
+    }
 }

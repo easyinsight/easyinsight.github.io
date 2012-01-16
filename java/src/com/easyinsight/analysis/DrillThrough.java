@@ -1,8 +1,8 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.dashboard.Dashboard;
+
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,9 +58,14 @@ public class DrillThrough extends Link {
         this.miniWindow = miniWindow;
     }
 
-    public void updateReportIDs(Map<Long, AnalysisDefinition> replacementMap) {
-        AnalysisDefinition report = replacementMap.get(reportID);
-        setReportID(report.getAnalysisID());
+    public void updateReportIDs(Map<Long, AnalysisDefinition> replacementMap, Map<Long, Dashboard> dashboardReplacementMap) {
+        if (reportID != null && reportID > 0) {
+            AnalysisDefinition report = replacementMap.get(reportID);
+            setReportID(report.getAnalysisID());
+        } else if (dashboardID != null && dashboardID > 0) {
+            Dashboard dashboard = dashboardReplacementMap.get(dashboardID);
+            setDashboardID(dashboard.getId());
+        }
     }
 
     public String toXML() {

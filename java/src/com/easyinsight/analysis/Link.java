@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.dashboard.Dashboard;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
@@ -88,7 +90,7 @@ public class Link implements Cloneable, Serializable {
         throw new UnsupportedOperationException();
     }
 
-    public void updateReportIDs(Map<Long, AnalysisDefinition> replacementMap) {
+    public void updateReportIDs(Map<Long, AnalysisDefinition> replacementMap, Map<Long, Dashboard> dashboardReplacementMap) {
         
     }
 

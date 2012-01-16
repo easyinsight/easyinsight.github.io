@@ -2,12 +2,16 @@ package com.easyinsight.dashboard;
 
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.AnalysisItemDescriptor;
+import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.core.FilterDescriptor;
 import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.scorecard.Scorecard;
+import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.util.RandomTextGenerator;
 
@@ -276,7 +280,7 @@ public class Dashboard implements Cloneable {
         }
     }
 
-    public Dashboard cloneDashboard(Map<Long, AnalysisDefinition> reportReplacementMap, Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource) throws CloneNotSupportedException {
+    public Dashboard cloneDashboard(Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource) throws CloneNotSupportedException {
         Dashboard dashboard = this.clone();
         dashboard.setTemporary(true);
         dashboard.setAuthorName(SecurityUtil.getUserName());
@@ -321,7 +325,7 @@ public class Dashboard implements Cloneable {
         }
 
         dashboard.setFilters(filterDefinitions);
-        dashboard.getRootElement().updateReportIDs(reportReplacementMap);
+        //dashboard.getRootElement().updateReportIDs(reportReplacementMap);
         dashboard.getRootElement().updateScorecardIDs(scorecardReplacmenetMap);
         return dashboard;
     }
@@ -354,7 +358,22 @@ public class Dashboard implements Cloneable {
         System.out.println(Integer.parseInt("CCCCCC", 16));
     }
 
-    /*public void updateIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
+    public void updateIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
         getRootElement().updateReportIDs(reportReplacementMap);
-    }*/
+    }
+    
+    public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {
+        List<EIDescriptor> eiDescs = new ArrayList<EIDescriptor>();
+        eiDescs.add(new DashboardDescriptor(getName(), getId(), getUrlKey(), getDataSourceID(), Roles.OWNER, null, accountVisible));
+        eiDescs.addAll(getRootElement().allItems(dataSourceItems));
+        for (FilterDefinition filterDefinition : filters) {
+            eiDescs.add(new FilterDescriptor(filterDefinition));
+            List<AnalysisItem> items = filterDefinition.getAnalysisItems(dataSourceItems, new ArrayList<AnalysisItem>(), true, true, 0);
+            for (AnalysisItem item : items) {
+                eiDescs.add(new AnalysisItemDescriptor(item));
+                eiDescs.addAll(item.getKey().getDescriptors());
+            }
+        }
+        return eiDescs;
+    }
 }

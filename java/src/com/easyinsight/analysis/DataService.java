@@ -649,7 +649,7 @@ public class DataService {
                 }
             }
             for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-                if (analysisItem.getReportFieldExtension() != null) {
+                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
                     TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
                     if (trendReportFieldExtension.getDate() != null) {
                         AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();

@@ -16,15 +16,12 @@ import flash.events.Event;
 
 import mx.collections.ArrayCollection;
 import mx.containers.VBox;
-import mx.controls.Alert;
 import mx.controls.Label;
 
 public class DashboardReportViewComponent extends VBox implements IDashboardViewComponent  {
 
     public var dashboardReport:DashboardReport;
     private var viewFactory:EmbeddedViewFactory;
-
-
 
     private var report:AnalysisDefinition;
 
@@ -42,20 +39,13 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
-        return new SizeInfo(dashboardReport.preferredWidth, alteredHeight == -1 ? dashboardReport.preferredHeight : alteredHeight);
+        return new SizeInfo(dashboardReport.preferredWidth, alteredHeight == -1 ? dashboardReport.preferredHeight : alteredHeight, dashboardReport.autoCalculateHeight);
     }
     
     private var alteredHeight:int = -1;
 
     protected override function createChildren():void {
         super.createChildren();
-        /*if (dashboardEditorMetadata.dashboard.absoluteSizing) {
-            width = dashboardReport.preferredWidth;
-            height = dashboardReport.preferredHeight;
-        } else {
-            percentWidth = 100;
-            percentHeight = 100;
-        }*/
         var sizeInfo:SizeInfo = obtainPreferredSizeInfo();
         if (sizeInfo.preferredWidth > 0) {
             width = dashboardReport.preferredWidth;

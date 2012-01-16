@@ -9,6 +9,7 @@ import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
 
@@ -68,26 +69,21 @@ public class DashboardService {
         try {
             conn.setAutoCommit(false);
             Dashboard dashboard = getDashboard(dashboardID);
-            Set<Long> reportIDs = dashboard.containedReports();
-            List<AnalysisDefinition> reports = new ArrayList<AnalysisDefinition>();
+            Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
+            Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
+            SolutionService.recurseDashboard(reports, dashboards, dashboard, session, conn);
 
-            for (Long containedReportID : reportIDs) {
-                AnalysisDefinition report = new AnalysisStorage().getPersistableReport(containedReportID, session);
-                reports.add(report);
-                Set<Long> containedReportIDs = report.containedReportIDs();
-                for (Long childReportID : containedReportIDs) {
-                    reports.add(new AnalysisStorage().getPersistableReport(childReportID, session));
-                }
-            }
-            for (AnalysisDefinition report : reports) {
+            for (AnalysisDefinition report : reports.values()) {
                 report.setTemporaryReport(false);
                 session.update(report);
             }
             session.flush();
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET TEMPORARY_DASHBOARD = ? where dashboard_id = ?");
-            updateStmt.setBoolean(1, false);
-            updateStmt.setLong(2, dashboardID);
-            updateStmt.executeUpdate();
+            for (Dashboard tDashboard : dashboards.values()) {
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET TEMPORARY_DASHBOARD = ? where dashboard_id = ?");
+                updateStmt.setBoolean(1, false);
+                updateStmt.setLong(2, tDashboard.getId());
+                updateStmt.executeUpdate();
+            }
             try {
                 PreparedStatement queryStmt = conn.prepareStatement("SELECT EXCHANGE_DASHBOARD_INSTALL_ID FROM EXCHANGE_DASHBOARD_INSTALL WHERE USER_ID = ? AND " +
                         "dashboard_id = ?");

@@ -1,6 +1,8 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.scorecard.Scorecard;
@@ -186,5 +188,14 @@ public class DashboardGrid extends DashboardElement {
         for (DashboardGridItem gridItem : gridItems) {
             gridItem.getDashboardElement().updateReportIDs(reportReplacementMap);
         }
+    }
+
+    @Override
+    public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {
+        List<EIDescriptor> descs = new ArrayList<EIDescriptor>();
+        for (DashboardGridItem gridItem : gridItems) {
+            descs.addAll(gridItem.getDashboardElement().allItems(dataSourceItems));
+        }
+        return descs;
     }
 }

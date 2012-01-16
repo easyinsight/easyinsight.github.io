@@ -23,7 +23,6 @@ public class Dashboard {
     public var authorName:String;
     public var creationDate:Date;
     public var updateDate:Date;
-    public var absoluteSizing:Boolean;
 
     public var backgroundColor:uint = 0xCCCCCC;
     public var padding:int = 3;
@@ -34,8 +33,6 @@ public class Dashboard {
     public var recommendedExchange:Boolean;
     public var dataSourceInfo:DataSourceInfo;
     public var role:int;
-    public var ytdMonth:String;
-    public var overrideYTD:Boolean;
     public var marmotScript:String;
     public var folder:int = EIDescriptor.MAIN_VIEWS_FOLDER;
 

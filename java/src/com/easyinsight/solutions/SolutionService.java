@@ -3,6 +3,7 @@ package com.easyinsight.solutions;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
@@ -467,18 +468,19 @@ public class SolutionService {
     }
 
     public DashboardDescriptor installDashboard(long dashboardID, long dataSourceID) {
+        DashboardDescriptor dashboardDescriptor;
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             Session session = Database.instance().createSession(conn);
-            DashboardDescriptor dashboardDescriptor = installDashboard(dashboardID, dataSourceID, conn, session, true, false);
+            
+            dashboardDescriptor = installDashboard(dashboardID, dataSourceID, conn, session, true, false);
 
             session.flush();
 
             conn.commit();
             session.close();
 
-            return dashboardDescriptor;
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -487,6 +489,43 @@ public class SolutionService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
+        try {
+            Dashboard source = new DashboardStorage().getDashboard(dashboardID);
+            Dashboard target = new DashboardStorage().getDashboard(dashboardDescriptor.getId());
+            FeedDefinition sourceDataSource = new FeedStorage().getFeedDefinitionData(source.getDataSourceID());
+            FeedDefinition targetDataSource = new FeedStorage().getFeedDefinitionData(target.getDataSourceID());
+            analyze(source.allItems(sourceDataSource.getFields()), target.allItems(targetDataSource.getFields()));
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return dashboardDescriptor;
+    }
+    
+    public static void recurseDashboard(Map<Long, AnalysisDefinition> reports, Map<Long, Dashboard> dashboards, Dashboard dashboard, Session session, EIConnection conn) throws Exception {
+        if (!dashboards.containsKey(dashboard.getId())) {
+            dashboards.put(dashboard.getId(), dashboard);
+            Set<Long> reportIDs = dashboard.containedReports();
+            for (Long reportID : reportIDs) {
+                AnalysisDefinition report = new AnalysisStorage().getPersistableReport(reportID, session);
+                recurseReport(reports, dashboards, report, session, conn);
+            }
+        }
+    }
+
+    public static void recurseReport(Map<Long, AnalysisDefinition> reports, Map<Long, Dashboard> dashboards, AnalysisDefinition report, Session session, EIConnection conn) throws Exception {
+        if (!reports.containsKey(report.getAnalysisID())) {
+            reports.put(report.getAnalysisID(), report);
+            Set<EIDescriptor> containedReportIDs = report.containedReportIDs();
+            for (EIDescriptor descriptor : containedReportIDs) {
+                if (descriptor.getType() == EIDescriptor.REPORT) {
+                    AnalysisDefinition child = new AnalysisStorage().getPersistableReport(descriptor.getId(), session);
+                    recurseReport(reports, dashboards, child, session, conn);
+                } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                    Dashboard dashboard = new DashboardStorage().getDashboard(descriptor.getId(), conn);
+                    recurseDashboard(reports, dashboards, dashboard, session, conn);
+                }
+            }
+        }
     }
 
     private DashboardDescriptor installDashboard(long dashboardID, long dataSourceID, EIConnection conn, Session session, boolean temporaryDashboard,
@@ -494,28 +533,47 @@ public class SolutionService {
         DashboardStorage dashboardStorage = new DashboardStorage();
         FeedStorage feedStorage = new FeedStorage();
         Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
-        Set<Long> reportIDs = dashboard.containedReports();
-        List<AnalysisDefinition> reports = new ArrayList<AnalysisDefinition>();
+        Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
+        Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
+        recurseDashboard(reports, dashboards, dashboard, session, conn);
 
-        for (Long containedReportID : reportIDs) {
+        /*for (Long containedReportID : reportIDs) {
             AnalysisDefinition report = new AnalysisStorage().getPersistableReport(containedReportID, session);
             reports.add(report);
-            Set<Long> containedReportIDs = report.containedReportIDs();
-            for (Long childReportID : containedReportIDs) {
-                reports.add(new AnalysisStorage().getPersistableReport(childReportID, session));
+            Set<EIDescriptor> containedReportIDs = report.containedReportIDs();
+            for (EIDescriptor descriptor : containedReportIDs) {
+                if (descriptor.getType() == EIDescriptor.REPORT) {
+                    reports.add(new AnalysisStorage().getPersistableReport(descriptor.getId(), session));
+                } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                    dashboards.add(new DashboardStorage().getDashboard(descriptor.getId(), conn));
+                }
             }
-        }
+        }*/
 
         Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
+        Map<Long, Dashboard> dashboardReplacementMap = new HashMap<Long, Dashboard>();
 
         FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
 
         List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
-        for (AnalysisDefinition child : reports) {
-            child.setFolder(EIDescriptor.OTHER_VIEW);
-            AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child);
-            reportReplacementMap.put(child.getAnalysisID(), copyReport);
+        List<Dashboard> dashboardList = new ArrayList<Dashboard>();
+        for (AnalysisDefinition childReport : reports.values()) {
+            //childReport.setFolder(EIDescriptor.OTHER_VIEW);
+            AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, childReport);
+            copyReport.setFolder(EIDescriptor.OTHER_VIEW);
+            reportReplacementMap.put(childReport.getAnalysisID(), copyReport);
             reportList.add(copyReport);
+        }
+        
+        for (Dashboard childDashboard : dashboards.values()) {
+            Dashboard copyDashboard = copyDashboardToDataSource(targetDataSource, childDashboard);
+            if (childDashboard == dashboard) {
+                copyDashboard.setFolder(EIDescriptor.MAIN_VIEW);
+            } else {
+                copyDashboard.setFolder(EIDescriptor.OTHER_VIEW);
+            }
+            dashboardReplacementMap.put(childDashboard.getId(), copyDashboard);
+            dashboardList.add(copyDashboard);
         }
 
         for (AnalysisDefinition copiedReport : reportList) {
@@ -523,13 +581,27 @@ public class SolutionService {
             copiedReport.setAccountVisible(makeAccountVisible);
             new AnalysisStorage().saveAnalysis(copiedReport, session);
         }
+        
+        for (Dashboard copiedDashboard : dashboardList) {
+            copiedDashboard.setTemporary(temporaryDashboard);
+            copiedDashboard.setAccountVisible(makeAccountVisible);
+            new DashboardStorage().saveDashboard(copiedDashboard, conn);
+        }
 
         for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
-            copiedReport.updateReportIDs(reportReplacementMap);
+            copiedReport.updateReportIDs(reportReplacementMap, dashboardReplacementMap);
+        }
+        
+        for (Dashboard copiedDashboard : dashboardReplacementMap.values()) {
+            copiedDashboard.updateIDs(reportReplacementMap);
         }
 
         for (AnalysisDefinition copiedReport : reportList) {
             new AnalysisStorage().saveAnalysis(copiedReport, session);
+        }
+        
+        for (Dashboard copiedDashboard : dashboardList) {
+            new DashboardStorage().saveDashboard(copiedDashboard, conn);
         }
 
         Set<Long> scorecardIDs = dashboard.containedScorecards();
@@ -551,13 +623,17 @@ public class SolutionService {
         for (Scorecard copiedScorecard : scorecardList) {
             new ScorecardStorage().saveScorecardForUser(copiedScorecard, SecurityUtil.getUserID(), conn);
         }
+        
+        Dashboard copiedDashboard = dashboardReplacementMap.get(dashboardID);
+        
 
-        Dashboard copiedDashboard = dashboard.cloneDashboard(reportReplacementMap, scorecardReplacementMap, true, targetDataSource.getFields(), targetDataSource);
+
+        /*Dashboard copiedDashboard = dashboard.cloneDashboard(scorecardReplacementMap, true, targetDataSource.getFields(), targetDataSource);
         copiedDashboard.setTemporary(temporaryDashboard);
         copiedDashboard.setDataSourceID(dataSourceID);
         copiedDashboard.setAccountVisible(makeAccountVisible);
 
-        dashboardStorage.saveDashboard(copiedDashboard, conn);
+        dashboardStorage.saveDashboard(copiedDashboard, conn);*/
 
         return new DashboardDescriptor(copiedDashboard.getName(), copiedDashboard.getId(), copiedDashboard.getUrlKey(), 0, Roles.NONE, null, false);
     }
@@ -584,22 +660,23 @@ public class SolutionService {
         }
     }
 
-    private InsightDescriptor installReport(long reportID, long dataSourceID, EIConnection conn, Session session, boolean keepTemporary, boolean makeAccountVisible) throws SQLException, CloneNotSupportedException {
+    private InsightDescriptor installReport(long reportID, long dataSourceID, EIConnection conn, Session session, boolean keepTemporary, boolean makeAccountVisible) throws Exception {
         AnalysisDefinition originalBaseReport = new AnalysisStorage().getPersistableReport(reportID, session);
         //FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
         // okay, we might have multiple reports here...
         // find all the other reports in the dependancy graph here
-        List<AnalysisDefinition> reports = originalBaseReport.containedReports(session);
-        Set<Long> containedReportIDs = originalBaseReport.containedReportIDs();
-        for (Long containedReportID : containedReportIDs) {
-            reports.add(new AnalysisStorage().getPersistableReport(containedReportID, session));
-        }
-        reports.add(originalBaseReport);
+        //List<AnalysisDefinition> reports = originalBaseReport.containedReports(session);
+        Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
+        Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
+        recurseReport(reports, dashboards, originalBaseReport, session, conn);
+        //reports.add(originalBaseReport);
         FeedStorage feedStorage = new FeedStorage();
         FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
         Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
+        Map<Long, Dashboard> dashboardReplacementMap = new HashMap<Long, Dashboard>();
         List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
-        for (AnalysisDefinition child : reports) {
+        List<Dashboard> dashboardList = new ArrayList<Dashboard>();
+        for (AnalysisDefinition child : reports.values()) {
             AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child);
             if (child.getAnalysisID() != reportID) {
                 copyReport.setFolder(EIDescriptor.OTHER_VIEW);
@@ -608,18 +685,39 @@ public class SolutionService {
             reportList.add(copyReport);
         }
 
+        for (Dashboard childDashboard : dashboards.values()) {
+            Dashboard copyDashboard = copyDashboardToDataSource(targetDataSource, childDashboard);
+            copyDashboard.setFolder(EIDescriptor.OTHER_VIEW);
+            dashboardReplacementMap.put(childDashboard.getId(), copyDashboard);
+            dashboardList.add(copyDashboard);
+        }
+
         for (AnalysisDefinition copiedReport : reportList) {
             copiedReport.setTemporaryReport(keepTemporary);
             copiedReport.setAccountVisible(makeAccountVisible);
             new AnalysisStorage().saveAnalysis(copiedReport, session);
         }
 
+        for (Dashboard copiedDashboard : dashboardList) {
+            copiedDashboard.setTemporary(keepTemporary);
+            copiedDashboard.setAccountVisible(makeAccountVisible);
+            new DashboardStorage().saveDashboard(copiedDashboard, conn);
+        }
+
         for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
-            copiedReport.updateReportIDs(reportReplacementMap);
+            copiedReport.updateReportIDs(reportReplacementMap, dashboardReplacementMap);
+        }
+
+        for (Dashboard copiedDashboard : dashboardReplacementMap.values()) {
+            copiedDashboard.updateIDs(reportReplacementMap);
         }
 
         for (AnalysisDefinition copiedReport : reportList) {
             new AnalysisStorage().saveAnalysis(copiedReport, session);
+        }
+
+        for (Dashboard copiedDashboard : dashboardList) {
+            new DashboardStorage().saveDashboard(copiedDashboard, conn);
         }
 
         session.flush();
@@ -640,6 +738,26 @@ public class SolutionService {
             }
         }
         return keys;
+    }
+    
+    private void analyze(List<EIDescriptor> originalDescriptors, List<EIDescriptor> newDescriptors) {
+        boolean collide = false;
+        Map<String, EIDescriptor> map = new HashMap<String, EIDescriptor>();
+        for (EIDescriptor descriptor : originalDescriptors) {
+            map.put(descriptor.getType() + "-" + descriptor.getId(), descriptor);
+        }
+        for (EIDescriptor descriptor : newDescriptors) {
+            EIDescriptor collision = map.get(descriptor.getType() + "-" + descriptor.getId());
+            if (collision != null) {
+                collide = true;
+                System.out.println("Collision on " + collision.getName() + " - " + collision.getId());
+            }
+        }
+        if (collide) {
+            System.out.println("Collisions were found");
+        } else {
+            System.out.println("No collisions");
+        }
     }
 
     private Map<Long, Long> createDataSourceReplacementMap(FeedDefinition localDefinition, FeedDefinition sourceDefinition, EIConnection conn) throws SQLException {
@@ -668,12 +786,27 @@ public class SolutionService {
         map.put(localDefinition.getDataFeedID(), sourceDefinition.getDataFeedID());
         return map;
     }
+    
+    public void keepEntity(long id, int type, long exchangeItemID) {
+        if (type == EIDescriptor.DASHBOARD) {
+            new DashboardService().keepDashboard(id, exchangeItemID);
+        } else if (type == EIDescriptor.REPORT) {
+            new AnalysisService().keepReport(id, exchangeItemID);
+        }
+    }
 
     private Scorecard copyScorecardToDataSource(FeedDefinition localDefinition, Scorecard scorecard) throws CloneNotSupportedException {
         Scorecard clonedScorecard = scorecard.clone(localDefinition, localDefinition.getFields());
         clonedScorecard.setExchangeVisible(false);
         clonedScorecard.setDataSourceID(localDefinition.getDataFeedID());
         return clonedScorecard;
+    }
+    
+    private Dashboard copyDashboardToDataSource(FeedDefinition localDefinition, Dashboard dashboard) throws CloneNotSupportedException {
+        Dashboard clonedDashboard = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), true, localDefinition.getFields(), localDefinition);
+        clonedDashboard.setExchangeVisible(false);
+        clonedDashboard.setDataSourceID(localDefinition.getDataFeedID());
+        return clonedDashboard;
     }
 
     private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report) throws CloneNotSupportedException {
