@@ -17,6 +17,7 @@
         override protected function commitProperties():void {
             super.commitProperties();
             if (dataSourceID != 0) {
+                transformContainer.feedID = dataSourceID;
                 if (reportID != 0 && (customFilters == null || customFilters.length == 0)) {
                     ProgressAlert.alert(this, "Retrieving report information...", null, analysisService.getFilters);
                     analysisService.getFilters.send(reportID);
@@ -114,5 +115,5 @@
         <util:SaveButton label="Reset Filters" fontSize="12" click="analysisService.getFilters.send(reportID)"/>
     </mx:HBox>
     <filtering:TransformContainer existingFilters="{filterDefinitions}" id="transformContainer"
-                                  feedID="{dataSourceID}" enabled="{customizeFiltersCheckbox.selected}"/>
+                                  enabled="{customizeFiltersCheckbox.selected}"/>
 </mx:VBox>
