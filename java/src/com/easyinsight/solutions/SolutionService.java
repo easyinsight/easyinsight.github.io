@@ -489,15 +489,15 @@ public class SolutionService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
-        try {
+        /*try {
             Dashboard source = new DashboardStorage().getDashboard(dashboardID);
             Dashboard target = new DashboardStorage().getDashboard(dashboardDescriptor.getId());
             FeedDefinition sourceDataSource = new FeedStorage().getFeedDefinitionData(source.getDataSourceID());
             FeedDefinition targetDataSource = new FeedStorage().getFeedDefinitionData(target.getDataSourceID());
-            //analyze(source.allItems(sourceDataSource.getFields()), target.allItems(targetDataSource.getFields()));
+            analyze(source.allItems(sourceDataSource.getFields()), target.allItems(targetDataSource.getFields()));
         } catch (Exception e) {
             LogClass.error(e);
-        }
+        }*/
         return dashboardDescriptor;
     }
     
