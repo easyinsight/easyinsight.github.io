@@ -782,9 +782,8 @@
 
         private function onDragComplete(event:DragEvent):void {
             event.preventDefault();
-            if (editWindow == null) {
-                dataView.revertDropAreas();
-            } else {
+            dataView.revertDropAreas();
+            if (editWindow != null) {
                 editWindow.normal();
             }
         }
@@ -802,9 +801,8 @@
         }
 
         private function onDragEnd():void {
-            if (editWindow == null) {
-                dataView.revertDropAreas();
-            } else {
+            dataView.revertDropAreas();
+            if (editWindow != null) {
                 editWindow.normal();
             }
         }
