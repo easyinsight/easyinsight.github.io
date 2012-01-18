@@ -55,7 +55,7 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
 
     public List<AnalysisItem> getAnalysisItems(boolean getEverything) {
         List<AnalysisItem> items = super.getAnalysisItems(getEverything);
-        if (getEverything) {
+        if (getEverything && date != null) {
             items.add(date);
         }
         return items;
