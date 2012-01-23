@@ -3,13 +3,14 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.DashboardStorage;
-import com.easyinsight.datafeeds.basecamp.BaseCampCompanySource;
+import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.datafeeds.composite.FederationSource;
 import com.easyinsight.datafeeds.constantcontact.CCContactSource;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksClientSource;
 import com.easyinsight.datafeeds.highrise.HighRiseCompanySource;
 import com.easyinsight.datafeeds.highrise.HighRiseContactSource;
+import com.easyinsight.datafeeds.highrise.HighRiseDealSource;
 import com.easyinsight.etl.LookupPair;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.etl.LookupTableUtil;
@@ -66,8 +67,8 @@ public class FeedService {
                 targetKey = targetObj.findAnalysisItem(CCContactSource.CONTACT_EMAIL).getKey();
                 dataSourceName = "Combined Highrise and Constant Contact";
             } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.BASECAMP_MASTER.getType()) {
-                sourceKey = sourceObj.findAnalysisItem(HighRiseCompanySource.COMPANY_NAME).getKey();
-                targetKey = targetObj.findAnalysisItem(BaseCampCompanySource.COMPANY_NAME).getKey();
+                sourceKey = sourceObj.findAnalysisItem(HighRiseDealSource.DEAL_NAME).getKey();
+                targetKey = targetObj.findAnalysisItem(BaseCampTodoSource.PROJECTNAME).getKey();
                 dataSourceName = "Combined Highrise and Basecamp";
             } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.FRESHBOOKS_COMPOSITE.getType()) {
                 sourceKey = sourceObj.findAnalysisItem(HighRiseCompanySource.COMPANY_NAME).getKey();
@@ -557,12 +558,16 @@ public class FeedService {
 
     public FeedDefinition getFeedDefinition(long dataFeedID) {
         SecurityUtil.authorizeFeed(dataFeedID, Roles.SHARER);
+        EIConnection conn = Database.instance().getConnection();
         try {
-            //SecurityUtil.authorizeFeed(dataFeedID, Roles.OWNER);
-            return feedStorage.getFeedDefinitionData(dataFeedID);
+            FeedDefinition dataSource = feedStorage.getFeedDefinitionData(dataFeedID, conn);
+            //dataSource.setDataSourceInfo(dataSource.createFeed().createSourceInfo(conn));
+            return dataSource;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
@@ -733,7 +738,7 @@ public class FeedService {
             insertTableStmt.execute();
             id = Database.instance().getAutoGenKey(insertTableStmt);
 
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(lookupTable.getDataSourceID(), conn);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(lookupTable.getDataSourceID(), conn, false);
             lookupTable.getTargetField().setLookupTableID(id);
             dataSource.getFields().add(lookupTable.getTargetField());
 
