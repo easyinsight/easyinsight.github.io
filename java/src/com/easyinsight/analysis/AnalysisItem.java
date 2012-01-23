@@ -17,7 +17,6 @@ import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedNode;
 import com.easyinsight.datafeeds.AnalysisItemNode;
 import com.easyinsight.etl.LookupTable;
-import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.pipeline.IComponent;
 import org.hibernate.Session;
 
@@ -421,6 +420,19 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return items;
     }
 
+    private AnalysisItem findMatch(AnalysisItem sourceItem, Map<String, List<AnalysisItem>> displayMap, Map<String, List<AnalysisItem>> keyMap) {
+
+        List<AnalysisItem> items = displayMap.get(sourceItem.toDisplay());
+        if (items == null) {
+            items = keyMap.get(sourceItem.toDisplay());
+        }
+        if (items == null) {
+            return null;
+        } else {
+            return items.get(0);
+        }
+    }
+
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(this);
@@ -429,8 +441,37 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (getLookupTableID() != null && getLookupTableID() > 0 && includeFilters) {
             LookupTable lookupTable = new FeedService().getLookupTable(getLookupTableID());
             if (lookupTable != null) {
-                Key key = lookupTable.getSourceField().getKey();
-                AnalysisItem analysisItem = findMatch(key, allItems);
+                Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+                Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+                for (AnalysisItem analysisItem : insightItems) {
+                    List<AnalysisItem> pipelineItems = keyMap.get(analysisItem.getKey().toKeyString());
+                    if (pipelineItems == null) {
+                        pipelineItems = new ArrayList<AnalysisItem>(1);
+                        keyMap.put(analysisItem.getKey().toKeyString(), pipelineItems);
+                    }
+                    pipelineItems.add(analysisItem);
+                    List<AnalysisItem> displayMapItems = displayMap.get(analysisItem.toDisplay());
+                    if (displayMapItems == null) {
+                        displayMapItems = new ArrayList<AnalysisItem>(1);
+                        displayMap.put(analysisItem.toDisplay(), displayMapItems);
+                    }
+                    displayMapItems.add(analysisItem);
+                }
+                for (AnalysisItem analysisItem : allItems) {
+                    List<AnalysisItem> pipelineItems = keyMap.get(analysisItem.getKey().toKeyString());
+                    if (pipelineItems == null) {
+                        pipelineItems = new ArrayList<AnalysisItem>(1);
+                        keyMap.put(analysisItem.getKey().toKeyString(), pipelineItems);
+                    }
+                    pipelineItems.add(analysisItem);
+                    List<AnalysisItem> displayMapItems = displayMap.get(analysisItem.toDisplay());
+                    if (displayMapItems == null) {
+                        displayMapItems = new ArrayList<AnalysisItem>(1);
+                        displayMap.put(analysisItem.toDisplay(), displayMapItems);
+                    }
+                    displayMapItems.add(analysisItem);
+                }
+                AnalysisItem analysisItem = findMatch(lookupTable.getSourceField(), displayMap, keyMap);
                 if (analysisItem != null) {
                     items.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
                 }

@@ -30,25 +30,52 @@ public class LookupTableComponent implements IComponent {
         }
     }
 
-    private AnalysisItem findMatch(Key key, Collection<AnalysisItem> reportItems, Collection<AnalysisItem> analysisItems) {
-        for (AnalysisItem analysisItem : reportItems) {
-            Key analysisItemKey = analysisItem.getKey();
-            if (analysisItemKey.matchesOrContains(key)) {
-                return analysisItem;
-            }
+    private AnalysisItem findMatch(AnalysisItem sourceItem, Map<String, List<AnalysisItem>> displayMap, Map<String, List<AnalysisItem>> keyMap) {
+        
+        List<AnalysisItem> items = displayMap.get(sourceItem.toDisplay());
+        if (items == null) {
+            items = keyMap.get(sourceItem.toDisplay());
         }
-        for (AnalysisItem analysisItem : analysisItems) {
-            Key analysisItemKey = analysisItem.getKey();
-            if (analysisItemKey.matchesOrContains(key)) {
-                return analysisItem;
-            }
+        if (items == null) {
+            return null;
+        } else {
+            return items.get(0);
         }
-        return null;
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        AnalysisItem sourceField = findMatch(lookupTable.getSourceField().getKey(), pipelineData.getReportItems(), pipelineData.getAllItems());
-        AnalysisItem targetField = findMatch(lookupTable.getTargetField().getKey(), pipelineData.getReportItems(), pipelineData.getAllItems());
+        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+        for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
+            List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+            if (items == null) {
+                items = new ArrayList<AnalysisItem>(1);
+                keyMap.put(analysisItem.getKey().toKeyString(), items);
+            }
+            items.add(analysisItem);
+            List<AnalysisItem> displayMapItems = displayMap.get(analysisItem.toDisplay());
+            if (displayMapItems == null) {
+                displayMapItems = new ArrayList<AnalysisItem>(1);
+                displayMap.put(analysisItem.toDisplay(), displayMapItems);
+            }
+            displayMapItems.add(analysisItem);
+        }
+        for (AnalysisItem analysisItem : pipelineData.getAllItems()) {
+            List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+            if (items == null) {
+                items = new ArrayList<AnalysisItem>(1);
+                keyMap.put(analysisItem.getKey().toKeyString(), items);
+            }
+            items.add(analysisItem);
+            List<AnalysisItem> displayMapItems = displayMap.get(analysisItem.toDisplay());
+            if (displayMapItems == null) {
+                displayMapItems = new ArrayList<AnalysisItem>(1);
+                displayMap.put(analysisItem.toDisplay(), displayMapItems);
+            }
+            displayMapItems.add(analysisItem);
+        }
+        AnalysisItem sourceField = findMatch(lookupTable.getSourceField(), displayMap, keyMap);
+        AnalysisItem targetField = findMatch(lookupTable.getTargetField(), displayMap, keyMap);
         for (IRow row : dataSet.getRows()) {
             Value sourceValue = row.getValue(sourceField.createAggregateKey());
             Value targetValue = lookupMap.get(sourceValue.toString());

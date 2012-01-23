@@ -9,6 +9,7 @@ import nu.xom.*;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 
@@ -59,12 +60,10 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
             return null;
     }
 
-    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError, FeedDefinition parentDefinition, boolean logRequest) throws BaseCampLoginException, ParsingException, ReportException {
+    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, @Nullable EIPageInfo pageInfo, boolean badCredentialsOnError, FeedDefinition parentDefinition, boolean logRequest) throws BaseCampLoginException, ParsingException, ReportException {
+
         HttpMethod restMethod = new GetMethod(url + path);
-        /*try {
-            Thread.sleep(250);
-        } catch (InterruptedException e) {
-        }*/
+
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
         boolean successful = false;
@@ -75,15 +74,14 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
             try {
                 client.executeMethod(restMethod);
                 if (logRequest) {
-                    System.out.println(restMethod.getResponseBodyAsString());
+                    //System.out.println(restMethod.getResponseBodyAsString());
                 }
                 doc = builder.build(restMethod.getResponseBodyAsStream());
                 String rootValue = doc.getRootElement().getValue();
                 if ("The API is not available to this account".equals(rootValue)) {
                     throw new ReportException(new DataSourceConnectivityReportFault("You need to enable API access to your Basecamp account--you can do this under Settings, API Export, Basecamp API in the Basecamp user interface.", parentDefinition));
                 }
-                //Thread.dumpStack();
-                //System.out.println(doc.getRootElement().getValue());
+
                 if(pageInfo != null) {
                     pageInfo.MaxPages = Integer.parseInt(restMethod.getResponseHeader("X-Pages").getValue());
                 }
@@ -92,6 +90,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                 System.out.println("IOException " + e.getMessage());
                 retryCount++;
                 if (e.getMessage().contains("503") || e instanceof SocketException) {
+                    //noinspection EmptyCatchBlock
                     try {
                         Thread.sleep(20000);
                     } catch (InterruptedException e1) {
@@ -105,9 +104,10 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                     throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Basecamp instance at " + url, parentDefinition));
-                } else if (statusLine.indexOf("503") != -1) {
+                } else if (statusLine.contains("503")) {
                     Header retryHeader = restMethod.getResponseHeader("Retry-After");
                     if (retryHeader == null) {
+                        //noinspection EmptyCatchBlock
                         try {
                             Thread.sleep(20000);
                         } catch (InterruptedException e1) {
@@ -115,13 +115,14 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                     } else {
                         int retryTime = Integer.parseInt(retryHeader.getValue());                        
                         int time = retryTime * 1000;
+                        //noinspection EmptyCatchBlock
                         try {
                             Thread.sleep(time);
                         } catch (InterruptedException e1) {                            
                         }
                     }
-                } else if (statusLine.indexOf("403") != -1) {
-                    throw new RuntimeException("403 error");
+                } else if (statusLine.contains("403")) {
+                    throw new Http403Exception();
                 } else {
                     if (badCredentialsOnError) {
                         throw new ReportException(new DataSourceConnectivityReportFault("Invalid Basecamp authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.", parentDefinition));
