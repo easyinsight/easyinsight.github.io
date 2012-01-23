@@ -219,6 +219,10 @@ public class DataService {
             trendDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
             trendDataResults.setDefinition(analysisDefinition);
             return trendDataResults;
+        } catch (com.easyinsight.security.SecurityException se) {
+            EmbeddedTrendDataResults results = new EmbeddedTrendDataResults();
+            results.setReportFault(new ServerError("You don't have access to this report. Check with your administrator about altering access privileges."));
+            return results;
         } catch (ReportException dae) {
             EmbeddedTrendDataResults embeddedDataResults = new EmbeddedTrendDataResults();
             embeddedDataResults.setReportFault(dae.getReportFault());
@@ -265,6 +269,10 @@ public class DataService {
             crossTabDataResults.setColumnCount(crosstab.getColumnSections().size() + crosstabReport.getRows().size() + 1);
             crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             return crossTabDataResults;
+        } catch (com.easyinsight.security.SecurityException se) {
+            EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
+            results.setReportFault(new ServerError("You don't have access to this report. Check with your administrator about altering access privileges."));
+            return results;
         } catch (ReportException re) {
             EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
             results.setReportFault(re.getReportFault());
@@ -376,6 +384,10 @@ public class DataService {
             }
             EmbeddedResults results = getEmbeddedResultsForReport(analysisDefinition, customFilters, insightRequestMetadata, drillThroughFilters, conn);
             conn.commit();
+            return results;
+        } catch (com.easyinsight.security.SecurityException se) {
+            EmbeddedDataResults results = new EmbeddedDataResults();
+            results.setReportFault(new ServerError("You don't have access to this report. Check with your administrator about altering access privileges."));
             return results;
         } catch (ReportException re) {
             EmbeddedDataResults results = new EmbeddedDataResults();
@@ -517,6 +529,10 @@ public class DataService {
             ytdDataResults.setDataSet(ytdStuff.getRows());
             ytdDataResults.setDefinition(wsytdDefinition);
             return ytdDataResults;
+        } catch (com.easyinsight.security.SecurityException se) {
+            EmbeddedCompareYearsDataResults results = new EmbeddedCompareYearsDataResults();
+            results.setReportFault(new ServerError("You don't have access to this report. Check with your administrator about altering access privileges."));
+            return results;
         } catch (ReportException dae) {
             EmbeddedCompareYearsDataResults embeddedDataResults = new EmbeddedCompareYearsDataResults();
             embeddedDataResults.setReportFault(dae.getReportFault());
@@ -582,6 +598,10 @@ public class DataService {
             ytdDataResults.setDataSet(ytdStuff.values);
             ytdDataResults.setDefinition(wsytdDefinition);
             return ytdDataResults;
+        } catch (com.easyinsight.security.SecurityException se) {
+            EmbeddedYTDDataResults results = new EmbeddedYTDDataResults();
+            results.setReportFault(new ServerError("You don't have access to this report. Check with your administrator about altering access privileges."));
+            return results;
         } catch (ReportException dae) {
             EmbeddedYTDDataResults embeddedDataResults = new EmbeddedYTDDataResults();
             embeddedDataResults.setReportFault(dae.getReportFault());
