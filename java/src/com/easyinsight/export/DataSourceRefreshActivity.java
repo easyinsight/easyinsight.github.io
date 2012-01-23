@@ -3,6 +3,8 @@ package com.easyinsight.export;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.scheduler.DataSourceTaskGenerator;
+import com.easyinsight.security.Roles;
+import com.easyinsight.security.SecurityUtil;
 import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
@@ -79,6 +81,16 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
             setProblemMessage(message);
         }
         queryProblemStmt.close();
+    }
+
+    @Override
+    public boolean authorize() {
+        try {
+            SecurityUtil.authorizeFeed(dataSourceID, Roles.SHARER);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override

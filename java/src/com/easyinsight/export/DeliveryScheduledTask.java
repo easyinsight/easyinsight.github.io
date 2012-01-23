@@ -505,14 +505,6 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
     }
 
-    public static void main(String[] args) {
-        String blah = "Send this to [UserName]";
-        Map<String, String> props = new HashMap<String, String>();
-        props.put("UserName", "James Boe");
-        String result = URLPattern.updateString(blah, null, props, new ArrayList<AnalysisItem>()).toString();
-        System.out.println(result);
-    }
-
     public static void sendEmails(EIConnection conn, byte[] bytes, String attachmentName, long accountID, String encoding, long activityID) throws SQLException, MessagingException, UnsupportedEncodingException {
         PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, REPORT_DELIVERY_ID FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         getInfoStmt.setLong(1, activityID);

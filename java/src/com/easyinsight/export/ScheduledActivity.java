@@ -180,4 +180,6 @@ public abstract class ScheduledActivity {
     public void schedule() {
 
     }
+
+    public abstract boolean authorize();
 }

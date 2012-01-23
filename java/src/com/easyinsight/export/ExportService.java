@@ -193,7 +193,10 @@ public class ExportService {
                 long activityID = rs.getLong(1);
                 int activityType = rs.getInt(2);
                 try {
-                    activities.add(ScheduledActivity.createActivity(activityType, activityID, conn));
+                    ScheduledActivity scheduledActivity = ScheduledActivity.createActivity(activityType, activityID, conn);
+                    if (scheduledActivity.authorize()) {
+                        activities.add(scheduledActivity);
+                    }
                 } catch (Exception e) {
                     //LogClass.error(e);
                     // blah
@@ -1699,6 +1702,9 @@ public class ExportService {
 
         public void format(HSSFRow row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal) {
             HSSFCell cell = row.createCell(cellIndex);
+            if (value == null) {
+                return;
+            }
             if (flexibleFormatting) {
                 double doubleValue = value.toDouble();
                 int castInt = (int) doubleValue;

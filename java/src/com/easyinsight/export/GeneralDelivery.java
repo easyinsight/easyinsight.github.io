@@ -3,6 +3,7 @@ package com.easyinsight.export;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import org.hibernate.Session;
 
@@ -219,6 +220,18 @@ public class GeneralDelivery extends ScheduledDelivery {
                 }
             });
             setDeliveryInfos(infos);
+        }
+    }
+
+    @Override
+    public boolean authorize() {
+        try {
+            for (DeliveryInfo deliveryInfo : deliveryInfos) {
+                SecurityUtil.authorizeFeed(deliveryInfo.getDataSourceID(), Roles.SUBSCRIBER);
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 

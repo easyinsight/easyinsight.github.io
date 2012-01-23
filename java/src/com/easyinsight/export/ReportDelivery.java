@@ -3,6 +3,7 @@ package com.easyinsight.export;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.security.SecurityUtil;
 import org.hibernate.Session;
 
 import java.sql.*;
@@ -214,6 +215,16 @@ public class ReportDelivery extends ScheduledDelivery {
             queryStmt.close();
         } else {
             throw new RuntimeException("Orphan activity");
+        }
+    }
+
+    @Override
+    public boolean authorize() {
+        try {
+            SecurityUtil.authorizeInsight(reportID);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 

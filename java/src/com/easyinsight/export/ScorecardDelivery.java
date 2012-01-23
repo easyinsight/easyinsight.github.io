@@ -135,6 +135,16 @@ public class ScorecardDelivery extends ScheduledDelivery {
     }
 
     @Override
+    public boolean authorize() {
+        try {
+            SecurityUtil.authorizeScorecard(scorecardID);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
     public void setup(EIConnection conn) throws SQLException {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT TASK_GENERATOR_ID FROM delivery_task_generator where SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         queryStmt.setLong(1, getScheduledActivityID());
