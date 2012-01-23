@@ -22,9 +22,28 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
 
     private boolean showLegend;
 
+    private String xAxisLabel;
+    private String yAxisLabel;
+
     public abstract int getChartType();
 
     public abstract int getChartFamily();
+
+    public String getxAxisLabel() {
+        return xAxisLabel;
+    }
+
+    public void setxAxisLabel(String xAxisLabel) {
+        this.xAxisLabel = xAxisLabel;
+    }
+
+    public String getyAxisLabel() {
+        return yAxisLabel;
+    }
+
+    public void setyAxisLabel(String yAxisLabel) {
+        this.yAxisLabel = yAxisLabel;
+    }
 
     public boolean isShowLegend() {
         return showLegend;
@@ -107,12 +126,16 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         showLegend = findBooleanProperty(properties, "showLegend", true);
+        xAxisLabel = findStringProperty(properties, "xAxisLabel", "");
+        yAxisLabel = findStringProperty(properties, "yAxisLabel", "");
     }
 
     @Override
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportBooleanProperty("showLegend", showLegend));
+        properties.add(new ReportStringProperty("xAxisLabel", xAxisLabel));
+        properties.add(new ReportStringProperty("yAxisLabel", yAxisLabel));
         return properties;
     }
 }

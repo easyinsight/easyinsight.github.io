@@ -176,11 +176,6 @@
             chart.setStyle("fontFamily", chartDef.getFont());
             chart.setStyle("fontSize", chartDef.fontSize);
 
-            /*var style:CSSStyleDeclaration = new CSSStyleDeclaration(".chartAxis");
-            style.setStyle("fontFamily", chartDef.fontName);
-            style.setStyle("fontSize", chartDef.fontSize);
-            StyleManager.setStyleDeclaration(".chartAxis", style, true);*/
-
             chart.setStyle("axisTitleStyleName", "chartAxis");
         }
 
@@ -221,7 +216,8 @@
 
                 dimensionFormatter = dimensionAxisItem.getFormatter();
                 dimensionAxis.categoryField = dimensionAxisItem.qualifiedName();
-                dimensionAxis.title = dimensionAxisItem.display;
+                //dimensionAxis.title = dimensionAxisItem.display;
+                dimensionAxis.title = (chartDef.xAxisLabel != null && chartDef.xAxisLabel != "") ? chartDef.xAxisLabel : dimensionAxisItem.display;
 
                 var mySeries:Array = new Array();
                 for (var i:int = 0; i < getMeasures().length; i++) {
@@ -235,7 +231,7 @@
                 var legendItems:Array = styleColumns(mySeries);
                 chart.series = mySeries;
 
-                measureAxis.title = firstMeasure.display;
+                measureAxis.title = (chartDef.yAxisLabel != null && chartDef.yAxisLabel != "") ? chartDef.yAxisLabel : firstMeasure.display;
 
 
 

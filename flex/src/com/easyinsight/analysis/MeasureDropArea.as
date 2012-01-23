@@ -35,7 +35,7 @@ package com.easyinsight.analysis
                     var analysisMeasure:AnalysisMeasure = new AnalysisMeasure();
                     analysisMeasure.key = analysisItem.key;
                     analysisMeasure.displayName = analysisItem.displayName;
-                    analysisMeasure.aggregation = AggregationTypes.COUNT;
+                    analysisMeasure.aggregation = AggregationTypes.COUNT_DISTINCT;
                     analysisMeasure.concrete = analysisItem.concrete;
                     analysisMeasure.filters = analysisItem.filters;
                     analysisItem = analysisMeasure;

@@ -13,6 +13,7 @@ import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
+import com.easyinsight.analysis.DimensionDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
@@ -45,7 +46,7 @@ public class TrendGridControlBar extends ReportControlBar implements IReportCont
 
         dimensionViewGrouping = new ListDropAreaGrouping();
         dimensionViewGrouping.maxElements = 1;
-        dimensionViewGrouping.dropAreaType = ListDropArea;
+        dimensionViewGrouping.dropAreaType = DimensionDropArea;
         dimensionViewGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         setStyle("verticalAlign", "middle");
     }

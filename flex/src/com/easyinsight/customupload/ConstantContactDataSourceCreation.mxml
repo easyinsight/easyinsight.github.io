@@ -37,7 +37,6 @@
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:ConstantContactDataSource = feedDefinition as ConstantContactDataSource;
             ds.ccUserName = userNameInput.text;
-            ds.briefMode = modeGroup.selectedValue == "brief";
         }
 
         private function install():void {
@@ -87,13 +86,6 @@
     <mx:RemoteObject destination="tokenService" id="tokenService">
         <mx:method name="getOAuthURL" result="gotURL()"/>
     </mx:RemoteObject>
-    <mx:TextArea text="Easy Insight can report against two levels of contact info from your Constant Contact data, brief and full. Brief data will only pull over a few fields such as email address and user name, but will also take a fraction of the time required by full to synchronize."
-            width="500" height="50" editable="false" borderStyle="none" selectable="false"/>
-    <mx:RadioButtonGroup id="modeGroup" selectedValue="brief"/>
-    <mx:HBox>
-        <mx:RadioButton label="Brief Contact Data" value="brief" selected="true" groupName="modeGroup"/>
-        <mx:RadioButton label="Full Contact Data" value="full" groupName="modeGroup"/>
-    </mx:HBox>
     <mx:HBox>
         <mx:Label text="Constant Contact User Name:"/>
         <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" width="250" text="{userName}"/>

@@ -15,6 +15,9 @@ public class ChartDefinition extends AnalysisDefinition {
     public var showLegend:Boolean = true;
     public var chartDefinitionID:Number;
 
+    public var xAxisLabel:String;
+    public var yAxisLabel:String;
+
     public static const SORT_X_DESCENDING:String = "X-Axis Descending";
     public static const SORT_X_ASCENDING:String = "X-Axis Ascending";
     public static const SORT_Y_ASCENDING:String = "Y-Axis Ascending";
