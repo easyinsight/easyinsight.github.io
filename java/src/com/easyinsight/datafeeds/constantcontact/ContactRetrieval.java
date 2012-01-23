@@ -135,7 +135,7 @@ public class ContactRetrieval {
         consumer.setMessageSigner(new HmacSha1MessageSigner());
         consumer.setTokenWithSecret(ccSource.getTokenKey(), ccSource.getTokenSecret());
 
-        PostMethod postMethod = new PostMethod("https://api.constantcontact.com/ws/customers/jboe99/activities");
+        PostMethod postMethod = new PostMethod("https://api.constantcontact.com/ws/customers/"+ccSource.getUsername()+"/activities");
         postMethod.setRequestHeader("Accept", "application/xml");
         postMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         List<String> columns = Arrays.asList("EMAIL%20ADDRESS", "FIRST%20NAME", "LAST%20NAME", "JOB%20TITLE", "COMPANY%20NAME", "WORK%20PHONE", "HOME%20PHONE", "CITY", "STATE", "COUNTRY", "POSTAL%20CODE",
@@ -147,7 +147,7 @@ public class ContactRetrieval {
             sb.append("columns=").append(column).append("&");
         }
         String ops = "activityType=EXPORT_CONTACTS&fileType=CSV&exportOptDate=true&exportOptSource=true&exportListName=true&sortBy=DATE_DESC&"+sb.toString()+"listId="+
-        URLEncoder.encode("http://api.constantcontact.com/ws/customers/jboe99/lists/" + listID, "UTF-8");
+        URLEncoder.encode("http://api.constantcontact.com/ws/customers/"+ccSource.getUsername()+"/lists/" + listID, "UTF-8");
         RequestEntity requestEntity = new StringRequestEntity(ops, "application/x-www-form-urlencoded", "UTF-8");
         postMethod.setRequestEntity(requestEntity);
         consumer.sign(postMethod);

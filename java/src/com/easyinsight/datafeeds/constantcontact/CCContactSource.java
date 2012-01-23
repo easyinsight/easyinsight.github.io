@@ -401,7 +401,7 @@ public class CCContactSource extends ConstantContactBaseSource {
 
         // get contact lists
 
-        Document doc = startBulkUpload("5");
+        Document doc = startBulkUpload("5", null);
         String id = doc.query("/entry/id/text()").get(0).getValue();
 
         System.out.println(id);
@@ -456,18 +456,18 @@ public class CCContactSource extends ConstantContactBaseSource {
         System.out.println(file);
     }
 
-    private static Document startBulkUpload(String listID) throws OAuthMessageSignerException, OAuthExpectationFailedException, OAuthCommunicationException, IOException, ParsingException {
+    private static Document startBulkUpload(String listID, ConstantContactCompositeSource ccSource) throws OAuthMessageSignerException, OAuthExpectationFailedException, OAuthCommunicationException, IOException, ParsingException {
         org.apache.commons.httpclient.HttpClient client = new org.apache.commons.httpclient.HttpClient();
 
         OAuthConsumer consumer = new CommonsHttp3OAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
         consumer.setMessageSigner(new HmacSha1MessageSigner());
         consumer.setTokenWithSecret("01d2d931-2df6-4cb8-88ca-e9f4c90c8bea", "ZKiEPe1wkLtIjmwpUHelXWKP3rE6gkVMaMqi");
 
-        PostMethod postMethod = new PostMethod("https://api.constantcontact.com/ws/customers/jboe99/activities");
+        PostMethod postMethod = new PostMethod("https://api.constantcontact.com/ws/customers"+ccSource.getUsername()+"/activities");
         postMethod.setRequestHeader("Accept", "application/xml");
         postMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         String ops = "activityType=EXPORT_CONTACTS&fileType=CSV&exportOptDate=true&exportOptSource=true&exportListName=true&sortBy=DATE_DESC&columns=EMAIL%20ADDRESS&columns=FIRST%20NAME&listId="+
-                URLEncoder.encode("http://api.constantcontact.com/ws/customers/jboe99/lists/" + listID, "UTF-8");
+                URLEncoder.encode("http://api.constantcontact.com/ws/customers/"+ccSource.getUsername()+"/lists/" + listID, "UTF-8");
         RequestEntity requestEntity = new StringRequestEntity(ops, "application/x-www-form-urlencoded", "UTF-8");
         postMethod.setRequestEntity(requestEntity);
         consumer.sign(postMethod);
