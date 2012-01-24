@@ -153,6 +153,7 @@ public class ContactRetrieval {
         consumer.sign(postMethod);
         client.executeMethod(postMethod);
         String string = postMethod.getResponseBodyAsString();
+        System.out.println(string);
         string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
         string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
         string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
