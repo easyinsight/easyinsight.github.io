@@ -135,6 +135,8 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                                 row.addValue(keys.get(COUNT), new NumericValue(1));
                                 hasEntries = true;
                             }
+                        } catch (Http403Exception he) {
+                            // ignore
                         } catch (Exception e) {
                             if ("Premature end of file.".equals(e.getMessage())) {
                                 LogClass.debug(e.getMessage());
