@@ -50,7 +50,9 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
     }
 
     public void updateIDs(ReplacementMap replacementMap) {
-        date = replacementMap.getField(date);
+        if (date != null) {
+            date = replacementMap.getField(date);
+        }
     }
 
     public List<AnalysisItem> getAnalysisItems(boolean getEverything) {
