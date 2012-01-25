@@ -157,55 +157,59 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 Map<String, MilestoneInfo> milestoneMap = new HashMap<String, MilestoneInfo>();
 
                 if (!"archived".equals(projectStatus)) {
-                    Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/calendar_entries.xml", client, builder, url, null, false, parentDefinition, false);
-
-                    Nodes milestoneCacheNodes = milestoneList.query("/calendar-entries/calendar-entry");
-                    for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
-                        Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
-                        String id = queryField(milestoneNode, "id/text()");
-                        String milestoneName = queryField(milestoneNode, "title/text()");
-                        String milestoneDl = queryField(milestoneNode, "deadline/text()");
-                        if (milestoneDl == null) {
-                            milestoneDl = queryField(milestoneNode, "due-at/text()");
-                        }
-                        String startAtString = queryField(milestoneNode, "start-at/text()");
-                        String type = queryField(milestoneNode, "type/text()");
-
-                        Date startDate = null;
-                        if (startAtString != null) {
-                            startDate = deadlineFormat.parse(startAtString);
-                        }
-                        Date milestoneDeadline = null;
-                        try {
-                            if (milestoneDl != null && "Milestone".equals(type)) {
-                                try {
-                                    milestoneDeadline = deadlineFormat.parse(milestoneDl);
-                                } catch (ParseException e) {
-                                    milestoneDeadline = altFormat.parse(milestoneDl);
-                                }
-                            } else if (milestoneDl != null) {
-                                try {
-                                    milestoneDeadline = deadlineFormat.parse(milestoneDl);
-                                } catch (ParseException e) {
-                                    milestoneDeadline = deadlineTimeFormat.parse(milestoneDl);
-                                }
+                    Document milestoneList;
+                    try {
+                        milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/calendar_entries.xml", client, builder, url, null, false, parentDefinition, false);
+                        Nodes milestoneCacheNodes = milestoneList.query("/calendar-entries/calendar-entry");
+                        for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
+                            Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
+                            String id = queryField(milestoneNode, "id/text()");
+                            String milestoneName = queryField(milestoneNode, "title/text()");
+                            String milestoneDl = queryField(milestoneNode, "deadline/text()");
+                            if (milestoneDl == null) {
+                                milestoneDl = queryField(milestoneNode, "due-at/text()");
                             }
-                        } catch (ParseException e) {
-                            e.printStackTrace();
+                            String startAtString = queryField(milestoneNode, "start-at/text()");
+                            String type = queryField(milestoneNode, "type/text()");
+
+                            Date startDate = null;
+                            if (startAtString != null) {
+                                startDate = deadlineFormat.parse(startAtString);
+                            }
+                            Date milestoneDeadline = null;
+                            try {
+                                if (milestoneDl != null && "Milestone".equals(type)) {
+                                    try {
+                                        milestoneDeadline = deadlineFormat.parse(milestoneDl);
+                                    } catch (ParseException e) {
+                                        milestoneDeadline = altFormat.parse(milestoneDl);
+                                    }
+                                } else if (milestoneDl != null) {
+                                    try {
+                                        milestoneDeadline = deadlineFormat.parse(milestoneDl);
+                                    } catch (ParseException e) {
+                                        milestoneDeadline = deadlineTimeFormat.parse(milestoneDl);
+                                    }
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            String milestoneCreatedOnString = queryField(milestoneNode, "created-on/text()");
+                            Date milestoneCreatedOn = deadlineFormat.parse(milestoneCreatedOnString);
+                            String milestoneCompletedOnString = queryField(milestoneNode, "completed-on/text()");
+                            Date milestoneCompletedOn = null;
+                            if (milestoneCompletedOnString != null) {
+                                milestoneCompletedOn = deadlineFormat.parse(milestoneCompletedOnString);
+                            }
+                            String milestoneOwner = null;
+                            String responsiblePartyId = queryField(milestoneNode, "responsible-party-id/text()");
+                            if (responsiblePartyId != null) {
+                                milestoneOwner = basecampCache.getUserName(responsiblePartyId);
+                            }
+                            milestoneMap.put(id, new MilestoneInfo(milestoneName, milestoneCreatedOn, milestoneCompletedOn, milestoneDeadline, milestoneOwner, type, startDate));
                         }
-                        String milestoneCreatedOnString = queryField(milestoneNode, "created-on/text()");
-                        Date milestoneCreatedOn = deadlineFormat.parse(milestoneCreatedOnString);
-                        String milestoneCompletedOnString = queryField(milestoneNode, "completed-on/text()");
-                        Date milestoneCompletedOn = null;
-                        if (milestoneCompletedOnString != null) {
-                            milestoneCompletedOn = deadlineFormat.parse(milestoneCompletedOnString);
-                        }
-                        String milestoneOwner = null;
-                        String responsiblePartyId = queryField(milestoneNode, "responsible-party-id/text()");
-                        if (responsiblePartyId != null) {
-                            milestoneOwner = basecampCache.getUserName(responsiblePartyId);
-                        }
-                        milestoneMap.put(id, new MilestoneInfo(milestoneName, milestoneCreatedOn, milestoneCompletedOn, milestoneDeadline, milestoneOwner, type, startDate));
+                    } catch (Http403Exception e) {
+                        continue;
                     }
                 }
 
