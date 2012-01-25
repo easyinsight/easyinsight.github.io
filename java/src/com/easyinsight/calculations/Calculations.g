@@ -48,7 +48,6 @@ literal	:	Decimal | String;
 
 Decimal	:	((UInteger (Dot UInteger)?) | (Dot UInteger)) ('E' Integer)?;
 
-
 Variable:	BracketedVariable | NoBracketsVariable;
 
 String	:	'\"' (Character | Digit | VariableWhitespace | SpecialChars)* '\"';
@@ -87,7 +86,7 @@ fragment BracketedVariable
 	:	OpenBrace (Character | Digit | VariableSpecialChars) (Character | Digit | VariableSpecialChars | VariableWhitespace)* CloseBrace;
 
 fragment NoBracketsVariable
-	:	(Character | Digit) (Character | Digit | VariableWhitespace)*;
+	:	Character (Character | Digit | VariableWhitespace)*;
 	
 // List any special characters that should be part of variable names here.
 fragment NoBracketSpecialChars
