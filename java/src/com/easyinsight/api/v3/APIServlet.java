@@ -40,6 +40,14 @@ public abstract class APIServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String authHeader = req.getHeader("Authorization");
+        if (authHeader == null) {
+            resp.setContentType("text/xml");
+            resp.setStatus(401);
+            resp.addHeader("WWW-Authenticate", "Basic realm=\"Easy Insight\"");
+            resp.getOutputStream().write("<response><code>401</code><message>Your credentials were rejected.</message></response>".getBytes());
+            resp.getOutputStream().flush();
+            return;
+        }
         String headerValue = authHeader.split(" ")[1];
         BASE64Decoder decoder = new BASE64Decoder();
         String userPass = new String(decoder.decodeBuffer(headerValue));
