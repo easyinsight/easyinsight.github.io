@@ -57,7 +57,7 @@
             var now:Number = _outcome.now.getValue() as Number;
             var exploreOption:ContextMenuItem = new ContextMenuItem("Analyze the metric...");
             exploreOption.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, analyzeData);
-            new StandardContextWindow(_outcome.measure, passThrough, this, _outcome, true, _outcome.measure.filters, _outcome.measure.getFormatter().format(_outcome.now), [exploreOption]);
+            new StandardContextWindow(_outcome.measure, passThrough, this, _outcome, report, true, _outcome.measure.filters, _outcome.measure.getFormatter().format(_outcome.now), [exploreOption]);
         }
 
         private function analyzeData(event:ContextMenuEvent):void {

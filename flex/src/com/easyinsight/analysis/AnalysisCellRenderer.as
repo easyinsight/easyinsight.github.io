@@ -201,7 +201,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color);
         utf.align = align;
         setTextFormat(utf);
-        new StandardContextWindow(analysisItem, passThrough, this, value);
+        new StandardContextWindow(analysisItem, passThrough, this, value, _report);
         invalidateProperties();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }

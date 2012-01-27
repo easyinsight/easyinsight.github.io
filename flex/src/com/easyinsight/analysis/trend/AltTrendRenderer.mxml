@@ -52,7 +52,7 @@
             trendIcon = TrendStatusRenderer.iconForKPI(_outcome);
             var exploreOption:ContextMenuItem = new ContextMenuItem("Analyze the trend...");
             exploreOption.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, analyzeData);
-            new StandardContextWindow(_outcome.measure, passThrough, this, _outcome, true, _outcome.measure.filters, _outcome.measure.getFormatter().format(_outcome.now), [ exploreOption ]);
+            new StandardContextWindow(_outcome.measure, passThrough, this, _outcome, _outcome.report, true, _outcome.measure.filters, _outcome.measure.getFormatter().format(_outcome.now), [ exploreOption ]);
         }
 
         private function analyzeData(event:ContextMenuEvent):void {

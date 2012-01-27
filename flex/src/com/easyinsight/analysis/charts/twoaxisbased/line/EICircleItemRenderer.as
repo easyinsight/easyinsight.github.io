@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.analysis.charts.twoaxisbased.line {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.pseudocontext.StandardContextWindow;
 
@@ -77,7 +78,13 @@ public class EICircleItemRenderer extends UIComponent implements IDataRenderer {
 		return _chartItem;
 	}
 
-	/**
+    private var _report:AnalysisDefinition;
+
+    public function set report(value:AnalysisDefinition):void {
+        _report = value;
+    }
+
+    /**
 	 *  @private
 	 */
 	public function set data(value:Object):void
@@ -94,7 +101,7 @@ public class EICircleItemRenderer extends UIComponent implements IDataRenderer {
         if (_analysisItem != null && _chartItem != null && _chartItem is ChartItem) {
             var columnSeriesItem:ChartItem = _chartItem as ChartItem;
             var obj:Object = columnSeriesItem.item;
-            new StandardContextWindow(_analysisItem, passThrough, this, obj);
+            new StandardContextWindow(_analysisItem, passThrough, this, obj, _report);
         }
     }
 

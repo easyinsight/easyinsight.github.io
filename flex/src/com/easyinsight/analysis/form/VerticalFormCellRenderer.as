@@ -3,7 +3,6 @@ package com.easyinsight.analysis.form
 import com.easyinsight.analysis.*;
 
 
-import com.easyinsight.pseudocontext.PseudoContextWindow;
 import com.easyinsight.pseudocontext.StandardContextWindow;
 
 import flash.events.Event;
@@ -88,17 +87,14 @@ public class VerticalFormCellRenderer extends VBox
             } else {
                 addChild(fieldLabel);
             }
-            new StandardContextWindow(analysisItem, passThrough, this, _data);
+            new StandardContextWindow(analysisItem, passThrough, this, _data, _report);
         } catch(e:Error) {
             Alert.show(e.message);
         }
     }
 
     private function onClick(event:MouseEvent):void {
-            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report, this.data);
-            PopUpManager.addPopUp(window, this);
-            window.x = event.stageX + 5;
-            window.y = event.stageY + 5;
+
     }
 
     private function passThrough(event:Event):void {

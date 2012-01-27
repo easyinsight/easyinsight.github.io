@@ -53,7 +53,7 @@ public class CustomTreeTextRenderer extends UITextField implements IListItemRend
         this._data = value;
         var tf:UITextFormat = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, 0);
         setTextFormat(tf);
-        new StandardContextWindow(analysisItem, passThrough, this, value, false);
+        new StandardContextWindow(analysisItem, passThrough, this, value, _report, false);
     }
 
     private function passThrough(event:Event):void {

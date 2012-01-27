@@ -1,5 +1,6 @@
 package com.easyinsight.pseudocontext {
 import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItemChangeEvent;
 import com.easyinsight.analysis.AnalysisItem;
@@ -42,13 +43,17 @@ public class StandardContextWindow {
     private var copyText:String;
 
     private var altKey:String;
+    
+    private var report:AnalysisDefinition;
 
     public function StandardContextWindow(analysisItem:AnalysisItem, passthroughFunction:Function, passthroughObject:InteractiveObject, data:Object,
+                                          report:AnalysisDefinition, 
                                           includeDrills:Boolean = true, filterDefinitions:ArrayCollection = null, copyText:String = null, additionalOptions:Array = null,
             altKey:String = null) {
         super();
         this.analysisItem = analysisItem;
         this.passthroughFunction = passthroughFunction;
+        this.report = report;
         this.passthroughObject = passthroughObject;
         this.filterDefinitions = filterDefinitions;
         this.data = data;
@@ -148,7 +153,7 @@ public class StandardContextWindow {
             var drillThrough:DrillThrough = link as DrillThrough;
             var drillContextItem:ContextMenuItem = new ContextMenuItem(drillThrough.label);
             drillContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem);
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, report);
                 executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();
             });

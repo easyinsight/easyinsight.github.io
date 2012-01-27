@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.analysis.charts.xaxisbased.column {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.pseudocontext.StandardContextWindow;
 
@@ -29,6 +30,13 @@ public class ContextMenuBoxItemRenderer extends UIComponent implements IDataRend
     }
 
     private var _stackItem:AnalysisItem;
+
+    private var _report:AnalysisDefinition;
+
+    public function set report(value:AnalysisDefinition):void {
+        _report = value;
+        invalidateProperties();
+    }
 
     public function set stackItem(value:AnalysisItem):void {
         _stackItem = value;
@@ -71,7 +79,7 @@ public class ContextMenuBoxItemRenderer extends UIComponent implements IDataRend
         if (_stackItem != null && _data != null && _data is ChartItem) {
             var columnSeriesItem:ChartItem = _data as ChartItem;
             var obj:Object = columnSeriesItem.item;
-            new StandardContextWindow(_stackItem, passThrough, this, obj, true, null, null, null, _seriesField);
+            new StandardContextWindow(_stackItem, passThrough, this, obj, _report, true, null, null, null, _seriesField);
         }
     }
 

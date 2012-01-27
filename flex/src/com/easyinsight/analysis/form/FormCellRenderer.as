@@ -49,7 +49,7 @@ public class FormCellRenderer extends Box
                 }
             } else if (defaultLink is DrillThrough) {
                 var drillThrough:DrillThrough = defaultLink as DrillThrough;
-                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem);
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, _report);
                 executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();
             }
@@ -130,7 +130,7 @@ public class FormCellRenderer extends Box
             if (defaultLink != null && objVal != null && objVal.type() != Value.EMPTY) {
                 hyperlinked = true;
             }
-            new StandardContextWindow(analysisItem, passThrough, this, _data);
+            new StandardContextWindow(analysisItem, passThrough, this, _data, _report);
         } catch(e:Error) {
             Alert.show(e.message);
         }

@@ -56,7 +56,7 @@ public class TrendNameRenderer extends UIComponent implements IListItemRenderer 
                 filterDefinition.inclusive = true;
                 filters.addItem(filterDefinition);
             }
-            new StandardContextWindow(trendOutcome.measure, passThrough, this, trendOutcome.dimensions, true, filters, trendOutcome.measure.getFormatter().format(trendOutcome.now), options, null);
+            new StandardContextWindow(trendOutcome.measure, passThrough, this, trendOutcome.dimensions, trendOutcome.report, true, filters, trendOutcome.measure.getFormatter().format(trendOutcome.now), options, null);
         }
     }
 

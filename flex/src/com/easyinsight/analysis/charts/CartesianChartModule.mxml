@@ -223,7 +223,7 @@
                     var measure:AnalysisMeasure = getMeasures().getItemAt(i) as AnalysisMeasure;
                     var series:Series = createSeries(measure, dataSet, dimensionAxisItem.qualifiedName(), i);
                     var cFactory:ClassFactory = new ClassFactory(ContextMenuBoxItemRenderer);
-                    cFactory.properties = { stackItem: dimensionAxisItem };
+                    cFactory.properties = { stackItem: dimensionAxisItem, report: chartDef };
                     series.setStyle("itemRenderer", cFactory);
                     mySeries.push(series);
                 }

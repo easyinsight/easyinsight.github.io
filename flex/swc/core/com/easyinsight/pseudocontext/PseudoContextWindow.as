@@ -226,7 +226,7 @@ public class PseudoContextWindow extends VBox {
 
     private function drillthroughClick(event:MouseEvent):void {
         var drillThrough:DrillThrough = event.currentTarget.data as DrillThrough;
-        var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem);
+        var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, analysisDefinition);
         executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
         executor.send();
     }
