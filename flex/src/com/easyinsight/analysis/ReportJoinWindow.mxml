@@ -79,7 +79,7 @@
         }
 
         private function revert():void {
-            startJoins = new ArrayCollection();
+            startJoins = null;
             customConnectionMap = new Object();
             ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
             analysisService.determineOverrides.send(dataSourceID, fields);
