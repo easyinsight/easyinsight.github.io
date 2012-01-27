@@ -209,7 +209,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                             milestoneMap.put(id, new MilestoneInfo(milestoneName, milestoneCreatedOn, milestoneCompletedOn, milestoneDeadline, milestoneOwner, type, startDate));
                         }
                     } catch (Http403Exception e) {
-                        continue;
+                        // ignore
                     }
                 }
 
