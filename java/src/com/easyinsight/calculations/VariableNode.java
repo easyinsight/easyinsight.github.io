@@ -3,7 +3,6 @@ package com.easyinsight.calculations;
 import com.easyinsight.analysis.*;
 import org.antlr.runtime.Token;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -66,7 +65,29 @@ public class VariableNode extends CalculationTreeNode {
             }
         }
         if (analysisItem == null) {
-            throw new FunctionException("We could not find a field named " + s);
+            analysisItems = displayItems.get(s);
+            for (AnalysisItem item : analysisItems) {
+                if (item.getType() == AnalysisItemTypes.MEASURE) {
+                    AnalysisMeasure analysisMeasure = (AnalysisMeasure) item;
+                    if (analysisMeasure.getAggregation() == aggregationType) {
+                        analysisItem = item;
+                        break;
+                    } else {
+                        AnalysisMeasure clonedMeasure;
+                        try {
+                            clonedMeasure = (AnalysisMeasure) analysisMeasure.clone();
+                        } catch (CloneNotSupportedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        clonedMeasure.setAggregation(aggregationType);
+                        analysisItem = clonedMeasure;
+                        break;
+                    }
+                }
+            }
+            if (analysisItem == null) {
+                throw new FunctionException("We could not find a field named " + s);
+            }
         }
     }
 
