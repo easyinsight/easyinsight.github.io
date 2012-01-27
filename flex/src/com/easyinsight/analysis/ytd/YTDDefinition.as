@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.analysis.ytd {
+import com.easyinsight.analysis.AggregationTypes;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 
@@ -20,6 +21,7 @@ public class YTDDefinition extends AnalysisDefinition {
     public var ytdID:int;
     public var headerWidth:int = 140;
     public var columnWidth:int = 73;
+    public var firstAggregation:int = AggregationTypes.SUM;
     public var patternName:String;
 
     public function YTDDefinition() {

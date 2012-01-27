@@ -89,6 +89,7 @@
                     } else if (drillthrough.dashboardID > 0) {
                         qualifiedName = EIDescriptor.DASHBOARD + "-" + drillthrough.dashboardID;
                     }
+                    script = drillthrough.marmotScript;
                     miniWindow = drillthrough.miniWindow;
                 }
             }
@@ -124,11 +125,13 @@
                         drillThrough.dashboardID = desc.id;
                     }
                     drillThrough.miniWindow = miniWindowCheckbox.selected;
+                    drillThrough.marmotScript = scriptArea.text;
                     _link = drillThrough;
                 }
                 if (valid) {
                     _link.linkID = linkID;
                     _link.label = labelInput.text;
+
                     if (firstLink == null) {
                         dispatchEvent(new LinkMetadataEvent(LinkMetadataEvent.LINK_DEFINED, _link));
                     } else {
@@ -138,6 +141,9 @@
                 }
             }
         }
+
+        [Bindable]
+        private var script:String;
         ]]></mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="getDescriptors" result="gotDescriptors()"/>
@@ -187,7 +193,7 @@
                     <mx:HBox>
                         <mx:Label text="Target Report:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
                         <util:SmartComboBox id="reportChooser" dataProvider="{reports}" labelField="name" selectedProperty="qualifiedName"
-                                selectedValue="{qualifiedName}"/>
+                                selectedValue="{qualifiedName}" rowCount="12"/>
                     </mx:HBox>
                     <mx:HBox>
                         <mx:Label text="Use Popup Window:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
@@ -196,6 +202,10 @@
                     <mx:HBox>
                         <mx:Label text="Default Link:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
                         <mx:CheckBox label="" id="defaultLinkCheckbox" selected="{defaultLink}"/>
+                    </mx:HBox>
+                    <mx:HBox>
+                        <mx:Label text="Scripting:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                        <mx:TextArea text="{script}" width="450" height="70" editable="true" id="scriptArea" borderStyle="inset" borderThickness="1"/>
                     </mx:HBox>
                 </mx:VBox>
             </mx:ViewStack>

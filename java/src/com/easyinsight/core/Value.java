@@ -10,7 +10,7 @@ import java.util.Map;
  * Date: Jul 1, 2008
  * Time: 11:00:34 AM
  */
-public abstract class Value implements Serializable {
+public abstract class Value implements Serializable, Comparable<Value> {
     public static final int STRING = 1;
     public static final int NUMBER = 2;
     public static final int DATE = 3;
@@ -42,6 +42,13 @@ public abstract class Value implements Serializable {
 
     public void setValueExtension(ValueExtension valueExtension) {
         this.valueExtension = valueExtension;
+    }
+    
+    public Value toSortValue() {
+        if (sortValue != null) {
+            return sortValue;
+        }
+        return this;
     }
 
     public Value getSortValue() {

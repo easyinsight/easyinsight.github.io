@@ -190,7 +190,8 @@ public class YTDUtil {
 
         for (AnalysisMeasure measure : measures) {
             AggregationFactory aggregationFactory = new AggregationFactory(measure, false);
-            ytdMap.put(measure, aggregationFactory.getAggregation());
+            ytdMap.put(measure, wsytdDefinition.getFirstAggregation() == AggregationTypes.SUM ? aggregationFactory.getAggregation() :
+                    aggregationFactory.getAggregation(wsytdDefinition.getFirstAggregation()));
             averageMap.put(measure, aggregationFactory.getAggregation(AggregationTypes.AVERAGE));
         }
         Set<Value> timeIntervals = new HashSet<Value>();
@@ -318,7 +319,7 @@ public class YTDUtil {
         Collections.sort(intervals, new Comparator<Value>() {
 
             public int compare(Value value, Value value1) {
-                return value.getSortValue().toDouble().compareTo(value1.getSortValue().toDouble());
+                return value.toSortValue().compareTo(value1.toSortValue());
             }
         });
         return new YTDStuff(intervals, values);

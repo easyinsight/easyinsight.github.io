@@ -7,10 +7,22 @@
  */
 package com.easyinsight.analysis.diagram {
 import com.anotherflexdev.diagrammer.BaseNode;
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.TrendOutcome;
 
 public class DiagramNode extends BaseNode {
+
+    private var _report:AnalysisDefinition;
+
     public function DiagramNode() {
+    }
+
+    public function get report():AnalysisDefinition {
+        return _report;
+    }
+
+    public function set report(value:AnalysisDefinition):void {
+        _report = value;
     }
 
     public function set outcome(value:TrendOutcome):void {

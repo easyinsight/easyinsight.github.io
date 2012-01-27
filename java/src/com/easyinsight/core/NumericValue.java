@@ -159,4 +159,11 @@ public class NumericValue extends Value implements Serializable {
     public int hashCode() {
         return value.hashCode();
     }
+
+    public int compareTo(Value value) {
+        if (value.type() == Value.NUMBER) {
+            return this.toDouble().compareTo(value.toDouble());
+        }
+        return 0;
+    }
 }

@@ -114,6 +114,9 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "feed_visibility")
     private boolean visibleAtFeedLevel;
 
+    @Column(name="auto_setup_delivery")
+    private boolean autoSetupDelivery;
+
     @Column(name = "author_name")
     private String authorName;
 
@@ -135,6 +138,14 @@ public class AnalysisDefinition implements Cloneable {
 
     @Column(name = "account_visible")
     private boolean accountVisible;
+
+    public boolean isAutoSetupDelivery() {
+        return autoSetupDelivery;
+    }
+
+    public void setAutoSetupDelivery(boolean autoSetupDelivery) {
+        this.autoSetupDelivery = autoSetupDelivery;
+    }
 
     public int getFolder() {
         return folder;
@@ -577,6 +588,8 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setAccountVisible(accountVisible);
         analysisDefinition.setMarmotScript(marmotScript);
         analysisDefinition.setReportRunMarmotScript(reportRunMarmotScript);
+        analysisDefinition.setRecommendedExchange(recommendedExchange);
+        analysisDefinition.setAutoSetupDelivery(autoSetupDelivery);
         if (joinOverrides != null) {
             List<JoinOverride> joins = new ArrayList<JoinOverride>();
             for (JoinOverride joinOverride : joinOverrides) {

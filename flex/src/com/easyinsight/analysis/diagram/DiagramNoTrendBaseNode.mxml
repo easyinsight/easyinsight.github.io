@@ -2,6 +2,7 @@
 <diagram:DiagramNode xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:diagrammer="com.anotherflexdev.diagrammer.*"
                      editable="false" xmlns:diagram="com.easyinsight.analysis.diagram.*">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.ClickUtil;
         import com.easyinsight.analysis.Link;
         import com.easyinsight.analysis.TrendOutcome;
@@ -19,8 +20,6 @@
         [Bindable]
         private var outcomeValue:String;
 
-
-
         override public function get outcome():TrendOutcome {
             return _outcome;
         }
@@ -36,7 +35,7 @@
         }
 
         private function mouseClick(event:MouseEvent):void {
-            ClickUtil.doStuff(defaultLink, _outcome, _outcome.measure, this);
+            ClickUtil.doStuff(defaultLink, _outcome, _outcome.measure, this, report);
         }
 
         override public function set outcome(value:TrendOutcome):void {

@@ -66,7 +66,7 @@ public class AccountTest extends TestCase {
         cal.add(Calendar.DAY_OF_YEAR, 31);
         conn = Database.instance().getConnection();
         try {
-            new AccountActivityStorage().updateAccountTimes(cal.getTime(), conn);            
+            //new AccountActivityStorage().updateAccountTimes(cal.getTime(), conn);
         } finally {
             Database.instance().closeConnection(conn);
         }

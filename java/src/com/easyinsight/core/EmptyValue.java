@@ -48,4 +48,8 @@ public class EmptyValue extends Value {
     public String toString() {
         return "(Empty)";
     }
+
+    public int compareTo(Value value) {
+        return 0;
+    }
 }

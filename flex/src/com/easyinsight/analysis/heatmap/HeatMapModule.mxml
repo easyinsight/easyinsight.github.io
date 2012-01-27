@@ -13,7 +13,6 @@
         import com.easyinsight.analysis.Link;
         import com.easyinsight.analysis.ReportWindowEvent;
         import com.easyinsight.filtering.FilterRawData;
-        import com.easyinsight.filtering.FilterValueDefinition;
         import com.easyinsight.report.ReportNavigationEvent;
         import com.google.maps.InfoWindowOptions;
         import com.google.maps.LatLng;
@@ -189,21 +188,23 @@
             if (heatMapDefinition.zipCode != null && heatMapDefinition.zipCode.links != null && heatMapDefinition.zipCode.links.length > 0) {
                 var link:Link = heatMapDefinition.zipCode.links.getItemAt(0) as Link;
                 if (link is DrillThrough) {
-                    var executor:DrillThroughExecutor = new DrillThroughExecutor(link as DrillThrough);
+                    var executor:DrillThroughExecutor = new DrillThroughExecutor(link as DrillThrough, point, heatMapDefinition.zipCode, heatMapDefinition);
                     executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, function(event:DrillThroughEvent):void {
-                        var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
+                        /*var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
                         var coordinateValue:CoordinateValue = point[heatMapDefinition.zipCode.qualifiedName()];
                         filterDefinition.field = heatMapDefinition.getCoreAnalysisItem(heatMapDefinition.zipCode);
                         filterDefinition.filteredValues = new ArrayCollection([coordinateValue.zip]);
                         filterDefinition.enabled = true;
                         filterDefinition.inclusive = true;
                         filterDefinition.singleValue = true;
-                        var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);
+                        var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);*/
                         if (event.drillThrough.miniWindow) {
-                            dispatchEvent(new ReportWindowEvent(event.report.id, 0, 0, filters, InsightDescriptor(event.report).dataFeedID,
-                                    InsightDescriptor(event.report).reportType));
+                            dispatchEvent(new ReportWindowEvent(event.drillThroughResponse.descriptor.id, 0, 0, event.drillThroughResponse.filters,
+                                    InsightDescriptor(event.drillThroughResponse.descriptor).dataFeedID,
+                                    InsightDescriptor(event.drillThroughResponse.descriptor).reportType));
                         } else {
-                            dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.report, filters));
+                            dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.drillThroughResponse.descriptor,
+                                    event.drillThroughResponse.filters));
                         }
                     });
                     executor.send();

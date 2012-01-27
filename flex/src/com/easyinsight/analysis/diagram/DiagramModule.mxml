@@ -39,6 +39,7 @@
                     } else {
                         node = new DiagramNoTrendBaseNode();
                     }
+                    node.report = diagramDef;
                     node.editEnabled = editor;
                     node.outcome = trendOutcome;
                     node.x = DiagramReportFieldExtension(trendOutcome.measure.reportFieldExtension).x;

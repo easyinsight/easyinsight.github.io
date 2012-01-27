@@ -2,17 +2,6 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:verticalllist="com.easyinsight.analysis.verticallist.*"
            implements="com.easyinsight.analysis.IReportRenderer" verticalScrollPolicy="off" width="100%"
            height="100%">
-    <mx:states>
-        <mx:State name="noData">
-            <mx:RemoveChild target="{dataGrid}"/>
-            <mx:AddChild relativeTo="{box}">
-                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-                    <mx:TextArea fontSize="22" text="We didn't find any data for the fields and filters that you specified in the report."
-                                 borderStyle="none" backgroundAlpha="0" width="500" height="65" editable="false" selectable="false" focusEnabled="false"/>
-                </mx:Box>
-            </mx:AddChild>
-        </mx:State>
-    </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisMeasure;
@@ -66,7 +55,6 @@
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
 
             if (dataSet.length == 0) {
-                currentState = "noData";
                 return;
             }
             var vert:YTDDefinition = analysisDefinition as YTDDefinition;
@@ -148,10 +136,8 @@
                 }
             }
             if (columns.length <= 1 || dColl.length == 0) {
-                currentState = "noData";
                 invalidateSize();
             } else {
-                currentState = "";
                 var reportWidth:int = 1;
                 for each (var col:AdvancedDataGridColumn in columns) {
                     reportWidth += (col.width + 1);
@@ -159,7 +145,7 @@
                 var endWidth:int = 0;
                 if (reportWidth < this.width) {
                     var delta:int = (this.width - reportWidth);
-                    delta = Math.min(delta, 500);
+                    //delta = Math.min(delta, 500);
                     var perColumnAdd:int = (delta) / columns.length;
                     for each (var colAdd:AdvancedDataGridColumn in columns) {
                         colAdd.width += perColumnAdd;

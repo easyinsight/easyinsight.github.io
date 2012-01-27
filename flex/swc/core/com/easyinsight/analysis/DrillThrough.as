@@ -6,6 +6,7 @@ public class DrillThrough extends Link{
     public var reportID:int;
     public var dashboardID:int;
     public var miniWindow:Boolean;
+    public var marmotScript:String;
 
     public function DrillThrough() {
         super();

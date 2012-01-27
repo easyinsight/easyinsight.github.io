@@ -21,6 +21,16 @@ public class WSYTDDefinition extends WSAnalysisDefinition {
 
     private String patternName;
 
+    private int firstAggregation = AggregationTypes.SUM;
+
+    public int getFirstAggregation() {
+        return firstAggregation;
+    }
+
+    public void setFirstAggregation(int firstAggregation) {
+        this.firstAggregation = firstAggregation;
+    }
+
     public String getPatternName() {
         return patternName;
     }
@@ -109,6 +119,7 @@ public class WSYTDDefinition extends WSAnalysisDefinition {
         headerWidth = (int) findNumberProperty(properties, "headerWidth", 140);
         columnWidth = (int) findNumberProperty(properties, "columnWidth", 73);
         patternName = findStringProperty(properties, "patternName", "");
+        firstAggregation = (int) findNumberProperty(properties, "firstAggregation", AggregationTypes.SUM);
     }
 
     public List<ReportProperty> createProperties() {
@@ -116,6 +127,7 @@ public class WSYTDDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("headerWidth", headerWidth));
         properties.add(new ReportNumericProperty("columnWidth", columnWidth));
         properties.add(new ReportStringProperty("patternName", patternName));
+        properties.add(new ReportNumericProperty("firstAggregation", firstAggregation));
         return properties;
     }
 }

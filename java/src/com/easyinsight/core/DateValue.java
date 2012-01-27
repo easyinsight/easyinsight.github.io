@@ -19,12 +19,21 @@ public class DateValue extends Value implements Serializable {
     private int day;
     private int hour;
     private int minute;
+    private int dateLevel;
     private boolean dateTime;
 
     private String format;
     private static final long serialVersionUID = 8170674055682369820L;
 
     public DateValue() {
+    }
+
+    public int getDateLevel() {
+        return dateLevel;
+    }
+
+    public void setDateLevel(int dateLevel) {
+        this.dateLevel = dateLevel;
     }
 
     public boolean isDateTime() {
@@ -147,5 +156,13 @@ public class DateValue extends Value implements Serializable {
 
     public void setMinute(int minute) {
         this.minute = minute;
+    }
+
+    public int compareTo(Value value) {
+        if (value.type() == Value.DATE) {
+            DateValue date2 = (DateValue) value;
+            return getDate().compareTo(date2.getDate());
+        }
+        return 0;
     }
 }

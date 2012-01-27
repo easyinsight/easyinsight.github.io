@@ -23,6 +23,17 @@ public class DrillThrough extends Link {
     @Column(name="mini_window")
     private boolean miniWindow;
 
+    @Column(name="marmotscript")
+    private String marmotScript;
+
+    public String getMarmotScript() {
+        return marmotScript;
+    }
+
+    public void setMarmotScript(String marmotScript) {
+        this.marmotScript = marmotScript;
+    }
+
     public Long getDashboardID() {
         return dashboardID;
     }

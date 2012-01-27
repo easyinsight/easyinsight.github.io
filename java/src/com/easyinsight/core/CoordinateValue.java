@@ -75,4 +75,8 @@ public class CoordinateValue extends Value implements Serializable {
         result = 31 * result + y.hashCode();
         return result;
     }
+
+    public int compareTo(Value value) {
+        return 0;
+    }
 }

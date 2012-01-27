@@ -160,6 +160,8 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setUrlKey(wsAnalysisDefinition.getUrlKey());
         analysisDefinition.setJoinOverrides(wsAnalysisDefinition.getJoinOverrides());
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);
+        analysisDefinition.setRecommendedExchange(wsAnalysisDefinition.isRecommendedExchange());
+        analysisDefinition.setAutoSetupDelivery(wsAnalysisDefinition.isAutoSetupDelivery());
         analysisDefinition.setDescription(wsAnalysisDefinition.getDescription());
         analysisDefinition.setAuthorName(wsAnalysisDefinition.getAuthorName());
         analysisDefinition.setMarmotScript(wsAnalysisDefinition.getMarmotScript());

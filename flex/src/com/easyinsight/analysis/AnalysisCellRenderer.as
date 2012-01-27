@@ -58,10 +58,14 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
             if (defaultLink is URLLink) {
                 var urlLink:URLLink = defaultLink as URLLink;
                 var url:String = data[urlLink.label + "_link"];
-                navigateToURL(new URLRequest(url), "_blank");
+                try {
+                    navigateToURL(new URLRequest(url), "_blank");
+                } catch (e:Error) {
+                    Alert.show(e.message);
+                }
             } else if (defaultLink is DrillThrough) {
                 var drillThrough:DrillThrough = defaultLink as DrillThrough;
-                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough);
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, _report);
                 executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();
             }
@@ -69,20 +73,11 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
     }
 
     private function onDrill(event:DrillThroughEvent):void {
-        var filters:ArrayCollection;
-        if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-            var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
-            filterDefinition.field = analysisItem;
-            filterDefinition.singleValue = true;
-            filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
-            filterDefinition.enabled = true;
-            filterDefinition.inclusive = true;
-            filters = new ArrayCollection([ filterDefinition ]);
-        }
         if (event.drillThrough.miniWindow) {
-            dispatchEvent(new ReportWindowEvent(event.report.id, 0, 0, filters, InsightDescriptor(event.report).dataFeedID, InsightDescriptor(event.report).reportType));
+            dispatchEvent(new ReportWindowEvent(event.drillThroughResponse.descriptor.id, 0, 0, event.drillThroughResponse.filters, InsightDescriptor(event.drillThroughResponse.descriptor).dataFeedID,
+                    InsightDescriptor(event.drillThroughResponse.descriptor).reportType));
         } else {
-            dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.report, filters));
+            dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.drillThroughResponse.descriptor, event.drillThroughResponse.filters));
         }
     }
 

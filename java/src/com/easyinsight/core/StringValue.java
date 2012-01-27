@@ -72,4 +72,14 @@ public class StringValue extends Value implements Serializable {
     public int hashCode() {
         return value.hashCode();
     }
+
+    public int compareTo(Value value) {
+        if (value.type() == Value.STRING) {
+            StringValue stringValue2 = (StringValue) value;
+            return this.getValue().compareTo(stringValue2.getValue());
+        } else if (value.type() == Value.EMPTY) {
+            return -1;
+        }
+        return 0;
+    }
 }

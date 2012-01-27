@@ -13,7 +13,6 @@ import com.easyinsight.analysis.HierarchyRollupEvent;
 import com.easyinsight.analysis.Link;
 import com.easyinsight.analysis.ReportWindowEvent;
 import com.easyinsight.analysis.URLLink;
-import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.report.ReportNavigationEvent;
 import com.easyinsight.solutions.InsightDescriptor;
 
@@ -27,7 +26,6 @@ import flash.net.navigateToURL;
 import flash.system.System;
 import flash.ui.Keyboard;
 
-import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.VBox;
 import mx.controls.Label;
@@ -228,23 +226,19 @@ public class PseudoContextWindow extends VBox {
 
     private function drillthroughClick(event:MouseEvent):void {
         var drillThrough:DrillThrough = event.currentTarget.data as DrillThrough;
-        var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough);
+        var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem);
         executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
         executor.send();
     }
 
     private function onDrill(event:DrillThroughEvent):void {
-        var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
-        filterDefinition.singleValue = true;
-        filterDefinition.field = analysisDefinition.getCoreAnalysisItem(analysisItem);
-        filterDefinition.filteredValues = new ArrayCollection([analysisDefinition.getValue(analysisItem, data)]);
-        filterDefinition.enabled = true;
-        filterDefinition.inclusive = true;
-        var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);
         if (event.drillThrough.miniWindow) {
-            onReport(new ReportWindowEvent(event.report.id, 0, 0, filters, InsightDescriptor(event.report).dataFeedID, InsightDescriptor(event.report).reportType));
+            onReport(new ReportWindowEvent(event.drillThroughResponse.descriptor.id, 0, 0, event.drillThroughResponse.filters,
+                    InsightDescriptor(event.drillThroughResponse.descriptor).dataFeedID,
+                    InsightDescriptor(event.drillThroughResponse.descriptor).reportType));
         } else {
-            onReport(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.report, filters));
+            onReport(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.drillThroughResponse.descriptor,
+                    event.drillThroughResponse.filters));
         }
     }
 

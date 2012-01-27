@@ -9,8 +9,9 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.email.UserStub;
 import com.easyinsight.exchange.ExchangeItem;
-import com.easyinsight.export.ExportService;
+import com.easyinsight.export.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.scorecard.ScorecardStorage;
@@ -58,7 +59,9 @@ public class SolutionService {
                     new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset(), conn);
                 }
             }
-            PreparedStatement analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID FROM ANALYSIS, DATA_FEED " +
+            Map<Long, AnalysisDefinition> alreadyInstalledMap = new HashMap<Long, AnalysisDefinition>();
+            List<InsightDescriptor> autoSetupDeliveries = new ArrayList<InsightDescriptor>();
+            PreparedStatement analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.auto_setup_delivery FROM ANALYSIS, DATA_FEED " +
                     " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                     "DATA_FEED.feed_type = ? AND ANALYSIS.SOLUTION_VISIBLE = ? AND " +
                     "analysis.recommended_exchange = ?");
@@ -69,7 +72,38 @@ public class SolutionService {
             Session session = Database.instance().createSession(conn);
             while (rs.next()) {
                 long reportID = rs.getLong(1);
-                installReport(reportID, solutionKPIData.getDataSourceID(), conn, session, false, true);
+                boolean autoSetupDelivery = rs.getBoolean(2);
+                InsightDescriptor report = installReport(reportID, solutionKPIData.getDataSourceID(), conn, session, false, true, alreadyInstalledMap);
+                if (autoSetupDelivery) {
+                    autoSetupDeliveries.add(report);
+                }
+            }
+
+            if (!autoSetupDeliveries.isEmpty()) {
+                GeneralDelivery generalDelivery = new GeneralDelivery();
+                generalDelivery.setHtmlEmail(true);
+                List<DeliveryInfo> deliveryInfos = new ArrayList<DeliveryInfo>();
+                for (InsightDescriptor insightDescriptor : autoSetupDeliveries) {
+                    DeliveryInfo deliveryInfo = new DeliveryInfo();
+                    deliveryInfo.setFormat(ReportDelivery.HTML_TABLE);
+                    deliveryInfo.setId(insightDescriptor.getId());
+                    deliveryInfo.setType(DeliveryInfo.REPORT);
+                    deliveryInfo.setFilters(new ArrayList<FilterDefinition>());
+                    deliveryInfos.add(deliveryInfo);
+                }
+                generalDelivery.setDeliveryInfos(deliveryInfos);
+                generalDelivery.setUsers(Arrays.asList(new UserStub(SecurityUtil.getUserID(), null, null, null, 0, null)));
+                generalDelivery.setSubject("Weekly Update of your " + dataSource.getFeedName() + " Stats");
+                generalDelivery.setDeliveryLabel("Weekly " + dataSource.getFeedName() + " Update");
+                generalDelivery.setBody("");
+                generalDelivery.setUserID(SecurityUtil.getUserID());
+                WeeklyScheduleType weeklyScheduleType = new WeeklyScheduleType();
+                weeklyScheduleType.setDayOfWeek(Calendar.MONDAY);
+                weeklyScheduleType.setHour(6);
+                weeklyScheduleType.setTimeOffset(solutionKPIData.getUtcOffset());
+                generalDelivery.setScheduleType(weeklyScheduleType);
+                generalDelivery.save(conn, solutionKPIData.getUtcOffset());
+                generalDelivery.setup(conn);
             }
 
             PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID FROM DASHBOARD, DATA_FEED " +
@@ -82,7 +116,7 @@ public class SolutionService {
             ResultSet dashboardRS = dashboardQueryStmt.executeQuery();
             while (dashboardRS.next()) {
                 long dashboardID = dashboardRS.getLong(1);
-                installDashboard(dashboardID, solutionKPIData.getDataSourceID(), conn, session, false, true);
+                installDashboard(dashboardID, solutionKPIData.getDataSourceID(), conn, session, false, true, alreadyInstalledMap);
             }
             session.close();
             conn.commit();
@@ -474,7 +508,7 @@ public class SolutionService {
             conn.setAutoCommit(false);
             Session session = Database.instance().createSession(conn);
             
-            dashboardDescriptor = installDashboard(dashboardID, dataSourceID, conn, session, true, false);
+            dashboardDescriptor = installDashboard(dashboardID, dataSourceID, conn, session, true, false, new HashMap<Long, AnalysisDefinition>());
 
             session.flush();
 
@@ -529,7 +563,7 @@ public class SolutionService {
     }
 
     private DashboardDescriptor installDashboard(long dashboardID, long dataSourceID, EIConnection conn, Session session, boolean temporaryDashboard,
-                                                 boolean makeAccountVisible) throws Exception {
+                                                 boolean makeAccountVisible, Map<Long, AnalysisDefinition> alreadyInstalledMap) throws Exception {
         DashboardStorage dashboardStorage = new DashboardStorage();
         FeedStorage feedStorage = new FeedStorage();
         Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
@@ -559,10 +593,16 @@ public class SolutionService {
         List<Dashboard> dashboardList = new ArrayList<Dashboard>();
         for (AnalysisDefinition childReport : reports.values()) {
             //childReport.setFolder(EIDescriptor.OTHER_VIEW);
-            AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, childReport);
-            copyReport.setFolder(EIDescriptor.OTHER_VIEW);
-            reportReplacementMap.put(childReport.getAnalysisID(), copyReport);
-            reportList.add(copyReport);
+            AnalysisDefinition alreadyInstalled = alreadyInstalledMap.get(childReport.getAnalysisID());
+            if (alreadyInstalled == null) {
+                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, childReport);
+                copyReport.setFolder(EIDescriptor.OTHER_VIEW);
+                reportReplacementMap.put(childReport.getAnalysisID(), copyReport);
+                reportList.add(copyReport);
+                alreadyInstalledMap.put(childReport.getAnalysisID(), copyReport);
+            } else {
+                reportReplacementMap.put(childReport.getAnalysisID(), alreadyInstalled);
+            }
         }
         
         for (Dashboard childDashboard : dashboards.values()) {
@@ -588,7 +628,7 @@ public class SolutionService {
             new DashboardStorage().saveDashboard(copiedDashboard, conn);
         }
 
-        for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
+        for (AnalysisDefinition copiedReport : reportList) {
             copiedReport.updateReportIDs(reportReplacementMap, dashboardReplacementMap);
         }
         
@@ -646,7 +686,7 @@ public class SolutionService {
 
 
             Session session = Database.instance().createSession(conn);
-            InsightDescriptor insightDescriptor = installReport(reportID, dataSourceID, conn, session, true, false);
+            InsightDescriptor insightDescriptor = installReport(reportID, dataSourceID, conn, session, true, false, new HashMap<Long, AnalysisDefinition>());
             conn.commit();
             session.close();
             return insightDescriptor;
@@ -660,7 +700,8 @@ public class SolutionService {
         }
     }
 
-    private InsightDescriptor installReport(long reportID, long dataSourceID, EIConnection conn, Session session, boolean keepTemporary, boolean makeAccountVisible) throws Exception {
+    private InsightDescriptor installReport(long reportID, long dataSourceID, EIConnection conn, Session session, 
+                                            boolean keepTemporary, boolean makeAccountVisible, Map<Long, AnalysisDefinition> alreadyInstalledMap) throws Exception {
         AnalysisDefinition originalBaseReport = new AnalysisStorage().getPersistableReport(reportID, session);
         //FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
         // okay, we might have multiple reports here...
@@ -677,12 +718,18 @@ public class SolutionService {
         List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
         List<Dashboard> dashboardList = new ArrayList<Dashboard>();
         for (AnalysisDefinition child : reports.values()) {
-            AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child);
-            if (child.getAnalysisID() != reportID) {
-                copyReport.setFolder(EIDescriptor.OTHER_VIEW);
+            AnalysisDefinition alreadyInstalled = alreadyInstalledMap.get(child.getAnalysisID());
+            if (alreadyInstalled == null) {
+                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child);
+                if (child.getAnalysisID() != reportID) {
+                    copyReport.setFolder(EIDescriptor.OTHER_VIEW);
+                }
+                reportReplacementMap.put(child.getAnalysisID(), copyReport);
+                reportList.add(copyReport);
+                alreadyInstalledMap.put(child.getAnalysisID(), copyReport);
+            } else {
+                reportReplacementMap.put(child.getAnalysisID(), alreadyInstalled);
             }
-            reportReplacementMap.put(child.getAnalysisID(), copyReport);
-            reportList.add(copyReport);
         }
 
         for (Dashboard childDashboard : dashboards.values()) {
@@ -704,11 +751,11 @@ public class SolutionService {
             new DashboardStorage().saveDashboard(copiedDashboard, conn);
         }
 
-        for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
+        for (AnalysisDefinition copiedReport : reportList) {
             copiedReport.updateReportIDs(reportReplacementMap, dashboardReplacementMap);
         }
 
-        for (Dashboard copiedDashboard : dashboardReplacementMap.values()) {
+        for (Dashboard copiedDashboard : dashboardList) {
             copiedDashboard.updateIDs(reportReplacementMap);
         }
 
@@ -813,6 +860,7 @@ public class SolutionService {
         AnalysisDefinition clonedReport = report.clone(localDefinition, localDefinition.getFields(), true);
         clonedReport.setSolutionVisible(false);
         clonedReport.setRecommendedExchange(false);
+        clonedReport.setAutoSetupDelivery(false);
         clonedReport.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
         clonedReport.setDataFeedID(localDefinition.getDataFeedID());
 

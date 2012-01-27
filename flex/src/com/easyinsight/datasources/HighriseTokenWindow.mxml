@@ -30,8 +30,8 @@
             <mx:TextInput id="tokenInput" width="300" text="{tokenValue}"/>
         </mx:HBox>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Save" click="save()"/>
-            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
 </util:EISlimWindow>

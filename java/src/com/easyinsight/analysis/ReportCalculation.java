@@ -148,6 +148,32 @@ public class ReportCalculation {
         }
     }
 
+    public List<FilterDefinition> apply(Map<String, Object> data, List<AnalysisItem> analysisItems) throws RecognitionException {
+        DrillthroughCalculationMetadata drillthroughCalculationMetadata = new DrillthroughCalculationMetadata();
+        drillthroughCalculationMetadata.setData(data);
+        drillthroughCalculationMetadata.setAnalysisItems(analysisItems);
+        ICalculationTreeVisitor visitor;
+        CalculationsParser.expr_return ret;
+        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
+        CommonTokenStream tokes = new CommonTokenStream();
+        tokes.setTokenSource(lexer);
+        CalculationsParser parser = new CalculationsParser(tokes);
+        parser.setTreeAdaptor(new NodeFactory());
+        ret = parser.expr();
+        CalculationTreeNode calculationTreeNode = (CalculationTreeNode) ret.getTree();
+        for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
+            if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
+                calculationTreeNode.deleteChild(i);
+                break;
+            }
+        }
+        visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory());
+        calculationTreeNode.accept(visitor);
+        ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, drillthroughCalculationMetadata);
+        calculationTreeNode.accept(rowVisitor);
+        return drillthroughCalculationMetadata.getDrillThroughFilters();
+    }
+
     public void apply(Dashboard dashboard, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap, Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters) throws SQLException {
         try {
             AnalysisDimension personaDimension = new AnalysisDimension();

@@ -15,6 +15,7 @@ import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.DateDropArea;
+import com.easyinsight.analysis.DimensionDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
@@ -47,7 +48,7 @@ public class YTDControlBar extends ReportControlBar implements IReportControlBar
         columnGrouping = new ListDropAreaGrouping();
         columnGrouping.unlimited = false;
         columnGrouping.maxElements = 1;
-        columnGrouping.dropAreaType = DateDropArea;
+        columnGrouping.dropAreaType = DimensionDropArea;
         columnGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         setStyle("verticalAlign", "middle");
     }
@@ -99,7 +100,7 @@ public class YTDControlBar extends ReportControlBar implements IReportControlBar
             listDefinition.timeDimension = null;
         } else {
             listDefinition.timeDimension = columnGrouping.getListColumns()[0];
-            AnalysisDateDimension(listDefinition.timeDimension).dateLevel = AnalysisItemTypes.MONTH_FLAT;
+            //AnalysisDateDimension(listDefinition.timeDimension).dateLevel = AnalysisItemTypes.MONTH_FLAT;
         }
         return listDefinition;
     }

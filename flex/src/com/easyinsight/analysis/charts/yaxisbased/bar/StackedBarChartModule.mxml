@@ -294,7 +294,7 @@
         private function onChartClick(event:ChartItemEvent):void {
             var series:BarSeries = event.hitData.chartItem.element as BarSeries;
             var key:String = series.yField;
-            ClickUtil.doStuff(defaultLink, event.hitData.item, barChartDef.stackItem, this, key, barChart);
+            ClickUtil.doStuff(defaultLink, event.hitData.item, barChartDef.stackItem, this, barChartDef, key, barChart);
         }
 
         private function customFill(element:ChartItem, index:Number):IFill {

@@ -3,9 +3,9 @@ package com.easyinsight.analysis;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
-import com.easyinsight.core.DataSourceDescriptor;
-import com.easyinsight.core.DerivedKey;
-import com.easyinsight.core.Key;
+import com.easyinsight.core.*;
+import com.easyinsight.dashboard.Dashboard;
+import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
@@ -15,7 +15,6 @@ import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
-import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.cache.Cache;
 
 import java.sql.*;
@@ -25,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
+import com.easyinsight.solutions.SolutionService;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -127,9 +127,11 @@ public class AnalysisService {
             FeedDefinition target = new FeedStorage().getFeedDefinitionData(connection.getTargetFeedID());
             joinOverride.setSourceItem(findSourceItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
             joinOverride.setTargetItem(findTargetItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
-            joinOverride.setSourceName(source.getFeedName());
-            joinOverride.setTargetName(target.getFeedName());
-            joinOverrides.add(joinOverride);
+            if (joinOverride.getSourceItem() != null && joinOverride.getTargetItem() != null) {
+                joinOverride.setSourceName(source.getFeedName());
+                joinOverride.setTargetName(target.getFeedName());
+                joinOverrides.add(joinOverride);
+            }
         }
 
         map.put(String.valueOf(compositeFeedDefinition.getDataFeedID()), joinOverrides);
@@ -157,9 +159,11 @@ public class AnalysisService {
                             break;
                         }
                     } else {
-                        if (connection.getSourceItem().getKey().toKeyString().equals(item.getKey().toKeyString())) {
-                            analysisItem = item;
-                            break;
+                        if (connection.getSourceItem() != null) {
+                            if (connection.getSourceItem().getKey().toKeyString().equals(item.getKey().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
                         }
                     }
                 }
@@ -182,10 +186,11 @@ public class AnalysisService {
                             break;
                         }
                     } else {
-
-                        if (connection.getTargetItem().getKey().toKeyString().equals(item.getKey().toKeyString())) {
-                            analysisItem = item;
-                            break;
+                        if (connection.getTargetItem() != null) {
+                            if (connection.getTargetItem().getKey().toKeyString().equals(item.getKey().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
                         }
                     }
                 }
@@ -193,6 +198,51 @@ public class AnalysisService {
 
         }
         return analysisItem;
+    }
+
+    public DrillThroughResponse drillThrough(DrillThrough drillThrough, Map<String, Object> data, AnalysisItem analysisItem,
+                                             WSAnalysisDefinition report) {
+        try {
+            List<FilterDefinition> filters;
+            if (drillThrough.getMarmotScript() != null && !"".equals(drillThrough.getMarmotScript())) {
+                filters = new ReportCalculation(drillThrough.getMarmotScript()).apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()));
+            } else {
+                if (report.getReportType() == WSAnalysisDefinition.HEATMAP) {
+                    CoordinateValue coordinateValue = (CoordinateValue) data.get(analysisItem.qualifiedName());
+                    FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+                    filterValueDefinition.setField(analysisItem);
+                    filterValueDefinition.setSingleValue(true);
+                    filterValueDefinition.setEnabled(true);
+                    filterValueDefinition.setInclusive(true);
+                    filterValueDefinition.setFilteredValues(Arrays.asList((Object) coordinateValue.getZip()));
+                    filters = Arrays.asList((FilterDefinition) filterValueDefinition);
+                } else {
+                    FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+                    filterValueDefinition.setField(analysisItem);
+                    filterValueDefinition.setSingleValue(true);
+                    filterValueDefinition.setEnabled(true);
+                    filterValueDefinition.setInclusive(true);
+                    filterValueDefinition.setFilteredValues(Arrays.asList(data.get(analysisItem.qualifiedName())));
+                    filters = Arrays.asList((FilterDefinition) filterValueDefinition);
+                }
+            }
+            DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
+            EIDescriptor descriptor;
+            if (drillThrough.getReportID() != null) {
+                InsightResponse insightResponse = openAnalysisIfPossibleByID(drillThrough.getReportID());
+                descriptor = insightResponse.getInsightDescriptor();
+            } else {
+                DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
+                dashboardDescriptor.setId(drillThrough.getDashboardID());
+                descriptor = dashboardDescriptor;
+            }
+            drillThroughResponse.setDescriptor(descriptor);
+            drillThroughResponse.setFilters(filters);
+            return drillThroughResponse;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     public List<Date> testFormat(String format, String value1, String value2, String value3) {
@@ -307,14 +357,26 @@ public class AnalysisService {
 
     public void keepReport(long reportID, long sourceReportID) {
         SecurityUtil.authorizeInsight(reportID);
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
         try {
-            new AnalysisStorage().clearCache(reportID);
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET TEMPORARY_REPORT = ? WHERE ANALYSIS_ID = ?");
-            updateStmt.setBoolean(1, false);
-            updateStmt.setLong(2, reportID);
-            updateStmt.executeUpdate();
-            updateStmt.close();
+            AnalysisDefinition baseReport = analysisStorage.getPersistableReport(reportID, session);
+            Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
+            Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
+            SolutionService.recurseReport(reports, dashboards, baseReport, session, conn);
+
+            for (AnalysisDefinition report : reports.values()) {
+                report.setTemporaryReport(false);
+                new AnalysisStorage().clearCache(report.getAnalysisID());
+                session.update(report);
+            }
+            session.flush();
+            for (Dashboard tDashboard : dashboards.values()) {
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET TEMPORARY_DASHBOARD = ? where dashboard_id = ?");
+                updateStmt.setBoolean(1, false);
+                updateStmt.setLong(2, tDashboard.getId());
+                updateStmt.executeUpdate();
+            }
             PreparedStatement queryStmt = conn.prepareStatement("SELECT EXCHANGE_REPORT_INSTALL_ID FROM EXCHANGE_REPORT_INSTALL WHERE USER_ID = ? AND " +
                     "REPORT_ID = ?");
             queryStmt.setLong(1, SecurityUtil.getUserID());
@@ -337,6 +399,7 @@ public class AnalysisService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
+            session.close();
             Database.closeConnection(conn);
         }
     }

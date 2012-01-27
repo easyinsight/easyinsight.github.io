@@ -83,6 +83,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean marketplaceVisible;
     private boolean solutionVisible;
     private boolean visibleAtFeedLevel;
+    private boolean recommendedExchange;
+    private boolean autoSetupDelivery;
     private Date dateCreated;
     private Date dateUpdated;
     private String description;
@@ -125,6 +127,22 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setLogReport(boolean logReport) {
         this.logReport = logReport;
+    }
+
+    public boolean isRecommendedExchange() {
+        return recommendedExchange;
+    }
+
+    public void setRecommendedExchange(boolean recommendedExchange) {
+        this.recommendedExchange = recommendedExchange;
+    }
+
+    public boolean isAutoSetupDelivery() {
+        return autoSetupDelivery;
+    }
+
+    public void setAutoSetupDelivery(boolean autoSetupDelivery) {
+        this.autoSetupDelivery = autoSetupDelivery;
     }
 
     public int getFolder() {

@@ -75,6 +75,9 @@ public class Account {
     @Column(name="first_day_of_week")
     private int firstDayOfWeek = 1;
 
+    @Column(name="account_reactivation_date")
+    private Date accountReactivationDate;
+
     @Column(name="source")
     private int accountSource;
 

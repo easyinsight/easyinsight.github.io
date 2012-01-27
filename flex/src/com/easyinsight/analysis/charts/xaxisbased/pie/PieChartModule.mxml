@@ -98,36 +98,8 @@
             }
         }
 
-        private function chartSelection(event:ChartItemEvent):void {
-            /*for (var j:int = 0; j < graphData.length; j++) {
-                var graphObj:Object = graphData.getItemAt(j);
-                var explode:Boolean = false;
-                for (var i:int = 0; i < pieChart.selectedChartItems.length; i++) {
-                    var obj:PieSeriesItem = pieChart.selectedChartItems[i];
-                    if (obj.item == graphObj) {
-                        explode = true;
-                    }
-                }
-                if (explode) {
-                    explodeData[j] = .2;
-                } else {
-                    explodeData[j] = 0;
-                }
-            }
-            var pieChartSeries:PieSeries = pieChart.series[0] as PieSeries;
-            pieChartSeries.perWedgeExplodeRadius = explodeData;*/
-        }
-
         private function renderPieLabel(data:Object, field:String, index:Number, percentValue:Number):String {
             return data[dimension] + ": " + '\n' + this.measureFormatter.format(data[measureName]);
-        }
-
-        private function onClick(event:ChartItemEvent):void {
-
-            /*var window:PseudoContextWindow = new PseudoContextWindow(dimensionItem, passThrough, this, pieChartDef, event.hitData.item);
-            PopUpManager.addPopUp(window, this);
-            window.x = event.stageX + 5;
-            window.y = event.stageY + 5;*/
         }
 
         private function passThrough(event:Event):void {
@@ -147,7 +119,7 @@
         private var defaultLink:Link;
 
         private function onChartClick(event:ChartItemEvent):void {
-            ClickUtil.doStuff(defaultLink, event.hitData.item, pieChartDef.xaxis, this);
+            ClickUtil.doStuff(defaultLink, event.hitData.item, pieChartDef.xaxis, this, pieChartDef);
         }
 
         [Bindable]
@@ -160,7 +132,7 @@
     <mx:Canvas width="100%" height="100%" id="canvas" backgroundAlpha="1" backgroundColor="#FFFFFF">
         <mx:HBox width="100%" height="100%" id="hbox">
             <mx:PieChart id="pieChart" dataProvider="{graphData}" selectionMode="none" height="100%" width="100%"
-                        paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" itemClick="onClick(event)"
+                        paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
                     showDataTips="true" fontFamily="Tahoma" fontSize="14">
                 <mx:series>
                     <mx:PieSeries field="{measureName}" nameField="{dimension}" labelPosition="{labelPosition}"

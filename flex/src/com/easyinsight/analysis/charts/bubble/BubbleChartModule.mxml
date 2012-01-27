@@ -97,7 +97,7 @@
         private var defaultLink:Link;
 
         private function onChartClick(event:ChartItemEvent):void {
-            ClickUtil.doStuff(defaultLink, event.hitData.item, bubbleChart.dimension, this, null, plotChart);
+            ClickUtil.doStuff(defaultLink, event.hitData.item, bubbleChart.dimension, this, bubbleChart, null, plotChart);
         }
 
 
@@ -146,16 +146,6 @@
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }
 
-        private function onClick(event:ChartItemEvent):void {
-            if (event.shiftKey) {
-
-                var window:PseudoContextWindow = new PseudoContextWindow(dimensionItem, passThrough, this, bubbleChart, event.hitData.item);
-                PopUpManager.addPopUp(window, this);
-                window.x = event.stageX + 5;
-                window.y = event.stageY + 5;
-            }
-        }
-
         private var _selectionEnabled:Boolean;
 
         [Bindable(event="selectionEnabledChanged")]
@@ -190,7 +180,7 @@
     <mx:Stroke id="stroke1" color="blue" weight="1"/>
 
 	<mx:BubbleChart id="plotChart" dataProvider="{graphData}" width="100%" height="100%" showDataTips="true" dataTipFunction="formatDataTip"
-		selectionMode="multiple" itemClick="onClick(event)" backgroundElements="{ChartUtil.gridLine('both')}">
+		selectionMode="multiple" backgroundElements="{ChartUtil.gridLine('both')}">
 		<mx:horizontalAxis>
 			<mx:LinearAxis labelFunction="renderXAxis" baseAtZero="false" title="{measure1Name}" id="xAxis"/>
 		</mx:horizontalAxis>

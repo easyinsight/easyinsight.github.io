@@ -229,7 +229,7 @@ public class GeneralDelivery extends ScheduledDelivery {
             for (DeliveryInfo deliveryInfo : deliveryInfos) {
                 SecurityUtil.authorizeFeed(deliveryInfo.getDataSourceID(), Roles.SUBSCRIBER);
             }
-            return true;
+            return deliveryInfos != null && !deliveryInfos.isEmpty();
         } catch (Exception e) {
             return false;
         }

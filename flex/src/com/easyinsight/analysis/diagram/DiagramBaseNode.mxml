@@ -43,7 +43,7 @@
         }
 
         private function mouseClick(event:MouseEvent):void {
-            ClickUtil.doStuff(defaultLink, _outcome, _outcome.measure, this);
+            ClickUtil.doStuff(defaultLink, _outcome, _outcome.measure, this, report);
         }
 
         override public function set outcome(value:TrendOutcome):void {

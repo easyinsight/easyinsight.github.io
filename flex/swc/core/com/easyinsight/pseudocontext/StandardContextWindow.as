@@ -14,7 +14,6 @@ import com.easyinsight.analysis.HierarchyRollupEvent;
 import com.easyinsight.analysis.Link;
 import com.easyinsight.analysis.URLLink;
 import com.easyinsight.filtering.FilterRawData;
-import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.report.ReportNavigationEvent;
 import com.easyinsight.solutions.InsightDescriptor;
 
@@ -149,7 +148,7 @@ public class StandardContextWindow {
             var drillThrough:DrillThrough = link as DrillThrough;
             var drillContextItem:ContextMenuItem = new ContextMenuItem(drillThrough.label);
             drillContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough);
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem);
                 executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();
             });
@@ -158,26 +157,13 @@ public class StandardContextWindow {
     }
 
     private function onDrill(event:DrillThroughEvent):void {
-        var filters:ArrayCollection;
-        if (filterDefinitions == null) {
-            if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-                var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
-                filterDefinition.field = analysisItem;
-                filterDefinition.singleValue = true;
-                filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
-                filterDefinition.enabled = true;
-                filterDefinition.inclusive = true;
-                filters = new ArrayCollection([ filterDefinition ]);
-            } else {
-                filters = new ArrayCollection();
-            }
-        } else {
-            filters = filterDefinitions;
-        }
         if (event.drillThrough.miniWindow) {
-            onReport(new ReportWindowEvent(event.report.id, 0, 0, filters, InsightDescriptor(event.report).dataFeedID, InsightDescriptor(event.report).reportType));
+            onReport(new ReportWindowEvent(event.drillThroughResponse.descriptor.id, 0, 0, event.drillThroughResponse.filters,
+                    InsightDescriptor(event.drillThroughResponse.descriptor).dataFeedID,
+                    InsightDescriptor(event.drillThroughResponse.descriptor).reportType));
         } else {
-            onReport(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.report, filters));
+            onReport(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.drillThroughResponse.descriptor,
+                    event.drillThroughResponse.filters));
         }
 
     }

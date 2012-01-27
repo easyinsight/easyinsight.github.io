@@ -144,6 +144,10 @@ public class FunctionFactory {
             return new Month();
         } else if (s.equals("weekofyear")) {
             return new WeekOfYear();
+        } else if (s.equals("stringliteral")) {
+            return new StringLiteral();
+        } else if (s.equals("drillthroughaddfilter")) {
+            return new DrillthroughAddFilter();
         } else {
             return null;
         }

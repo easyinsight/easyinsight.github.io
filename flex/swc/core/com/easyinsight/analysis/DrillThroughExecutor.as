@@ -17,36 +17,29 @@ public class DrillThroughExecutor extends EventDispatcher {
 
     private var analysisService:RemoteObject;
     private var drillThrough:DrillThrough;
+    private var data:Object;
+    private var analysisItem:AnalysisItem;
+    private var report:AnalysisDefinition;
 
-    public function DrillThroughExecutor(drillThrough:DrillThrough) {
+    public function DrillThroughExecutor(drillThrough:DrillThrough, data:Object, analysisItem:AnalysisItem, report:AnalysisDefinition) {
         this.drillThrough = drillThrough;
-        if (drillThrough.reportID > 0) {
-            analysisService = new RemoteObject();
-            analysisService.destination = "analysisDefinition";
-            analysisService.openAnalysisIfPossibleByID.addEventListener(ResultEvent.RESULT, onResult);
-        } else if (drillThrough.dashboardID > 0) {
-        }
+        this.data = data;
+        this.analysisItem = analysisItem;
+        this.report = report;
+        analysisService = new RemoteObject();
+        analysisService.destination = "analysisDefinition";
+        analysisService.drillThrough.addEventListener(ResultEvent.RESULT, onResult);
     }
 
     public function send():void {
-        if (drillThrough.reportID > 0) {
-            ProgressAlert.alert(Application.application as UIComponent, "Retrieving report information...", null, analysisService.openAnalysisIfPossibleByID);
-            analysisService.openAnalysisIfPossibleByID.send(drillThrough.reportID);
-        } else {
-            var dd:DashboardDescriptor = new DashboardDescriptor();
-            dd.id = drillThrough.dashboardID;
-            dispatchEvent(new DrillThroughEvent(dd, drillThrough));
-        }
+        ProgressAlert.alert(Application.application as UIComponent, "Retrieving report information...", null, analysisService.drillThrough);
+        analysisService.drillThrough.send(drillThrough, data, analysisItem, report);
     }
 
     private function onResult(event:ResultEvent):void {
-        var result:InsightResponse = analysisService.openAnalysisIfPossibleByID.lastResult as InsightResponse;
-        analysisService.openAnalysisIfPossibleByID.removeEventListener(ResultEvent.RESULT, onResult);
-        if (result.insightDescriptor != null) {
-            dispatchEvent(new DrillThroughEvent(result.insightDescriptor, drillThrough));
-        } else {
-            Alert.show("We were unable to load the requested report.");
-        }
+        var result:DrillThroughResponse = analysisService.drillThrough.lastResult as DrillThroughResponse;
+        analysisService.drillThrough.removeEventListener(ResultEvent.RESULT, onResult);
+        dispatchEvent(new DrillThroughEvent(drillThrough, result));
     }
 }
 }

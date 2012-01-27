@@ -6,7 +6,6 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.analysis {
-import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.report.ReportNavigationEvent;
 import com.easyinsight.solutions.InsightDescriptor;
 
@@ -22,12 +21,13 @@ public class ClickUtil {
     
     private static var utils:ArrayCollection = new ArrayCollection();
     
-    public function ClickUtil(defaultLink:Link,  data:Object, analysisItem:AnalysisItem, parent:UIComponent, altKey:String) {
+    public function ClickUtil(defaultLink:Link,  data:Object, analysisItem:AnalysisItem, parent:UIComponent, altKey:String, report:AnalysisDefinition) {
         this.defaultLink = defaultLink;
         this.data = data;
         this.analysisItem = analysisItem;
         this.parent = parent;
         this.altKey = altKey;
+        this.report = report;
     }
     
     private var defaultLink:Link;
@@ -35,6 +35,7 @@ public class ClickUtil {
     private var analysisItem:AnalysisItem;
     private var parent:UIComponent;
     private var altKey:String;
+    private var report:AnalysisDefinition;
     
     public function argh():void {
         if (defaultLink != null) {
@@ -46,15 +47,16 @@ public class ClickUtil {
             } else if (defaultLink is DrillThrough) {
                 utils.addItem(this);
                 var drillThrough:DrillThrough = defaultLink as DrillThrough;
-                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough);
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, report);
                 executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();
             }
         }
     }
 
-    public static function doStuff(defaultLink:Link,  data:Object, analysisItem:AnalysisItem, parent:UIComponent, altKey:String = null, chart:ChartBase = null):void {
-        var c:ClickUtil = new ClickUtil(defaultLink, data,  analysisItem, parent, altKey);
+    public static function doStuff(defaultLink:Link,  data:Object, analysisItem:AnalysisItem, parent:UIComponent, report:AnalysisDefinition,
+                                   altKey:String = null, chart:ChartBase = null):void {
+        var c:ClickUtil = new ClickUtil(defaultLink, data,  analysisItem, parent, altKey, report);
         c.argh();
         if (chart != null) {
             chart.clearSelection();
@@ -63,24 +65,13 @@ public class ClickUtil {
 
     private function onDrill(event:DrillThroughEvent):void {
         utils.removeItemAt(utils.getItemIndex(this));
-        var filters:ArrayCollection;
-        if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-            var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
-            filterDefinition.field = analysisItem;
-            filterDefinition.singleValue = true;
-            if (altKey == null) {
-                filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
-            } else {
-                filterDefinition.filteredValues = new ArrayCollection([altKey]);
-            }
-            filterDefinition.enabled = true;
-            filterDefinition.inclusive = true;
-            filters = new ArrayCollection([ filterDefinition ]);
-        }
         if (event.drillThrough.miniWindow) {
-            parent.dispatchEvent(new ReportWindowEvent(event.report.id, 0, 0, filters, InsightDescriptor(event.report).dataFeedID, InsightDescriptor(event.report).reportType));
+            parent.dispatchEvent(new ReportWindowEvent(event.drillThroughResponse.descriptor.id, 0, 0, event.drillThroughResponse.filters,
+                    InsightDescriptor(event.drillThroughResponse.descriptor).dataFeedID,
+                    InsightDescriptor(event.drillThroughResponse.descriptor).reportType));
         } else {
-            parent.dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.report, filters));
+            parent.dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.drillThroughResponse.descriptor,
+                    event.drillThroughResponse.filters));
         }
     }
 }

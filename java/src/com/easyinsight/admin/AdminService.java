@@ -17,6 +17,7 @@ import java.lang.management.ThreadInfo;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -49,6 +50,86 @@ public class AdminService {
             session.getTransaction().rollback();
         } finally {
             session.close();
+        }
+    }
+
+
+    public void constantContactSync() {
+        new Thread(new Runnable() {
+
+            public void run() {
+                try {
+                    ConstantContactSync.updateContactLists();
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
+            }
+        }).start();
+
+    }
+
+    public void archiveOldDataSources() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement getAccounts = conn.prepareStatement("SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_STATE = ? AND ACCOUNT.CREATION_DATE < ?");
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.MONTH, -6);
+            getAccounts.setInt(1, Account.DELINQUENT);
+            getAccounts.setTimestamp(2, new Timestamp(cal.getTime().getTime()));
+            ResultSet accounts = getAccounts.executeQuery();
+            PreparedStatement getDataSourcesStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE " +
+                    "USER.ACCOUNT_ID = ? AND USER.USER_ID = UPLOAD_POLICY_USERS.USER_ID AND UPLOAD_POLICY_USERS.FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
+                    "DATA_FEED.VISIBLE = ?");
+            PreparedStatement getScorecardStmt = conn.prepareStatement("SELECT SCORECARD_ID FROM SCORECARD, USER WHERE USER.ACCOUNT_ID = ? AND " +
+                    "SCORECARD.USER_ID = USER.USER_ID");
+            PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD_ID FROM DASHBOARD, USER, USER_TO_DASHBOARD WHERE USER.ACCOUNT_ID = ? AND " +
+                    "SCORECARD.USER_ID = USER.USER_ID AND USER_TO_DASHBOARD.USER_ID = USER.USER_ID AND USER.USER_");
+            PreparedStatement hideDataSourceStmt = conn.prepareStatement("UPDATE DATA_FEED SET VISIBLE = ?, ARCHIVED = ? WHERE DATA_FEED.DATA_FEED_ID = ?");
+            PreparedStatement hideReportStmt = conn.prepareStatement("UPDATE ANALYSIS SET TEMPORARY_REPORT = ?, ARCHIVED = ? WHERE DATA_FEED.DATA_FEED_ID = ?");
+            PreparedStatement hideDashboardStmt = conn.prepareStatement("UPDATE DASHBOARD SET TEMPORARY_DASHBOARD = ?, archived = ? WHERE dashboard.data_source_id = ?");
+            PreparedStatement hideScorecardStmt = conn.prepareStatement("UPDATE SCORECARD SET scorecard_visible = ?, archived = ? where scorecard.data_source_id = ?");
+            while (accounts.next()) {
+                long accountID = accounts.getLong(1);
+                getDataSourcesStmt.setLong(1, accountID);
+                ResultSet dataSources = getDataSourcesStmt.executeQuery();
+                while (dataSources.next()) {
+                    long dataSourceID = dataSources.getLong(1);
+                    hideDataSourceStmt.setBoolean(1, true);
+                    hideDataSourceStmt.setBoolean(2, true);
+                    hideDataSourceStmt.setLong(3, dataSourceID);
+                    hideDataSourceStmt.executeUpdate();
+                    hideReportStmt.setBoolean(1, false);
+                    hideReportStmt.setBoolean(2, true);
+                    hideReportStmt.setLong(3, dataSourceID);
+                    hideReportStmt.executeUpdate();
+                    hideDashboardStmt.setBoolean(1, false);
+                    hideDashboardStmt.setBoolean(2, true);
+                    hideDashboardStmt.setLong(3, dataSourceID);
+                    hideDashboardStmt.executeUpdate();
+                    hideScorecardStmt.setBoolean(1, false);
+                    hideScorecardStmt.setBoolean(2, true);
+                    hideScorecardStmt.setLong(3, dataSourceID);
+                    hideScorecardStmt.executeUpdate();
+                }
+                getScorecardStmt.setLong(1, accountID);
+                ResultSet scorecards = getScorecardStmt.executeQuery();
+                while (scorecards.next()) {
+                    long scorecardID = scorecards.getLong(1);
+
+                }
+
+            }
+
+
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 

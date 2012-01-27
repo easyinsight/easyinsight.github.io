@@ -50,4 +50,8 @@ public abstract class Aggregation extends Value {
     public Double toDouble() {
         return getValue().toDouble();
     }
+
+    public int compareTo(Value value) {
+        return 0;
+    }
 }
