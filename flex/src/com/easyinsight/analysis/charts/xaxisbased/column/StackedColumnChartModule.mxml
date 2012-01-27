@@ -20,6 +20,7 @@
         import com.easyinsight.analysis.Link;
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.charts.ChartUtil;
+        import com.easyinsight.analysis.charts.EILegend;
 
 
         import com.easyinsight.filtering.FilterRawData;
@@ -136,7 +137,7 @@
 
 
                 canvas.addChild(columnChart);
-                legend = new Legend();
+                legend = new EILegend();
                 legend.percentHeight = 100;
                 legend.dataProvider = columnChart;
                 canvas.addChild(legend);
@@ -146,7 +147,7 @@
         }
 
         [Bindable]
-        private var legend:Legend;
+        private var legend:EILegend;
 
         private function myDataFunction(series:Series, item:Object, fieldName:String):Object {
             if (fieldName == 'yValue')

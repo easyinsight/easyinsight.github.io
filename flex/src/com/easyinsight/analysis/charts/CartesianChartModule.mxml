@@ -65,7 +65,7 @@
         private var measureAxis:LinearAxis;
 
         [Bindable]
-        private var legend:Legend;
+        private var legend:EILegend;
 
         private var sortable:Boolean = true;
         private var selectable:Boolean = true;
@@ -126,8 +126,7 @@
 
                 // create the data series
                 canvas.addChild(chart);
-                legend = new Legend();
-                legend.direction = "vertical";
+                legend = new EILegend();
                 legend.percentHeight = 100;
                 legend.visible = true;
                 canvas.addChild(legend);
