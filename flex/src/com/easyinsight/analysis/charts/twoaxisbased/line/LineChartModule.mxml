@@ -101,6 +101,10 @@
             dispatchEvent(event);
         }
 
+        private function legendDataChanged(event:Event):void {
+            legend.dataProvider = lineChart.legendData;
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
 
             var lineChartDef:LineChartDefinition = analysisDefinition as LineChartDefinition;
@@ -119,14 +123,13 @@
 
                 this.chartData = new ArrayCollection(dataSet.toArray());
 
+                lineChart.removeEventListener("legendDataChanged", legendDataChanged);
                 hbox.removeChild(lineChart);
 
                 lineChart = new LineChart();
                 lineChart.setStyle("fontFamily", lineChartDef.getFont());
                 lineChart.setStyle("fontSize", lineChartDef.fontSize);
-                lineChart.addEventListener("legendDataChanged", function(event:Event):void {
-                    legend.dataProvider = lineChart.legendData;
-                });
+                lineChart.addEventListener("legendDataChanged", legendDataChanged);
                 legend.visible = true;
                 lineChart.percentHeight = 100;
                 lineChart.percentWidth = 100;

@@ -98,6 +98,7 @@
                 // define the chart itself
 
                 columnChart = new ColumnChart();
+
                 columnChart.percentHeight = 100;
                 columnChart.percentWidth = 100;
                 columnChart.showDataTips = true;
@@ -139,11 +140,16 @@
                 canvas.addChild(columnChart);
                 legend = new EILegend();
                 legend.percentHeight = 100;
-                legend.dataProvider = columnChart;
+                //legend.dataProvider = columnChart;
                 canvas.addChild(legend);
+                columnChart.addEventListener("legendDataChanged", legendDataChanged);
             } else {
                 columnChart.visible = true;
             }
+        }
+
+        private function legendDataChanged(event:Event):void {
+            legend.dataProvider = columnChart.legendData;
         }
 
         [Bindable]
@@ -227,7 +233,7 @@
 
                     var uniqueLineSeries:ColumnSeries = new ColumnSeries();
                     var cFactory:ClassFactory = new ClassFactory(ContextMenuBoxItemRenderer);
-                    cFactory.properties = { stackItem: stackItem, seriesField: key};
+                    cFactory.properties = { stackItem: stackItem, seriesField: key, report: columnChartDef};
                     uniqueLineSeries.setStyle("itemRenderer", cFactory);
                     uniqueLineSeries.setStyle("fill", FillProvider.getColor(columnChartDef.colorScheme, i));
                     //uniqueLineSeries.xField = columnChartDef.xaxis.qualifiedName();

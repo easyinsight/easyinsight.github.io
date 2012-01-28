@@ -132,7 +132,7 @@
                 canvas.addChild(barChart);
                 legend = new EILegend();
                 legend.percentHeight = 100;
-                legend.dataProvider = barChart;
+                barChart.addEventListener("legendDataChanged", legendDataChanged);
                 canvas.addChild(legend);
             } else {
                 barChart.visible = true;
@@ -175,6 +175,10 @@
                 filterRawData.addPair(xAxisItem, obj.item[xAxisItem.key.createString()]);
             }
             return filterRawData;
+        }
+
+        private function legendDataChanged(event:Event):void {
+            legend.dataProvider = barChart.legendData;
         }
 
         private var barChartDef:StackedBarChartDefinition;
@@ -222,7 +226,7 @@
 
                     var uniqueLineSeries:BarSeries = new BarSeries();
                     var cFactory:ClassFactory = new ClassFactory(ContextMenuBoxItemRenderer);
-                    cFactory.properties = { stackItem: barChartDef.stackItem, seriesField: key};
+                    cFactory.properties = { stackItem: barChartDef.stackItem, seriesField: key, report: barChartDef};
                     uniqueLineSeries.setStyle("itemRenderer", cFactory);
                     uniqueLineSeries.setStyle("fill", FillProvider.getColor(barChartDef.colorScheme, i, 90));
                     if (key == null || key == "") {
