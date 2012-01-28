@@ -204,6 +204,7 @@ public abstract class APIServlet extends HttpServlet {
                 }
                 feedDefinition.setFeedName(dataSourceName);
                 feedDefinition.setUncheckedAPIEnabled(true);
+                feedDefinition.setAccountVisible(true);
                 UploadPolicy uploadPolicy = new UploadPolicy(userID, SecurityUtil.getAccountID());
                 feedDefinition.setUploadPolicy(uploadPolicy);
                 feedDefinition.setFields(analysisItems);
