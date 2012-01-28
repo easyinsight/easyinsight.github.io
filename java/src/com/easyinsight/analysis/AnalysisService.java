@@ -228,7 +228,7 @@ public class AnalysisService {
             }
             DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
             EIDescriptor descriptor;
-            if (drillThrough.getReportID() != null) {
+            if (drillThrough.getReportID() != null && drillThrough.getReportID() != 0) {
                 InsightResponse insightResponse = openAnalysisIfPossibleByID(drillThrough.getReportID());
                 descriptor = insightResponse.getInsightDescriptor();
             } else {
