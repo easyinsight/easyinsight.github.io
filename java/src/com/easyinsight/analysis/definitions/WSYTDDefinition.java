@@ -20,8 +20,17 @@ public class WSYTDDefinition extends WSAnalysisDefinition {
     private int columnWidth;
 
     private String patternName;
+    private String ytdLabel;
 
     private int firstAggregation = AggregationTypes.SUM;
+
+    public String getYtdLabel() {
+        return ytdLabel;
+    }
+
+    public void setYtdLabel(String ytdLabel) {
+        this.ytdLabel = ytdLabel;
+    }
 
     public int getFirstAggregation() {
         return firstAggregation;
@@ -119,6 +128,7 @@ public class WSYTDDefinition extends WSAnalysisDefinition {
         headerWidth = (int) findNumberProperty(properties, "headerWidth", 140);
         columnWidth = (int) findNumberProperty(properties, "columnWidth", 73);
         patternName = findStringProperty(properties, "patternName", "");
+        ytdLabel = findStringProperty(properties, "ytdLabel", "YTD");
         firstAggregation = (int) findNumberProperty(properties, "firstAggregation", AggregationTypes.SUM);
     }
 
@@ -127,6 +137,7 @@ public class WSYTDDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("headerWidth", headerWidth));
         properties.add(new ReportNumericProperty("columnWidth", columnWidth));
         properties.add(new ReportStringProperty("patternName", patternName));
+        properties.add(new ReportStringProperty("ytdLabel", ytdLabel));
         properties.add(new ReportNumericProperty("firstAggregation", firstAggregation));
         return properties;
     }

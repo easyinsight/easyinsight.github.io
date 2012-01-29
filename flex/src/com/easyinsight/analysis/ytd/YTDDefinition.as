@@ -23,6 +23,7 @@ public class YTDDefinition extends AnalysisDefinition {
     public var columnWidth:int = 73;
     public var firstAggregation:int = AggregationTypes.SUM;
     public var patternName:String;
+    public var ytdLabel:String = "YTD";
 
     public function YTDDefinition() {
     }

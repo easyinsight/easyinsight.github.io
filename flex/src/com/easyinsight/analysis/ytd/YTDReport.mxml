@@ -79,7 +79,7 @@
                 columns.addItem(createColumn(interval.toString()));
             }
             
-            columns.addItem(createColumn("YTD"));
+            columns.addItem(createColumn(vert.ytdLabel));
             columns.addItem(createColumn("Average"));
             
             var hasBenchmark:Boolean = false;
@@ -120,7 +120,7 @@
                         }
                         obj[label] = applyMeasure(y + 1, formatter.format(timeIntervalValue.value), columns);
                     }
-                    obj["YTD"] = applyMeasure(ytdValue.timeIntervalValues.length + 1, formatter.format(ytdValue.ytd), columns);
+                    obj[vert.ytdLabel] = applyMeasure(ytdValue.timeIntervalValues.length + 1, formatter.format(ytdValue.ytd), columns);
                     obj["Average"] = applyMeasure(ytdValue.timeIntervalValues.length + 2, formatter.format(ytdValue.average), columns);
                     if (hasBenchmark && ytdValue.benchmarkMeasure != null) {
                         obj["BK"] = applyMeasure(ytdValue.timeIntervalValues.length + 3, ytdValue.benchmarkMeasure.getFormatter().format(ytdValue.benchmarkValue), columns);
