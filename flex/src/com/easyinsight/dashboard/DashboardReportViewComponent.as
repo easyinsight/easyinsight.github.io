@@ -30,6 +30,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         //setStyle("cornerRadius", 10);
         setStyle("horizontalAlign", "center");
         setStyle("verticalAlign", "middle");
+        setStyle("verticalGap", 0);
         setStyle("paddingLeft", 0);
         setStyle("paddingRight", 0);
         setStyle("paddingTop", 0);
@@ -44,8 +45,8 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     
     private var alteredHeight:int = -1;
 
-    protected override function createChildren():void {
-        super.createChildren();
+    override protected function commitProperties():void {
+        super.commitProperties();
         var sizeInfo:SizeInfo = obtainPreferredSizeInfo();
         if (sizeInfo.preferredWidth > 0) {
             width = dashboardReport.preferredWidth;
@@ -62,11 +63,17 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             setStyle("borderThickness", 3);
             setStyle("borderColor", 0x00000);
         }
+        viewFactory.usePreferredHeight = dashboardReport.autoCalculateHeight;
+        dispatchEvent(new SizeOverrideEvent());
+    }
+
+    protected override function createChildren():void {
+        super.createChildren();
+
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(dashboardReport.report.reportType);
         var controller:IEmbeddedReportController = new controllerClass();
         viewFactory = controller.createEmbeddedView();
         viewFactory.styleCanvas = dashboardEditorMetadata.borderThickness > 0;
-        viewFactory.usePreferredHeight = dashboardReport.autoCalculateHeight;
         viewFactory.reportID = dashboardReport.report.id;
         viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
         viewFactory.dashboardID = dashboardEditorMetadata.dashboardID;
@@ -176,6 +183,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             transformContainer.setStyle("backgroundAlpha", dashboardStack.filterBackgroundAlpha);*/
             transformContainer.filterEditable = false;
             var myFilterColl:ArrayCollection = new ArrayCollection();
+            var visibleFilters:int = 0;
             for each (var filterDefinition:FilterDefinition in filterDefinitions) {
                 var exists:Boolean = false;
                 for each (var existing:FilterDefinition in parentFilters) {
@@ -185,6 +193,9 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                 }
                 if (exists) {
                     continue;
+                }
+                if (filterDefinition.showOnReportView) {
+                    visibleFilters++;
                 }
                 myFilterColl.addItem(filterDefinition);
             }
@@ -204,7 +215,9 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                 transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
                 transformContainer.role = dashboardEditorMetadata.role;
                 transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-                addChildAt(transformContainer, dashboardReport.showLabel ? 1 : 0);
+                if (visibleFilters > 0) {
+                    addChildAt(transformContainer, dashboardReport.showLabel ? 1 : 0);
+                }
             }
         }
         viewFactory.additionalFilterDefinitions = createAdditionalFilters(filterMap);

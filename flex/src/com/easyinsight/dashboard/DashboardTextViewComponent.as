@@ -4,6 +4,7 @@ import com.easyinsight.util.AutoSizeTextArea;
 
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
+import mx.controls.Alert;
 import mx.controls.TextArea;
 
 public class DashboardTextViewComponent extends Box implements IDashboardViewComponent  {
@@ -14,23 +15,55 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
 
     public function DashboardTextViewComponent() {
         super();
-        percentWidth = 100;
-        percentHeight = 100;
         setStyle("horizontalAlign", "center");
         setStyle("verticalAlign", "middle");
+        setStyle("paddingLeft", 10);
+        setStyle("paddingTop", 10);
+        setStyle("paddingRight", 10);
+        setStyle("paddingBottom", 10);
+        setStyle("backgroundColor", 0xFFFFFF);
+        setStyle("backgroundAlpha", 1);
+        setStyle("borderStyle", "inset");
+        setStyle("borderThickness", 3);
+        setStyle("borderColor", 0x00000);
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
-        return new SizeInfo();
+        return new SizeInfo(dashboardText.preferredWidth, dashboardText.preferredHeight);
     }
 
     protected override function createChildren():void {
         super.createChildren();
-        textArea = new AutoSizeTextArea();
-        textArea.percentWidth = 100;
+        var canvas:Box = new Box();
+        canvas.setStyle("borderStyle", "solid");
+        canvas.setStyle("borderThickness", 1);
+        canvas.setStyle("cornerRadius", 8);
+        canvas.setStyle("dropShadowEnabled", true);
+        canvas.setStyle("paddingLeft", 10);
+        canvas.setStyle("paddingRight", 10);
+        canvas.setStyle("paddingBottom", 10);
+        canvas.setStyle("paddingTop", 10);
+        canvas.percentHeight = 100;
+        canvas.percentWidth = 100;
+        addChild(canvas);
+        textArea = new TextArea();
+        if (dashboardText.preferredHeight == 0) {
+            textArea.percentHeight = 100;
+            this.percentHeight = 100;
+        } else {
+            textArea.height = dashboardText.preferredHeight - 50;
+            this.height = dashboardText.preferredHeight;
+        }
+        if (dashboardText.preferredWidth == 0) {
+            textArea.percentWidth = 100;
+            this.percentWidth = 100;
+        } else {
+            textArea.width = dashboardText.preferredWidth;
+            this.width = dashboardText.preferredWidth;
+        }
         textArea.editable = false;
         textArea.text = dashboardText.text;
-        addChild(textArea);
+        canvas.addChild(textArea);
     }
 
     public function refresh():void {

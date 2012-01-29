@@ -6,6 +6,7 @@ import mx.collections.ArrayCollection;
 import mx.containers.Grid;
 import mx.containers.GridItem;
 import mx.containers.GridRow;
+import mx.controls.Alert;
 import mx.core.UIComponent;
 
 public class DashboardGridViewComponent extends Grid implements IDashboardViewComponent {
@@ -36,12 +37,16 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
                 var childSizeInfo:SizeInfo = IDashboardViewComponent(gridItem.getChildAt(0)).obtainPreferredSizeInfo();
                 if (childSizeInfo.preferredWidth != 0) {
                     gridItem.width = childSizeInfo.preferredWidth + dashboardGrid.paddingLeft + dashboardGrid.paddingRight;
+                    gridItem.percentWidth = NaN;
                 } else {
+                    gridItem.width = NaN;
                     gridItem.percentWidth = 100;
                 }
                 if (childSizeInfo.preferredHeight != 0) {
                     gridItem.height = childSizeInfo.preferredHeight + dashboardGrid.paddingTop + dashboardGrid.paddingBottom;
+                    gridItem.percentHeight = NaN;
                 } else {
+                    gridItem.height = NaN;
                     gridItem.percentHeight = 100;
                 }
             }
@@ -95,7 +100,7 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
                     gridItem.percentHeight = 100; 
                 }
 
-                if (e.dashboardElement is DashboardReport) {
+                if (e.dashboardElement is DashboardReport || e.dashboardElement is DashboardTextElement) {
                     gridItem.setStyle("paddingLeft", 3);
                     gridItem.setStyle("paddingRight", 3);
                     gridItem.setStyle("paddingTop", 3);
@@ -119,6 +124,12 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
+        for (var i:int = 0; i < dashboardGrid.rows; i++) {
+            for (var j:int = 0; j < dashboardGrid.columns; j++) {
+                var e:DashboardGridItem = findItem(i, j);
+                e.dashboardElement;
+            }
+        }
         return new SizeInfo(dashboardGrid.preferredWidth, dashboardGrid.preferredHeight);
     }
 

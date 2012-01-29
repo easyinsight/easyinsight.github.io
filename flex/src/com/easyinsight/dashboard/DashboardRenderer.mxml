@@ -1,7 +1,10 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*" width="100%"
-         height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" horizontalScrollPolicy="off">
+         height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" horizontalScrollPolicy="off"
+        verticalGap="0">
     <mx:Script><![CDATA[
+        import com.easyinsight.filtering.FilterDefinition;
+
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.core.Container;
@@ -74,8 +77,17 @@
                 filterDefinitions.addAll(_initialFilters);
             }
             this.filterDefinitions = filterDefinitions;
+            
+            var visibleCount:int = 0;
+            if (dashboard.filters != null) {
+                for each (var filter:FilterDefinition in dashboard.filters) {
+                    if (filter.showOnReportView) {
+                        visibleCount++;
+                    }
+                }
+            }
 
-            filterIndex = (dashboard.filters != null && dashboard.filters.length > 0) ? 1 : 0;
+            filterIndex = (visibleCount > 0) ? 1 : 0;
 
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = dataSourceID;

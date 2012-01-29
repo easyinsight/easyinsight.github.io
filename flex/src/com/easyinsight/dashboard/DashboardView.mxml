@@ -2,7 +2,7 @@
 <report:DataViewPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:dashboard="com.easyinsight.dashboard.*"
                      creationComplete="onCreation()"
                      implements="com.easyinsight.listing.IPerspective" xmlns:report="com.easyinsight.report.*"
-        styleName="screenBackground" width="100%" height="100%">
+        styleName="screenBackground" width="100%" height="100%" verticalGap="0">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.list.SizeOverrideEvent;
@@ -80,8 +80,8 @@
                 //addChildAt(dashboardHeader, 0);
                 nameContainer.includeInLayout = true;
                 //addChildAt(nameContainer, 1);
-                box.visible = true;
-                box.includeInLayout = true;
+                descriptionBox.visible = true;
+                descriptionBox.includeInLayout = true;
                 //addChildAt(box, 2);
             }
             var contextMenu:ContextMenu = new ContextMenu();
@@ -145,7 +145,7 @@
             dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
             if (dashboard.borderThickness == 0 && exchangeItem == null) {
                 nameContainer.includeInLayout = false;
-                box.includeInLayout = false;
+                descriptionBox.includeInLayout = false;
             }
             if (dashboard.backgroundColor == 0xFFFFFF) {
                 setStyle("backgroundColor", 0xFFFFFF);
@@ -302,10 +302,10 @@
         private function toggleReportInfo():void {
             if (reportInfoLabel == "Show Dashboard Info") {
                 reportInfoLabel = "Hide Dashboard Info";
-                addChildAt(box, 2);
+                addChildAt(descriptionBox, 2);
             } else {
                 reportInfoLabel = "Show Report Info";
-                removeChild(box);
+                removeChild(descriptionBox);
             }
         }
 
@@ -321,11 +321,11 @@
         override protected function generateState():void {
             super.generateState();
             showReportInfoButton = !_showAddBar;
-            if (box != null && !_showAddBar && contains(box)) {
-                removeChild(box);
+            if (descriptionBox != null && !_showAddBar && contains(descriptionBox)) {
+                removeChild(descriptionBox);
             }
-            if (box != null) {
-                box.visible = true;
+            if (descriptionBox != null) {
+                descriptionBox.visible = true;
             }
             if (!_fixedID) {
                 var feedFragmentObject:Object = new Object();
@@ -352,7 +352,7 @@
         <mx:Label text="{dashboardName}" fontSize="24" maxWidth="600" color="#000000"/>
         <mx:LinkButton label="{reportInfoLabel}" textDecoration="underline" fontSize="14" visible="{showReportInfoButton}" click="toggleReportInfo()"/>
     </mx:HBox>
-    <mx:Box width="100%" styleName="descriptionContainer" id="box" visible="false" includeInLayout="false">
+    <mx:Box width="100%" styleName="descriptionContainer" id="descriptionBox" visible="false" includeInLayout="false">
         <report:DefaultDescriptionArea previousReportLabel="{previousReportLabel}" previousReportAvailable="{previousReportAvailable}"
                                    nextReportAvailable="{nextReportAvailable}" nextReportLabel="{nextReportLabel}" showAdd="{_showAddBar}" description="{description}"
                                    previousReport="toPreviousReport()" nextReport="toNextReport()" saveToAccount="keepEntity()"/>
