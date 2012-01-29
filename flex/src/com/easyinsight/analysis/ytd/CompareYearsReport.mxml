@@ -137,7 +137,7 @@
             var endWidth:int = 0;
             if (reportWidth < this.width) {
                 var delta:int = (this.width - reportWidth);
-                delta = Math.min(delta, 500);
+                //delta = Math.min(delta, 500);
                 var perColumnAdd:int = (delta) / columns.length;
                 for each (var colAdd:AdvancedDataGridColumn in columns) {
                     colAdd.width += perColumnAdd;
@@ -166,7 +166,7 @@
         }
         ]]></mx:Script>
     <mx:Canvas id="box" verticalScrollPolicy="auto" horizontalScrollPolicy="off" width="100%" height="100%">
-        <verticalllist:VerticalDataGrid id="dataGrid" headerColors="{[0x333333, 0x333333]}" fontSize="10" verticalScrollPolicy="off" variableRowHeight="false" horizontalGridLines="false" horizontalGridLineColor="#DDDDDD" verticalGridLines="false"
+        <verticalllist:VerticalDataGrid id="dataGrid" headerColors="{[0x333333, 0x333333]}" fontSize="12" verticalScrollPolicy="off" variableRowHeight="false" horizontalGridLines="false" horizontalGridLineColor="#DDDDDD" verticalGridLines="false"
                                         alternatingItemColors="{[0xFFFFFF, 0xFFFFFF]}" backgroundColor="#FFFFFF" borderStyle="none" selectionMode="none" horizontalScrollPolicy="auto">
         </verticalllist:VerticalDataGrid>
     </mx:Canvas>

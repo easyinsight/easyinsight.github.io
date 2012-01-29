@@ -27,6 +27,7 @@ import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.analysis.ytd.CompareYearsDefinition;
+import com.easyinsight.analysis.ytd.YTDDefinition;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardElement;
 import com.easyinsight.dashboard.DashboardGrid;
@@ -266,6 +267,9 @@ public class StyleConfiguration {
         }
         if (report is CompareYearsDefinition) {
             items.addItem(new TextReportFormItem("Pattern Name", "patternName", CompareYearsDefinition(report).patternName, report));
+        }
+        if (report is YTDDefinition) {
+            items.addItem(new NumericReportFormItem("Custom Aggregation", "firstAggregation", YTDDefinition(report).firstAggregation, report, 1, 15));
         }
         if (report is CombinedVerticalListDefinition) {
             items.addItem(new NumericReportFormItem("Header Width", "headerWidth", CombinedVerticalListDefinition(report).headerWidth, report, 100, 400));

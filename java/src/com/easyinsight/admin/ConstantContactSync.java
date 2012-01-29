@@ -569,7 +569,7 @@ public class ConstantContactSync {
         createDripMarketingCampaign(fourWeeksContactList, FOUR_WEEKS);
     }
     
-    public static void updateContactLists() throws IOException {
+    public static void updateContactLists() throws IOException, ParsingException, InterruptedException {
         Calendar cal = Calendar.getInstance();
         for (int i = 0; i < 32; i++) {
 
@@ -578,20 +578,22 @@ public class ConstantContactSync {
             newContactList(cal.getTime());
             cal.add(Calendar.DAY_OF_YEAR, -1);
         }
+        List<User> payingUsers = new ArrayList<User>();
+        List<User> reactivateUsers = new ArrayList<User>();
+        List<User> otherUsers = new ArrayList<User>();
+        Map<String, List<User>> dripMarketingIncludeList = new HashMap<String, List<User>>();
+        Map<String, List<User>> dripMarketingRemoveList = new HashMap<String, List<User>>();
+        Map<String, String> dripMarketingMap = new HashMap<String, String>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Map<String, ContactList> map = new HashMap<String, ContactList>();
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
-            List<User> payingUsers = new ArrayList<User>();
-            List<User> reactivateUsers = new ArrayList<User>();
-            List<User> otherUsers = new ArrayList<User>();
-            Map<String, List<User>> dripMarketingIncludeList = new HashMap<String, List<User>>();
-            Map<String, List<User>> dripMarketingRemoveList = new HashMap<String, List<User>>();
-            Map<String, String> dripMarketingMap = new HashMap<String, String>();
+
 
             List<ContactList> contactLists = getContactLists();
 
-            Map<String, ContactList> map = new HashMap<String, ContactList>();
+
             for (ContactList contactList : contactLists) {
                 map.put(contactList.getShortName(), contactList);
             }
@@ -649,33 +651,7 @@ public class ConstantContactSync {
 
             
             
-            Set<String> purgeLists = getUsers(dripMarketingMap, map);
-            purgeLists.add("43");
-            purgeLists.add("44");
-            purgeLists.add("45");
 
-            removeUsersFromContactList(purgeLists);
-            if (payingUsers.size() > 0) {
-                addUsersToContactList("43", payingUsers);
-            }
-            if (reactivateUsers.size() > 0) {
-                addUsersToContactList("44", otherUsers);
-            }
-            if (otherUsers.size() > 0) {
-                addUsersToContactList("45", otherUsers);
-            }
-
-            for (String string : purgeLists) {
-                if (string.equals("43") || string.equals("44") || string.equals("45")) {
-                    continue;
-                }
-                System.out.println("Purging " + string);
-                List<User> users = dripMarketingIncludeList.get(string);
-                if (users != null && users.size() > 0) {
-                    System.out.println("users size = " + users.size());
-                    addUsersToContactList(string, users);
-                }
-            }
             
             // retrieve all users and their contact lists
             // for each drip marketing list, are all the users correctly sync'd?
@@ -688,6 +664,33 @@ public class ConstantContactSync {
         } finally {
             session.getTransaction().commit();
             session.close();
+        }
+        Set<String> purgeLists = getUsers(dripMarketingMap, map);
+        purgeLists.add("43");
+        purgeLists.add("44");
+        purgeLists.add("45");
+
+        removeUsersFromContactList(purgeLists);
+        if (payingUsers.size() > 0) {
+            addUsersToContactList("43", payingUsers);
+        }
+        if (reactivateUsers.size() > 0) {
+            addUsersToContactList("44", otherUsers);
+        }
+        if (otherUsers.size() > 0) {
+            addUsersToContactList("45", otherUsers);
+        }
+
+        for (String string : purgeLists) {
+            if (string.equals("43") || string.equals("44") || string.equals("45")) {
+                continue;
+            }
+            System.out.println("Purging " + string);
+            List<User> users = dripMarketingIncludeList.get(string);
+            if (users != null && users.size() > 0) {
+                System.out.println("users size = " + users.size());
+                addUsersToContactList(string, users);
+            }
         }
     }
     

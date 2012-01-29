@@ -135,7 +135,7 @@
     <mx:TabNavigator id="tabNavigator" creationPolicy="all" selectedIndex="{startIndex}" width="100%" height="325" paddingLeft="5" paddingRight="5"
             paddingTop="5" paddingBottom="5">
         <mx:Box width="100%" height="100%" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
-            horizontalAlign="center" label="Additional Properties" verticalScrollPolicy="on">
+            horizontalAlign="center" label="Report Properties" verticalScrollPolicy="on">
             <mx:Form label="General Properties">
                 <mx:FormItem label="Report Name:">
                     <mx:TextInput id="reportNameInput" width="380" text="{reportName}"/>
