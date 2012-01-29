@@ -45,28 +45,6 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     
     private var alteredHeight:int = -1;
 
-    override protected function commitProperties():void {
-        super.commitProperties();
-        var sizeInfo:SizeInfo = obtainPreferredSizeInfo();
-        if (sizeInfo.preferredWidth > 0) {
-            width = dashboardReport.preferredWidth;
-        } else {
-            percentWidth = 100;
-        }
-        if (sizeInfo.preferredHeight > 0) {
-            height = dashboardReport.preferredHeight;
-        } else {
-            percentHeight = 100;
-        }
-        if (dashboardEditorMetadata.borderThickness > 0) {
-            setStyle("borderStyle", "inset");
-            setStyle("borderThickness", 3);
-            setStyle("borderColor", 0x00000);
-        }
-        viewFactory.usePreferredHeight = dashboardReport.autoCalculateHeight;
-        dispatchEvent(new SizeOverrideEvent());
-    }
-
     protected override function createChildren():void {
         super.createChildren();
         var sizeInfo:SizeInfo = obtainPreferredSizeInfo();
