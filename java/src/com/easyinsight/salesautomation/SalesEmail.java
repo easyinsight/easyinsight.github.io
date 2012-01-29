@@ -165,7 +165,7 @@ public class SalesEmail implements Runnable {
             if (unsubscribeRS.next()) {
                 unsubscribeKey = unsubscribeRS.getString(1);
             } else {
-                unsubscribeKey = RandomTextGenerator.generateText(12);
+                unsubscribeKey = RandomTextGenerator.generateText(25);
                 insertKeyStmt.setLong(1, SecurityUtil.getUserID());
                 insertKeyStmt.setString(2, unsubscribeKey);
                 insertKeyStmt.execute();
