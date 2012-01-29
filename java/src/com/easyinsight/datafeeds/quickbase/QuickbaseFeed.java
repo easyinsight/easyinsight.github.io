@@ -144,9 +144,11 @@ public class QuickbaseFeed extends Feed {
             String key = filter.getField().getKey().toBaseKey().toKeyString().split("\\.")[1];
             if (filter instanceof FilterValueDefinition) {
                 FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
-                String value = filterValueDefinition.getFilteredValues().get(0).toString();
-                queryBuilder.append("{'" + key + "'.CT.'" + value + "'}");
-                queryBuilder.append(" AND ");
+                if (filterValueDefinition.getFilteredValues().size() > 0) {
+                    String value = filterValueDefinition.getFilteredValues().get(0).toString();
+                    queryBuilder.append("{'" + key + "'.CT.'" + value + "'}");
+                    queryBuilder.append(" AND ");
+                }
             } else if (filter instanceof FilterDateRangeDefinition) {
                 FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filter;
                 long startTime = filterDateRangeDefinition.getStartDate().getTime();
