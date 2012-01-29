@@ -226,9 +226,9 @@ public class GeneralDelivery extends ScheduledDelivery {
     @Override
     public boolean authorize() {
         try {
-            for (DeliveryInfo deliveryInfo : deliveryInfos) {
+            /*for (DeliveryInfo deliveryInfo : deliveryInfos) {
                 SecurityUtil.authorizeFeed(deliveryInfo.getDataSourceID(), Roles.SUBSCRIBER);
-            }
+            }*/
             return deliveryInfos != null && !deliveryInfos.isEmpty();
         } catch (Exception e) {
             return false;
