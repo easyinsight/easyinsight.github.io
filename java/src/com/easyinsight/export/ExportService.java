@@ -1718,6 +1718,9 @@ public class ExportService {
             }
             if (value.type() == Value.NUMBER) {
                 NumericValue numericValue = (NumericValue) value;
+                if (numericValue.toDouble() == null) {
+                    return;
+                }
                 double doubleValue = numericValue.toDouble();
                 if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
                     doubleValue = 0;
