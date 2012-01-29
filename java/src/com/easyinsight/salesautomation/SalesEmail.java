@@ -80,8 +80,9 @@ public class SalesEmail implements Runnable {
         // does the user have any KPIs defined?
 
         PreparedStatement userStmt = conn.prepareStatement("SELECT USER.email, USER.first_name, USER.name, ACCOUNT.account_type, ACCOUNT.account_state FROM USER, ACCOUNT WHERE USER.USER_ID = ? AND " +
-                "USER.account_id = ACCOUNT.account_id");
+                "USER.account_id = ACCOUNT.account_id and user.opt_in_email = ?");
         userStmt.setLong(1, userID);
+        userStmt.setBoolean(2, true);
         ResultSet rs = userStmt.executeQuery();
         rs.next();
 
@@ -91,12 +92,6 @@ public class SalesEmail implements Runnable {
         int accountState = rs.getInt(5);
 
         if (accountState != Account.TRIAL) return;
-
-        String effectiveName = firstName == null ? lastName : firstName;
-
-        List<EmailBlock> emailBlocks = new ArrayList<EmailBlock>();
-
-        emailBlocks.add(new ParagraphEmailBlock("Hello " + effectiveName + ","));
 
         String subject = null;
 
