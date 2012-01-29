@@ -255,7 +255,9 @@ public class YTDUtil {
             IRow tempRow1 = tempSet.getRow(0);
             AnalysisMeasure measure = ytdValue.getAnalysisMeasure();
             if (measure.hasType(AnalysisItemTypes.CALCULATION) && measure.getAggregation() == AggregationTypes.AVERAGE) {
-                ytdValue.setYtd(tempRow1.getValue(measure.createAggregateKey()));
+                if (wsytdDefinition.getFirstAggregation() != AggregationTypes.MEDIAN) {
+                    ytdValue.setYtd(tempRow1.getValue(measure.createAggregateKey()));
+                }
                 ytdValue.setAverage(tempRow1.getValue(measure.createAggregateKey()));
             }
         }
