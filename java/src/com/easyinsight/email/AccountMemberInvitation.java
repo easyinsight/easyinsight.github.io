@@ -1,5 +1,6 @@
 package com.easyinsight.email;
 
+import com.easyinsight.admin.ConstantContactSync;
 import com.easyinsight.logging.LogClass;
 
 import javax.mail.MessagingException;
@@ -33,13 +34,13 @@ public class AccountMemberInvitation {
             "Please click the link below to activate your account:\r\n\r\n"+
             "{1}\r\n\r\n"+
             "Once you've activated your account, you can always log back in to your account at:\r\n\r\n"+
-            "https://www.easy-insight.com/app/\r\n\r\n"+
-            "Thank you for choosing Easy Insight. Introductory screencasts that may help you out are available at http://www.youtube.com/user/easyinsight. In particular, you may find the following screencasts helpful as starting points:\r\n\r\n"+
+            "https://www.easy-insight.com/app/";
+            /*"Thank you for choosing Easy Insight. Introductory screencasts that may help you out are available at http://www.youtube.com/user/easyinsight. In particular, you may find the following screencasts helpful as starting points:\r\n\r\n"+
             "Easy Insight and Basecamp - http://www.youtube.com/watch?v=XISV8DLN2XA\r\n"+
             "Easy Insight and Highrise - http://www.youtube.com/watch?v=XISV8DLN2XA\r\n"+
             "Easy Insight and Flat Files - http://www.youtube.com/watch?v=XISV8DLN2XA\r\n\r\n"+
             "Documentation is available at http://www.easy-insight.com/documentation/toc.html\r\n\r\n"+
-            "If you have any questions around use of the service, please don't hesitant to contact us at support@easy-insight.com.\r\n\r\nThanks and welcome again!\r\n\r\nThe Team at Easy Insight";
+            "If you have any questions around use of the service, please don't hesitant to contact us at support@easy-insight.com.\r\n\r\nThanks and welcome again!\r\n\r\nThe Team at Easy Insight";*/
 
     private static String salesText =
             "The following user requested sales info:\r\n\r\n" +
@@ -93,9 +94,20 @@ public class AccountMemberInvitation {
     public void sendActivationEmail(String to, String firstName, String activation) {
         String url = "https://www.easy-insight.com/app/accountactivation?activationID=" + activation;
         String body = welcomeEmailText.replace("{0}", firstName).replace("{1}", url);
-        String subject = "Welcome to Easy Insight!";
+        String subject = "Activate your Easy Insight account";
         try {
             new SendGridEmail().sendEmail(to, subject, body, "sales@easy-insight.com", false, "Easy Insight");
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendWelcomeEmail(String to) {
+        String body = ConstantContactSync.getContent(ConstantContactSync.CREATION_DAY);
+        String subject = "Welcome to Easy Insight!";
+        try {
+            new SendGridEmail().sendEmail(to, subject, body, "sales@easy-insight.com", true, "Easy Insight");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

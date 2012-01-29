@@ -51,17 +51,15 @@ public class EIAccountManagementService {
         try {
             conn.setAutoCommit(false);
 
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.USER_ID FROM USER, ACCOUNT WHERE USER.OPT_IN_EMAIL = ? AND " +
-                    "USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND USER.ACCOUNT_ADMIN = ? AND ACCOUNT_STATE = ? AND ACCOUNT.CREATION_DATE < ?");
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_STATE = ?");
-            queryStmt.setBoolean(1, true);
-            queryStmt.setBoolean(2, true);
-            queryStmt.setLong(3, Account.DELINQUENT);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCOUNT.ACCOUNT_ID FROM ACCOUNT WHERE " +
+                    "ACCOUNT_STATE = ? AND ACCOUNT.CREATION_DATE < ?");
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_ID = ?");
+            queryStmt.setInt(1, Account.DELINQUENT);
             Calendar cal = Calendar.getInstance();
             cal.set(Calendar.YEAR, 2011);
-            cal.set(Calendar.MONTH, Calendar.MAY);
+            cal.set(Calendar.MONTH, Calendar.OCTOBER);
             cal.set(Calendar.DAY_OF_YEAR, 30);
-            queryStmt.setTimestamp(4, new Timestamp(cal.getTimeInMillis()));
+            queryStmt.setTimestamp(2, new Timestamp(cal.getTimeInMillis()));
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long accountID = rs.getLong(1);

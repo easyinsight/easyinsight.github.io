@@ -75,7 +75,7 @@ public class ConstantContactSync {
         return "";
     }
 
-    private static String getContent(int marketingType) {
+    public static String getContent(int marketingType) {
         switch (marketingType) {
             case CREATION_DAY:
                 return "<html>\n" +
@@ -117,7 +117,7 @@ public class ConstantContactSync {
                         "                    <img src=\"http://www.easy-insight.com/images/ReportEditorEmail.jpg\" alt=\"Report Editor Image\"/>\n" +
                         "                </div>\n" +
                         "\n" +
-                        "            <h2 style=\"font-size:16px\">Building Reports</h2>\n" +
+                        "            <h2 style=\"font-size:16px;padding-top:10px\">Building Reports</h2>\n" +
                         "\n" +
                         "            <p style=\"font-size:13px;text-align:left\">You can easily build your own reports inside of Easy Insight using our simple drag and drop report editor. Whether it's a simple list, a chart, or something more involved, you can create any type of visualization through the editor. For more information on building reports, take a look at <a href=\"http://www.easy-insight.com/documentation/reportediting.html\">http://www.easy-insight.com/documentation/reportediting.html</a>.</p>\n" +
                         "\n" +
@@ -195,6 +195,10 @@ public class ConstantContactSync {
                         "                    <a href=\"http://twitter.com/easyinsight\"><img border=\"0\" src=\"http://www.easy-insight.com/images/twitter.png\" alt=\"Follow us on Twitter\"/></a>\n" +
                         "                    <a href=\"http://www.facebook.com/pages/Easy-Insight/445964470213\"><img border=\"0\" src=\"http://www.easy-insight.com/images/facebook.png\" alt=\"Follow us on Facebook\"/></a>\n" +
                         "                </div>\n" +
+                        "                <p>\n" +
+                        "                    <a href=\"{0}\" style=\"font-size: 12px\">\n" +
+                        "                        Thanks, but stop sending this email to me</a>\n" +
+                        "                </p>\n" +
                         "            </div>\n" +
                         "        </div>\n" +
                         "    </div>\n" +
@@ -256,6 +260,10 @@ public class ConstantContactSync {
                         "                    <a href=\"http://twitter.com/easyinsight\"><img border=\"0\" src=\"http://www.easy-insight.com/images/twitter.png\" alt=\"Follow us on Twitter\"/></a>\n" +
                         "                    <a href=\"http://www.facebook.com/pages/Easy-Insight/445964470213\"><img border=\"0\" src=\"http://www.easy-insight.com/images/facebook.png\" alt=\"Follow us on Facebook\"/></a>\n" +
                         "                </div>\n" +
+                        "                <p>\n" +
+                        "                    <a href=\"{0}\" style=\"font-size: 12px\">\n" +
+                        "                        Thanks, but stop sending this email to me</a>\n" +
+                        "                </p>\n" +
                         "            </div>\n" +
                         "        </div>\n" +
                         "    </div>\n" +
@@ -317,6 +325,10 @@ public class ConstantContactSync {
                         "                    <a href=\"http://twitter.com/easyinsight\"><img border=\"0\" src=\"http://www.easy-insight.com/images/twitter.png\" alt=\"Follow us on Twitter\"/></a>\n" +
                         "                    <a href=\"http://www.facebook.com/pages/Easy-Insight/445964470213\"><img border=\"0\" src=\"http://www.easy-insight.com/images/facebook.png\" alt=\"Follow us on Facebook\"/></a>\n" +
                         "                </div>\n" +
+                        "                <p>\n" +
+                        "                    <a href=\"{0}\" style=\"font-size: 12px\">\n" +
+                        "                        Thanks, but stop sending this email to me</a>\n" +
+                        "                </p>\n" +
                         "            </div>\n" +
                         "        </div>\n" +
                         "    </div>\n" +
@@ -370,6 +382,10 @@ public class ConstantContactSync {
                         "                    <a href=\"http://twitter.com/easyinsight\"><img border=\"0\" src=\"http://www.easy-insight.com/images/twitter.png\" alt=\"Follow us on Twitter\"/></a>\n" +
                         "                    <a href=\"http://www.facebook.com/pages/Easy-Insight/445964470213\"><img border=\"0\" src=\"http://www.easy-insight.com/images/facebook.png\" alt=\"Follow us on Facebook\"/></a>\n" +
                         "                </div>\n" +
+                        "                <p>\n" +
+                        "                    <a href=\"{0}\" style=\"font-size: 12px\">\n" +
+                        "                        Thanks, but stop sending this email to me</a>\n" +
+                        "                </p>\n" +
                         "            </div>\n" +
                         "        </div>\n" +
                         "    </div>\n" +
@@ -571,13 +587,13 @@ public class ConstantContactSync {
     
     public static void updateContactLists() throws IOException, ParsingException, InterruptedException {
         Calendar cal = Calendar.getInstance();
-        for (int i = 0; i < 32; i++) {
+        /*for (int i = 0; i < 32; i++) {
 
             // create drip marketing lists for the last 31 days
 
             newContactList(cal.getTime());
             cal.add(Calendar.DAY_OF_YEAR, -1);
-        }
+        }*/
         List<User> payingUsers = new ArrayList<User>();
         List<User> reactivateUsers = new ArrayList<User>();
         List<User> otherUsers = new ArrayList<User>();
@@ -681,7 +697,7 @@ public class ConstantContactSync {
             addUsersToContactList("45", otherUsers);
         }
 
-        for (String string : purgeLists) {
+        /*for (String string : purgeLists) {
             if (string.equals("43") || string.equals("44") || string.equals("45")) {
                 continue;
             }
@@ -691,7 +707,7 @@ public class ConstantContactSync {
                 System.out.println("users size = " + users.size());
                 addUsersToContactList(string, users);
             }
-        }
+        }*/
     }
     
     public static void newContactList(Date date) throws IOException {

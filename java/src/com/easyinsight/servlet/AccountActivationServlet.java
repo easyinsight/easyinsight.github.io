@@ -2,6 +2,7 @@ package com.easyinsight.servlet;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.email.AccountMemberInvitation;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.AccountActivityStorage;
@@ -58,6 +59,19 @@ public class AccountActivationServlet extends HttpServlet {
                     Calendar cal = Calendar.getInstance();
                     cal.add(Calendar.DAY_OF_YEAR, 30);
                     new AccountActivityStorage().saveAccountTimeChange(accountID, Account.ACTIVE, cal.getTime(), conn);
+                }
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT EMAIL FROM USER WHERE ACCOUNT_ID = ?");
+                queryStmt.setLong(1, accountID);
+                ResultSet userRS = queryStmt.executeQuery();
+                if (userRS.next()) {
+                    final String email = userRS.getString(1);
+                    new Thread(new Runnable() {
+
+                        public void run() {
+                            new AccountMemberInvitation().sendWelcomeEmail(email);
+                        }
+                    }).start();
+
                 }
             } else {
                 resp.getWriter().write("This activation key was no longer valid. You can log into the application directly at https://www.easy-insight.com/app.");
