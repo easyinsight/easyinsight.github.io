@@ -69,11 +69,27 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
     protected override function createChildren():void {
         super.createChildren();
-
+        var sizeInfo:SizeInfo = obtainPreferredSizeInfo();
+        if (sizeInfo.preferredWidth > 0) {
+            width = dashboardReport.preferredWidth;
+        } else {
+            percentWidth = 100;
+        }
+        if (sizeInfo.preferredHeight > 0) {
+            height = dashboardReport.preferredHeight;
+        } else {
+            percentHeight = 100;
+        }
+        if (dashboardEditorMetadata.borderThickness > 0) {
+            setStyle("borderStyle", "inset");
+            setStyle("borderThickness", 3);
+            setStyle("borderColor", 0x00000);
+        }
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(dashboardReport.report.reportType);
         var controller:IEmbeddedReportController = new controllerClass();
         viewFactory = controller.createEmbeddedView();
         viewFactory.styleCanvas = dashboardEditorMetadata.borderThickness > 0;
+        viewFactory.usePreferredHeight = dashboardReport.autoCalculateHeight;
         viewFactory.reportID = dashboardReport.report.id;
         viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
         viewFactory.dashboardID = dashboardEditorMetadata.dashboardID;
