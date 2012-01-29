@@ -17,15 +17,20 @@
             super.analysisItem = val;
             if (val is AnalysisStep) {
                 var step:AnalysisStep = val as AnalysisStep;
+                dateLevel = step.dateLevel;
                 startDate = step.startDate;
                 endDate = step.endDate;
                 correlationDimension = step.correlationDimension;
             }
         }
 
+        [Bindable]
+        private var dateLevel:int;
+
         override public function save(analysisItem:AnalysisItem):void {
             super.save(analysisItem);
             var step:AnalysisStep = analysisItem as AnalysisStep;
+            step.dateLevel = int(dateBox.selectedItem.data);
             step.startDate = startDateComboBox.selectedItem as AnalysisDateDimension;
             step.endDate = endDateComboBox.selectedItem as AnalysisDateDimension;
             step.correlationDimension = correlationComboBox.selectedItem as AnalysisDimension;
@@ -41,5 +46,25 @@
     <mx:FormItem label="Correlation Dimension: ">
         <util:AnalysisItemComboBox dataProvider="{dimensionFields}" id="correlationComboBox" labelField="display"
                 selectedValue="{correlationDimension}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Aggregation Level: ">
+        <util:SmartComboBox id="dateBox" rowCount="12" selectedValue="{dateLevel}" selectedProperty="data">
+            <mx:ArrayCollection>
+                <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
+                <mx:Object label="Quarter - Year" data="{AnalysisItemTypes.QUARTER_OF_YEAR}"/>
+                <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
+                <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
+                <mx:Object label="Day - Month - Year - Hour" data="{AnalysisItemTypes.HOUR_LEVEL}"/>
+                <mx:Object label="Day - Month - Year - Hour - Minute"
+                           data="{AnalysisItemTypes.MINUTE_LEVEL}"/>
+                <mx:Object label="Week - Year" data="{AnalysisItemTypes.WEEK_LEVEL}"/>
+
+                <mx:Object label="Quarter" data="{AnalysisItemTypes.QUARTER_OF_YEAR_FLAT}"/>
+                <mx:Object label="Month" data="{AnalysisItemTypes.MONTH_FLAT}"/>
+                <mx:Object label="Day of Year" data="{AnalysisItemTypes.DAY_OF_YEAR_FLAT}"/>
+                <mx:Object label="Day of Week" data="{AnalysisItemTypes.DAY_OF_WEEK_FLAT}"/>
+                <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
+            </mx:ArrayCollection>
+        </util:SmartComboBox>
     </mx:FormItem>
 </analysis:AnalysisItemDetailEditor>

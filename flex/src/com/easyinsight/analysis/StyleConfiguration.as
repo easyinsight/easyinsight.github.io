@@ -270,6 +270,7 @@ public class StyleConfiguration {
         }
         if (report is YTDDefinition) {
             items.addItem(new NumericReportFormItem("Custom Aggregation", "firstAggregation", YTDDefinition(report).firstAggregation, report, 1, 15));
+            items.addItem(new TextReportFormItem("Sum Label", "ytdLabel", YTDDefinition(report).ytdLabel, report));
         }
         if (report is CombinedVerticalListDefinition) {
             items.addItem(new NumericReportFormItem("Header Width", "headerWidth", CombinedVerticalListDefinition(report).headerWidth, report, 100, 400));
