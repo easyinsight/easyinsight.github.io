@@ -137,7 +137,7 @@
             var endWidth:int = 0;
             if (reportWidth < this.width) {
                 var delta:int = (this.width - reportWidth);
-                //delta = Math.min(delta, 500);
+                delta = Math.min(delta, 800);
                 var perColumnAdd:int = (delta) / columns.length;
                 for each (var colAdd:AdvancedDataGridColumn in columns) {
                     colAdd.width += perColumnAdd;
