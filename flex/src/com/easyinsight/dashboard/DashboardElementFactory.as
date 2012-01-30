@@ -77,6 +77,7 @@ public class DashboardElementFactory {
             return comp;
         } else if (element is DashboardTextElement) {
             var text:DashboardTextViewComponent = new DashboardTextViewComponent();
+            text.metadata = dashboardEditorMetadata;
             text.dashboardText = element as DashboardTextElement;
             return text;
         }
