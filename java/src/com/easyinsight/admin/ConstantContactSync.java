@@ -678,7 +678,6 @@ public class ConstantContactSync {
             LogClass.error(e);
             session.getTransaction().rollback();
         } finally {
-            session.getTransaction().commit();
             session.close();
         }
         Set<String> purgeLists = getUsers(dripMarketingMap, map);
