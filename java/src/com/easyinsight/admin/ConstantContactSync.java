@@ -633,7 +633,7 @@ public class ConstantContactSync {
                         }
                     }
 
-                    if (accountCreationDate != null) {
+                    /*if (accountCreationDate != null) {
                         System.out.println("testing " + accountCreationDate);
                         long then = accountCreationDate.getTime();
                         long now = System.currentTimeMillis();
@@ -661,7 +661,7 @@ public class ConstantContactSync {
                                 dripMarketingMap.put(user.getEmail(), null);
                             }
                         }
-                    }
+                    }*/
                 }
             }
 
