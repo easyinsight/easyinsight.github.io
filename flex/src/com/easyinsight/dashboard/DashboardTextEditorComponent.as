@@ -5,6 +5,7 @@ import com.easyinsight.util.AutoSizeTextArea;
 import mx.collections.ArrayCollection;
 import mx.containers.VBox;
 import mx.controls.TextArea;
+import mx.managers.PopUpManager;
 
 public class DashboardTextEditorComponent extends VBox implements IDashboardEditorComponent {
 
@@ -16,8 +17,6 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
         super();
         setStyle("verticalAlign", "middle");
         setStyle("horizontalAlign", "center");
-        this.percentWidth = 100;
-        this.percentHeight = 100;
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
@@ -27,9 +26,22 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
     protected override function createChildren():void {
         super.createChildren();
         textArea = new AutoSizeTextArea();
-        textArea.percentHeight = 100;
-        textArea.percentWidth = 100;
+        if (dashboardText.preferredHeight == 0) {
+            textArea.percentHeight = 100;
+            this.percentHeight = 100;
+        } else {
+            textArea.height = dashboardText.preferredHeight - 60;
+            this.height = dashboardText.preferredHeight;
+        }
+        if (dashboardText.preferredWidth == 0) {
+            textArea.percentWidth = 100;
+            this.percentWidth = 100;
+        } else {
+            textArea.width = dashboardText.preferredWidth;
+            this.width = dashboardText.preferredWidth;
+        }
         textArea.editable = true;
+        textArea.text = dashboardText.text;
         addChild(textArea);
     }
 
@@ -42,6 +54,9 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
     }
 
     public function edit():void {
+        var window:DashboardEditWindow = new DashboardEditWindow();
+        window.dashboardElement = dashboardText;
+        PopUpManager.addPopUp(window, this, true);
     }
 
     public function refresh():void {
