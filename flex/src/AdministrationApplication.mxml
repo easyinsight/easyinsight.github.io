@@ -15,8 +15,8 @@
                         <mx:Button label="Report Admin XML" click="reportAdminXML()"/>
                         <mx:Button label="Report Test" click="reportTest()"/>
                         <mx:Button label="Global Skin" click="globalSkin()"/>
-                        <mx:Button label="Special Offer Update" click="specialOffer()"/>
                         <mx:Button label="Header Logo" click="headerLogo()"/>
+                        <mx:Button label="Synchronize" click="sync()"/>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Connections">
                         <solutions:SolutionAdministration width="100%" height="100%"/>
@@ -54,6 +54,10 @@
             var window:HeaderImageCreator = new HeaderImageCreator();
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+        }
+        
+        private function sync():void {
+            adminService.constantContactSync.send();
         }
 
         private function updateZipCodes():void {
@@ -178,6 +182,7 @@
     </mx:RemoteObject>
     <mx:RemoteObject id="adminService" destination="admin">
         <mx:method name="threadDump"/>
+        <mx:method name="constantContactSync"/>
         <mx:method name="clearOrphanData"/>
     </mx:RemoteObject>
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
