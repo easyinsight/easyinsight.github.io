@@ -463,11 +463,11 @@ public class CCContactSource extends ConstantContactBaseSource {
         consumer.setMessageSigner(new HmacSha1MessageSigner());
         consumer.setTokenWithSecret("01d2d931-2df6-4cb8-88ca-e9f4c90c8bea", "ZKiEPe1wkLtIjmwpUHelXWKP3rE6gkVMaMqi");
 
-        PostMethod postMethod = new PostMethod("https://api.constantcontact.com/ws/customers"+ccSource.getUsername()+"/activities");
+        PostMethod postMethod = new PostMethod("https://api.constantcontact.com/ws/customers"+ccSource.getCcUserName()+"/activities");
         postMethod.setRequestHeader("Accept", "application/xml");
         postMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         String ops = "activityType=EXPORT_CONTACTS&fileType=CSV&exportOptDate=true&exportOptSource=true&exportListName=true&sortBy=DATE_DESC&columns=EMAIL%20ADDRESS&columns=FIRST%20NAME&listId="+
-                URLEncoder.encode("http://api.constantcontact.com/ws/customers/"+ccSource.getUsername()+"/lists/" + listID, "UTF-8");
+                URLEncoder.encode("http://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/lists/" + listID, "UTF-8");
         RequestEntity requestEntity = new StringRequestEntity(ops, "application/x-www-form-urlencoded", "UTF-8");
         postMethod.setRequestEntity(requestEntity);
         consumer.sign(postMethod);

@@ -23,10 +23,13 @@ public class PersonaEquals extends Function {
         if (persona == null) {
             return new EmptyValue();
         }
-        for (int i = 1; i < paramCount(); i++) {
-            String personaToTry = getParameter(i).toString();
+        /*for (int i = 0; i < paramCount(); i++) {
+            System.out.println(i + " = " + getParameter(i));
+        }*/
+        for (int i = 0; i < paramCount() - 1; i++) {
+            String personaToTry = minusQuotes(getParameter(i)).toString();
             if (persona.equals(personaToTry)) {
-                return getParameter(getParameterCount());
+                return getParameter(paramCount() - 1);
             }
         }
         return new EmptyValue();
