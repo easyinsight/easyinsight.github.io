@@ -228,15 +228,17 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
             tasks.addAll(getTasks(token.getTokenValue(), "upcoming", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
             tasks.addAll(getTasks(token.getTokenValue(), "assigned", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
             tasks.addAll(getTasks(token.getTokenValue(), "completed", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-            try {
+
                 for (HighriseAdditionalToken additionalToken : highRiseCompositeSource.getAdditionalTokens()) {
-                    tasks.addAll(getTasks(additionalToken.getToken(), "upcoming", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-                    tasks.addAll(getTasks(additionalToken.getToken(), "assigned", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-                    tasks.addAll(getTasks(additionalToken.getToken(), "completed", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
+                    try {
+                        tasks.addAll(getTasks(additionalToken.getToken(), "upcoming", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
+                        tasks.addAll(getTasks(additionalToken.getToken(), "assigned", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
+                        tasks.addAll(getTasks(additionalToken.getToken(), "completed", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
+                    } catch (Exception e) {
+                        System.out.println("Failed to load tasks for token " + additionalToken.getToken());
+                    }
                 }
-            } catch (Exception e) {
-                // ignore
-            }
+
             for (TaskInfo task : tasks) {
                 task.addToDataSet(ds);
             }

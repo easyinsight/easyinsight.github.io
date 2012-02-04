@@ -600,6 +600,7 @@ public class DataStorage implements IDataStorage {
             keyStrings.add(key.toSQL());
         }
 
+        
         if (keys == null) {
             keys = new HashMap<Key, KeyMetadata>();
             Iterator<AnalysisItem> iter = reportItems.iterator();
@@ -627,6 +628,10 @@ public class DataStorage implements IDataStorage {
                 } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
                     keys.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
                 } else {
+                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                        AnalysisDimension analysisDimension = (AnalysisDimension) analysisItem;
+                        countDistinct = countDistinct || !analysisDimension.isGroup();
+                    }
                     keys.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
                 }
             }

@@ -36,6 +36,12 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
     public static final String XMLDATETIMEFORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     public static final String ALTDATEFORMAT = "EEE MMM dd HH:mm:ss zzz yyyy";
 
+    /*
+    e6630db11f381ce469305018e1e773b6ad4a6a14
+Client Secret:
+f845c2a78ca4df6a19cd23515deda0ce826ff8d0
+     */
+
     public static final String TODOLISTNAME = "To-do List";
     public static final String MILESTONENAME = "Milestone";
     public static final String MILESTONE_OWNER = "Milestone Owner";
@@ -112,13 +118,12 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
             BaseCampCache basecampCache = source.getOrCreateCache(client);
             Document projects = runRestRequest("/projects.xml", client, builder, url, null, true, parentDefinition, false);
             Nodes projectNodes = projects.query("/projects/project");
-            for(int i = 0;i < projectNodes.size();i++) {
+            for (int i = 0; i < projectNodes.size(); i++) {
                 DataSet ds = new DataSet();
                 Node curProject = projectNodes.get(i);
                 String projectName = queryField(curProject, "name/text()");
                 String projectCreatedAtString = queryField(curProject, "created-on/text()");
                 String projectChangedOnString = queryField(curProject, "last-changed-on/text()");
-
 
 
                 Date projectCreatedAt = deadlineFormat.parse(projectCreatedAtString);
@@ -136,11 +141,11 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
 
                 long daysSinceChange = delta / (60 * 60 * 1000 * 24);
 
-                if (source.isIncrementalRefresh() && daysSinceChange > 2) {
+                /*if (source.isIncrementalRefresh() && daysSinceChange > 2) {
                     continue;
-                }
+                }*/
 
-                String announcement = queryField(curProject, "announcement/text()"); 
+                String announcement = queryField(curProject, "announcement/text()");
                 loadingProgress(i, projectNodes.size(), "Synchronizing with todo items of " + projectName + "...", callDataID);
                 String projectStatus = queryField(curProject, "status/text()");
                 if ("template".equals(projectStatus)) {
@@ -158,74 +163,87 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
 
                 if (!"archived".equals(projectStatus)) {
                     Document milestoneList;
-                    try {
-                        milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/calendar_entries.xml", client, builder, url, null, false, parentDefinition, false);
-                        Nodes milestoneCacheNodes = milestoneList.query("/calendar-entries/calendar-entry");
-                        for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
-                            Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
-                            String id = queryField(milestoneNode, "id/text()");
-                            String milestoneName = queryField(milestoneNode, "title/text()");
-                            String milestoneDl = queryField(milestoneNode, "deadline/text()");
-                            if (milestoneDl == null) {
-                                milestoneDl = queryField(milestoneNode, "due-at/text()");
-                            }
-                            String startAtString = queryField(milestoneNode, "start-at/text()");
-                            String type = queryField(milestoneNode, "type/text()");
 
-                            Date startDate = null;
-                            if (startAtString != null) {
-                                startDate = deadlineFormat.parse(startAtString);
+                    int milestoneCount;
+                    int page = 0;
+                    try {
+                        do {
+                            milestoneCount = 0;
+                            if (page == 0) {
+                                milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/calendar_entries.xml", client, builder, url, null, false, parentDefinition, false);
+                            } else {
+                                milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/calendar_entries.xml?page=" + page, client, builder, url, null, false, parentDefinition, false);
                             }
-                            Date milestoneDeadline = null;
-                            try {
-                                if (milestoneDl != null && "Milestone".equals(type)) {
-                                    try {
-                                        milestoneDeadline = deadlineFormat.parse(milestoneDl);
-                                    } catch (ParseException e) {
-                                        milestoneDeadline = altFormat.parse(milestoneDl);
-                                    }
-                                } else if (milestoneDl != null) {
-                                    try {
-                                        milestoneDeadline = deadlineFormat.parse(milestoneDl);
-                                    } catch (ParseException e) {
-                                        milestoneDeadline = deadlineTimeFormat.parse(milestoneDl);
-                                    }
+
+                            Nodes milestoneCacheNodes = milestoneList.query("/calendar-entries/calendar-entry");
+                            for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
+                                milestoneCount++;
+                                Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
+                                String id = queryField(milestoneNode, "id/text()");
+                                String milestoneName = queryField(milestoneNode, "title/text()");
+                                String milestoneDl = queryField(milestoneNode, "deadline/text()");
+                                if (milestoneDl == null) {
+                                    milestoneDl = queryField(milestoneNode, "due-at/text()");
                                 }
-                            } catch (ParseException e) {
-                                e.printStackTrace();
+                                String startAtString = queryField(milestoneNode, "start-at/text()");
+                                String type = queryField(milestoneNode, "type/text()");
+
+                                Date startDate = null;
+                                if (startAtString != null) {
+                                    startDate = deadlineFormat.parse(startAtString);
+                                }
+                                Date milestoneDeadline = null;
+                                try {
+                                    if (milestoneDl != null && "Milestone".equals(type)) {
+                                        try {
+                                            milestoneDeadline = deadlineFormat.parse(milestoneDl);
+                                        } catch (ParseException e) {
+                                            milestoneDeadline = altFormat.parse(milestoneDl);
+                                        }
+                                    } else if (milestoneDl != null) {
+                                        try {
+                                            milestoneDeadline = deadlineFormat.parse(milestoneDl);
+                                        } catch (ParseException e) {
+                                            milestoneDeadline = deadlineTimeFormat.parse(milestoneDl);
+                                        }
+                                    }
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                String milestoneCreatedOnString = queryField(milestoneNode, "created-on/text()");
+                                Date milestoneCreatedOn = deadlineFormat.parse(milestoneCreatedOnString);
+                                String milestoneCompletedOnString = queryField(milestoneNode, "completed-on/text()");
+                                Date milestoneCompletedOn = null;
+                                if (milestoneCompletedOnString != null) {
+                                    milestoneCompletedOn = deadlineFormat.parse(milestoneCompletedOnString);
+                                }
+                                String milestoneOwner = null;
+                                String responsiblePartyId = queryField(milestoneNode, "responsible-party-id/text()");
+                                if (responsiblePartyId != null) {
+                                    milestoneOwner = basecampCache.getUserName(responsiblePartyId);
+                                }
+                                milestoneMap.put(id, new MilestoneInfo(milestoneName, milestoneCreatedOn, milestoneCompletedOn, milestoneDeadline, milestoneOwner, type, startDate));
                             }
-                            String milestoneCreatedOnString = queryField(milestoneNode, "created-on/text()");
-                            Date milestoneCreatedOn = deadlineFormat.parse(milestoneCreatedOnString);
-                            String milestoneCompletedOnString = queryField(milestoneNode, "completed-on/text()");
-                            Date milestoneCompletedOn = null;
-                            if (milestoneCompletedOnString != null) {
-                                milestoneCompletedOn = deadlineFormat.parse(milestoneCompletedOnString);
-                            }
-                            String milestoneOwner = null;
-                            String responsiblePartyId = queryField(milestoneNode, "responsible-party-id/text()");
-                            if (responsiblePartyId != null) {
-                                milestoneOwner = basecampCache.getUserName(responsiblePartyId);
-                            }
-                            milestoneMap.put(id, new MilestoneInfo(milestoneName, milestoneCreatedOn, milestoneCompletedOn, milestoneDeadline, milestoneOwner, type, startDate));
-                        }
+
+                            page++;
+                        } while (milestoneCount == 50);
                     } catch (Http403Exception e) {
                         // ignore
                     }
                 }
 
 
-
                 Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/todo_lists.xml", client, builder, url, null, false, parentDefinition, false);
                 Nodes todoListNodes = todoLists.query("/todo-lists/todo-list");
                 if (todoListNodes.size() > 0) {
-                    for(int j = 0;j < todoListNodes.size();j++) {
+                    for (int j = 0; j < todoListNodes.size(); j++) {
                         Node todoListNode = todoListNodes.get(j);
                         String todoListName = queryField(todoListNode, "name/text()");
                         String todoListId = queryField(todoListNode, "id/text()");
                         String todoListDesc = queryField(todoListNode, "description/text()");
                         String todoListPrivacy = "true".equalsIgnoreCase(queryField(todoListNode, "private/text()")) ? "private" : "public";
                         String milestoneIdToRetrieve = queryField(todoListNode, "milestone-id/text()");
-                        MilestoneInfo milestoneInfo = milestoneMap.get(milestoneIdToRetrieve);                        
+                        MilestoneInfo milestoneInfo = milestoneMap.get(milestoneIdToRetrieve);
                         String milestoneName = null;
                         Date milestoneCreatedOn = null;
                         Date milestoneCompletedOn = null;
@@ -250,7 +268,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
 
                             Nodes todoItemNodes = todoItems.query("/todo-items/todo-item");
                             if (todoItemNodes.size() > 0) {
-                                for(int k = 0;k < todoItemNodes.size();k++) {
+                                for (int k = 0; k < todoItemNodes.size(); k++) {
                                     Node todoItem = todoItemNodes.get(k);
                                     String responsiblePartyId = queryField(todoItem, "responsible-party-id/text()");
                                     String responsiblePartyName = basecampCache.getUserName(responsiblePartyId);
@@ -260,16 +278,16 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                                     String completerName = basecampCache.getUserName(completerId);
                                     String createdDateString = queryField(todoItem, "created-on/text()");
                                     Date createdDate = null;
-                                    if(createdDateString != null )
+                                    if (createdDateString != null)
                                         createdDate = df.parse(createdDateString);
                                     String completedDateString = queryField(todoItem, "completed-on/text()");
                                     Date completedDate = null;
-                                    if(completedDateString != null)
+                                    if (completedDateString != null)
                                         completedDate = df.parse(completedDateString);
 
                                     String dueOnString = queryField(todoItem, "due-at/text()");
                                     Date dueOnDate = null;
-                                    if(dueOnString != null)
+                                    if (dueOnString != null)
                                         dueOnDate = df.parse(dueOnString);
 
                                     IRow row = ds.createRow();

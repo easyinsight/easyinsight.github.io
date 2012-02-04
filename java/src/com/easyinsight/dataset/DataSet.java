@@ -91,11 +91,14 @@ public class DataSet implements Serializable {
     public ListTransform listTransform(List<AnalysisItem> columns, Set<Integer> skipAggregations) {
         ListTransform listTransform = new ListTransform(skipAggregations);
         Collection<AnalysisDimension> ourDimensions = new ArrayList<AnalysisDimension>();
+        Collection<AnalysisDimension> ungroupedDimensions = new ArrayList<AnalysisDimension>();
         for (AnalysisItem column : columns) {
             if (column.hasType(AnalysisItemTypes.DIMENSION)) {
                 AnalysisDimension analysisDimension = (AnalysisDimension) column;
                 if (analysisDimension.isGroup()) {
                     ourDimensions.add(analysisDimension);
+                } else {
+                    ungroupedDimensions.add(analysisDimension);
                 }
                 if (analysisDimension.requiresDataEarly()) {
                     analysisDimension.handleEarlyData(rows);
@@ -104,16 +107,21 @@ public class DataSet implements Serializable {
         }
         Collection<AnalysisItem> paredDownColumns = new LinkedHashSet<AnalysisItem>(columns);
         List<String> keys = new ArrayList<String>();
-        for (IRow row : rows) {
+        for (int i = 0; i < rows.size(); i++) {
+            IRow row = rows.get(i);
             StringBuilder keyBuilder = new StringBuilder();
             for (AnalysisDimension dimension : ourDimensions) {
                 Value dimensionValue = row.getValue(dimension.createAggregateKey());
                 keyBuilder.append(dimension.qualifiedName()).append(":").append(dimensionValue.toString()).append(":");
             }
+            for (AnalysisDimension dimension : ungroupedDimensions) {
+                keyBuilder.append(dimension.qualifiedName()).append(":").append(i);
+            }
             String key = keyBuilder.toString();
             keys.add(key);
-
+            System.out.println(key);
         }
+        
         listTransform.addCompositeKeys(keys);
         listTransform.addColumns(paredDownColumns);
         for (int i = 0; i < rows.size(); i++) {
@@ -215,6 +223,16 @@ public class DataSet implements Serializable {
                     if ("".equals(value.toString())) {
                         row.addValue(analysisItem.createAggregateKey(), new EmptyValue());
                     }
+                }
+            }
+        }
+    }
+    
+    public void rowsWithCriteria(Value value) {
+        for (IRow row : rows) {
+            for (Value existing : row.getValues().values()) {
+                if (existing.equals(value)) {
+                    System.out.println("Match: " + row);
                 }
             }
         }
