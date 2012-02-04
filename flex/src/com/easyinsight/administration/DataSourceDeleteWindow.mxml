@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var reportXML:String;
+
+        private function gotReportXML():void {
+            reportXML = adminService.describeReport.lastResult as String;
+        }
+
+        private function forcedRun():void {
+            Alert.show(adminService.forceRun.lastResult as String);
+        }
+
+        private function clear():void {
+            ProgressAlert.alert(this, "Deleting...", null, adminService.adminClearDataSource);
+            adminService.adminClearDataSource.send(urlInput.text)
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="adminService" destination="admin">
+        <mx:method name="adminClearDataSource" result="gotReportXML()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:TextInput id="urlInput"/>
+        <mx:Button label="Nuke" click="clear()"/>
+        <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+    </mx:VBox>
+</util:EISlimWindow>
