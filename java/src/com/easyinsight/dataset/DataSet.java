@@ -119,7 +119,6 @@ public class DataSet implements Serializable {
             }
             String key = keyBuilder.toString();
             keys.add(key);
-            System.out.println(key);
         }
         
         listTransform.addCompositeKeys(keys);
