@@ -187,15 +187,21 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
                 int initialVelocity = Integer.parseInt(queryField(curProject, "initial_velocity/text()"));
                 int currentVelocity = Integer.parseInt(queryField(curProject, "current_velocity/text()"));
                 String labels = queryField(curProject, "labels/text()");
+                Set<String> storyIDs = new HashSet<String>();
                 Document currentIterations = runRestRequest(httpClient, token, "https://www.pivotaltracker.com/services/v3/projects/" + id +
                     "/iterations/current");
-                parseIterations(keys, dataSet, dateFormat, id, name, initialVelocity, currentVelocity, labels, currentIterations, "Current");
+                storyIDs.addAll(parseIterations(keys, dataSet, dateFormat, id, name, initialVelocity, currentVelocity, labels, currentIterations, "Current"));
                 Document backlogIterations = runRestRequest(httpClient, token, "https://www.pivotaltracker.com/services/v3/projects/" + id +
                     "/iterations/backlog");
-                parseIterations(keys, dataSet, dateFormat, id, name, initialVelocity, currentVelocity, labels, backlogIterations, "Backlog");
+                storyIDs.addAll(parseIterations(keys, dataSet, dateFormat, id, name, initialVelocity, currentVelocity, labels, backlogIterations, "Backlog"));
                 Document doneIterations = runRestRequest(httpClient, token, "https://www.pivotaltracker.com/services/v3/projects/" + id +
                     "/iterations/done");
-                parseIterations(keys, dataSet, dateFormat, id, name, initialVelocity, currentVelocity, labels, doneIterations, "Done");
+                storyIDs.addAll(parseIterations(keys, dataSet, dateFormat, id, name, initialVelocity, currentVelocity, labels, doneIterations, "Done"));
+                /*Document iceboxIterations = runRestRequest(httpClient, token, "https://www.pivotaltracker.com/services/v3/projects/" + id +
+                        "/iterations/icebox");
+                parseIterations(keys, dataSet, dateFormat, id, name, initialVelocity, currentVelocity, labels, iceboxIterations, "Icebox");*/
+                processStories(keys, dataSet, dateFormat, httpClient, token, id, storyIDs, name, initialVelocity, currentVelocity, labels);
+                
             }
             return dataSet;
         } catch (Exception e) {
@@ -203,8 +209,69 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    private void parseIterations(Map<String, Key> keys, DataSet dataSet, DateFormat dateFormat, String id, String name,
+    private void processStories(Map<String, Key> keys, DataSet dataSet, DateFormat dateFormat, HttpClient httpClient, String token,
+                                String projectID, Set<String> storyIDs, String name,
+                                int initialVelocity, int currentVelocity, String labels) throws IOException, ParsingException, ParseException {
+        Document doc = runRestRequest(httpClient, token, "https://www.pivotaltracker.com/services/v3/projects/" + projectID +
+                "/stories?limit=3000");
+        Nodes stories = doc.query("/stories/story");
+        for (int k = 0; k < stories.size(); k++) {
+            Node storyNode = stories.get(k);
+            String storyName = queryField(storyNode, "name/text()");
+            String storyID = queryField(storyNode, "id/text()");
+            if (storyIDs.contains(storyID)) {
+                continue;
+            }
+            String requestedBy = queryField(storyNode, "requested_by/text()");
+            String ownedBy = queryField(storyNode, "owned_by/text()");
+            String state = queryField(storyNode, "current_state/text()");
+            String estimateString = queryField(storyNode, "estimate/text()");
+            int estimate = 0;
+            if (estimateString != null) {
+                estimate = Integer.parseInt(estimateString);
+            }
+            String storyType = queryField(storyNode, "story_type/text()");
+            String storyLabels = queryField(storyNode, "labels/text()");
+            String storyCreatedAtString = queryField(storyNode, "created_at/text()");
+            Date storyCreatedAt = null;
+            if (storyCreatedAtString != null) {
+                storyCreatedAt = dateFormat.parse(storyCreatedAtString);
+            }
+            String storyUpdatedAtString = queryField(storyNode, "updated_at/text()");
+            Date storyUpdatedAt = null;
+            if (storyUpdatedAtString != null) {
+                storyUpdatedAt = dateFormat.parse(storyUpdatedAtString);
+            }
+            String storyAcceptedAtString = queryField(storyNode, "accepted_at/text()");
+            Date storyAcceptedAt = null;
+            if (storyAcceptedAtString != null) {
+                storyAcceptedAt = dateFormat.parse(storyAcceptedAtString);
+            }
+            String storyURL = queryField(storyNode, "url/text()");
+            IRow row = dataSet.createRow();
+            row.addValue(keys.get(PROJECT_NAME), name);
+            row.addValue(keys.get(PROJECT_ID), projectID);
+            row.addValue(keys.get(PROJECT_INITIAL_VELOCITY), initialVelocity);
+            row.addValue(keys.get(PROJECT_CURRENT_VELOCITY), currentVelocity);
+            row.addValue(keys.get(PROJECT_LABELS), labels);
+            row.addValue(keys.get(STORY_NAME), storyName);
+            row.addValue(keys.get(STORY_REQUESTED_BY), requestedBy);
+            row.addValue(keys.get(STORY_OWNED_BY), ownedBy);
+            row.addValue(keys.get(STORY_STATE), state);
+            row.addValue(keys.get(STORY_TYPE), storyType);
+            row.addValue(keys.get(STORY_URL), storyURL);
+            row.addValue(keys.get(STORY_LABELS), storyLabels);
+            row.addValue(keys.get(STORY_ESTIMATE), estimate);
+            row.addValue(keys.get(STORY_COUNT), new NumericValue(1));
+            row.addValue(keys.get(STORY_CREATED_AT), storyCreatedAt);
+            row.addValue(keys.get(STORY_UPDATED_AT), storyUpdatedAt);
+            row.addValue(keys.get(STORY_ACCEPTED_AT), storyAcceptedAt);
+        }
+    }
+
+    private Set<String> parseIterations(Map<String, Key> keys, DataSet dataSet, DateFormat dateFormat, String id, String name,
                                  int initialVelocity, int currentVelocity, String labels, Document iterations, String iterationState) throws ParseException {
+        Set<String> storyIDs = new HashSet<String>();
         Nodes iterationNodes = iterations.query("/iterations/iteration");
         for (int j = 0; j < iterationNodes.size(); j++) {
             Node curIteration = iterationNodes.get(j);
@@ -223,6 +290,8 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
             for (int k = 0; k < stories.size(); k++) {
                 Node storyNode = stories.get(k);
                 String storyName = queryField(storyNode, "name/text()");
+                String storyID = queryField(storyNode, "id/text()");
+                storyIDs.add(storyID);
                 String requestedBy = queryField(storyNode, "requested_by/text()");
                 String ownedBy = queryField(storyNode, "owned_by/text()");
                 String state = queryField(storyNode, "current_state/text()");
@@ -273,6 +342,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
                 row.addValue(keys.get(STORY_ACCEPTED_AT), storyAcceptedAt);
             }
         }
+        return storyIDs;
     }
 
     @NotNull
