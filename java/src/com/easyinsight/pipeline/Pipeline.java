@@ -87,7 +87,7 @@ public abstract class Pipeline {
                 if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
                     AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
                     if (analysisCalculation.getAggregation() == AggregationTypes.AVERAGE) {
-                        List<AnalysisItem> baseItems = analysisItem.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+                        List<AnalysisItem> baseItems = analysisItem.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
                         allRequestedAnalysisItems.addAll(baseItems);
                         List<AnalysisItem> linkItems = analysisItem.addLinkItems(allFields);
                         allRequestedAnalysisItems.addAll(linkItems);
@@ -104,13 +104,13 @@ public abstract class Pipeline {
 
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                List<AnalysisItem> items = filterDefinition.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> items = filterDefinition.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, allNeededAnalysisItems);
                 allNeededAnalysisItems.addAll(items);
             }
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
-                List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, allNeededAnalysisItems);
                 allNeededAnalysisItems.addAll(baseItems);
                 List<AnalysisItem> linkItems = item.addLinkItems(allFields);
                 allNeededAnalysisItems.addAll(linkItems);
@@ -174,9 +174,17 @@ public abstract class Pipeline {
         return resultSet;
     }
 
+    /*
+    class com.easyinsight.pipeline.AggregationComponent -
+    [{Hours Cost=4.0, Hours=4.0, Project ID=1701498, Expenses - User ID=203116, Expenses Total Cost=500.0, User ID=203116, Time Tracking Project ID=1701498, Time Tracking User ID=203116, Expenses Project ID=1701498, User Default Hourly Rate=1.0, Project Name=Shivano Budgeted},
+    {Hours Cost=20.0, Hours=20.0, Project ID=1701498, Expenses - User ID=203116, Expenses Total Cost=500.0, User ID=203116, Time Tracking Project ID=1701498, Time Tracking User ID=203116, Expenses Project ID=1701498, User Default Hourly Rate=1.0, Project Name=Shivano Budgeted},
+    {Hours Cost=50.0, Hours=50.0, Project ID=1701498, Expenses - User ID=203116, Expenses Total Cost=500.0, User ID=203116, Time Tracking Project ID=1701498, Time Tracking User ID=203116, Expenses Project ID=1701498, User Default Hourly Rate=1.0, Project Name=Shivano Budgeted},
+    {Hours Cost=5000.0, Hours=5.0, Project ID=1701498, Expenses - User ID=203116, Expenses Total Cost=500.0, User ID=203115, Time Tracking Project ID=1701498, Time Tracking User ID=203115, Expenses Project ID=1701498, User Default Hourly Rate=1000.0, Project Name=Shivano Budgeted}]
+     */
+
     public DataResults toList(DataSet dataSet) {
         for (IComponent component : components) {
-           // System.out.println(component.getClass() + " - " + dataSet);
+            //System.out.println(component.getClass() + " - " + dataSet.getRows());
             long startTime = System.currentTimeMillis();
             dataSet = component.apply(dataSet, pipelineData);
             long endTime = System.currentTimeMillis();

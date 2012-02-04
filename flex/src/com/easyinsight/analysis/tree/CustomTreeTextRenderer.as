@@ -1,6 +1,9 @@
 package com.easyinsight.analysis.tree {
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.HierarchyLevel;
+import com.easyinsight.analysis.TextReportFieldExtension;
 import com.easyinsight.pseudocontext.PseudoContextWindow;
 import com.easyinsight.pseudocontext.StandardContextWindow;
 
@@ -36,6 +39,16 @@ public class CustomTreeTextRenderer extends UITextField implements IListItemRend
     public function set analysisItem(val:AnalysisItem):void {
         _analysisItem = val;
     }
+    
+    private var _depth:int;
+
+    public function get depth():int {
+        return _depth;
+    }
+
+    public function set depth(value:int):void {
+        _depth = value;
+    }
 
     public function validateProperties():void {
     }
@@ -51,8 +64,27 @@ public class CustomTreeTextRenderer extends UITextField implements IListItemRend
 
     public function set data(value:Object):void {
         this._data = value;
-        var tf:UITextFormat = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, 0);
+        if (analysisItem.reportFieldExtension != null && analysisItem.reportFieldExtension is TextReportFieldExtension) {
+            var ext:TextReportFieldExtension = analysisItem.reportFieldExtension as TextReportFieldExtension;
+            if (ext.wordWrap) {
+                this.multiline = true;
+                this.wordWrap = true;
+            }
+        }
+        var treeDef:TreeDefinition = _report as TreeDefinition;
+        var index:int = -1;
+        for (var i:int = 0; i < AnalysisHierarchyItem(treeDef.hierarchy).hierarchyLevels.length; i++) {
+            var level:HierarchyLevel = AnalysisHierarchyItem(treeDef.hierarchy).hierarchyLevels.getItemAt(i) as HierarchyLevel;
+            if (level.analysisItem == analysisItem) {
+                depth = i;
+            }
+        }
+
+        var color:uint = depth == 0 ? 0xFFFFFF : 0x000000;
+        trace("depth = " + depth + ", color = " + color);
+        var tf:UITextFormat = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color);
         setTextFormat(tf);
+
         new StandardContextWindow(analysisItem, passThrough, this, value, _report, false);
     }
 

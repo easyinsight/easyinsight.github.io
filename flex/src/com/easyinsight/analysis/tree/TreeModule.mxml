@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%"
-        creationComplete="setupListeners()">
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
+           implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%"
+           creationComplete="setupListeners()">
     <mx:states>
         <mx:State name="lookupTable">
             <mx:AddChild relativeTo="{topBar}">
@@ -37,7 +38,7 @@
         import com.easyinsight.analysis.list.LookupTableChangeEvent;
         import com.easyinsight.etl.LookupPair;
         import com.easyinsight.etl.LookupTable;
-        import com.easyinsight.filtering.FilterRawData;
+
 
         import mx.collections.ArrayCollection;
         import mx.collections.Grouping;
@@ -67,7 +68,7 @@
             currentState = "lookupTable";
         }
 
-        private function handleLevel(level:HierarchyLevel, levels:ArrayCollection, row:Object, masterResult:Object, items:ArrayCollection):Object {
+        private static function handleLevel(level:HierarchyLevel, levels:ArrayCollection, row:Object, masterResult:Object, items:ArrayCollection):Object {
             var value:Object = row[level.analysisItem.qualifiedName()];
             var key:String = String(value);
             var result:Object = masterResult[key];
@@ -105,6 +106,17 @@
 
         private var fieldLength:int;
 
+        [Embed(source="../../../../../assets/empty.png")]
+        private var empty:Class;
+
+        private function groupIconFunction(item:Object,depth:int):Class {
+            return empty;
+        }
+
+        private function iconFunction(item:Object):Class {
+            return empty;
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var treeDefinition:TreeDefinition = analysisDefinition as TreeDefinition;
             if (dataSet.length > 0) {
@@ -123,6 +135,12 @@
                 coreGrid.setStyle("color", treeDefinition.textColor);
                 coreGrid.setStyle("alternatingItemColors", [ treeDefinition.rowColor1, treeDefinition.rowColor2 ]);
                 coreGrid.setStyle("headerColors", [ treeDefinition.headerColor1, treeDefinition.headerColor2 ]);
+                if (treeDefinition.autoExpandAll) {
+                    coreGrid.groupIconFunction = groupIconFunction;
+                    coreGrid.iconFunction = iconFunction;
+                    coreGrid.displayDisclosureIcon = false;
+                    coreGrid.setStyle("depthColors", [0xBBBBBB, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF]);
+                }
                 this.treeDef = treeDefinition;
                 var explicitWidth:Boolean = true;
                 for each (var treeItem:AnalysisItem in treeDef.getFields()) {
@@ -136,6 +154,7 @@
                     dataSet.sort = myData.sort;
                     dataSet.refresh();
                 }
+
                 groupingColl.source = dataSet;
                 var columns:Array = [];
                 var analysisItems:Array = [];
@@ -143,35 +162,39 @@
                 var groupingFields:Array = [];
                 for (var lvlCount:int = 0; lvlCount < hierarchy.hierarchyLevels.length - 1; lvlCount++) {
                     var level:HierarchyLevel = hierarchy.hierarchyLevels.getItemAt(lvlCount) as HierarchyLevel;
+
                     var groupingField:GroupingField = new CustomGroupingField(level.analysisItem);
+                    groupingField.compareFunction = SortFunctionFactory.createSortFunction(level.analysisItem, false);
                     groupingField.name = level.analysisItem.qualifiedName();
                     groupingFields.push(groupingField);
-                    var summaryRow:SummaryRow = new SummaryRow();
-                    summaryRow.summaryPlacement = "group";
-                    var fields:Array = [];
-                    for each (var measure:AnalysisItem in treeDefinition.items) {
-                        if (measure.hasType(AnalysisItemTypes.MEASURE)) {
-                            var summaryField:SummaryField = new SummaryField();
-                            var castMeasure:AnalysisMeasure = measure as AnalysisMeasure;
-                            if (castMeasure.aggregation == AggregationTypes.SUM) {
-                                summaryField.operation = "SUM";
-                            } else if (castMeasure.aggregation == AggregationTypes.AVERAGE) {
-                                summaryField.operation = "AVG";
-                            } else if (castMeasure.aggregation == AggregationTypes.MAX) {
-                                summaryField.operation = "MAX";
-                            } else if (castMeasure.aggregation == AggregationTypes.MIN) {
-                                summaryField.operation = "MIN";
-                            } else if (castMeasure.aggregation == AggregationTypes.COUNT) {
-                                summaryField.operation = "COUNT";
-                            } else {
-                                summaryField.operation = "SUM";
+                    if (!treeDefinition.autoExpandAll) {
+                        var summaryRow:SummaryRow = new SummaryRow();
+                        summaryRow.summaryPlacement = "group";
+                        var fields:Array = [];
+                        for each (var measure:AnalysisItem in treeDefinition.items) {
+                            if (measure.hasType(AnalysisItemTypes.MEASURE)) {
+                                var summaryField:SummaryField = new SummaryField();
+                                var castMeasure:AnalysisMeasure = measure as AnalysisMeasure;
+                                if (castMeasure.aggregation == AggregationTypes.SUM) {
+                                    summaryField.operation = "SUM";
+                                } else if (castMeasure.aggregation == AggregationTypes.AVERAGE) {
+                                    summaryField.operation = "AVG";
+                                } else if (castMeasure.aggregation == AggregationTypes.MAX) {
+                                    summaryField.operation = "MAX";
+                                } else if (castMeasure.aggregation == AggregationTypes.MIN) {
+                                    summaryField.operation = "MIN";
+                                } else if (castMeasure.aggregation == AggregationTypes.COUNT) {
+                                    summaryField.operation = "COUNT";
+                                } else {
+                                    summaryField.operation = "SUM";
+                                }
+                                summaryField.dataField = measure.qualifiedName();
+                                fields.push(summaryField);
                             }
-                            summaryField.dataField = measure.qualifiedName();
-                            fields.push(summaryField);
                         }
+                        summaryRow.fields = fields;
+                        groupingField.summaries = [ summaryRow ];
                     }
-                    summaryRow.fields = fields;
-                    groupingField.summaries = [ summaryRow ];
                 }
                 grouping.fields = groupingFields;
                 groupingColl.grouping = grouping;
@@ -209,11 +232,18 @@
                 };
                 hierarchyColumn.dataField = bottomItem.qualifiedName();
                 var existingHierarchyIndex:int = findColumnIndex(hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName());
-                if (!fieldsChanged && existingHierarchyIndex != -1) {
-                    var existingHierarchyColumn:AdvancedDataGridColumn = coreGrid.columns[existingIndex];
+                if (hierarchy.reportFieldExtension != null && hierarchy.reportFieldExtension is TextReportFieldExtension &&
+                        TextReportFieldExtension(hierarchy.reportFieldExtension).fixedWidth > 0) {
+                    var ext1:TextReportFieldExtension = hierarchy.reportFieldExtension as TextReportFieldExtension;
+                    hierarchyColumn.width = ext1.fixedWidth;
+                } else if (!fieldsChanged && existingHierarchyIndex != -1) {
+                    var existingHierarchyColumn:AdvancedDataGridColumn = coreGrid.columns[0];
                     hierarchyColumn.width = existingHierarchyColumn.width;
                 } else if (explicitWidth) {
                     hierarchyColumn.width = hierarchy.width;
+                }
+                if (hierarchy.reportFieldExtension != null && hierarchy.reportFieldExtension is TextReportFieldExtension) {
+                    hierarchyColumn.sortable = TextReportFieldExtension(hierarchy.reportFieldExtension).sortable;
                 }
                 var hierarchyHeaderFactory:ClassFactory = new ClassFactory(ListViewHeaderRenderer);
                 hierarchyHeaderFactory.properties = { eiColor: treeDefinition.headerTextColor };
@@ -284,6 +314,9 @@
                             columnHeaderObject.width = ext.fixedWidth;
                             columnHeaderObject.resizable = false;
                         }
+                        if (!ext.sortable) {
+                            columnHeaderObject.sortable = false;
+                        }
                     }
                     if (myLookupTable == null) {
                         factory.properties = { analysisItem: myHeader, report: treeDef };
@@ -310,6 +343,10 @@
                 groupingColl.refresh();
                 coreGrid.dataProvider = groupingColl;
                 coreGrid.columns = columns;
+                if (treeDefinition.autoExpandAll) {
+                    coreGrid.validateNow();
+                    coreGrid.expandAll();
+                }
             } else {
                 if (treeDefinition.items.length > 0 && treeDefinition.hierarchy != null) stackIndex = 2;
                 else stackIndex = 1;
@@ -357,7 +394,7 @@
 
         private var pairMaps:ArrayCollection;
 
-        private function getCellRendererClass(item:AnalysisItem, lookupTable:LookupTable):Class {
+        private static function getCellRendererClass(item:AnalysisItem, lookupTable:LookupTable):Class {
             if (lookupTable != null) {
                 if (lookupTable.targetField.hasType(AnalysisItemTypes.DATE)) {
                     return LookupTableDateCellRenderer;
@@ -453,7 +490,7 @@
         <mx:VBox width="100%" height="100%">
             <mx:Box id="topBar" width="100%"/>
             <mx:AdvancedDataGrid id="coreGrid" width="100%" height="100%" visible="true" columnStretch="onStretch(event)"
-                    variableRowHeight="true"/>
+                                 variableRowHeight="true"/>
         </mx:VBox>
     </mx:Canvas>
 

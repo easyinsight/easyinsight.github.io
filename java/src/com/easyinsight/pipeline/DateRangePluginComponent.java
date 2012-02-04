@@ -11,6 +11,7 @@ import com.easyinsight.dataset.DataSet;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -73,7 +74,7 @@ public class DateRangePluginComponent implements IComponent {
     private boolean findItem(AnalysisItem field, List<AnalysisItem> allRequestedAnalysisItems, List<AnalysisItem> allFields) {
         int found = 0;
         for (AnalysisItem item : allRequestedAnalysisItems) {
-            List<AnalysisItem> items = item.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), false, false, CleanupComponent.AGGREGATE_CALCULATIONS);
+            List<AnalysisItem> items = item.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), false, false, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
             found += items.contains(field) ? 1 : 0;
         }
         return found > 0;

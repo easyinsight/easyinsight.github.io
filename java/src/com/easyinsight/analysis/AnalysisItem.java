@@ -85,6 +85,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="item_position")
     private int itemPosition;
 
+    @OneToOne (fetch = FetchType.LAZY)
+    @JoinColumn(name="sort_item_id")
+    private AnalysisItem sortItem;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "analysis_item_to_link",
             joinColumns = @JoinColumn(name = "analysis_item_id", nullable = false),
@@ -115,6 +119,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public AnalysisItem getSortItem() {
+        return sortItem;
+    }
+
+    public void setSortItem(AnalysisItem sortItem) {
+        this.sortItem = sortItem;
     }
 
     public String getMarmotScript() {
@@ -396,6 +408,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (reportFieldExtension != null) {
             reportFieldExtension.updateIDs(replacementMap);
         }
+        if (sortItem != null) {
+            sortItem = replacementMap.getField(sortItem);
+        }
     }
     
     private AnalysisItem findMatch(Key key, Collection<AnalysisItem> analysisItems) {
@@ -410,11 +425,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return null;
     }
     
-    protected List<AnalysisItem> measureFilters(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
+    protected List<AnalysisItem> measureFilters(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         if (includeFilters && getFilters().size() > 0) {
             for (FilterDefinition filterDefinition : getFilters()) {
-                items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
+                items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet));
             }
         }
         return items;
@@ -433,10 +448,13 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
-        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
-        items.add(this);
-        items.addAll(measureFilters(allItems, insightItems, getEverything, includeFilters, criteria));
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet) {
+
+        if (getSortItem() != null && analysisItemSet.contains(this)) {
+            return new ArrayList<AnalysisItem>(analysisItemSet);
+        }
+        analysisItemSet.add(this);
+        analysisItemSet.addAll(measureFilters(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet));
         
         if (getLookupTableID() != null && getLookupTableID() > 0 && includeFilters) {
             LookupTable lookupTable = new FeedService().getLookupTable(getLookupTableID());
@@ -472,15 +490,18 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                     displayMapItems.add(analysisItem);
                 }
                 AnalysisItem analysisItem = findMatch(lookupTable.getSourceField(), displayMap, keyMap);
-                if (analysisItem != null) {
-                    items.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
+                if (analysisItem != null && !analysisItemSet.contains(analysisItem)) {
+                    analysisItemSet.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet));
                 }
             }
         }
         if (reportFieldExtension != null) {
-            items.addAll(reportFieldExtension.getAnalysisItems(getEverything));
+            analysisItemSet.addAll(reportFieldExtension.getAnalysisItems(getEverything));
         }
-        return items;
+        if (sortItem != null) {
+            analysisItemSet.addAll(sortItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet));
+        }
+        return new ArrayList<AnalysisItem>(analysisItemSet);
     }
 
     public List<AnalysisItem> addLinkItems(List<AnalysisItem> allItems) {
@@ -565,6 +586,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             reportFieldExtension = (ReportFieldExtension) Database.deproxy(reportFieldExtension);
             reportFieldExtension.afterLoad();
         }
+        if (sortItem != null) {
+            sortItem = (AnalysisItem) Database.deproxy(sortItem);
+            sortItem.afterLoad();
+        }
     }
 
     public String toKeySQL() {
@@ -596,6 +621,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             for (Link link : getLinks()) {
                 link.beforeSave();
             }
+        }
+        if (sortItem != null) {
+            sortItem.reportSave(session);
+            session.saveOrUpdate(sortItem);
         }
     }
 

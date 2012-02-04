@@ -14,6 +14,7 @@
             ext.fixedWidth = parseInt(fixedWidthInput.text);
             ext.align = alignComboBox.selectedItem as String;
             ext.wordWrap = wordWrapCheckbox.selected;
+            ext.sortable = sortableCheckbox.selected;
             analysisItem.reportFieldExtension = ext;
         }
 
@@ -25,6 +26,7 @@
                 align = ext.align == null ? "Left" : ext.align;
                 wordWrap = ext.wordWrap;
                 fixedWidth = String(ext.fixedWidth);
+                sortable = ext.sortable;
             }
         }
 
@@ -42,6 +44,9 @@
 
         [Bindable]
         private var customFontSize:String;
+        
+        [Bindable]
+        private var sortable:Boolean = true;
         ]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="Align:">
@@ -63,6 +68,9 @@
         </mx:FormItem>
         <mx:FormItem label="Word Wrap:">
             <mx:CheckBox id="wordWrapCheckbox" selected="{wordWrap}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Sortable:">
+            <mx:CheckBox id="sortableCheckbox" selected="{sortable}"/>
         </mx:FormItem>
     </mx:Form>
 </mx:VBox>

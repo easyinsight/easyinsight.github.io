@@ -32,6 +32,7 @@ import mx.formatters.Formatter;
         public var tooltip:String;
         public var reportFieldExtension:ReportFieldExtension;
         public var marmotScript:String;
+        public var sortItem:AnalysisItem;
 		
 		public function AnalysisItem() {
 			super();

@@ -19,6 +19,12 @@ public class StandardReportPipeline extends Pipeline {
 
         List<IComponent> components = new ArrayList<IComponent>();
 
+        // lookup tables, calculations, filters can potentially be pushed down to a lower level of operation here, pre-composite join
+
+        // okay, but what about after composite join, how do we get accurate results...
+
+        //
+
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
@@ -38,7 +44,7 @@ public class StandardReportPipeline extends Pipeline {
         for (AnalysisItem item : allNeededAnalysisItems) {
             if (item.hasType(AnalysisItemTypes.CALCULATION) || item.hasType(AnalysisItemTypes.DERIVED_DIMENSION) ||
                     item.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-                items.addAll(item.getAnalysisItems(allItems, reportItems, false, false, CleanupComponent.AGGREGATE_CALCULATIONS));
+                items.addAll(item.getAnalysisItems(allItems, reportItems, false, false, CleanupComponent.AGGREGATE_CALCULATIONS, items));
             }
         }
 
@@ -119,6 +125,12 @@ public class StandardReportPipeline extends Pipeline {
 
         // need another cleanup component here...
         components.add(new CleanupComponent(0, false));
+        
+        for (AnalysisItem analysisItem : reportItems) {
+            if (analysisItem.getSortItem() != null) {
+                components.add(new SortDecorationComponent(analysisItem));
+            }
+        }
 
         components.add(new AggregationComponent(AggregationTypes.RANK));
 

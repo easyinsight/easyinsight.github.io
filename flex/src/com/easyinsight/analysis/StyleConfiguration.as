@@ -151,6 +151,7 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Alternating Row Color 2", "rowColor2", TreeDefinition(report).rowColor2, report));
             items.addItem(new ColorReportFormItem("Header Top Color", "headerColor1", TreeDefinition(report).headerColor1, report));
             items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", TreeDefinition(report).headerColor2, report));
+            items.addItem(new CheckBoxReportFormItem("Auto Expand All", "autoExpandAll", TreeDefinition(report).autoExpandAll, report));
         }
         if (report is ChartDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show Legend", "showLegend", ChartDefinition(report).showLegend, report));

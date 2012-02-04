@@ -46,7 +46,9 @@ public class CustomTreeRenderer extends AdvancedDataGridGroupItemRenderer {
     protected override function commitProperties():void {
         super.commitProperties();
         //Alert.show("depth = " + AdvancedDataGridListData(listData).depth);
+        trace("data field = " + AdvancedDataGridListData(listData).dataField);
         var levelItem:AnalysisItem = HierarchyLevel(AnalysisHierarchyItem(analysisItem).hierarchyLevels.getItemAt(AdvancedDataGridListData(listData).depth - 1)).analysisItem;
+        levelItem.reportFieldExtension = analysisItem.reportFieldExtension;
         CustomTreeTextRenderer(label).analysisItem = levelItem;
         CustomTreeTextRenderer(label).report = report;
 

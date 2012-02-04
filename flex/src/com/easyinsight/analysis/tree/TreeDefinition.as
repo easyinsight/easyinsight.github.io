@@ -18,6 +18,7 @@ public class TreeDefinition extends AnalysisDefinition{
     public var rowColor2:uint = 0xFFFFFF;
     public var headerColor1:uint = 0xFFFFFF;
     public var headerColor2:uint = 0xEFEFEF;
+    public var autoExpandAll:Boolean = false;
 
     public function TreeDefinition() {
         super();

@@ -171,8 +171,8 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     }
 
     @Override
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
-        List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria);
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet) {
+        List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet);
         if (getStartDateDimension() != null) {
             items.add(getStartDateDimension());
         }
@@ -202,6 +202,12 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         System.out.println("initial dates = " + endDate + " and " + startDate);
         System.out.println("utc offset = " + insightRequestMetadata.getUtcOffset());*/
 
+        if (endDate == null) {
+            endDate = new Date();
+        }
+        if (startDate == null) {
+            startDate = new Date();
+        }
         workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
         workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
         Calendar startCal = Calendar.getInstance();

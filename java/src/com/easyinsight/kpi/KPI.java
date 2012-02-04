@@ -6,10 +6,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.pipeline.CleanupComponent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -155,7 +152,7 @@ public class KPI implements Cloneable {
             if (this.getFilters() != null) {
                 for (FilterDefinition persistableFilterDefinition : this.getFilters()) {
                     filterDefinitions.add(persistableFilterDefinition.clone());
-                    List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+                    List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
                     for (AnalysisItem item : filterItems) {
                         if (replacementMap.get(item.getAnalysisItemID()) == null) {
                             AnalysisItem clonedFilterItem = item.clone();
@@ -326,5 +323,25 @@ public class KPI implements Cloneable {
 
     public void setCoreFeedUrlKey(String coreFeedUrlKey) {
         this.coreFeedUrlKey = coreFeedUrlKey;
+    }
+    
+    public AnalysisMeasure createMeasure() throws CloneNotSupportedException {
+        AnalysisMeasure analysisMeasure1 = (AnalysisMeasure) getAnalysisMeasure().clone();
+        if (analysisMeasure1.getFilters() == null) {
+            analysisMeasure1.setFilters(new ArrayList<FilterDefinition>());
+        }
+        TrendReportFieldExtension trendReportFieldExtension = new TrendReportFieldExtension();
+        for (FilterDefinition filter : getFilters()) {
+            if (filter instanceof RollingFilterDefinition) {
+                RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;
+                trendReportFieldExtension.setDate(rollingFilterDefinition.getField());
+            } else {
+                analysisMeasure1.getFilters().add(filter);
+            }
+        }
+        trendReportFieldExtension.setIconImage(iconImage);
+        trendReportFieldExtension.setHighLow(highIsGood);
+        analysisMeasure1.setReportFieldExtension(trendReportFieldExtension);
+        return analysisMeasure1;
     }
 }

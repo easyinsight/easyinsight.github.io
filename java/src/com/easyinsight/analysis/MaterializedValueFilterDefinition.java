@@ -32,7 +32,7 @@ public class MaterializedValueFilterDefinition extends MaterializedFilterDefinit
     }
 
     public boolean allows(Value value) {
-        boolean allows;
+        boolean allows = false;
         if (all) {
             return true;
         }
@@ -45,11 +45,15 @@ public class MaterializedValueFilterDefinition extends MaterializedFilterDefinit
 
             Value[] values = analysisList.transformToMultiple(value);
             for (Value splitValue : values) {
+                if (!allows && splitValue.type() == Value.EMPTY) {
+                    StringValue emptyValue = new StringValue("");
+                    allows = this.values.contains(emptyValue);
+                }
                 if (this.values.contains(splitValue)) {
-                    return true;
+                    allows = true;
                 }
             }
-            return false;
+            return allows;
         } else {
             allows = values.contains(value);
             if (!allows) {

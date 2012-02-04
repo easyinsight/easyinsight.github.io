@@ -21,6 +21,15 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
     private int headerColor2;
     private int textColor;
     private int headerTextColor;
+    private boolean autoExpandAll;
+
+    public boolean isAutoExpandAll() {
+        return autoExpandAll;
+    }
+
+    public void setAutoExpandAll(boolean autoExpandAll) {
+        this.autoExpandAll = autoExpandAll;
+    }
 
     public long getTreeDefinitionID() {
         return treeDefinitionID;
@@ -162,6 +171,7 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
         headerColor2 = (int) findNumberProperty(properties, "headerColor2", 0xEFEFEF);
         textColor = (int) findNumberProperty(properties, "textColor", 0x000000);
         headerTextColor = (int) findNumberProperty(properties, "headerTextColor", 0x000000);
+        autoExpandAll = findBooleanProperty(properties, "autoExpandAll", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -172,6 +182,7 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("headerColor2", headerColor2));
         properties.add(new ReportNumericProperty("textColor", textColor));
         properties.add(new ReportNumericProperty("headerTextColor", headerTextColor));
+        properties.add(new ReportBooleanProperty("autoExpandAll", autoExpandAll));
         return properties;
     }
 

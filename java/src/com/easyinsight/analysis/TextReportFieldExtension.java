@@ -23,6 +23,17 @@ public class TextReportFieldExtension extends ReportFieldExtension {
     @Column(name="word_wrap")
     private boolean wordWrap;
 
+    @Column(name="sortable")
+    private boolean sortable = true;
+
+    public boolean isSortable() {
+        return sortable;
+    }
+
+    public void setSortable(boolean sortable) {
+        this.sortable = sortable;
+    }
+
     public boolean isWordWrap() {
         return wordWrap;
     }

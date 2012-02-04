@@ -50,7 +50,7 @@
         <mx:State name="Grouping">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:GroupingDetailEditor addedToStage="detailEditor = groupingDetailEditor"
-                                               id="groupingDetailEditor"
+                                               id="groupingDetailEditor"  measureFields="{measureFields}"
                                                dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
                                                measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>

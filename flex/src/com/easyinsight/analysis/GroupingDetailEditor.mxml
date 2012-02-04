@@ -2,11 +2,19 @@
 <analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
                                    xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.controls.Alert;
+
         [Bindable]
         private var useKeyDimensionSelected:Boolean;
 
         [Bindable]
-        private var keyDimension:AnalysisDimension;
+        private var keyDimension:String;
+
+        [Bindable]
+        private var sortDimension:String;
 
         [Bindable]
         private var group:Boolean = true;
@@ -18,13 +26,41 @@
             return new AnalysisDimension();
         }
 
+        override protected function commitProperties():void {
+            super.commitProperties();
+            var fields:ArrayCollection = new ArrayCollection();
+            for each (var m:AnalysisItem in measureFields) {
+                fields.addItem(m);
+            }
+            for each (var g:AnalysisItem in dimensionFields) {
+                fields.addItem(g);
+            }
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("display", true) ];
+            fields.sort = sort;
+            fields.refresh();
+            var noComp:Object = { display: "[ No Comparison ]"};
+            fields.addItemAt(noComp, 0);
+            sortComboBox.dataProvider = fields;
+            if (dim != null) {
+                sortComboBox.selectedValue = dim.sortItem != null ? dim.sortItem.display : null;
+            }
+        }
+        
+        [Bindable]
+        private var fields:ArrayCollection;
+        
+        private var dim:AnalysisDimension;
+
         override public function set analysisItem(val:AnalysisItem):void {
             super.analysisItem = val;
             if (val is AnalysisDimension) {
+                this.dim = val as AnalysisDimension;
                 var analysisDimension:AnalysisDimension = val as AnalysisDimension;
                 useKeyDimensionSelected = analysisDimension.keyDimension != null;
-                keyDimension = analysisDimension.keyDimension;
+                keyDimension = analysisDimension.keyDimension != null ? analysisDimension.keyDimension.display : null;
                 group = analysisDimension.group;
+                invalidateProperties();
             }
         }
 
@@ -35,10 +71,18 @@
             if (useKeyDimension.selected) {
                 analysisDimension.keyDimension = dimensionKeyComboBox.selectedItem as AnalysisDimension;
             }
+            var sortItem:AnalysisItem = sortComboBox.selectedItem as AnalysisItem;
+            if (sortItem != null) {
+                analysisDimension.sortItem = sortItem;
+            }
         }
         ]]></mx:Script>
     <mx:FormItem label="Group: ">
         <mx:CheckBox id="groupCheckbox" selected="{group}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Sort By: ">
+        <util:SmartComboBox dataProvider="{fields}" id="sortComboBox" labelField="display"
+                            selectedValue="{sortDimension}" selectedProperty="display"/>
     </mx:FormItem>
     <mx:CheckBox label="Use Another Grouping as Key: " id="useKeyDimension"
                  selected="{useKeyDimensionSelected}"

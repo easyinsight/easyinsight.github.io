@@ -86,10 +86,20 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
         if (targetItem.getKey().getKeyID() == 0) {
             session.save(getField().getKey());
         }
+        if (getField().getAnalysisItemID() == 0) {
+            session.save(getField());
+        } else {
+            session.update(getField());
+        }
         for (AnalysisItem analysisItem : availableItems) {
             analysisItem.reportSave(session);
             if (analysisItem.getKey().getKeyID() == 0) {
                 session.save(getField().getKey());
+            }
+            if (analysisItem.getAnalysisItemID() == 0) {
+                session.save(getField());
+            } else {
+                session.update(getField());
             }
         }
     }
@@ -109,8 +119,8 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
     }
 
     @Override
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
-        List<AnalysisItem> analysisItems = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria);
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet) {
+        List<AnalysisItem> analysisItems = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet);
         if (getEverything) {
             analysisItems.addAll(availableItems);
             analysisItems.add(targetItem);

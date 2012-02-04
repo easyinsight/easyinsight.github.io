@@ -64,6 +64,7 @@ public class TreeControlBar extends ReportControlBar implements IReportControlBa
         groupingLabel.text = "Hierarchy:";
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
+        hierarchyGrouping.report = treeDefinition;
         addDropAreaGrouping(hierarchyGrouping);
         var areaMeasureLabel:Label = new Label();
         areaMeasureLabel.text = "Fields:";

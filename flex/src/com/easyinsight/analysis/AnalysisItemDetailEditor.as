@@ -34,6 +34,7 @@ public class AnalysisItemDetailEditor extends Form {
 
     public function set measureObjects(val:ArrayCollection):void {
         _measureObjects = val;
+        invalidateProperties();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 
@@ -44,6 +45,7 @@ public class AnalysisItemDetailEditor extends Form {
 
     public function set dimensionFields(val:ArrayCollection):void {
         _dimensionFields = val;
+        invalidateProperties();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 
@@ -54,6 +56,7 @@ public class AnalysisItemDetailEditor extends Form {
 
     public function set dateDimensionFields(val:ArrayCollection):void {
         _dateDimensionFields = val;
+        invalidateProperties();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 

@@ -418,7 +418,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
-                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, columnSet);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID()) {
                     if (!columnSet.contains(item)) {
@@ -436,7 +436,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         if (retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : retrieveFilterDefinitions()) {
-                columnSet.addAll(filterDefinition.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS));
+                columnSet.addAll(filterDefinition.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, columnSet));
             }
         }
         for (AnalysisItem analysisItem : getLimitFields()) {
