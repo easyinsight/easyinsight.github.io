@@ -6,6 +6,8 @@ import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.outboundnotifications.BroadcastInfo;
@@ -26,6 +28,7 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.User;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 /**
@@ -67,8 +70,32 @@ public class AdminService {
         }).start();
 
     }
+    
+    public void adminClearDataSource(long dataSourceID) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            try {
+                feedDefinition.delete(conn);
+            } catch (HibernateException e) {
+                LogClass.error(e);
+                PreparedStatement manualDeleteStmt = conn.prepareStatement("DELETE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                manualDeleteStmt.setLong(1, dataSourceID);
+                manualDeleteStmt.executeUpdate();
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
 
-    public void archiveOldDataSources() {
+    /*public void archiveOldDataSources() {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -131,7 +158,7 @@ public class AdminService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
-    }
+    }*/
 
     public Collection<ActionLog> getRecentActions() {
         EIConnection conn = Database.instance().getConnection();
