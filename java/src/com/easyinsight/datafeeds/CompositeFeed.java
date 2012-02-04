@@ -677,7 +677,7 @@ public class CompositeFeed extends Feed {
                     break;
                 }
             }
-            List<AnalysisItem> items = analysisItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(analysisItem), false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+            List<AnalysisItem> items = analysisItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(analysisItem), false, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
             for (AnalysisItem item : items) {
                 addItem(item);
                 joinItems.add(item);
