@@ -83,12 +83,12 @@
         <load-on-startup>3</load-on-startup>
     </servlet>
 
-    <servlet>
+    <!--<servlet>
         <servlet-name>ReportImage</servlet-name>
         <display-name>ReportImage</display-name>
         <servlet-class>com.easyinsight.export.ImageInlineServlet</servlet-class>
         <load-on-startup>3</load-on-startup>
-    </servlet>
+    </servlet>-->
 
     <servlet>
         <servlet-name>PDF</servlet-name>
@@ -321,10 +321,10 @@
         <url-pattern>/pdf</url-pattern>
     </servlet-mapping>
 
-    <servlet-mapping>
+    <!--<servlet-mapping>
         <servlet-name>ReportImage</servlet-name>
         <url-pattern>/ReportImage</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>-->
 
     <servlet-mapping>
         <servlet-name>OAuth</servlet-name>
