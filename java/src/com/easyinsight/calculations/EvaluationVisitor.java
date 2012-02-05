@@ -28,8 +28,9 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         this.analysisItem = analysisItem;
         if (analysisItem != null && analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
             AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
-            emptyAsZero = analysisCalculation.getFormattingConfiguration().getFormattingType() != FormattingConfiguration.MILLISECONDS &&
-                    analysisCalculation.getFormattingConfiguration().getFormattingType() != FormattingConfiguration.SECONDS;
+            /*emptyAsZero = analysisCalculation.getFormattingConfiguration().getFormattingType() != FormattingConfiguration.MILLISECONDS &&
+                    analysisCalculation.getFormattingConfiguration().getFormattingType() != FormattingConfiguration.SECONDS;*/
+            emptyAsZero = true;
         }
     }
 
