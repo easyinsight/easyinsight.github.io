@@ -143,6 +143,11 @@ public class NumericValue extends Value implements Serializable {
     }
 
     public Double toDouble() {
+        if (value != null) {
+            if (value.isInfinite() || value.isNaN()) {
+                value = 0.;
+            }
+        }
         return value;
     }
 
