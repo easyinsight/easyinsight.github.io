@@ -159,7 +159,7 @@ public class SalesEmail implements Runnable {
         if (string != null) {
             PreparedStatement queryUnsubscribeStmt = conn.prepareStatement("SELECT unsubscribe_key from user_unsubscribe_key WHERE USER_ID = ?");
             PreparedStatement insertKeyStmt = conn.prepareStatement("INSERT INTO USER_UNSUBSCRIBE_KEY (USER_ID, UNSUBSCRIBE_KEY) VALUES (?, ?)");
-            queryUnsubscribeStmt.setLong(1, SecurityUtil.getUserID());
+            queryUnsubscribeStmt.setLong(1, userID);
             ResultSet unsubscribeRS = queryUnsubscribeStmt.executeQuery();
             String unsubscribeKey;
             if (unsubscribeRS.next()) {
