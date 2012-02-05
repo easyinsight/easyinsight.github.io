@@ -52,6 +52,8 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
     public static final String ITERATION_NUMBER = "Iteration Number";
 
     public static final String STORY_NAME = "Story Name";
+    public static final String STORY_ID = "Story ID";
+    public static final String STORY_DESCRIPTION = "Story Description";
     public static final String STORY_REQUESTED_BY = "Story Requested By";
     public static final String STORY_OWNED_BY = "Story Owned By";
     public static final String STORY_STATE = "Story State";
@@ -155,7 +157,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
     }
 
     public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
-        Token tokenObj = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.PIVOTAL_TRACKER_TOKEN, getDataFeedID(), false, conn);
+        Token tokenObj;
         try {
             if (ptUserName != null && ptPassword != null) {
                 String tokenValue = getToken(ptUserName, ptPassword);
@@ -226,6 +228,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
             String ownedBy = queryField(storyNode, "owned_by/text()");
             String state = queryField(storyNode, "current_state/text()");
             String estimateString = queryField(storyNode, "estimate/text()");
+            String storyDescription = queryField(storyNode, "description/text()");
             int estimate = 0;
             if (estimateString != null) {
                 estimate = Integer.parseInt(estimateString);
@@ -255,6 +258,8 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
             row.addValue(keys.get(PROJECT_CURRENT_VELOCITY), currentVelocity);
             row.addValue(keys.get(PROJECT_LABELS), labels);
             row.addValue(keys.get(STORY_NAME), storyName);
+            row.addValue(keys.get(STORY_ID), storyID);
+            row.addValue(keys.get(STORY_DESCRIPTION), storyDescription);
             row.addValue(keys.get(STORY_REQUESTED_BY), requestedBy);
             row.addValue(keys.get(STORY_OWNED_BY), ownedBy);
             row.addValue(keys.get(STORY_STATE), state);
@@ -296,6 +301,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
                 String ownedBy = queryField(storyNode, "owned_by/text()");
                 String state = queryField(storyNode, "current_state/text()");
                 String estimateString = queryField(storyNode, "estimate/text()");
+                String storyDescription = queryField(storyNode, "description/text()");
                 int estimate = 0;
                 if (estimateString != null) {
                     estimate = Integer.parseInt(estimateString);
@@ -329,6 +335,8 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
                 row.addValue(keys.get(ITERATION_FINISH_DATE), iterationFinishDate);
                 row.addValue(keys.get(ITERATION_STATE), iterationState);
                 row.addValue(keys.get(STORY_NAME), storyName);
+                row.addValue(keys.get(STORY_ID), storyID);
+                row.addValue(keys.get(STORY_DESCRIPTION), storyDescription);
                 row.addValue(keys.get(STORY_REQUESTED_BY), requestedBy);
                 row.addValue(keys.get(STORY_OWNED_BY), ownedBy);
                 row.addValue(keys.get(STORY_STATE), state);
@@ -350,7 +358,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         return Arrays.asList(PROJECT_ID, PROJECT_NAME, PROJECT_INITIAL_VELOCITY, PROJECT_CURRENT_VELOCITY, PROJECT_LABELS,
                 ITERATION_ID, ITERATION_START_DATE, ITERATION_FINISH_DATE, ITERATION_NUMBER, ITERATION_STATE, STORY_NAME,
                 STORY_REQUESTED_BY, STORY_OWNED_BY, STORY_STATE, STORY_ESTIMATE, STORY_LABELS, STORY_CREATED_AT, STORY_TYPE,
-                STORY_UPDATED_AT, STORY_ACCEPTED_AT, STORY_URL, STORY_COUNT);
+                STORY_UPDATED_AT, STORY_ACCEPTED_AT, STORY_URL, STORY_COUNT, STORY_ID, STORY_DESCRIPTION);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -377,6 +385,18 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         analysisItems.add(new AnalysisDimension(keys.get(STORY_STATE), true));
         analysisItems.add(new AnalysisDimension(keys.get(STORY_TYPE), true));
         analysisItems.add(new AnalysisDimension(keys.get(STORY_URL), true));
+        analysisItems.add(new AnalysisDimension(keys.get(STORY_DESCRIPTION), true));
+        analysisItems.add(new AnalysisDimension(keys.get(STORY_ID), true));
         return analysisItems;
+    }
+
+    @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new PivotalTracker1To2(this));
     }
 }

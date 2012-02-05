@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.basecamp;
 
 import com.easyinsight.analysis.AnalysisDimension;
+import com.easyinsight.analysis.AnalysisText;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
@@ -21,9 +22,10 @@ public class BaseCampTodoComments1To2 extends DataSourceMigration {
 
     @Override
     public void migrate(Map<String, Key> keys, EIConnection conn) throws Exception {
-        /*AnalysisDimension projectDimension = new AnalysisDimension(new NamedKey(BaseCampTodoCommentsSource.PROJECT_ID), true);
+        AnalysisDimension projectDimension = new AnalysisDimension(new NamedKey(BaseCampTodoCommentsSource.PROJECT_ID), true);
         projectDimension.setHidden(true);
-        addAnalysisItem(projectDimension);*/
+        addAnalysisItem(projectDimension);
+        migrateAnalysisItem(BaseCampTodoCommentsSource.COMMENT_BODY, new AnalysisText(BaseCampTodoCommentsSource.COMMENT_BODY, true));
     }
 
     @Override
