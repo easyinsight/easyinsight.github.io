@@ -214,8 +214,8 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                                 }
                                 dataStorage.insertData(dataSet);
                             } catch (Exception e) {
-                                LogClass.error(e);
-                                //LogClass.info(e.getMessage());
+                                //LogClass.error(e);
+                                LogClass.info(e.getMessage());
                             }
 
                         }
