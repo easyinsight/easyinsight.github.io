@@ -23,7 +23,7 @@ public class DeliveryInfo implements IDeliverable {
     public var type:int;
     public var format:int;
     public var label:String;
-    public var sendIfNoData:Boolean;
+    public var sendIfNoData:Boolean = true;
 
     public function DeliveryInfo() {
     }

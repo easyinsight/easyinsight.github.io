@@ -89,6 +89,7 @@ public class SolutionService {
                     deliveryInfo.setId(insightDescriptor.getId());
                     deliveryInfo.setType(DeliveryInfo.REPORT);
                     deliveryInfo.setFilters(new ArrayList<FilterDefinition>());
+                    deliveryInfo.setSendIfNoData(true);
                     deliveryInfos.add(deliveryInfo);
                 }
                 generalDelivery.setDeliveryInfos(deliveryInfos);
