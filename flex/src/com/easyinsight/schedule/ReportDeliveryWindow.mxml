@@ -33,6 +33,7 @@
                 formatValue = String(_deliveryInfo.format);
                 customFilters = _deliveryInfo.filters;
                 deliveryLabel = _deliveryInfo.label;
+                sendIfNoData = _deliveryInfo.sendIfNoData;
                 analysisService.getInsightDescriptors.send();
             }
         }
@@ -99,6 +100,9 @@
 
         [Bindable]
         private var deliveryLabel:String;
+
+        [Bindable]
+        private var sendIfNoData:Boolean = true;
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptors" result="gotReports()"/>
@@ -107,7 +111,8 @@
         <mx:TabNavigator width="100%" height="100%" creationPolicy="all">
             <mx:VBox label="Report" paddingLeft="10" paddingTop="10" width="100%" height="100%">
                 <schedule:ReportDeliveryConfiguration id="deliveryConfiguration" reportChangeable="true"
-                                                      reportID="{reportID}" formatValue="{formatValue}" deliveryLabel="{deliveryLabel}"/>
+                                                      reportID="{reportID}" formatValue="{formatValue}" deliveryLabel="{deliveryLabel}"
+                        sendOnNoData="{sendIfNoData}"/>
             </mx:VBox>
                 <schedule:FilterDeliveryConfiguration label="Filters" paddingLeft="10" paddingRight="10" id="filterConfiguration"
                                                   customFilters="{customFilters}" reportID="{reportID}" dataSourceID="{dataSourceID}"

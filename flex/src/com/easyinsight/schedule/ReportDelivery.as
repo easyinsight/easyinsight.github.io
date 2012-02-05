@@ -21,6 +21,7 @@ public class ReportDelivery extends ScheduledDelivery implements IDeliverable {
     public var customFilters:ArrayCollection;
     public var dataSourceID:int;
     public var deliveryLabel:String;
+    public var sendIfNoData:Boolean = true;
 
     public function ReportDelivery() {
         super();
@@ -63,6 +64,10 @@ public class ReportDelivery extends ScheduledDelivery implements IDeliverable {
 
     public function setLabel(label:String):void {
         this.deliveryLabel = label;
+    }
+
+    public function setSendOnNoData(noData:Boolean):void {
+        this.sendIfNoData = noData;
     }
 }
 }

@@ -22,6 +22,15 @@ public class DeliveryInfo {
     private int type;
     private int index;
     private int format;
+    private boolean sendIfNoData;
+
+    public boolean isSendIfNoData() {
+        return sendIfNoData;
+    }
+
+    public void setSendIfNoData(boolean sendIfNoData) {
+        this.sendIfNoData = sendIfNoData;
+    }
 
     public String getLabel() {
         return label;

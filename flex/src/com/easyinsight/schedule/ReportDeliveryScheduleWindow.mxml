@@ -83,6 +83,7 @@
                 formatValue = String(_activity.reportFormat);
                 dataSourceID = _activity.dataSourceID;
                 customFilters = _activity.customFilters;
+                sendOnNoData = _activity.sendIfNoData;
             } else {
                 if (_fixedReportID != 0) {
                     dataSourceID = _fixedReportDataSourceID;
@@ -276,6 +277,9 @@
 
         [Bindable]
         private var deliveryLabel:String;
+
+        [Bindable]
+        private var sendOnNoData:Boolean = true;
         ]]></mx:Script>
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="addOrUpdateSchedule" result="saved()"/>
@@ -290,7 +294,8 @@
         <mx:TabNavigator creationPolicy="all" width="600" height="500" id="tabNavigator">
             <mx:VBox label="Report" paddingLeft="10" paddingTop="10">
                 <schedule:ReportDeliveryConfiguration id="deliveryConfiguration" reportChangeable="{reportChangeable}"
-                        reports="{reports}" reportID="{reportID}" formatValue="{formatValue}" deliveryLabel="{deliveryLabel}"/>
+                        reports="{reports}" reportID="{reportID}" formatValue="{formatValue}" deliveryLabel="{deliveryLabel}"
+                        sendOnNoData="{sendOnNoData}"/>
             </mx:VBox>
             <schedule:FilterDeliveryConfiguration label="Filters" paddingLeft="10" paddingRight="10" id="filterConfiguration"
                     customFilters="{customFilters}" reportID="{reportID}" dataSourceID="{dataSourceID}"/>

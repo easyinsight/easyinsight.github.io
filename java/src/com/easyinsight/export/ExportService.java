@@ -312,7 +312,7 @@ public class ExportService {
         try {
             analysisDefinition.updateMetadata();
             if (format == ReportDelivery.EXCEL) {
-                byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata);
+                byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata, true);
                     new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
                             "application/excel");
             } else if (format == ReportDelivery.HTML_TABLE) {
@@ -334,7 +334,7 @@ public class ExportService {
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
-                    html = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata);
+                    html = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, true);
                 } else {
                     ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
                     html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata);
@@ -792,7 +792,7 @@ public class ExportService {
         EIConnection conn = Database.instance().getConnection();
         try {
             analysisDefinition.updateMetadata();
-            return toExcel(analysisDefinition, insightRequestMetadata);
+            return toExcel(analysisDefinition, insightRequestMetadata, true);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -834,12 +834,12 @@ public class ExportService {
         FlexContext.getHttpRequest().getSession().setAttribute("anonID", anonID);
     }
 
-    public byte[] toExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) throws IOException, SQLException {
+    public byte[] toExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean onNoData) throws IOException, SQLException {
         EIConnection conn = Database.instance().getConnection();
         try {
             ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
 
-            HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, exportMetadata, conn, insightRequestMetadata);
+            HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, exportMetadata, conn, insightRequestMetadata, onNoData);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             workbook.write(baos);
             byte[] bytes = baos.toByteArray();
@@ -869,9 +869,9 @@ public class ExportService {
         }
     }
 
-    public byte[] toExcelEmail(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws IOException, SQLException {
+    public byte[] toExcelEmail(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean onNoData) throws IOException, SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
-        HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, exportMetadata, conn, insightRequestMetadata);
+        HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, exportMetadata, conn, insightRequestMetadata, onNoData);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         workbook.write(baos);
         byte[] bytes = baos.toByteArray();
@@ -1080,10 +1080,13 @@ public class ExportService {
         return new VListInfo(dColl, columns);
     }
 
-    public static String kpiReportToHtmlTable(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+    public static String kpiReportToHtmlTable(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean sendIfNoData) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSKPIDefinition kpiReport = (WSKPIDefinition) listDefinition;
         TrendDataResults trendDataResults = DataService.getTrendDataResults(kpiReport, insightRequestMetadata, conn);
+        if (trendDataResults.getTrendOutcomes().size() == 0 && !sendIfNoData) {
+            return null;
+        }
         List<TrendOutcome> outcomes = trendDataResults.getTrendOutcomes();
         StringBuilder sb = new StringBuilder();
         
@@ -1286,7 +1289,7 @@ public class ExportService {
     }
 
     private HSSFWorkbook createWorkbookFromList(WSAnalysisDefinition listDefinition, ExportMetadata exportMetadata,
-                                                EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+                                                EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean generateWithNoData) throws SQLException {
         HSSFWorkbook workbook = new HSSFWorkbook();
 
         Map<AnalysisItem, Style> styleMap = new HashMap<AnalysisItem, Style>();
@@ -1294,27 +1297,29 @@ public class ExportService {
         HSSFSheet sheet = workbook.createSheet();
         workbook.setSheetName(0, "Data");
 
+        boolean hasData;
         if (listDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
-            listVerticalList(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
-        } else if (listDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST_COMBINED) {
-            listCombinedList(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
+            hasData = listVerticalList(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
         } else if (listDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
-            listCrosstab(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
+            hasData = listCrosstab(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
         } else if (listDefinition.getReportType() == WSAnalysisDefinition.TREND ||
                 listDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
                 listDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
-            listTrends(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
+            hasData = listTrends(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
         } else if (listDefinition.getReportType() == WSAnalysisDefinition.YTD) {
-            listYTD(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
+            hasData = listYTD(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
         } else if (listDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
-            listCompareYears(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
+            hasData = listCompareYears(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
         } else {
-            listExcel(listDefinition, workbook, sheet, insightRequestMetadata, conn, exportMetadata);
+            hasData = listExcel(listDefinition, workbook, sheet, insightRequestMetadata, conn, exportMetadata);
+        }
+        if (!hasData && !generateWithNoData) {
+            return null;
         }
         return workbook;
     }
 
-    private void listTrends(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+    private boolean listTrends(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
                                   InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSKPIDefinition crosstabDefinition = (WSKPIDefinition) report;
         TrendDataResults trendDataResults = DataService.getTrendDataResults(crosstabDefinition, insightRequestMetadata, conn);
@@ -1367,9 +1372,10 @@ public class ExportService {
                 style.format(dataRow, i, percentValue, percentMeasure, exportMetadata.cal);
             }
         }
+        return trendDataResults.getTrendOutcomes().size() > 0;
     }
 
-    private void listCrosstab(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+    private boolean listCrosstab(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
                                   InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) report;
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
@@ -1421,6 +1427,7 @@ public class ExportService {
                 }
             }
         }
+        return dataSet.getRows().size() > 0;
     }
 
     private void listCombinedList(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
@@ -1458,7 +1465,7 @@ public class ExportService {
         }
     }
 
-    private void listCompareYears(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+    private boolean listCompareYears(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
                          InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSCompareYearsDefinition verticalList = (WSCompareYearsDefinition) report;
         ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
@@ -1496,9 +1503,10 @@ public class ExportService {
                 i++;
             }
         }
+        return dataSet.getDataSet().getRows().size() > 0;
     }
 
-    private void listYTD(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+    private boolean listYTD(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
                                   InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSYTDDefinition verticalList = (WSYTDDefinition) report;
         ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
@@ -1569,9 +1577,10 @@ public class ExportService {
                 }
             }
         }
+        return dataSet.getDataSet().getRows().size() > 0;
     }
 
-    private void listVerticalList(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+    private boolean listVerticalList(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
                                   InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         WSVerticalListDefinition verticalList = (WSVerticalListDefinition) report;
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
@@ -1596,9 +1605,10 @@ public class ExportService {
                 style.format(row, i+ 1, value, baseMeasure, exportMetadata.cal);
             }
         }
+        return dataSet.getRows().size() > 0;
     }
 
-    private void listExcel(WSAnalysisDefinition listDefinition, HSSFWorkbook workbook, HSSFSheet sheet,
+    private boolean listExcel(WSAnalysisDefinition listDefinition, HSSFWorkbook workbook, HSSFSheet sheet,
                            InsightRequestMetadata insightRequestMetadata, EIConnection conn, ExportMetadata exportMetadata) {
         ListDataResults listDataResults = (ListDataResults) DataService.list(listDefinition, insightRequestMetadata, conn);
         if (listDefinition.getReportType() == WSAnalysisDefinition.LIST) {
@@ -1683,6 +1693,7 @@ public class ExportService {
                 }
             }
         }
+        return listDataResults.getRows().length > 0;
     }
 
     private static class NumericStyle extends Style {
@@ -1746,6 +1757,9 @@ public class ExportService {
                         result = days + "d:" + hours + "h";
                     }
                     cell.setCellValue(result);
+                } else if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.PERCENTAGE) {
+                    doubleValue = doubleValue / 100;
+                    cell.setCellValue(doubleValue);
                 } else {
                     cell.setCellValue(doubleValue);
                 }

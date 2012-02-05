@@ -33,8 +33,17 @@ public class ReportDelivery extends ScheduledDelivery {
     private long senderID;
     private long dataSourceID;
     private String deliveryLabel;
+    private boolean sendIfNoData;
 
     private List<FilterDefinition> customFilters;
+
+    public boolean isSendIfNoData() {
+        return sendIfNoData;
+    }
+
+    public void setSendIfNoData(boolean sendIfNoData) {
+        this.sendIfNoData = sendIfNoData;
+    }
 
     public String getDeliveryLabel() {
         return deliveryLabel;
@@ -137,7 +146,7 @@ public class ReportDelivery extends ScheduledDelivery {
         clearStmt.executeUpdate();
         clearStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY (REPORT_ID, delivery_format, subject, body, " +
-                "SCHEDULED_ACCOUNT_ACTIVITY_ID, html_email, timezone_offset, sender_user_id, delivery_label) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                "SCHEDULED_ACCOUNT_ACTIVITY_ID, html_email, timezone_offset, sender_user_id, delivery_label, send_if_no_data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, reportID);
         insertStmt.setInt(2, reportFormat);
         insertStmt.setString(3, subject);
@@ -151,6 +160,7 @@ public class ReportDelivery extends ScheduledDelivery {
             insertStmt.setNull(8, Types.BIGINT);
         }
         insertStmt.setString(9, deliveryLabel);
+        insertStmt.setBoolean(10, sendIfNoData);
         insertStmt.execute();
         long deliveryID = Database.instance().getAutoGenKey(insertStmt);
         insertStmt.close();
@@ -174,7 +184,7 @@ public class ReportDelivery extends ScheduledDelivery {
     protected void customLoad(EIConnection conn) throws SQLException {
         super.customLoad(conn);
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, ANALYSIS.TITLE, " +
-                "timezone_offset, SENDER_USER_ID, REPORT_DELIVERY_ID, ANALYSIS.DATA_FEED_ID, DELIVERY_LABEL FROM " +
+                "timezone_offset, SENDER_USER_ID, REPORT_DELIVERY_ID, ANALYSIS.DATA_FEED_ID, DELIVERY_LABEL, SEND_IF_NO_DATA FROM " +
                 "REPORT_DELIVERY, ANALYSIS WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ? AND REPORT_DELIVERY.REPORT_ID = ANALYSIS.ANALYSIS_ID");
         queryStmt.setLong(1, getScheduledActivityID());
@@ -195,6 +205,7 @@ public class ReportDelivery extends ScheduledDelivery {
             long reportDeliveryID = rs.getLong(9);
             dataSourceID = rs.getLong(10);
             deliveryLabel = rs.getString(11);
+            sendIfNoData = rs.getBoolean(12);
             Session session = Database.instance().createSession(conn);
             try {
                 PreparedStatement filterStmt = conn.prepareStatement("SELECT FILTER_ID FROM DELIVERY_TO_FILTER_DEFINITION WHERE REPORT_DELIVERY_ID = ?");

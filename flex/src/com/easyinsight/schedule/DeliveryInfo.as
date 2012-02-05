@@ -23,6 +23,7 @@ public class DeliveryInfo implements IDeliverable {
     public var type:int;
     public var format:int;
     public var label:String;
+    public var sendIfNoData:Boolean;
 
     public function DeliveryInfo() {
     }
@@ -48,6 +49,10 @@ public class DeliveryInfo implements IDeliverable {
             return label;
         }
         return name;
+    }
+
+    public function setSendOnNoData(noData:Boolean):void {
+        this.sendIfNoData = noData;
     }
 }
 }

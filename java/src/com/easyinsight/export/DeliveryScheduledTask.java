@@ -64,6 +64,22 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
         typeStmt.close();
     }
+    
+    private static class DeliveryResult {
+        private String body;
+        private AttachmentInfo attachmentInfo;
+
+        private DeliveryResult() {
+        }
+
+        private DeliveryResult(String body) {
+            this.body = body;
+        }
+
+        private DeliveryResult(AttachmentInfo attachmentInfo) {
+            this.attachmentInfo = attachmentInfo;
+        }
+    }
 
     private void generalDelivery(EIConnection conn) throws Exception {
         PreparedStatement getInfoStmt = conn.prepareStatement("SELECT SUBJECT, BODY, HTML_EMAIL, TIMEZONE_OFFSET, GENERAL_DELIVERY_ID, USER_ID FROM GENERAL_DELIVERY, " +
@@ -107,6 +123,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 deliveryInfo.setType(DeliveryInfo.SCORECARD);
                 infos.add(deliveryInfo);
             }
+
+            if (infos.isEmpty()) {
+                return;
+            }
+
             Collections.sort(infos, new Comparator<DeliveryInfo>() {
 
                 public int compare(DeliveryInfo deliveryInfo, DeliveryInfo deliveryInfo1) {
@@ -147,7 +168,14 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
                 List<AttachmentInfo> attachmentInfos = new ArrayList<AttachmentInfo>();
                 for (DeliveryInfo deliveryInfo : infos) {
-                    body = handleDeliveryInfo(deliveryInfo, body, attachmentInfos, conn, timezoneOffset);
+                    DeliveryResult deliveryResult = handleDeliveryInfo(deliveryInfo, conn, timezoneOffset);
+                    if (deliveryResult != null) {
+                        if (deliveryResult.body != null) {
+                            body += deliveryResult.body;
+                        } else if (deliveryResult.attachmentInfo != null) {
+                            attachmentInfos.add(deliveryResult.attachmentInfo);
+                        }
+                    }
                 }
 
                 PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, delivery_to_user WHERE delivery_to_user.scheduled_account_activity_id = ? and " +
@@ -201,7 +229,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
     }
 
-    private String handleDeliveryInfo(DeliveryInfo deliveryInfo, String body, List<AttachmentInfo> attachmentInfos, EIConnection conn, int timezoneOffset) throws Exception {
+    private DeliveryResult handleDeliveryInfo(DeliveryInfo deliveryInfo, EIConnection conn, int timezoneOffset) throws Exception {
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setUtcOffset(timezoneOffset);
         if (deliveryInfo.getFormat() == ReportDelivery.EXCEL) {
@@ -211,8 +239,10 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 analysisDefinition.setName(deliveryInfo.getLabel());
             }
             updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
-            byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata);
-            attachmentInfos.add(new AttachmentInfo(bytes, deliveryInfo.getName() + ".xls", "application/xls"));
+            byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata, true);
+            if (bytes != null) {
+                return new DeliveryResult(new AttachmentInfo(bytes, deliveryInfo.getName() + ".xls", "application/xls"));
+            }
         } else if (deliveryInfo.getFormat() == ReportDelivery.HTML_TABLE) {
             if (deliveryInfo.getType() == DeliveryInfo.REPORT) {
                 WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
@@ -221,13 +251,15 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     analysisDefinition.setName(deliveryInfo.getLabel());
                 }
                 updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
-                String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata);
-                body += table;
+                String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, true);
+                if (table != null) {
+                    return new DeliveryResult(table);
+                }
             } else if (deliveryInfo.getType() == DeliveryInfo.SCORECARD) {
-                body += ExportService.exportScorecard(deliveryInfo.getId(), insightRequestMetadata, conn);
+                return new DeliveryResult(ExportService.exportScorecard(deliveryInfo.getId(), insightRequestMetadata, conn));
             }
         }
-        return body;
+        return null;
     }
 
     private void scorecardDelivery(EIConnection conn) throws Exception {
@@ -338,7 +370,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
     private void reportDelivery(EIConnection conn) throws SQLException, IOException, MessagingException, DocumentException {
 
-        PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, REPORT_DELIVERY_ID, TIMEZONE_OFFSET, SENDER_USER_ID, REPORT_DELIVERY_ID FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+        PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, REPORT_DELIVERY_ID, TIMEZONE_OFFSET, SENDER_USER_ID, " +
+                "REPORT_DELIVERY_ID, send_if_no_data FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         getInfoStmt.setLong(1, activityID);
         ResultSet deliveryInfoRS = getInfoStmt.executeQuery();
         if (deliveryInfoRS.next()) {
@@ -351,6 +384,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
             final long senderID = deliveryInfoRS.getLong(8);
 
             List<FilterDefinition> customFilters = getCustomFilters(deliveryInfoRS.getLong(9), conn);
+
+            boolean sendIfNoData = deliveryInfoRS.getBoolean(10);
 
             PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT USER_ID FROM user_to_analysis where analysis_id = ?");
 
@@ -397,17 +432,21 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         updateReportWithCustomFilters(analysisDefinition, customFilters);
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                         insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata);
-                        String reportName = analysisDefinition.getName();
-                        sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
+                        byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata, sendIfNoData);
+                        if (bytes != null) {
+                            String reportName = analysisDefinition.getName();
+                            sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
+                        }
                     } else if (deliveryFormat == ReportDelivery.HTML_TABLE) {
                         WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
                         analysisDefinition.updateMetadata();
                         updateReportWithCustomFilters(analysisDefinition, customFilters);
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                         insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata);
-                        sendNoAttachEmails(conn, table, activityID, subject, body, htmlEmail, ScheduledActivity.REPORT_DELIVERY);
+                        String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData);
+                        if (table != null) {
+                            sendNoAttachEmails(conn, table, activityID, subject, body, htmlEmail, ScheduledActivity.REPORT_DELIVERY);
+                        }
                     } else if (deliveryFormat == ReportDelivery.PNG) {
                         new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn);
                     } else if (deliveryFormat == ReportDelivery.PDF) {
@@ -466,10 +505,13 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
     }
 
-    private String createHTMLTable(EIConnection conn, WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+    private String createHTMLTable(EIConnection conn, WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean sendIfNoData) throws SQLException {
         String table;
         if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
             DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
+            if (dataSet.getRows().size() == 0 && !sendIfNoData) {
+                return null;
+            }
             table = ExportService.verticalListToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST_COMBINED) {
             List<DataSet> dataSets = DataService.getEmbeddedVerticalDataSets((WSCombinedVerticalListDefinition) analysisDefinition,
@@ -481,13 +523,19 @@ public class DeliveryScheduledTask extends ScheduledTask {
             table = ExportService.compareYearsToHTMLTable(analysisDefinition, conn, insightRequestMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
             DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
+            if (dataSet.getRows().size() == 0 && !sendIfNoData) {
+                return null;
+            }
             table = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
-            table = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata);
+            table = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, sendIfNoData);
         } else {
             ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
+            if (listDataResults.getRows().length == 0 && !sendIfNoData) {
+                return null;
+            }
             table = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata);
         }
         return table;

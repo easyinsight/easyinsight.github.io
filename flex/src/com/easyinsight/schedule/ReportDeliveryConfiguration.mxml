@@ -89,6 +89,7 @@
                 activity.setName(reportComboBox.selectedItem.name);
             }
             activity.setLabel(deliveryLabelInput.text);
+            activity.setSendOnNoData(sendOnNoDataCheckbox.selected)
         }
 
         private var _deliveryLabel:String;
@@ -103,6 +104,20 @@
             _deliveryLabel = value;
             dispatchEvent(new Event("deliveryLabelChanged"));
         }
+
+
+        private var _sendOnNoData:Boolean = true;
+
+        [Bindable(event="sendOnNoDataChanged")]
+        public function get sendOnNoData():Boolean {
+            return _sendOnNoData;
+        }
+
+        public function set sendOnNoData(value:Boolean):void {
+            if (_sendOnNoData == value) return;
+            _sendOnNoData = value;
+            dispatchEvent(new Event("sendOnNoDataChanged"));
+        }
         ]]></mx:Script>
     <mx:FormItem label="Report:" id="reportComboBoxItem">
         <util:SmartComboBox dataProvider="{reports}" selectedValue="{reportID}" selectedProperty="id"
@@ -110,6 +125,9 @@
     </mx:FormItem>
     <mx:FormItem label="Custom Delivery Label:">
         <mx:TextInput id="deliveryLabelInput" text="{deliveryLabel}" width="300"/>
+    </mx:FormItem>
+    <mx:FormItem label="Send on No Data:">
+        <mx:CheckBox id="sendOnNoDataCheckbox" selected="{sendOnNoData}"/>
     </mx:FormItem>
     <mx:FormItem label="Output Format:">
         <util:SmartComboBox id="outputFormatBox" selectedValue="{formatValue}" selectedProperty="data"

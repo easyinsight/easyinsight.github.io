@@ -13,5 +13,6 @@ public interface IDeliverable {
     function setFilters(filters:ArrayCollection):void;
     function setName(name:String):void;
     function setLabel(label:String):void;
+    function setSendOnNoData(noData:Boolean):void;
 }
 }
