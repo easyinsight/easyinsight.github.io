@@ -139,6 +139,7 @@
                     coreGrid.groupIconFunction = groupIconFunction;
                     coreGrid.iconFunction = iconFunction;
                     coreGrid.displayDisclosureIcon = false;
+                    coreGrid.displayItemsExpanded = true;
                     coreGrid.setStyle("depthColors", [0xBBBBBB, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF]);
                 }
                 this.treeDef = treeDefinition;
@@ -343,10 +344,10 @@
                 groupingColl.refresh();
                 coreGrid.dataProvider = groupingColl;
                 coreGrid.columns = columns;
-                if (treeDefinition.autoExpandAll) {
+                /*if (treeDefinition.autoExpandAll) {
                     coreGrid.validateNow();
                     coreGrid.expandAll();
-                }
+                }*/
             } else {
                 if (treeDefinition.items.length > 0 && treeDefinition.hierarchy != null) stackIndex = 2;
                 else stackIndex = 1;
