@@ -28,15 +28,16 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
-            var fields:ArrayCollection = new ArrayCollection();
+            var fieldArray:Array = [];
             for each (var m:AnalysisItem in measureFields) {
-                fields.addItem(m);
+                fieldArray.push(m);
             }
             for each (var g:AnalysisItem in dimensionFields) {
-                fields.addItem(g);
+                fieldArray.push(g);
             }
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("display", true) ];
+            var fields:ArrayCollection = new ArrayCollection(fieldArray);
             fields.sort = sort;
             fields.refresh();
             var noComp:Object = { display: "[ No Comparison ]"};
