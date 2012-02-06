@@ -84,7 +84,9 @@ public class SalesEmail implements Runnable {
         userStmt.setLong(1, userID);
         userStmt.setBoolean(2, true);
         ResultSet rs = userStmt.executeQuery();
-        rs.next();
+        if (!rs.next()) {
+            return;
+        }
 
         String email = rs.getString(1);
         String firstName = rs.getString(2);
