@@ -1,6 +1,7 @@
 package com.easyinsight.filtering
 {
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.formatter.FormattingConfiguration;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
@@ -89,14 +90,32 @@ public class SliderMeasureFilter extends HBox implements IFilter
     private function onFilterEdit(event:FilterEditEvent):void {
         var measureFilter:FilterRangeDefinition = event.filterDefinition as FilterRangeDefinition;
         if (measureFilter.startValueDefined) {
-            lowValueString = String(measureFilter.startValue);
-        } else {
-            lowValueString = "";
+            var lowString:String;
+            if (measureFilter.field.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
+                var hours:int = _filterDefinition.startValue / 60 / 60 / 1000;
+                if (hours >= 24) {
+                    lowString = String(hours / 24) + " days";
+                } else {
+                    lowString = String(hours) + " hours";
+                }
+            } else {
+                lowString =  _filterDefinition.field.getFormatter().format(_filterDefinition.startValue);
+            }
+            lowValueString = lowString;
         }
         if (measureFilter.endValueDefined) {
-            highValueString = String(measureFilter.endValue);
-        } else {
-            highValueString = "";
+            var highString:String;
+            if (measureFilter.field.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
+                var highHours:int = _filterDefinition.endValue / 60 / 60 / 1000;
+                if (highHours >= 24) {
+                    highString = String(highHours / 24) + " days";
+                } else {
+                    highString = String(highHours) + " hours";
+                }
+            } else {
+                highString =  _filterDefinition.field.getFormatter().format(_filterDefinition.endValue);
+            }
+            highValueString = highString;
         }
         if (measureFilter.startValueDefined || measureFilter.endValueDefined) {
             currentState = "Configured";
@@ -217,10 +236,32 @@ public class SliderMeasureFilter extends HBox implements IFilter
 
         } else {
             if (_filterDefinition.startValueDefined) {
-                lowValueString = _filterDefinition.field.getFormatter().format(_filterDefinition.startValue);
+                var lowString:String;
+                if (_filterDefinition.field.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
+                    var hours:int = _filterDefinition.startValue / 60 / 60 / 1000;
+                    if (hours >= 24) {
+                        lowString = String(hours / 24) + " days";
+                    } else {
+                        lowString = String(hours) + " hours";
+                    }
+                } else {
+                    lowString =  _filterDefinition.field.getFormatter().format(_filterDefinition.startValue);
+                }
+                lowValueString = lowString;
             }
             if (_filterDefinition.endValueDefined) {
-                highValueString = _filterDefinition.field.getFormatter().format(_filterDefinition.endValue);
+                var highString:String;
+                if (_filterDefinition.field.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
+                    var highHours:int = _filterDefinition.endValue / 60 / 60 / 1000;
+                    if (highHours >= 24) {
+                        highString = String(highHours / 24) + " days";
+                    } else {
+                        highString = String(highHours) + " hours";
+                    }
+                } else {
+                    highString =  _filterDefinition.field.getFormatter().format(_filterDefinition.endValue);
+                }
+                highValueString = highString;
             }
             if (_filterEditable) {
                 currentState = "Configured";
