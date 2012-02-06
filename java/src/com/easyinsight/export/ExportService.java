@@ -684,22 +684,26 @@ public class ExportService {
                 currencyFormatter.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
                 valueString = currencyFormatter.format(doubleValue);
             } else if (formattingConfiguration.getFormattingType() == FormattingConfiguration.MILLISECONDS) {
-                if (doubleValue < 60000) {
-                    int seconds = (int) (doubleValue / 1000);
-                    int milliseconds = (int) (doubleValue % 1000);
+                double absoluteValue = Math.abs(doubleValue);
+                if (absoluteValue < 60000) {
+                    int seconds = (int) (absoluteValue / 1000);
+                    int milliseconds = (int) (absoluteValue % 1000);
                     valueString = seconds + "s:" + milliseconds + "ms";
-                } else if (doubleValue < (60000 * 60)) {
-                    int minutes = (int) (doubleValue / 60000);
-                    int seconds = (int) (doubleValue / 1000) % 60;
+                } else if (absoluteValue < (60000 * 60)) {
+                    int minutes = (int) (absoluteValue / 60000);
+                    int seconds = (int) (absoluteValue / 1000) % 60;
                     valueString = minutes + "m: " +seconds + "s";
-                } else if (doubleValue < (60000 * 60 * 24)) {
-                    int hours = (int) (doubleValue / (60000 * 60));
-                    int minutes = (int) (doubleValue % 24);
+                } else if (absoluteValue < (60000 * 60 * 24)) {
+                    int hours = (int) (absoluteValue / (60000 * 60));
+                    int minutes = (int) (absoluteValue % 24);
                     valueString = hours + "h:" + minutes + "m";
                 } else {
-                    int days = (int) (doubleValue / (60000 * 60 * 24));
-                    int hours = (int) (doubleValue / (60000 * 60) % 24);
+                    int days = (int) (absoluteValue / (60000 * 60 * 24));
+                    int hours = (int) (absoluteValue / (60000 * 60) % 24);
                     valueString = days + "d:" + hours + "h";
+                }
+                if (doubleValue < 0) {
+                    valueString = "(" + valueString + ")";
                 }
             } else if (formattingConfiguration.getFormattingType() == FormattingConfiguration.SECONDS) {
                 doubleValue = doubleValue * 1000;
@@ -1640,7 +1644,7 @@ public class ExportService {
             int headerPosition = positionMap.get(analysisItem);
             int width;
             if (textReportFieldExtension != null && textReportFieldExtension.getFixedWidth() > 0) {
-                width = textReportFieldExtension.getFixedWidth() / 15 * 256;
+                width = Math.max(textReportFieldExtension.getFixedWidth() / 15 * 256, 5000);
             } else if (analysisItem.getWidth() > 0) {
                 width = Math.max((analysisItem.getWidth() / 15 * 256), 5000);
             } else {
@@ -1738,23 +1742,26 @@ public class ExportService {
                 }
                 if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.MILLISECONDS) {
                     String result;
-
-                    if (doubleValue < 60000) {
-                        int seconds = (int) (doubleValue / 1000);
-                        int milliseconds = (int) (doubleValue % 1000);
+                    double unsigned = Math.abs(doubleValue);
+                    if (unsigned < 60000L) {
+                        int seconds = (int) (unsigned / 1000);
+                        int milliseconds = (int) (unsigned % 1000);
                         result = seconds + "s:" + milliseconds + "ms";
-                    } else if (doubleValue < (60000 * 60)) {
-                        int minutes = (int) (doubleValue / 60000);
-                        int seconds = (int) (doubleValue / 1000) % 60;
+                    } else if (unsigned < (60000 * 60)) {
+                        int minutes = (int) (unsigned / 60000);
+                        int seconds = (int) (unsigned / 1000) % 60;
                         result = minutes + "m: " +seconds + "s";
-                    } else if (doubleValue < (60000 * 60 * 24)) {
-                        int hours = (int) (doubleValue / (60000 * 60));
-                        int minutes = (int) (doubleValue % 24);
+                    } else if (unsigned < (60000 * 60 * 24)) {
+                        int hours = (int) (unsigned / (60000 * 60));
+                        int minutes = (int) (unsigned % 24);
                         result = hours + "h:" + minutes + "m";
                     } else {
-                        int days = (int) (doubleValue / (60000 * 60 * 24));
-                        int hours = (int) (doubleValue / (60000 * 60) % 24);
+                        int days = (int) (unsigned / (60000 * 60 * 24));
+                        int hours = (int) (unsigned / (60000 * 60) % 24);
                         result = days + "d:" + hours + "h";
+                    }
+                    if (doubleValue < 0) {
+                        result = "(" + result + ")";
                     }
                     cell.setCellValue(result);
                 } else if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.PERCENTAGE) {

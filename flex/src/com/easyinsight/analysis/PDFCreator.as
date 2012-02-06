@@ -26,7 +26,7 @@ public class PDFCreator {
 
     private function gotExcelID(event:ResultEvent):void {
         var url:URLRequest = new URLRequest("/app/pdf");
-        navigateToURL(url, "_blank");
+        navigateToURL(url, "_self");
     }
 
     public function exportReportToPDF(report:AnalysisDefinition, parent:UIComponent, coreView:DisplayObject):void {

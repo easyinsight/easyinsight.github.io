@@ -22,7 +22,7 @@ public class ExcelCreator {
 
     private function gotExcelID(event:ResultEvent):void {
         var url:URLRequest = new URLRequest("/app/excel");
-        navigateToURL(url, "_blank");
+        navigateToURL(url, "_self");
     }
 
     public function exportExcel(definition:AnalysisDefinition, parent:UIComponent):void {
