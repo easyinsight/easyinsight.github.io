@@ -466,7 +466,7 @@ public class FeedService {
     }
 
     public String updateFeedDefinition(FeedDefinition feedDefinition) {
-        SecurityUtil.authorizeFeed(feedDefinition.getDataFeedID(), Roles.OWNER);
+        SecurityUtil.authorizeFeed(feedDefinition.getDataFeedID(), Roles.SHARER);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
