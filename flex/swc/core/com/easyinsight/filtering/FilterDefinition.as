@@ -85,5 +85,9 @@ import flash.events.EventDispatcher;
             return filterName + ":" + String(getType());
         }
     }
+
+    public function get displayName():String {
+        return getLabel(this, field);
+    }
 }
 }
