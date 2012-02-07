@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _filterDefinitions:ArrayCollection;
+
+        [Bindable(event="filterDefinitionsChanged")]
+        public function get filterDefinitions():ArrayCollection {
+            return _filterDefinitions;
+        }
+
+        public function set filterDefinitions(value:ArrayCollection):void {
+            if (_filterDefinitions == value) return;
+            _filterDefinitions = value;
+            dispatchEvent(new Event("filterDefinitionsChanged"));
+        }
+
+        private function save():void {
+            dispatchEvent(new FilterReorderEvent(filterDefinitions));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:DataGrid dataProvider="{filterDefinitions}" dragEnabled="true" dropEnabled="true" dragMoveEnabled="true" headerHeight="0">
+        <mx:columns>
+            <mx:DataGridColumn headerText="Filter Name" dataField="displayName" sortable="false"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox horizontalAlign="center" width="100%">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

@@ -9,6 +9,9 @@ import com.easyinsight.analysis.AnalysisItemWrapper;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.display.DisplayObject;
+import flash.events.ContextMenuEvent;
+import flash.ui.ContextMenu;
+import flash.ui.ContextMenuItem;
 
 import flash.utils.Dictionary;
 
@@ -176,6 +179,17 @@ public class TransformContainer extends HBox
             }
             loadingFromReport = false;
         }
+        if (!_reportView) {
+            var contextMenu:ContextMenu = new ContextMenu();
+            var manageFiltersItem:ContextMenuItem = new ContextMenuItem("Manage Filters");
+            manageFiltersItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, manageFilters);
+            contextMenu.customItems = [ manageFiltersItem ];
+            this.contextMenu = contextMenu;
+        }
+    }
+
+    private function manageFilters(event:ContextMenuEvent):void {
+        reorderFilters();
     }
 
     protected var _loadingFromReport:Boolean = false;
@@ -322,6 +336,7 @@ public class TransformContainer extends HBox
             analysisFilter.targetItem = event.analysisItem;
             analysisFilter.availableItems = new ArrayCollection();
             analysisFilter.availableItems.addItem(event.analysisItem);
+            analysisFilter.toggleEnabled = true;
             addFilterDefinition(analysisFilter);
         }
     }
@@ -386,6 +401,26 @@ public class TransformContainer extends HBox
 
     private function onFilterSelection(event:FilterCreationEvent):void {
         initializeFilter(event.filter, true);
+    }
+    
+    public function reorderFilters():void {
+        var window:FilterOrderWindow = new FilterOrderWindow();
+        window.filterDefinitions = getFilterDefinitions();
+        window.addEventListener(FilterReorderEvent.FILTER_REORDER, onReorder, false, 0, true);
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUp(window);
+    }
+
+    private function onReorder(event:FilterReorderEvent):void {
+        reset();
+        _filterDefinitions = event.filters;
+        loadingFromReport = true;
+        if (_filterDefinitions != null) {
+            for each (var filter:FilterDefinition in _filterDefinitions) {
+                addFilterDefinition(filter);
+            }
+        }
+        loadingFromReport = false;
     }
 
     private function filterAdded(event:FilterUpdatedEvent):void {

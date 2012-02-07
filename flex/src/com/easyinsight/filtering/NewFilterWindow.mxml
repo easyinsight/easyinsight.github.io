@@ -80,7 +80,7 @@
         <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
             <mx:VBox>
                 <mx:Label text="Choose a field for the filter:"/>
-                <mx:ComboBox dataProvider="{availableFields}" id="fieldBox" labelField="displayName"/>
+                <mx:ComboBox dataProvider="{availableFields}" id="fieldBox" labelField="displayName" rowCount="15"/>
                 <mx:HBox>
                     <util:SaveButton label="Create the Filter" click="newFieldFilter()"/>
                     <util:CancelButton label="Cancel" click="this.close()"/>
@@ -92,7 +92,7 @@
             </mx:HBox>
             <mx:VBox>
                 <mx:Label text="Choose a field for the filter:"/>
-                <mx:ComboBox dataProvider="{availableFields}" id="aFieldBox" labelField="displayName"/>
+                <mx:ComboBox dataProvider="{availableFields}" id="aFieldBox" labelField="displayName" rowCount="15"/>
                 <mx:HBox>
                     <util:SaveButton label="Create a new Field Choice Filter" click="newFieldChoiceFilter()"/>
                     <util:CancelButton label="Cancel" click="this.close()"/>

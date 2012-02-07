@@ -108,7 +108,7 @@ public class RollingRangeFilter extends HBox implements IFilter
 
     override protected function createChildren():void {
         super.createChildren();
-        if (rollingFilter == null || !rollingFilter.toggleEnabled) {
+        if (rollingFilter != null && !rollingFilter.toggleEnabled) {
             var checkbox:CheckBox = new CheckBox();
             checkbox.selected = rollingFilter == null ? true : rollingFilter.enabled;
             checkbox.toolTip = "Click to disable this filter.";
@@ -130,6 +130,7 @@ public class RollingRangeFilter extends HBox implements IFilter
                 newFilter = true;
                 rollingFilter = new RollingDateRangeFilterDefinition();
                 rollingFilter.field = _analysisItem;
+                rollingFilter.toggleEnabled = true;
             }
             if (rollingFilter.intrinsic || rollingFilter.trendFilter) {
                 rangeOptions.removeItemAt(0);

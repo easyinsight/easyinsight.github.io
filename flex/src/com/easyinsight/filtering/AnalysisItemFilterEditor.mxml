@@ -2,6 +2,8 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         creationComplete="setup()" implements="com.easyinsight.filtering.IFilterDetailEditor">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.util.PopUpUtil;
 
@@ -54,9 +56,24 @@
                 allFields.addItem(wrapper.analysisItem);
             }
         }
+
+        private function bulkAddFields():void {
+            var map:Object = new Object();
+            for each (var existing:AnalysisItem in analysisItemFilter.availableItems) {
+                map[existing.qualifiedName()] = existing;
+            }
+            for each (var field:AnalysisItem in allFields) {
+                if ((field.hasType(AnalysisItemTypes.DIMENSION) || field.hasType(AnalysisItemTypes.DATE)) && map[field.qualifiedName()] == null) {
+                    filterFields.addItem(field);
+                }
+            }
+        }
         ]]></mx:Script>
-    <mx:Button label="Add Field..." click="addField()"/>
-    <mx:DataGrid dataProvider="{filterFields}">
+    <mx:HBox>
+        <mx:Button label="Add Field..." click="addField()"/>
+        <mx:Button label="Bulk Add Fields..." click="bulkAddFields()"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{filterFields}" dragEnabled="true" dropEnabled="true" dragMoveEnabled="true">
         <mx:columns>
             <util:EIDataGridColumn headerText="Field" dataField="display" width="400"/>
             <util:EIDataGridColumn headerText="" itemRenderer="com.easyinsight.filtering.AnalysisItemFilterControls" width="50"/>

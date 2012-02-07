@@ -7,6 +7,7 @@ import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.Label;
@@ -90,23 +91,23 @@ public class GenericFilter extends HBox implements IFilter {
                 checkbox.addEventListener(Event.CHANGE, onChange);
                 addChild(checkbox);
             //}
-            if (_showLabel) {
+            //if (_showLabel) {
                 if (labelText == null) {
                     labelText = new Label();
                 }
                 if (_valueType == NAMED_REF) {
                     labelText.text = NamedFilterReference(_filterDefinition).referenceName;
                 } else {
-                    labelText.text = _filterDefinition.field.display + ":";
+                    labelText.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
                 }
                 addChild(labelText);
-            } else {
+            /*} else {
                 if (_valueType == NAMED_REF) {
                     this.toolTip = NamedFilterReference(_filterDefinition).referenceName;
                 } else {
-                    this.toolTip = _filterDefinition.field.display + ":";
+                    this.toolTip = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
                 }
-            }
+            }*/
             if (_filterEditable) {
                 if (editButton == null) {
                     editButton = new Button();
