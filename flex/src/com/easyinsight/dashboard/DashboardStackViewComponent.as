@@ -160,6 +160,10 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         createStackChildren(dashboardStack.consolidateHeaderElements ? buttonsBox : defaultButtonsBox);
     }
 
+    protected function getButtonsBox():Container {
+        return dashboardStack.consolidateHeaderElements ? buttonsBox : defaultButtonsBox;
+    }
+
     private var _consolidateHeader:Container = null;
 
     public function set consolidateHeader(value:Container):void {
@@ -250,6 +254,18 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             logoutButton.y = 10;
             logoutButton.x = logoutButton.parent.width - 100;
         }
+    }
+
+    protected function addStackChild(stackItem:DashboardStackItem, index:int):void {
+        var topButton:Button = new Button();
+        topButton.styleName = "grayButton";
+        topButton.data = index;
+        topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
+        topButton.label = "Stack Item " + index;
+        getButtonsBox().addChild(topButton);
+        var comp:UIComponent = createComp(null, index);
+        viewChildren.addItem(comp);
+        viewStack.addChild(comp);
     }
 
     private function createStackChildren(headerbar:Container):void {
