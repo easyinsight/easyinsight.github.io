@@ -38,6 +38,7 @@ public class DataSetKeys {
         if (position == null) {
             position = max;
             keyMap.put(analysisItem.createAggregateKey(), position);
+            keys.add(analysisItem.createAggregateKey());
             max++;
         }
         return position;

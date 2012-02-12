@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class Crosstab {
 
-    private Map<Intersection, Value> intersectionMap = new HashMap<Intersection, Value>();
+    private Map<Intersection, Map<AnalysisItem, Value>> intersectionMap = new HashMap<Intersection, Map<AnalysisItem, Value>>();
 
     private List<Section> rowSections;
 
@@ -27,7 +27,7 @@ public class Crosstab {
         return columnSections;
     }
 
-    public Value getValue(Section rowSection, Section columnSection) {
+    public Map<AnalysisItem, Value> getValue(Section rowSection, Section columnSection) {
         return intersectionMap.get(new Intersection(rowSection, columnSection));
     }
 
@@ -45,8 +45,15 @@ public class Crosstab {
             }
             rowSectionSet.add(rowSection);
             columnSectionSet.add(columnSection);
-            Value value = row.getValue(crosstab.getMeasures().get(0));
-            intersectionMap.put(new Intersection(rowSection, columnSection), value);
+            Intersection intersection = new Intersection(rowSection, columnSection);
+            Map<AnalysisItem, Value> metricMap = intersectionMap.get(intersection);
+            if (metricMap == null) {
+                metricMap = new HashMap<AnalysisItem, Value>();
+                intersectionMap.put(intersection, metricMap);
+            }
+            for (AnalysisItem analysisItem : crosstab.getMeasures()) {
+                metricMap.put(analysisItem, row.getValue(analysisItem));
+            }
         }
         rowSections = new ArrayList<Section>(rowSectionSet);
         columnSections = new ArrayList<Section>(columnSectionSet);
@@ -110,7 +117,8 @@ public class Crosstab {
         Map<Value, Value> columnSet = null;
         
         AnalysisMeasure baseMeasure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
-        if (baseMeasure.getAggregation() == AggregationTypes.AVERAGE && crosstabDefinition.getColumns().size() == 1 && crosstabDefinition.getRows().size() == 1) {
+        if (baseMeasure.getAggregation() == AggregationTypes.AVERAGE && crosstabDefinition.getColumns().size() == 1 && crosstabDefinition.getRows().size() == 1 &&
+                crosstabDefinition.getMeasures().size() == 1) {
         
             WSListDefinition rowTotals = new WSListDefinition();
             rowTotals.setDataFeedID(crosstabDefinition.getDataFeedID());
@@ -137,7 +145,9 @@ public class Crosstab {
 
         List<Section> columnSections = getColumnSections();
         List<Section> rowSections = getRowSections();
-        CrosstabValue[][] array = new CrosstabValue[rowSections.size() + crosstabDefinition.getColumns().size() + 2][Math.max(columnSections.size(), crosstabDefinition.getColumns().size()) + crosstabDefinition.getRows().size() + 1];
+        int rowOffset = crosstabDefinition.getMeasures().size() > 1 ? 2 : 1;
+        CrosstabValue[][] array = new CrosstabValue[rowSections.size() + crosstabDefinition.getColumns().size() + rowOffset + 1][Math.max(columnSections.size() * crosstabDefinition.getMeasures().size(), crosstabDefinition.getColumns().size()) + crosstabDefinition.getRows().size() + 1];
+
         for (int i = 0; i < crosstabDefinition.getRows().size(); i++) {
             AnalysisItem row = crosstabDefinition.getRows().get(i);
             array[1][i] = new CrosstabValue(new StringValue(row.toDisplay()), row, true, false);
@@ -146,86 +156,117 @@ public class Crosstab {
             AnalysisItem column = crosstabDefinition.getColumns().get(i);
             array[0][i + crosstabDefinition.getRows().size()] = new CrosstabValue(new StringValue(column.toDisplay()), column, true, false);
         }
-        for (int i = 0; i < columnSections.size(); i++) {
-            Section columnSection = columnSections.get(i);
+        for (int i = 0; i < (columnSections.size() * crosstabDefinition.getMeasures().size()); i += (crosstabDefinition.getMeasures().size())) {
+            Section columnSection = columnSections.get(i / crosstabDefinition.getMeasures().size());
             for (int j = 0; j < crosstabDefinition.getColumns().size(); j++) {
                 Value headerValue = columnSection.values.get(j);
                 array[j + 1][i + crosstabDefinition.getRows().size()] = new CrosstabValue(headerValue, crosstabDefinition.getColumns().get(j));
             }
         }
+        if (crosstabDefinition.getMeasures().size() > 1) {
+            for (int i = 0; i < (columnSections.size() * crosstabDefinition.getMeasures().size()); i += (crosstabDefinition.getMeasures().size())) {
+                for (int j = 0; j < crosstabDefinition.getColumns().size(); j++) {
+                    for (int k = 0; k < crosstabDefinition.getMeasures().size(); k++) {
+                        AnalysisItem analysisItem = crosstabDefinition.getMeasures().get(k);
+                        array[j + 2][i + crosstabDefinition.getRows().size() + k] = new CrosstabValue(new StringValue(analysisItem.toDisplay()), analysisItem, true, false);
+                    }
+                }
+            }    
+        }
         for (int j = 0; j < rowSections.size(); j++) {
             Section columnSection = rowSections.get(j);
             for (int i = 0; i < crosstabDefinition.getRows().size(); i++) {
                 Value headerValue = columnSection.values.get(i);
-                array[j + crosstabDefinition.getColumns().size() + 1][i] = new CrosstabValue(headerValue, crosstabDefinition.getRows().get(i));
+                array[j + crosstabDefinition.getColumns().size() + rowOffset][i] = new CrosstabValue(headerValue, crosstabDefinition.getRows().get(i));
             }
         }
-        for (int i = 0; i < columnSections.size(); i++) {
-            Section columnSection = columnSections.get(i);
+        for (int i = 0; i < (columnSections.size() * crosstabDefinition.getMeasures().size()); i += (crosstabDefinition.getMeasures().size())) {
+            Section columnSection = columnSections.get(i / crosstabDefinition.getMeasures().size());
             for (int j = 0; j < rowSections.size(); j++) {
                 Section rowSection = rowSections.get(j);
-                Value value = intersectionMap.get(new Intersection(rowSection, columnSection));
-                if (value == null) {
-                    value = new EmptyValue();
+                Map<AnalysisItem, Value> map = intersectionMap.get(new Intersection(rowSection, columnSection));
+                for (int k = 0; k < crosstabDefinition.getMeasures().size(); k++) {
+                    AnalysisItem analysisItem = crosstabDefinition.getMeasures().get(k);
+                    Value value = null;
+                    if (map != null) {
+                        value = map.get(analysisItem);
+                    }
+                    if (value == null) {
+                        value = new EmptyValue();
+                    }
+                    array[j + crosstabDefinition.getColumns().size() + rowOffset][i + crosstabDefinition.getRows().size() + k] = new CrosstabValue(value, null);
                 }
-                array[j + crosstabDefinition.getColumns().size() + 1][i + crosstabDefinition.getRows().size()] = new CrosstabValue(value, null);
             }
         }
 
         for (int i = 0; i < columnSections.size(); i++) {
-            double sum = 0;
+            Map<AnalysisItem, Aggregation> sumMap = new HashMap<AnalysisItem, Aggregation>();
+            for (AnalysisItem analysisItem : crosstabDefinition.getMeasures()) {
+                AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+                sumMap.put(analysisMeasure, new AggregationFactory(analysisMeasure, false).getAggregation());
+            }
             Section columnSection = columnSections.get(i);
             if (columnSet == null) {
-                AggregationFactory aggregationFactory = new AggregationFactory((AnalysisMeasure) crosstabDefinition.getMeasures().get(0), false);
-                Aggregation aggregation = aggregationFactory.getAggregation();
-                for (int j = 0; j < rowSections.size(); j++) {
-                    Section rowSection = rowSections.get(j);
-                    Value value = intersectionMap.get(new Intersection(rowSection, columnSection));
-                    if (value != null) {
-                        aggregation.addValue(value);
+                for (int j = 0; j < crosstabDefinition.getMeasures().size(); j++) {
+                    AnalysisMeasure analysisMeasure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(j);
+
+                    for (Section rowSection : rowSections) {
+                        Map<AnalysisItem, Value> map = intersectionMap.get(new Intersection(rowSection, columnSection));
+                        if (map != null) {
+                            Value value = map.get(analysisMeasure);
+                            if (value != null) {
+                                sumMap.get(analysisMeasure).addValue(value);
+                            }
+                        }
                     }
-                }
-                Double sumValue;
-                sumValue = aggregation.toDouble();
-                if (sumValue != null) {
-                    sum = sumValue;
+                    double sum = 0;
+                    Double sumValue = sumMap.get(analysisMeasure).toDouble();
+                    if (sumValue != null) {
+                        sum = sumValue;
+                    }
+                    array[rowSections.size() + crosstabDefinition.getColumns().size() + rowOffset][(i * crosstabDefinition.getMeasures().size()) + j + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
                 }
             } else {
                 Value sectionValue = columnSection.values.get(0);
                 Value aggregateValue = columnSet.get(sectionValue);
+                double sum = 0;
                 if (aggregateValue.toDouble() != null) {
                     sum = aggregateValue.toDouble();
                 }
+                array[rowSections.size() + crosstabDefinition.getColumns().size() + 1][i + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
             }
-
-            array[rowSections.size() + crosstabDefinition.getColumns().size() + 1][i + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
         }
 
-        for (int j = 0; j < rowSections.size(); j++) {
-            Section rowSection = rowSections.get(j);
-            double sum = 0;
-            if (rowSet == null) {
-                AggregationFactory aggregationFactory = new AggregationFactory((AnalysisMeasure) crosstabDefinition.getMeasures().get(0), false);
-                Aggregation aggregation = aggregationFactory.getAggregation();
-                for (int i = 0; i < columnSections.size(); i++) {
-                    Section columnSection = columnSections.get(i);
-                    Value value = intersectionMap.get(new Intersection(rowSection, columnSection));
-                    if (value != null) {
-                        aggregation.addValue(value);
+        if (crosstabDefinition.getMeasures().size() == 1) {
+            for (int j = 0; j < rowSections.size(); j++) {
+                Section rowSection = rowSections.get(j);
+                double sum = 0;
+                if (rowSet == null) {
+                    AggregationFactory aggregationFactory = new AggregationFactory((AnalysisMeasure) crosstabDefinition.getMeasures().get(0), false);
+                    Aggregation aggregation = aggregationFactory.getAggregation();
+                    for (int i = 0; i < columnSections.size(); i++) {
+                        Section columnSection = columnSections.get(i);
+                        Map<AnalysisItem, Value> map = intersectionMap.get(new Intersection(rowSection, columnSection));
+                        if (map != null) {
+                            Value value = map.values().iterator().next();
+                            if (value != null) {
+                                aggregation.addValue(value);
+                            }
+                        }
+                    }
+                    Double sumValue = aggregation.toDouble();
+                    if (sumValue != null) {
+                        sum = sumValue;
+                    }
+                } else {
+                    Value sectionValue = rowSection.values.get(0);
+                    Value aggregateValue = rowSet.get(sectionValue);
+                    if (aggregateValue.toDouble() != null) {
+                        sum = aggregateValue.toDouble();
                     }
                 }
-                Double sumValue = aggregation.toDouble();
-                if (sumValue != null) {
-                    sum = sumValue;
-                }
-            } else {
-                Value sectionValue = rowSection.values.get(0);
-                Value aggregateValue = rowSet.get(sectionValue);
-                if (aggregateValue.toDouble() != null) {
-                    sum = aggregateValue.toDouble();
-                }
+                array[j + crosstabDefinition.getColumns().size() + rowOffset][columnSections.size() + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
             }
-            array[j + crosstabDefinition.getColumns().size() + 1][columnSections.size() + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
         }
 
 

@@ -376,13 +376,14 @@ public class ExportService {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(analysisDefinition.getName()).append("</h0>").append("</div>");
         }
         sb.append("<table style=\"").append(tableStyle).append("\">\r\n");
-        for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size() + 2); j++) {
+        int rowOffset = crosstabDefinition.getMeasures().size() > 1 ? 3 : 2;
+        for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size() + rowOffset); j++) {
             if (j < crosstabDefinition.getColumns().size()) {
                 sb.append("<tr>");
             } else {
                 sb.append("<tr>");
             }
-            for (int i = 0; i < (crosstab.getColumnSections().size() + crosstabDefinition.getRows().size() + 1); i++) {
+            for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabDefinition.getMeasures().size()) + crosstabDefinition.getRows().size() + 1); i++) {
                 CrosstabValue crosstabValue = values[j][i];
                 if (crosstabValue == null) {
                     if (i == 0 || j < 2) {
@@ -587,9 +588,10 @@ public class ExportService {
         PdfPTable table = new PdfPTable(crosstab.getColumnSections().size() + crosstabDefinition.getRows().size() + 1);
         table.setSpacingBefore(20);
         table.getDefaultCell().setPadding(5);
-        for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size()) + 2; j++) {
+        int rowOffset = crosstabDefinition.getMeasures().size() > 1 ? 3 : 2;
+        for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size()) + rowOffset; j++) {
 
-            for (int i = 0; i < (crosstab.getColumnSections().size() + crosstabDefinition.getRows().size()) + 1; i++) {
+            for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabDefinition.getMeasures().size()) + crosstabDefinition.getRows().size() + 1); i++) {
                 CrosstabValue crosstabValue = values[j][i];
                 String cellValue;
                 if (crosstabValue == null) {
@@ -1403,9 +1405,10 @@ public class ExportService {
         for (int i = 0; i < (crosstab.getColumnSections().size() + crosstabDefinition.getRows().size()) + 1; i++) {
             sheet.setColumnWidth(i, 5000);
         }
-        for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size()) + 2; j++) {
+        int rowOffset = crosstabDefinition.getMeasures().size() > 1 ? 3 : 2;
+        for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size()) + rowOffset; j++) {
             HSSFRow row = sheet.createRow(j);
-            for (int i = 0; i < (crosstab.getColumnSections().size() + crosstabDefinition.getRows().size()) + 1; i++) {
+            for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabDefinition.getMeasures().size()) + crosstabDefinition.getRows().size() + 1); i++) {
                 CrosstabValue crosstabValue = values[j][i];
                 if (crosstabValue == null) {
                     if (j == (crosstab.getColumnSections().size() + crosstabDefinition.getRows().size()) + 1 &&
@@ -2146,6 +2149,65 @@ public class ExportService {
         }
         sb.append("</table>");
         return sb.toString();
+    }
+
+    public static String dataSetToHTMLTable(Collection<AnalysisItem> fields, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
+
+        try {
+            ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+
+            StringBuilder sb = new StringBuilder();
+            List<AnalysisItem> items = new ArrayList<AnalysisItem>(fields);
+            items.remove(null);
+            Collections.sort(items, new Comparator<AnalysisItem>() {
+    
+                public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                    return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
+                }
+            });
+
+            sb.append("<table style=\"").append(tableStyle).append("\">");
+            sb.append("<tr style=\"").append(headerTRStyle).append("\">");
+            for (AnalysisItem analysisItem : items) {
+                for (AnalysisItem headerItem : fields) {
+                    if (headerItem == analysisItem) {
+                        sb.append("<th style=\"").append(thStyle).append("\">");
+                        sb.append(headerItem.toDisplay());
+                        sb.append("</th>");
+                    }
+                }
+            }
+            sb.append("</tr>");
+            for (IRow row : dataSet.getRows()) {
+                sb.append("<tr style=\">").append(trStyle).append("\"</tr>");
+                for (AnalysisItem analysisItem : items) {
+                    //for (int i = 0; i < fields.length; i++) {
+                        //AnalysisItem headerItem = listDataResults.getHeaders()[i];
+                        //if (headerItem == analysisItem) {
+                    StringBuilder styleString = new StringBuilder(tdStyle);
+                    String align = "left";
+                    styleString.append(align);
+                    Value value = row.getValue(analysisItem);
+                    if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
+                        TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
+                        if (textValueExtension.getColor() != 0) {
+                            String hexString = "#" + Integer.toHexString(textValueExtension.getColor());
+                            styleString.append(";color:").append(hexString);
+                        }
+                    }
+                    sb.append("<td style=\"").append(styleString.toString()).append("\">");
+    
+                    sb.append(ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol));
+    
+                    sb.append("</td>");
+                }
+                sb.append("</tr>");
+            }
+            sb.append("</table>");
+            return sb.toString();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void exportScorecardToXLS(long scorecardID, InsightRequestMetadata insightRequestMetadata) throws Exception {

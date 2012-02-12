@@ -8,7 +8,6 @@
         import com.easyinsight.analysis.CustomChangeEvent;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.formatters.Formatter;
 
@@ -56,8 +55,10 @@
                     columns.push(column);
                 }
 
+                var add:int = crosstabDefinition.measures.length > 1 ? 1 : 0;
+
                 dataGrid.headerRows = crosstabDefinition.rows.length;
-                dataGrid.rowItems = crosstabDefinition.columns.length + 1;
+                dataGrid.rowItems = crosstabDefinition.columns.length + 1 + add;
                 /*dataGrid.lockedColumnCount = crosstabDefinition.rows.length;
                 dataGrid.lockedRowCount = crosstabDefinition.columns.length + 1;*/
                 dataGrid.columns = columns;
@@ -81,7 +82,7 @@
                 } else {
                     dataGrid.x = 0;
                 }
-                dataGrid.height = translated.length * 22 + 4;
+                dataGrid.height = (translated.length) * 22 + 4;
                 dataGrid.dataProvider = translated;
 
             }

@@ -38,7 +38,7 @@ public class CrosstabControlBar extends ReportControlBar implements IReportContr
         columnGrouping.dropAreaType = DimensionDropArea;
         columnGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         measureGrouping = new ListDropAreaGrouping();
-        measureGrouping.maxElements = 1;
+        measureGrouping.unlimited = true;
         measureGrouping.dropAreaType = MeasureDropArea;
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
     }

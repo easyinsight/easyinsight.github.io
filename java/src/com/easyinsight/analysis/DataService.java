@@ -6,6 +6,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -249,9 +250,10 @@ public class DataService {
             CrosstabValue[][] values = crosstab.toTable(crosstabReport, insightRequestMetadata, conn);
 
             List<CrosstabMapWrapper> resultData = new ArrayList<CrosstabMapWrapper>();
-            for (int j = 0; j < (crosstab.getRowSections().size() + crosstabReport.getColumns().size()) + 2; j++) {
+            int rowOffset = crosstabReport.getMeasures().size() > 1 ? 3 : 2;
+            for (int j = 0; j < (crosstab.getRowSections().size() + crosstabReport.getColumns().size()) + rowOffset; j++) {
                 Map<String, CrosstabValue> resultMap = new HashMap<String, CrosstabValue>();
-                for (int i = 0; i < (crosstab.getColumnSections().size() + crosstabReport.getRows().size() + 1); i++) {
+                for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size() + 1); i++) {
                     CrosstabValue crosstabValue = values[j][i];
                     if (crosstabValue == null) {
 
@@ -266,7 +268,7 @@ public class DataService {
             EmbeddedCrosstabDataResults crossTabDataResults = new EmbeddedCrosstabDataResults();
             crossTabDataResults.setDataSet(resultData);
             crossTabDataResults.setDefinition(crosstabReport);
-            crossTabDataResults.setColumnCount(crosstab.getColumnSections().size() + crosstabReport.getRows().size() + 1);
+            crossTabDataResults.setColumnCount((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size() + 1);
             crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             return crossTabDataResults;
         } catch (com.easyinsight.security.SecurityException se) {
@@ -333,7 +335,7 @@ public class DataService {
     private EmbeddedResults getEmbeddedResultsForReport(WSAnalysisDefinition analysisDefinition, List<FilterDefinition> customFilters,
                                                         InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters, EIConnection conn) throws Exception {
         ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
-        DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet());
+        DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn);
         EmbeddedResults embeddedResults = results.toEmbeddedResults();
         embeddedResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
         embeddedResults.setDefinition(analysisDefinition);
@@ -429,7 +431,7 @@ public class DataService {
                                    EIConnection conn) {
         try {
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-            DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet());
+            DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn);
             results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             return results;
         } catch (ReportException dae) {
@@ -727,9 +729,10 @@ public class DataService {
             CrosstabValue[][] values = crosstab.toTable(analysisDefinition, insightRequestMetadata, conn);
 
             List<CrosstabMapWrapper> resultData = new ArrayList<CrosstabMapWrapper>();
-            for (int j = 0; j < (crosstab.getRowSections().size() + analysisDefinition.getColumns().size()) + 2; j++) {
+            int rowOffset = analysisDefinition.getMeasures().size() > 1 ? 3 : 2;
+            for (int j = 0; j < (crosstab.getRowSections().size() + analysisDefinition.getColumns().size()) + rowOffset; j++) {
                 Map<String, CrosstabValue> resultMap = new HashMap<String, CrosstabValue>();
-                for (int i = 0; i < (crosstab.getColumnSections().size() + analysisDefinition.getRows().size() + 1); i++) {
+                for (int i = 0; i < ((crosstab.getColumnSections().size() * analysisDefinition.getMeasures().size()) + analysisDefinition.getRows().size() + 1); i++) {
                     CrosstabValue crosstabValue = values[j][i];
                     if (crosstabValue == null) {
 
@@ -743,7 +746,7 @@ public class DataService {
             }
             CrossTabDataResults crossTabDataResults = new CrossTabDataResults();
             crossTabDataResults.setDataSet(resultData);
-            crossTabDataResults.setColumnCount(crosstab.getColumnSections().size() + analysisDefinition.getRows().size() + 1);
+            crossTabDataResults.setColumnCount((crosstab.getColumnSections().size() * analysisDefinition.getMeasures().size()) + analysisDefinition.getRows().size() + 1);
             crossTabDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
             crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             return crossTabDataResults;
@@ -796,7 +799,10 @@ public class DataService {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-            DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet());
+            DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn);
+            if (analysisDefinition.isLogReport()) {
+                new SendGridEmail().sendEmail("jboe@easy-insight.com", "Data Source Audit", reportRetrieval.getPipeline().toLogString(), "jboe@easy-insight.com", true, "Audit Test");
+            }
             results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             results.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
             return results;
