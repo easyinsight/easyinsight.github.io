@@ -3,8 +3,10 @@ package com.easyinsight.pipeline;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSCompareYearsDefinition;
 import com.easyinsight.analysis.definitions.WSYTDDefinition;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.export.ExportService;
 
 import java.util.*;
 
@@ -181,10 +183,16 @@ public abstract class Pipeline {
     {Hours Cost=50.0, Hours=50.0, Project ID=1701498, Expenses - User ID=203116, Expenses Total Cost=500.0, User ID=203116, Time Tracking Project ID=1701498, Time Tracking User ID=203116, Expenses Project ID=1701498, User Default Hourly Rate=1.0, Project Name=Shivano Budgeted},
     {Hours Cost=5000.0, Hours=5.0, Project ID=1701498, Expenses - User ID=203116, Expenses Total Cost=500.0, User ID=203115, Time Tracking Project ID=1701498, Time Tracking User ID=203115, Expenses Project ID=1701498, User Default Hourly Rate=1000.0, Project Name=Shivano Budgeted}]
      */
+    
+    private StringBuilder logger = new StringBuilder();
 
-    public DataResults toList(DataSet dataSet) {
+    public DataResults toList(DataSet dataSet, EIConnection conn) {
         for (IComponent component : components) {
             //System.out.println(component.getClass() + " - " + dataSet.getRows());
+            if (pipelineData.getReport().isLogReport()) {
+                logger.append("<h1>" + component.getClass().getName() + "</h1>");
+                logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, conn, pipelineData.getInsightRequestMetadata()));
+            }
             long startTime = System.currentTimeMillis();
             dataSet = component.apply(dataSet, pipelineData);
             long endTime = System.currentTimeMillis();
@@ -198,5 +206,9 @@ public abstract class Pipeline {
             component.decorate(results);
         }
         return results;
+    }
+    
+    public String toLogString() {
+        return logger.toString();
     }
 }
