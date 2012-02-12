@@ -5,6 +5,7 @@ import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Button;
 import mx.core.Container;
 import mx.core.UIComponent;
 import mx.managers.PopUpManager;
@@ -70,12 +71,23 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
             window.addEventListener(GridDimensionEvent.GRID_DIMENSION, onDimensions, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-        } /*else {
+        }
+        var button:Button = new Button();
+        button.label = "Add";
+        button.addEventListener(MouseEvent.CLICK, addStackElement);
+        getButtonsBox().addChild(button);
+         /*else {
             recreateStructure();
         }*/
+
     }
 
-
+    private function addStackElement(event:MouseEvent):void {
+        dashboardStack.count++;
+        var stackItem:DashboardStackItem = new DashboardStackItem();
+        dashboardStack.gridItems.addItem(stackItem);
+        addStackChild(stackItem,  dashboardStack.gridItems.getItemIndex(stackItem));
+    }
 
     /*private function recreateStructure():void {
         removeAllChildren();
@@ -135,7 +147,7 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         window.availableDimensions = dashboardEditorMetadata.availableFields;
         window.dataSourceID = dashboardEditorMetadata.dataSourceID;
         window.allFields = dashboardEditorMetadata.allFields;
-        //window.addEventListener(GridDimensionEvent.GRID_DIMENSION, onDimensions, false, 0, true);
+        window.addEventListener(GridDimensionEvent.GRID_DIMENSION, onDimensions, false, 0, true);
         PopUpManager.addPopUp(window, this, true);
         PopUpUtil.centerPopUp(window);
     }
