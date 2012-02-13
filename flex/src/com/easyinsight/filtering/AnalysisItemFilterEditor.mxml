@@ -63,8 +63,14 @@
                 map[existing.qualifiedName()] = existing;
             }
             for each (var field:AnalysisItem in allFields) {
-                if ((field.hasType(AnalysisItemTypes.DIMENSION) || field.hasType(AnalysisItemTypes.DATE)) && map[field.qualifiedName()] == null) {
-                    filterFields.addItem(field);
+                if (analysisItemFilter.targetItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    if (field.hasType(AnalysisItemTypes.MEASURE) && map[field.qualifiedName()] == null) {
+                        filterFields.addItem(field);
+                    }
+                } else {
+                    if ((field.hasType(AnalysisItemTypes.DIMENSION) || field.hasType(AnalysisItemTypes.DATE)) && map[field.qualifiedName()] == null) {
+                        filterFields.addItem(field);
+                    }
                 }
             }
         }

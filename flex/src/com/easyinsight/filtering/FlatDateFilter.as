@@ -126,11 +126,17 @@ import mx.rpc.events.ResultEvent;
 			} else {
 			}
 
+            var latestYear:String = String(new Date().fullYear);
+
+
             var dp:ArrayCollection = new ArrayCollection();
             if (_filterDefinition.dateLevel == AnalysisItemTypes.YEAR_LEVEL) {
                 for (var year:int = lowDate.getFullYear(); year <= highDate.getFullYear(); year++) {
                     dp.addItem(String(year));
                 }
+            }
+            if (!dp.contains(latestYear)) {
+                dp.addItem(latestYear);
             }
             comboBox.dataProvider = dp;
             if (dp.getItemIndex(String(_filterDefinition.value)) != -1) {
