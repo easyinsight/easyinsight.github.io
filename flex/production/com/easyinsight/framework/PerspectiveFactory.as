@@ -1,5 +1,5 @@
 package com.easyinsight.framework {
-import com.easyinsight.ReportEditor;
+import com.easyinsight.SimpleReportEditor;
 import com.easyinsight.account.AccountBasePage;
 import com.easyinsight.account.Help;
 import com.easyinsight.analysis.AnalysisItemEditor;
@@ -24,7 +24,7 @@ public class PerspectiveFactory implements IPerspectiveFactory {
         var perspective:PerspectiveFactoryResult;
         switch (type) {
             case PerspectiveInfo.REPORT_EDITOR:
-                perspective = new DirectUIComponent(new ReportEditor());
+                perspective = new DirectUIComponent(new SimpleReportEditor());
                 break;
             case PerspectiveInfo.REPORT_VIEW:
                 perspective = new DirectUIComponent(new ReportView());
