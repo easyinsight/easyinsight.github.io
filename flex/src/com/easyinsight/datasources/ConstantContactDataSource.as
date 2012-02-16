@@ -1,6 +1,8 @@
 package com.easyinsight.datasources {
 import com.easyinsight.customupload.ConstantContactDataSourceCreation;
 
+import mx.collections.ArrayCollection;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.constantcontact.ConstantContactCompositeSource")]
 public class ConstantContactDataSource extends CompositeServerDataSource {
@@ -18,6 +20,11 @@ public class ConstantContactDataSource extends CompositeServerDataSource {
 
     override public function getFeedType():int {
         return DataSourceType.CONSTANT_CONTACT;
+    }
+
+    override public function createAdminPages():ArrayCollection {
+        var pages:ArrayCollection = new ArrayCollection();
+        return pages;
     }
 
     override public function configClass():Class {

@@ -15,7 +15,6 @@ public class ApplicationSkinTO {
     public var headerBarBackgroundColor:uint = 0xF0F0F0;
     public var headerBarBackgroundColorEnabled:Boolean = false;
     public var headerBarLogo:ImageDescriptor;
-    public var headerBarLogoEnabled:Boolean = false;
     public var headerBarDividerColor:uint = 0xD42525;
     public var headerBarDividerColorEnabled:Boolean = false;
     public var centerCanvasBackgroundColor:uint = 0xFFFFFF;
@@ -26,6 +25,9 @@ public class ApplicationSkinTO {
     public var reportBackgroundEnabled:Boolean = false;
     public var reportBackgroundSize:String;
     public var reportBackgroundSizeEnabled:Boolean = false;
+    public var reportBackgroundColor:uint;
+    public var reportTextColor:uint;
+    public var reportHeader:Boolean = false;
 
     public var myDataName:Boolean = true;
     public var myDataSize:Boolean = false;

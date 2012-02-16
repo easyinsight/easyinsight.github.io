@@ -1,5 +1,6 @@
 package com.easyinsight.datasources
 {
+import mx.collections.ArrayCollection;
 
 [Bindable]
 	[RemoteClass(alias="com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource")]
@@ -14,6 +15,10 @@ package com.easyinsight.datasources
 		    this.feedName = "CloudWatch";
         }
 
+    override public function createAdminPages():ArrayCollection {
+        var pages:ArrayCollection = new ArrayCollection();
+        return pages;
+    }
 
     override public function configClass():Class {
         return CloudWatchDataSourceCreation;

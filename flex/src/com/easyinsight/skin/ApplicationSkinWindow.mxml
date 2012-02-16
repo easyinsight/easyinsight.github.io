@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        creationComplete="onCreation()">
+                   xmlns:skin="com.easyinsight.skin.*"
+                   creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.CheckBoxReportFormItem;
         import com.easyinsight.analysis.ColorReportFormItem;
@@ -15,6 +16,8 @@
         import com.easyinsight.framework.User;
 
         import com.easyinsight.util.PopUpUtil;
+
+        import mx.binding.utils.BindingUtils;
 
         import mx.collections.ArrayCollection;
 
@@ -39,6 +42,7 @@
             _skinMode = value;
         }
 
+        [Bindable]
         private var skin:ApplicationSkinTO;
 
         private function onCreation():void {
@@ -70,12 +74,19 @@
             items.addItem(new ComboBoxReportFormItem("Core Application Background Styling", "coreAppBackgroundSize", skin.coreAppBackgroundSize, skin, ["100%", "Auto"], "coreAppBackgroundSizeEnabled"));
             items.addItem(new ColorReportFormItem("Header Bar Background Color", "headerBarBackgroundColor", skin.headerBarBackgroundColor, skin, "headerBarBackgroundColorEnabled"));
             items.addItem(new ColorReportFormItem("Header Bar Divider Color", "headerBarDividerColor", skin.headerBarDividerColor, skin, "headerBarDividerColorEnabled"));
-            items.addItem(new ImageReportFormItem("Logo File", "headerBarLogo", skin.headerBarLogo, skin, "headerBarLogoEnabled"));
+            /*items.addItem(new ImageReportFormItem("Logo File", "headerBarLogo", skin.headerBarLogo, skin, "headerBarLogoEnabled"));*/
+
             items.addItem(new ColorReportFormItem("Center Canvas Background Color", "centerCanvasBackgroundColor", skin.centerCanvasBackgroundColor, skin, "centerCanvasBackgroundColorEnabled"));
             items.addItem(new NumericReportFormItem("Center Canvas Background Alpha", "centerCanvasBackgroundAlpha", skin.centerCanvasBackgroundAlpha, skin, 0, 1, "centerCanvasBackgroundAlphaEnabled"));
 
             items.addItem(new ImageReportFormItem("Report Editor Background Image", "reportBackground", skin.reportBackground, skin, "reportBackgroundEnabled"));
             items.addItem(new ComboBoxReportFormItem("Report Editor Background Styling", "reportBackgroundSize", skin.reportBackgroundSize, skin, ["100%", "Auto"], "reportBackgroundSizeEnabled"));
+            reportBackgroundColor = skin.reportBackgroundColor;
+            reportTextColor = skin.reportTextColor;
+            headerLogo = skin.headerBarLogo;
+            customHeaderShown = skin.reportHeader;
+            BindingUtils.bindProperty(this, "reportBackgroundColor", backgroundColorItem, "value");
+            BindingUtils.bindProperty(this, "reportTextColor", textColorItem, "value");
             var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
             lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
             for each (var item:ReportFormItem in items) {
@@ -125,6 +136,10 @@
                 for each (var item:ReportFormItem in items) {
                     item.save();
                 }
+                skin.reportHeader = customHeader.selected;
+                skin.reportBackgroundColor = backgroundColorItem.selectedColor;
+                skin.reportTextColor = textColorItem.selectedColor;
+                skin.headerBarLogo = logoImageBox.imageDescriptor;
                 if (_skinMode == USER_SKIN) {
                     preferencesService.saveUserSkin.send(skin);
                 } else if (_skinMode == ACCOUNT_SKIN) {
@@ -132,6 +147,46 @@
                 }
             }
         }
+
+        private var _reportBackgroundColor:uint;
+        private var _reportTextColor:uint;
+        private var _headerLogo:ImageDescriptor;
+
+        [Bindable(event="headerLogoChanged")]
+        public function get headerLogo():ImageDescriptor {
+            return _headerLogo;
+        }
+
+        public function set headerLogo(value:ImageDescriptor):void {
+            if (_headerLogo == value) return;
+            _headerLogo = value;
+            dispatchEvent(new Event("headerLogoChanged"));
+        }
+
+        [Bindable(event="reportBackgroundColorChanged")]
+        public function get reportBackgroundColor():uint {
+            return _reportBackgroundColor;
+        }
+
+        public function set reportBackgroundColor(value:uint):void {
+            if (_reportBackgroundColor == value) return;
+            _reportBackgroundColor = value;
+            dispatchEvent(new Event("reportBackgroundColorChanged"));
+        }
+
+        [Bindable(event="reportTextColorChanged")]
+        public function get reportTextColor():uint {
+            return _reportTextColor;
+        }
+
+        public function set reportTextColor(value:uint):void {
+            if (_reportTextColor == value) return;
+            _reportTextColor = value;
+            dispatchEvent(new Event("reportTextColorChanged"));
+        }
+
+        [Bindable]
+        private var customHeaderShown:Boolean;
         ]]></mx:Script>
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
         <mx:method name="getUserSkin" result="gotUserSkin()"/>
@@ -149,6 +204,27 @@
             <mx:VBox label="My Data Settings" width="600" horizontalAlign="center">
                 <mx:Form id="myDataForm" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
 
+                </mx:Form>
+            </mx:VBox>
+            <mx:VBox label="Report Header" paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
+                <mx:CheckBox label="Do you want to define a custom header for reports and dashboards?" id="customHeader" selected="{customHeaderShown}"/>
+                <mx:HBox width="800" id="headerArea" paddingTop="5" paddingBottom="5" paddingLeft="10" verticalAlign="middle" enabled="{customHeader.selected}"
+                        backgroundColor="{reportBackgroundColor}">
+                    <mx:Box backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" borderColor="#FFFFFF" borderThickness="1" cornerRadius="5"
+                            borderStyle="solid">
+                        <skin:ShowImageBox id="logoImageBox" imageDescriptor="{headerLogo}"/>
+                    </mx:Box>
+                    <mx:Spacer width="100%"/>
+                    <mx:Label text="Report or Dashboard Name" fontSize="24" maxWidth="600" id="reportLabel" color="{reportTextColor}"/>
+                    <mx:Spacer width="100%"/>
+                </mx:HBox>
+                <mx:Form enabled="{customHeader.selected}">
+                    <mx:FormItem label="Background Color:">
+                        <mx:ColorPicker selectedColor="{reportBackgroundColor}" id="backgroundColorItem"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Text Color:">
+                        <mx:ColorPicker selectedColor="{reportTextColor}" id="textColorItem"/>
+                    </mx:FormItem>
                 </mx:Form>
             </mx:VBox>
         </mx:TabNavigator>

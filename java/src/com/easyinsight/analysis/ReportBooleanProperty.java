@@ -21,6 +21,12 @@ public class ReportBooleanProperty extends ReportProperty {
         this.value = value;
     }
 
+    public ReportBooleanProperty(String propertyName, boolean value, boolean enabled) {
+        super(propertyName);
+        setEnabled(enabled);
+        this.value = value;
+    }
+
     public ReportBooleanProperty() {
     }
 

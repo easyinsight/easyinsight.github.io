@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Button xmlns:mx="http://www.adobe.com/2006/mxml" click="createAndShow()" styleName="grayButton" label="Navigate">
+	<mx:Metadata>
+		[Event(name="newReportAction", type="com.easyinsight.analysis.AdditionalActionEvent")]
+		[Event(name="newDashboardAction", type="com.easyinsight.analysis.AdditionalActionEvent")]
+		[Event(name="searchAction", type="com.easyinsight.analysis.AdditionalActionEvent")]
+		[Event(name="configureDataSourceAction", type="com.easyinsight.analysis.AdditionalActionEvent")]
+		[Event(name="reportViewAction", type="com.easyinsight.analysis.AdditionalActionEvent")]
+	</mx:Metadata>
+	<mx:Script>
+		<![CDATA[
+        import com.easyinsight.dashboard.DashboardContextWindow;
+        import com.easyinsight.dashboard.DashboardDescriptor;
+        import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.quicksearch.QuickSearchEvent;
+        import com.easyinsight.quicksearch.QuickSearchWindow;
+        import com.easyinsight.report.ReportPerspectiveInfo;
+        import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.controls.Menu;
+        import mx.events.MenuEvent;
+        import mx.managers.PopUpManager;
+
+        private var _analysisDefinition:AnalysisDefinition;
+
+        public function set analysisDefinition(value:AnalysisDefinition):void {
+            _analysisDefinition = value;
+        }
+
+        private function search(event:Event):void {
+            var window:QuickSearchWindow = new QuickSearchWindow();
+            window.addEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch, false, 0, true);
+            window.addEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch, false, 0, true);
+            PopUpManager.addPopUp(window, this, false);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function createAndShow():void {
+            var window:AdditionalActionWindow = new AdditionalActionWindow();
+            window.reportSaved = _analysisDefinition.analysisID > 0;
+            window.addEventListener(AdditionalActionEvent.NEW_REPORT, function (event:AdditionalActionEvent):void {
+                dispatchEvent(event);
+            }, false, 0, true);
+            window.addEventListener(AdditionalActionEvent.REPORT_VIEW, function (event:AdditionalActionEvent):void {
+                dispatchEvent(event);
+            }, false, 0, true);
+            window.addEventListener(AdditionalActionEvent.NEW_DASHBOARD, function (event:AdditionalActionEvent):void {
+                dispatchEvent(event);
+            }, false, 0, true);
+            window.addEventListener(AdditionalActionEvent.CONFIGURE_DATA_SOURCE, function (event:AdditionalActionEvent):void {
+                dispatchEvent(event);
+            }, false, 0, true);
+            window.addEventListener(AdditionalActionEvent.SEARCH, search, false, 0, true);
+
+            window.x = this.x - 300;
+            window.y = this.y + 10;
+            PopUpManager.addPopUp(window, this);
+        }
+
+        private function onQuickSearch(event:QuickSearchEvent):void {
+            event.currentTarget.removeEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch);
+            event.currentTarget.removeEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch);
+            if (event.type == QuickSearchEvent.QUICK_SEARCH) {
+                if (event.eiDescriptor.getType() == EIDescriptor.DATA_SOURCE) {
+                    var eiDescriptor:DataSourceDescriptor = event.eiDescriptor as DataSourceDescriptor;
+                    User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.REPORT_EDITOR, {dataSourceID:eiDescriptor.id})));
+                } else if (event.eiDescriptor.getType() == EIDescriptor.REPORT) {
+                    User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new ReportPerspectiveInfo(event.eiDescriptor as InsightDescriptor)));
+                } else if (event.eiDescriptor.getType() == EIDescriptor.DASHBOARD) {
+                    //User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id})));
+                    var dashboardWindow:DashboardContextWindow = new DashboardContextWindow();
+                    dashboardWindow.dashboardDescriptor = event.eiDescriptor as DashboardDescriptor;
+                    dashboardWindow.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
+                    PopUpManager.addPopUp(dashboardWindow, this, false);
+                    PopUpUtil.centerPopUp(dashboardWindow);
+                } else if (event.eiDescriptor.getType() == EIDescriptor.SCORECARD) {
+                    User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID:event.eiDescriptor.id})));
+                }
+            }
+        }
+
+        private static function onAnalyze(event:Event):void {
+            User.getEventNotifier().dispatchEvent(event);
+        }
+        ]]>
+	</mx:Script>
+</mx:Button>

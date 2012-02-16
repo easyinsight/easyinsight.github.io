@@ -78,6 +78,16 @@ public class DataViewFactory extends VBox implements IRetrievable {
         dispatchEvent(new Event("reportSelectableChanged"));
     }
 
+    public function noExplicitControlBarWidth():void {
+        ReportControlBar(_controlBar).percentWidth = 100;
+        ReportControlBar(_controlBar).width = NaN;
+    }
+
+    public function explicitControlBarWidth(width:int):void {
+        ReportControlBar(_controlBar).percentWidth = NaN;
+        ReportControlBar(_controlBar).width = width;
+    }
+
     public function highlightDropAreas(analysisItem:AnalysisItem):void {
         _controlBar.highlight(analysisItem);
         reportCanvas.highlight();
@@ -209,9 +219,12 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     private static function dragEnterHandler(event:DragEvent):void {
-        var newItem:AnalysisItemWrapper = event.dragSource.dataForFormat("treeDataGridItems")[0];
-        if (newItem.isAnalysisItem()) {
-            DragManager.acceptDragDrop(IUIComponent(event.currentTarget));
+        var data:Object = event.dragSource.dataForFormat("treeDataGridItems");
+        if (data != null) {
+            var newItem:AnalysisItemWrapper = data[0];
+            if (newItem.isAnalysisItem()) {
+                DragManager.acceptDragDrop(IUIComponent(event.currentTarget));
+            }
         }
     }
 

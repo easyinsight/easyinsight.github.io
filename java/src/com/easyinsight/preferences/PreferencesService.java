@@ -139,27 +139,6 @@ public class PreferencesService {
         return applicationSkin;
     }
 
-    public ApplicationSkin getUserSkin() {
-        ApplicationSkin applicationSkin = null;
-        Session session = Database.instance().createSession();
-        try {
-            session.getTransaction().begin();
-            List results = session.createQuery("from ApplicationSkinSettings where userID = ?").setLong(0, SecurityUtil.getUserID()).list();
-            if (results.size() > 0) {
-                ApplicationSkinSettings settings = (ApplicationSkinSettings) results.get(0);
-                applicationSkin = settings.toSkin();
-            }
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException();
-        } finally {
-            session.close();
-        }
-        return applicationSkin;
-    }
-
     public ApplicationSkin getAccountSkin() {
         Session session = Database.instance().createSession();
         try {

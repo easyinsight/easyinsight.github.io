@@ -1,0 +1,178 @@
+<?xml version="1.0" ?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisChangedEvent;
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.DataViewFactory;
+        import com.easyinsight.analysis.GenericDefinitionEditWindow;
+        import com.easyinsight.analysis.JoinOverrideEvent;
+        import com.easyinsight.analysis.ReportJoinWindow;
+        import com.easyinsight.analysis.ReportPreferencesEvent;
+        import com.easyinsight.code.MarmotScriptEvent;
+        import com.easyinsight.code.ReportMarmotScriptWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.managers.PopUpManager;
+
+        private var _wrappers:ArrayCollection;
+        private var _dataSourceID:int;
+        private var _analysisDefinition:AnalysisDefinition;
+        private var _dataView:DataViewFactory;
+
+        private function onCreation():void {
+            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (!_joinsCustomizable) {
+                hbox.removeChild(customizeJoinsBox);
+            }
+        }
+
+        private function onMouseDown(event:MouseEvent):void {
+            var result:Boolean = hitTestPoint(event.stageX, event.stageY);
+            if (!result) {
+                close();
+            }
+        }
+
+        public function set wrappers(value:ArrayCollection):void {
+            _wrappers = value;
+        }
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        public function set analysisDefinition(value:AnalysisDefinition):void {
+            _analysisDefinition = value;
+        }
+
+        public function set dataView(value:DataViewFactory):void {
+            _dataView = value;
+        }
+
+        public function joinControl():void {
+            var window:ReportJoinWindow = new ReportJoinWindow();
+            var items:ArrayCollection = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in _wrappers) {
+                items.addItem(wrapper.analysisItem);
+            }
+            window.fields = items;
+            window.dataSourceID = _dataSourceID;
+            window.startJoins = _analysisDefinition.joinOverrides;
+            window.addEventListener(JoinOverrideEvent.JOIN_OVERRIDE_SET, onJoinOverride, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onJoinOverride(event:JoinOverrideEvent):void {
+            _analysisDefinition.joinOverrides = event.joins;
+            _dataView.refresh();
+        }
+
+        private var _joinsCustomizable:Boolean;
+
+
+        [Bindable(event="joinsCustomizableChanged")]
+        public function get joinsCustomizable():Boolean {
+            return _joinsCustomizable;
+        }
+
+        public function set joinsCustomizable(value:Boolean):void {
+            if (_joinsCustomizable == value) return;
+            _joinsCustomizable = value;
+            dispatchEvent(new Event("joinsCustomizableChanged"));
+        }
+
+        private function customCode():void {
+            var window:ReportMarmotScriptWindow = new ReportMarmotScriptWindow();
+            window.script = _analysisDefinition.marmotScript;
+            window.afterScript = _analysisDefinition.reportRunMarmotScript;
+            window.addEventListener(MarmotScriptEvent.SAVE_SCRIPT, onScript, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function editReportProperties(index:int = 0):void {
+            var window:GenericDefinitionEditWindow = new GenericDefinitionEditWindow();
+            window.definition = _analysisDefinition;
+            window.allFields = _wrappers;
+            window.startIndex = index;
+            window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, function (event:ReportPreferencesEvent):void {
+                dispatchEvent(new AnalysisChangedEvent());
+                if (event.refreshData) {
+                    _dataView.forceRetrieve();
+                } else {
+                    _dataView.rerender();
+                }
+            }, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onScript(event:MarmotScriptEvent):void {
+            _analysisDefinition.marmotScript = event.script;
+            _analysisDefinition.reportRunMarmotScript = event.afterScript;
+            dispatchEvent(new AnalysisChangedEvent());
+            _dataView.refresh();
+        }
+        ]]></mx:Script>
+    <mx:VBox paddingLeft="10" paddingRight="10" horizontalAlign="center">
+        <mx:HBox id="hbox">
+            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                     backgroundColor="#FFFFFF" height="120"
+                     width="150" cornerRadius="8" buttonMode="true" id="embedBox"
+                     mouseOver="embedBox.setStyle('backgroundColor', 0xDDDDDD)"
+                     mouseOut="embedBox.setStyle('backgroundColor', 0xFFFFFF)"
+                     click="editReportProperties()"
+                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                <mx:Image source="@Embed(source='../../../../assets/table_edit.png')"/>
+                <mx:Text text="Edit Properties" fontSize="14" selectable="false"/>
+                <mx:TextArea
+                        text="Edit advanced report properties such as styling and limits"
+                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                        height="60"
+                        width="130" textAlign="center"/>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                     backgroundColor="#FFFFFF" height="120"
+                     width="150" cornerRadius="8" buttonMode="true" id="customCodeBox"
+                     mouseOver="customCodeBox.setStyle('backgroundColor', 0xDDDDDD)"
+                     mouseOut="customCodeBox.setStyle('backgroundColor', 0xFFFFFF)"
+                     click="customCode()"
+                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                <mx:Image source="@Embed(source='../../../../assets/code.png')"/>
+                <mx:Text text="Customize Code" fontSize="14" selectable="false"/>
+                <mx:TextArea
+                        text="Apply additional scripting to further customize the report"
+                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                        height="60"
+                        width="130" textAlign="center"/>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                     backgroundColor="#FFFFFF" height="120"
+                     width="150" cornerRadius="8" buttonMode="true" id="customizeJoinsBox"
+                     mouseOver="customizeJoinsBox.setStyle('backgroundColor', 0xDDDDDD)"
+                     mouseOut="customizeJoinsBox.setStyle('backgroundColor', 0xFFFFFF)"
+                     click="joinControl()"
+                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                <mx:Image source="@Embed(source='../../../../assets/branchx16.png')"/>
+                <mx:Text text="Customize Joins" fontSize="14" selectable="false"/>
+                <mx:TextArea
+                        text="Customize the connections between data sources"
+                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                        height="60"
+                        width="130" textAlign="center"/>
+            </mx:VBox>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

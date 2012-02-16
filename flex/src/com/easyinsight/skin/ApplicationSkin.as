@@ -16,6 +16,9 @@ public class ApplicationSkin extends EventDispatcher {
     private var defaultReportBackground:Class;
     private var _reportBackground:Object = defaultReportBackground;
     private var _reportBackgroundSize:String = "100%";
+    private var _headerBackgroundColor:uint;
+    private var _headerTextColor:uint;
+    private var _reportHeader:Boolean;
 
     private var _myDataName:Boolean = true;
     private var _myDataSize:Boolean = false;
@@ -57,6 +60,9 @@ public class ApplicationSkin extends EventDispatcher {
         centerCanvasBackgroundAlpha = appSkin.centerCanvasBackgroundAlpha;
         coreAppBackgroundColor = appSkin.coreAppBackgroundColor;
         coreAppBackgroundSize = appSkin.coreAppBackgroundSize;
+        headerBackgroundColor = appSkin.reportBackgroundColor;
+        headerTextColor = appSkin.reportTextColor;
+        reportHeader = appSkin.reportHeader;
         if (appSkin.reportBackground != null) {
             var reportLoader:ImageLoader = new ImageLoader();
             reportLoader.addEventListener(ImageLoadEvent.IMAGE_LOADED, function(event:ImageLoadEvent):void {
@@ -83,6 +89,39 @@ public class ApplicationSkin extends EventDispatcher {
         myDataNewDashboard = appSkin.myDataNewDashboard;
         myDataLookupTable = appSkin.myDataLookupTable;
         myDataAccountVisible = appSkin.myDataAccountVisible;
+    }
+
+    [Bindable(event="reportHeaderChanged")]
+    public function get reportHeader():Boolean {
+        return _reportHeader;
+    }
+
+    public function set reportHeader(value:Boolean):void {
+        if (_reportHeader == value) return;
+        _reportHeader = value;
+        dispatchEvent(new Event("reportHeaderChanged"));
+    }
+
+    [Bindable(event="headerBackgroundColorChanged")]
+    public function get headerBackgroundColor():uint {
+        return _headerBackgroundColor;
+    }
+
+    public function set headerBackgroundColor(value:uint):void {
+        if (_headerBackgroundColor == value) return;
+        _headerBackgroundColor = value;
+        dispatchEvent(new Event("headerBackgroundColorChanged"));
+    }
+
+    [Bindable(event="headerTextColorChanged")]
+    public function get headerTextColor():uint {
+        return _headerTextColor;
+    }
+
+    public function set headerTextColor(value:uint):void {
+        if (_headerTextColor == value) return;
+        _headerTextColor = value;
+        dispatchEvent(new Event("headerTextColorChanged"));
     }
 
     [Bindable(event="reportBackgroundChanged")]

@@ -9,9 +9,12 @@
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.report.BreadCrumb;
+        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.framework.User;
+
+        import mx.binding.utils.BindingUtils;
 
         import mx.controls.Button;
 
@@ -78,7 +81,7 @@
                 dashboardHeader.visible = true;
                 dashboardHeader.includeInLayout = true;
                 //addChildAt(dashboardHeader, 0);
-                nameContainer.includeInLayout = true;
+                headerArea.includeInLayout = true;
                 //addChildAt(nameContainer, 1);
                 descriptionBox.visible = true;
                 descriptionBox.includeInLayout = true;
@@ -142,9 +145,13 @@
 
 
         private function gotDashboard():void {
+            BindingUtils.bindProperty(this, "headerBarLogo", ApplicationSkin.instance(), "headerBarLogo");
+            BindingUtils.bindProperty(this, "headerBackgroundColor", ApplicationSkin.instance(), "headerBackgroundColor");
+            BindingUtils.bindProperty(this, "headerTextColor", ApplicationSkin.instance(), "headerTextColor");
+            BindingUtils.bindProperty(this, "headerVisible", ApplicationSkin.instance(), "reportHeader");
             dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
             if (dashboard.borderThickness == 0 && exchangeItem == null) {
-                nameContainer.includeInLayout = false;
+                headerArea.includeInLayout = false;
                 descriptionBox.includeInLayout = false;
             }
             if (dashboard.backgroundColor == 0xFFFFFF) {
@@ -342,15 +349,87 @@
 
         [Bindable]
         private var showLoading:Boolean;
+
+        private var _headerBarLogoChanged:Boolean = false;
+        private var _headerBackgroundColorChanged:Boolean = false;
+        private var _headerTextColorChanged:Boolean = false;
+
+        public function set headerBarLogo(value:Object):void {
+            _headerLogo = value;
+            _headerBarLogoChanged = true;
+            invalidateDisplayList();
+        }
+
+        public function set headerBackgroundColor(color:uint):void {
+            _headerBackgroundColor = color;
+            _headerBackgroundColorChanged = true;
+            invalidateDisplayList();
+        }
+
+        public function set headerTextColor(color:uint):void {
+            _headerTextColor = color;
+            _headerTextColorChanged = true;
+            invalidateDisplayList();
+        }
+
+        private var _headerVisibleChanged:Boolean;
+
+        private var _headerBackgroundColor:uint;
+        private var _headerTextColor:uint;
+        private var _headerVisible:Boolean;
+
+        private var _headerLogo:Object;
+
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            if (_headerVisible) {
+                if (_headerBarLogoChanged) {
+                    if (_headerLogo is Bitmap) {
+                        var bitmap:Bitmap = ApplicationSkin.instance().headerBarLogo as Bitmap;
+                        logoImage.source = new Bitmap(bitmap.bitmapData);
+                        _headerBarLogoChanged = false;
+                    }
+                }
+                if (_headerTextColorChanged) {
+                    linkButton.setStyle("color", _headerTextColor);
+                    reportLabel.setStyle("color", _headerTextColor);
+                    _headerTextColorChanged = false;
+                }
+                if (_headerBackgroundColorChanged) {
+                    headerArea.setStyle("backgroundColor", _headerBackgroundColor);
+                    _headerBackgroundColorChanged = false;
+                }
+            }
+        }
+
+
+        [Bindable(event="headerVisibleChanged")]
+        public function get headerVisible():Boolean {
+            return _headerVisible;
+        }
+
+        public function set headerVisible(value:Boolean):void {
+            if (_headerVisible == value) return;
+            _headerVisible = value;
+            invalidateDisplayList();
+            dispatchEvent(new Event("headerVisibleChanged"));
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="getDashboardView" result="gotDashboard()"/>
     </mx:RemoteObject>
     <dashboard:DashboardSlimHeader id="dashboardHeader" dataSource="{dataSource}" viewFactory="{rootView}" includeInLayout="false" visible="false"/>
-    <mx:HBox width="100%" horizontalAlign="center" paddingTop="5" paddingBottom="5" verticalAlign="middle" id="nameContainer" includeInLayout="false">
+    <mx:HBox width="100%" id="headerArea" paddingTop="5" paddingBottom="5" paddingLeft="10" verticalAlign="middle">
+        <mx:Box backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" borderColor="#FFFFFF" borderThickness="1" cornerRadius="5"
+                borderStyle="solid" visible="{headerVisible}">
+            <mx:Image id="logoImage"/>
+        </mx:Box>
+        <mx:Spacer width="100%"/>
         <mx:HBox id="breadCrumbBox"/>
-        <mx:Label text="{dashboardName}" fontSize="24" maxWidth="600" color="#000000"/>
-        <mx:LinkButton label="{reportInfoLabel}" textDecoration="underline" fontSize="14" visible="{showReportInfoButton}" click="toggleReportInfo()"/>
+        <mx:Label text="{dashboardName}" fontSize="24" maxWidth="600" id="reportLabel"/>
+        <mx:LinkButton label="{reportInfoLabel}" textDecoration="underline" fontSize="14" visible="{showReportInfoButton}" click="toggleReportInfo()"
+                       id="linkButton"/>
+        <mx:Spacer width="100%"/>
     </mx:HBox>
     <mx:Box width="100%" styleName="descriptionContainer" id="descriptionBox" visible="false" includeInLayout="false">
         <report:DefaultDescriptionArea previousReportLabel="{previousReportLabel}" previousReportAvailable="{previousReportAvailable}"

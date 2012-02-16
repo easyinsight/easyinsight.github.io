@@ -1,0 +1,143 @@
+<?xml version="1.0" ?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                   xmlns:report="com.easyinsight.report.*"
+                   creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisChangedEvent;
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItemEditEvent;
+        import com.easyinsight.analysis.AnalysisItemEditWindow;
+        import com.easyinsight.analysis.AnalysisItemNode;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.CalculationMeasureWindow;
+        import com.easyinsight.analysis.DerivedDateWindow;
+        import com.easyinsight.analysis.DerivedGroupingWindow;
+        import com.easyinsight.analysis.FieldEditorEvent;
+        import com.easyinsight.analysis.HierarchyWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.managers.PopUpManager;
+
+        private var _dataSourceID:int;
+
+        private var _wrappers:ArrayCollection;
+        private var _availableFields:ArrayCollection;
+        private var _analysisDefinition:AnalysisDefinition;
+
+        private function onCreation():void {
+            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
+        }
+
+        private function onMouseDown(event:MouseEvent):void {
+            var result:Boolean = hitTestPoint(event.stageX, event.stageY);
+            if (!result) {
+                close();
+            }
+        }
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        public function set wrappers(value:ArrayCollection):void {
+            _wrappers = value;
+        }
+
+        public function set availableFields(value:ArrayCollection):void {
+            _availableFields = value;
+        }
+
+        public function set analysisDefinition(value:AnalysisDefinition):void {
+            _analysisDefinition = value;
+        }
+
+        private function createCalculation():void {
+            var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            window.editorClass = CalculationMeasureWindow;
+            window.dataSourceID = _dataSourceID;
+            window.analysisItems = _wrappers;
+            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
+            PopUpManager.addPopUp(window, this);
+            PopUpUtil.centerPopUp(window);
+            dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_OPENED, window));
+            window.addEventListener(Event.CLOSE, onClose, false, 0, true);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onClose(event:Event):void {
+            dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_CLOSED, event.currentTarget as AnalysisItemEditWindow));
+        }
+
+        private function createCalculatedGrouping():void {
+            var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            window.editorClass = DerivedGroupingWindow;
+            window.dataSourceID = _dataSourceID;
+            window.analysisItems = _wrappers;
+            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
+            PopUpManager.addPopUp(window, this);
+            PopUpUtil.centerPopUp(window);
+            dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_OPENED, window));
+            window.addEventListener(Event.CLOSE, onClose, false, 0, true);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function createCalculatedDate():void {
+            var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            window.editorClass = DerivedDateWindow;
+            window.dataSourceID = _dataSourceID;
+            window.analysisItems = _wrappers;
+            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
+            PopUpManager.addPopUp(window, this);
+            PopUpUtil.centerPopUp(window);
+            dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_OPENED, window));
+            window.addEventListener(Event.CLOSE, onClose, false, 0, true);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onNewItem(event:AnalysisItemEditEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            dispatchEvent(event);
+            var node:AnalysisItemNode = new AnalysisItemNode();
+            node.analysisItem = event.analysisItem;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
+            _availableFields.addItem(wrapper);
+            _wrappers.addItem(wrapper);
+            if (_analysisDefinition.addedItems == null) {
+                _analysisDefinition.addedItems = new ArrayCollection();
+            }
+            _analysisDefinition.addedItems.addItem(event.analysisItem);
+        }
+
+        public function createHierarchy():void {
+            var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            window.editorClass = HierarchyWindow;
+            window.analysisItems = _wrappers;
+            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
+            PopUpManager.addPopUp(window, this);
+            PopUpUtil.centerPopUp(window);
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+        <mx:HBox>
+            <report:BigButton imageClass="@Embed(source='../../../../assets/text_formula.png')"
+                              headerText="Create a Custom Measure"
+                              description="Define a custom measure such as Probability or Estimate"
+                    click="createCalculation()"/>
+            <report:BigButton imageClass="@Embed(source='../../../../assets/code.png')"
+                              headerText="Create a Custom Grouping"
+                              description="Define a custom grouping such as Channel or Project Owner"
+                    click="createCalculatedGrouping()"/>
+        </mx:HBox>
+        <mx:HBox>
+            <report:BigButton imageClass="@Embed(source='../../../../assets/calendar.png')"
+                              headerText="Create a Custom Date"
+                              description="Define a custom date such as Close Date or Project Deadline"
+                              click="createCalculatedDate()"/>
+            <report:BigButton imageClass="@Embed(source='../../../../assets/cubes_blue_add.png')"
+                              headerText="Create a Hierarchy"
+                              description="Define a hierarchy to enable rollup and drilldown on tree reports"
+                              click="createHierarchy()"/>
+        </mx:HBox>
+</util:EISlimWindow>

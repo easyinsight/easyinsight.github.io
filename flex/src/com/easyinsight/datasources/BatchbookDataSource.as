@@ -1,6 +1,7 @@
 package com.easyinsight.datasources {
 import com.easyinsight.customupload.BatchbookDataSourceCreation;
 
+import mx.collections.ArrayCollection;
 
 
 [Bindable]
@@ -17,6 +18,11 @@ public class BatchbookDataSource extends CompositeServerDataSource {
 
     override public function getFeedType():int {
         return DataSourceType.BATCHBOOK;
+    }
+
+    override public function createAdminPages():ArrayCollection {
+        var pages:ArrayCollection = new ArrayCollection();
+        return pages;
     }
 
     override public function configClass():Class {

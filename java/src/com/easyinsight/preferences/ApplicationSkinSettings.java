@@ -1,7 +1,6 @@
 package com.easyinsight.preferences;
 
 import com.easyinsight.analysis.ReportProperty;
-import com.easyinsight.security.SecurityUtil;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -100,14 +99,7 @@ public class ApplicationSkinSettings {
         } else {
             accountSkin = new ApplicationSkinSettings();
         }
-        ApplicationSkinSettings userSkin;
-        results = session.createQuery("from ApplicationSkinSettings where userID = ?").setLong(0, userID).list();
-        if (results.size() > 0) {
-            userSkin = (ApplicationSkinSettings) results.get(0);
-        } else {
-            userSkin = new ApplicationSkinSettings();
-        }
-        return globalSkin.override(accountSkin).override(userSkin).toSkin();
+        return globalSkin.override(accountSkin).toSkin();
     }
 
     private ApplicationSkinSettings override(ApplicationSkinSettings settings) {

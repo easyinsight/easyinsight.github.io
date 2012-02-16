@@ -30,7 +30,7 @@
             <mx:Label text="Account Settings" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
              <mx:Button label="Edit Account Settings..." click="editAccountSettings()" styleName="grayButton" fontSize="14" width="220"/>
              <mx:Button label="Edit Account Skin..." click="editAccountStyling()" styleName="grayButton" fontSize="14" width="220"/>
-             <mx:Button label="Edit My Skin..." click="editUserStyling()" styleName="grayButton" fontSize="14" width="220"/>
+             <!--<mx:Button label="Edit My Skin..." click="editUserStyling()" styleName="grayButton" fontSize="14" width="220"/>-->
              <mx:Button label="SSO Configuration..." click="ssoConfig()" styleName="grayButton" fontSize="14" width="220" visible="{showSSO}"/>
              <mx:Button label="Edit Login Page..." click="loginPageConfig()" styleName="grayButton" fontSize="14" width="220" visible="{showLoginPageConfig}" />
         </mx:VBox>
