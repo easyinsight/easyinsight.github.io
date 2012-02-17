@@ -45,27 +45,7 @@ public class VariableNode extends CalculationTreeNode {
             s = s.substring(1, s.length() - 1);
         variableKey = new AggregateKeySpecification(s, aggregationType);
         List<AnalysisItem> analysisItems = keyItems.get(s);
-        for (AnalysisItem item : analysisItems) {
-            if (item.getType() == AnalysisItemTypes.MEASURE) {
-                AnalysisMeasure analysisMeasure = (AnalysisMeasure) item;
-                if (analysisMeasure.getAggregation() == aggregationType) {
-                    analysisItem = item;
-                    break;
-                } else {
-                    AnalysisMeasure clonedMeasure;
-                    try {
-                        clonedMeasure = (AnalysisMeasure) analysisMeasure.clone();
-                    } catch (CloneNotSupportedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    clonedMeasure.setAggregation(aggregationType);
-                    analysisItem = clonedMeasure;
-                    break;
-                }
-            }
-        }
-        if (analysisItem == null) {
-            analysisItems = displayItems.get(s);
+        if (analysisItems != null) {
             for (AnalysisItem item : analysisItems) {
                 if (item.getType() == AnalysisItemTypes.MEASURE) {
                     AnalysisMeasure analysisMeasure = (AnalysisMeasure) item;
@@ -82,6 +62,30 @@ public class VariableNode extends CalculationTreeNode {
                         clonedMeasure.setAggregation(aggregationType);
                         analysisItem = clonedMeasure;
                         break;
+                    }
+                }
+            }
+        }
+        if (analysisItem == null) {
+            analysisItems = displayItems.get(s);
+            if (analysisItems != null) {
+                for (AnalysisItem item : analysisItems) {
+                    if (item.getType() == AnalysisItemTypes.MEASURE) {
+                        AnalysisMeasure analysisMeasure = (AnalysisMeasure) item;
+                        if (analysisMeasure.getAggregation() == aggregationType) {
+                            analysisItem = item;
+                            break;
+                        } else {
+                            AnalysisMeasure clonedMeasure;
+                            try {
+                                clonedMeasure = (AnalysisMeasure) analysisMeasure.clone();
+                            } catch (CloneNotSupportedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            clonedMeasure.setAggregation(aggregationType);
+                            analysisItem = clonedMeasure;
+                            break;
+                        }
                     }
                 }
             }
