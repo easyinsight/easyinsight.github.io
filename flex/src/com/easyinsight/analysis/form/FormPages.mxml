@@ -28,7 +28,7 @@
             }
             nextPageEnabled = true;
             box.removeAllChildren();
-            var form:Form = forms.getItemAt(currentPage) as Form;
+            var form:UIComponent = forms.getItemAt(currentPage) as UIComponent;
             box.addChild(form);
         }
 
