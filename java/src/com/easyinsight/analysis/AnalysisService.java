@@ -214,6 +214,7 @@ public class AnalysisService {
                     filterValueDefinition.setSingleValue(true);
                     filterValueDefinition.setEnabled(true);
                     filterValueDefinition.setInclusive(true);
+                    filterValueDefinition.setToggleEnabled(true);
                     filterValueDefinition.setFilteredValues(Arrays.asList((Object) coordinateValue.getZip()));
                     filters = Arrays.asList((FilterDefinition) filterValueDefinition);
                 } else {
@@ -222,6 +223,7 @@ public class AnalysisService {
                     filterValueDefinition.setSingleValue(true);
                     filterValueDefinition.setEnabled(true);
                     filterValueDefinition.setInclusive(true);
+                    filterValueDefinition.setToggleEnabled(true);
                     filterValueDefinition.setFilteredValues(Arrays.asList(data.get(analysisItem.qualifiedName())));
                     filters = Arrays.asList((FilterDefinition) filterValueDefinition);
                 }

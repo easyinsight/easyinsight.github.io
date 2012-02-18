@@ -3,6 +3,7 @@ import com.easyinsight.analysis.DelayedAPIKeyLink;
 import com.easyinsight.analysis.DelayedDeepLink;
 import com.easyinsight.analysis.DelayedFeedAdminLink;
 import com.easyinsight.analysis.DelayedFeedLink;
+import com.easyinsight.analysis.DelayedNewDashboardLink;
 import com.easyinsight.analysis.DelayedReportLink;
 import com.easyinsight.dashboard.DelayedDashboardViewLink;
 import com.easyinsight.etl.DelayedLookupTableLink;
@@ -27,6 +28,11 @@ public class FragmentParser {
             }),
             new FragmentTester("feedID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 var deepFeedLink:DelayedFeedLink = new DelayedFeedLink(key);
+                deepFeedLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
+                deepFeedLink.execute();
+            }),
+            new FragmentTester("newDashboardID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
+                var deepFeedLink:DelayedNewDashboardLink = new DelayedNewDashboardLink(key);
                 deepFeedLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 deepFeedLink.execute();
             }),
