@@ -1,34 +1,11 @@
 <?xml version="1.0" ?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF" borderThickness="1" cornerRadius="15" dropShadowEnabled="true"
-        borderStyle="solid" creationComplete="onCreation()">
-    <mx:states>
-        <mx:State name="admin">
-            <mx:AddChild relativeTo="{bottomBox}">
-                <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addCutoffFilter()" mouseChildren="false"
-                            buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
-                            id="cuttoffBox"
-                            rollOver="cuttoffBox.setStyle('backgroundColor', 0xDDDDDD)"
-                            rollOut="cuttoffBox.setStyle('backgroundColor', 0xFFFFFF)">
-                        <mx:Label text="Cutoff Filter" fontSize="14"/>
-                        <mx:TextArea text="Restrict this field to end at a certain month"
-                                borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                                textAlign="center"/>
-                    </mx:VBox>
-            </mx:AddChild>
-        </mx:State>
-    </mx:states>
+        borderStyle="solid">
     <mx:Script><![CDATA[
-        import com.easyinsight.account.Account;
         import com.easyinsight.analysis.AnalysisItem;
-        import com.easyinsight.framework.User;
 
         import mx.managers.PopUpManager;
 
-        private function onCreation():void {
-            if (User.getInstance().getAccountType() >= Account.PRO) {
-                currentState = "admin";
-            }
-        }
 
         private function addLastValue():void {
             var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.LAST_VALUE);
@@ -160,8 +137,8 @@
                             id="flatValueBox"
                             rollOver="flatValueBox.setStyle('backgroundColor', 0xDDDDDD)"
                             rollOut="flatValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                        <mx:Label text="Single Value" fontSize="14"/>
-                        <mx:TextArea text="Restrict this field to a single month or year"
+                        <mx:Label text="Year" fontSize="14"/>
+                        <mx:TextArea text="Restrict this field to a single year"
                                 borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
                                 textAlign="center"/>
                     </mx:VBox>
@@ -170,7 +147,7 @@
                             id="multiFlatValueBox"
                             rollOver="multiFlatValueBox.setStyle('backgroundColor', 0xDDDDDD)"
                             rollOut="multiFlatValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                        <mx:Label text="Multiple Flat Value" fontSize="14"/>
+                        <mx:Label text="Multiple Month" fontSize="14"/>
                         <mx:TextArea text="Restrict this field to one or more months"
                                 borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
                                 textAlign="center"/>
