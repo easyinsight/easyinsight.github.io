@@ -51,9 +51,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         return new SizeInfo(dashboardStack.preferredWidth, dashboardStack.preferredHeight);
     }
 
-    private var viewStack:ViewStack;
+    protected var viewStack:ViewStack;
 
-    private var viewChildren:ArrayCollection;
+    protected var viewChildren:ArrayCollection;
 
     private function onChange(targetIndex:int):void {
         var currentComp:UIComponent = viewStack.selectedChild;
@@ -77,7 +77,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         }
     }
 
-    private function onButtonClick(event:MouseEvent):void {
+    protected function onButtonClick(event:Event):void {
         var targetIndex:int = event.currentTarget.data as int;
         onChange(targetIndex);
     }
@@ -255,17 +255,27 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             logoutButton.x = logoutButton.parent.width - 100;
         }
     }
-
-    protected function addStackChild(stackItem:DashboardStackItem, index:int):void {
+    
+    protected function createStackButton(index:int, label:String):UIComponent {
         var topButton:Button = new Button();
+        topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
         topButton.styleName = "grayButton";
         topButton.data = index;
-        topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
-        topButton.label = "Stack Item " + index;
-        getButtonsBox().addChild(topButton);
+        topButton.label = label;
+        return topButton;
+    }
+
+    protected function addStackChild(stackItem:DashboardStackItem, index:int):void {
+        var topButton:UIComponent = createStackButton(index,  "Stack Item " + index);
+        getButtonsBox().addChildAt(topButton, index);
         var comp:UIComponent = createComp(null, index);
         viewChildren.addItem(comp);
         viewStack.addChild(comp);
+
+    }
+
+    protected function editMode():Boolean {
+        return false;
     }
 
     private function createStackChildren(headerbar:Container):void {
@@ -273,27 +283,26 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
             var report:DashboardElement = stackItem.dashboardElement;
             if (dashboardStack.selectionType == 'Buttons') {
-                var topButton:Button = new Button();
-                topButton.styleName = "grayButton";
-                topButton.data = i;
-                topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
+                var label:String;
                 if (report == null) {
-                    topButton.label = "Stack Item " + i;
+                    label = "Stack Item " + i;
                 } else if (report is DashboardReport) {
-                    topButton.label = DashboardReport(report).report.name;
+                    label = DashboardReport(report).report.name;
                     if (DashboardReport(report).report.reportType == AnalysisDefinition.HEATMAP) {
                         leftEffect = null;
                         rightEffect = null;
                     }
                 } else {
                     if (report.label != null && report.label != "") {
-                        topButton.label = report.label;
+                        label = report.label;
                     } else {
-                        topButton.label = String(i);
+                        label = String(i);
                     }
                 }
-                if (dashboardStack.count > 1) {
-                    headerbar.addChild(topButton);
+                var topButton:UIComponent = createStackButton(i, label);
+
+                if (editMode() || dashboardStack.count > 1) {
+                    headerbar.addChildAt(topButton, i);
                 }
             }
             var comp:UIComponent = createComp(report, i);

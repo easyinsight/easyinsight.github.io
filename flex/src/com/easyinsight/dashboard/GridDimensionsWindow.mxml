@@ -9,7 +9,7 @@
         }
         ]]></mx:Script>
     <mx:VBox horizontalAlign="center">
-        <mx:Label text="The first step to a dashboard is to define an initial grid:" fontSize="16"/>
+        <mx:Label text="What dimensions should this grid use?" fontSize="16"/>
         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
             <mx:FormItem label="Number of Rows:">
                 <mx:NumericStepper id="rowStepper" minimum="1" maximum="5" value="2"/>

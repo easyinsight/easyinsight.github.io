@@ -6,6 +6,7 @@ import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.display.DisplayObject;
 import flash.events.Event;
+import flash.events.EventDispatcher;
 
 import flash.events.MouseEvent;
 
@@ -72,6 +73,20 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         dispatchEvent(new Event("buttonsVisibleChanged"));
     }
 
+    public function clearValidation():void {
+        dropBox.setStyle("borderColor", 0xCCCCCC);
+        dropBox.setStyle("borderStyle", "none");
+        dropBox.setStyle("borderThickness", 1);
+        dropBox.setStyle("backgroundColor", 0xFFFFFF);
+    }
+
+    public function validationFail():void {
+        dropBox.setStyle("borderColor", "red");
+        dropBox.setStyle("borderStyle", "solid");
+        dropBox.setStyle("borderThickness", 2);
+        dropBox.setStyle("backgroundColor", 0xFFDDDD);
+    }
+
     protected override function createChildren():void {
         super.createChildren();
         var topCanvas:Canvas = new Canvas();
@@ -117,6 +132,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
                 editorComp = IDashboardEditorComponent(DashboardElementFactory.createEditorUIComponent(element, dashboardEditorMetadata));
             }
             dropBox.addChild(DisplayObject(editorComp));
+            editorComp.initialRetrieve();
         } else {
             dropBox.setStyle("backgroundColor", 0xFFFFFF);
             dropBox.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
@@ -162,18 +178,33 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
             dropBox.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
             dropBox.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
             dropBox.setStyle("backgroundColor", 0xFFFFFF);
+            dispatchEvent(new DashboardPopulateEvent(DashboardPopulateEvent.DASHBOARD_POPULATE, this));
             dispatchEvent(new DashboardChangedEvent());
         }
     }
 
-    public function validate():Boolean {
+    public function validate():String {
+        if (dropBox.getChildren().length == 0) {
+            return "You need to add at least one element to the dashboard.";
+        } else {
+            errorString = null;
+        }
         var comp:IDashboardEditorComponent = dropBox.getChildAt(0) as IDashboardEditorComponent;
         return comp.validate();
     }
 
     public function save():void {
-        var comp:IDashboardEditorComponent = dropBox.getChildAt(0) as IDashboardEditorComponent;
-        comp.save();
+        if (dropBox.getChildren().length > 0) {
+            var comp:IDashboardEditorComponent = dropBox.getChildAt(0) as IDashboardEditorComponent;
+            comp.save();
+        }
+    }
+    
+    public function component():IDashboardEditorComponent {
+        if (dropBox.getChildren().length > 0) {
+            return dropBox.getChildAt(0) as IDashboardEditorComponent;
+        }
+        return null;
     }
 
     protected function dragEnterHandler(event:DragEvent):void {
@@ -207,14 +238,22 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         buttonsVisible = true;
         this.element = element;
         updateText();
+        clearValidation();
         errorString = null;
         editorComp = IDashboardEditorComponent(DashboardElementFactory.createEditorUIComponent(element, dashboardEditorMetadata));
+        EventDispatcher(editorComp).addEventListener(DashboardPopulateEvent.DASHBOARD_POPULATE, propagate);
         editorComp.initialRetrieve();
         dropBox.addChild(DisplayObject(editorComp));
         dropBox.setStyle("backgroundColor", 0xEEEEEE);
         dropBox.removeEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
         dropBox.removeEventListener(DragEvent.DRAG_DROP, dragDropHandler);
+        dispatchEvent(new DashboardPopulateEvent(DashboardPopulateEvent.DASHBOARD_POPULATE, this));
         dispatchEvent(new DashboardChangedEvent());
+
+    }
+
+    private function propagate(event:DashboardPopulateEvent):void {
+        dispatchEvent(new DashboardPopulateEvent(event.type, this));
     }
 
     public var editorComp:IDashboardEditorComponent;

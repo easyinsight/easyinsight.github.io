@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="600"
+                   horizontalAlign="center">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.ReportFormItem;
+        import com.easyinsight.analysis.StyleConfiguration;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+
+        private var _dashboardElement:DashboardElement;
+
+        private var items:ArrayCollection;
+
+        protected override function createChildren():void {
+            super.createChildren();
+            items = StyleConfiguration.getDashboardElementItems(_dashboardElement);
+            var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
+            lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
+            for each (var item:ReportFormItem in items) {
+                form.addChild(item);
+            }
+            rows = DashboardGrid(_dashboardElement).rows;
+            columns = DashboardGrid(_dashboardElement).columns;
+        }
+
+        private function onDone(event:FlexEvent):void {
+            PopUpUtil.centerPopUp(this);
+        }
+
+        private function save():void {
+            var valid:Boolean = true;
+            for each (var validateItem:ReportFormItem in items) {
+                valid = valid && validateItem.validate();
+            }
+            if (valid) {
+                for each (var item:ReportFormItem in items) {
+                    item.save();
+                }
+            }
+            DashboardGrid(_dashboardElement).rows = rowStepper.value;
+            DashboardGrid(_dashboardElement).columns = columnStepper.value;
+            dispatchEvent(new Event(Event.CHANGE));
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var rows:int;
+
+        [Bindable]
+        private var columns:int;
+
+        private var lastTab:int;
+
+        private function onEvent(event:Event):void {
+            if (lastTab != tabNavigator.selectedIndex) {
+                lastTab = tabNavigator.selectedIndex;
+                PopUpUtil.centerPopUp(this);
+            }
+        }
+
+        public function set dashboardElement(value:DashboardElement):void {
+            _dashboardElement = value;
+        }
+        ]]></mx:Script>
+
+    <mx:TabNavigator resizeToContent="true" id="tabNavigator" creationPolicy="all">
+        <mx:Box label="Grid Properties" paddingLeft="5" paddingTop="5" paddingBottom="5"
+                horizontalAlign="center" height="300" updateComplete="onEvent(event)">
+            <mx:Label text="What dimensions should this grid use?" fontSize="16"/>
+            <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                <mx:FormItem label="Number of Rows:">
+                    <mx:NumericStepper id="rowStepper" minimum="1" maximum="5" value="{rows}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Number of Columns:">
+                    <mx:NumericStepper id="columnStepper" minimum="1" maximum="5" value="{columns}"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:Box>
+        <mx:Box label="Styling" paddingLeft="5" paddingTop="5" paddingBottom="5"
+                horizontalAlign="center" height="300" verticalScrollPolicy="on">
+            <mx:Form id="form"/>
+        </mx:Box>
+    </mx:TabNavigator>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

@@ -18,8 +18,23 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         this.percentHeight = 100;
     }
 
+    private function dashboardPopulate(event:DashboardPopulateEvent):void {
+        var box:DashboardBox = event.dashboardBox;
+        var index:int = viewChildren.getItemIndex(box);
+        if (box.element == null) {
+            (getButtonsBox().getChildAt(index))["label"] = "Stack Item " + index;
+        } else if (box.element is DashboardReport) {
+            (getButtonsBox().getChildAt(index))["label"] = DashboardReport(box.element).report.name;
+        } else if (box.element.label != null && box.element.label != "") {
+            (getButtonsBox().getChildAt(index))["label"] = box.element.label;
+        } else {
+            (getButtonsBox().getChildAt(index))["label"] = "Stack Item " + index;
+        }  
+    }
+
     override protected function createComp(element:DashboardElement, i:int):UIComponent {
         var box:DashboardBox = new DashboardBox();
+        box.addEventListener(DashboardPopulateEvent.DASHBOARD_POPULATE, dashboardPopulate);
         box.dashboardEditorMetadata = dashboardEditorMetadata;
         if (element == null) {
 
@@ -63,15 +78,24 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         dashboardStack.gridItems = items;
     }
 
+    override protected function editMode():Boolean {
+        return true;
+    }
+
     protected override function createChildren():void {
-        super.createChildren();
         if (dashboardStack.count == 0) {
+            dashboardStack.count = 1;
+            var eTemp:DashboardStackItem = new DashboardStackItem();
+            dashboardStack.gridItems.addItem(eTemp);
+        }
+        super.createChildren();
+        /*if (dashboardStack.count == 0) {
             var window:StackDimensionsWindow = new StackDimensionsWindow();
             window.dashboardStack = dashboardStack;
             window.addEventListener(GridDimensionEvent.GRID_DIMENSION, onDimensions, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-        }
+        }*/
         var button:Button = new Button();
         button.label = "Add";
         button.addEventListener(MouseEvent.CLICK, addStackElement);
@@ -81,33 +105,38 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         }*/
 
     }
+    
+    private function deletePage(event:DashboardStackEvent):void {
+        var button:UIComponent = event.currentTarget as UIComponent;
+        dashboardStack.count--;
+        var index:int = getButtonsBox().getChildIndex(button);
+        dashboardStack.gridItems.removeItemAt(index);
+        getButtonsBox().removeChildAt(index);
+        viewStack.removeChildAt(index);
+        viewChildren.removeItemAt(index);
+    }
+
+    override protected function createStackButton(index:int, label:String):UIComponent {
+        var topButton:DashboardEditButton = new DashboardEditButton();
+        topButton.dashboardStack = dashboardStack;
+        topButton.addEventListener(DashboardStackEvent.DELETE_PAGE, deletePage);
+        topButton.addEventListener(DashboardStackEvent.CLICK, onButtonClick);
+        topButton.data = index;
+        topButton.label = label;
+        return topButton;
+    }
 
     private function addStackElement(event:MouseEvent):void {
         dashboardStack.count++;
         var stackItem:DashboardStackItem = new DashboardStackItem();
         dashboardStack.gridItems.addItem(stackItem);
-        addStackChild(stackItem,  dashboardStack.gridItems.getItemIndex(stackItem));
+        addStackChild(stackItem, dashboardStack.gridItems.getItemIndex(stackItem));
     }
 
-    /*private function recreateStructure():void {
-        removeAllChildren();
-        for (var i:int = 0; i < dashboardStack.count; i++) {
-            var box:DashboardBox = new DashboardBox();
-            box.dashboardEditorMetadata = dashboardEditorMetadata;
-            if (dashboardStack.gridItems.length > i) {
-                var e:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
-                box.element = e.dashboardElement;
-            } else {
-                var eTemp:DashboardStackItem = new DashboardStackItem();
-                dashboardStack.gridItems.addItem(eTemp);
-            }
-            addChild(box);
-        }
-    }*/
-
     private function onDimensions(event:GridDimensionEvent):void {
+        dispatchEvent(new DashboardPopulateEvent(DashboardPopulateEvent.DASHBOARD_POPULATE));
         if (dashboardStack.count != stackChildSize()) {
-            for (var i:int = 0; i < dashboardStack.count; i++) {
+            for (var i:int = stackChildSize(); i < dashboardStack.count; i++) {
                 if (dashboardStack.gridItems.length > i) {
 
                 } else {
@@ -119,20 +148,20 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         }
     }
 
-    public function validate():Boolean {
-        var valid:Boolean = true;
+    public function validate():String {
+        var valid:String = null;
         var comps:ArrayCollection = stackComponents();
         if (comps.length != dashboardStack.count) {
             this.errorString = "You need to configure all children of this stack.";
             dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
-            valid = false;
+            valid = "You need to configure all children of this stack.";
         }
         if (valid) {
             for each (var box:DashboardBox in comps) {
                 if (box.element == null) {
                     box.errorString = "You need to configure this section of the grid.";
                     box.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
-                    valid = false;
+                    valid = "You need to configure all children of this stack.";
                 } else {
                     valid = valid && box.validate();
                 }

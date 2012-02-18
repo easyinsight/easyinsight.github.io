@@ -46,15 +46,14 @@ public class DashboardImageEditorComponent extends VBox implements IDashboardEdi
         image.imageDescriptor = imageBox.imageDescriptor;
     }
 
-    public function validate():Boolean {
+    public function validate():String {
         if (image.imageDescriptor == null) {
             setStyle("borderColor", "red");
-            setStyle("borderThickness", 1);
+            setStyle("borderThickness", 2);
             setStyle("borderStyle", "solid");
-            errorString = "You need to configure this section of the grid.";
             dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
         }
-        return image.imageDescriptor != null;
+        return "You need to add an image.";
     }
 
     public function edit():void {

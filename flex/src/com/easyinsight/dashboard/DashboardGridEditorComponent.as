@@ -1,7 +1,8 @@
 package com.easyinsight.dashboard {
+import com.easyinsight.analysis.list.SizeOverrideEvent;
 import com.easyinsight.util.PopUpUtil;
 
-import flash.events.MouseEvent;
+import flash.events.Event;
 
 import mx.collections.ArrayCollection;
 import mx.containers.Grid;
@@ -17,6 +18,7 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         super();
         this.percentWidth = 100;
         this.percentHeight = 100;
+        addEventListener(SizeOverrideEvent.SIZE_OVERRIDE, onSizeOverride);
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
@@ -26,16 +28,22 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
     public function save():void {
         var items:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
-            var row:GridRow = getChildAt(i) as GridRow;
-            for (var j:int = 0; j < dashboardGrid.columns; j++) {
-                var item:GridItem = row.getChildAt(j) as GridItem;
-                var box:DashboardBox = item.getChildAt(0) as DashboardBox;
-                box.save();
-                var dashboardGridItem:DashboardGridItem = new DashboardGridItem();
-                dashboardGridItem.rowIndex = i;
-                dashboardGridItem.columnIndex = j;
-                dashboardGridItem.dashboardElement = box.element;
-                items.addItem(dashboardGridItem);
+            if (i < getChildren().length) {
+                var row:GridRow = getChildAt(i) as GridRow;
+                for (var j:int = 0; j < dashboardGrid.columns; j++) {
+                    if (j < row.getChildren().length) {
+                        var item:GridItem = row.getChildAt(j) as GridItem;
+                        var box:DashboardBox = item.getChildAt(0) as DashboardBox;
+                        box.save();
+                        if (box.element != null) {
+                            var dashboardGridItem:DashboardGridItem = new DashboardGridItem();
+                            dashboardGridItem.rowIndex = i;
+                            dashboardGridItem.columnIndex = j;
+                            dashboardGridItem.dashboardElement = box.element;
+                            items.addItem(dashboardGridItem);
+                        }
+                    }
+                }
             }
         }
         dashboardGrid.gridItems = items;
@@ -50,6 +58,36 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
             PopUpUtil.centerPopUp(window);
         }
         recreateStructure();
+    }
+
+    private function onSizeOverride(event:SizeOverrideEvent):void {
+        for (var i:int = 0; i < dashboardGrid.rows; i++) {
+            var gridRow:GridRow = getChildAt(i) as GridRow;
+            for (var j:int = 0; j < dashboardGrid.columns; j++) {
+                var e:DashboardGridItem = findItem(i, j);
+                var gridItem:GridItem = gridRow.getChildAt(j) as GridItem;
+                var box:DashboardBox = gridItem.getChildAt(0) as DashboardBox;
+                var comp:IDashboardEditorComponent = box.component();
+                if (comp != null) {
+                    var childSizeInfo:SizeInfo = comp.obtainPreferredSizeInfo();
+
+                    if (childSizeInfo.preferredWidth != 0) {
+                        gridItem.width = childSizeInfo.preferredWidth + dashboardGrid.paddingLeft + dashboardGrid.paddingRight;
+                        gridItem.percentWidth = NaN;
+                    } else {
+                        gridItem.width = NaN;
+                        gridItem.percentWidth = 100;
+                    }
+                    if (childSizeInfo.preferredHeight != 0) {
+                        gridItem.height = childSizeInfo.preferredHeight + dashboardGrid.paddingTop + dashboardGrid.paddingBottom;
+                        gridItem.percentHeight = NaN;
+                    } else {
+                        gridItem.height = NaN;
+                        gridItem.percentHeight = 100;
+                    }
+                }
+            }
+        }
     }
 
     private var viewChildren:ArrayCollection;
@@ -87,6 +125,12 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         recreateStructure();
     }
 
+    private function onChange(event:Event):void {
+        save();
+        recreateStructure();
+        dispatchEvent(new DashboardPopulateEvent(DashboardPopulateEvent.DASHBOARD_POPULATE));
+    }
+
     private function findItem(x:int, y:int):DashboardGridItem {
         for each (var e:DashboardGridItem in dashboardGrid.gridItems) {
             if (e.rowIndex == x && e.columnIndex == y) {
@@ -96,17 +140,16 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         return null;
     }
 
-    public function validate():Boolean {
-        var valid:Boolean = true;
+    public function validate():String {
+        var valid:String = null;
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
             var row:GridRow = getChildAt(i) as GridRow;
             for (var j:int = 0; j < dashboardGrid.columns; j++) {
                 var item:GridItem = row.getChildAt(j) as GridItem;
                 var box:DashboardBox = item.getChildAt(0) as DashboardBox;
                 if (box.element == null) {
-                    box.errorString = "You need to configure this section of the grid.";
-                    box.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
-                    valid = false;
+                    box.validationFail();
+                    valid = "You need to fully configure this grid.";
                 } else {
                     valid = valid && box.validate();
                 }
@@ -118,8 +161,9 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
     public var dashboardEditorMetadata:DashboardEditorMetadata;
 
     public function edit():void {
-        var window:DashboardEditWindow = new DashboardEditWindow();
+        var window:GridEditWindow = new GridEditWindow();
         window.dashboardElement = dashboardGrid;
+        window.addEventListener(Event.CHANGE, onChange, false, 0, true);
         PopUpManager.addPopUp(window, this, true);
     }
 

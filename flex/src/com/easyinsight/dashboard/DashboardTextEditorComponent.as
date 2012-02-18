@@ -49,8 +49,8 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
         dashboardText.text = textArea.text;
     }
 
-    public function validate():Boolean {
-        return true;
+    public function validate():String {
+        return null;
     }
 
     public function edit():void {

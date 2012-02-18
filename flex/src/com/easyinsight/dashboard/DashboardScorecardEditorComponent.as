@@ -37,8 +37,8 @@ public class DashboardScorecardEditorComponent extends VBox implements IDashboar
     public function save():void {
     }
 
-    public function validate():Boolean {
-        return true;
+    public function validate():String {
+        return null;
     }
 
     public function edit():void {

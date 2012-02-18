@@ -1,5 +1,7 @@
 package com.easyinsight.dashboard {
 
+import flash.events.Event;
+
 import mx.collections.ArrayCollection;
 import mx.containers.VBox;
 import mx.managers.PopUpManager;
@@ -19,7 +21,7 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
-        return new SizeInfo();
+        return reportComp.obtainPreferredSizeInfo();
     }
 
     private var reportComp:DashboardReportViewComponent = new DashboardReportViewComponent();
@@ -35,14 +37,19 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
     public function save():void {
     }
 
-    public function validate():Boolean {
-        return true;
+    public function validate():String {
+        return null;
     }
 
     public function edit():void {
         var window:DashboardEditWindow = new DashboardEditWindow();
         window.dashboardElement = report;
+        window.addEventListener(Event.CHANGE, onChange, false, 0, true);
         PopUpManager.addPopUp(window, this, true);
+    }
+
+    private function onChange(event:Event):void {
+        reportComp.invalidateProperties();
     }
 
     public function refresh():void {

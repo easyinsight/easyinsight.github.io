@@ -4,6 +4,7 @@
         verticalGap="0">
     <mx:Script><![CDATA[
         import com.easyinsight.filtering.FilterDefinition;
+        import com.easyinsight.skin.ApplicationSkin;
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
@@ -59,7 +60,11 @@
                 setStyle("paddingBottom", 0);
             }
 
-            dashboardStyleArea.setStyle("backgroundColor", dashboard.backgroundColor);
+            if (ApplicationSkin.instance().reportHeader) {
+                dashboardStyleArea.setStyle("backgroundColor", ApplicationSkin.instance().headerBackgroundColor);
+            } else {
+                dashboardStyleArea.setStyle("backgroundColor", dashboard.backgroundColor);
+            }
 
             if (dashboard.backgroundColor == 0xFFFFFF) {
                 setStyle("backgroundColor", 0xFFFFFF);
@@ -174,6 +179,7 @@
             _initialFilters = value;
         }
         ]]></mx:Script>
+    <mx:Spacer height="10"/>
     <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}" id="filterViewStack">
         <mx:Box/>
 
