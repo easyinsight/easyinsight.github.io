@@ -7,6 +7,7 @@ public class ApplicationSkinTO {
     public var id:int;
 
     public var coreAppBackgroundImage:ImageDescriptor;
+    public var reportHeaderImage:ImageDescriptor;
     public var coreAppBackgroundImageEnabled:Boolean = false;
     public var coreAppBackgroundColor:uint = 0x818285;
     public var coreAppBackgroundColorEnabled:Boolean = false;
