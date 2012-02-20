@@ -9,13 +9,10 @@ public class ApplicationSkin extends EventDispatcher {
     private var _coreAppBackgroundSize:String = "auto";
     private var _headerBarBackgroundColor:uint = 0xF0F0F0;
     private var _headerBarLogo:Object;
+    private var _reportHeaderImage:Object;
     private var _headerBarDividerColor:uint = 0xD42525;
     private var _centerCanvasBackgroundColor:uint = 0xFFFFFF;
     private var _centerCanvasBackgroundAlpha:Number = 1;
-    [Embed(source="../../../../assets/background2.JPG")]
-    private var defaultReportBackground:Class;
-    private var _reportBackground:Object = defaultReportBackground;
-    private var _reportBackgroundSize:String = "100%";
     private var _headerBackgroundColor:uint;
     private var _headerTextColor:uint;
     private var _reportHeader:Boolean;
@@ -63,14 +60,15 @@ public class ApplicationSkin extends EventDispatcher {
         headerBackgroundColor = appSkin.reportBackgroundColor;
         headerTextColor = appSkin.reportTextColor;
         reportHeader = appSkin.reportHeader;
-        if (appSkin.reportBackground != null) {
-            var reportLoader:ImageLoader = new ImageLoader();
-            reportLoader.addEventListener(ImageLoadEvent.IMAGE_LOADED, function(event:ImageLoadEvent):void {
-                reportBackground = event.bitmap;
+
+        if (appSkin.reportHeaderImage != null) {
+            var reportHeaderImageLoader:ImageLoader = new ImageLoader();
+            reportHeaderImageLoader.addEventListener(ImageLoadEvent.IMAGE_LOADED, function(event:ImageLoadEvent):void {
+                reportHeaderImage = event.bitmap;
             });
-            reportLoader.load(appSkin.reportBackground.id);
-            reportBackgroundSize = appSkin.reportBackgroundSize;
+            reportHeaderImageLoader.load(appSkin.reportHeaderImage.id);
         }
+
         if (appSkin.headerBarLogo != null) {
             var headerBarLoader:ImageLoader = new ImageLoader();
             headerBarLoader.addEventListener(ImageLoadEvent.IMAGE_LOADED, function(event:ImageLoadEvent):void {
@@ -89,6 +87,17 @@ public class ApplicationSkin extends EventDispatcher {
         myDataNewDashboard = appSkin.myDataNewDashboard;
         myDataLookupTable = appSkin.myDataLookupTable;
         myDataAccountVisible = appSkin.myDataAccountVisible;
+    }
+
+    [Bindable(event="reportHeaderImageChanged")]
+    public function get reportHeaderImage():Object {
+        return _reportHeaderImage;
+    }
+
+    public function set reportHeaderImage(value:Object):void {
+        if (_reportHeaderImage == value) return;
+        _reportHeaderImage = value;
+        dispatchEvent(new Event("reportHeaderImageChanged"));
     }
 
     [Bindable(event="reportHeaderChanged")]
@@ -122,28 +131,6 @@ public class ApplicationSkin extends EventDispatcher {
         if (_headerTextColor == value) return;
         _headerTextColor = value;
         dispatchEvent(new Event("headerTextColorChanged"));
-    }
-
-    [Bindable(event="reportBackgroundChanged")]
-    public function get reportBackground():Object {
-        return _reportBackground;
-    }
-
-    public function set reportBackground(value:Object):void {
-        if (_reportBackground == value) return;
-        _reportBackground = value;
-        dispatchEvent(new Event("reportBackgroundChanged"));
-    }
-
-    [Bindable(event="reportBackgroundSizeChanged")]
-    public function get reportBackgroundSize():String {
-        return _reportBackgroundSize;
-    }
-
-    public function set reportBackgroundSize(value:String):void {
-        if (_reportBackgroundSize == value) return;
-        _reportBackgroundSize = value;
-        dispatchEvent(new Event("reportBackgroundSizeChanged"));
     }
 
     [Bindable(event="coreAppBackgroundSizeChanged")]

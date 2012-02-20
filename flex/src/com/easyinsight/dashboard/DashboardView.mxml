@@ -14,7 +14,7 @@
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.framework.User;
 
-        import mx.binding.utils.BindingUtils;
+
 
         import mx.controls.Button;
 
@@ -145,10 +145,10 @@
 
 
         private function gotDashboard():void {
-            BindingUtils.bindProperty(this, "headerBarLogo", ApplicationSkin.instance(), "headerBarLogo");
-            BindingUtils.bindProperty(this, "headerBackgroundColor", ApplicationSkin.instance(), "headerBackgroundColor");
-            BindingUtils.bindProperty(this, "headerTextColor", ApplicationSkin.instance(), "headerTextColor");
-            BindingUtils.bindProperty(this, "headerVisible", ApplicationSkin.instance(), "reportHeader");
+            this.headerBarLogo = ApplicationSkin.instance().reportHeaderImage;
+            this.headerBackgroundColor = ApplicationSkin.instance().headerBackgroundColor;
+            this.headerTextColor = ApplicationSkin.instance().headerTextColor;
+            this.headerVisible = ApplicationSkin.instance().reportHeader;
             dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
             if (dashboard.borderThickness == 0 && exchangeItem == null) {
                 headerArea.includeInLayout = false;

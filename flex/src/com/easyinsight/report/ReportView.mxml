@@ -398,7 +398,7 @@
         private var _headerBackgroundColorChanged:Boolean = false;
         private var _headerTextColorChanged:Boolean = false;
 
-        public function set headerBarLogo(value:Object):void {
+        public function set reportHeaderImage(value:Object):void {
             _headerLogo = value;
             _headerBarLogoChanged = true;
             invalidateDisplayList();
@@ -429,7 +429,7 @@
             if (_headerVisible) {
                 if (_headerBarLogoChanged) {
                     if (_headerLogo is Bitmap) {
-                        var bitmap:Bitmap = ApplicationSkin.instance().headerBarLogo as Bitmap;
+                        var bitmap:Bitmap = ApplicationSkin.instance().reportHeaderImage as Bitmap;
                         logoImage.source = new Bitmap(bitmap.bitmapData);
                         _headerBarLogoChanged = false;
                     }
@@ -475,10 +475,10 @@
                 viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
                 viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
                 viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onSetup);
-                BindingUtils.bindProperty(this, "headerBarLogo", ApplicationSkin.instance(), "headerBarLogo");
-                BindingUtils.bindProperty(this, "headerBackgroundColor", ApplicationSkin.instance(), "headerBackgroundColor");
-                BindingUtils.bindProperty(this, "headerTextColor", ApplicationSkin.instance(), "headerTextColor");
-                BindingUtils.bindProperty(this, "headerVisible", ApplicationSkin.instance(), "reportHeader");
+                this.reportHeaderImage = ApplicationSkin.instance().reportHeaderImage;
+                this.headerBackgroundColor = ApplicationSkin.instance().headerBackgroundColor;
+                this.headerTextColor = ApplicationSkin.instance().headerTextColor;
+                this.headerVisible = ApplicationSkin.instance().reportHeader;
 
                 loading = true;
 

@@ -23,6 +23,27 @@ import java.util.*;
  */
 public class PreferencesService {
 
+    public ApplicationSkin getUserSkin() {
+        ApplicationSkin applicationSkin = null;
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from ApplicationSkinSettings where userID = ?").setLong(0, SecurityUtil.getUserID()).list();
+            if (results.size() > 0) {
+                ApplicationSkinSettings settings = (ApplicationSkinSettings) results.get(0);
+                applicationSkin = settings.toSkin();
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException();
+        } finally {
+            session.close();
+        }
+        return applicationSkin;
+    }
+
     public long addImage(String imageName, byte[] bytes, boolean publicImage) {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
@@ -76,6 +97,33 @@ public class PreferencesService {
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
+        }
+    }
+
+    public byte[] getImage(long imageID, EIConnection conn)  {
+        byte[] bytes;
+        long accountID;
+        try {
+            accountID = SecurityUtil.getAccountID();
+        } catch (Exception e) {
+            accountID = 0;
+        }
+
+        try {
+
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE, USER WHERE USER_IMAGE_ID = ? AND ((USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID) OR (USER_IMAGE.public_visibility = ?))");
+            queryStmt.setLong(1, imageID);
+            queryStmt.setLong(2, accountID);
+            queryStmt.setBoolean(3, true);
+            ResultSet rs = queryStmt.executeQuery();
+            rs.next();
+            bytes = rs.getBytes(1);
+
+            return bytes;
+        } catch (Exception e) {
+            LogClass.error(e);
+
+            throw new RuntimeException(e);
         }
     }
 
@@ -163,7 +211,7 @@ public class PreferencesService {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         Session session = Database.instance().createSession();
         try {
-            ApplicationSkinSettings settings = skin.toSettings();
+            ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.APPLICATION);
             settings.setGlobalSkin(true);
             session.getTransaction().begin();
             session.saveOrUpdate(settings);
@@ -181,7 +229,7 @@ public class PreferencesService {
         ApplicationSkin result;
         Session session = Database.instance().createSession();
         try {
-            ApplicationSkinSettings settings = skin.toSettings();
+            ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.USER);
             settings.setUserID(SecurityUtil.getUserID());
             session.getTransaction().begin();
             session.saveOrUpdate(settings);
@@ -201,7 +249,7 @@ public class PreferencesService {
         ApplicationSkin result;
         Session session = Database.instance().createSession();
         try {
-            ApplicationSkinSettings settings = skin.toSettings();
+            ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.ACCOUNT);
             settings.setAccountID(SecurityUtil.getAccountID());
             session.getTransaction().begin();
             session.saveOrUpdate(settings);

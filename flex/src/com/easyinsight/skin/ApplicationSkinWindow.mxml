@@ -3,7 +3,6 @@
                    xmlns:skin="com.easyinsight.skin.*"
                    creationComplete="onCreation()">
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.CheckBoxReportFormItem;
         import com.easyinsight.analysis.ColorReportFormItem;
 
         import com.easyinsight.analysis.ComboBoxReportFormItem;
@@ -74,16 +73,15 @@
             items.addItem(new ComboBoxReportFormItem("Core Application Background Styling", "coreAppBackgroundSize", skin.coreAppBackgroundSize, skin, ["100%", "Auto"], "coreAppBackgroundSizeEnabled"));
             items.addItem(new ColorReportFormItem("Header Bar Background Color", "headerBarBackgroundColor", skin.headerBarBackgroundColor, skin, "headerBarBackgroundColorEnabled"));
             items.addItem(new ColorReportFormItem("Header Bar Divider Color", "headerBarDividerColor", skin.headerBarDividerColor, skin, "headerBarDividerColorEnabled"));
+            items.addItem(new ImageReportFormItem("Header Logo", "headerBarLogo", skin.headerBarLogo, skin));
             /*items.addItem(new ImageReportFormItem("Logo File", "headerBarLogo", skin.headerBarLogo, skin, "headerBarLogoEnabled"));*/
 
             items.addItem(new ColorReportFormItem("Center Canvas Background Color", "centerCanvasBackgroundColor", skin.centerCanvasBackgroundColor, skin, "centerCanvasBackgroundColorEnabled"));
             items.addItem(new NumericReportFormItem("Center Canvas Background Alpha", "centerCanvasBackgroundAlpha", skin.centerCanvasBackgroundAlpha, skin, 0, 1, "centerCanvasBackgroundAlphaEnabled"));
 
-            items.addItem(new ImageReportFormItem("Report Editor Background Image", "reportBackground", skin.reportBackground, skin, "reportBackgroundEnabled"));
-            items.addItem(new ComboBoxReportFormItem("Report Editor Background Styling", "reportBackgroundSize", skin.reportBackgroundSize, skin, ["100%", "Auto"], "reportBackgroundSizeEnabled"));
             reportBackgroundColor = skin.reportBackgroundColor;
             reportTextColor = skin.reportTextColor;
-            headerLogo = skin.headerBarLogo;
+            headerLogo = skin.reportHeaderImage;
             customHeaderShown = skin.reportHeader;
             BindingUtils.bindProperty(this, "reportBackgroundColor", backgroundColorItem, "value");
             BindingUtils.bindProperty(this, "reportTextColor", textColorItem, "value");
@@ -91,22 +89,6 @@
             lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
             for each (var item:ReportFormItem in items) {
                 reportForm.addChild(item);
-            }
-
-            var offset:int = items.length;
-            items.addItem(new CheckBoxReportFormItem("Name on My Data Tree", "myDataName", skin.myDataName, skin));
-            items.addItem(new CheckBoxReportFormItem("Owner on My Data Tree", "myDataOwner", skin.myDataOwner, skin));
-            items.addItem(new CheckBoxReportFormItem("Creation Date on My Data Tree", "myDataCreationDate", skin.myDataCreationDate, skin));
-            items.addItem(new CheckBoxReportFormItem("Size on My Data Tree", "myDataSize", skin.myDataSize, skin));
-            items.addItem(new CheckBoxReportFormItem("Last Data Time on My Data Tree", "myDataLastTime", skin.myDataLastTime, skin));
-            items.addItem(new CheckBoxReportFormItem("Account Visible on My Data Tree", "myDataAccountVisible", skin.myDataAccountVisible, skin));
-            items.addItem(new CheckBoxReportFormItem("Combine Data Source", "myDataCombine", skin.myDataCombine, skin));
-            items.addItem(new CheckBoxReportFormItem("Create Scorecard", "myDataNewScorecard", skin.myDataNewScorecard, skin));
-            items.addItem(new CheckBoxReportFormItem("Create Dashboard", "myDataNewDashboard", skin.myDataNewDashboard, skin));
-            items.addItem(new CheckBoxReportFormItem("Create Lookup Table", "myDataLookupTable", skin.myDataLookupTable, skin));
-
-            for (var i:int = offset; i < items.length; i++) {
-                myDataForm.addChild(DisplayObject(items.getItemAt(i)));
             }
         }
 
@@ -139,7 +121,7 @@
                 skin.reportHeader = customHeader.selected;
                 skin.reportBackgroundColor = backgroundColorItem.selectedColor;
                 skin.reportTextColor = textColorItem.selectedColor;
-                skin.headerBarLogo = logoImageBox.imageDescriptor;
+                skin.reportHeaderImage = logoImageBox.imageDescriptor;
                 if (_skinMode == USER_SKIN) {
                     preferencesService.saveUserSkin.send(skin);
                 } else if (_skinMode == ACCOUNT_SKIN) {
@@ -189,8 +171,8 @@
         private var customHeaderShown:Boolean;
         ]]></mx:Script>
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
-        <mx:method name="getUserSkin" result="gotUserSkin()"/>
         <mx:method name="getAccountSkin" result="gotAccountSkin()"/>
+        <mx:method name="getUserSkin" result="gotUserSkin()"/>
         <mx:method name="saveUserSkin" result="savedSettings()"/>
         <mx:method name="saveAccountSkin" result="savedSettings()"/>
     </mx:RemoteObject>
@@ -201,15 +183,10 @@
 
                 </mx:Form>
             </mx:VBox>
-            <mx:VBox label="My Data Settings" width="600" horizontalAlign="center">
-                <mx:Form id="myDataForm" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-
-                </mx:Form>
-            </mx:VBox>
             <mx:VBox label="Report Header" paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
                 <mx:CheckBox label="Do you want to define a custom header for reports and dashboards?" id="customHeader" selected="{customHeaderShown}"/>
                 <mx:HBox width="800" id="headerArea" paddingTop="5" paddingBottom="5" paddingLeft="10" verticalAlign="middle" enabled="{customHeader.selected}"
-                        backgroundColor="{reportBackgroundColor}">
+                         backgroundColor="{reportBackgroundColor}">
                     <mx:Box backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" borderColor="#FFFFFF" borderThickness="1" cornerRadius="5"
                             borderStyle="solid">
                         <skin:ShowImageBox id="logoImageBox" imageDescriptor="{headerLogo}"/>

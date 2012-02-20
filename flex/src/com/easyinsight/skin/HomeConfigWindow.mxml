@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                   xmlns:skin="com.easyinsight.skin.*"
+                   creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.CheckBoxReportFormItem;
+        import com.easyinsight.analysis.ColorReportFormItem;
+        import com.easyinsight.analysis.ComboBoxReportFormItem;
+        import com.easyinsight.analysis.ImageReportFormItem;
+        import com.easyinsight.analysis.NumericReportFormItem;
+        import com.easyinsight.analysis.ReportFormItem;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.binding.utils.BindingUtils;
+        import mx.collections.ArrayCollection;
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+
+        private var items:ArrayCollection = new ArrayCollection();
+
+        private var _skinMode:int;
+
+        [Bindable]
+        private var _initialIndex:int = 0;
+
+        public function set initialIndex(value:int):void {
+            _initialIndex = value;
+        }
+
+        public function set skinMode(value:int):void {
+            _skinMode = value;
+        }
+
+        [Bindable]
+        private var skin:ApplicationSkinTO;
+
+        private function onCreation():void {
+            preferencesService.getUserSkin.send();
+        }
+
+        private function gotUserSkin():void {
+            skin = preferencesService.getUserSkin.lastResult as ApplicationSkinTO;
+            gotSettings();
+        }
+
+        private function gotSettings():void {
+
+            if (skin == null) {
+                skin = new ApplicationSkinTO();
+            }
+
+            var offset:int = items.length;
+            items.addItem(new CheckBoxReportFormItem("Show Report Owner", "myDataOwner", skin.myDataOwner, skin));
+            items.addItem(new CheckBoxReportFormItem("Show Creation Date", "myDataCreationDate", skin.myDataCreationDate, skin));
+            items.addItem(new CheckBoxReportFormItem("Show Account Visible", "myDataAccountVisible", skin.myDataAccountVisible, skin));
+            items.addItem(new CheckBoxReportFormItem("Combine Data Source", "myDataCombine", skin.myDataCombine, skin));
+            items.addItem(new CheckBoxReportFormItem("Create Scorecard", "myDataNewScorecard", skin.myDataNewScorecard, skin));
+            items.addItem(new CheckBoxReportFormItem("Create Dashboard", "myDataNewDashboard", skin.myDataNewDashboard, skin));
+            items.addItem(new CheckBoxReportFormItem("Create Lookup Table", "myDataLookupTable", skin.myDataLookupTable, skin));
+            var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
+            lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
+            for (var i:int = offset; i < items.length; i++) {
+                myDataForm.addChild(DisplayObject(items.getItemAt(i)));
+            }
+        }
+
+        private function onDone(event:FlexEvent):void {
+            PopUpUtil.centerPopUp(this);
+        }
+
+        private function savedSettings():void {
+            var resultSkin:ApplicationSkinTO;
+            resultSkin = preferencesService.saveUserSkin.lastResult as ApplicationSkinTO;
+            User.getInstance().applicationSkin = resultSkin;
+            ApplicationSkin.instance().applyUserSettings(User.getInstance().applicationSkin);
+            dispatchEvent(new Event(Event.CHANGE));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function save():void {
+            var valid:Boolean = true;
+            for each (var validateItem:ReportFormItem in items) {
+                valid = valid && validateItem.validate();
+            }
+            if (valid) {
+                for each (var item:ReportFormItem in items) {
+                    item.save();
+                }
+                preferencesService.saveUserSkin.send(skin);
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="preferencesService" id="preferencesService">
+        <mx:method name="getUserSkin" result="gotUserSkin()"/>
+        <mx:method name="saveUserSkin" result="savedSettings()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:TabNavigator resizeToContent="true" creationPolicy="all" selectedIndex="{_initialIndex}">
+            <mx:VBox label="Home Page Settings" width="600" horizontalAlign="center">
+                <mx:Form id="myDataForm" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+
+                </mx:Form>
+            </mx:VBox>
+        </mx:TabNavigator>
+
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

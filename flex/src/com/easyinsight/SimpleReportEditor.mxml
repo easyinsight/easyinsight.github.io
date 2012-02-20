@@ -984,7 +984,7 @@
     </mx:HBox>
     <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275"
              paddingBottom="10" paddingTop="33">
-        <mx:VBox width="100%" id="headerArea" verticalGap="0">
+        <mx:VBox width="100%" id="headerArea" verticalGap="0" backgroundColor="#FFFFFF">
 
             <filtering:TransformContainer id="transformContainer" paddingLeft="10"
                                           paddingBottom="10"

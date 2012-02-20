@@ -43,7 +43,7 @@
         protected override function commitProperties():void {
             super.commitProperties();
             solutionGrid.setStyle("backgroundImage", defaultReportBackground);
-            solutionGrid.setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
+            solutionGrid.setStyle("backgroundSize", "100%");
         }
 
         [Bindable(event="saasChanged")]

@@ -11,6 +11,11 @@ import java.util.List;
  * Time: 10:26:46 PM
  */
 public class ApplicationSkin {
+    
+    public static final int APPLICATION = 1;
+    public static final int ACCOUNT = 2;
+    public static final int USER = 3;
+
     private ImageDescriptor coreAppBackgroundImage;
     private boolean coreAppBackgroundImageEnabled;
     private int coreAppBackgroundColor;
@@ -20,15 +25,14 @@ public class ApplicationSkin {
     private int headerBarBackgroundColor;
     private boolean headerBarBackgroundColorEnabled;
     private ImageDescriptor headerBarLogo;
+    private ImageDescriptor reportHeaderImage;
     private int headerBarDividerColor;
     private boolean headerBarDividerColorEnabled;
     private int centerCanvasBackgroundColor;
     private boolean centerCanvasBackgroundColorEnabled;
     private double centerCanvasBackgroundAlpha;
     private boolean centerCanvasBackgroundAlphaEnabled;
-    private ImageDescriptor reportBackground;
     private boolean reportBackgroundEnabled;
-    private String reportBackgroundSize;
     private boolean reportBackgroundSizeEnabled;
     private int reportBackgroundColor;
     private int reportTextColor;
@@ -54,39 +58,42 @@ public class ApplicationSkin {
         this.id = id;
     }
 
-    public ApplicationSkinSettings toSettings() {
+    public ApplicationSkinSettings toSettings(int mode) {
         ApplicationSkinSettings settings = new ApplicationSkinSettings();
         List<ReportProperty> properties = new ArrayList<ReportProperty>();
-        if (coreAppBackgroundImage != null) {
-            properties.add(new ReportImageProperty("coreAppBackgroundImage", coreAppBackgroundImage, coreAppBackgroundImageEnabled));
+        if (mode == APPLICATION || mode == ACCOUNT) {
+            if (coreAppBackgroundImage != null) {
+                properties.add(new ReportImageProperty("coreAppBackgroundImage", coreAppBackgroundImage, coreAppBackgroundImageEnabled));
+            }
+            if (headerBarLogo != null) {
+                properties.add(new ReportImageProperty("headerBarLogo", headerBarLogo, true));
+            }
+            if (reportHeaderImage != null) {
+                properties.add(new ReportImageProperty("reportHeaderImage", reportHeaderImage, true));
+            }
+            properties.add(new ReportNumericProperty("coreAppBackgroundColor", coreAppBackgroundColor, coreAppBackgroundColorEnabled));
+            properties.add(new ReportNumericProperty("headerBarBackgroundColor", headerBarBackgroundColor, headerBarBackgroundColorEnabled));
+            properties.add(new ReportNumericProperty("headerBarDividerColor", headerBarDividerColor, headerBarDividerColorEnabled));
+            properties.add(new ReportNumericProperty("centerCanvasBackgroundColor", centerCanvasBackgroundColor, centerCanvasBackgroundColorEnabled));
+            properties.add(new ReportNumericProperty("centerCanvasBackgroundAlpha", centerCanvasBackgroundAlpha, centerCanvasBackgroundAlphaEnabled));
+            properties.add(new ReportStringProperty("coreAppBackgroundSize", coreAppBackgroundSize, coreAppBackgroundSizeEnabled));
+            properties.add(new ReportNumericProperty("reportBackgroundColor", reportBackgroundColor, true));
+            properties.add(new ReportNumericProperty("reportTextColor", reportTextColor, true));
+            properties.add(new ReportBooleanProperty("reportHeader", reportHeader, true));
         }
-        if (headerBarLogo != null) {
-            properties.add(new ReportImageProperty("headerBarLogo", headerBarLogo, true));
+        if (mode == APPLICATION || mode == USER) {
+            properties.add(new ReportBooleanProperty("myDataName", myDataName));
+            properties.add(new ReportBooleanProperty("myDataSize", myDataSize));
+            properties.add(new ReportBooleanProperty("myDataOwner", myDataOwner));
+            properties.add(new ReportBooleanProperty("myDataCreationDate", myDataCreationDate));
+            properties.add(new ReportBooleanProperty("myDataLastTime", myDataLastTime));
+            properties.add(new ReportBooleanProperty("myDataCombine", myDataCombine));
+            properties.add(new ReportBooleanProperty("myDataScorecard", myDataNewScorecard));
+            properties.add(new ReportBooleanProperty("myDataKPITree", myDataNewKPITree));
+            properties.add(new ReportBooleanProperty("myDataDashboard", myDataNewDashboard));
+            properties.add(new ReportBooleanProperty("myDataLookupTable", myDataLookupTable));
+            properties.add(new ReportBooleanProperty("myDataAccountVisible", myDataAccountVisible));
         }
-        if (reportBackground != null) {
-            properties.add(new ReportImageProperty("reportBackground", reportBackground, reportBackgroundEnabled));
-        }
-        properties.add(new ReportNumericProperty("coreAppBackgroundColor", coreAppBackgroundColor, coreAppBackgroundColorEnabled));
-        properties.add(new ReportNumericProperty("headerBarBackgroundColor", headerBarBackgroundColor, headerBarBackgroundColorEnabled));
-        properties.add(new ReportNumericProperty("headerBarDividerColor", headerBarDividerColor, headerBarDividerColorEnabled));
-        properties.add(new ReportNumericProperty("centerCanvasBackgroundColor", centerCanvasBackgroundColor, centerCanvasBackgroundColorEnabled));
-        properties.add(new ReportNumericProperty("centerCanvasBackgroundAlpha", centerCanvasBackgroundAlpha, centerCanvasBackgroundAlphaEnabled));
-        properties.add(new ReportStringProperty("coreAppBackgroundSize", coreAppBackgroundSize, coreAppBackgroundSizeEnabled));
-        properties.add(new ReportStringProperty("reportBackgroundSize", reportBackgroundSize, reportBackgroundSizeEnabled));
-        properties.add(new ReportNumericProperty("reportBackgroundColor", reportBackgroundColor, true));
-        properties.add(new ReportNumericProperty("reportTextColor", reportTextColor, true));
-        properties.add(new ReportBooleanProperty("reportHeader", reportHeader, true));
-        properties.add(new ReportBooleanProperty("myDataName", myDataName));
-        properties.add(new ReportBooleanProperty("myDataSize", myDataSize));
-        properties.add(new ReportBooleanProperty("myDataOwner", myDataOwner));
-        properties.add(new ReportBooleanProperty("myDataCreationDate", myDataCreationDate));
-        properties.add(new ReportBooleanProperty("myDataLastTime", myDataLastTime));
-        properties.add(new ReportBooleanProperty("myDataCombine", myDataCombine));
-        properties.add(new ReportBooleanProperty("myDataScorecard", myDataNewScorecard));
-        properties.add(new ReportBooleanProperty("myDataKPITree", myDataNewKPITree));
-        properties.add(new ReportBooleanProperty("myDataDashboard", myDataNewDashboard));
-        properties.add(new ReportBooleanProperty("myDataLookupTable", myDataLookupTable));
-        properties.add(new ReportBooleanProperty("myDataAccountVisible", myDataAccountVisible));
         settings.setSkinID(id);
         settings.setProperties(properties);
         return settings;
@@ -108,13 +115,12 @@ public class ApplicationSkin {
         headerBarDividerColorEnabled = propertyEnabled(properties, "headerBarDividerColor");
         coreAppBackgroundSize = findStringProperty(properties, "coreAppBackgroundSize", "100%");
         coreAppBackgroundSizeEnabled = propertyEnabled(properties, "coreAppBackgroundSize");
-        reportBackground = findImage(properties, "reportBackground", null);
         reportBackgroundEnabled = propertyEnabled(properties, "reportBackground");
-        reportBackgroundSize = findStringProperty(properties, "reportBackgroundSize", "100%");
         reportBackgroundSizeEnabled = propertyEnabled(properties, "reportBackgroundSize");
         reportBackgroundColor = (int) findNumberProperty(properties, "reportBackgroundColor", 0);
         reportTextColor = (int) findNumberProperty(properties, "reportTextColor", 0);
         reportHeader = propertyEnabled(properties, "reportHeader");
+        reportHeaderImage = findImage(properties, "reportHeaderImage", null);
         myDataName = findBooleanProperty(properties, "myDataName", true);
         myDataSize = findBooleanProperty(properties, "myDataSize", false);
         myDataOwner = findBooleanProperty(properties, "myDataOwner", false);
@@ -126,6 +132,14 @@ public class ApplicationSkin {
         myDataNewDashboard = findBooleanProperty(properties, "myDataDashboard", true);
         myDataLookupTable = findBooleanProperty(properties, "myDataLookupTable", false);
         myDataAccountVisible = findBooleanProperty(properties, "myDataAccountVisible", false);
+    }
+
+    public ImageDescriptor getReportHeaderImage() {
+        return reportHeaderImage;
+    }
+
+    public void setReportHeaderImage(ImageDescriptor reportHeaderImage) {
+        this.reportHeaderImage = reportHeaderImage;
     }
 
     public boolean isReportHeader() {
@@ -214,22 +228,6 @@ public class ApplicationSkin {
 
     public void setCenterCanvasBackgroundAlpha(double centerCanvasBackgroundAlpha) {
         this.centerCanvasBackgroundAlpha = centerCanvasBackgroundAlpha;
-    }
-
-    public ImageDescriptor getReportBackground() {
-        return reportBackground;
-    }
-
-    public void setReportBackground(ImageDescriptor reportBackground) {
-        this.reportBackground = reportBackground;
-    }
-
-    public String getReportBackgroundSize() {
-        return reportBackgroundSize;
-    }
-
-    public void setReportBackgroundSize(String reportBackgroundSize) {
-        this.reportBackgroundSize = reportBackgroundSize;
     }
 
     public boolean isCoreAppBackgroundImageEnabled() {
