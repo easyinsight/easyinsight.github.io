@@ -205,7 +205,7 @@ public class AnalysisService {
         try {
             List<FilterDefinition> filters;
             if (drillThrough.getMarmotScript() != null && !"".equals(drillThrough.getMarmotScript())) {
-                filters = new ReportCalculation(drillThrough.getMarmotScript()).apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()));
+                filters = new ReportCalculation(drillThrough.getMarmotScript()).apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report);
             } else {
                 if (report.getReportType() == WSAnalysisDefinition.HEATMAP) {
                     CoordinateValue coordinateValue = (CoordinateValue) data.get(analysisItem.qualifiedName());
