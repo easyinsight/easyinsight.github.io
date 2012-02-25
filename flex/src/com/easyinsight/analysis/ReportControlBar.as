@@ -120,12 +120,14 @@ public class ReportControlBar extends FlowBox {
         dispatchEvent(new Event("analysisItemsChanged"));
     }
 
-    public function highlight(analysisItem:AnalysisItem):void {
+    public function highlight(analysisItem:AnalysisItem):Boolean {
+        var valid:Boolean = false;
         for each (var child:DisplayObject in getChildren()) {
             if (child is ListDropAreaGrouping) {
-                ListDropAreaGrouping(child).highlight(analysisItem);
+                valid = valid || ListDropAreaGrouping(child).highlight(analysisItem);
             }
         }
+        return valid;
     }
 
     public function normal():void {

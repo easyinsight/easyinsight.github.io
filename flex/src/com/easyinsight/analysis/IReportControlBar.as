@@ -18,7 +18,7 @@ public interface IReportControlBar {
 
     function onDataReceipt(event:DataServiceEvent):void;
 
-    function highlight(analysisItem:AnalysisItem):void;
+    function highlight(analysisItem:AnalysisItem):Boolean;
     function normal():void;
 }
 }

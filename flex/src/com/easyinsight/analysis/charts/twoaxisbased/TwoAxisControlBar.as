@@ -22,6 +22,7 @@ import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
+import mx.controls.Alert;
 import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.controls.RadioButton;
@@ -67,14 +68,24 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
         }
     }
 
-    override public function highlight(analysisItem:AnalysisItem):void {
-        super.highlight(analysisItem);
+    override public function highlight(analysisItem:AnalysisItem):Boolean {
+        var valid:Boolean = false;
         if (stack.selectedIndex == 0) {
-            yAxisGrouping.highlight(analysisItem);
-            measureGrouping.highlight(analysisItem);
+            if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                valid = valid || xAxisGrouping.highlight(analysisItem);
+            } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                valid = valid || yAxisGrouping.highlight(analysisItem);
+            } else {
+                valid = valid || measureGrouping.highlight(analysisItem);
+            }
         } else {
-            measuresGrouping.highlight(analysisItem);
+            if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                valid = valid || xAxisGrouping.highlight(analysisItem);
+            } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                valid = valid || measuresGrouping.highlight(analysisItem);
+            }
         }
+        return valid;
     }
 
     override public function normal():void {

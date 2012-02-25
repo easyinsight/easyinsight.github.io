@@ -42,10 +42,12 @@ public class ListDropAreaGrouping extends FlowBox {
         _dataSourceID = value;
     }
 
-    public function highlight(analysisItem:AnalysisItem):void {
+    public function highlight(analysisItem:AnalysisItem):Boolean {
+        var valid:Boolean = false;
         for each (var area:DropArea in dropAreas) {
-            area.highlight(analysisItem);
+            valid = valid || area.highlight(analysisItem);
         }
+        return valid;
     }
 
     public function normal():void {

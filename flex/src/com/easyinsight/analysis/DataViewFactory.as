@@ -19,7 +19,6 @@ import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.Canvas;
 import mx.containers.VBox;
-import mx.controls.Alert;
 import mx.core.IUIComponent;
 import mx.core.UIComponent;
 import mx.events.DragEvent;
@@ -89,8 +88,10 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     public function highlightDropAreas(analysisItem:AnalysisItem):void {
-        _controlBar.highlight(analysisItem);
-        reportCanvas.highlight();
+        var highlight:Boolean = _controlBar.highlight(analysisItem);
+        if (highlight) {
+            reportCanvas.highlight();
+        }
         /*if (notConfigured.parent) {
             notConfigured.highlight(analysisItem);
         } else {

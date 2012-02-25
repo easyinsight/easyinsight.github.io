@@ -93,11 +93,13 @@ public class DropArea extends HBox
         _report = value;
     }
 
-    public function highlight(analysisItem:AnalysisItem):void {
-        if (recommend(analysisItem)) {
+    public function highlight(analysisItem:AnalysisItem):Boolean {
+        var valid:Boolean = recommend(analysisItem);
+        if (valid) {
             setStyle("borderColor", 0x00AA00);
             setStyle("backgroundColor", 0xBBFFBB);
         }
+        return valid;
     }
 
     public function normal():void {
