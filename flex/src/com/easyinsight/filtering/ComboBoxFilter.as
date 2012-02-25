@@ -15,6 +15,7 @@ import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.ComboBox;
 import mx.controls.Label;
+import mx.controls.LinkButton;
 import mx.controls.ProgressBar;
 import mx.core.UIComponent;
 import mx.events.DropdownEvent;
@@ -111,7 +112,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
     
     private var checkbox:CheckBox;
     
-    private var filterLabel:Label;
+    private var filterLabel:UIComponent;
 
     override protected function createChildren():void {
         super.createChildren();
@@ -139,8 +140,17 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             //addChild(checkbox);
         }
 
-        filterLabel = new Label();
-        filterLabel.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+        if (_filterEditable) {
+            filterLabel = new LinkButton();
+            filterLabel.setStyle("fontSize", 12);
+            filterLabel.setStyle("textDecoration", "underline");
+            LinkButton(filterLabel).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+        } else {
+            filterLabel = new Label();
+            Label(filterLabel).text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+        }
+        
+        
         //addChild(label);
 
         if (comboBox == null) {
@@ -154,12 +164,13 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
         //addChild(viewStack);
 
         if (_filterEditable) {
-            if (editButton == null) {
+            filterLabel.addEventListener(MouseEvent.CLICK, edit);
+            /*if (editButton == null) {
                 editButton = new Button();
                 editButton.addEventListener(MouseEvent.CLICK, edit);
                 editButton.setStyle("icon", ImageConstants.EDIT_ICON);
                 editButton.toolTip = "Edit";
-            }
+            }*/
             //hbox.addChild(editButton);
             if (deleteButton == null) {
                 deleteButton = new Button();
@@ -231,7 +242,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             filterLabel.x = xPos;
             filterLabel.y = (this.height - filterLabel.height) / 2;
             filterLabel.setActualSize(filterLabel.measuredWidth, filterLabel.measuredHeight);            
-            xPos += filterLabel.measuredWidth + 8;
+            xPos += filterLabel.measuredWidth;
             comboBox.x = xPos;
             comboBox.y = (this.height - comboBox.height) / 2;
             comboBox.setActualSize(comboBox.measuredWidth, comboBox.measuredHeight);
@@ -244,6 +255,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
                 xPos += editButton.measuredWidth + 8;
             }
             if (deleteButton) {
+                xPos += 8;
                 deleteButton.x = xPos;
                 deleteButton.y = (this.height - deleteButton.height) / 2;
                 deleteButton.setActualSize(deleteButton.measuredWidth, deleteButton.measuredHeight);

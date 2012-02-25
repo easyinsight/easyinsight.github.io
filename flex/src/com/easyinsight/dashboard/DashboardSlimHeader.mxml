@@ -5,7 +5,10 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.IRetrievable;
         import com.easyinsight.datasources.DataSourceInfo;
+        import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.genredata.ExchangeItem;
+        import com.easyinsight.skin.ImageConstants;
 
         import mx.controls.Alert;
 
@@ -24,11 +27,15 @@
 
         private var _dashboard:Dashboard;
 
+        [Bindable]
+        private var editable:Boolean;
+
         public function set dashboard(value:Dashboard):void {
             _dashboard = value;
             if (_dashboard != null) {
                 description = _dashboard.description;
                 dashboardName = _dashboard.name;
+                editable = _dashboard.role == 1;
             }
         }
 
@@ -127,6 +134,8 @@
            id="exportButton" toolTip="Export the dashboard..." label="Export" icon="{exportToExcelIcon}"/>
     <mx:Button click="_dashboardView.toggleFilters()" styleName="grayButton" labelPlacement="right"
                id="filterButton" label="Toggle Filters" icon="{filterIcon}"/>
+    <mx:Button click="dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { dashboardID: _dashboard.id})))" styleName="grayButton" labelPlacement="right"
+               id="editButton" label="Edit the Dashboard" icon="{ImageConstants.EDIT_ICON}" visible="{editable}"/>
     <mx:Spacer width="100%"/>
     <mx:Label text="{dashboardName}" maxWidth="350"
               fontSize="14" toolTip="{description}"/>

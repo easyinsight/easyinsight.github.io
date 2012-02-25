@@ -148,6 +148,8 @@ public class FunctionFactory {
             return new StringLiteral();
         } else if (s.equals("drillthroughaddfilter")) {
             return new DrillthroughAddFilter();
+        } else if (s.equals("drillthroughaddfilters")) {
+            return new DrillthroughAddFilters();
         } else {
             return null;
         }

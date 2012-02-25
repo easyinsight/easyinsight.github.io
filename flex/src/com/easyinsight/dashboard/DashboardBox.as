@@ -1,5 +1,5 @@
 package com.easyinsight.dashboard {
-import com.easyinsight.dashboard.DashboardElementFactory;
+
 import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.solutions.InsightDescriptor;
@@ -19,7 +19,9 @@ import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.controls.Button;
 import mx.controls.Label;
+import mx.controls.LinkButton;
 import mx.controls.List;
+import mx.controls.TextArea;
 import mx.core.IUIComponent;
 import mx.events.DragEvent;
 import mx.managers.DragManager;
@@ -96,20 +98,25 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         labelText.percentWidth = 100;
         labelText.y = 3;
         labelText.setStyle("textAlign", "center");
-        labelText.setStyle("fontSize", 14);
+        labelText.setStyle("fontSize", 10);
         topCanvas.addChild(labelText);
         var topBox:HBox = new HBox();
         topBox.setStyle("horizontalAlign", "right");
         topBox.setStyle("verticalAlign", "middle");
         topBox.setStyle("paddingRight", 5);
-        topBox.height = 30;
+        topBox.height = 16;
         topBox.percentWidth = 100;
-        var editButton:Button = new Button();
-        editButton.setStyle("icon", ImageConstants.EDIT_ICON);
+
+        
+        var editButton:LinkButton = new LinkButton();
+        editButton.label = "Edit";
+        editButton.setStyle("fontSize", 10);
         editButton.addEventListener(MouseEvent.CLICK, onEdit);
         BindingUtils.bindProperty(editButton, "visible", this, "buttonsVisible");
-        var deleteButton:Button = new Button();
-        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
+        var deleteButton:LinkButton = new LinkButton();
+        //deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
+        deleteButton.label = "Clear";
+        deleteButton.setStyle("fontSize", 10);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         deleteButton.enabled = _allowDelete;
         BindingUtils.bindProperty(deleteButton, "visible", this, "buttonsVisible");
@@ -124,6 +131,8 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         dropBox.setStyle("paddingTop", 5);
         dropBox.percentHeight = 100;
         dropBox.percentWidth = 100;
+        dropBox.setStyle("verticalAlign", "middle");
+        dropBox.setStyle("horizontalAlign", "center");
         addChild(dropBox);
         if (element != null) {
             updateText();
@@ -137,6 +146,12 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
             dropBox.setStyle("backgroundColor", 0xFFFFFF);
             dropBox.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
             dropBox.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
+            var dropTextArea:TextArea = new TextArea();
+            dropTextArea.setStyle("backgroundAlpha", 0);
+            dropTextArea.setStyle("fontSize", 12);
+            dropTextArea.text = "Drag a control or report from the left side options to here.";
+            dropTextArea.width = 200;
+            dropBox.addChild(dropTextArea);
         }
         buttonsVisible = element != null;
     }
@@ -176,15 +191,26 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
             buttonsVisible = false;
             dropBox.removeAllChildren();
             dropBox.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
+            dropBox.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
             dropBox.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
             dropBox.setStyle("backgroundColor", 0xFFFFFF);
+            var dropTextArea:TextArea = new TextArea();
+            dropTextArea.setStyle("backgroundAlpha", 0);
+            dropTextArea.setStyle("fontSize", 12);
+            dropTextArea.text = "Drag a control or report from the left side options to here.";
+            dropTextArea.width = 200;
+            dropBox.addChild(dropTextArea);
             dispatchEvent(new DashboardPopulateEvent(DashboardPopulateEvent.DASHBOARD_POPULATE, this));
             dispatchEvent(new DashboardChangedEvent());
         }
     }
 
+    private function dragOverHandler(event:DragEvent):void {
+        DragManager.showFeedback(DragManager.MOVE);
+    }
+
     public function validate():String {
-        if (dropBox.getChildren().length == 0) {
+        if (dropBox.getChildren().length == 0 || !(dropBox.getChildAt(0) is IDashboardEditorComponent)) {
             return "You need to add at least one element to the dashboard.";
         } else {
             errorString = null;
@@ -229,11 +255,11 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
             dashboardScorecard.scorecard = source as ScorecardDescriptor;
             element = dashboardScorecard;
         }
-        if (this.element != null) {
-            dropBox.removeAllChildren();
-            this.element = null;
-            editorComp = null;
-        }
+
+        dropBox.removeAllChildren();
+        this.element = null;
+        editorComp = null;
+
 
         buttonsVisible = true;
         this.element = element;

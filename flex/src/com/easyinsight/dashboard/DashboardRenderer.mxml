@@ -179,7 +179,6 @@
             _initialFilters = value;
         }
         ]]></mx:Script>
-    <mx:Spacer height="10"/>
     <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}" id="filterViewStack">
         <mx:Box/>
 

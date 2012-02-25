@@ -22,15 +22,7 @@
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.controls.Menu;
-        import mx.events.MenuEvent;
         import mx.managers.PopUpManager;
-
-        private var _analysisDefinition:AnalysisDefinition;
-
-        public function set analysisDefinition(value:AnalysisDefinition):void {
-            _analysisDefinition = value;
-        }
 
         private function search(event:Event):void {
             var window:QuickSearchWindow = new QuickSearchWindow();
@@ -42,7 +34,6 @@
 
         private function createAndShow():void {
             var window:AdditionalActionWindow = new AdditionalActionWindow();
-            window.reportSaved = _analysisDefinition.analysisID > 0;
             window.addEventListener(AdditionalActionEvent.NEW_REPORT, function (event:AdditionalActionEvent):void {
                 dispatchEvent(event);
             }, false, 0, true);

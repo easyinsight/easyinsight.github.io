@@ -248,12 +248,6 @@
             PopUpUtil.centerPopUp(window);
         }
 
-
-
-        /*public function saveReport():void {
-            dashboardService.keepDashboard.send(originalExchangeItem != null ? dashboardExchangeID : dashboard.id, exchangeItem.id);
-        }*/
-
         [Bindable]
         private var filterIndex:int = 0;
 
@@ -309,9 +303,9 @@
         private function toggleReportInfo():void {
             if (reportInfoLabel == "Show Dashboard Info") {
                 reportInfoLabel = "Hide Dashboard Info";
-                addChildAt(descriptionBox, 2);
+                addChildAt(descriptionBox, 3);
             } else {
-                reportInfoLabel = "Show Report Info";
+                reportInfoLabel = "Show Dashboard Info";
                 removeChild(descriptionBox);
             }
         }
@@ -327,7 +321,7 @@
 
         override protected function generateState():void {
             super.generateState();
-            showReportInfoButton = !_showAddBar;
+            showReportInfoButton = !_showAddBar && description != null && description != "";
             if (descriptionBox != null && !_showAddBar && contains(descriptionBox)) {
                 removeChild(descriptionBox);
             }
@@ -385,7 +379,7 @@
             if (_headerVisible) {
                 if (_headerBarLogoChanged) {
                     if (_headerLogo is Bitmap) {
-                        var bitmap:Bitmap = ApplicationSkin.instance().headerBarLogo as Bitmap;
+                        var bitmap:Bitmap = _headerLogo as Bitmap;
                         logoImage.source = new Bitmap(bitmap.bitmapData);
                         _headerBarLogoChanged = false;
                     }
@@ -431,6 +425,7 @@
                        id="linkButton"/>
         <mx:Spacer width="100%"/>
     </mx:HBox>
+    <mx:Spacer height="10"/>
     <mx:Box width="100%" styleName="descriptionContainer" id="descriptionBox" visible="false" includeInLayout="false">
         <report:DefaultDescriptionArea previousReportLabel="{previousReportLabel}" previousReportAvailable="{previousReportAvailable}"
                                    nextReportAvailable="{nextReportAvailable}" nextReportLabel="{nextReportLabel}" showAdd="{_showAddBar}" description="{description}"

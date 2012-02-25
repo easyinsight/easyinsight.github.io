@@ -20,6 +20,8 @@ import mx.controls.CheckBox;
 import mx.controls.DateField;
 	import mx.controls.HSlider;
 import mx.controls.Label;
+import mx.controls.LinkButton;
+import mx.core.UIComponent;
 import mx.events.CalendarLayoutChangeEvent;
 	import mx.events.SliderEvent;
 import mx.formatters.DateFormatter;
@@ -198,9 +200,18 @@ import mx.rpc.events.ResultEvent;
             }
             //}
 
-            var label:Label = new Label();
-            label.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
-            addChild(label);
+            var filterLabel:UIComponent;
+            if (_filterEditable) {
+                filterLabel = new LinkButton();
+                filterLabel.setStyle("fontSize", 12);
+                filterLabel.setStyle("textDecoration", "underline");
+                filterLabel.addEventListener(MouseEvent.CLICK, edit);
+                LinkButton(filterLabel).label = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            } else {
+                filterLabel = new Label();
+                Label(filterLabel).text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            }
+            addChild(filterLabel);
 
             var leftSideStack:ViewStack = new ViewStack();
             BindingUtils.bindProperty(leftSideStack, "selectedIndex", this, "leftIndex");
@@ -268,11 +279,6 @@ import mx.rpc.events.ResultEvent;
 			}
 
             if (_filterEditable) {
-                var editButton:Button = new Button();
-                editButton.addEventListener(MouseEvent.CLICK, edit);
-                editButton.setStyle("icon", ImageConstants.EDIT_ICON);
-                editButton.toolTip = "Edit";
-                addChild(editButton);
 
 
                 var deleteButton:Button = new Button();

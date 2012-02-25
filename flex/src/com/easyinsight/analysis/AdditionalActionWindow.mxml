@@ -1,19 +1,7 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:report="com.easyinsight.report.*"
-                   xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+                   xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()" backgroundAlpha=".9">
     <mx:Script><![CDATA[
-        private var _reportSaved:Boolean;
-
-        public function set reportSaved(value:Boolean):void {
-            _reportSaved = value;
-        }
-
-        override protected function createChildren():void {
-            super.createChildren();
-            if (!_reportSaved) {
-                topBox.removeChild(viewReportButton);
-            }
-        }
 
         private function onCreation():void {
             stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
@@ -30,24 +18,24 @@
         <report:BigButton imageClass="@Embed(source='../../../../assets/media_play_green.png')" id="viewReportButton"
                           headerText="End User View"
                           description="View this report through the simplified end user view"
-                          click="dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.REPORT_VIEW)); this.close()"/>
+                          click="dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.REPORT_VIEW)); this.close()" textHeight="45"/>
         <report:BigButton imageClass="@Embed(source='../../../../assets/table.png')"
                           headerText="Create a New Report"
                           description="Build a new report against this data source"
-                          click="dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.NEW_REPORT)); this.close()"/>
+                          click="dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.NEW_REPORT)); this.close()" textHeight="45"/>
         <report:BigButton imageClass="@Embed(source='../../../../assets/presentation_chart.png')"
                           headerText="Create a New Dashboard"
                           description="Build a new dashboard against this data source"
-                          click="dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.NEW_DASHBOARD)); this.close()"/>
+                          click="dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.NEW_DASHBOARD)); this.close()" textHeight="45"/>
     </mx:HBox>
     <mx:HBox>
         <report:BigButton imageClass="@Embed(source='../../../../assets/find.png')"
                           headerText="Navigate to Another Report"
                           description="Navigate to another already existing report or dashboard"
-                          click="dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.SEARCH)); this.close()"/>
+                          click="dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.SEARCH)); this.close()" textHeight="45"/>
         <report:BigButton imageClass="@Embed(source='../../../../assets/businessman_edit.png')"
                           headerText="Configure the Data Source"
                           description="Open up the Configuration screen for this data source"
-                          click="dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.CONFIGURE_DATA_SOURCE)); this.close()"/>
+                          click="dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.CONFIGURE_DATA_SOURCE)); this.close()" textHeight="45"/>
     </mx:HBox>
 </util:EISlimWindow>

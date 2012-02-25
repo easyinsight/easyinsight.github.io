@@ -122,10 +122,7 @@
                     <mx:Label text="What do you want to name this dashboard?" fontSize="14" fontWeight="bold"/>
                     <mx:TextInput text="{dashboardName}" id="reportNameInput" width="530" fontSize="14"/>
                     <mx:Spacer height="20"/>
-                    <mx:Label text="What tags should be applied to this report?" fontSize="14" fontWeight="bold"/>
-                    <mx:TextInput text="{dashboardTags}" id="reportTagsInput" width="530" fontSize="14"/>
-                    <mx:Spacer height="20"/>
-                    <mx:Label text="How do you want to describe this report?" fontSize="14" fontWeight="bold"/>
+                    <mx:Label text="How do you want to describe this dashboard?" fontSize="14" fontWeight="bold"/>
                     <mx:TextArea width="530" height="75" id="reportDescriptionInput"
                                          text="{dashboardDescription}" fontSize="14" borderStyle="inset" borderThickness="1"/>
                     <mx:Spacer height="100%"/>

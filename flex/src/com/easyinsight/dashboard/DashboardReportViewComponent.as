@@ -171,10 +171,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
             var parentFilters:ArrayCollection = createAdditionalFilters(filterMap);
             transformContainer = new TransformContainer();
-            /*transformContainer.setStyle("borderStyle", dashboardStack.filterBorderStyle);
-            transformContainer.setStyle("borderColor", dashboardStack.filterBorderColor);
-            transformContainer.setStyle("backgroundColor", dashboardStack.filterBackgroundColor);
-            transformContainer.setStyle("backgroundAlpha", dashboardStack.filterBackgroundAlpha);*/
+
             transformContainer.filterEditable = false;
             var myFilterColl:ArrayCollection = new ArrayCollection();
             var visibleFilters:int = 0;

@@ -110,11 +110,16 @@ public class MyDataDataSourceDisplay extends VBox {
             button = new Button();
             button.label = "Refresh the data source";
             button.styleName = "grayButton";
+            button.setStyle("icon", refreshIcon);
             button.addEventListener(MouseEvent.CLICK, onClick);
             button.visible = false;
         }
         addChild(button);
     }
+
+    [Bindable]
+    [Embed(source="../../../../assets/refresh.png")]
+    private var refreshIcon:Class;
 
     private var dataSourceChanged:Boolean = false;
 

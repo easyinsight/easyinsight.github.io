@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:filtering="com.easyinsight.filtering.*" xmlns:easyinsight="com.easyinsight.*"
+         xmlns:analysis="com.easyinsight.analysis.*"
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%" creationComplete="populateData()"
          styleName="screenBackground">
     <mx:Script><![CDATA[
@@ -10,6 +11,9 @@
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.FeedMetadata;
+        import com.easyinsight.analysis.PromptEvent;
+        import com.easyinsight.analysis.SavePromptWindow;
+        import com.easyinsight.analysis.SavedAnalysisEvent;
         import com.easyinsight.code.MarmotScriptEvent;
         import com.easyinsight.code.MarmotScriptWindow;
         import com.easyinsight.commands.CommandEvent;
@@ -17,6 +21,7 @@
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.scorecard.ScorecardDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ActionDashboardLog;
@@ -160,15 +165,6 @@
         private var rootView:IDashboardViewComponent;
 
         private function onDimensions(event:DashboardSetupEvent):void {
-            /*var grid:DashboardGrid = new DashboardGrid();
-            grid.rows = event.rows;
-            grid.columns = event.columns;
-            var box:DashboardBox = new DashboardBox();
-            rootView = box;
-            box.dashboardEditorMetadata = metadata;
-            box.element = grid;
-            box.allowDelete = false;
-            dashboardCanvas.addChild(box);*/
             var box:DashboardBox = new DashboardBox();
             box.dashboardEditorMetadata = metadata;
             dashboardCanvas.addChild(box);
@@ -184,8 +180,9 @@
 
         private function closeEditor():void {
             if (dashboardChanged) {
-                Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+                createPromptWindow("You have unsaved changes. Are you sure you want to exit?", function ():void {
+                    dispatchEvent(new AnalysisCloseEvent());
+                });
             } else {
                 dispatchEvent(new AnalysisCloseEvent());
             }
@@ -197,7 +194,7 @@
             }
         }
 
-        private function save():void {
+        private function save(saveHandler:Function = null):void {
             var box:DashboardBox = dashboardCanvas.getChildAt(0) as DashboardBox;
             var message:String = box.validate();
             if (message == null) {
@@ -206,7 +203,10 @@
                 _dashboard.dataSourceID = dataSourceID;
                 _dashboard.filters = transformContainer.getFilterDefinitions();
                 var window:DashboardSaveWindow = new DashboardSaveWindow();
-                window.addEventListener(DashboardSaveEvent.DASHBOARD_SAVE, onSave, false, 0, true);
+                if (saveHandler == null) {
+                    saveHandler = onSave;
+                }
+                window.addEventListener(DashboardSaveEvent.DASHBOARD_SAVE, saveHandler, false, 0, true);
                 window.exchangeSave = exchangeSave;
                 window.dashboard = _dashboard;
                 PopUpManager.addPopUp(window, this, true);
@@ -319,6 +319,79 @@
 
         public function cleanup():void {
         }
+
+        private function newReport():void {
+            if (dashboardChanged) {
+                createPromptWindow("You have unsaved changes to this dashboard.", function ():void {
+                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID)));
+                });
+            } else {
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID)));
+            }
+        }
+
+        private function newDashboard():void {
+            if (dashboardChanged) {
+                createPromptWindow("You have unsaved changes to this dashboard.", function ():void {
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID})));
+                });
+            } else {
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID})));
+            }
+        }
+
+        private function createRequiredPromptWindow(prompt:String, doneHandler:Function):void {
+            var window:SavePromptWindow = new SavePromptWindow();
+            window.prompt = prompt;
+            window.defineOption("Save", PromptEvent.PROMPT_SAVE);
+            window.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
+            window.addEventListener(PromptEvent.PROMPT_SAVE, function (event:PromptEvent):void {
+                save(function (event:SavedAnalysisEvent):void {
+                    doneHandler.call();
+                });
+            }, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function createPromptWindow(prompt:String, doneHandler:Function):void {
+            var window:SavePromptWindow = new SavePromptWindow();
+            window.prompt = prompt;
+            window.addEventListener(PromptEvent.PROMPT_SAVE, function (event:PromptEvent):void {
+                save(function (event:SavedAnalysisEvent):void {
+                    doneHandler.call();
+                });
+            }, false, 0, true);
+            window.addEventListener(PromptEvent.PROMPT_DISCARD, function (event:PromptEvent):void {
+                doneHandler.call();
+            }, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function goReport():void {
+            if (_dashboard.id == 0) {
+                createRequiredPromptWindow("You need to save this dashboard first.", function():void {
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+                });
+            } else if (dashboardChanged) {
+                createRequiredPromptWindow("You have unsaved changes to this dashboard.", function():void {
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+                });
+            } else {
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+            }
+        }
+
+        private function goAdmin():void {
+            if (dashboardChanged) {
+                createPromptWindow("You have unsaved changes to this dashboard.", function():void {
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
+                });
+            } else {
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
+            }
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptorsForDataSource" result="gotReports()"/>
@@ -340,12 +413,13 @@
                    toolTip="Close" labelPlacement="right" label="Close Editor" styleName="grayButton"/>
         <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
                    toolTip="Save" labelPlacement="right" label="Save" styleName="grayButton"/>
-        <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="viewDashboard()"
-                   toolTip="View Dashboard" label="Dashboard View" labelPlacement="right" enabled="{dashboardViewable}" styleName="grayButton"/>
         <mx:Button icon="@Embed(source='../../../../assets/document_edit.png')" click="configureDashboard()"
                    toolTip="Configure Dashboard" label="Configure Dashboard" labelPlacement="right" styleName="grayButton"/>
         <mx:Button icon="@Embed(source='../../../../assets/code_edit.png')" click="editCode()"
                    toolTip="Edit Code" label="Edit Code" labelPlacement="right" styleName="grayButton"/>
+        <analysis:AdditionalActionButton newReportAction="newReport()" newDashboardAction="newDashboard()" reportViewAction="goReport()"
+                                         configureDataSourceAction="goAdmin()" toolTip="Actions" icon="@Embed(source='../../../../assets/businessman_edit.png')"
+                                         />
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
     </mx:HBox>

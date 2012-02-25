@@ -9,6 +9,7 @@
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.skin.ApplicationSkinWindow;
+        import com.easyinsight.skin.HomeConfigWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -66,10 +67,8 @@
         }
 
         private function customizeMyData():void {
-            var applicationSkinWindow:ApplicationSkinWindow = new ApplicationSkinWindow();
-            applicationSkinWindow.skinMode = ApplicationSkinWindow.USER_SKIN;
+            var applicationSkinWindow:HomeConfigWindow = new HomeConfigWindow();
             applicationSkinWindow.addEventListener(Event.CHANGE, updateUI, false, 0, true);
-            applicationSkinWindow.initialIndex = 1;
             PopUpManager.addPopUp(applicationSkinWindow, this, true);
             PopUpUtil.centerPopUp(applicationSkinWindow);
         }

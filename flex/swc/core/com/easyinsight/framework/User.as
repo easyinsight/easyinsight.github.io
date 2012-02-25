@@ -7,9 +7,15 @@ import com.easyinsight.preferences.UISettings;
 
 import com.easyinsight.skin.ApplicationSkinTO;
 
+import flash.display.Bitmap;
+
+import flash.display.Loader;
+import flash.display.LoaderInfo;
+
 import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.net.SharedObject;
+import flash.utils.ByteArray;
 
 public class User extends EventDispatcher
 {
@@ -69,6 +75,16 @@ public class User extends EventDispatcher
         return formatString;
     }
 
+    private var _reportLogo:Bitmap;
+
+    public function get reportLogo():Bitmap {
+        return _reportLogo;
+    }
+
+    public function set reportLogo(value:Bitmap):void {
+        _reportLogo = value;
+    }
+
     [Bindable(event="guestUserChanged")]
     public function get guestUser():Boolean {
         return _guestUser;
@@ -124,9 +140,28 @@ public class User extends EventDispatcher
         _user.reportTypeOptions = response.reportTypeOptions;
         _user.fixedDashboardID = response.fixedDashboardID;
         _user.subdomainEnabled = response.subdomainEnabled;
+        if (response.reportImage != null) {
+            _user.loadBytes(response.reportImage);
+        }
+        
         if (response.uiSettings != null) {
             _user.uiConfiguration = UIConfiguration.fromUISettings(response.uiSettings);
         }
+    }
+    
+    private var loader:Loader;
+
+    private function loadBytes(bytes:ByteArray):void {
+        loader = new Loader();
+        loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
+        loader.loadBytes(bytes);
+    }
+
+    private function onComplete(event:Event):void {
+        var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
+        reportLogo = Bitmap(loaderContent.loader.content);
+        loaderContent.loader.removeEventListener(Event.COMPLETE, onComplete);
+        loader = null;
     }
 
     public function changeSettings(settings:UISettings):void {

@@ -1,4 +1,6 @@
 package com.easyinsight.skin {
+import com.easyinsight.framework.User;
+
 import flash.events.Event;
 import flash.events.EventDispatcher;
 
@@ -64,9 +66,12 @@ public class ApplicationSkin extends EventDispatcher {
         if (appSkin.reportHeaderImage != null) {
             var reportHeaderImageLoader:ImageLoader = new ImageLoader();
             reportHeaderImageLoader.addEventListener(ImageLoadEvent.IMAGE_LOADED, function(event:ImageLoadEvent):void {
+                User.getInstance().reportLogo = event.bitmap;
                 reportHeaderImage = event.bitmap;
             });
             reportHeaderImageLoader.load(appSkin.reportHeaderImage.id);
+        } else {
+            User.getInstance().reportLogo = null;
         }
 
         if (appSkin.headerBarLogo != null) {

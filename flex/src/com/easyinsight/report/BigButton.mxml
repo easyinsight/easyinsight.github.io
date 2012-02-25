@@ -1,12 +1,30 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-         backgroundColor="#FFFFFF" height="120"
+         backgroundColor="#FFFFFF"
          width="200" cornerRadius="8" buttonMode="true"
          mouseOver="setStyle('backgroundColor', 0xDDDDDD)"
          mouseOut="setStyle('backgroundColor', 0xFFFFFF)"
          mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
     <mx:Script><![CDATA[
         private var _imageClass:Class;
+
+        private var _textHeight:uint = 60;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            this.height = _textHeight + 60;
+        }
+
+        [Bindable(event="textHeightChanged")]
+        public function get textHeight():uint {
+            return _textHeight;
+        }
+
+        public function set textHeight(value:uint):void {
+            if (_textHeight == value) return;
+            _textHeight = value;
+            dispatchEvent(new Event("textHeightChanged"));
+        }
 
         [Bindable(event="imageClassChanged")]
         public function get imageClass():Class {
@@ -51,6 +69,6 @@
     <mx:TextArea
             text="{description}"
             fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-            height="60"
+            height="{textHeight}"
             width="180" textAlign="center"/>
 </mx:VBox>

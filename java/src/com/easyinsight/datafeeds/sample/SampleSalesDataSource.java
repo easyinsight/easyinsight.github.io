@@ -67,8 +67,8 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
             row.addValue(keys.get(PRODUCT), productNames[(int) (Math.random() * 5)]);
             row.addValue(keys.get(QUANTITY), (int) (Math.random() * 3));
             Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.YEAR, -1);
-            cal.set(Calendar.DAY_OF_YEAR, (int) (Math.random() * 365));
+            //cal.add(Calendar.YEAR, -1);
+            cal.add(Calendar.DAY_OF_YEAR, - (int) (Math.random() * 365));
             row.addValue(keys.get(ORDER_DATE), cal.getTime());
         }
         return dataSet;

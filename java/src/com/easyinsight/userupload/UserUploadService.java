@@ -115,6 +115,84 @@ public class UserUploadService {
         return getFeedAnalysisTree(onlyMyData, 0);
     }
 
+    public List<EIDescriptor> getFeedAnalysisTreeForDataSource(DataSourceDescriptor dataSourceDescriptor) {
+        long userID = SecurityUtil.getUserID();
+        long accountID = SecurityUtil.getAccountID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            List<EIDescriptor> objects = new ArrayList<EIDescriptor>();
+            List<EIDescriptor> results = new ArrayList<EIDescriptor>();
+
+            AnalysisStorage analysisStorage = new AnalysisStorage();
+            
+            objects.addAll(new DashboardStorage().getDashboardsForDataSource(userID, accountID, conn, dataSourceDescriptor.getId()).values());
+            objects.addAll(analysisStorage.getInsightDescriptorsForDataSource(userID, accountID, dataSourceDescriptor.getId(), conn));
+            objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn).values());
+
+            Iterator<EIDescriptor> iter = objects.iterator();
+            while (iter.hasNext()) {
+                EIDescriptor descriptor = iter.next();
+                if (!keep(descriptor, false)) {
+                    iter.remove();
+                }
+            }
+
+            iter = objects.iterator();
+            while (iter.hasNext()) {
+                EIDescriptor descriptor = iter.next();
+                long dataSourceID = getDataSourceID(descriptor);
+                if (dataSourceID == dataSourceDescriptor.getId()) {
+                    dataSourceDescriptor.getChildren().add(descriptor);
+                }
+                iter.remove();
+            }
+
+            for (LookupTableDescriptor lookupTableDescriptor : feedStorage.getLookupTableDescriptors(conn)) {
+                if (lookupTableDescriptor.getDataSourceID() == dataSourceDescriptor.getId()) {
+                    lookupTableDescriptor.setRole(dataSourceDescriptor.getRole());
+                    dataSourceDescriptor.getChildren().add(lookupTableDescriptor);
+                }
+            }
+
+            for (EIDescriptor descriptor : results) {
+                if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
+                    Collections.sort(dataSourceDescriptor.getChildren(), new Comparator<EIDescriptor>() {
+
+                        public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
+                            String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName() : "";
+                            String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName() : "";
+                            return name1.compareTo(name2);
+                        }
+                    });
+                }
+            }
+
+            Collections.sort(results, new Comparator<EIDescriptor>() {
+
+                public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
+                    String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName() : "";
+                    String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName() : "";
+                    return name1.compareTo(name2);
+                }
+            });
+
+            /*MyDataTree myDataTree = new MyDataTree(results, false);
+            myDataTree.setDashboardCount(dashboardCount);
+            myDataTree.setDataSourceCount(dataSourceCount);
+            myDataTree.setReportCount(reportCount);*/
+            conn.commit();
+            return dataSourceDescriptor.getChildren();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(false);
+            Database.closeConnection(conn);
+        }
+    }
+
     public MyDataTree getFeedAnalysisTree(boolean onlyMyData, long groupID) {
         onlyMyData = false;
         long userID = SecurityUtil.getUserID();
@@ -250,7 +328,7 @@ public class UserUploadService {
                         public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
                             String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName() : "";
                             String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName() : "";
-                            return name1.compareTo(name2);
+                            return name1.compareToIgnoreCase(name2);
                         }
                     });
                 }
@@ -261,7 +339,7 @@ public class UserUploadService {
                 public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
                     String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName() : "";
                     String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName() : "";
-                    return name1.compareTo(name2);
+                    return name1.compareToIgnoreCase(name2);
                 }
             });
 

@@ -1,12 +1,9 @@
 package com.easyinsight.users;
 
 import com.easyinsight.analysis.ReportTypeOptions;
+import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.preferences.ApplicationSkin;
-import com.easyinsight.preferences.ApplicationSkinSettings;
-import com.easyinsight.preferences.UISettingRetrieval;
-import com.easyinsight.preferences.UISettings;
-import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.preferences.*;
 import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
@@ -55,6 +52,7 @@ public class UserServiceResponse {
     private ReportTypeOptions reportTypeOptions;
     private boolean subdomainEnabled;
     private String personaName;
+    private byte[] reportImage;
 
     public static UserServiceResponse createResponseWithUISettings(User user, ApplicationSkin applicationSkin, String personaName) {
         return createResponse(user, applicationSkin, personaName);
@@ -77,13 +75,28 @@ public class UserServiceResponse {
         if (rs.next()) {
             personaName = rs.getString(1);
         }
-        return createResponse(user, applicationSkin, personaName);
+        byte[] bytes = null;
+        if (applicationSkin.getReportHeaderImage() != null) {
+            bytes = new PreferencesService().getImage(applicationSkin.getReportHeaderImage().getId(), conn);
+        }
+        UserServiceResponse response = createResponse(user, applicationSkin, personaName);
+        response.setReportImage(bytes);
+        return response;
     }
 
     private static UserServiceResponse createResponse(User user, ApplicationSkin applicationSkin, String personaName)  {
         Account account = user.getAccount();
         System.out.println("Log in from " + user.getUserID() + " - " + user.getEmail());
-        return new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+        byte[] bytes = null;
+        if (applicationSkin.getReportHeaderImage() != null) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                bytes = new PreferencesService().getImage(applicationSkin.getReportHeaderImage().getId(), conn);    
+            } finally {
+                Database.closeConnection(conn);
+            }
+        }
+        UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                                 user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
@@ -91,6 +104,8 @@ public class UserServiceResponse {
                                 account.getCurrencySymbol(), applicationSkin, account.getFirstDayOfWeek(),
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
                     new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName);
+        response.setReportImage(bytes);
+        return response;
     }
 
     public UserServiceResponse(boolean successful, String failureMessage) {
@@ -142,6 +157,14 @@ public class UserServiceResponse {
         this.reportTypeOptions = reportTypeOptions;
         this.subdomainEnabled = subdomainEnabled;
         this.personaName = personaName;
+    }
+
+    public byte[] getReportImage() {
+        return reportImage;
+    }
+
+    public void setReportImage(byte[] reportImage) {
+        this.reportImage = reportImage;
     }
 
     public String getPersonaName() {

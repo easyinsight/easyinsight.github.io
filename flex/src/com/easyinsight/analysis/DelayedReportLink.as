@@ -4,8 +4,13 @@ package com.easyinsight.analysis
 
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.report.ReportAnalyzeSource;
-	import flash.events.EventDispatcher;
-	import mx.rpc.events.ResultEvent;
+import com.easyinsight.util.ProgressAlert;
+
+import flash.events.EventDispatcher;
+
+import mx.core.Application;
+import mx.core.UIComponent;
+import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 	
 	public class DelayedReportLink extends EventDispatcher
@@ -22,6 +27,7 @@ import com.easyinsight.report.ReportAnalyzeSource;
 		}
 		
 		public function execute():void {
+            ProgressAlert.alert(UIComponent(Application.application), "Opening the report...", null, analysisService.openAnalysisIfPossible);
 			analysisService.openAnalysisIfPossible.send(analysisID);
 		}
 

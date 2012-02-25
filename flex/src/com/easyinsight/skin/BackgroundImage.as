@@ -105,16 +105,26 @@ public class BackgroundImage extends Canvas {
         }
     }
 
+    private var _minCenterWidth:int = 1000;
+
+    public function get minCenterWidth():int {
+        return _minCenterWidth;
+    }
+
+    public function set minCenterWidth(value:int):void {
+        _minCenterWidth = value;
+    }
+
     protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         if (_applyCenterScreenLogic) {
             if (getChildren().length == 2) {
                 var margin:int = 200;
                 var centerWidth:int = unscaledWidth - margin;
-                if (centerWidth < 1000) {
+                if (centerWidth < _minCenterWidth) {
                     // if we're now down to 900, reduce margin by 100
-                    margin -= (1000 - centerWidth);
-                    centerWidth = 1000;
+                    margin -= (_minCenterWidth - centerWidth);
+                    centerWidth = _minCenterWidth;
                 }
                 var content:DisplayObject = getChildren()[1];
                 content.width = centerWidth;

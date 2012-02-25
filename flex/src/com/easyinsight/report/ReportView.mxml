@@ -429,7 +429,7 @@
             if (_headerVisible) {
                 if (_headerBarLogoChanged) {
                     if (_headerLogo is Bitmap) {
-                        var bitmap:Bitmap = ApplicationSkin.instance().reportHeaderImage as Bitmap;
+                        var bitmap:Bitmap = User.getInstance().reportLogo;
                         logoImage.source = new Bitmap(bitmap.bitmapData);
                         _headerBarLogoChanged = false;
                     }
@@ -475,7 +475,7 @@
                 viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
                 viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
                 viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onSetup);
-                this.reportHeaderImage = ApplicationSkin.instance().reportHeaderImage;
+                this.reportHeaderImage = User.getInstance().reportLogo;
                 this.headerBackgroundColor = ApplicationSkin.instance().headerBackgroundColor;
                 this.headerTextColor = ApplicationSkin.instance().headerTextColor;
                 this.headerVisible = ApplicationSkin.instance().reportHeader;
@@ -628,7 +628,7 @@
             } else {
                 currentState = "";
             }
-            showReportInfoButton = !_showAddBar;
+            showReportInfoButton = !_showAddBar && description != null && description != "";
             if (!_showAddBar && contains(box)) {
                 removeChild(box);
             }

@@ -14,6 +14,7 @@ import com.easyinsight.util.ActionDataSourceLog;
 import com.easyinsight.util.ActionLog;
 import com.easyinsight.util.ActionReportLog;
 import com.easyinsight.util.MultiLineButton;
+import com.easyinsight.util.MultiLineLinkButton;
 
 import flash.events.MouseEvent;
 
@@ -23,11 +24,11 @@ public class LastActionLink extends HBox {
 
     private var actionLog:ActionLog;
 
-    private var button:MultiLineButton;
+    private var button:MultiLineLinkButton;
 
     public function LastActionLink() {
-        button = new MultiLineButton();
-        button.styleName = "grayButton";
+        button = new MultiLineLinkButton();
+        //button.styleName = "grayButton";
         button.addEventListener(MouseEvent.CLICK, onClick);
         button.width = 180;
         button.setStyle("fontSize", 12);

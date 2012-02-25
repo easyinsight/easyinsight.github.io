@@ -5,6 +5,8 @@ import com.easyinsight.guest.Scenario;
 import com.easyinsight.preferences.UISettings;
 import com.easyinsight.skin.ApplicationSkinTO;
 
+import flash.utils.ByteArray;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.users.UserServiceResponse")]
 public class UserServiceResponse
@@ -43,6 +45,7 @@ public class UserServiceResponse
     public var fixedDashboardID:int;
     public var reportTypeOptions:ReportTypeOptions;
     public var subdomainEnabled:Boolean;
+    public var reportImage:ByteArray;
 
     public function UserServiceResponse()
         {

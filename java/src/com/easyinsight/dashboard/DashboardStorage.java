@@ -128,6 +128,84 @@ public class DashboardStorage {
         return dashboards;
     }
 
+    public RolePrioritySet<DashboardDescriptor> getDashboardsForDataSource(long userID, long accountID, EIConnection conn, long dataSourceID) throws SQLException {
+        RolePrioritySet<DashboardDescriptor> dashboards = new RolePrioritySet<DashboardDescriptor>();
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id, dashboard.account_visible, dashboard.folder from " +
+                "dashboard, user_to_dashboard, user where user.account_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
+                "dashboard.temporary_dashboard = ? and dashboard.account_visible = ? and user_to_dashboard.user_id = user.user_id and dashboard.data_source_id = ?");
+        PreparedStatement ownerStmt = conn.prepareStatement("SELECT user.first_name, user.name from user, user_to_dashboard where " +
+                "user.user_id = user_to_dashboard.user_id and user_to_dashboard.dashboard_id = ?");
+        queryStmt.setLong(1, accountID);
+        queryStmt.setBoolean(2, false);
+        queryStmt.setBoolean(3, true);
+        queryStmt.setLong(4, dataSourceID);
+        ResultSet rs = queryStmt.executeQuery();
+        while (rs.next()) {
+            ownerStmt.setLong(1, rs.getLong(1));
+            ResultSet ownerRS = ownerStmt.executeQuery();
+            String name;
+            if (ownerRS.next()) {
+                String firstName = ownerRS.getString(1);
+                String lastName = ownerRS.getString(2);
+                name = firstName != null ? firstName + " " + lastName : lastName;
+            } else {
+                name = "";
+            }
+            dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.SHARER, name, rs.getBoolean(5), rs.getInt(6)));
+        }
+        queryStmt.close();
+        PreparedStatement ueryAccountStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id, " +
+                "dashboard.account_visible, dashboard.folder from " +
+                "dashboard, user_to_dashboard where user_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
+                "dashboard.temporary_dashboard = ? and dashboard.data_source_id = ?");
+        ueryAccountStmt.setLong(1, userID);
+        ueryAccountStmt.setBoolean(2, false);
+        ueryAccountStmt.setLong(3, dataSourceID);
+        ResultSet accountRS = ueryAccountStmt.executeQuery();
+        while (accountRS.next()) {
+            ownerStmt.setLong(1, accountRS.getLong(1));
+            ResultSet ownerRS = ownerStmt.executeQuery();
+            String name;
+            if (ownerRS.next()) {
+                String firstName = ownerRS.getString(1);
+                String lastName = ownerRS.getString(2);
+                name = firstName != null ? firstName + " " + lastName : lastName;
+            } else {
+                name = "";
+            }
+            dashboards.add(new DashboardDescriptor(accountRS.getString(2), accountRS.getLong(1), accountRS.getString(3), accountRS.getLong(4), Roles.OWNER, name, accountRS.getBoolean(5),
+                    accountRS.getInt(6)));
+        }
+        ueryAccountStmt.close();
+
+        PreparedStatement dashboardGroupStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.data_source_id, dashboard.URL_KEY, group_to_user_join.binding_type, " +
+                "dashboard.creation_date, dashboard.account_visible, dashboard.folder FROM dashboard, group_to_user_join," +
+                "group_to_dashboard WHERE " +
+                "dashboard.dashboard_id = group_to_dashboard.dashboard_id and group_to_dashboard.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and dashboard.temporary_dashboard = ? and " +
+                "dashboard.data_source_id = ?");
+        dashboardGroupStmt.setLong(1, userID);
+        dashboardGroupStmt.setBoolean(2, false);
+        dashboardGroupStmt.setLong(3, dataSourceID);
+        ResultSet dashboardRS = dashboardGroupStmt.executeQuery();
+        while (dashboardRS.next()) {
+            ownerStmt.setLong(1, dashboardRS.getLong(1));
+            ResultSet ownerRS = ownerStmt.executeQuery();
+            String name;
+            if (ownerRS.next()) {
+                String firstName = ownerRS.getString(1);
+                String lastName = ownerRS.getString(2);
+                name = firstName != null ? firstName + " " + lastName : lastName;
+            } else {
+                name = "";
+            }
+            dashboards.add(new DashboardDescriptor(dashboardRS.getString(2), dashboardRS.getLong(1),  dashboardRS.getString(4), dashboardRS.getLong(3), Roles.SUBSCRIBER, name,
+                    dashboardRS.getBoolean(7), dashboardRS.getInt(8)));
+        }
+        ownerStmt.close();
+        dashboardGroupStmt.close();
+        return dashboards;
+    }
+
     public void saveDashboard(Dashboard dashboard, EIConnection conn) throws SQLException {
         if (dashboard.getId() == 0) {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD (DASHBOARD_NAME, URL_KEY, " +

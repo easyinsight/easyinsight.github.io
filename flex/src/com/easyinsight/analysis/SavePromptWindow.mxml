@@ -1,8 +1,12 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
+        import com.easyinsight.util.CancelButton;
+        import com.easyinsight.util.SaveButton;
+
         import mx.collections.ArrayCollection;
         import mx.controls.Button;
+        import mx.core.UIComponent;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -34,9 +38,14 @@
                 options.addItem(cancel);
             }
             for each (var o:Object in options) {
-                var button:Button = new Button();
-                button.label = o.name;
-                button.styleName = "grayButton";
+                var button:UIComponent;
+                if (o.name == "Cancel") {
+                    button = new CancelButton();
+                    CancelButton(button).label = o.name;
+                } else {
+                    button = new SaveButton();
+                    SaveButton(button).label = o.name;
+                }
                 button.setStyle("fontSize", 14);
                 button.addEventListener(MouseEvent.CLICK, createHandler(o.event, this));
                 box.addChild(button);

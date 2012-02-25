@@ -111,10 +111,8 @@ public class PreferencesService {
 
         try {
 
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE, USER WHERE USER_IMAGE_ID = ? AND ((USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID) OR (USER_IMAGE.public_visibility = ?))");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE WHERE USER_IMAGE_ID = ?");
             queryStmt.setLong(1, imageID);
-            queryStmt.setLong(2, accountID);
-            queryStmt.setBoolean(3, true);
             ResultSet rs = queryStmt.executeQuery();
             rs.next();
             bytes = rs.getBytes(1);
