@@ -980,7 +980,7 @@
                    toolTip="Edit Report Configuration" label="Additional Configuration" labelPlacement="right" styleName="grayButton"/>
         <analysis:AdditionalActionButton newReportAction="newReport()" newDashboardAction="newDashboard()" reportViewAction="goReport()"
                                          configureDataSourceAction="goAdmin()" toolTip="Actions" icon="@Embed(source='../../../assets/businessman_edit.png')"
-                analysisDefinition="{analysisDefinition}"/>
+                />
     </mx:HBox>
     <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275"
              paddingBottom="10" paddingTop="33">
