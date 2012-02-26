@@ -119,7 +119,7 @@ public class ApplicationSkin {
         reportBackgroundSizeEnabled = propertyEnabled(properties, "reportBackgroundSize");
         reportBackgroundColor = (int) findNumberProperty(properties, "reportBackgroundColor", 0);
         reportTextColor = (int) findNumberProperty(properties, "reportTextColor", 0);
-        reportHeader = propertyEnabled(properties, "reportHeader");
+        reportHeader = findBooleanProperty(properties, "reportHeader", false);
         reportHeaderImage = findImage(properties, "reportHeaderImage", null);
         myDataName = findBooleanProperty(properties, "myDataName", true);
         myDataSize = findBooleanProperty(properties, "myDataSize", false);
