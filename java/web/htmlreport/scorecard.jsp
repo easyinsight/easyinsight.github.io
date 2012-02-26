@@ -32,8 +32,16 @@
                 response.sendRedirect("index.jsp");
             } else {
                 try {
-                    com.easyinsight.security.SecurityUtil.populateThreadLocal((String) session.getAttribute("userName"), (Long) session.getAttribute("userID"),
-                            (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, (Integer) session.getAttribute("dayOfWeek"), null);
+                    String userName = (String) session.getAttribute("userName");
+                    Long userID = (Long) session.getAttribute("userID");
+                    Long accountID = (Long) session.getAttribute("accountID");
+                    Integer accountType = (Integer) session.getAttribute("accountType");
+                    Integer dayOfWeek = (Integer) session.getAttribute("dayOfWeek");
+                    if (dayOfWeek == null) {
+                        dayOfWeek = 1;
+                    }
+                    com.easyinsight.security.SecurityUtil.populateThreadLocal(userName, userID,
+                            accountID, accountType, false, dayOfWeek, null);
                     try {
                         EIConnection conn = Database.instance().getConnection();
                         try {

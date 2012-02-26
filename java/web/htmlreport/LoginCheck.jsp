@@ -21,6 +21,7 @@
             session.setAttribute("userID", user.getUserID());
             session.setAttribute("accountType", account.getAccountType());
             session.setAttribute("userName", userName);
+            session.setAttribute("dayOfWeek", account.getFirstDayOfWeek());
             response.sendRedirect("menu.jsp");
             return;
         }
