@@ -62,8 +62,8 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
     public static final String CREATORNAME = "Creator";
     public static final String CREATORID = "Creator ID";
     public static final String ITEMID = "Item ID";
-    //public static final String CALENDAR_EVENT_TYPE = "Calendar Event Type";
-    //public static final String CALENDAR_EVENT_START = "Calendar Event Start";
+    public static final String CALENDAR_EVENT_TYPE = "Calendar Event Type";
+    public static final String CALENDAR_EVENT_START = "Calendar Event Start";
 
     public static final String MILESTONE_LAST_COMMENT = "Latest Milestone Comment";
 
@@ -250,16 +250,16 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
                         Date milestoneDeadline = null;
                         String milestoneComment = null;
                         String milestoneOwner = null;
-                        /*Date eventStart = null;
-                        String eventType = null;*/
+                        Date eventStart = null;
+                        String eventType = null;
                         if (milestoneInfo != null) {
                             milestoneName = milestoneInfo.milestoneName;
                             milestoneCreatedOn = milestoneInfo.milestoneCreatedOn;
                             milestoneCompletedOn = milestoneInfo.milestoneCompletedOn;
                             milestoneDeadline = milestoneInfo.milestoneDeadline;
                             milestoneOwner = milestoneInfo.milestoneOwner;
-                            /*eventStart = milestoneInfo.startDate;
-                            eventType = milestoneInfo.type;*/
+                            eventStart = milestoneInfo.startDate;
+                            eventType = milestoneInfo.type;
                             milestoneInfo.published = true;
                         }
 
@@ -327,9 +327,10 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
                                     row.addValue(keys.get(MILESTONE_ID), milestoneIdToRetrieve);
                                     /*if (eventStart != null) {
                                         row.addValue(keys.get(CALENDAR_EVENT_START), new DateValue(eventStart));
+                                    }*/
+                                    if (keys.containsKey(CALENDAR_EVENT_TYPE)) {
+                                        row.addValue(keys.get(CALENDAR_EVENT_TYPE), eventType);
                                     }
-                                    row.addValue(keys.get(CALENDAR_EVENT_TYPE), eventType);*/
-
                                     row.addValue(keys.get(COUNT), new NumericValue(1));
                                 }
                             } else {
@@ -352,6 +353,9 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
                                 row.addValue(keys.get(MILESTONE_COMPLETED_ON), milestoneCompletedOn);
                                 row.addValue(keys.get(MILESTONE_OWNER), milestoneOwner);
                                 row.addValue(keys.get(MILESTONE_ID), milestoneIdToRetrieve);
+                                if (keys.containsKey(CALENDAR_EVENT_TYPE)) {
+                                    row.addValue(keys.get(CALENDAR_EVENT_TYPE), eventType);
+                                }
                                 /*if (eventStart != null) {
                                     row.addValue(keys.get(CALENDAR_EVENT_START), eventStart);
                                 }
@@ -376,6 +380,9 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
                             row.addValue(keys.get(MILESTONE_COMPLETED_ON), milestoneCompletedOn);
                             row.addValue(keys.get(MILESTONE_OWNER), milestoneOwner);
                             row.addValue(keys.get(MILESTONE_ID), milestoneIdToRetrieve);
+                            if (keys.containsKey(CALENDAR_EVENT_TYPE)) {
+                                row.addValue(keys.get(CALENDAR_EVENT_TYPE), eventType);
+                            }
                             /*row.addValue(keys.get(CALENDAR_EVENT_START), eventStart);
                             row.addValue(keys.get(CALENDAR_EVENT_TYPE), eventType);*/
                         }
@@ -402,6 +409,9 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
                         }
                         row.addValue(keys.get(MILESTONENAME), entry.getValue().milestoneName);
                         row.addValue(keys.get(MILESTONE_ID), entry.getKey());
+                        if (keys.containsKey(CALENDAR_EVENT_TYPE)) {
+                            row.addValue(keys.get(CALENDAR_EVENT_TYPE), entry.getValue().type);
+                        }
                         /*row.addValue(keys.get(CALENDAR_EVENT_START), entry.getValue().startDate);
                         row.addValue(keys.get(CALENDAR_EVENT_TYPE), entry.getValue().type);*/
                     }
@@ -477,7 +487,7 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
         analysisItems.add(new AnalysisDimension(keys.get(TODOLISTNAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(ANNOUNCEMENT), true));
         //analysisItems.add(new AnalysisDimension(keys.get(CALENDAR_EVENT_START), true));
-        //analysisItems.add(new AnalysisDimension(keys.get(CALENDAR_EVENT_TYPE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CALENDAR_EVENT_TYPE), true));
         analysisItems.add(new AnalysisDimension(keys.get(MILESTONENAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(MILESTONE_OWNER), true));
         analysisItems.add(new AnalysisDimension(keys.get(MILESTONE_ID), true));
@@ -500,12 +510,12 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
 
     @Override
     public int getVersion() {
-        return 7;
+        return 8;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
         return Arrays.asList(new BaseCampTodo1To2(this), new BaseCampTodo2To3(this), new BaseCampTodo3To4(this),
-                new BaseCampTodo4To5(this), new BaseCampTodo5To6(this), new BaseCampTodo6To7(this));
+                new BaseCampTodo4To5(this), new BaseCampTodo5To6(this), new BaseCampTodo6To7(this), new BaseCampTodo7To8(this));
     }
 }

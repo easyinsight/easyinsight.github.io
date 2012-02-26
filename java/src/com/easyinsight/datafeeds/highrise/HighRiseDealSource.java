@@ -60,7 +60,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_NAME), true));
-        analysisItems.add(new AnalysisDimension(keys.get(DESCRIPTION), true));
+        analysisItems.add(new AnalysisText(keys.get(DESCRIPTION)));
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_OWNER), true));
@@ -131,7 +131,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
             HighriseCompanyCache highriseCompanyCache = highRiseCompositeSource.getOrCreateCompanyCache(client, lastRefreshDate);
             HighriseCache highriseCache = highRiseCompositeSource.getOrCreateCache(client);
             //do {
-            Document userDoc = runRestRequest("/deal_categories.xml", client, builder, url, true, false, parentDefinition);
+            Document userDoc = runRestRequest("/deal_categories.xml", client, builder, url, true, true, parentDefinition);
             Nodes dealCategoryDoc = userDoc.query("/deal-categories/deal-category");
             for (int i = 0; i < dealCategoryDoc.size(); i++) {
                 Node categoryNode = dealCategoryDoc.get(i);
@@ -232,12 +232,12 @@ public class HighRiseDealSource extends HighRiseBaseSource {
 
     @Override
     public int getVersion() {
-        return 6;
+        return 7;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
         return Arrays.asList(new HighRise1To2(this), new HighRiseDeal2To3(this), new HighRiseDeal3To4(this),
-                new HighRiseDeal4To5(this), new HighRiseDeal5To6(this));
+                new HighRiseDeal4To5(this), new HighRiseDeal5To6(this), new HighRiseDeal6To7(this));
     }
 }

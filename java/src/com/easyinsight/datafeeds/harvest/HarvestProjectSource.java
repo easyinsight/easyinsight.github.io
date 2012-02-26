@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.harvest;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
@@ -42,7 +43,8 @@ public class HarvestProjectSource extends HarvestBaseSource {
     public static final String LAST_RECORD = "Project Last Record At";
     public static final String PROJECT_COUNT = "Project Count";
     public static final String FEES = "Project Fees"; // FOR FUTURE USE
-
+    public static final String BASECAMP_ID = "Basecamp Project ID";
+    public static final String HIGHRISE_ID = "Highrise Deal ID";
 
 
     public HarvestProjectSource() {
@@ -58,7 +60,7 @@ public class HarvestProjectSource extends HarvestBaseSource {
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(PROJECT_ID, PROJECT_NAME, PROJECT_ACTIVE, PROJECT_BILLABLE, PROJECT_BILL_BY, HOURLY,
-                CLIENT_ID, PROJECT_CODE, NOTES, BUDGET_BY, BUDGET, FIRST_RECORD, LAST_RECORD, PROJECT_COUNT);
+                CLIENT_ID, PROJECT_CODE, NOTES, BUDGET_BY, BUDGET, FIRST_RECORD, LAST_RECORD, PROJECT_COUNT, BASECAMP_ID, HIGHRISE_ID);
     }
 
     @Override
@@ -71,6 +73,8 @@ public class HarvestProjectSource extends HarvestBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_ACTIVE), true));
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_BILLABLE), true));
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_BILL_BY), true));
+        analysisItems.add(new AnalysisDimension(keys.get(BASECAMP_ID), true));
+        analysisItems.add(new AnalysisDimension(keys.get(HIGHRISE_ID), true));
         analysisItems.add(new AnalysisMeasure(keys.get(HOURLY), HOURLY, AggregationTypes.AVERAGE, true, FormattingConfiguration.CURRENCY));
         AnalysisDimension clientID = new AnalysisDimension(keys.get(CLIENT_ID), true);
         clientID.setHidden(true);
@@ -107,6 +111,8 @@ public class HarvestProjectSource extends HarvestBaseSource {
                 String notes = queryField(curProject, "notes/text()");
                 String budgetBy = queryField(curProject, "budget-by/text()");
                 String budget = queryField(curProject, "budget/text()");
+                String basecampID = queryField(curProject, "basecamp-id/text()");
+                String highriseID = queryField(curProject, "highrise-deal-id/text()");
                 if (budget == null) {
                     budget = queryField(curProject, "cost-budget/text()");
                 }
@@ -121,6 +127,8 @@ public class HarvestProjectSource extends HarvestBaseSource {
                 row.addValue(keys.get(PROJECT_BILL_BY), billBy);
                 row.addValue(keys.get(CLIENT_ID), clientId);
                 row.addValue(keys.get(PROJECT_CODE), code);
+                row.addValue(keys.get(BASECAMP_ID), basecampID);
+                row.addValue(keys.get(HIGHRISE_ID), highriseID);
                 if(hourly != null && hourly.length() > 0)
                     row.addValue(keys.get(HOURLY), Double.parseDouble(hourly));
                 row.addValue(keys.get(NOTES), notes);
@@ -139,5 +147,15 @@ public class HarvestProjectSource extends HarvestBaseSource {
             throw new RuntimeException(e);
         }
         return ds;
+    }
+
+    @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new HarvestProject1To2(this));
     }
 }

@@ -8,6 +8,7 @@ import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.datafeeds.composite.FederationSource;
 import com.easyinsight.datafeeds.constantcontact.CCContactSource;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksClientSource;
+import com.easyinsight.datafeeds.harvest.HarvestProjectSource;
 import com.easyinsight.datafeeds.highrise.HighRiseCompanySource;
 import com.easyinsight.datafeeds.highrise.HighRiseContactSource;
 import com.easyinsight.datafeeds.highrise.HighRiseDealSource;
@@ -55,33 +56,86 @@ public class FeedService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            CompositeFeedNode sourceNode = new CompositeFeedNode(source.getId(), 0, 0);
-            CompositeFeedNode targetNode = new CompositeFeedNode(target.getId(), 0, 0);
-            String dataSourceName;
+
             FeedDefinition sourceObj = feedStorage.getFeedDefinitionData(source.getId(), conn);
             FeedDefinition targetObj = feedStorage.getFeedDefinitionData(target.getId(), conn);
-            Key sourceKey;
-            Key targetKey;
-            if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.CONSTANT_CONTACT.getType()) {
-                sourceKey = sourceObj.findAnalysisItem(HighRiseContactSource.CONTACT_WORK_EMAIL).getKey();
-                targetKey = targetObj.findAnalysisItem(CCContactSource.CONTACT_EMAIL).getKey();
-                dataSourceName = "Combined Highrise and Constant Contact";
-            } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.BASECAMP_MASTER.getType()) {
-                sourceKey = sourceObj.findAnalysisItem(HighRiseDealSource.DEAL_NAME).getKey();
-                targetKey = targetObj.findAnalysisItem(BaseCampTodoSource.PROJECTNAME).getKey();
-                dataSourceName = "Combined Highrise and Basecamp";
-            } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.FRESHBOOKS_COMPOSITE.getType()) {
-                sourceKey = sourceObj.findAnalysisItem(HighRiseCompanySource.COMPANY_NAME).getKey();
-                targetKey = targetObj.findAnalysisItem(FreshbooksClientSource.ORGANIZATION).getKey();
-                dataSourceName = "Combined Highrise and Freshbooks";
+
+            CompositeFeedNode sourceNode = new CompositeFeedNode(source.getId(), 0, 0);
+
+            if (target.getDataSourceType() == FeedType.COMPOSITE.getType()) {
+                CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) targetObj;
+                compositeFeedDefinition.getCompositeFeedNodes().add(sourceNode);
+                for (CompositeFeedNode childNode : compositeFeedDefinition.getCompositeFeedNodes()) {
+                    FeedDefinition childObj = feedStorage.getFeedDefinitionData(childNode.getDataFeedID(), conn);
+                    Key sourceKey = null;
+                    Key targetKey = null;
+                    if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && childObj.getFeedType().getType() == FeedType.CONSTANT_CONTACT.getType()) {
+                        sourceKey = sourceObj.findAnalysisItem(HighRiseContactSource.CONTACT_WORK_EMAIL).getKey();
+                        targetKey = childObj.findAnalysisItem(CCContactSource.CONTACT_EMAIL).getKey();
+                    } else if (source.getDataSourceType() == FeedType.CONSTANT_CONTACT.getType() && childObj.getFeedType().getType() == FeedType.HIGHRISE_COMPOSITE.getType()) {
+                        sourceKey = sourceObj.findAnalysisItem(CCContactSource.CONTACT_EMAIL).getKey();
+                        targetKey = childObj.findAnalysisItem(HighRiseContactSource.CONTACT_WORK_EMAIL).getKey();
+                    } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && childObj.getDataSourceType() == FeedType.BASECAMP_MASTER.getType()) {
+                        sourceKey = sourceObj.findAnalysisItem(HighRiseDealSource.DEAL_NAME).getKey();
+                        targetKey = childObj.findAnalysisItem(BaseCampTodoSource.PROJECTNAME).getKey();
+                    } else if (source.getDataSourceType() == FeedType.BASECAMP_MASTER.getType() && childObj.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType()) {
+                        sourceKey = sourceObj.findAnalysisItem(BaseCampTodoSource.PROJECTNAME).getKey();
+                        targetKey = childObj.findAnalysisItem(HighRiseDealSource.DEAL_NAME).getKey();
+                    } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && childObj.getDataSourceType() == FeedType.FRESHBOOKS_COMPOSITE.getType()) {
+                        sourceKey = sourceObj.findAnalysisItem(HighRiseCompanySource.COMPANY_NAME).getKey();
+                        targetKey = childObj.findAnalysisItem(FreshbooksClientSource.ORGANIZATION).getKey();
+                    } else if (source.getDataSourceType() == FeedType.FRESHBOOKS_COMPOSITE.getType() && childObj.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType()) {
+                        sourceKey = sourceObj.findAnalysisItem(FreshbooksClientSource.ORGANIZATION).getKey();
+                        targetKey = childObj.findAnalysisItem(HighRiseCompanySource.COMPANY_NAME).getKey();
+                    } else if (source.getDataSourceType() == FeedType.HARVEST_COMPOSITE.getType() && childObj.getFeedType().getType() == FeedType.HIGHRISE_COMPOSITE.getType()) {
+                        sourceKey = sourceObj.findAnalysisItem(HarvestProjectSource.HIGHRISE_ID).getKey();
+                        targetKey = childObj.findAnalysisItem(HighRiseDealSource.DEAL_ID).getKey();
+                    } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && childObj.getFeedType().getType() == FeedType.HARVEST_COMPOSITE.getType()) {
+                        targetKey = childObj.findAnalysisItem(HarvestProjectSource.HIGHRISE_ID).getKey();
+                        sourceKey = sourceObj.findAnalysisItem(HighRiseDealSource.DEAL_ID).getKey();
+                    } else if (source.getDataSourceType() == FeedType.HARVEST_COMPOSITE.getType() && childObj.getFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
+                        sourceKey = sourceObj.findAnalysisItem(HarvestProjectSource.BASECAMP_ID).getKey();
+                        targetKey = childObj.findAnalysisItem(BaseCampTodoSource.PROJECTID).getKey();
+                    } else if (source.getDataSourceType() == FeedType.BASECAMP_MASTER.getType() && childObj.getFeedType().getType() == FeedType.HARVEST_COMPOSITE.getType()) {
+                        targetKey = childObj.findAnalysisItem(HarvestProjectSource.BASECAMP_ID).getKey();
+                        sourceKey = sourceObj.findAnalysisItem(BaseCampTodoSource.PROJECTID).getKey();
+                    }
+                    if (sourceKey != null && targetKey != null) {
+                        CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(source.getId(), childObj.getDataFeedID(), sourceKey, targetKey, sourceObj.getFeedName(),
+                            childObj.getFeedName(), false, false, false, false);
+                        compositeFeedDefinition.getConnections().add(compositeFeedConnection);
+                    }
+                }
+                new DataSourceInternalService().updateFeedDefinition(compositeFeedDefinition, conn);
+                return new DataSourceDescriptor(compositeFeedDefinition.getFeedName(), compositeFeedDefinition.getDataFeedID(),
+                        compositeFeedDefinition.getFeedType().getType(), compositeFeedDefinition.isAccountVisible());
             } else {
-                throw new RuntimeException();
+                CompositeFeedNode targetNode = new CompositeFeedNode(target.getId(), 0, 0);
+                String dataSourceName;
+
+                Key sourceKey;
+                Key targetKey;
+                if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.CONSTANT_CONTACT.getType()) {
+                    sourceKey = sourceObj.findAnalysisItem(HighRiseContactSource.CONTACT_WORK_EMAIL).getKey();
+                    targetKey = targetObj.findAnalysisItem(CCContactSource.CONTACT_EMAIL).getKey();
+                    dataSourceName = "Combined Highrise and Constant Contact";
+                } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.BASECAMP_MASTER.getType()) {
+                    sourceKey = sourceObj.findAnalysisItem(HighRiseDealSource.DEAL_NAME).getKey();
+                    targetKey = targetObj.findAnalysisItem(BaseCampTodoSource.PROJECTNAME).getKey();
+                    dataSourceName = "Combined Highrise and Basecamp";
+                } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.FRESHBOOKS_COMPOSITE.getType()) {
+                    sourceKey = sourceObj.findAnalysisItem(HighRiseCompanySource.COMPANY_NAME).getKey();
+                    targetKey = targetObj.findAnalysisItem(FreshbooksClientSource.ORGANIZATION).getKey();
+                    dataSourceName = "Combined Highrise and Freshbooks";
+                } else {
+                    throw new RuntimeException();
+                }
+                CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(source.getId(), target.getId(), sourceKey, targetKey, sourceObj.getFeedName(),
+                        targetObj.getFeedName(), false, false, false, false);
+                CompositeFeedDefinition dataSource = createCompositeFeed(Arrays.asList(sourceNode, targetNode), Arrays.asList(compositeFeedConnection), dataSourceName, conn);
+                conn.commit();
+                return new DataSourceDescriptor(dataSource.getFeedName(), dataSource.getDataFeedID(), dataSource.getFeedType().getType(), false);
             }
-            CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(source.getId(), target.getId(), sourceKey, targetKey, sourceObj.getFeedName(),
-                    targetObj.getFeedName(), false, false, false, false);
-            CompositeFeedDefinition dataSource = createCompositeFeed(Arrays.asList(sourceNode, targetNode), Arrays.asList(compositeFeedConnection), dataSourceName, conn);
-            conn.commit();
-            return new DataSourceDescriptor(dataSource.getFeedName(), dataSource.getDataFeedID(), dataSource.getFeedType().getType(), false);
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -99,6 +153,18 @@ public class FeedService {
         EIConnection conn = Database.instance().getConnection();
         try {
             List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(userID, accountID, conn);
+            JoinSuggestion suggestion0 = analyze(FeedType.HIGHRISE_COMPOSITE, FeedType.COMPOSITE, "Highrise", "Existing Cube", dataSources, conn);
+            if (suggestion0 != null) {
+                suggestions.add(suggestion0);
+            }
+            JoinSuggestion suggestionA = analyze(FeedType.BASECAMP, FeedType.COMPOSITE, "Highrise", "Existing Cube", dataSources, conn);
+            if (suggestionA != null) {
+                suggestions.add(suggestionA);
+            }
+            JoinSuggestion suggestionB = analyze(FeedType.CONSTANT_CONTACT, FeedType.COMPOSITE, "Constant Contact", "Existing Cube", dataSources, conn);
+            if (suggestionB != null) {
+                suggestions.add(suggestionB);
+            }
             JoinSuggestion suggestion1 = analyze(FeedType.HIGHRISE_COMPOSITE, FeedType.CONSTANT_CONTACT, "Highrise", "Constant Contact", dataSources, conn);
             if (suggestion1 != null) {
                 suggestions.add(suggestion1);
