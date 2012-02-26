@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                    xmlns:report="com.easyinsight.report.*"
-                   creationComplete="onCreation()">
+                   creationComplete="onCreation()" horizontalAlign="center">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.EmailReportWindow;
@@ -144,4 +144,5 @@
                           headerText="Embed Report into Website"
                           click="embed()"/>
     </mx:HBox>
+    <util:CancelButton label="Cancel" click="this.close()"/>
 </util:EISlimWindow>
