@@ -1,6 +1,7 @@
 package com.easyinsight.preferences;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.logging.LogClass;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,7 +102,11 @@ public class ApplicationSkin {
 
     public void populateProperties(List<ReportProperty> properties) {
         coreAppBackgroundImage = findImage(properties, "coreAppBackgroundImage", null);
-        headerBarLogo = findImage(properties, "headerBarLogo", null);
+        try {
+            headerBarLogo = findImage(properties, "headerBarLogo", null);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
         coreAppBackgroundImageEnabled = propertyEnabled(properties, "coreAppBackgroundImage");
         coreAppBackgroundColor = (int) findNumberProperty(properties, "coreAppBackgroundColor", 0);
         coreAppBackgroundColorEnabled = propertyEnabled(properties, "coreAppBackgroundColor");
