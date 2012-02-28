@@ -130,11 +130,11 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                     customKey = new NamedKey("zd" + id);
                 }
                 String type = queryField(recordNode, "type/text()");
-                if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type)) {
+                if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type) || "FieldTagger".equals(type)) {
                     items.add(new AnalysisDimension(customKey, title));
                 } else if ("MultiLineField".equals(type)) {
                     items.add(new AnalysisText(customKey, title));
-                } else if ("NumericField".equals(type) || "DecimalField".equals(type)) {
+                } else if ("NumericField".equals(type) || "DecimalField".equals(type) || "FieldInteger".equals(type)) {
                     items.add(new AnalysisMeasure(customKey, title, AggregationTypes.SUM));
                 }
             }
