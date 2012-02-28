@@ -1840,6 +1840,12 @@ public class ExportService {
                 if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
                     string = string.replaceAll("\\<.*?\\>", "");
                 }
+                if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                    DerivedAnalysisDimension dim = (DerivedAnalysisDimension) analysisItem;
+                    if (dim.isHtml()) {
+                        string = string.replaceAll("\\<.*?\\>", "");
+                    }
+                }
                 if (string.length() > 15000) {
                     string = string.substring(0, 15000);
                 }
