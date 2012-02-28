@@ -59,14 +59,24 @@ public class ZendeskOrganizationSource extends ZendeskBaseSource {
             DataSet dataSet = new DataSet();
             HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
             Builder builder = new Builder();
-            Document doc = runRestRequest(zendeskCompositeSource, httpClient, "/organizations.xml", builder);
-            Nodes organizationNodes = doc.query("/organizations/organization");
-            for (int i = 0; i < organizationNodes.size(); i++) {
-                Node organizationNode = organizationNodes.get(i);
-                IRow row = dataSet.createRow();
-                row.addValue(keys.get(NAME), queryField(organizationNode, "name/text()"));
-                row.addValue(keys.get(ID), queryField(organizationNode, "id/text()"));
-            }
+            boolean moreData;
+            int page = 1;
+            do {
+                String url = "/organizations.xml";
+                if (page > 1) {
+                    url += "?page=" + page;
+                }
+                Document doc = runRestRequest(zendeskCompositeSource, httpClient, url, builder);
+                Nodes organizationNodes = doc.query("/organizations/organization");
+                moreData = organizationNodes.size() == 30;
+                for (int i = 0; i < organizationNodes.size(); i++) {
+                    Node organizationNode = organizationNodes.get(i);
+                    IRow row = dataSet.createRow();
+                    row.addValue(keys.get(NAME), queryField(organizationNode, "name/text()"));
+                    row.addValue(keys.get(ID), queryField(organizationNode, "id/text()"));
+                }
+                page++;
+            } while (moreData);
             return dataSet;
         } catch (ReportException re) {
             throw re;
