@@ -1843,6 +1843,7 @@ public class ExportService {
                 if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                     DerivedAnalysisDimension dim = (DerivedAnalysisDimension) analysisItem;
                     if (dim.isHtml()) {
+                        string = string.replaceAll("</p>", "\n");
                         string = string.replaceAll("\\<.*?\\>", "");
                     }
                 }
@@ -1980,11 +1981,17 @@ public class ExportService {
             cellStyle.setWrapText(true);
             style = new StringStyle(cellStyle, analysisItem, workbook);
         } else {
+            boolean wordWrap = false;
+            if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                DerivedAnalysisDimension dim = (DerivedAnalysisDimension) analysisItem;
+                wordWrap = dim.isWordWrap();
+            }
             HSSFCellStyle genericStyle = workbook.createCellStyle();
             genericStyle.setDataFormat(workbook.createDataFormat().getFormat("0"));
             if (textExtension != null) {
-                genericStyle.setWrapText(textExtension.isWordWrap());
+                wordWrap = textExtension.isWordWrap() || wordWrap;
             }
+            genericStyle.setWrapText(wordWrap);
             style = new StringStyle(genericStyle, analysisItem, workbook);
         }
 
