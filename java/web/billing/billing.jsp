@@ -172,7 +172,7 @@
         </div>
             <div style="width:100%;background-color:#FFFFFF">
                 <div style="width:100%;text-align:center"><h1 style="color:#FFFFFF;background-image:url(/images/banner-wide.jpg);background-repeat:repeat-y;padding:10px;">Billing</h1></div>
-                <p>Please input your billing information below. Your first billing cycle will start upon completion of any remaining trial time. Easy Insight does not offer any type of refund after billing.</p>
+                <p><%= account.billingIntroParagraph() %></p>
         <% if(request.getParameter("error") != null) { %>
             <p><span class="error"><%
                 String errorCode = request.getParameter("response_code");

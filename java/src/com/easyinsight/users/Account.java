@@ -39,6 +39,7 @@ public class Account {
     public static final int TRIAL = 9;
     public static final int CLOSING = 10;
     public static final int REACTIVATION_POSSIBLE = 11;
+    public static final int BILLING_FAILED = 12;
 
     public static final int WEBSITE = 1;
     public static final int SNAPPCLOUD = 2;
@@ -104,6 +105,9 @@ public class Account {
 
     @Column(name="billing_information_given")
     private Boolean billingInformationGiven;
+    
+    /*@Column(name="billing_failures")
+    private int billingFailures;*/
 
     @Column(name="marketplace_enabled")
     private boolean marketplaceEnabled;
@@ -180,11 +184,17 @@ public class Account {
     @Column(name="vat")
     private String vat;
 
-
-
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    /*public int getBillingFailures() {
+        return billingFailures;
+    }
+
+    public void setBillingFailures(int billingFailures) {
+        this.billingFailures = billingFailures;
+    }*/
 
     public int getPricingModel() {
         return pricingModel;
@@ -667,5 +677,16 @@ public class Account {
 
     public void setSubdomain(String subdomain) {
         this.subdomain = subdomain;
+    }
+
+    public String billingIntroParagraph() {
+        if (accountState == Account.TRIAL) {
+            return "Please input your billing information below. Your first billing cycle will start upon completion of any remaining trial time. Easy Insight does not offer any type of refund after billing.";    
+        } else if (accountState == Account.DELINQUENT || accountState == Account.CLOSING || accountState == Account.CLOSED) {
+            return "Please input your billing information below. Your card will be billed upon submit. Easy Insight does not offer any type of refund after billing.";
+        } else if (accountState == Account.ACTIVE) {
+            return "Please input your updated billing information below. The new card will be billed as per your normal billing cycle. Easy Insight does not offer any type of refund after billing.";
+        }
+        return "Please input your billing information below. Your card will be billed upon submit. Easy Insight does not offer any type of refund after billing.";
     }
 }
