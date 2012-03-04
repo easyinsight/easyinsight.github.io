@@ -52,6 +52,7 @@ public class User extends EventDispatcher
     public var reportTypeOptions:ReportTypeOptions;
     public var fixedDashboardID:int;
     public var subdomainEnabled:Boolean;
+    public var refreshReports:Boolean;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -140,6 +141,7 @@ public class User extends EventDispatcher
         _user.reportTypeOptions = response.reportTypeOptions;
         _user.fixedDashboardID = response.fixedDashboardID;
         _user.subdomainEnabled = response.subdomainEnabled;
+        _user.refreshReports = response.refreshReports;
         if (response.reportImage != null) {
             _user.loadBytes(response.reportImage);
         }

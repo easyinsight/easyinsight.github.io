@@ -16,6 +16,8 @@ package com.easyinsight.framework
         public var optInEmail:Boolean;
         public var fixedDashboardID:int;
         public var initialSetupDone:Boolean;
+        public var invoiceRecipient:Boolean;
+        public var autoRefreshReports:Boolean;
 		
 		public function UserTransferObject()
 		{

@@ -46,6 +46,7 @@ public class UserServiceResponse
     public var reportTypeOptions:ReportTypeOptions;
     public var subdomainEnabled:Boolean;
     public var reportImage:ByteArray;
+    public var refreshReports:Boolean;
 
     public function UserServiceResponse()
         {
