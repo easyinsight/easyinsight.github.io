@@ -43,7 +43,7 @@ public class FreshbooksEstimateSource extends FreshbooksBaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(ESTIMATE_ID, CLIENT_ID, AMOUNT, NUMBER, TERMS, NOTES, COUNT, DATE, STATUS);
+        return Arrays.asList(ESTIMATE_ID, CLIENT_ID, AMOUNT, NUMBER, TERMS, NOTES, COUNT);
     }
 
     @Override
@@ -58,8 +58,8 @@ public class FreshbooksEstimateSource extends FreshbooksBaseSource {
         items.add(new AnalysisDimension(keys.get(FreshbooksEstimateSource.CLIENT_ID), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksEstimateSource.NOTES), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksEstimateSource.TERMS), true));
-        items.add(new AnalysisDimension(keys.get(FreshbooksEstimateSource.STATUS), true));
-        items.add(new AnalysisDateDimension(keys.get(FreshbooksEstimateSource.DATE), true, AnalysisDateDimension.DAY_LEVEL));
+        /*items.add(new AnalysisDimension(keys.get(FreshbooksEstimateSource.STATUS), true));
+        items.add(new AnalysisDateDimension(keys.get(FreshbooksEstimateSource.DATE), true, AnalysisDateDimension.DAY_LEVEL));*/
         items.add(new AnalysisMeasure(keys.get(FreshbooksEstimateSource.COUNT), AggregationTypes.SUM));
         items.add(new AnalysisMeasure(keys.get(FreshbooksEstimateSource.AMOUNT), AMOUNT, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));                
         return items;
@@ -103,8 +103,8 @@ public class FreshbooksEstimateSource extends FreshbooksBaseSource {
                         IRow row = dataSet.createRow();
                         addValue(row, FreshbooksEstimateSource.ESTIMATE_ID, invoiceID, keys);
                         addValue(row, FreshbooksEstimateSource.NUMBER, invoiceNumber, keys);
-                        addValue(row, FreshbooksEstimateSource.STATUS, status, keys);
-                        addValue(row, FreshbooksEstimateSource.DATE, date, keys);
+                        /*addValue(row, FreshbooksEstimateSource.STATUS, status, keys);
+                        addValue(row, FreshbooksEstimateSource.DATE, date, keys);*/
                         addValue(row, FreshbooksEstimateSource.NOTES, notes, keys);
                         addValue(row, FreshbooksEstimateSource.TERMS, terms, keys);
                         addValue(row, FreshbooksEstimateSource.CLIENT_ID, clientID, keys);
@@ -128,13 +128,13 @@ public class FreshbooksEstimateSource extends FreshbooksBaseSource {
 
     @Override
     public int getVersion() {
-        return 2;
+        return 1;
     }
 
-    @Override
+    /*@Override
     public List<DataSourceMigration> getMigrations() {
         return Arrays.asList((DataSourceMigration) new FreshbooksEstimate1To2(this));
-    }
+    }*/
 
     @Override
     public Feed createFeedObject(FeedDefinition parent) {
