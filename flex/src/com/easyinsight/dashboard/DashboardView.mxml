@@ -6,6 +6,8 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.list.SizeOverrideEvent;
+        import com.easyinsight.framework.EIGlobalTimer;
+        import com.easyinsight.framework.GlobalDataSourceEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.report.BreadCrumb;
@@ -142,7 +144,9 @@
             _dashboardID = value;
         }
 
-
+        private function refreshEvent(event:Event):void {
+            dashboardRenderer.refreshData();
+        }
 
         private function gotDashboard():void {
             this.headerBarLogo = ApplicationSkin.instance().reportHeaderImage;
@@ -150,6 +154,10 @@
             this.headerTextColor = ApplicationSkin.instance().headerTextColor;
             this.headerVisible = ApplicationSkin.instance().reportHeader;
             dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
+            if (User.getInstance().refreshReports) {
+                EIGlobalTimer.instance().addEventListener(GlobalDataSourceEvent.GLOBAL_DATA_SOURCE, refreshEvent, false, 0, true);
+                EIGlobalTimer.instance().dataSourceID = dashboard.dataSourceID;
+            }
             if (dashboard.borderThickness == 0 && exchangeItem == null) {
                 headerArea.includeInLayout = false;
                 descriptionBox.includeInLayout = false;
