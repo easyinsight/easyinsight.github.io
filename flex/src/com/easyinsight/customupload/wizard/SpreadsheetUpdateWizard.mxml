@@ -1,0 +1,128 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
+                        width="100%" height="100%" implements="com.easyinsight.listing.IPerspective">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.kpi.KPITutorialEvent;
+        import com.easyinsight.kpi.TutorialButtons;
+        import com.easyinsight.kpi.TutorialPanel;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.core.UIComponent;
+
+        private var _fields:ArrayCollection;
+
+        public function set fields(value:ArrayCollection):void {
+            _fields = value;
+        }
+
+        private var fieldPanels:ArrayCollection;
+
+        private function next(event:KPITutorialEvent):void {
+            if ((viewStack.getChildren().length) <= (panelIndex + 1)) {
+                createPanel(panelIndex - 1);
+            }
+            panelIndex++;
+        }
+
+        private function back(event:KPITutorialEvent):void {
+            panelIndex--;
+        }
+
+        private function createPanel(i:int):void {
+            viewStack.addChild(fieldPanels.getItemAt(i) as UIComponent);
+        }
+
+        [Bindable]
+        private var panelIndex:int;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            fieldPanels = new ArrayCollection();
+            for (var i:int = 0; i < _fields.length; i++) {
+                var field:FieldUploadInfo = _fields.getItemAt(i) as FieldUploadInfo;
+                var tutorialPanel:TutorialPanel = new TutorialPanel();
+                tutorialPanel.percentHeight = 100;
+                tutorialPanel.percentWidth = 100;
+                var panel:SpreadsheetTutorialWindow = new SpreadsheetTutorialWindow();
+                fieldPanels.addItem(tutorialPanel);
+                panel.info = field;
+                tutorialPanel.addChild(panel);
+                var controls:TutorialButtons = new TutorialButtons();
+                controls.backEnabled = true;
+                controls.addEventListener(KPITutorialEvent.PREVIOUS, back);
+                controls.addEventListener(KPITutorialEvent.NEXT, next);
+                controls.nextEnabled = i < (_fields.length - 1);
+                controls.finishEnabled = true;
+                controls.addEventListener(KPITutorialEvent.FINISH, onFinish);
+                controls.addEventListener(KPITutorialEvent.CANCEL, onCancel);
+                controls.tutorialPanel = panel;
+                tutorialPanel.addChild(controls);
+                //viewStack.addChild(tutorialPanel);
+            }
+            viewStack.addChild(fieldPanels.getItemAt(0) as TutorialPanel);
+        }
+
+        private function onFinish(event:KPITutorialEvent):void {
+            var fields:ArrayCollection = new ArrayCollection();
+            for each (var panel:TutorialPanel in fieldPanels) {
+                fields.addItem(SpreadsheetTutorialWindow(panel.getChildAt(0)).analysisItem);
+            }
+            ProgressAlert.alert(this, "Adding new fields to the data source...", null, uploadService.updateData);
+            uploadService.updateData.send(_dataSourceID, _bytes, _op == 2, fields);
+        }
+
+        private function onChange(event:Event):void {
+
+        }
+
+        private var _dataSourceID:int;
+
+        private var _bytes:ByteArray;
+
+        private var _op:int;
+
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        public function set bytes(value:ByteArray):void {
+            _bytes = value;
+        }
+
+        public function set op(value:int):void {
+            _op = value;
+        }
+
+        private function updatedDataSource():void {
+            dispatchEvent(new AnalysisCloseEvent());
+        }
+
+        private function onCancel(event:Event):void {
+            dispatchEvent(new AnalysisCloseEvent());
+        }
+
+        public function gotFocus():void {
+        }
+
+        public function cleanup():void {
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="updateData" result="updatedDataSource()"/>
+    </mx:RemoteObject>
+    <mx:Canvas width="100%" height="100%">
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+            <mx:Box height="50%" width="100%" backgroundColor="0x000000"/>
+            <mx:Box height="50%" width="100%" backgroundColor="0xAAAAAA"/>
+        </mx:VBox>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ViewStack selectedIndex="{panelIndex}" change="onChange(event)"
+                          id="viewStack" resizeToContent="true" width="1000" height="550"
+                          backgroundColor="0xFFFFFF">
+            </mx:ViewStack>
+        </mx:Box>
+    </mx:Canvas>
+</mx:Module>
