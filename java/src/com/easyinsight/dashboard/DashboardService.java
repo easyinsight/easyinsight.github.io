@@ -273,7 +273,14 @@ public class DashboardService {
                 }
             }
             for (Map.Entry<AnalysisItem, List<FlatDateFilter>> entry : flatDateFilters.entrySet()) {
-                AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(dataSourceID, entry.getKey(), 0, 0, dashboardID);
+                AnalysisDateDimensionResultMetadata metadata = (AnalysisDateDimensionResultMetadata) new DataService().getAnalysisItemMetadata(dataSourceID, entry.getKey(), 0, 0, dashboardID);
+                Date date = new Date();
+                if (metadata.getLatestDate() != null) {
+                    Date latestDate = metadata.getLatestDate();
+                    if (latestDate.compareTo(date) == -1) {
+                        metadata.setLatestDate(date);
+                    }
+                }
                 for (FlatDateFilter filterDefinition : entry.getValue()) {
                     filterDefinition.setCachedValues(metadata);
                 }
