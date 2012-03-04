@@ -257,7 +257,7 @@
             if (event.reportFault != null) {
                 event.reportFault.popup(this, onProblem);
             } else {
-                EIGlobalTimer.instance().dataSourceTime = event.dataSourceInfo.lastDataTime;
+                //EIGlobalTimer.instance().dataSourceTime = event.dataSourceInfo.lastDataTime;
                 dataSource = event.dataSourceInfo;
                 loading = false;
                 overlayIndex = 0;
@@ -474,8 +474,8 @@
                 viewFactory.dataSourceID = _dataSourceID;
                 BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
                 if (User.getInstance().refreshReports) {
-                    EIGlobalTimer.instance().addEventListener(GlobalDataSourceEvent.GLOBAL_DATA_SOURCE, refreshEvent, false, 0, true);
-                    EIGlobalTimer.instance().dataSourceID = _dataSourceID;
+                    /*EIGlobalTimer.instance().addEventListener(GlobalDataSourceEvent.GLOBAL_DATA_SOURCE, refreshEvent, false, 0, true);
+                    EIGlobalTimer.instance().dataSourceID = _dataSourceID;*/
                 }
                 //viewFactory.drillthroughFilters = _parameterFilters;
                 screenTarget.addChild(viewFactory);

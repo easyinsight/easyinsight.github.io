@@ -155,8 +155,8 @@
             this.headerVisible = ApplicationSkin.instance().reportHeader;
             dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
             if (User.getInstance().refreshReports) {
-                EIGlobalTimer.instance().addEventListener(GlobalDataSourceEvent.GLOBAL_DATA_SOURCE, refreshEvent, false, 0, true);
-                EIGlobalTimer.instance().dataSourceID = dashboard.dataSourceID;
+                /*EIGlobalTimer.instance().addEventListener(GlobalDataSourceEvent.GLOBAL_DATA_SOURCE, refreshEvent, false, 0, true);
+                EIGlobalTimer.instance().dataSourceID = dashboard.dataSourceID;*/
             }
             if (dashboard.borderThickness == 0 && exchangeItem == null) {
                 headerArea.includeInLayout = false;
@@ -171,6 +171,7 @@
                 setStyle("paddingRight", 0);
                 setStyle("paddingBottom", 0);
             }
+            //EIGlobalTimer.instance().dataSourceTime = dashboard.dataSourceInfo.lastDataTime;
             dataSource = dashboard.dataSourceInfo;
             dashboardName = dashboard.name;
             description = dashboard.description;
