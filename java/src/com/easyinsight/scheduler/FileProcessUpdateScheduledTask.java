@@ -3,15 +3,19 @@ package com.easyinsight.scheduler;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisMeasure;
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.DataSourceInternalService;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.dataset.PersistableDataSetForm;
+import com.easyinsight.userupload.UploadFormat;
 import com.easyinsight.userupload.UserUploadService;
 
 import javax.persistence.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,6 +36,11 @@ public class FileProcessUpdateScheduledTask {
     @Transient
     private String feedName;
 
+    private List<AnalysisItem> newFields;
+
+    public void setNewFields(List<AnalysisItem> newFields) {
+        this.newFields = newFields;
+    }
 
     public long getFeedID() {
         return feedID;
@@ -45,19 +54,10 @@ public class FileProcessUpdateScheduledTask {
         return uploadID;
     }
 
-    public void updateData(long feedID, boolean update, Connection conn, byte[] bytes) throws Exception {
+    public void updateData(long feedID, boolean update, EIConnection conn, byte[] bytes) throws Exception {
         DataStorage metadata = null;
         try {
             FileBasedFeedDefinition feedDefinition = (FileBasedFeedDefinition) new FeedStorage().getFeedDefinitionData(feedID, conn);
-            /*if(background) {
-                AsyncRunningEvent ev = new AsyncRunningEvent();
-                ev.setTask(this);
-                ev.setUserID(userID);
-                feedName = feedDefinition.getFeedName();
-                ev.setFeedID(feedDefinition.getDataFeedID());
-                ev.setFeedName(feedDefinition.getFeedName());
-                EventDispatcher.instance().dispatch(ev);
-            }*/
             AnalysisMeasure rowCount = null;
             for (AnalysisItem field : feedDefinition.getFields()) {
                 if (field.hasType(AnalysisItemTypes.MEASURE)) {
@@ -67,14 +67,17 @@ public class FileProcessUpdateScheduledTask {
                     }
                 }
             }
+            if (newFields != null && newFields.size() > 0) {
+                feedDefinition.getFields().addAll(newFields);
+            }
+            new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn);
             metadata = DataStorage.writeConnection(feedDefinition, conn, accountID);
-            PersistableDataSetForm form = feedDefinition.getUploadFormat().createDataSet(bytes, feedDefinition.getFields());
+            UploadFormat uploadFormat = feedDefinition.getUploadFormat();
+            PersistableDataSetForm form = uploadFormat.createDataSet(bytes, feedDefinition.getFields());
             if (update) {
-                //DataRetrievalManager.instance().storeData(feedID, form);
                 metadata.truncate();
                 metadata.insertData(form.toDataSet(rowCount));
             } else {
-                //DataRetrievalManager.instance().appendData(feedID, form);
                 metadata.insertData(form.toDataSet(rowCount));
             }
             metadata.commit();

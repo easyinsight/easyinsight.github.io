@@ -8,9 +8,14 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
+import nu.xom.Document;
+import nu.xom.Node;
+import nu.xom.Nodes;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -57,7 +62,61 @@ public class FreshbooksPaymentSource extends FreshbooksBaseSource {
     }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
-        return new DataSet();
+        FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) parentDefinition;
+        if (freshbooksCompositeSource.isLiveDataSource()) {
+            return new DataSet();
+        }
+        try {
+            DataSet dataSet = new DataSet();
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+            int requestPage = 1;
+            int pages;
+            int currentPage;
+            do {
+                Document invoicesDoc = query("payment.list", "<page>" + requestPage + "</page>", freshbooksCompositeSource);
+                Nodes paymentSummaryNodes = invoicesDoc.query("/response/payments");
+                if (paymentSummaryNodes.size() > 0) {
+                    Node invoicesSummaryNode = paymentSummaryNodes.get(0);
+                    String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                    String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                    pages = Integer.parseInt(pageString);
+                    currentPage = Integer.parseInt(currentPageString);
+                    Nodes invoices = invoicesDoc.query("/response/payments/payment");
+
+                    for (int i = 0; i < invoices.size(); i++) {
+                        Node invoice = invoices.get(i);
+                        String invoiceID = queryField(invoice, "invoice_id/text()");
+                        String paymentID = queryField(invoice, "payment_id/text()");
+                        String type = queryField(invoice, "type/text()");
+                        String clientID = queryField(invoice, "client_id/text()");
+                        String notes = queryField(invoice, "notes/text()");
+                        String amountString = queryField(invoice, "amount/text()");
+                        String invoiceDateString = queryField(invoice, "date/text()");
+                        Date invoiceDate = df.parse(invoiceDateString);
+                        IRow row = dataSet.createRow();
+                        addValue(row, FreshbooksPaymentSource.INVOICE_ID, invoiceID, keys);
+                        addValue(row, FreshbooksPaymentSource.PAYMENT_ID, paymentID, keys);
+                        addValue(row, FreshbooksPaymentSource.CLIENT_ID, clientID, keys);
+                        addValue(row, FreshbooksPaymentSource.TYPE, type, keys);
+                        addValue(row, FreshbooksPaymentSource.NOTES, notes, keys);
+                        if (amountString != null) {
+                            addValue(row, FreshbooksPaymentSource.AMOUNT, Double.parseDouble(amountString), keys);
+                        }
+                        addValue(row, FreshbooksPaymentSource.PAYMENT_DATE, invoiceDate, keys);
+                        addValue(row, FreshbooksPaymentSource.COUNT, 1, keys);
+                    }
+                } else {
+                    break;
+                }
+                requestPage++;
+            } while (currentPage < pages);
+            return dataSet;
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

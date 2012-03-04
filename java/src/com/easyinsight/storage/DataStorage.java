@@ -155,7 +155,7 @@ public class DataStorage implements IDataStorage {
             }
         }
         dataStorage.metadata = getMetadata(feedDefinition.getDataFeedID(), conn);
-
+        dataStorage.tableDefined = dataStorage.metadata != null;
         if (dataStorage.metadata == null) {
             dataStorage.metadata = createDefaultMetadata(conn);
         }
@@ -171,6 +171,12 @@ public class DataStorage implements IDataStorage {
         dataStorage.storageConn = dataStorage.database.getConnection();
         dataStorage.storageConn.setAutoCommit(false);
         return dataStorage;
+    }
+
+    private boolean tableDefined;
+
+    public boolean isTableDefined() {
+        return tableDefined;
     }
 
     public FeedPersistenceMetadata getMetadata() {

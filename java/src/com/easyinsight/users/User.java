@@ -26,6 +26,9 @@ public class User {
     @Column(name="name")
     private String name;
 
+    @Column(name="refresh_reports")
+    private boolean refreshReports;
+
     @Column(name="initial_setup_done")
     private boolean initialSetupDone;
 
@@ -46,6 +49,9 @@ public class User {
 
     @Column(name="account_admin")
     private boolean accountAdmin;
+
+    @Column(name="invoice_recipient")
+    private boolean invoiceRecipient;
 
     @Column(name="hash_type")
     private String hashType;
@@ -98,7 +104,25 @@ public class User {
         userTransferObject.setFirstName(firstName);
         userTransferObject.setPersonaID(personaID != null ? personaID : 0);
         userTransferObject.setFixedDashboardID(fixedDashboardID != null ? fixedDashboardID : 0);
+        userTransferObject.setAutoRefreshReports(refreshReports);
+        userTransferObject.setInvoiceRecipient(invoiceRecipient);
         return userTransferObject;
+    }
+
+    public boolean isRefreshReports() {
+        return refreshReports;
+    }
+
+    public void setRefreshReports(boolean refreshReports) {
+        this.refreshReports = refreshReports;
+    }
+
+    public boolean isInvoiceRecipient() {
+        return invoiceRecipient;
+    }
+
+    public void setInvoiceRecipient(boolean invoiceRecipient) {
+        this.invoiceRecipient = invoiceRecipient;
     }
 
     public Date getCreatedOn() {
@@ -287,6 +311,8 @@ public class User {
         setName(transferObject.getName());
         setTitle(transferObject.getTitle());
         setOptInEmail(transferObject.isOptInEmail());
+        setInvoiceRecipient(transferObject.isInvoiceRecipient());
+        setRefreshReports(transferObject.isAutoRefreshReports());
         if (transferObject.getFixedDashboardID() == 0) {
             setFixedDashboardID(null);
         } else {

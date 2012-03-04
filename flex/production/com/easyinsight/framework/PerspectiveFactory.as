@@ -32,6 +32,9 @@ public class PerspectiveFactory implements IPerspectiveFactory {
             case PerspectiveInfo.SPREADSHEET_WIZARD:
                 perspective = new ModuleUIComponent("SpreadsheetWizard", "Loading the wizard to process your spreadsheet...");
                 break;
+            case PerspectiveInfo.SPREADSHEET_UPDATE:
+                perspective = new ModuleUIComponent("SpreadsheetUpdateWizard", "Loading the wizard to update your spreadsheet...");
+                break;
             case PerspectiveInfo.COMPOSITE_WORKSPACE:
                 perspective = new DirectUIComponent(new NewCompositeFeedWorkspace());
                 break;

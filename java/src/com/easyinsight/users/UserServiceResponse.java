@@ -53,6 +53,7 @@ public class UserServiceResponse {
     private boolean subdomainEnabled;
     private String personaName;
     private byte[] reportImage;
+    private boolean refreshReports;
 
     public static UserServiceResponse createResponseWithUISettings(User user, ApplicationSkin applicationSkin, String personaName) {
         return createResponse(user, applicationSkin, personaName);
@@ -103,7 +104,7 @@ public class UserServiceResponse {
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
                                 account.getCurrencySymbol(), applicationSkin, account.getFirstDayOfWeek(),
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName);
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports());
         response.setReportImage(bytes);
         return response;
     }
@@ -121,7 +122,7 @@ public class UserServiceResponse {
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
                                String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
-                               boolean subdomainEnabled, String personaName) {
+                               boolean subdomainEnabled, String personaName, boolean refreshReports) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -157,6 +158,15 @@ public class UserServiceResponse {
         this.reportTypeOptions = reportTypeOptions;
         this.subdomainEnabled = subdomainEnabled;
         this.personaName = personaName;
+        this.refreshReports = refreshReports;
+    }
+
+    public boolean isRefreshReports() {
+        return refreshReports;
+    }
+
+    public void setRefreshReports(boolean refreshReports) {
+        this.refreshReports = refreshReports;
     }
 
     public byte[] getReportImage() {

@@ -118,15 +118,23 @@ public class FeedService {
                 if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.CONSTANT_CONTACT.getType()) {
                     sourceKey = sourceObj.findAnalysisItem(HighRiseContactSource.CONTACT_WORK_EMAIL).getKey();
                     targetKey = targetObj.findAnalysisItem(CCContactSource.CONTACT_EMAIL).getKey();
-                    dataSourceName = "Combined Highrise and Constant Contact";
+                    dataSourceName = "Combined Data Sources";
                 } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.BASECAMP_MASTER.getType()) {
                     sourceKey = sourceObj.findAnalysisItem(HighRiseDealSource.DEAL_NAME).getKey();
                     targetKey = targetObj.findAnalysisItem(BaseCampTodoSource.PROJECTNAME).getKey();
-                    dataSourceName = "Combined Highrise and Basecamp";
+                    dataSourceName = "Combined Data Sources";
                 } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.FRESHBOOKS_COMPOSITE.getType()) {
                     sourceKey = sourceObj.findAnalysisItem(HighRiseCompanySource.COMPANY_NAME).getKey();
                     targetKey = targetObj.findAnalysisItem(FreshbooksClientSource.ORGANIZATION).getKey();
-                    dataSourceName = "Combined Highrise and Freshbooks";
+                    dataSourceName = "Combined Data Sources";
+                } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.HARVEST_COMPOSITE.getType()) {
+                    sourceKey = sourceObj.findAnalysisItem(HighRiseDealSource.DEAL_ID).getKey();
+                    targetKey = targetObj.findAnalysisItem(HarvestProjectSource.HIGHRISE_ID).getKey();
+                    dataSourceName = "Combined Data Sources";
+                } else if (source.getDataSourceType() == FeedType.BASECAMP_MASTER.getType() && target.getDataSourceType() == FeedType.HARVEST_COMPOSITE.getType()) {
+                    sourceKey = sourceObj.findAnalysisItem(BaseCampTodoSource.PROJECTID).getKey();
+                    targetKey = targetObj.findAnalysisItem(HarvestProjectSource.BASECAMP_ID).getKey();
+                    dataSourceName = "Combined Data Sources";
                 } else {
                     throw new RuntimeException();
                 }
@@ -164,6 +172,10 @@ public class FeedService {
             JoinSuggestion suggestionB = analyze(FeedType.CONSTANT_CONTACT, FeedType.COMPOSITE, "Constant Contact", "Existing Cube", dataSources, conn);
             if (suggestionB != null) {
                 suggestions.add(suggestionB);
+            }
+            JoinSuggestion suggestionC = analyze(FeedType.FRESHBOOKS_COMPOSITE, FeedType.COMPOSITE, "FreshBooks", "Existing Cube", dataSources, conn);
+            if (suggestionC != null) {
+                suggestions.add(suggestionC);
             }
             JoinSuggestion suggestion1 = analyze(FeedType.HIGHRISE_COMPOSITE, FeedType.CONSTANT_CONTACT, "Highrise", "Constant Contact", dataSources, conn);
             if (suggestion1 != null) {

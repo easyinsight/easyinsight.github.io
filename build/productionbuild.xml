@@ -416,7 +416,7 @@
     <target name="modules2" depends="report.linechart, report.list"/>
     <target name="modules3" depends="report.piechart, report.plotchart"/>
     <target name="modules4" depends="report.crosstab, report.tree, report.treemap, app.embeddeddashboard"/>
-    <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail"/>
+    <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail, perspective.spreadsheetupdatewizard"/>
     <target name="modules7" depends="perspective.kpiwindow,perspective.datasourceadmin"/>
     <target name="modules8" depends="report.heatmap, report.gantt, report.form"/>
     <target name="apps" depends="compileFlexOptimized, app.embeddedreport, app.selenium, app.admin, app.embeddedlist"/>
@@ -447,6 +447,10 @@
 
     <target name="perspective.spreadsheetwizard">
         <buildSWF mainMXML="com/easyinsight/customupload/wizard/SpreadsheetWizard.mxml" swfName="SpreadsheetWizard" buildFile="perspectives/spreadsheet-wizard-module.xml"/>
+    </target>
+
+    <target name="perspective.spreadsheetupdatewizard">
+        <buildSWF mainMXML="com/easyinsight/customupload/wizard/SpreadsheetUpdateWizard.mxml" swfName="SpreadsheetUpdateWizard" buildFile="perspectives/spreadsheet-update-module.xml"/>
     </target>
 
     <target name="perspective.connectiondetail">

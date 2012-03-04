@@ -6,12 +6,11 @@ import com.easyinsight.analysis.ReportException;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.Feed;
+import com.easyinsight.datafeeds.StaticFeed;
 import com.easyinsight.logging.LogClass;
 import nu.xom.*;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
-import oauth.signpost.http.HttpRequest;
 import oauth.signpost.signature.PlainTextMessageSigner;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -21,7 +20,6 @@ import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.BasicHttpEntity;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
@@ -40,7 +38,7 @@ import java.util.Map;
  * Date: Jul 29, 2010
  * Time: 10:07:03 AM
  */
-public abstract class FreshbooksFeed extends Feed {
+public abstract class FreshbooksFeed extends StaticFeed {
 
     private String url;
     private String tokenKey;

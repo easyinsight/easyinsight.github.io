@@ -71,6 +71,8 @@
             this.personaID = userTransferObject.personaID;
             this.newsletterSelected = userTransferObject.optInEmail;
             this.viewID = userTransferObject.fixedDashboardID;
+            this.autoRefresh = userTransferObject.autoRefreshReports;
+            this.invoiceRecipient = userTransferObject.invoiceRecipient;
             createLabel = "Update User";
         }
 
@@ -131,6 +133,8 @@
                 user.name = fullNameInput.text;
                 user.firstName = firstNameInput.text;
                 user.fixedDashboardID = singleViewComboBox.selectedItem.id;
+                user.autoRefreshReports = refreshCheckbox.selected;
+                user.invoiceRecipient = invoiceCheckbox.selected;
                 if (showPersonaOption) {
                     var persona:Object = personaComboBox.selectedItem;
                     if (persona != Persona.EMPTY_PERSONA) {
@@ -201,6 +205,12 @@
         [Bindable]
         private var welcomeMessage:String;
 
+        [Bindable]
+        private var autoRefresh:Boolean;
+
+        [Bindable]
+        private var invoiceRecipient:Boolean;
+
         private var dlsVBox:VBox;
 
         [Bindable]
@@ -234,6 +244,9 @@
             <mx:FormItem label="Account Administrator:">
                 <mx:CheckBox id="accountAdminCheckbox" selected="{accountAdmin}"/>
             </mx:FormItem>
+            <mx:FormItem label="Invoice Recipient:">
+                <mx:CheckBox id="invoiceCheckbox" selected="{invoiceRecipient}"/>
+            </mx:FormItem>
             <mx:FormItem label="Send Newsletter to User:">
                 <mx:CheckBox id="newsletterCheckbox" selected="{newsletterSelected}"/>
             </mx:FormItem>
@@ -243,6 +256,9 @@
             </mx:FormItem>
             <mx:FormItem label="Fixed View:">
                 <util:SmartComboBox dataProvider="{availableViews}" labelField="name" id="singleViewComboBox" selectedProperty="id" selectedValue="{viewID}" enabled="{!accountAdmin}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Auto Refresh Reports and Dashboards:">
+                <mx:CheckBox id="refreshCheckbox" selected="{autoRefresh}"/>
             </mx:FormItem>
         </mx:Form>
     </mx:TabNavigator>

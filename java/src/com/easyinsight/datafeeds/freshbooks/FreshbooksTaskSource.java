@@ -8,6 +8,9 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
+import nu.xom.Document;
+import nu.xom.Node;
+import nu.xom.Nodes;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -54,7 +57,56 @@ public class FreshbooksTaskSource extends FreshbooksBaseSource {
     }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
-        return new DataSet();
+        FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) parentDefinition;
+        if (freshbooksCompositeSource.isLiveDataSource()) {
+            return new DataSet();
+        }
+        try {
+            DataSet dataSet = new DataSet();
+
+            int requestPage = 1;
+            int pages;
+            int currentPage;
+            do {
+                Document invoicesDoc = query("task.list", "<page>" + requestPage + "</page>", freshbooksCompositeSource);
+                Nodes nodes = invoicesDoc.query("/response/tasks");
+                if (nodes.size() > 0) {
+                    Node invoicesSummaryNode = nodes.get(0);
+                    String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                    String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                    pages = Integer.parseInt(pageString);
+                    currentPage = Integer.parseInt(currentPageString);
+                    Nodes invoices = invoicesDoc.query("/response/tasks/task");
+
+                    for (int i = 0; i < invoices.size(); i++) {
+                        Node invoice = invoices.get(i);
+                        String taskID = queryField(invoice, "task_id/text()");
+                        String name = queryField(invoice, "name/text()");
+                        String description = queryField(invoice, "description/text()");
+                        String billable = queryField(invoice, "billable/text()");
+                        String rate = queryField(invoice, "rate/text()");
+
+                        IRow row = dataSet.createRow();
+                        addValue(row, FreshbooksTaskSource.TASK_ID, taskID, keys);
+                        addValue(row, FreshbooksTaskSource.NAME, name, keys);
+                        addValue(row, FreshbooksTaskSource.DESCRIPTION, description, keys);
+                        addValue(row, FreshbooksTaskSource.BILLABLE, billable, keys);
+                        if (rate != null) {
+                            addValue(row, FreshbooksTaskSource.RATE,  Double.parseDouble(rate), keys);
+                        }
+                        addValue(row, FreshbooksTaskSource.COUNT, 1, keys);
+                    }
+                    requestPage++;
+                } else {
+                    break;
+                }
+            } while (currentPage < pages);
+            return dataSet;
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.FreshbooksDataSource;
+
+        [Bindable]
+        private var url:String;
+        [Bindable]
+        private var liveDataSource:Boolean;
+        
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
+            url = ds.url;
+            liveDataSource = ds.liveDataSource;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
+            ds.url = urlInput.text;
+            ds.liveDataSource = liveDataSourceCheckbox.selected;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:Form paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
+        <mx:FormItem label="FreshBooks URL:">
+            <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Live FreshBooks Connection:" direction="horizontal">
+            <mx:CheckBox id="liveDataSourceCheckbox" selected="{liveDataSource}"/>
+            <!--<mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on inactive projects, you can save time on your synchronization by not pulling those projects across into Easy Insight."/>-->
+        </mx:FormItem>
+	</mx:Form>
+</mx:VBox>

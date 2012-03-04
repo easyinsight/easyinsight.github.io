@@ -42,6 +42,32 @@ import flex.messaging.FlexContext;
  */
 public class UserService {
 
+    public TimerResponse runTimer(TimerRequest timerRequest) {
+        boolean rerun = false;
+        try {
+            if (timerRequest.getDataSourceID() > 0 && timerRequest.getDate() != null) {
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    PreparedStatement stmt = conn.prepareStatement("SELECT refresh_time FROM data_source_refresh_log WHERE data_source_id = ?");
+                    stmt.setLong(1, timerRequest.getDataSourceID());
+                    ResultSet rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        Date refreshTime = rs.getTimestamp(1);
+                        if (timerRequest.getDate().compareTo(refreshTime) < 0) {
+                            rerun = true;
+                        }
+                    }
+                } finally {
+                    Database.closeConnection(conn);
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        return new TimerResponse(rerun, getBuildPath());
+    }
+
     public BasicInfo getBuildPath() {
         try {
             URL url = getClass().getClassLoader().getResource("version.properties");
@@ -84,7 +110,7 @@ public class UserService {
                 nukeTimedState.executeUpdate();
                 PreparedStatement addTimedState = conn.prepareStatement("INSERT INTO ACCOUNT_TIMED_STATE (ACCOUNT_ID, ACCOUNT_STATE, STATE_CHANGE_TIME) VALUES (?, ?, ?)");
                 Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.DAY_OF_YEAR, 15);
+                cal.add(Calendar.DAY_OF_YEAR, 30);
                 addTimedState.setLong(1, accountID);
                 addTimedState.setInt(2, Account.ACTIVE);
                 addTimedState.setTimestamp(3, new java.sql.Timestamp(cal.getTimeInMillis()));

@@ -1,6 +1,7 @@
 package com.easyinsight.datasources {
 import com.easyinsight.customupload.FileFeedUpdateWindow;
 import com.easyinsight.framework.User;
+import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.util.PopUpUtil;
 
@@ -160,8 +161,12 @@ public class MyDataDataSourceDisplay extends VBox {
     private function fileData(feedDescriptor:DataSourceDescriptor):void {
         var feedUpdateWindow:FileFeedUpdateWindow = FileFeedUpdateWindow(PopUpManager.createPopUp(this.parent.parent.parent, FileFeedUpdateWindow, true));
         feedUpdateWindow.feedID = feedDescriptor.id;
+        feedUpdateWindow.addEventListener(AnalyzeEvent.ANALYZE, onEvent, false, 0, true);
         PopUpUtil.centerPopUp(feedUpdateWindow);
+    }
 
+    private function onEvent(event:Event):void {
+        dispatchEvent(event);
     }
 
     private function onRefresh(event:DataSourceRefreshEvent):void {

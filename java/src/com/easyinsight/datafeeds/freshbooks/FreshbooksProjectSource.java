@@ -8,9 +8,14 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
+import nu.xom.Document;
+import nu.xom.Node;
+import nu.xom.Nodes;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -56,7 +61,58 @@ public class FreshbooksProjectSource extends FreshbooksBaseSource {
     }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
-        return new DataSet();
+        FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) parentDefinition;
+        if (freshbooksCompositeSource.isLiveDataSource()) {
+            return new DataSet();
+        }
+        try {
+            DataSet dataSet = new DataSet();
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+            int requestPage = 1;
+            int pages;
+            int currentPage;
+            do {
+                Document invoicesDoc = query("project.list", "<page>" + requestPage + "</page>", freshbooksCompositeSource);
+                Nodes nodes = invoicesDoc.query("/response/projects");
+                if (nodes.size() > 0) {
+                    Node invoicesSummaryNode = nodes.get(0);
+                    String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                    String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                    pages = Integer.parseInt(pageString);
+                    currentPage = Integer.parseInt(currentPageString);
+                    Nodes invoices = invoicesDoc.query("/response/projects/project");
+
+                    for (int i = 0; i < invoices.size(); i++) {
+                        Node invoice = invoices.get(i);
+                        String projectID = queryField(invoice, "project_id/text()");
+                        String name = queryField(invoice, "name/text()");
+                        String description = queryField(invoice, "description/text()");
+                        String billMethod = queryField(invoice, "bill_method/text()");
+                        String clientID = queryField(invoice, "client_id/text()");
+                        String rateString = queryField(invoice, "rate/text()");
+                        IRow row = dataSet.createRow();
+                        addValue(row, FreshbooksProjectSource.PROJECT_ID, projectID, keys);
+                        addValue(row, FreshbooksProjectSource.CLIENT_ID, clientID, keys);
+                        addValue(row, FreshbooksProjectSource.DESCRIPTION, description, keys);
+                        addValue(row, FreshbooksProjectSource.NAME, name, keys);
+                        addValue(row, FreshbooksProjectSource.BILL_METHOD, billMethod, keys);
+                        if (rateString != null) {
+                            addValue(row, FreshbooksProjectSource.RATE, Double.parseDouble(rateString), keys);
+                        }
+                        addValue(row, FreshbooksProjectSource.COUNT, 1, keys);
+                    }
+                    requestPage++;
+                } else {
+                    break;
+                }
+            } while (currentPage < pages);
+            return dataSet;
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

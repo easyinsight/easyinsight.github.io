@@ -4,6 +4,7 @@ import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.dashboard.DashboardStorage;
+import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.scorecard.ScorecardDescriptor;
@@ -735,6 +736,10 @@ public class UserUploadService {
                                 } else {
                                     feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
                                 }
+                                PreparedStatement stmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_REFRESH_LOG (REFRESH_TIME, DATA_SOURCE_ID) VALUES (?, ?)");
+                                stmt.setTimestamp(1, new Timestamp(now.getTime()));
+                                stmt.setLong(2, dataSource.getDataFeedID());
+                                stmt.execute();
                                 ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, now);
                                 conn.commit();
                             } catch (ReportException re) {
@@ -771,13 +776,46 @@ public class UserUploadService {
         }
     }
 
-    public void updateData(long feedID, byte[] bytes, boolean update) {
+    public Collection<FieldUploadInfo> analyzeUpdate(long feedID, byte[] bytes) {
         SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
+            UserUploadAnalysis analysis = dataSource.getUploadFormat().analyze(bytes);
+            Map<String, AnalysisItem> fieldMap = new HashMap<String, AnalysisItem>();
+            for (AnalysisItem field : dataSource.getFields()) {
+                fieldMap.put(field.getKey().toBaseKey().toKeyString(), field);
+            }
+            Collection<FieldUploadInfo> fieldInfos = new ArrayList<FieldUploadInfo>();
+            for (AnalysisItem field : analysis.getFields()) {
+                if (!fieldMap.containsKey(field.getKey().toBaseKey().toKeyString())) {
+                    FieldUploadInfo fieldUploadInfo = new FieldUploadInfo();
+                    fieldUploadInfo.setGuessedItem(field);
+                    fieldUploadInfo.setSampleValues(new ArrayList<String>(analysis.getSampleMap().get(field.getKey())));
+                    fieldInfos.add(fieldUploadInfo);
+                }
+            }
+            conn.commit();
+            return fieldInfos;
+        } catch (Throwable e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void updateData(long feedID, byte[] bytes, boolean update, List<AnalysisItem> newFields) {
+        SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             FileProcessUpdateScheduledTask task = new FileProcessUpdateScheduledTask();
             task.setFeedID(feedID);
+            task.setNewFields(newFields);
             task.setUpdate(update);
             task.setUserID(SecurityUtil.getUserID());
             task.setAccountID(SecurityUtil.getAccountID());
@@ -785,20 +823,16 @@ public class UserUploadService {
             conn.commit();
         } catch (Throwable e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
+    }
+
+    public void updateData(long feedID, byte[] bytes, boolean update) {
+        updateData(feedID, bytes, update, null);
     }
 
     public long uploadPNG(byte[] bytes) {

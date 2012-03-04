@@ -8,6 +8,9 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
+import nu.xom.Document;
+import nu.xom.Node;
+import nu.xom.Nodes;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -70,7 +73,41 @@ public class FreshbooksStaffSource extends FreshbooksBaseSource {
     }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
-        return new DataSet();
+        FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) parentDefinition;
+        if (freshbooksCompositeSource.isLiveDataSource()) {
+            return new DataSet();
+        }
+        try {
+
+            DataSet dataSet = new DataSet();
+
+
+            Document invoicesDoc = query("staff.list", "", freshbooksCompositeSource);
+            Nodes invoices = invoicesDoc.query("/response/staff_members/member");
+            for (int i = 0; i < invoices.size(); i++) {
+                Node invoice = invoices.get(i);
+                String firstName = queryField(invoice, "first_name/text()");
+                String lastName = queryField(invoice, "last_name/text()");
+                String name = firstName + " " + lastName;
+                String userName = queryField(invoice, "username/text()");
+                String email = queryField(invoice, "email/text()");
+                String staffID = queryField(invoice, "staff_id/text()");
+
+                IRow row = dataSet.createRow();
+                addValue(row, FreshbooksStaffSource.FIRST_NAME, firstName, keys);
+                addValue(row, FreshbooksStaffSource.STAFF_ID, staffID, keys);
+                addValue(row, FreshbooksStaffSource.LAST_NAME, lastName, keys);
+                addValue(row, FreshbooksStaffSource.NAME, name, keys);
+                addValue(row, FreshbooksStaffSource.USERNAME, userName, keys);
+                addValue(row, FreshbooksStaffSource.EMAIL, email, keys);
+            }
+
+            return dataSet;
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -25,6 +25,9 @@ public class UserTransferObject {
     private long fixedDashboardID;
     private boolean initialSetupDone;
 
+    private boolean invoiceRecipient;
+    private boolean autoRefreshReports;
+
     public UserTransferObject() {
     }
 
@@ -34,6 +37,23 @@ public class UserTransferObject {
         this.email = email;
         this.name = name;
         this.firstName = firstName;
+    }
+
+
+    public boolean isInvoiceRecipient() {
+        return invoiceRecipient;
+    }
+
+    public void setInvoiceRecipient(boolean invoiceRecipient) {
+        this.invoiceRecipient = invoiceRecipient;
+    }
+
+    public boolean isAutoRefreshReports() {
+        return autoRefreshReports;
+    }
+
+    public void setAutoRefreshReports(boolean autoRefreshReports) {
+        this.autoRefreshReports = autoRefreshReports;
     }
 
     public boolean isInitialSetupDone() {
@@ -144,6 +164,8 @@ public class UserTransferObject {
         user.setUserName(getUserName());
         user.setOptInEmail(isOptInEmail());
         user.setInitialSetupDone(isInitialSetupDone());
+        user.setRefreshReports(isAutoRefreshReports());
+        user.setInvoiceRecipient(isInvoiceRecipient());
         if (getFixedDashboardID() > 0) {
             user.setFixedDashboardID(getFixedDashboardID());
         }

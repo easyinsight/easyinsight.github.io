@@ -549,8 +549,9 @@ public class UserAccountAdminService {
                 user.setUpdatedOn(new Date());
                 session.update(user);
                 session.flush();
-                conn.commit();
+                new AccountActivityStorage().generateSalesEmailSchedules(user.getUserID(), conn);
             }
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -656,9 +657,70 @@ public class UserAccountAdminService {
 
     public void deleteUser(long userID) {
         SecurityUtil.authorizeAccountAdmin();
-        Session session = Database.instance().createSession();
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
         try {
-            session.beginTransaction();
+            conn.setAutoCommit(false);
+            PreparedStatement findReportStmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM USER_TO_ANALYSIS WHERE USER_ID = ?");
+            PreparedStatement findUserReportStmt = conn.prepareStatement("SELECT USER_ID FROM USER_TO_ANALYSIS WHERE ANALYSIS_ID = ?");
+            findReportStmt.setLong(1, userID);
+            ResultSet reportRS = findReportStmt.executeQuery();
+            Set<Long> reportIDs = new HashSet<Long>();
+            while (reportRS.next()) {
+                long reportID = reportRS.getLong(1);
+                findUserReportStmt.setLong(1, reportID);
+                ResultSet userRS = findUserReportStmt.executeQuery();
+                boolean add = true;
+                while (userRS.next()) {
+                    long ownerID = userRS.getLong(1);
+                    if (ownerID == SecurityUtil.getUserID()) {
+                        add = false;
+                    }
+                }
+                if (add) {
+                    reportIDs.add(reportID);
+                }
+            }
+            PreparedStatement findDashboardStmt = conn.prepareStatement("SELECT DASHBOARD_ID FROM USER_TO_DASHBOARD WHERE USER_ID = ?");
+            PreparedStatement findUserDashboardStmt = conn.prepareStatement("SELECT USER_ID FROM USER_TO_DASHBOARD WHERE DASHBOARD_ID = ?");
+            findDashboardStmt.setLong(1, userID);
+            ResultSet dashboardDS = findDashboardStmt.executeQuery();
+            Set<Long> dashboardIDs = new HashSet<Long>();
+            while (dashboardDS.next()) {
+                long dashboardID = dashboardDS.getLong(1);
+                findUserDashboardStmt.setLong(1, dashboardID);
+                ResultSet userRS = findUserDashboardStmt.executeQuery();
+                boolean add = true;
+                while (userRS.next()) {
+                    long ownerID = userRS.getLong(1);
+                    if (ownerID == SecurityUtil.getUserID()) {
+                        add = false;
+                    }
+                }
+                if (add) {
+                    dashboardIDs.add(dashboardID);
+                }
+            }
+            PreparedStatement findDataStmt = conn.prepareStatement("SELECT FEED_ID FROM UPLOAD_POLICY_USERS WHERE USER_ID = ?");
+            PreparedStatement findUserDataStmt = conn.prepareStatement("SELECT USER_ID FROM UPLOAD_POLICY_USERS WHERE FEED_ID = ?");
+            findDataStmt.setLong(1, userID);
+            ResultSet dataSourceRS = findDataStmt.executeQuery();
+            Set<Long> dataSourceIDs = new HashSet<Long>();
+            while (dataSourceRS.next()) {
+                long dataSourceID = dataSourceRS.getLong(1);
+                findUserDataStmt.setLong(1, dataSourceID);
+                ResultSet userRS = findUserDataStmt.executeQuery();
+                boolean add = true;
+                while (userRS.next()) {
+                    long ownerID = userRS.getLong(1);
+                    if (ownerID == SecurityUtil.getUserID()) {
+                        add = false;
+                    }
+                }
+                if (add) {
+                    dataSourceIDs.add(dataSourceID);
+                }
+            }
             List results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
             if (results.size() > 0) {
                 User user = (User) results.get(0);
@@ -667,12 +729,35 @@ public class UserAccountAdminService {
                 }
                 session.delete(user);
             }
-            session.getTransaction().commit();
+            PreparedStatement addUserToReportStmt = conn.prepareStatement("INSERT INTO USER_TO_ANALYSIS (USER_ID, ANALYSIS_ID, RELATIONSHIP_TYPE, OPEN) VALUES (?, ?, ?, ?)");
+            for (Long reportID : reportIDs) {
+                addUserToReportStmt.setLong(1, SecurityUtil.getUserID());
+                addUserToReportStmt.setLong(2, reportID);
+                addUserToReportStmt.setInt(3, Roles.OWNER);
+                addUserToReportStmt.setBoolean(4, false);
+                addUserToReportStmt.execute();
+            }
+            PreparedStatement addUserToDashboardStmt = conn.prepareStatement("INSERT INTO USER_TO_DASHBOARD (USER_ID, DASHBOARD_ID) VALUES (?, ?)");
+            for (Long dashboardID : dashboardIDs) {
+                addUserToDashboardStmt.setLong(1, SecurityUtil.getUserID());
+                addUserToDashboardStmt.setLong(2, dashboardID);
+                addUserToDashboardStmt.execute();
+            }
+            PreparedStatement addUserToDataSourceStmt = conn.prepareStatement("INSERT INTO UPLOAD_POLICY_USERS (USER_ID, FEED_ID, ROLE) VALUES (?, ?, ?)");
+            for (Long dataSourceID : dataSourceIDs) {
+                addUserToDataSourceStmt.setLong(1, SecurityUtil.getUserID());
+                addUserToDataSourceStmt.setLong(2, dataSourceID);
+                addUserToDataSourceStmt.setInt(3, Roles.OWNER);
+                addUserToDataSourceStmt.execute();
+            }
+            session.flush();
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
+            conn.rollback();
         } finally {
             session.close();
+            Database.closeConnection(conn);
         }
     }
 

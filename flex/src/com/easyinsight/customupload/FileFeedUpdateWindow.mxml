@@ -2,8 +2,11 @@
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="600" height="300" creationComplete="doCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.util.ProgressAlert;
 
-            import com.easyinsight.util.ProgressAlert;
+            import mx.collections.ArrayCollection;
 
             import mx.managers.PopUpManager;
 
@@ -59,13 +62,15 @@
 
 			
 			private function replace():void {
-                ProgressAlert.alert(this, "Updating data...", null, uploadService.updateData);
-				uploadService.updateData.send(_feedID, fileData, true);
+                op = 2;
+                ProgressAlert.alert(this, "Analyzing...", null, uploadService.analyzeUpdate);
+                uploadService.analyzeUpdate.send(_feedID, fileData);
 			}
 			
 			private function append():void {
-                ProgressAlert.alert(this, "Updating data...", null, uploadService.updateData);
-				uploadService.updateData.send(_feedID, fileData, false);
+                op = 1;
+                ProgressAlert.alert(this, "Analyzing...", null, uploadService.analyzeUpdate);
+                uploadService.analyzeUpdate.send(_feedID, fileData);
 			}
 			
 			private function cancel():void {
@@ -75,10 +80,29 @@
             private function updatedData():void {
 				PopUpManager.removePopUp(this);
 			}
+            
+            private var op:int = 0;
+
+            private function analyzedUpdate():void {
+                var fields:ArrayCollection = uploadService.analyzeUpdate.lastResult as ArrayCollection;
+                if (fields.length == 0) {
+                    if (op == 1) {
+                        ProgressAlert.alert(this, "Updating data...", null, uploadService.updateData);
+                        uploadService.updateData.send(_feedID, fileData, false);
+                    } else if (op == 2) {
+                        ProgressAlert.alert(this, "Updating data...", null, uploadService.updateData);
+                        uploadService.updateData.send(_feedID, fileData, true);
+                    }
+                } else {
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SPREADSHEET_UPDATE, {dataSourceID: _feedID, op: op, bytes: fileData, fields: fields})));
+                    PopUpManager.removePopUp(this);
+                }
+            }
 		]]>
 	</mx:Script>
 	<mx:RemoteObject id="uploadService" destination="userUpload">
 		<mx:method name="updateData" result="updatedData()"/>
+		<mx:method name="analyzeUpdate" result="analyzedUpdate()"/>
 	</mx:RemoteObject>
 	<mx:VBox width="100%" height="100%" id="coreVBox" styleName="TitleWindowContents">		
 		<mx:Form id="coreForm">

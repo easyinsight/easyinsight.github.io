@@ -8,6 +8,9 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
+import nu.xom.Document;
+import nu.xom.Node;
+import nu.xom.Nodes;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -62,7 +65,62 @@ public class FreshbooksInvoiceLineSource extends FreshbooksBaseSource {
     }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
-        return new DataSet();
+        FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) parentDefinition;
+        if (freshbooksCompositeSource.isLiveDataSource()) {
+            return new DataSet();
+        }
+        try {
+            DataSet dataSet = new DataSet();
+
+            int requestPage = 1;
+            int pages;
+            int currentPage;
+            do {
+                String string = "<page>" + requestPage + "</page>";
+                Document invoicesDoc = query("invoice.list", string, freshbooksCompositeSource);
+                Nodes invoiceList = invoicesDoc.query("/response/invoices");
+                if (invoiceList.size() > 0) {
+                    Node invoicesSummaryNode = invoicesDoc.query("/response/invoices").get(0);
+                    String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                    String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                    pages = Integer.parseInt(pageString);
+                    currentPage = Integer.parseInt(currentPageString);
+                    Nodes invoices = invoicesDoc.query("/response/invoices/invoice");
+
+                    for (int i = 0; i < invoices.size(); i++) {
+                        Node invoice = invoices.get(i);
+                        String invoiceID = queryField(invoice, "invoice_id/text()");
+                        Nodes lineItems = invoice.query("lines/line");
+                        for (int j = 0; j < lineItems.size(); j++) {
+                            Node lineItem = lineItems.get(j);
+                            IRow row = dataSet.createRow();
+                            addValue(row, FreshbooksInvoiceLineSource.INVOICE_ID, invoiceID, keys);
+                            String lineItemID = queryField(lineItem, "line_id/text()");
+                            String amountString = queryField(lineItem, "amount/text()");
+                            String quantityString = queryField(lineItem, "quantity/text()");
+                            String unitCostString = queryField(lineItem, "unit_cost/text()");
+                            String description = queryField(lineItem, "description/text()");
+                            String name = queryField(lineItem, "name/text()");
+                            addValue(row, FreshbooksInvoiceLineSource.DESCRIPTION, description, keys);
+                            addValue(row, FreshbooksInvoiceLineSource.LINE_ID, lineItemID, keys);
+                            addValue(row, FreshbooksInvoiceLineSource.NAME, name, keys);
+                            addValue(row, FreshbooksInvoiceLineSource.COUNT, 1, keys);
+                            if (amountString != null) addValue(row, FreshbooksInvoiceLineSource.AMOUNT, Double.parseDouble(amountString), keys);
+                            if (amountString != null) addValue(row, FreshbooksInvoiceLineSource.QUANTITY, Double.parseDouble(quantityString), keys);
+                            if (amountString != null) addValue(row, FreshbooksInvoiceLineSource.UNIT_COST, Double.parseDouble(unitCostString), keys);
+                        }
+                    }
+                    requestPage++;
+                } else {
+                    break;
+                }
+            } while (currentPage < pages);
+            return dataSet;
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

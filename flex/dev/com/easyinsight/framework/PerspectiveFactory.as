@@ -4,6 +4,7 @@ import com.easyinsight.account.AccountBasePage;
 import com.easyinsight.account.Help;
 import com.easyinsight.administration.feed.FeedAdministrationContainer;
 import com.easyinsight.analysis.AnalysisItemEditor;
+import com.easyinsight.customupload.wizard.SpreadsheetUpdateWizard;
 import com.easyinsight.customupload.wizard.SpreadsheetWizard;
 import com.easyinsight.dashboard.DashboardEditor;
 import com.easyinsight.dashboard.DashboardView;
@@ -12,6 +13,7 @@ import com.easyinsight.feedassembly.NewCompositeFeedWorkspace;
 import com.easyinsight.feedassembly.NewFederatedWindow;
 import com.easyinsight.genredata.Exchange;
 import com.easyinsight.kpi.KPIModule;
+import com.easyinsight.listing.DataSourceSpecificList;
 import com.easyinsight.listing.MyData;
 import com.easyinsight.report.ReportView;
 import com.easyinsight.schedule.ScheduleManagement;
@@ -35,6 +37,9 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 break;
             case PerspectiveInfo.SPREADSHEET_WIZARD:
                 perspective = new DirectUIComponent(new SpreadsheetWizard());
+                break;
+            case PerspectiveInfo.SPREADSHEET_UPDATE:
+                perspective = new DirectUIComponent(new SpreadsheetUpdateWizard());
                 break;
             case PerspectiveInfo.COMPOSITE_WORKSPACE:
                 perspective = new DirectUIComponent(new NewCompositeFeedWorkspace());
@@ -86,6 +91,9 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 break;
             case PerspectiveInfo.FEDERATED_EDITOR:
                 perspective = new DirectUIComponent(new NewFederatedWindow());
+                break;
+            case PerspectiveInfo.DATA_SOURCE_SPECIFIC:
+                perspective = new DirectUIComponent(new DataSourceSpecificList());
                 break;
         }
         return perspective;

@@ -28,6 +28,8 @@ public class PerspectiveInfo {
     public static const SCORECARD_EDITOR:int = 31;
     public static const SCORECARD_VIEW:int = 32;
     public static const FEDERATED_EDITOR:int = 33;
+    public static const DATA_SOURCE_SPECIFIC:int = 34;
+    public static const SPREADSHEET_UPDATE:int = 35;
 
     public var perspectiveType:int;
     public var properties:Object = null;

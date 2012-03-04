@@ -257,6 +257,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
             row.addValue(keys.get(PROJECT_INITIAL_VELOCITY), initialVelocity);
             row.addValue(keys.get(PROJECT_CURRENT_VELOCITY), currentVelocity);
             row.addValue(keys.get(PROJECT_LABELS), labels);
+            row.addValue(keys.get(ITERATION_STATE), "Icebox");
             row.addValue(keys.get(STORY_NAME), storyName);
             row.addValue(keys.get(STORY_ID), storyID);
             row.addValue(keys.get(STORY_DESCRIPTION), storyDescription);

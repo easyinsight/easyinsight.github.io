@@ -24,6 +24,8 @@
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataServiceLoadingEvent;
+        import com.easyinsight.framework.EIGlobalTimer;
+        import com.easyinsight.framework.GlobalDataSourceEvent;
         import com.easyinsight.framework.HierarchyOverride;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
@@ -255,6 +257,7 @@
             if (event.reportFault != null) {
                 event.reportFault.popup(this, onProblem);
             } else {
+                EIGlobalTimer.instance().dataSourceTime = event.dataSourceInfo.lastDataTime;
                 dataSource = event.dataSourceInfo;
                 loading = false;
                 overlayIndex = 0;
@@ -459,6 +462,10 @@
             dispatchEvent(new Event("headerVisibleChanged"));
         }
 
+        private function refreshEvent(event:Event):void {
+            forceRefresh();
+        }
+
         override protected function createChildren():void {
             super.createChildren();
             try {
@@ -466,6 +473,10 @@
                 viewFactory.reportID = _reportID;
                 viewFactory.dataSourceID = _dataSourceID;
                 BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
+                if (User.getInstance().refreshReports) {
+                    EIGlobalTimer.instance().addEventListener(GlobalDataSourceEvent.GLOBAL_DATA_SOURCE, refreshEvent, false, 0, true);
+                    EIGlobalTimer.instance().dataSourceID = _dataSourceID;
+                }
                 //viewFactory.drillthroughFilters = _parameterFilters;
                 screenTarget.addChild(viewFactory);
                 viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);

@@ -8,9 +8,14 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
+import nu.xom.Document;
+import nu.xom.Node;
+import nu.xom.Nodes;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -62,7 +67,60 @@ public class FreshbooksTimeEntrySource extends FreshbooksBaseSource {
     }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
-        return new DataSet();
+        FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) parentDefinition;
+        if (freshbooksCompositeSource.isLiveDataSource()) {
+            return new DataSet();
+        }
+        try {
+            DataSet dataSet = new DataSet();
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+            int requestPage = 1;
+            int pages;
+            int currentPage;
+            do {
+                Document invoicesDoc = query("time_entry.list", "<page>" + requestPage + "</page>", freshbooksCompositeSource);
+                Nodes timeNodes = invoicesDoc.query("/response/time_entries");
+                if (timeNodes.size() == 0) {
+                    return dataSet;
+                }
+                Node invoicesSummaryNode = timeNodes.get(0);
+                String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                pages = Integer.parseInt(pageString);
+                currentPage = Integer.parseInt(currentPageString);
+                Nodes invoices = invoicesDoc.query("/response/time_entries/time_entry");
+
+                for (int i = 0; i < invoices.size(); i++) {
+                    Node invoice = invoices.get(i);
+                    String timeEntryID = queryField(invoice, "time_entry_id/text()");
+                    String staffID = queryField(invoice, "staff_id/text()");
+                    String projectID = queryField(invoice, "project_id/text()");
+                    String taskID = queryField(invoice, "task_id/text()");
+                    String notes = queryField(invoice, "notes/text()");
+                    String hoursString = queryField(invoice, "hours/text()");
+                    String timeDateString = queryField(invoice, "date/text()");
+                    Date entryDate = df.parse(timeDateString);
+                    IRow row = dataSet.createRow();
+                    addValue(row, FreshbooksTimeEntrySource.TIME_ENTRY_ID, timeEntryID, keys);
+                    addValue(row, FreshbooksTimeEntrySource.STAFF_ID, staffID, keys);
+                    addValue(row, FreshbooksTimeEntrySource.PROJECT_ID, projectID, keys);
+                    addValue(row, FreshbooksTimeEntrySource.TASK_ID, taskID, keys);
+                    addValue(row, FreshbooksTimeEntrySource.NOTES, notes, keys);
+                    if (hoursString != null) {
+                        addValue(row, FreshbooksTimeEntrySource.HOURS, Double.parseDouble(hoursString), keys);
+                    }
+                    addValue(row, FreshbooksTimeEntrySource.DATE, entryDate, keys);
+                    addValue(row, FreshbooksTimeEntrySource.COUNT, 1, keys);
+                }
+                requestPage++;
+            } while (currentPage < pages);
+            return dataSet;
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

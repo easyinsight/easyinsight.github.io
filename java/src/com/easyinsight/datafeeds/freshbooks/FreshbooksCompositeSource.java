@@ -39,7 +39,17 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
         setFeedName("FreshBooks");
     }
 
+    private boolean liveDataSource;
+
     private String pin;
+
+    public boolean isLiveDataSource() {
+        return liveDataSource;
+    }
+
+    public void setLiveDataSource(boolean liveDataSource) {
+        this.liveDataSource = liveDataSource;
+    }
 
     public String getPin() {
         return pin;
@@ -99,7 +109,11 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
     }
 
     public int getDataSourceType() {
-        return DataSourceInfo.LIVE;
+        if (liveDataSource) {
+            return DataSourceInfo.LIVE;
+        } else {
+            return DataSourceInfo.COMPOSITE_PULL;
+        }
     }
 
     @Override
@@ -139,24 +153,26 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO FRESHBOOKS (DATA_SOURCE_ID, TOKEN_KEY, TOKEN_SECRET_KEY, URL) VALUES (?, ?, ?, ?)");
+        PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO FRESHBOOKS (DATA_SOURCE_ID, TOKEN_KEY, TOKEN_SECRET_KEY, URL, LIVE_DATA_SOURCE) VALUES (?, ?, ?, ?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
         basecampStmt.setString(2, tokenKey);
         basecampStmt.setString(3, tokenSecretKey);
         basecampStmt.setString(4, getUrl());
+        basecampStmt.setBoolean(5, liveDataSource);
         basecampStmt.execute();
         basecampStmt.close();
     }
 
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, TOKEN_KEY, TOKEN_SECRET_KEY FROM FRESHBOOKS WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, TOKEN_KEY, TOKEN_SECRET_KEY, LIVE_DATA_SOURCE FROM FRESHBOOKS WHERE DATA_SOURCE_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
             this.setUrl(rs.getString(1));
             setTokenKey(rs.getString(2));
             setTokenSecretKey(rs.getString(3));
+            setLiveDataSource(rs.getBoolean(4));
         }
         loadStmt.close();
     }

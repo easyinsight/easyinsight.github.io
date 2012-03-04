@@ -23,6 +23,10 @@ public class FreshbooksCategoryFeed extends FreshbooksFeed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
+            FreshbooksCompositeSource parent = (FreshbooksCompositeSource) getParentSource(conn);
+            if (!parent.isLiveDataSource()) {
+                return super.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
+            }
             Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
                 Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
