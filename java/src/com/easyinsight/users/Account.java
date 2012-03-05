@@ -606,7 +606,7 @@ public class Account {
         if (successful) {
             String invoiceBody = info.toInvoiceText(this);
             for (User user : getUsers()) {
-                if (user.isAccountAdmin()) {
+                if (user.isInvoiceRecipient()) {
                     try {
                         new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, "support@easy-insight.com", false, "Easy Insight");
                     } catch (Exception e) {
@@ -617,7 +617,7 @@ public class Account {
         } else {
             String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information to resume service.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
             for (User user : getUsers()) {
-                if (user.isAccountAdmin()) {
+                if (user.isInvoiceRecipient()) {
                     try {
                         new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
                     } catch (Exception e) {
