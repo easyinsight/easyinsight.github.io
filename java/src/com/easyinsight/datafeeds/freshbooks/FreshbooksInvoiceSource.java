@@ -97,6 +97,7 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
                         Node invoice = invoices.get(i);
                         String invoiceID = queryField(invoice, "invoice_id/text()");
                         String invoiceNumber = queryField(invoice, "number/text()");
+
                         String clientID = queryField(invoice, "client_id/text()");
                         String status = queryField(invoice, "status/text()");
                         String amountString = queryField(invoice, "amount/text()");
@@ -105,6 +106,7 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
                         String invoiceDateString = queryField(invoice, "date/text()");
                         Date invoiceDate = df.parse(invoiceDateString);
                         IRow row = dataSet.createRow();
+                        String discount = queryField(invoice, "discount/text()");
                         addValue(row, FreshbooksInvoiceSource.INVOICE_ID, invoiceID, keys);
                         addValue(row, FreshbooksInvoiceSource.INVOICE_NUMBER, invoiceNumber, keys);
                         addValue(row, FreshbooksInvoiceSource.CLIENT_ID, clientID, keys);
@@ -112,6 +114,7 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
                         if (amountString != null) addValue(row, FreshbooksInvoiceSource.AMOUNT, Double.parseDouble(amountString), keys);
                         if (amountString != null) addValue(row, FreshbooksInvoiceSource.AMOUNT_OUTSTANDING, Double.parseDouble(amountOutstandingString), keys);
                         if (amountString != null) addValue(row, FreshbooksInvoiceSource.AMOUNT_PAID, Double.parseDouble(paidString), keys);
+                        if (discount != null) addValue(row, FreshbooksInvoiceSource.DISCOUNT, Double.parseDouble(discount), keys);
                         addValue(row, FreshbooksInvoiceSource.INVOICE_DATE, invoiceDate, keys);
                         addValue(row, FreshbooksInvoiceSource.COUNT, 1, keys);
                     }
