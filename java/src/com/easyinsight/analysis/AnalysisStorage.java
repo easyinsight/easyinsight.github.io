@@ -223,6 +223,7 @@ public class AnalysisStorage {
                 if (filter instanceof FilterValueDefinition) {
                     FilterValueDefinition valueFilter = (FilterValueDefinition) filter;
                     for (PersistableValue persistableValue : valueFilter.getPersistedValues()) {
+                        persistableValue.truncate();
                         session.saveOrUpdate(persistableValue);
                     }
                 }

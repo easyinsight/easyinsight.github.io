@@ -32,4 +32,7 @@ public abstract class PersistableValue implements Cloneable, Serializable {
         persistableValue.setValueID(0);
         return persistableValue;
     }
+
+    public void truncate() {
+    }
 }

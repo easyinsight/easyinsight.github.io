@@ -35,4 +35,11 @@ public class PersistableStringValue extends PersistableValue {
     public Value toValue() {
         return new StringValue(value);
     }
+
+    @Override
+    public void truncate() {
+        if (value != null && value.length() > 250) {
+            value = value.substring(0, 250);
+        }
+    }
 }
