@@ -1,5 +1,7 @@
 package com.easyinsight.users;
 
+import java.util.List;
+
 /**
  * User: James Boe
  * Date: Mar 27, 2009
@@ -12,6 +14,15 @@ public class AccountStats {
     private int currentUsers;
     private long apiUsedToday;
     private long apiMaxToday;
+    private List<DataSourceStats> statsList;
+
+    public List<DataSourceStats> getStatsList() {
+        return statsList;
+    }
+
+    public void setStatsList(List<DataSourceStats> statsList) {
+        this.statsList = statsList;
+    }
 
     public int getAvailableUsers() {
         return availableUsers;
