@@ -12,6 +12,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.StandardReportPipeline;
+import com.easyinsight.storage.DataStorage;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -238,13 +239,14 @@ public class DataService {
         }
     }
 
-    public EmbeddedCrosstabDataResults getEmbeddedCrosstabResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
+    public EmbeddedCrosstabDataResults getEmbeddedCrosstabResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
+                                                                  List<FilterDefinition> drillthroughFilters) {
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeInsight(reportID);
             System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSCrosstabDefinition crosstabReport = (WSCrosstabDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
-            ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, crosstabReport, conn, customFilters, null);
+            ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, crosstabReport, conn, customFilters, drillthroughFilters);
             Crosstab crosstab = new Crosstab();
             crosstab.crosstab(crosstabReport, reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet()));
             CrosstabValue[][] values = crosstab.toTable(crosstabReport, insightRequestMetadata, conn);
@@ -879,13 +881,12 @@ public class DataService {
 
             
             
-            /*
+
             if (insightRequestMetadata.getHierarchyOverrides() != null) {
                 for (AnalysisItemOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
                     hierarchyOverride.apply(analysisDefinition.getAllAnalysisItems());
                 }
             }
-             */
 
             List<FilterDefinition> dlsFilters = addDLSFilters(analysisDefinition.getDataFeedID(), conn);
             analysisDefinition.getFilterDefinitions().addAll(dlsFilters);
@@ -1007,6 +1008,36 @@ public class DataService {
                 dataSet.setLastTime(new Date());
             }
             return this;
+        }
+    }
+    
+    public void addData(long dataSourceID, Map<AnalysisItem, Object> data) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            DataSet dataSet = new DataSet();
+            IRow row = dataSet.createRow();
+            for (Map.Entry<AnalysisItem, Object> entry : data.entrySet()) {
+                if (entry.getKey().hasType(AnalysisItemTypes.MEASURE)) {
+                    row.addValue(entry.getKey().getKey().toBaseKey(), (Number) entry.getValue());
+                } else if (entry.getKey().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    row.addValue(entry.getKey().getKey().toBaseKey(), (Date) entry.getValue());
+                } else {
+                    row.addValue(entry.getKey().getKey().toBaseKey(), (String) entry.getValue());
+                }
+            }
+            DataStorage dataStorage = DataStorage.writeConnection(dataSource, conn, SecurityUtil.getAccountID());
+            dataStorage.insertData(dataSet);
+            dataStorage.commit();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 }

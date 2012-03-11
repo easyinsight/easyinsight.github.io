@@ -49,7 +49,8 @@ public class EmbeddedCrosstabService extends EmbeddedDataService implements IEmb
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.utcOffset = new Date().getTimezoneOffset();
-        dataRemoteSource.getEmbeddedCrosstabResults.send(reportID, dataSourceID, filters, metadata);
+        metadata.hierarchyOverrides = hierarchyOverrides;
+        dataRemoteSource.getEmbeddedCrosstabResults.send(reportID, dataSourceID, filters, metadata, drillthroughFilters);
     }
 
     private function processListData(event:ResultEvent):void {

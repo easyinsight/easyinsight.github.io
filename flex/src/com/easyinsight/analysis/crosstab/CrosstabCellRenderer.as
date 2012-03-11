@@ -8,6 +8,9 @@
 package com.easyinsight.analysis.crosstab {
 
 import com.easyinsight.analysis.TextValueExtension;
+import com.easyinsight.pseudocontext.StandardContextWindow;
+
+import flash.events.Event;
 
 import flash.text.TextFormat;
 
@@ -78,12 +81,17 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
                 }
             } else {
                 if (crosstabValue.headerLabel) {
+                    new StandardContextWindow(crosstabValue.header, passThrough, this, crosstabValue.value, _report);
                     text.setTextFormat(new TextFormat(_report.getFont(), 12, 0xFFFFFF, null));
                 } else {
                     text.setTextFormat(new TextFormat(_report.getFont(), 11, 0xFFFFFF, null));
                 }
             }
         }
+    }
+    
+    private function passThrough(event:Event):void {
+        dispatchEvent(event);
     }
 
     private var crosstabValue:CrosstabValue;
