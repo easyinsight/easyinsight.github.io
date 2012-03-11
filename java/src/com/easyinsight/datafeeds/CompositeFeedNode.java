@@ -17,14 +17,34 @@ public class CompositeFeedNode implements Serializable {
     private long dataFeedID;
     private int x;
     private int y;
+    private String dataSourceName;
+    private int dataSourceType;
 
     public CompositeFeedNode() {
     }
 
-    public CompositeFeedNode(long dataFeedID, int x, int y) {
+    public CompositeFeedNode(long dataFeedID, int x, int y, String dataSourceName, int dataSourceType) {
         this.dataFeedID = dataFeedID;
         this.x = x;
         this.y = y;
+        this.dataSourceName = dataSourceName;
+        this.dataSourceType = dataSourceType;
+    }
+
+    public String getDataSourceName() {
+        return dataSourceName;
+    }
+
+    public void setDataSourceName(String dataSourceName) {
+        this.dataSourceName = dataSourceName;
+    }
+
+    public int getDataSourceType() {
+        return dataSourceType;
+    }
+
+    public void setDataSourceType(int dataSourceType) {
+        this.dataSourceType = dataSourceType;
     }
 
     public int getX() {

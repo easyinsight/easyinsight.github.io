@@ -60,7 +60,7 @@ public class FeedService {
             FeedDefinition sourceObj = feedStorage.getFeedDefinitionData(source.getId(), conn);
             FeedDefinition targetObj = feedStorage.getFeedDefinitionData(target.getId(), conn);
 
-            CompositeFeedNode sourceNode = new CompositeFeedNode(source.getId(), 0, 0);
+            CompositeFeedNode sourceNode = new CompositeFeedNode(source.getId(), 0, 0, source.getName(), source.getDataSourceType());
 
             if (target.getDataSourceType() == FeedType.COMPOSITE.getType()) {
                 CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) targetObj;
@@ -110,7 +110,7 @@ public class FeedService {
                 return new DataSourceDescriptor(compositeFeedDefinition.getFeedName(), compositeFeedDefinition.getDataFeedID(),
                         compositeFeedDefinition.getFeedType().getType(), compositeFeedDefinition.isAccountVisible());
             } else {
-                CompositeFeedNode targetNode = new CompositeFeedNode(target.getId(), 0, 0);
+                CompositeFeedNode targetNode = new CompositeFeedNode(target.getId(), 0, 0, target.getName(), target.getDataSourceType());
                 String dataSourceName;
 
                 Key sourceKey;

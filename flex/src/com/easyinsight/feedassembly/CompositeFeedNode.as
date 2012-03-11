@@ -1,6 +1,5 @@
 package com.easyinsight.feedassembly
 {
-	import mx.collections.ArrayCollection;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.datafeeds.CompositeFeedNode")]
@@ -9,6 +8,8 @@ package com.easyinsight.feedassembly
 		public var dataFeedID:int;
         public var x:int;
         public var y:int;
+        public var dataSourceName:String;
+        public var dataSourceType:int;
 		
 		public function CompositeFeedNode()
 			{

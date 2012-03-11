@@ -61,7 +61,7 @@ public abstract class EIV3API implements IEIV3API {
             } else {
                 throw new ServiceRuntimeException("More than one data source was found by that name.");
             }
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, FEED_NAME, FEED_TYPE FROM DATA_FEED WHERE " +
                     "DATA_FEED.API_KEY = ?");
             Map<String, CompositeFeedNode> compositeNodes = new HashMap<String, CompositeFeedNode>();
             List<CompositeFeedConnection> compositeConnections = new ArrayList<CompositeFeedConnection>();
@@ -70,7 +70,7 @@ public abstract class EIV3API implements IEIV3API {
                 ResultSet dataSetRS = queryStmt.executeQuery();
                 if (dataSetRS.next()) {
                     long dataSourceID = dataSetRS.getLong(1);
-                    compositeNodes.put(dataSource, new CompositeFeedNode(dataSourceID, 0, 0));
+                    compositeNodes.put(dataSource, new CompositeFeedNode(dataSourceID, 0, 0, dataSetRS.getString(2), dataSetRS.getInt(3)));
                 } else {
                     throw new ServiceRuntimeException("We couldn't find a data source with the key of " + dataSource + ".");
                 }
