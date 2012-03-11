@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
-        implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+        implements="com.easyinsight.administration.feed.IFeedAdminDetail" paddingTop="10">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.DerivedKey;
 
         import com.easyinsight.analysis.NamedKey;
+        import com.easyinsight.feedassembly.CompositeFeedDefinition;
+        import com.easyinsight.feedassembly.CompositeFeedNode;
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
@@ -14,24 +17,77 @@
         private var _fields:ArrayCollection;
 
         public function set fields(value:ArrayCollection):void {
-            _fields = value;
+            var fields:ArrayCollection = new ArrayCollection();
+            for each (var analysisItem:AnalysisItem in value) {
+                fields.addItem(new AnalysisItemDispatcher(analysisItem));
+            }
+            _fields = fields;
+            _fields.filterFunction = filterFunction;
         }
 
+        private function filterFunction(item:Object):Boolean {
+            var dataSource:CompositeFeedNode = dataSourceBox.selectedItem as CompositeFeedNode;
+            if (dataSource != null) {
+                var analysisItem:AnalysisItem = AnalysisItemDispatcher(item).analysisItem;
+                if (analysisItem.key is DerivedKey) {
+                    var key:DerivedKey = analysisItem.key as DerivedKey;
+                    if (dataSource.dataFeedID == key.feedID) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return true;
+        }
+
+        public function set dataSource(feedDefinition:FeedDefinitionData):void {
+            if (feedDefinition is CompositeFeedDefinition) {
+                var comp:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition;
+                dataSources = new ArrayCollection(comp.compositeFeedNodes.toArray());
+                dataSources.addItemAt({dataSourceName: "[ All ]" }, 0);
+            }
+        }
+        
+        [Bindable]
+        private var dataSources:ArrayCollection;
+
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+
             for each (var item:AnalysisItem in feedDefinition.fields) {
-                for each (var field:AnalysisItem in _fields) {
-                    if (item.analysisItemID == field.analysisItemID) {
-                        item.key = field.key;
+                for each (var field:AnalysisItemDispatcher in _fields) {
+                    if (item.analysisItemID == field.analysisItem.analysisItemID) {
+                        item.key = field.analysisItem.key;
                     }
                 }
             }
         }
 
+        private function onChange():void {
+            _fields.refresh();
+        }
+
         public function validate():Boolean {
             return true;
         }
+
+        private function selectAll():void {
+            for each (var dispatcher:AnalysisItemDispatcher in _fields) {
+                dispatcher.indexed = true;
+            }
+        }
+
+        private function unselectAll():void {
+            for each (var dispatcher:AnalysisItemDispatcher in _fields) {
+                dispatcher.indexed = false;
+            }
+        }
         ]]></mx:Script>
-    <mx:DataGrid dataProvider="{_fields}" width="950" height="100%">
+    <mx:HBox>
+        <mx:Button label="Select All" click="selectAll()" styleName="grayButton"/>
+        <mx:Button label="Unselect All" click="unselectAll()" styleName="grayButton"/>
+        <mx:ComboBox dataProvider="{dataSources}" labelField="dataSourceName" change="onChange()" id="dataSourceBox"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{_fields}" width="950" height="100%" id="dataGrid">
         <mx:columns>
             <util:EIDataGridColumn dataField="display" headerText="Field" width="900"/>
             <util:EIDataGridColumn headerText="" itemRenderer="com.easyinsight.google.IndexCheckbox" width="100"/>

@@ -6,24 +6,24 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.google {
-import com.easyinsight.analysis.AnalysisItem;
 
 import com.easyinsight.analysis.NamedKey;
 
 import flash.events.Event;
+
+import mx.binding.utils.BindingUtils;
 
 import mx.containers.HBox;
 import mx.controls.CheckBox;
 
 public class IndexCheckbox extends HBox {
 
-    private var analysisItem:AnalysisItem;
+    private var analysisItem:AnalysisItemDispatcher;
 
     private var checkbox:CheckBox;
 
     public function IndexCheckbox() {
         checkbox = new CheckBox();
-        checkbox.addEventListener(Event.CHANGE, onChange);
         percentWidth = 100;
         setStyle("horizontalAlign", "center");
     }
@@ -33,16 +33,26 @@ public class IndexCheckbox extends HBox {
         addChild(checkbox);
     }
 
-    private function onChange(event:Event):void {
-        var namedKey:NamedKey = analysisItem.key.toBaseKey() as NamedKey;
+    /*private function onChange(event:Event):void {
+        var namedKey:NamedKey = analysisItem.analysisItem.key.toBaseKey() as NamedKey;
         namedKey.indexed = checkbox.selected;
         namedKey.keyChanged = true;
-    }
+    }*/
 
     override public function set data(val:Object):void {
-        analysisItem = val as AnalysisItem;
-        var namedKey:NamedKey = analysisItem.key.toBaseKey() as NamedKey;
-        checkbox.selected = namedKey.indexed;
+        analysisItem = val as AnalysisItemDispatcher;
+        BindingUtils.bindProperty(this, "selected", analysisItem,  "indexed");
+    }
+    
+    public function get selected():Boolean {
+        return checkbox.selected;
+    }
+    
+    public function set selected(value:Boolean):void {
+        checkbox.selected = value;
+        var namedKey:NamedKey = analysisItem.analysisItem.key.toBaseKey() as NamedKey;
+        namedKey.indexed = checkbox.selected;
+        namedKey.keyChanged = true;
     }
 
     override public function get data():Object {
