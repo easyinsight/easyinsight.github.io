@@ -1,7 +1,8 @@
 package com.easyinsight.administration.feed
 {
 	import com.easyinsight.customupload.UploadPolicy;
-	import com.easyinsight.feedassembly.CompositeFeedDefinition;
+import com.easyinsight.datasources.DataSourceInfo;
+import com.easyinsight.feedassembly.CompositeFeedDefinition;
 	
 	import mx.collections.ArrayCollection;
 	
@@ -35,6 +36,7 @@ package com.easyinsight.administration.feed
         public var lastRefreshStart:Date;
         public var marmotScript:String;
         public var concreteFieldsEditable:Boolean;
+        public var dataSourceInfo:DataSourceInfo;
 		
 		public function FeedDefinitionData()
 		{
@@ -48,5 +50,9 @@ package com.easyinsight.administration.feed
 		public function getFeedType():int {
 			return DataFeedType.STATIC;
 		}
+
+        public function allowFieldEdit():Boolean {
+            return getFeedType() == DataFeedType.STATIC;
+        }
 	}
 }

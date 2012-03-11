@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Module xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+           xmlns:datasources="com.easyinsight.report.*"
            width="100%" height="100%"
-           xmlns:feed="com.easyinsight.administration.feed.*"  xmlns:easyinsight="com.easyinsight.*"
+           xmlns:feed="com.easyinsight.administration.feed.*" xmlns:easyinsight="com.easyinsight.*"
            creationComplete="setupListeners()"
            implements="com.easyinsight.listing.IPerspective"
            styleName="screenBackground">
@@ -12,6 +13,7 @@
         import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.code.MarmotScriptEvent;
         import com.easyinsight.code.MarmotScriptWindow;
+        import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
@@ -69,9 +71,15 @@
 
         private var pages:ArrayCollection;
 
+        [Bindable]
+        private var dataSourceInfo:DataSourceInfo;
+
+        [Bindable]
+        private var refreshable:Boolean;
+
         private function gotFeedDefinition():void {
             this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
-            concreteFieldsEditable = feedDefinition.concreteFieldsEditable;
+            concreteFieldsEditable = feedDefinition.concreteFieldsEditable || feedDefinition.allowFieldEdit();
             BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
             this.feedType = feedDefinition.getFeedType();
             this.pages = feedDefinition.createAdminPages();
@@ -83,7 +91,8 @@
             }
             this.feedAdminMode = true;
 
-
+            dataSourceInfo = feedDefinition.dataSourceInfo;
+            //refreshable = dataSourceInfo.type == DataSourceInfo.STORED_PULL || dataSourceInfo.type == DataSourceInfo.COMPOSITE_PULL;
 
             var fragmentObject:Object = new Object();
             fragmentObject.feedAdminID = String(feedDefinition.apiKey);
@@ -219,7 +228,9 @@
                     label="Create a New Report" labelPlacement="right" styleName="grayButton"/>
             <mx:Button icon="@Embed(source='../../../../../assets/garbage.png')" click="clearCaches()" toolTip="Clear Caches"
                     label="Clear Caches" labelPlacement="right" styleName="grayButton"/>
-            <mx:Button icon="@Embed(source='../../../../../assets/code_edit.png')" click="editCode()" toolTip="Clear Caches"
+            <!--<datasources:RefreshButton styleName="grayButton" label="Refresh the Data Source" dataSource="{dataSourceInfo}"
+                                       icon="@Embed(source='../../../../../assets/refresh.png')" labelPlacement="right" enabled="{refreshable}"/>-->
+            <mx:Button icon="@Embed(source='../../../../../assets/code_edit.png')" click="editCode()" toolTip="Edit Code..."
                     label="Edit Code" labelPlacement="right" styleName="grayButton"/>
             <mx:Label fontSize="14" color="#FFFFFF"/>
             <mx:Spacer width="100%"/>

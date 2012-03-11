@@ -12,6 +12,10 @@ package com.easyinsight.customupload
 		{
 			super();
 		}
-		
-	}
+
+
+        override public function allowFieldEdit():Boolean {
+            return true;
+        }
+    }
 }

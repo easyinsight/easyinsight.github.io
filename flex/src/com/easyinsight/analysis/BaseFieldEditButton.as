@@ -171,7 +171,7 @@ public class BaseFieldEditButton extends UIComponent implements IListItemRendere
         if (analysisItemWrapper.isAnalysisItem()) {
             editVisible = !analysisItemWrapper.analysisItem.concrete || _concreteFieldsEditable;
             copyVisible = true;
-            deleteVisible = !analysisItemWrapper.analysisItem.concrete;
+            deleteVisible = !analysisItemWrapper.analysisItem.concrete || _concreteFieldsEditable;
         } else {
             editVisible = false;
             copyVisible = false;
