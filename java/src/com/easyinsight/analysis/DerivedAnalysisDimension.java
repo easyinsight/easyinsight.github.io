@@ -94,6 +94,9 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
+            if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
+                throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + toDisplay() + ".", this));
+            }
             throw new RuntimeException(e.getMessage() + " in calculating " + derivationCode, e);
         }
         VariableListVisitor variableVisitor = new VariableListVisitor();
