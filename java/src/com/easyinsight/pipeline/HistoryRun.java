@@ -26,7 +26,9 @@ public class HistoryRun {
         for (FilterDefinition filter : filters) {
             if (filter instanceof RollingFilterDefinition) {
                 rollingFilter = filter;
-                filter.getField().setSort(2);
+                if (filter.getField() != null) {
+                    filter.getField().setSort(2);
+                }
             }
         }
 
