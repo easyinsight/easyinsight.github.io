@@ -327,11 +327,16 @@ public class GoogleAnalyticsFeed extends Feed {
         } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             String key = analysisItem.getKey().toKeyString();
             String date = entry.stringValueOf(key);
-            if (date != null) {
-                Date dateValue = dateFormat.parse(date);
-                value = new DateValue(dateValue);
-            } else {
-                value = new DateValue(new Date());
+            try {
+                if (date != null) {
+                    Date dateValue = dateFormat.parse(date);
+                    value = new DateValue(dateValue);
+                } else {
+                    value = new DateValue(new Date());
+                }
+            } catch (ParseException e) {
+                System.out.println("Parse exception on " + date);
+                value = new EmptyValue();
             }
         } else {
             value = new StringValue(entry.stringValueOf(analysisItem.getKey().toKeyString()));
