@@ -150,9 +150,6 @@
             tabNavigator.addChildAt(editor as DisplayObject, 0);
             if (_analysisItem != null) {
                 if (_analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                    if (!(_reportType == AnalysisDefinition.TREND || _reportType == AnalysisDefinition.DIAGRAM || _reportType == AnalysisDefinition.TREND_GRID)) {
-                        tabNavigator.removeChild(linksBox);
-                    }
                 } else {
                     tabNavigator.removeChild(filtersBox);
                 }
@@ -212,15 +209,10 @@
         private function onSaveComplete(event:AnalysisItemSaveEvent):void {
             if (event.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                 event.analysisItem.filters = transformContainer.getFilterDefinitions();
-                if (_reportType == AnalysisDefinition.TREND || _reportType == AnalysisDefinition.DIAGRAM || _reportType == AnalysisDefinition.TREND_GRID) {
-                    event.analysisItem.links = links;
-                } else {
-                    event.analysisItem.links = new ArrayCollection();
-                }
             } else {
                 event.analysisItem.filters = new ArrayCollection();
-                event.analysisItem.links = links;
             }
+            event.analysisItem.links = links;
             if (_reportEditor != null) {
                 _reportEditor.save(event.analysisItem);
             }

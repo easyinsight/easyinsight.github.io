@@ -207,25 +207,29 @@ public class AnalysisService {
             if (drillThrough.getMarmotScript() != null && !"".equals(drillThrough.getMarmotScript())) {
                 filters = new ReportCalculation(drillThrough.getMarmotScript()).apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report);
             } else {
-                if (report.getReportType() == WSAnalysisDefinition.HEATMAP) {
-                    CoordinateValue coordinateValue = (CoordinateValue) data.get(analysisItem.qualifiedName());
-                    FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-                    filterValueDefinition.setField(analysisItem);
-                    filterValueDefinition.setSingleValue(true);
-                    filterValueDefinition.setEnabled(true);
-                    filterValueDefinition.setInclusive(true);
-                    filterValueDefinition.setToggleEnabled(true);
-                    filterValueDefinition.setFilteredValues(Arrays.asList((Object) coordinateValue.getZip()));
-                    filters = Arrays.asList((FilterDefinition) filterValueDefinition);
+                if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    filters = new ArrayList<FilterDefinition>();
                 } else {
-                    FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-                    filterValueDefinition.setField(analysisItem);
-                    filterValueDefinition.setSingleValue(true);
-                    filterValueDefinition.setEnabled(true);
-                    filterValueDefinition.setInclusive(true);
-                    filterValueDefinition.setToggleEnabled(true);
-                    filterValueDefinition.setFilteredValues(Arrays.asList(data.get(analysisItem.qualifiedName())));
-                    filters = Arrays.asList((FilterDefinition) filterValueDefinition);
+                    if (report.getReportType() == WSAnalysisDefinition.HEATMAP) {
+                        CoordinateValue coordinateValue = (CoordinateValue) data.get(analysisItem.qualifiedName());
+                        FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+                        filterValueDefinition.setField(analysisItem);
+                        filterValueDefinition.setSingleValue(true);
+                        filterValueDefinition.setEnabled(true);
+                        filterValueDefinition.setInclusive(true);
+                        filterValueDefinition.setToggleEnabled(true);
+                        filterValueDefinition.setFilteredValues(Arrays.asList((Object) coordinateValue.getZip()));
+                        filters = Arrays.asList((FilterDefinition) filterValueDefinition);
+                    } else {
+                        FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+                        filterValueDefinition.setField(analysisItem);
+                        filterValueDefinition.setSingleValue(true);
+                        filterValueDefinition.setEnabled(true);
+                        filterValueDefinition.setInclusive(true);
+                        filterValueDefinition.setToggleEnabled(true);
+                        filterValueDefinition.setFilteredValues(Arrays.asList(data.get(analysisItem.qualifiedName())));
+                        filters = Arrays.asList((FilterDefinition) filterValueDefinition);
+                    }
                 }
             }
             DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
