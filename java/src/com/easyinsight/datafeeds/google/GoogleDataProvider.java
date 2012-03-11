@@ -232,7 +232,7 @@ public class GoogleDataProvider {
                 UploadPolicy childPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
                 clearDBDataSource.setUploadPolicy(childPolicy);
                 new FeedCreation().createFeed(clearDBDataSource, conn, new DataSet(), childPolicy);
-                CompositeFeedNode node = new CompositeFeedNode(clearDBDataSource.getDataFeedID(), 0, 0);
+                CompositeFeedNode node = new CompositeFeedNode(clearDBDataSource.getDataFeedID(), 0, 0, clearDBDataSource.getFeedName(), clearDBDataSource.getFeedType().getType());
                 nodes.add(node);
             }
             clearDBCompositeSource.setCompositeFeedNodes(nodes);
@@ -358,7 +358,8 @@ public class GoogleDataProvider {
                         FeedCreationResult result = new FeedCreation().createFeed(quickbaseDatabaseSource, conn, new DataSet(), childPolicy);
                         result.getTableDefinitionMetadata().commit();
                         result.getTableDefinitionMetadata().closeConnection();
-                        CompositeFeedNode node = new CompositeFeedNode(quickbaseDatabaseSource.getDataFeedID(), 0, 0);
+                        CompositeFeedNode node = new CompositeFeedNode(quickbaseDatabaseSource.getDataFeedID(), 0, 0, quickbaseDatabaseSource.getFeedName(),
+                                quickbaseDatabaseSource.getFeedType().getType());
                         nodes.add(node);
                     }
                 }

@@ -59,7 +59,8 @@ public abstract class DataSourceMigration {
         CompositeServerDataSource compositeServerDataSource = (CompositeServerDataSource) dataSource;
         UploadPolicy uploadPolicy = dataSource.getUploadPolicy();
         compositeServerDataSource.newDefinition((IServerDataSourceDefinition) childDataSource, conn, "", uploadPolicy);
-        CompositeFeedNode compositeFeedNode = new CompositeFeedNode(childDataSource.getDataFeedID(), 50, 50);
+        CompositeFeedNode compositeFeedNode = new CompositeFeedNode(childDataSource.getDataFeedID(), 50, 50, childDataSource.getFeedName(),
+                childDataSource.getFeedType().getType());
         compositeServerDataSource.getCompositeFeedNodes().add(compositeFeedNode);
         compositeServerDataSource.populateFields(conn);
     }
