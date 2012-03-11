@@ -835,42 +835,81 @@ public class UserAccountAdminService {
 
     private AccountStats getAccountStats(EIConnection conn) throws SQLException {
         long accountID = SecurityUtil.getAccountID();
-        long usedSize = 0;
         long maxSize;
         int currentUsers = 0;
         int maxUsers;
         long usedAPI = 0;
         long maxAPI = Account.getMaxCount(SecurityUtil.getAccountTier());
-            PreparedStatement queryUsedStmt = conn.prepareStatement("select sum(feed_persistence_metadata.size) from feed_persistence_metadata, " +
-                    "upload_policy_users, user where feed_persistence_metadata.feed_id = upload_policy_users.feed_id and user.user_id = upload_policy_users.user_id and user.account_id = ?");
-            queryUsedStmt.setLong(1, accountID);
-            ResultSet rs = queryUsedStmt.executeQuery();
-            if (rs.next()) {
-                usedSize = rs.getLong(1);
+        PreparedStatement queryStmt = conn.prepareStatement("select feed_persistence_metadata.size, feed_persistence_metadata.feed_id, data_feed.feed_type, data_feed.visible, " +
+                "data_feed.parent_source_id, data_feed.feed_name from feed_persistence_metadata, upload_policy_users, user, data_feed where " +
+                "data_feed.data_feed_id = upload_policy_users.feed_id and feed_persistence_metadata.feed_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id and " +
+                "user.account_id = ?");
+        queryStmt.setLong(1, accountID);
+        ResultSet qRS = queryStmt.executeQuery();
+        Map<Long, DataSourceStats> statsMap = new HashMap<Long, DataSourceStats>();
+        while (qRS.next()) {
+            long size = qRS.getLong(1);
+            long dataSourceID = qRS.getLong(2);
+            int type = qRS.getInt(3);
+            boolean visible = qRS.getBoolean(4);
+            long parentSourceID = qRS.getLong(5);
+            String feedName = qRS.getString(6);
+            DataSourceStats dataSourceStats = statsMap.get(dataSourceID);
+            if (dataSourceStats == null) {
+                dataSourceStats = new DataSourceStats();
+                statsMap.put(dataSourceID, dataSourceStats);
             }
-            PreparedStatement usersStmt = conn.prepareStatement("SELECT count(user_id) from user where account_id = ?");
-            usersStmt.setLong(1, accountID);
-            ResultSet usersRS = usersStmt.executeQuery();
-            if (usersRS.next()) {
-                currentUsers = usersRS.getInt(1);
+            dataSourceStats.setSize(size);
+            dataSourceStats.setVisible(visible);
+            dataSourceStats.setDataSourceID(dataSourceID);
+            dataSourceStats.setName(feedName);
+            statsMap.put(dataSourceID, dataSourceStats);
+            if (parentSourceID > 0) {
+                DataSourceStats parent = statsMap.get(parentSourceID);
+                if (parent == null) {
+                    parent = new DataSourceStats();
+                    statsMap.put(parentSourceID, parent);
+                }
+                parent.getChildStats().add(dataSourceStats);
             }
-            PreparedStatement apiTodayStmt = conn.prepareStatement("SELECT used_bandwidth from bandwidth_usage where account_id = ? AND bandwidth_date = ?");
-            apiTodayStmt.setLong(1, accountID);
-            apiTodayStmt.setDate(2, new java.sql.Date(System.currentTimeMillis()));
-            ResultSet apiRS = apiTodayStmt.executeQuery();
-            if (apiRS.next()) {
-                usedAPI = apiRS.getLong(1);
+        }
+        List<DataSourceStats> statsList = new ArrayList<DataSourceStats>();
+        long usedSize = 0;
+        for (DataSourceStats stats : statsMap.values()) {
+            if (stats.isVisible()) {
+                statsList.add(stats);
+                usedSize += stats.getSize();
+                for (DataSourceStats child : stats.getChildStats()) {
+                    usedSize += child.getSize();
+                    stats.setSize(stats.getSize() + child.getSize());
+                }
             }
-            PreparedStatement statsStmt = conn.prepareStatement("SELECT max_users, max_size FROM account where account_id = ?");
-            statsStmt.setLong(1, accountID);
-            ResultSet statRS = statsStmt.executeQuery();
-            statRS.next();
-            maxUsers = statRS.getInt(1);
-            maxSize = statRS.getLong(2);
+        }
+
+        PreparedStatement usersStmt = conn.prepareStatement("SELECT count(user_id) from user where account_id = ?");
+        usersStmt.setLong(1, accountID);
+        ResultSet usersRS = usersStmt.executeQuery();
+        if (usersRS.next()) {
+            currentUsers = usersRS.getInt(1);
+        }
+        PreparedStatement apiTodayStmt = conn.prepareStatement("SELECT used_bandwidth from bandwidth_usage where account_id = ? AND bandwidth_date = ?");
+        apiTodayStmt.setLong(1, accountID);
+        apiTodayStmt.setDate(2, new java.sql.Date(System.currentTimeMillis()));
+        ResultSet apiRS = apiTodayStmt.executeQuery();
+        if (apiRS.next()) {
+            usedAPI = apiRS.getLong(1);
+        }
+        PreparedStatement statsStmt = conn.prepareStatement("SELECT max_users, max_size FROM account where account_id = ?");
+        statsStmt.setLong(1, accountID);
+        ResultSet statRS = statsStmt.executeQuery();
+        statRS.next();
+        maxUsers = statRS.getInt(1);
+        maxSize = statRS.getLong(2);
         AccountStats accountStats = new AccountStats();
         accountStats.setMaxSpace(maxSize);
         accountStats.setUsedSpace(usedSize);
         accountStats.setCurrentUsers(currentUsers);
+        accountStats.setStatsList(statsList);
         accountStats.setAvailableUsers(maxUsers);
         accountStats.setApiUsedToday(usedAPI);
         accountStats.setApiMaxToday(maxAPI);

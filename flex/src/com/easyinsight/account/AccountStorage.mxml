@@ -2,7 +2,11 @@
 <account:AccountFormItem xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
         label="Storage Used:" direction="horizontal">
     <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
         import mx.formatters.NumberFormatter;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var spaceUsed:String;
@@ -10,9 +14,20 @@
         [Bindable]
         private var availableSpace:String;
 
+
+        private var statsList:ArrayCollection;
+
+        private function showDetails():void {
+            var window:AccountSizingWindow = new AccountSizingWindow();
+            window.statsList = statsList;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         protected override function commitProperties():void {
             super.commitProperties();
             var accountStats:AccountStats = accountInfo.accountStats;
+            statsList = accountStats.statsList;
             var numberFormatter:NumberFormatter = new NumberFormatter();
             numberFormatter.precision = 2;
             if (accountStats.maxSpace <= 1000000) {
@@ -27,7 +42,8 @@
             }
         }]]>
     </mx:Script>
-    <mx:Label text="{spaceUsed}" fontFamily="Lucida Grande" fontWeight="normal"/>
+    <mx:LinkButton label="{spaceUsed}" fontFamily="Lucida Grande" fontWeight="normal" click="showDetails()" fontSize="12" textDecoration="underline" paddingTop="0" paddingBottom="0"
+            paddingLeft="0" paddingRight="0"/>
     <mx:Label text=" / "/>
     <mx:Label text="{availableSpace}" fontFamily="Lucida Grande" fontWeight="normal"/>
 </account:AccountFormItem>
