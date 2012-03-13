@@ -32,11 +32,35 @@
         <from>/rewrite-status</from>
         <to>/test/status/</to>
     </outbound-rule>-->
+    <!--<rule>
+        <from>/reportimage/([0-9]+).png</from>
+        <to>/ReportImage?imageID=$1</to>
+    </rule>-->
 
     <rule>
-        <from>/xml/reports/([0-9]+)</from>
+        <from>/me.xml</from>
+        <to>/xml/Me</to>
+    </rule>
+
+    <rule>
+        <from>/xml/reports/([A-Za-z0-9]+)</from>
         <to>/xml/RunReport?reportID=$1</to>
     </rule>
+
+    <rule>
+        <from>/reports/([A-Za-z0-9]+).xml</from>
+        <to>/xml/RunReport?reportID=$1</to>
+    </rule>
+
+    <!--<rule>
+        <from>/json/reports/([0-9]+)</from>
+        <to>/json/RunReport?reportID=$1</to>
+    </rule>
+
+    <rule>
+        <from>/reports/([0-9]+).json</from>
+        <to>/json/RunReport?reportID=$1</to>
+    </rule>-->
 
 
     <!--

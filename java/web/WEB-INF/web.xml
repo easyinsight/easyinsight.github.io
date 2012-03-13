@@ -105,6 +105,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>Me</servlet-name>
+        <display-name>Me</display-name>
+        <servlet-class>com.easyinsight.api.v3.MeServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>DefineCompositeDataSource</servlet-name>
         <display-name>DefineCompositeDataSource</display-name>
         <servlet-class>com.easyinsight.api.v3.DefineCompositeDataSourceServlet</servlet-class>
@@ -146,6 +153,13 @@
         <load-on-startup>4</load-on-startup>
     </servlet>
 
+    <!--<servlet>
+        <servlet-name>RunReportJSON</servlet-name>
+        <display-name>RunReportJSON</display-name>
+        <servlet-class>com.easyinsight.api.v3.RunReportJSONServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>-->
+
     <servlet>
         <servlet-name>Commit</servlet-name>
         <display-name>Commit</display-name>
@@ -180,6 +194,20 @@
         <servlet-class>com.easyinsight.users.OAuthServlet</servlet-class>
         <load-on-startup>4</load-on-startup>
     </servlet>
+
+    <!--<servlet>
+        <servlet-name>DefineTable</servlet-name>
+        <display-name>DefineTable</display-name>
+        <servlet-class>com.easyinsight.datafeeds.custom.DatabaseTableDefineServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>QueryTable</servlet-name>
+        <display-name>QueryTable</display-name>
+        <servlet-class>com.easyinsight.datafeeds.custom.DatabaseQueryServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>-->
 
     <!-- MessageBroker Servlet -->
     <servlet>
@@ -281,9 +309,19 @@
         <url-pattern>/xml/RunReport</url-pattern>
     </servlet-mapping>
 
+    <!--<servlet-mapping>
+        <servlet-name>RunReportJSON</servlet-name>
+        <url-pattern>/json/RunReport</url-pattern>
+    </servlet-mapping>-->
+
     <servlet-mapping>
         <servlet-name>DeleteDataSource</servlet-name>
         <url-pattern>/xml/DeleteDataSource</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Me</servlet-name>
+        <url-pattern>/xml/Me</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
@@ -305,6 +343,16 @@
         <servlet-name>HtmlImage</servlet-name>
         <url-pattern>/htmlimage</url-pattern>
     </servlet-mapping>
+
+    <!--<servlet-mapping>
+        <servlet-name>DefineTable</servlet-name>
+        <url-pattern>/defineTable</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>QueryTable</servlet-name>
+        <url-pattern>/queryTable</url-pattern>
+    </servlet-mapping>-->
 
     <servlet-mapping>
         <servlet-name>Excel</servlet-name>
