@@ -31,6 +31,7 @@
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemCopyEvent;
         import com.easyinsight.analysis.AnalysisItemEditEvent;
         import com.easyinsight.analysis.AnalysisItemEditWindow;
         import com.easyinsight.analysis.AnalysisItemNode;
@@ -492,6 +493,7 @@
                 addEventListener(ReportEditorFieldEvent.ITEM_EDIT, fieldEventHandler.editField);
                 addEventListener(ReportEditorFieldEvent.ITEM_FILTER, filterField);
                 addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
+                addEventListener(AnalysisItemCopyEvent.ITEM_COPY, onCopy);
                 addEventListener(AddedItemUpdateEvent.UPDATE, onFieldUpdate);
                 addEventListener(AnalysisItemDeleteEvent.ANALYSIS_ITEM_DELETE, onAnalysisItemDelete);
                 addEventListener(CommandEvent.COMMAND, onCommand);
@@ -529,6 +531,25 @@
                 PopUpManager.addPopUp(errorWindow, this, true);
                 PopUpUtil.centerPopUp(errorWindow);
             }
+        }
+
+        private function onCopy(event:AnalysisItemCopyEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            var wrapper:AnalysisItemWrapper;
+            if (event.wrapper == null) {
+                var node:AnalysisItemNode = new AnalysisItemNode();
+                node.analysisItem = event.analysisItem;
+                wrapper = new AnalysisItemWrapper(node);
+            } else {
+                wrapper = event.wrapper;
+            }
+
+            availableFields.addItem(wrapper);
+            wrappers.addItem(wrapper);
+            if (analysisDefinition.addedItems == null) {
+                analysisDefinition.addedItems = new ArrayCollection();
+            }
+            analysisDefinition.addedItems.addItem(event.analysisItem);
         }
 
         private function addFieldToReport(event:ReportEditorFieldEvent):void {
