@@ -29,20 +29,15 @@
         override protected function commitProperties():void {
             super.commitProperties();
             var fieldArray:Array = [];
+            var noComp:Object = { display: "[ No Comparison ]"};
+            fieldArray.push(noComp);
             for each (var m:AnalysisItem in measureFields) {
                 fieldArray.push(m);
             }
             for each (var g:AnalysisItem in dimensionFields) {
                 fieldArray.push(g);
             }
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("display", true) ];
-            var fields:ArrayCollection = new ArrayCollection(fieldArray);
-            fields.sort = sort;
-            fields.refresh();
-            var noComp:Object = { display: "[ No Comparison ]"};
-            fields.addItemAt(noComp, 0);
-            sortComboBox.dataProvider = fields;
+            sortComboBox.dataProvider = new ArrayCollection(fieldArray);
             if (dim != null) {
                 sortComboBox.selectedValue = dim.sortItem != null ? dim.sortItem.display : null;
             }
