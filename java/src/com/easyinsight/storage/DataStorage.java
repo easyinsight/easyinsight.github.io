@@ -470,27 +470,30 @@ public class DataStorage implements IDataStorage {
             }
             DataSet existing = null;
             Map<Key, KeyMetadata> keyMetadatas;
+            keyMetadatas = new HashMap<Key, KeyMetadata>();
+            Map<Key, Key> keyMap = new HashMap<Key, Key>();
+            for (AnalysisItem analysisItem : previousItems) {
+                if (analysisItem.isDerived()) {
+                    continue;
+                }
+                Key key = analysisItem.createAggregateKey(false);
+                keyMap.put(key.toBaseKey(), key);
+                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
+                } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    keyMetadatas.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+                } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                    keyMetadatas.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
+                } else {
+                    keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
+                }
+            }
             if (migrateData) {
                 if (previousKeys.isEmpty()) {
                     existing = new DataSet();
                 } else {
 
-                    keyMetadatas = new HashMap<Key, KeyMetadata>();
-                    for (AnalysisItem analysisItem : previousItems) {
-                        if (analysisItem.isDerived()) {
-                            continue;
-                        }
-                        Key key = analysisItem.createAggregateKey(false);
-                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                            keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
-                        } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                            keyMetadatas.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
-                        } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
-                            keyMetadatas.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
-                        } else {
-                            keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
-                        }
-                    }
+
                     InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                     insightRequestMetadata.setNow(new Date());
                     insightRequestMetadata.setAggregateQuery(false);
@@ -516,7 +519,8 @@ public class DataStorage implements IDataStorage {
             if (migrateData) {
                 for (FieldMigration fieldMigration : fieldMigrations) {
                     for (IRow row : existing.getRows()) {
-                        Value existingValue = row.getValue(fieldMigration.key);
+                        Key key = keyMap.get(fieldMigration.key);
+                        Value existingValue = row.getValue(key);
                         String string = existingValue.toString();
                         if (fieldMigration.newType == Value.DATE) {
                         } else if (fieldMigration.newType == Value.NUMBER) {
