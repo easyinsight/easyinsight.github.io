@@ -8,6 +8,7 @@ import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 
 import java.sql.*;
 import java.util.Iterator;
@@ -244,8 +245,13 @@ public class TempStorage implements IDataStorage {
             if (date == null) {
                 insertStmt.setNull(i++, Types.BIGINT);
             } else {
-                long id = dateDimCache.getDateDimID(date, storageConn);
-                insertStmt.setLong(i++, id);
+                try {
+                    long id = dateDimCache.getDateDimID(date, storageConn);
+                    insertStmt.setLong(i++, id);
+                } catch (SQLException e) {
+                    LogClass.info(e.getMessage());
+                    insertStmt.setNull(i++, Types.BIGINT);
+                }
             }
         } else if (keyMetadata.getType() == Value.NUMBER) {
             Double num = null;
