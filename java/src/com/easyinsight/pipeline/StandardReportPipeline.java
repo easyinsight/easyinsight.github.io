@@ -126,11 +126,11 @@ public class StandardReportPipeline extends Pipeline {
         // need another cleanup component here...
         components.add(new CleanupComponent(0, false));
         
-        for (AnalysisItem analysisItem : reportItems) {
+        /*for (AnalysisItem analysisItem : reportItems) {
             if (analysisItem.getSortItem() != null) {
                 components.add(new SortDecorationComponent(analysisItem));
             }
-        }
+        }*/
 
         components.add(new AggregationComponent(AggregationTypes.RANK));
 
