@@ -19,7 +19,6 @@ import flash.events.Event;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.Canvas;
-import mx.controls.Alert;
 import mx.core.UIComponent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -44,6 +43,7 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
 
     public function EmbeddedViewFactory() {
         super();
+        //setStyle("backgroundColor", 0xCCCCCC);
         this.percentHeight = 100;
         this.percentWidth = 100;
     }
@@ -106,11 +106,13 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         }
         canvas.setStyle("backgroundAlpha", 1);
         canvas.setStyle("backgroundColor", 0xFFFFFF);
-        canvas.x = 10;
-        canvas.y = 5;
         reportCanvas = new ReportCanvas();
+        canvas.x = 10;
         reportCanvas.x = 10;
-        reportCanvas.y = 10;
+        if (_spaceSides) {
+            canvas.y = 5;
+            reportCanvas.y = 10;
+        }
         BindingUtils.bindProperty(reportCanvas, "loading", this, "loading");
         BindingUtils.bindProperty(reportCanvas, "overlayIndex", this, "overlayIndex");
         BindingUtils.bindProperty(reportCanvas, "stackTrace", this, "stackTrace");
@@ -129,13 +131,27 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
     private var canvas:Canvas;
     
     private var noData:NoData;
-    
+
+    private var _spaceSides:Boolean = true;
+
+    public function set spaceSides(value:Boolean):void {
+        _spaceSides = value;
+    }
+
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
-        canvas.width = unscaledWidth - 20;
-        canvas.height = unscaledHeight - 10;
-        reportCanvas.width = unscaledWidth - 40;
-        reportCanvas.height = unscaledHeight - 40;
+        if (_spaceSides) {
+            canvas.width = unscaledWidth - 20;
+            canvas.height = unscaledHeight - 10;
+            reportCanvas.width = unscaledWidth - 40;
+            reportCanvas.height = unscaledHeight - 40;
+        } else {
+            canvas.width = unscaledWidth - 20;
+            canvas.height = unscaledHeight;
+            reportCanvas.width = unscaledWidth - 40;
+            reportCanvas.height = unscaledHeight;
+        }
+
         if (currentComponent != null && (currentComponent.height != reportCanvas.height || currentComponent.width != reportCanvas.width)) {
             currentComponent.height = reportCanvas.height;
             currentComponent.width = reportCanvas.width;
@@ -205,7 +221,6 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
     }
 
      private function retrievalFault(event:ReportRetrievalFault):void {
-         Alert.show("report retrieval fault");
         overlayIndex = 2;
         dispatchEvent(event);
     }
