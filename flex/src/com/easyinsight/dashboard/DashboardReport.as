@@ -13,7 +13,7 @@ public class DashboardReport extends DashboardElement {
     public var labelPlacement:int;
     public var showLabel:Boolean;
     public var autoCalculateHeight:Boolean;
-    public var spaceSides:Boolean;
+    public var spaceSides:Boolean = true;
 
     public function DashboardReport() {
         super();
