@@ -498,9 +498,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (reportFieldExtension != null) {
             analysisItemSet.addAll(reportFieldExtension.getAnalysisItems(getEverything));
         }
-        if (sortItem != null) {
+        /*if (sortItem != null) {
             analysisItemSet.addAll(sortItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet));
-        }
+        }*/
         return new ArrayList<AnalysisItem>(analysisItemSet);
     }
 
