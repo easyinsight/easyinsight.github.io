@@ -88,6 +88,7 @@ public class StyleConfiguration {
             false, function(dashboardReport:DashboardReport):Boolean {
                         return dashboardReport.report.reportType == AnalysisDefinition.LIST;
                     }));
+            items.addItem(new CheckBoxReportFormItem("Space Sides", "spaceSides", DashboardReport(dashboardElement).spaceSides, dashboardElement));
         }
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];

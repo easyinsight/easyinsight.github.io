@@ -71,6 +71,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         viewFactory.reportID = dashboardReport.report.id;
         viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
         viewFactory.dashboardID = dashboardEditorMetadata.dashboardID;
+        viewFactory.spaceSides = dashboardReport.spaceSides;
         if (dashboardReport.showLabel) {
             var label:Label = new Label();
             label.setStyle("fontSize", 14);
