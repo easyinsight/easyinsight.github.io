@@ -126,7 +126,15 @@ public class TempStorage implements IDataStorage {
                 for (KeyMetadata keyMetadata : keys.values()) {
                     i = setValue(insertStmt, row, i, keyMetadata, storageConn);
                 }
-                insertStmt.execute();
+                try {
+                    insertStmt.execute();
+                } catch (SQLException e) {
+                    if (e.getMessage() != null && e.getMessage().contains("Data truncated")) {
+                        LogClass.info(e.getMessage());
+                    } else {
+                        throw e;
+                    }
+                }
             }
             insertStmt.close();
         } finally {
