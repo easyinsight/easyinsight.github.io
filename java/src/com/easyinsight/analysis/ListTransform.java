@@ -48,7 +48,7 @@ public class ListTransform {
         measureIndexSize = measureIndexMap.size();
     }
 
-    public void groupData(String compositeDimensionKey, AnalysisMeasure measure, Value value) {
+    public void groupData(String compositeDimensionKey, AnalysisMeasure measure, Value value, Value keyValue) {
 
         Integer position = measureIndexMap.get(measure);
         Aggregation[] values = keyMap.get(compositeDimensionKey);
@@ -69,7 +69,12 @@ public class ListTransform {
             aggregation = aggregationFactory.getAggregation();
             values[position] = aggregation;
         }
-        aggregation.addValue(value);
+        if (keyValue == null || !aggregation.keyDimensions.contains(keyValue)) {
+            if (keyValue != null) {
+                aggregation.keyDimensions.add(keyValue);
+            }
+            aggregation.addValue(value);    
+        }
     }
 
     public void groupData(String compositeDimensionKey, AnalysisDimension dimension, Value value) {
