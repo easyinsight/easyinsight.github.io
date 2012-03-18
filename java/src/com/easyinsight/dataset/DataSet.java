@@ -2,9 +2,7 @@ package com.easyinsight.dataset;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.ListDataResults;
-import com.easyinsight.core.EmptyValue;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.Value;
+import com.easyinsight.core.*;
 import com.easyinsight.storage.IWhere;
 
 import java.util.*;
@@ -86,12 +84,25 @@ public class DataSet implements Serializable {
 
     public String toString() {
         return rows.toString();
-    }    
+    }
 
-    public ListTransform listTransform(List<AnalysisItem> columns, Set<Integer> skipAggregations) {
+    private long toID(Key key) {
+        if (key instanceof DerivedKey) {
+            DerivedKey derivedKey = (DerivedKey) key;
+            Key next = derivedKey.getParentKey();
+            if (next instanceof NamedKey) {
+                return derivedKey.getFeedID();
+            }
+            return toID(next);
+        }
+        return 0;
+    }
+
+    public ListTransform listTransform(List<AnalysisItem> columns, Set<Integer> skipAggregations, Map<Long, AnalysisItem> uniqueItems) {
         ListTransform listTransform = new ListTransform(skipAggregations);
         Collection<AnalysisDimension> ourDimensions = new ArrayList<AnalysisDimension>();
         Collection<AnalysisDimension> ungroupedDimensions = new ArrayList<AnalysisDimension>();
+        Map<AnalysisItem, AnalysisItem> keyMapping = new HashMap<AnalysisItem, AnalysisItem>();
         for (AnalysisItem column : columns) {
             if (column.hasType(AnalysisItemTypes.DIMENSION)) {
                 AnalysisDimension analysisDimension = (AnalysisDimension) column;
@@ -102,6 +113,14 @@ public class DataSet implements Serializable {
                 }
                 if (analysisDimension.requiresDataEarly()) {
                     analysisDimension.handleEarlyData(rows);
+                }
+            } else if (column.hasType(AnalysisItemTypes.MEASURE)) {
+                if (uniqueItems != null) {
+                    long id = toID(column.getKey());
+                    if (id != 0) {
+                        AnalysisItem dim = uniqueItems.get(id);
+                        keyMapping.put(column, dim);
+                    }
                 }
             }
         }
@@ -115,7 +134,11 @@ public class DataSet implements Serializable {
                 keyBuilder.append(dimension.qualifiedName()).append(":").append(dimensionValue.toString()).append(":");
             }
             for (AnalysisDimension dimension : ungroupedDimensions) {
-                keyBuilder.append(dimension.qualifiedName()).append(":").append(i);
+                if (uniqueItems != null && uniqueItems.size() > 0) {
+                    keyBuilder.append(dimension.qualifiedName());    
+                } else {
+                    keyBuilder.append(dimension.qualifiedName()).append(":").append(i);
+                }
             }
             String key = keyBuilder.toString();
             keys.add(key);
@@ -131,7 +154,12 @@ public class DataSet implements Serializable {
                     AnalysisMeasure measure = (AnalysisMeasure) column;
                     Value value = row.getValue(measure.createAggregateKey());
                     if (value != null) {
-                        listTransform.groupData(key, measure, value);
+                        AnalysisItem keyDim = keyMapping.get(measure);
+                        Value keyValue = null;
+                        if (keyDim != null) {
+                            keyValue = row.getValue(keyDim);
+                        }
+                        listTransform.groupData(key, measure, value, keyValue);
                     }
                 } else {
                     AnalysisDimension analysisDimension = (AnalysisDimension) column;

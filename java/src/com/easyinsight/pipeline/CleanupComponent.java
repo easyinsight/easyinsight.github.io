@@ -69,6 +69,11 @@ public class CleanupComponent implements IComponent {
                 allNeededAnalysisItems.addAll(items);
             }
         }
+        if (cleanupCriteria == AGGREGATE_CALCULATIONS) {
+            if (pipelineData.getUniqueItems() != null) {
+                allNeededAnalysisItems.addAll(pipelineData.getUniqueItems().values());
+            }
+        }
         pipelineData.setReportItems(allNeededAnalysisItems);
         return dataSet;
     }

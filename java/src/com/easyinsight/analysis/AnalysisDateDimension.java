@@ -55,6 +55,11 @@ public class AnalysisDateDimension extends AnalysisDimension {
         this.dateLevel = dateLevel;
     }
 
+    @Override
+    protected String getQualifiedSuffix() {
+        return getType() + ":" + dateLevel + ":" + toDisplay();
+    }
+
     public AnalysisDateDimension(Key key, String displayName, int dateLevel) {
         super(key, displayName);
         this.dateLevel = dateLevel;

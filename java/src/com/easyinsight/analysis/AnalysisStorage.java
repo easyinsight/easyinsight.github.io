@@ -220,13 +220,6 @@ public class AnalysisStorage {
         if (analysisDefinition.getFilterDefinitions() != null) {
             for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {                
                 filter.beforeSave(session);
-                if (filter instanceof FilterValueDefinition) {
-                    FilterValueDefinition valueFilter = (FilterValueDefinition) filter;
-                    for (PersistableValue persistableValue : valueFilter.getPersistedValues()) {
-                        persistableValue.truncate();
-                        session.saveOrUpdate(persistableValue);
-                    }
-                }
             }
         }
         if (analysisDefinition.getAddedItems() != null) {

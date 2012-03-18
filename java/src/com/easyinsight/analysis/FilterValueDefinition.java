@@ -173,6 +173,10 @@ public class FilterValueDefinition extends FilterDefinition {
         }
         Set<PersistableValue> filterDefinitionValues = PersistableValueFactory.fromValue(valueSet);
         setPersistedValues(filterDefinitionValues);
+        for (PersistableValue persistableValue : getPersistedValues()) {
+            persistableValue.truncate();
+            session.saveOrUpdate(persistableValue);
+        }
     }
 
     public void afterLoad() {

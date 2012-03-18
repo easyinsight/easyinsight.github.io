@@ -4,12 +4,18 @@ import com.easyinsight.analysis.AggregationTypes;
 import com.easyinsight.core.Value;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * User: James Boe
  * Date: Jan 20, 2008
  * Time: 9:56:09 PM
  */
 public abstract class Aggregation extends Value {
+    
+    public Set<Value> keyDimensions = new HashSet<Value>();
+    
     public abstract void addValue(Value value);
 
     public abstract Value getValue();

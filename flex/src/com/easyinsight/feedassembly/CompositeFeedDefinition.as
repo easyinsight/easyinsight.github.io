@@ -11,6 +11,7 @@ import mx.collections.ArrayCollection;
 	{
 		public var compositeFeedNodes:ArrayCollection = new ArrayCollection();
 		public var connections:ArrayCollection = new ArrayCollection();
+        public var uniqueFields:Object;
 		
 		public function CompositeFeedDefinition()
 		{

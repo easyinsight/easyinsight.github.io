@@ -1,6 +1,5 @@
 package com.easyinsight.pipeline;
 
-import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.InsightRequestMetadata;
@@ -19,15 +18,22 @@ public class PipelineData {
     private InsightRequestMetadata insightRequestMetadata;
     private Map<String, String> dataSourceProperties;
     private Set<AnalysisItem> allRequestedItems;
+    private Map<Long, AnalysisItem> uniqueItems;
 
     public PipelineData(WSAnalysisDefinition report, Collection<AnalysisItem> reportItems, InsightRequestMetadata insightRequestMetadata,
-                        List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems) {
+                        List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems,
+                        Map<Long, AnalysisItem> uniqueItems) {
         this.report = report;
         this.reportItems = reportItems;
         this.insightRequestMetadata = insightRequestMetadata;
         this.allItems = allItems;
         this.dataSourceProperties = dataSourceProperties;
         this.allRequestedItems = allRequestedItems;
+        this.uniqueItems = uniqueItems;
+    }
+
+    public Map<Long, AnalysisItem> getUniqueItems() {
+        return uniqueItems;
     }
 
     public void setAllRequestedItems(Set<AnalysisItem> allRequestedItems) {

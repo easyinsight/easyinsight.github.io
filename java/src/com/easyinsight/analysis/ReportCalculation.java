@@ -138,7 +138,7 @@ public class ReportCalculation {
                 filterComponents.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null, false));
             }
             DataSet set = feed.getAggregateDataSet(analysisItemList, dlsFilters, new InsightRequestMetadata(), feed.getFields(), false, conn);
-            PipelineData pipelineData = new PipelineData(null, null, new InsightRequestMetadata(), null, null, null);
+            PipelineData pipelineData = new PipelineData(null, null, new InsightRequestMetadata(), null, null, null, null);
             for (IComponent component : filterComponents) {
                 set = component.apply(set, pipelineData);
             }

@@ -1,23 +1,27 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSKPIDefinition;
-import com.easyinsight.core.AnalysisItemDescriptor;
-import com.easyinsight.core.EIDescriptor;
-import com.easyinsight.core.FilterDescriptor;
+import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ResultsBridge;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.io.Serializable;
 
 import com.easyinsight.preferences.ImageDescriptor;
+import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -470,7 +474,58 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 columnSet.addAll(items);
             }
         }
+        Set<Long> ids = new HashSet<Long>();
+        for (AnalysisItem analysisItem : columnSet) {
+            Key key = analysisItem.getKey();
+            long dsID = toID(key);
+            if (dsID != 0) {
+                ids.add(dsID);
+            }
+        }
+        Set<AnalysisItem> uniqueFields = new HashSet<AnalysisItem>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement query = conn.prepareStatement("SELECT analysis_item_id FROM data_source_to_unique_field WHERE data_source_id = ? and child_source_id = ?");
+            for (Long id : ids) {
+                query.setLong(1, getDataFeedID());
+                query.setLong(2, id);
+                ResultSet rs = query.executeQuery();
+                if (rs.next()) {
+                    long uniqueID = rs.getLong(1);
+                    if (!rs.wasNull()) {
+                        Session session = Database.instance().createSession(conn);
+                        AnalysisDimension uniqueItem = (AnalysisDimension) session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, uniqueID).list().get(0);
+                        uniqueItem.afterLoad();
+                        for (AnalysisItem field : allItems) {
+                            if (field.getKey().toBaseKey().equals(uniqueItem.getKey().toBaseKey()) && field.getType() == uniqueItem.getType()) {
+                                uniqueFields.add(field);
+                                AnalysisDimension dim = (AnalysisDimension) field;
+                                dim.setGroup(false);
+                            }
+                        }
+                    }
+                }
+            }
+            query.close();
+        } catch (SQLException e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        columnSet.addAll(uniqueFields);
         return columnSet;
+    }
+
+    private long toID(Key key) {
+        if (key instanceof DerivedKey) {
+            DerivedKey derivedKey = (DerivedKey) key;
+            Key next = derivedKey.getParentKey();
+            if (next instanceof NamedKey) {
+                return derivedKey.getFeedID();
+            }
+            return toID(next);
+        }
+        return 0;
     }
 
     public LimitsResults applyLimits(DataSet dataSet) {
