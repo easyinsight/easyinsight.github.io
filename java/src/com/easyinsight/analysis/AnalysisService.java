@@ -201,7 +201,7 @@ public class AnalysisService {
         return analysisItem;
     }
     
-    public void updateRow(ActualRow actualRow, long dataSourceID) {
+    /*public void updateRow(ActualRow actualRow, long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -223,7 +223,7 @@ public class AnalysisService {
         } finally {
             Database.closeConnection(conn);
         }
-    }
+    }*/
 
     public ActualRowSet getActualRows(Map<String, Object> data, AnalysisItem analysisItem, WSAnalysisDefinition report, int offset) {
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
