@@ -59,6 +59,9 @@ public class User {
     @Column(name="hash_salt")
     private String hashSalt;
 
+    @Column(name="analyst")
+    private boolean analyst;
+
     @Column(name="user_key")
     private String userKey;
     @Column(name="user_secret_key")
@@ -106,6 +109,7 @@ public class User {
         userTransferObject.setFixedDashboardID(fixedDashboardID != null ? fixedDashboardID : 0);
         userTransferObject.setAutoRefreshReports(refreshReports);
         userTransferObject.setInvoiceRecipient(invoiceRecipient);
+        userTransferObject.setAnalyst(analyst);
         return userTransferObject;
     }
 
@@ -147,6 +151,14 @@ public class User {
 
     public void setFixedDashboardID(Long fixedDashboardID) {
         this.fixedDashboardID = fixedDashboardID;
+    }
+
+    public boolean isAnalyst() {
+        return analyst;
+    }
+
+    public void setAnalyst(boolean analyst) {
+        this.analyst = analyst;
     }
 
     public String getHashType() {
@@ -313,6 +325,7 @@ public class User {
         setOptInEmail(transferObject.isOptInEmail());
         setInvoiceRecipient(transferObject.isInvoiceRecipient());
         setRefreshReports(transferObject.isAutoRefreshReports());
+        setAnalyst(transferObject.isAnalyst());
         if (transferObject.getFixedDashboardID() == 0) {
             setFixedDashboardID(null);
         } else {

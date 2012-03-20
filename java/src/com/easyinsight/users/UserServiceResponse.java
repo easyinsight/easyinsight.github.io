@@ -54,6 +54,7 @@ public class UserServiceResponse {
     private String personaName;
     private byte[] reportImage;
     private boolean refreshReports;
+    private boolean analyst;
 
     public static UserServiceResponse createResponseWithUISettings(User user, ApplicationSkin applicationSkin, String personaName) {
         return createResponse(user, applicationSkin, personaName);
@@ -104,7 +105,7 @@ public class UserServiceResponse {
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
                                 account.getCurrencySymbol(), applicationSkin, account.getFirstDayOfWeek(),
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports());
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst());
         response.setReportImage(bytes);
         return response;
     }
@@ -122,7 +123,7 @@ public class UserServiceResponse {
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
                                String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
-                               boolean subdomainEnabled, String personaName, boolean refreshReports) {
+                               boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -159,6 +160,15 @@ public class UserServiceResponse {
         this.subdomainEnabled = subdomainEnabled;
         this.personaName = personaName;
         this.refreshReports = refreshReports;
+        this.analyst = analyst;
+    }
+
+    public boolean isAnalyst() {
+        return analyst;
+    }
+
+    public void setAnalyst(boolean analyst) {
+        this.analyst = analyst;
     }
 
     public boolean isRefreshReports() {

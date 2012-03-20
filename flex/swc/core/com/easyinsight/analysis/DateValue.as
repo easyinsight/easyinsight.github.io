@@ -11,15 +11,18 @@ package com.easyinsight.analysis
         public var hour:int;
         public var minute:int;
 
+        public var format:String;
+
         public var dateTime:Boolean;
 
         public var cachedDate:Date;
 
         public var date:Date;
 				
-		public function DateValue()
+		public function DateValue(date:Date = null)
 		{
 			super();
+            this.date = date;
 		}
 
         private function getDate():Date {

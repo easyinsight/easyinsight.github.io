@@ -27,6 +27,7 @@ public class UserTransferObject {
 
     private boolean invoiceRecipient;
     private boolean autoRefreshReports;
+    private boolean analyst;
 
     public UserTransferObject() {
     }
@@ -39,6 +40,13 @@ public class UserTransferObject {
         this.firstName = firstName;
     }
 
+    public boolean isAnalyst() {
+        return analyst;
+    }
+
+    public void setAnalyst(boolean analyst) {
+        this.analyst = analyst;
+    }
 
     public boolean isInvoiceRecipient() {
         return invoiceRecipient;
@@ -166,6 +174,7 @@ public class UserTransferObject {
         user.setInitialSetupDone(isInitialSetupDone());
         user.setRefreshReports(isAutoRefreshReports());
         user.setInvoiceRecipient(isInvoiceRecipient());
+        user.setAnalyst(isAnalyst());
         if (getFixedDashboardID() > 0) {
             user.setFixedDashboardID(getFixedDashboardID());
         }

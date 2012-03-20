@@ -6,9 +6,10 @@ package com.easyinsight.analysis
 	{
 		public var value:Number;
 		
-		public function NumericValue()
+		public function NumericValue(value:Number = 0)
 		{
 			super();
+            this.value = value;
 		}
 
         override public function type():int {

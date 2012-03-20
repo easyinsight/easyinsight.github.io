@@ -21,6 +21,7 @@
         import com.easyinsight.customupload.ProblemDataEvent;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.datasources.DataSourceInfo;
+        import com.easyinsight.filtering.AnalysisItemFilterDefinition;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataServiceLoadingEvent;
@@ -33,6 +34,8 @@
 
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
         import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.rowedit.ActualRowEditWindow;
+        import com.easyinsight.rowedit.ActualRowEvent;
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ActionReportLog;
@@ -92,7 +95,15 @@
             addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             addEventListener(AnalysisItemOverrideEvent.ANALYSIS_ITEM_OVERRIDE, fieldChange);
+            addEventListener(ActualRowEvent.ACTUAL_ROW_DATA, actualRowEvent);
             viewFactory.loadRenderer();
+        }
+
+        private function actualRowEvent(event:ActualRowEvent):void {
+            var window:ActualRowEditWindow = new ActualRowEditWindow();
+            window.actualRowSet = event.actualRowSet;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onRollup(event:HierarchyRollupEvent):void {
@@ -257,7 +268,7 @@
             if (event.reportFault != null) {
                 event.reportFault.popup(this, onProblem);
             } else {
-                //EIGlobalTimer.instance().dataSourceTime = event.dataSourceInfo.lastDataTime;
+                EIGlobalTimer.instance().dataSourceTime = event.dataSourceInfo.lastDataTime;
                 dataSource = event.dataSourceInfo;
                 loading = false;
                 overlayIndex = 0;
@@ -472,10 +483,10 @@
 
                 viewFactory.reportID = _reportID;
                 viewFactory.dataSourceID = _dataSourceID;
-                BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
+                //BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
                 if (User.getInstance().refreshReports) {
-                    /*EIGlobalTimer.instance().addEventListener(GlobalDataSourceEvent.GLOBAL_DATA_SOURCE, refreshEvent, false, 0, true);
-                    EIGlobalTimer.instance().dataSourceID = _dataSourceID;*/
+                    EIGlobalTimer.instance().addEventListener(GlobalDataSourceEvent.GLOBAL_DATA_SOURCE, refreshEvent, false, 0, true);
+                    EIGlobalTimer.instance().dataSourceID = _dataSourceID;
                 }
                 //viewFactory.drillthroughFilters = _parameterFilters;
                 screenTarget.addChild(viewFactory);
@@ -557,18 +568,33 @@
             if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
 
                 var fObj:Object = new Object();
+                var paramObj:Object = new Object();
                 if (_parameterFilters != null) {
                     for each (var eFilter:FilterDefinition in _parameterFilters) {
-                        fObj[eFilter.qualifiedName()] = eFilter;
+                        if (eFilter.getType() == FilterDefinition.ANALYSIS_ITEM) {
+                            paramObj[eFilter.filterName] = eFilter;
+                        } else {
+                            fObj[eFilter.qualifiedName()] = eFilter;
+                        }
                     }
                 }
                 var toUse:ArrayCollection = new ArrayCollection();
                 for each (var filter:FilterDefinition in report.filterDefinitions) {
-                    var existing:FilterDefinition = fObj[filter.qualifiedName()];
-                    if (existing) {
-                        toUse.addItem(existing);
-                    } else {
+                    if (filter.getType() == FilterDefinition.ANALYSIS_ITEM) {
+                        var aFilter:AnalysisItemFilterDefinition = paramObj[filter.filterName];
+                        if (aFilter != null) {
+                            var ourFilter:AnalysisItemFilterDefinition = filter as AnalysisItemFilterDefinition;
+                            ourFilter.targetItem = aFilter.targetItem;
+                        }
                         toUse.addItem(filter);
+                    } else {
+                        var existing:FilterDefinition = fObj[filter.qualifiedName()];
+                        if (existing) {
+                            toUse.addItem(existing);
+                            existing.showOnReportView = filter.showOnReportView;
+                        } else {
+                            toUse.addItem(filter);
+                        }
                     }
                 }
                 viewFactory.filterDefinitions = toUse;
@@ -613,7 +639,7 @@
                 removeExportButton.target = exportButton;
                 ops.push(removeExportButton);
             }
-            if (!_showReportEditor || _showAddBar || User.getInstance().guestUser) {
+            if (!_showReportEditor || _showAddBar || User.getInstance().guestUser || !User.getInstance().analyst) {
                 var removeEditButton:RemoveChild = new RemoveChild();
                 removeEditButton.target = editReportButton;
                 ops.push(removeEditButton);

@@ -35,6 +35,7 @@ public class User extends EventDispatcher
     public var uiConfiguration:UIConfiguration;
     public var firstName:String;
     public var freeUpgradePossible:Boolean;
+    public var analyst:Boolean;
     public var lastLoginDate:Date;
     public var firstLogin:Boolean;
     public var accountName:String;
@@ -142,6 +143,7 @@ public class User extends EventDispatcher
         _user.fixedDashboardID = response.fixedDashboardID;
         _user.subdomainEnabled = response.subdomainEnabled;
         _user.refreshReports = response.refreshReports;
+        _user.analyst = response.analyst;
         if (response.reportImage != null) {
             _user.loadBytes(response.reportImage);
         }
