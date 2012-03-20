@@ -13,6 +13,7 @@
         import com.easyinsight.analysis.verticallist.VerticalListRowHeaderRenderer;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.formatters.Formatter;
 
@@ -130,6 +131,13 @@
                         dColl.addItem(obj);
                         if (ytdValue.analysisMeasure.underline) {
                             underlines.push(a);
+                        } else {
+                            if (ytdValue.analysisMeasure.reportFieldExtension != null && ytdValue.analysisMeasure.reportFieldExtension is YTDReportFieldExtension) {
+                                var ext:YTDReportFieldExtension = ytdValue.analysisMeasure.reportFieldExtension as YTDReportFieldExtension;
+                                if (ext.lineAbove) {
+                                    underlines.push(a - 1);
+                                }
+                            }
                         }
                         a++;
                     }

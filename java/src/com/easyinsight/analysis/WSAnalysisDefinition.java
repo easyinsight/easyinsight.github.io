@@ -24,6 +24,8 @@ import com.easyinsight.preferences.ImageDescriptor;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
+import javax.persistence.Transient;
+
 /**
  * User: James Boe
  * Date: Jan 10, 2008
@@ -474,16 +476,26 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 columnSet.addAll(items);
             }
         }
-        Set<Long> ids = new HashSet<Long>();
-        for (AnalysisItem analysisItem : columnSet) {
-            Key key = analysisItem.getKey();
-            long dsID = toID(key);
-            if (dsID != 0) {
-                ids.add(dsID);
+        if (uniqueIteMap != null) {
+            Set<Long> ids = new HashSet<Long>();
+            for (AnalysisItem analysisItem : columnSet) {
+                Key key = analysisItem.getKey();
+                long dsID = toID(key);
+                if (dsID != 0) {
+                    ids.add(dsID);
+                }
             }
+            Set<AnalysisItem> uniqueFields = new HashSet<AnalysisItem>();
+            for (Long id : ids) {
+                AnalysisDimension analysisDimension = (AnalysisDimension) uniqueIteMap.get(id);
+                if (analysisDimension != null) {
+                    analysisDimension.setGroup(false);
+                    uniqueFields.add(analysisDimension);
+                }
+            }
+            columnSet.addAll(uniqueFields);
         }
-        Set<AnalysisItem> uniqueFields = new HashSet<AnalysisItem>();
-        EIConnection conn = Database.instance().getConnection();
+        /*EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement query = conn.prepareStatement("SELECT analysis_item_id FROM data_source_to_unique_field WHERE data_source_id = ? and child_source_id = ?");
             for (Long id : ids) {
@@ -511,8 +523,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
             LogClass.error(e);
         } finally {
             Database.closeConnection(conn);
-        }
-        columnSet.addAll(uniqueFields);
+        }*/
+
         return columnSet;
     }
 
@@ -613,6 +625,17 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 filterDefinitions.add(filterDefinition);
             }
         }
+    }
+
+    @Transient
+    private transient Map<Long, AnalysisItem> uniqueIteMap = new HashMap<Long, AnalysisItem>();
+
+    public Map<Long, AnalysisItem> getUniqueIteMap() {
+        return uniqueIteMap;
+    }
+
+    public void setUniqueIteMap(Map<Long, AnalysisItem> uniqueIteMap) {
+        this.uniqueIteMap = uniqueIteMap;
     }
 
     public boolean hasCustomResultsBridge() {

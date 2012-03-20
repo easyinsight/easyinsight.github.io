@@ -148,9 +148,11 @@ public class ReportCalculation {
         }
     }
 
-    public List<FilterDefinition> apply(Map<String, Object> data, List<AnalysisItem> analysisItems, WSAnalysisDefinition report) throws RecognitionException {
+    public List<FilterDefinition> apply(Map<String, Object> data, List<AnalysisItem> analysisItems, WSAnalysisDefinition report,
+                                        AnalysisItem field) throws RecognitionException {
         DrillthroughCalculationMetadata drillthroughCalculationMetadata = new DrillthroughCalculationMetadata();
         drillthroughCalculationMetadata.setData(data);
+        drillthroughCalculationMetadata.setField(field);
         drillthroughCalculationMetadata.setReport(report);
         drillthroughCalculationMetadata.setAnalysisItems(analysisItems);
         ICalculationTreeVisitor visitor;

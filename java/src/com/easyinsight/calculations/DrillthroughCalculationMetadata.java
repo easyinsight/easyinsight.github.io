@@ -16,6 +16,15 @@ public class DrillthroughCalculationMetadata extends CalculationMetadata {
     private List<FilterDefinition> drillThroughFilters = new ArrayList<FilterDefinition>();
     private List<AnalysisItem> analysisItems;
     private Map<String, Object> data;
+    private AnalysisItem field;
+
+    public AnalysisItem getField() {
+        return field;
+    }
+
+    public void setField(AnalysisItem field) {
+        this.field = field;
+    }
 
     public Map<String, Object> getData() {
         return data;

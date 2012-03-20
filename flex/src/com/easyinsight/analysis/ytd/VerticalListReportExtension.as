@@ -10,13 +10,12 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.ReportFieldExtension;
 
 [Bindable]
-[RemoteClass(alias="com.easyinsight.analysis.YTDReportFieldExtension")]
-public class YTDReportFieldExtension extends ReportFieldExtension {
-    
-    public var benchmark:AnalysisItem;
+[RemoteClass(alias="com.easyinsight.analysis.VerticalListReportExtension")]
+public class VerticalListReportExtension extends ReportFieldExtension {
+
     public var lineAbove:Boolean;
     
-    public function YTDReportFieldExtension() {
+    public function VerticalListReportExtension() {
     }
 }
 }

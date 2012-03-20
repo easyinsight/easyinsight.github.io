@@ -47,6 +47,7 @@ public class CompareYearsControlBar extends ReportControlBar implements IReportC
 
     override protected function createChildren():void {
         super.createChildren();
+        listViewGrouping.report = listDefinition;
         var columnGroupingLabel:Label = new Label();
         columnGroupingLabel.text = "Column:";
         columnGroupingLabel.setStyle("fontSize", 14);
@@ -92,7 +93,7 @@ public class CompareYearsControlBar extends ReportControlBar implements IReportC
             listDefinition.timeDimension = null;
         } else {
             listDefinition.timeDimension = columnGrouping.getListColumns()[0];
-            AnalysisDateDimension(listDefinition.timeDimension).dateLevel = AnalysisItemTypes.YEAR_LEVEL;
+            //AnalysisDateDimension(listDefinition.timeDimension).dateLevel = AnalysisItemTypes.YEAR_LEVEL;
         }
         return listDefinition;
     }

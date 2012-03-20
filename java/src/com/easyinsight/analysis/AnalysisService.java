@@ -25,6 +25,7 @@ import java.util.*;
 import java.util.Date;
 
 import com.easyinsight.solutions.SolutionService;
+import com.easyinsight.storage.DataStorage;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -199,13 +200,84 @@ public class AnalysisService {
         }
         return analysisItem;
     }
+    
+    public void updateRow(ActualRow actualRow, long dataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            DataStorage dataStorage = DataStorage.writeConnection(dataSource, conn);
+            try {
+                dataStorage.updateRow(actualRow, dataSource.getFields());
+                dataStorage.commit();
+            } catch (Exception e) {
+                dataStorage.rollback();
+                throw e;
+            } finally {
+                dataStorage.closeConnection();
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public ActualRowSet getActualRows(Map<String, Object> data, AnalysisItem analysisItem, WSAnalysisDefinition report, int offset) {
+        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+        insightRequestMetadata.setUtcOffset(offset);
+        try {
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID());
+            dataSource = resolveToDataSource(dataSource, analysisItem.getKey());
+            List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+            filterValueDefinition.setField(analysisItem);
+            filterValueDefinition.setSingleValue(true);
+            filterValueDefinition.setEnabled(true);
+            filterValueDefinition.setInclusive(true);
+            filterValueDefinition.setToggleEnabled(true);
+            filterValueDefinition.setFilteredValues(Arrays.asList(data.get(analysisItem.qualifiedName())));
+            filters.add(filterValueDefinition);
+            DataStorage dataStorage = DataStorage.readConnection(dataSource.getFields(), dataSource.getDataFeedID());
+            try {
+                ActualRowSet rowSet = dataStorage.allData(filters, dataSource.getFields(), null, insightRequestMetadata);
+                rowSet.setDataSourceID(dataSource.getDataFeedID());
+                return rowSet;
+            } finally {
+                dataStorage.closeConnection();
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private FeedDefinition resolveToDataSource(FeedDefinition dataSource, Key key) throws SQLException {
+        if (key instanceof NamedKey) {
+            return dataSource;
+        } else {
+            DerivedKey derivedKey = (DerivedKey) key;
+            long parentID = derivedKey.getFeedID();
+            FeedDefinition parent = new FeedStorage().getFeedDefinitionData(parentID);
+            return resolveToDataSource(parent, derivedKey.getParentKey());
+        }
+    }
 
     public DrillThroughResponse drillThrough(DrillThrough drillThrough, Map<String, Object> data, AnalysisItem analysisItem,
                                              WSAnalysisDefinition report) {
         try {
             List<FilterDefinition> filters;
             if (drillThrough.getMarmotScript() != null && !"".equals(drillThrough.getMarmotScript())) {
-                filters = new ReportCalculation(drillThrough.getMarmotScript()).apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report);
+
+                filters = new ArrayList<FilterDefinition>();
+                StringTokenizer toker = new StringTokenizer(drillThrough.getMarmotScript(), "\r\n");
+                while (toker.hasMoreTokens()) {
+                    String line = toker.nextToken();
+                    filters.addAll(new ReportCalculation(line).apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
+                            analysisItem));
+                }
             } else {
                 if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     filters = new ArrayList<FilterDefinition>();

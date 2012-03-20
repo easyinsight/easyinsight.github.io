@@ -150,6 +150,14 @@ public class FunctionFactory {
             return new DrillthroughAddFilter();
         } else if (s.equals("drillthroughaddfilters")) {
             return new DrillthroughAddFilters();
+        } else if (s.equals("mapfilterfield")) {
+            return new MapFilterField();
+        } else if (s.equals("fieldchoicedrillthrough")) {
+            return new FieldChoiceDrillthrough();
+        } else if (s.equals("uniquefield")) {
+            return new UniqueField();
+        } else if (s.equals("case")) {
+            return new CaseFunction();
         } else {
             return null;
         }

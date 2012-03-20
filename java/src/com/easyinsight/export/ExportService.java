@@ -235,7 +235,7 @@ public class ExportService {
         }
     }
 
-    public long exportDataSourceToCSV(long dataSourceID) {
+    /*public long exportDataSourceToCSV(long dataSourceID) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         try {
             FeedDefinition dataSource = new FeedService().getFeedDefinition(dataSourceID);
@@ -262,7 +262,7 @@ public class ExportService {
             throw new RuntimeException(e);
         }
         return 0;
-    }
+    }*/
 
     public void exportDashboardToPDF(Dashboard dashboard, List<Page> pages, boolean landscapeOrientation) {
         SecurityUtil.authorizeDashboard(dashboard.getId());
@@ -2073,11 +2073,19 @@ public class ExportService {
     private static final String thStyle = "border-style:solid;padding:6px;border-width:1px;border-color:#000000";
     private static final String headerTRStyle = "background-color:#EEEEEE";
     private static final String trStyle = "padding:0px;margin:0px";
+    private static final String summaryTRStyle = "padding:0px;margin:0px;background-color:#F4F4F4";
     private static final String tdStyle = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
 
     public static String listReportToHTMLTable(WSAnalysisDefinition report, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         if (listDataResults.getReportFault() != null) {
             return listDataResults.getReportFault().toString();
+        }
+
+        if (report.getReportType() == WSAnalysisDefinition.LIST) {
+            WSListDefinition list = (WSListDefinition) report;
+            if (list.isSummaryTotal()) {
+                listDataResults.summarize();
+            }
         }
 
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
@@ -2122,7 +2130,7 @@ public class ExportService {
         }
         sb.append("</tr>");
         for (com.easyinsight.analysis.ListRow listRow : listDataResults.getRows()) {
-            sb.append("<tr style=\">").append(trStyle).append("\"</tr>");
+            sb.append("<tr style=\"").append(trStyle).append("\">");
             for (AnalysisItem analysisItem : items) {
                 for (int i = 0; i < listDataResults.getHeaders().length; i++) {
                     AnalysisItem headerItem = listDataResults.getHeaders()[i];
@@ -2156,6 +2164,7 @@ public class ExportService {
                             }
                         }
                         sb.append("<td style=\"").append(styleString.toString()).append("\">");
+                        //sb.append("<td>");
                         URLLink defaultLink = linkMap.get(analysisItem);
                         boolean showLink = defaultLink != null && value.getLinks() != null && value.getLinks().get(defaultLink.getLabel()) != null;
                         if (showLink) {
@@ -2172,6 +2181,52 @@ public class ExportService {
                 }
             }
             sb.append("</tr>");
+        }
+        if (report.getReportType() == WSAnalysisDefinition.LIST) {
+            WSListDefinition list = (WSListDefinition) report;
+            if (list.isSummaryTotal()) {
+                sb.append("<tr style=\"").append(summaryTRStyle).append("\">");
+                for (AnalysisItem analysisItem : items) {
+                    for (int j = 0; j < listDataResults.getHeaders().length; j++) {
+                        AnalysisItem headerItem = listDataResults.getHeaders()[j];
+
+                        if (headerItem == analysisItem) {
+                            if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
+                                double summary = listDataResults.getSummaries()[j];
+                                if (Double.isNaN(summary) || Double.isInfinite(summary)) {
+                                    summary = 0;
+                                }
+                                StringBuilder styleString = new StringBuilder(tdStyle);
+                                String align = "left";
+                                if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                                    TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
+                                    if (textReportFieldExtension.getAlign() != null) {
+                                        if ("Left".equals(textReportFieldExtension.getAlign())) {
+                                            align = "left";
+                                        } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                                            align = "center";
+                                        } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                                            align = "right";
+                                        }
+                                    }
+                                    styleString.append(align);
+                                    if (textReportFieldExtension.getFixedWidth() > 0) {
+                                        styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
+                                    }
+                                } else {
+                                    styleString.append(align);
+                                }
+                                sb.append("<td style=\"").append(styleString.toString()).append("\">");
+                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                                sb.append("</td>");
+                            } else {
+                                sb.append("<td></td>");
+                            }
+                        }
+                    }
+                }
+                sb.append("</tr>");
+            }
         }
         sb.append("</table>");
         return sb.toString();
@@ -2205,7 +2260,7 @@ public class ExportService {
             }
             sb.append("</tr>");
             for (IRow row : dataSet.getRows()) {
-                sb.append("<tr style=\">").append(trStyle).append("\"</tr>");
+                sb.append("<tr style=\">").append(summaryTRStyle).append("\">");
                 for (AnalysisItem analysisItem : items) {
                     //for (int i = 0; i < fields.length; i++) {
                         //AnalysisItem headerItem = listDataResults.getHeaders()[i];

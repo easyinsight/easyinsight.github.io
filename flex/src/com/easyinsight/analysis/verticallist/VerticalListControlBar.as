@@ -55,6 +55,7 @@ public class VerticalListControlBar extends ReportControlBar implements IReportC
 
     override protected function createChildren():void {
         super.createChildren();
+        listViewGrouping.report = listDefinition;
         var columnGroupingLabel:Label = new Label();
         columnGroupingLabel.text = "Column:";
         columnGroupingLabel.setStyle("fontSize", 14);

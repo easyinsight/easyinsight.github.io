@@ -125,6 +125,13 @@
                     dColl.addItem(obj);
                     if (AnalysisMeasure(ytdValue.measure).underline) {
                         underlines.push(a);
+                    } else {
+                        if (ytdValue.measure.reportFieldExtension != null && ytdValue.measure.reportFieldExtension is VerticalListReportExtension) {
+                            var ext:VerticalListReportExtension = ytdValue.measure.reportFieldExtension as VerticalListReportExtension;
+                            if (ext.lineAbove) {
+                                underlines.push(a - 1);
+                            }
+                        }
                     }
                     a++;
                 }

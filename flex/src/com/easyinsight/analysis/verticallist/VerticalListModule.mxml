@@ -19,6 +19,7 @@
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.Value;
+        import com.easyinsight.analysis.ytd.VerticalListReportExtension;
 
         import mx.collections.ArrayCollection;
         import mx.formatters.Formatter;
@@ -138,6 +139,13 @@
                     dColl.addItem(obj);
                     if (measure.underline) {
                         underlines.push(a);
+                    } else {
+                        if (measure.reportFieldExtension != null && measure.reportFieldExtension is VerticalListReportExtension) {
+                            var ext:VerticalListReportExtension = measure.reportFieldExtension as VerticalListReportExtension;
+                            if (ext.lineAbove) {
+                                underlines.push(a - 1);
+                            }
+                        }
                     }
                     a++;
                 }
