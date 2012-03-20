@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="800" height="500"
+        backgroundColor="#FFFFFF">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.DateValue;
+        import com.easyinsight.analysis.NumericValue;
+        import com.easyinsight.analysis.StringValue;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.containers.FormItem;
+        import mx.controls.Alert;
+        import mx.controls.DateField;
+        import mx.controls.TextArea;
+        import mx.controls.TextInput;
+
+        import mx.core.UIComponent;
+
+        import mx.managers.PopUpManager;
+        
+        public var actualRowSet:ActualRowSet;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            var actualRow:ActualRow = actualRowSet.rows.getItemAt(0) as ActualRow;
+            var i:int = 0;
+            for each (var analysisItem:AnalysisItem in actualRowSet.analysisItems) {
+                var value:Value = actualRow.values[analysisItem.qualifiedName()];
+                if (value == null) {
+                    continue;
+                }
+                var comp:UIComponent;
+                if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                    var dateField:DateField = new DateField();
+                    dateField.editable = true;
+                    if (value.type() == Value.DATE) {
+                        dateField.selectedDate = value.getValue() as Date;
+                    }
+                    comp = dateField;
+                } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    var textInput:TextInput = new TextInput();
+                    textInput.text = String(value.getValue());
+                    comp = textInput;
+                } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                    var textArea:TextArea = new TextArea();
+                    textArea.text = String(value.getValue());
+                    comp = textArea;
+                } else {
+                    var groupingInput:TextInput = new TextInput();
+                    groupingInput.text = String(value.getValue());
+                    comp = groupingInput;
+                }
+                var formItem:FormItem = new FormItem();
+                formItem.data = analysisItem;
+                formItem.addChild(comp);
+                formItem.label = analysisItem.display;
+                if (i % 2 == 0) {
+                    form1.addChild(formItem);
+                } else {
+                    form2.addChild(formItem);
+                }
+                i++;
+            }
+        }
+        
+        private function saveForm(actualRow:ActualRow,  form:Form):void {
+            for each (var formItem:FormItem in form.getChildren()) {
+                var comp:UIComponent = formItem.getChildAt(0) as UIComponent;
+                var analysisItem:AnalysisItem = formItem.data as AnalysisItem;
+                if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                    var dateField:DateField = comp as DateField;
+                    actualRow.values[analysisItem.qualifiedName()] = new DateValue(dateField.selectedDate);
+                } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    var input:TextInput = comp as TextInput;
+                    actualRow.values[analysisItem.qualifiedName()] = new NumericValue(Number(input.text));
+                } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                    var area:TextArea = comp as TextArea;
+                    actualRow.values[analysisItem.qualifiedName()] = new StringValue(area.text);
+                } else {
+                    var textInput:TextInput = comp as TextInput;
+                    actualRow.values[analysisItem.qualifiedName()] = new StringValue(textInput.text);
+                }
+            }
+        }
+
+        private function save():void {
+            var actualRow:ActualRow = actualRowSet.rows.getItemAt(0) as ActualRow;
+            saveForm(actualRow,  form1);
+            saveForm(actualRow,  form2);
+            ProgressAlert.alert(this, "Updating...", null, analysisService.updateRow);
+            analysisService.updateRow.send(actualRow, actualRowSet.dataSourceID);
+        }
+        
+        private function updated():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="updateRow" result="updated()"/>
+    </mx:RemoteObject>
+    <mx:VBox width="100%" height="100%">
+        <mx:HBox width="100%">
+            <mx:Form id="form1" width="50%" height="100%"/>
+            <mx:Form id="form2" width="50%" height="100%"/>
+        </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>
