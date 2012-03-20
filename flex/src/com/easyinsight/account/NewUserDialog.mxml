@@ -127,6 +127,7 @@
                 Alert.show("There are one or more problems with the user information you specified.");
             } else {
                 var user:UserTransferObject = new UserTransferObject();
+                user.analyst = true;
                 user.userID = userID;
                 user.email = emailInput.text;
                 user.userName = userNameInput.text;
@@ -228,39 +229,45 @@
         <mx:method name="getUserDLS" result="gotUserDLS()"/>
     </mx:RemoteObject>
     <mx:TabNavigator id="tabNavigator" resizeToContent="true">
-        <mx:Form label="Base Info" id="baseInfoForm">
-            <mx:FormItem label="User ID:" direction="horizontal">
-                <mx:TextInput id="userNameInput" text="{userName}" width="400"/>
-            </mx:FormItem>
-            <mx:FormItem label="First Name:" direction="horizontal">
-                <mx:TextInput id="firstNameInput" text="{firstName}" width="400"/>
-            </mx:FormItem>
-            <mx:FormItem label="Last Name:" direction="horizontal">
-                <mx:TextInput id="fullNameInput" text="{fullName}" width="400"/>
-            </mx:FormItem>
-            <mx:FormItem label="Email Address:" direction="horizontal">
-                <mx:TextInput id="emailInput" text="{email}" width="400"/>
-            </mx:FormItem>
-            <mx:FormItem label="Account Administrator:">
-                <mx:CheckBox id="accountAdminCheckbox" selected="{accountAdmin}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Invoice Recipient:">
-                <mx:CheckBox id="invoiceCheckbox" selected="{invoiceRecipient}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Send Newsletter to User:">
-                <mx:CheckBox id="newsletterCheckbox" selected="{newsletterSelected}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Persona:" visible="{showPersonaOption}">
-                <util:PersonaItemComboBox dataProvider="{personas}" labelField="name" id="personaComboBox" selectedProperty="personaID"
-                        selectedValue="{personaID}" change="onPersonaChange(event)"/>
-            </mx:FormItem>
-            <mx:FormItem label="Fixed View:">
-                <util:SmartComboBox dataProvider="{availableViews}" labelField="name" id="singleViewComboBox" selectedProperty="id" selectedValue="{viewID}" enabled="{!accountAdmin}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Auto Refresh Reports and Dashboards:">
-                <mx:CheckBox id="refreshCheckbox" selected="{autoRefresh}"/>
-            </mx:FormItem>
-        </mx:Form>
+        <mx:VBox label="Base Info" horizontalAlign="center" paddingLeft="5">
+            <mx:Form  id="baseInfoForm">
+                <mx:FormItem label="User ID:" direction="horizontal">
+                    <mx:TextInput id="userNameInput" text="{userName}" width="400"/>
+                </mx:FormItem>
+                <mx:FormItem label="First Name:" direction="horizontal">
+                    <mx:TextInput id="firstNameInput" text="{firstName}" width="400"/>
+                </mx:FormItem>
+                <mx:FormItem label="Last Name:" direction="horizontal">
+                    <mx:TextInput id="fullNameInput" text="{fullName}" width="400"/>
+                </mx:FormItem>
+                <mx:FormItem label="Email Address:" direction="horizontal">
+                    <mx:TextInput id="emailInput" text="{email}" width="400"/>
+                </mx:FormItem>
+                <mx:FormItem label="Account Administrator:">
+                    <mx:CheckBox id="accountAdminCheckbox" selected="{accountAdmin}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Invoice Recipient:">
+                    <mx:CheckBox id="invoiceCheckbox" selected="{invoiceRecipient}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Send Newsletter to User:">
+                    <mx:CheckBox id="newsletterCheckbox" selected="{newsletterSelected}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Persona:" visible="{showPersonaOption}">
+                    <util:PersonaItemComboBox dataProvider="{personas}" labelField="name" id="personaComboBox" selectedProperty="personaID"
+                            selectedValue="{personaID}" change="onPersonaChange(event)"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:HRule width="100%"/>
+            <mx:Form>
+                <mx:FormItem label="Fixed View:">
+                    <util:SmartComboBox dataProvider="{availableViews}" labelField="name" id="singleViewComboBox" selectedProperty="id" selectedValue="{viewID}" enabled="{!accountAdmin}"
+                            maxWidth="300"/>
+                </mx:FormItem>
+                <mx:FormItem label="Auto Refresh Reports and Dashboards:">
+                    <mx:CheckBox id="refreshCheckbox" selected="{autoRefresh}"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
     </mx:TabNavigator>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="{createLabel}" click="save()"/>
