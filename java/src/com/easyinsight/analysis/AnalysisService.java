@@ -225,7 +225,7 @@ public class AnalysisService {
         }
     }*/
 
-    public ActualRowSet getActualRows(Map<String, Object> data, AnalysisItem analysisItem, WSAnalysisDefinition report, int offset) {
+    /*public ActualRowSet getActualRows(Map<String, Object> data, AnalysisItem analysisItem, WSAnalysisDefinition report, int offset) {
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setUtcOffset(offset);
         try {
@@ -252,7 +252,7 @@ public class AnalysisService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     private FeedDefinition resolveToDataSource(FeedDefinition dataSource, Key key) throws SQLException {
         if (key instanceof NamedKey) {
