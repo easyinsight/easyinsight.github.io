@@ -60,7 +60,7 @@ public class User {
     private String hashSalt;
 
     @Column(name="analyst")
-    private boolean analyst;
+    private boolean analyst = true;
 
     @Column(name="user_key")
     private String userKey;
