@@ -10,9 +10,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.CompositeReportPipeline;
 import com.easyinsight.pipeline.Pipeline;
-import com.easyinsight.storage.IDataStorage;
-import com.easyinsight.storage.IWhere;
-import com.easyinsight.storage.StringWhere;
+import com.easyinsight.storage.*;
 import com.easyinsight.users.Account;
 import nu.xom.*;
 import org.apache.http.client.HttpClient;
@@ -102,6 +100,24 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         indexEnabled = rs.getBoolean(2);
         weightsID = rs.getLong(3);
         queryStmt.close();
+    }
+
+    protected void clearData(DataStorage dataStorage) throws SQLException {
+        if (databaseID.equals("beutk2zd6")) {
+            Key dateKey = null;
+            for (AnalysisItem analysisItem : getFields()) {
+                if ("Date".equals(analysisItem.toDisplay())) {
+                    dateKey = analysisItem.getKey();
+                }
+            }
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, -60);
+            Date boundaryTime = cal.getTime();
+            IWhere where = new DateWhere(dateKey, boundaryTime, Comparison.GREATER_THAN);
+            dataStorage.deleteData(Arrays.asList(where));
+        } else {
+            dataStorage.truncate();
+        }
     }
 
     public String getDatabaseID() {
@@ -535,18 +551,18 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                             for (AnalysisItem analysisItem : items) {    
                                 String value = childElement.getValue();
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
-                                    row.addValue(analysisItem.createAggregateKey(), new Date(Long.parseLong(value)));
+                                    row.addValue(analysisItem.getKey(), new Date(Long.parseLong(value)));
                                 } else {
-                                    row.addValue(analysisItem.createAggregateKey(), value);
+                                    row.addValue(analysisItem.getKey(), value);
                                 }
                             }
                         }
                     }
                 }
-                //dataSet = new DataSet();
-
+                IDataStorage.insertData(dataSet);
+                dataSet = new DataSet();
             } while (count == 1000);
-            Pipeline pipeline = new CompositeReportPipeline();
+            /*Pipeline pipeline = new CompositeReportPipeline();
             WSListDefinition analysisDefinition = new WSListDefinition();
             List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
             for (Collection<AnalysisItem> columnList : map.values()) {
@@ -558,7 +574,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             for (AnalysisItem analysisItem : columns) {
                 dataSet.getDataSetKeys().replaceKey(analysisItem.createAggregateKey(), analysisItem.getKey());
             }
-            IDataStorage.insertData(dataSet);
+            IDataStorage.insertData(dataSet);*/
             return null;
         } catch (ReportException re) {
             throw re;
