@@ -6,19 +6,10 @@ import com.easyinsight.analysis.definitions.WSYTDDefinition;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
-import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.export.ExportService;
-import com.easyinsight.logging.LogClass;
-import org.hibernate.Session;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -159,18 +150,30 @@ public abstract class Pipeline {
                 allNeededAnalysisItems.addAll(items);
             }
         }
-        
-        Set<Long> ids = new HashSet<Long>();
-        for (AnalysisItem analysisItem : allNeededAnalysisItems) {
-            Key key = analysisItem.getKey();
-            long dsID = toID(key);
-            if (dsID != 0) {
-                ids.add(dsID);
-            }
-        }
 
         Map<Long, AnalysisItem> uniqueFields = new HashMap<Long, AnalysisItem>();
-        EIConnection conn = Database.instance().getConnection();
+
+        if (report.getUniqueIteMap() != null) {
+            Set<Long> ids = new HashSet<Long>();
+            for (AnalysisItem analysisItem : allNeededAnalysisItems) {
+                Key key = analysisItem.getKey();
+                long dsID = toID(key);
+                if (dsID != 0) {
+                    ids.add(dsID);
+                }
+            }
+
+
+            for (Long id : ids) {
+                AnalysisDimension analysisDimension = (AnalysisDimension) report.getUniqueIteMap().get(id);
+                if (analysisDimension != null) {
+                    analysisDimension.setGroup(false);
+                    uniqueFields.put(id, analysisDimension);
+                }
+            }
+            allNeededAnalysisItems.addAll(uniqueFields.values());
+        }
+        /*EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement query = conn.prepareStatement("SELECT analysis_item_id FROM data_source_to_unique_field WHERE data_source_id = ? and child_source_id = ?");
             for (Long id : ids) {
@@ -198,8 +201,8 @@ public abstract class Pipeline {
             LogClass.error(e);
         } finally {
             Database.closeConnection(conn);
-        }
-        allNeededAnalysisItems.addAll(uniqueFields.values());
+        }*/
+
 
         pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource == null ? new HashMap<String, String>() : dataSource.getProperties(), allRequestedAnalysisItems,
                 uniqueFields);
@@ -253,7 +256,7 @@ public abstract class Pipeline {
 
     public DataResults toList(DataSet dataSet, EIConnection conn) {
         for (IComponent component : components) {
-            //System.out.println(component.getClass() + " - " + dataSet.getRows());
+            /*System.out.println(component.getClass() + " - " + dataSet.getRows());*/
             /*if (pipelineData.getReport().isLogReport()) {
                 logger.append("<h1>" + component.getClass().getName() + "</h1>");
                 logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, conn, pipelineData.getInsightRequestMetadata()));
