@@ -6,16 +6,15 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Node;
-import nu.xom.Nodes;
+import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -86,34 +85,38 @@ public class BatchbookTodoSource extends BatchbookBaseSource {
             for (int i = 0; i < userNodes.size(); i++) {
                 Node userNode = userNodes.get(i);
                 String email = queryField(userNode, "email/text()");
-                Document deals = runRestRequest("/service/todos.xml?assigned_to=" + email, httpClient, new Builder(), batchbookCompositeSource.getUrl(), parentDefinition);
-                Nodes dealNodes = deals.query("/todos/todo");
-                for (int j = 0; j < dealNodes.size(); j++) {
-                    Node dealNode = dealNodes.get(j);
-                    IRow row = dataSet.createRow();
-                    row.addValue(keys.get(TODO_ID), queryField(dealNode, "id/text()"));
-                    row.addValue(keys.get(TODO_TITLE), queryField(dealNode, "title/text()"));
-                    row.addValue(keys.get(TODO_DESCRIPTION), queryField(dealNode, "description/text()"));
-                    row.addValue(keys.get(FLAGGED), queryField(dealNode, "flagged/text()"));
-                    row.addValue(keys.get(COMPLETE), queryField(dealNode, "complete/text()"));
-                    row.addValue(keys.get(ASSIGNED_BY), queryField(dealNode, "assigned_by/text()"));
-                    row.addValue(keys.get(ASSIGNED_TO), queryField(dealNode, "assigned_to/text()"));
+                try {
+                    Document deals = runRestRequest("/service/todos.xml?assigned_to=" + email, httpClient, new Builder(), batchbookCompositeSource.getUrl(), parentDefinition);
+                    Nodes dealNodes = deals.query("/todos/todo");
+                    for (int j = 0; j < dealNodes.size(); j++) {
+                        Node dealNode = dealNodes.get(j);
+                        IRow row = dataSet.createRow();
+                        row.addValue(keys.get(TODO_ID), queryField(dealNode, "id/text()"));
+                        row.addValue(keys.get(TODO_TITLE), queryField(dealNode, "title/text()"));
+                        row.addValue(keys.get(TODO_DESCRIPTION), queryField(dealNode, "description/text()"));
+                        row.addValue(keys.get(FLAGGED), queryField(dealNode, "flagged/text()"));
+                        row.addValue(keys.get(COMPLETE), queryField(dealNode, "complete/text()"));
+                        row.addValue(keys.get(ASSIGNED_BY), queryField(dealNode, "assigned_by/text()"));
+                        row.addValue(keys.get(ASSIGNED_TO), queryField(dealNode, "assigned_to/text()"));
 
-                    row.addValue(keys.get(TODO_COUNT), 1);
-                    row.addValue(keys.get(DUE_DATE), dueDateFormat.parse(queryField(dealNode, "due_date/text()")));
-                    row.addValue(keys.get(CREATED_AT), dateFormat.parse(queryField(dealNode, "created_at/text()")));
-                    row.addValue(keys.get(UPDATED_AT), dateFormat.parse(queryField(dealNode, "updated_at/text()")));
+                        row.addValue(keys.get(TODO_COUNT), 1);
+                        row.addValue(keys.get(DUE_DATE), dueDateFormat.parse(queryField(dealNode, "due_date/text()")));
+                        row.addValue(keys.get(CREATED_AT), dateFormat.parse(queryField(dealNode, "created_at/text()")));
+                        row.addValue(keys.get(UPDATED_AT), dateFormat.parse(queryField(dealNode, "updated_at/text()")));
 
-                    Nodes tagNodes = dealNode.query("tags/tag/name/text()");
-                    StringBuilder tagBuilder = new StringBuilder();
-                    for (int k = 0; k < tagNodes.size(); k++) {
-                        String tag = tagNodes.get(k).getValue();
-                        tagBuilder.append(tag).append(",");
+                        Nodes tagNodes = dealNode.query("tags/tag/name/text()");
+                        StringBuilder tagBuilder = new StringBuilder();
+                        for (int k = 0; k < tagNodes.size(); k++) {
+                            String tag = tagNodes.get(k).getValue();
+                            tagBuilder.append(tag).append(",");
+                        }
+                        if (tagNodes.size() > 0) {
+                            tagBuilder.deleteCharAt(tagBuilder.length() - 1);
+                        }
+                        row.addValue(keys.get(TAGS), tagBuilder.toString());
                     }
-                    if (tagNodes.size() > 0) {
-                        tagBuilder.deleteCharAt(tagBuilder.length() - 1);
-                    }
-                    row.addValue(keys.get(TAGS), tagBuilder.toString());
+                } catch (Exception e) {
+                    LogClass.info(e.getMessage());
                 }
             }
         } catch (ReportException re) {

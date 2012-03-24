@@ -7,16 +7,9 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Node;
-import nu.xom.Nodes;
-import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -65,33 +58,19 @@ public class BatchbookCommunicationsSource extends BatchbookBaseSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+
         BatchbookCompositeSource batchbookCompositeSource = (BatchbookCompositeSource) parentDefinition;
-        HttpClient httpClient = getHttpClient(batchbookCompositeSource.getBbApiKey(), "");
         try {
-            Document deals = runRestRequest("/service/communications.xml?limit=5000", httpClient, new Builder(), batchbookCompositeSource.getUrl(), parentDefinition);
-            Nodes dealNodes = deals.query("/communications/communication");
-            for (int i = 0; i < dealNodes.size(); i++) {
-                Node dealNode = dealNodes.get(i);
+            List<Communication> communications = batchbookCompositeSource.getOrCreateCache().getCommunications();
+            for (Communication communication : communications) {
                 IRow row = dataSet.createRow();
-                row.addValue(keys.get(COMMUNICATION_ID), queryField(dealNode, "id/text()"));
-                row.addValue(keys.get(SUBJECT), queryField(dealNode, "subject/text()"));
-                row.addValue(keys.get(BODY), queryField(dealNode, "body/text()"));
-                row.addValue(keys.get(TYPE), queryField(dealNode, "ctype/text()"));
-
+                row.addValue(keys.get(COMMUNICATION_ID), communication.getId());
+                row.addValue(keys.get(SUBJECT), communication.getSubject());
+                row.addValue(keys.get(BODY), communication.getBody());
+                row.addValue(keys.get(TYPE), communication.getType());
                 row.addValue(keys.get(COMMUNICATION_COUNT), 1);
-                row.addValue(keys.get(DATE), dateFormat.parse(queryField(dealNode, "date/text()")));
-
-                Nodes tagNodes = dealNode.query("tags/tag/name/text()");
-                StringBuilder tagBuilder = new StringBuilder();
-                for (int j = 0; j < tagNodes.size(); j++) {
-                    String tag = tagNodes.get(j).getValue();
-                    tagBuilder.append(tag).append(",");
-                }
-                if (tagNodes.size() > 0) {
-                    tagBuilder.deleteCharAt(tagBuilder.length() - 1);
-                }
-                row.addValue(keys.get(TAGS), tagBuilder.toString());
+                row.addValue(keys.get(DATE), communication.getDate());
+                row.addValue(keys.get(TAGS), communication.getTags());
             }
         } catch (ReportException re) {
             throw re;

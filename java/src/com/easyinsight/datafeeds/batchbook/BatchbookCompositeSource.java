@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.batchbook;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -89,6 +90,7 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.BATCHBOOK_COMMUNICATIONS);
         feedTypes.add(FeedType.BATCHBOOK_USERS);
         feedTypes.add(FeedType.BATCHBOOK_TODOS);
+        feedTypes.add(FeedType.BATCHBOOK_COMMUNICATION_PARTIES);
         return feedTypes;
     }
 
@@ -109,14 +111,41 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
+    protected void refreshDone() {
+        batchbookCommunicationsCache = null;
+    }
+
+    private BatchbookCommunicationsCache batchbookCommunicationsCache;
+
+    public BatchbookCommunicationsCache getOrCreateCache() {
+        if (batchbookCommunicationsCache == null) {
+            batchbookCommunicationsCache = new BatchbookCommunicationsCache();
+            batchbookCommunicationsCache.populate(this);
+        }
+        return batchbookCommunicationsCache;
+    }
+
+    @Override
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
     }
 
     @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new BatchbookComposite1To2(this));
+    }
+
+    @Override
     protected Collection<ChildConnection> getLiveChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.BATCHBOOK_DEALS, FeedType.BATCHBOOK_COMPANIES, BatchbookDealSource.DEAL_WITH_ID, BatchbookCompanySource.COMPANY_ID),
-            new ChildConnection(FeedType.BATCHBOOK_COMPANIES, FeedType.BATCHBOOK_PEOPLE, BatchbookCompanySource.COMPANY_ID, BatchbookPeopleSource.COMPANY_ID));
+            new ChildConnection(FeedType.BATCHBOOK_COMPANIES, FeedType.BATCHBOOK_PEOPLE, BatchbookCompanySource.COMPANY_ID, BatchbookPeopleSource.COMPANY_ID),
+                new ChildConnection(FeedType.BATCHBOOK_COMMUNICATIONS, FeedType.BATCHBOOK_COMMUNICATION_PARTIES, BatchbookCommunicationsSource.COMMUNICATION_ID, BatchbookCommunicationsPartySource.COMMUNICATION_ID),
+                new ChildConnection(FeedType.BATCHBOOK_PEOPLE, FeedType.BATCHBOOK_COMMUNICATION_PARTIES, BatchbookPeopleSource.PERSON_ID, BatchbookCommunicationsPartySource.CONTACT_ID));
     }
 
     @Override
