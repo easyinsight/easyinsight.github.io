@@ -1,7 +1,5 @@
 package com.easyinsight.datafeeds;
 
-import com.easyinsight.core.DateValue;
-import com.easyinsight.core.Value;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.kpi.KPI;
