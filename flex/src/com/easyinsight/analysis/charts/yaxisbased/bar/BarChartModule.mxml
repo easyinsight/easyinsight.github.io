@@ -24,6 +24,7 @@
         import mx.charts.chartClasses.ChartBase;
         import mx.charts.chartClasses.DataTransform;
         import mx.charts.chartClasses.IAxisRenderer;
+        import mx.charts.chartClasses.NumericAxis;
         import mx.charts.chartClasses.Series;
         import mx.charts.series.BarSeries;
         import mx.charts.series.items.BarSeriesItem;
@@ -118,7 +119,7 @@
             CartesianChart(chart).verticalAxis = axis;
         }
 
-        override protected function assignMeasureAxis(axis:LinearAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
+        override protected function assignMeasureAxis(axis:NumericAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
             CartesianChart(chart).horizontalAxisRenderers = [ axisRenderer ];
             CartesianChart(chart).horizontalAxis = axis;
         }

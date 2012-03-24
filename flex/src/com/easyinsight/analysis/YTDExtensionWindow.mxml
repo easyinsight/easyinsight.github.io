@@ -15,6 +15,7 @@
         public function save(analysisItem:AnalysisItem):void {
             var ext:YTDReportFieldExtension = new YTDReportFieldExtension();
             ext.benchmark = dateComboBox.selectedItem as AnalysisItem;
+            ext.lineAbove = verticalLineBox.selected;
             analysisItem.reportFieldExtension = ext;
         }
 
@@ -25,6 +26,7 @@
                 if (ext.benchmark != null) {
                     selectedValue = ext.benchmark.display;
                 }
+                verticalLineAbove = ext.lineAbove;
             }
         }
 
@@ -45,11 +47,17 @@
 
         [Bindable]
         private var selectedValue:String;
+        
+        [Bindable]
+        private var verticalLineAbove:Boolean;
         ]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="Which field should serve as a benchmark?">
             <util:SmartComboBox dataProvider="{dateFields}" id="dateComboBox" labelField="display" selectedValue="{selectedValue}" selectedProperty="display"
                                 rowCount="{rowCount}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Draw a vertical line over this field:">
+            <mx:CheckBox id="verticalLineBox" selected="{verticalLineAbove}"/>
         </mx:FormItem>
     </mx:Form>
 

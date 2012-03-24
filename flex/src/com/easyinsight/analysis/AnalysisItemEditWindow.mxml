@@ -177,6 +177,11 @@
                 ytdEditor.analysisItem = _analysisItem;
                 ytdEditor.analysisItems = _analysisItems;
                 tabNavigator.addChild(ytdEditor);
+            } else if (_reportType == AnalysisDefinition.VERTICAL_LIST || _reportType == AnalysisDefinition.COMPARE_YEARS) {
+                var vertEditor:VertExtensionWindow = new VertExtensionWindow();
+                _reportEditor = vertEditor;
+                vertEditor.analysisItem = _analysisItem;
+                tabNavigator.addChild(vertEditor);
             }
             if (initialWindow == EXTENSION) {
                 lastTab = tabNavigator.getChildIndex(DisplayObject(_reportEditor));

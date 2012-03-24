@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+         implements="com.easyinsight.analysis.IReportExtensionEditor" label="YTD"
+         paddingLeft="20" paddingBottom="20" paddingRight="20" paddingTop="20">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.ytd.VerticalListReportExtension;
+
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var dateFields:ArrayCollection;
+
+        private var _analysisItem:AnalysisItem;
+
+        public function save(analysisItem:AnalysisItem):void {
+            var ext:VerticalListReportExtension = new VerticalListReportExtension();
+            ext.lineAbove = verticalLineBox.selected;
+            analysisItem.reportFieldExtension = ext;
+        }
+
+        public function set analysisItem(analysisItem:AnalysisItem):void {
+            _analysisItem = analysisItem;
+            var ext:VerticalListReportExtension = _analysisItem.reportFieldExtension as VerticalListReportExtension;
+            if (ext != null) {
+                verticalLineAbove = ext.lineAbove;
+            }
+        }
+
+        public function set analysisItems(analysisItems:ArrayCollection):void {
+        }
+
+        [Bindable]
+        private var verticalLineAbove:Boolean;
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Draw a vertical line over this field:">
+            <mx:CheckBox id="verticalLineBox" selected="{verticalLineAbove}"/>
+        </mx:FormItem>
+    </mx:Form>
+
+
+</mx:VBox>

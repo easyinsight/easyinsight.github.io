@@ -10,40 +10,38 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
-        import com.easyinsight.analysis.AnalysisItemTypes;
+
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.ChartDefinition;
         import com.easyinsight.analysis.ClickUtil;
         import com.easyinsight.analysis.CustomChangeEvent;
-        import com.easyinsight.analysis.DrillThrough;
-        import com.easyinsight.analysis.DrillThroughEvent;
-        import com.easyinsight.analysis.DrillThroughExecutor;
+
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.Link;
-        import com.easyinsight.analysis.ReportWindowEvent;
-        import com.easyinsight.analysis.URLLink;
+
         import com.easyinsight.analysis.Value;
+        import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartDefinition;
         import com.easyinsight.analysis.charts.xaxisbased.column.ContextMenuBoxItemRenderer;
-        import com.easyinsight.filtering.FilterRawData;
-        import com.easyinsight.filtering.FilterValueDefinition;
-        import com.easyinsight.report.ReportNavigationEvent;
-        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
+
 
         import mx.charts.AxisRenderer;
 
         import mx.charts.CategoryAxis;
-        import mx.charts.ChartItem;
+
         import mx.charts.HitData;
-        import mx.charts.Legend;
+
         import mx.charts.LinearAxis;
+        import mx.charts.LogAxis;
         import mx.charts.chartClasses.ChartBase;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.IAxisRenderer;
+        import mx.charts.chartClasses.NumericAxis;
         import mx.charts.chartClasses.Series;
-        import mx.charts.events.ChartEvent;
+
         import mx.charts.events.ChartItemEvent;
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
+
         import mx.formatters.Formatter;
         import mx.graphics.GradientEntry;
         import mx.graphics.LinearGradient;
@@ -62,7 +60,7 @@
         private var chart:ChartBase;
 
         private var dimensionAxis:CategoryAxis;
-        private var measureAxis:LinearAxis;
+        private var measureAxis:NumericAxis;
 
         [Bindable]
         private var legend:EILegend;
@@ -115,14 +113,6 @@
 
                 // define the Y axis
 
-                measureAxis = new LinearAxis();
-                measureAxis.title = "Blah";
-                measureAxis.labelFunction = renderAxis;
-
-                var mAxisRenderer:AxisRenderer = new AxisRenderer();
-                mAxisRenderer.setStyle("axisStroke", ChartUtil.axisStroke());
-                mAxisRenderer.axis = measureAxis;
-                assignMeasureAxis(measureAxis, chart, mAxisRenderer);
 
                 // create the data series
                 canvas.addChild(chart);
@@ -139,7 +129,7 @@
 
         }
 
-        protected function assignMeasureAxis(axis:LinearAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
+        protected function assignMeasureAxis(axis:NumericAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
 
         }
 
@@ -154,15 +144,6 @@
         private function renderDimensionAxis(item:Object, prevValue:Object, axis:CategoryAxis, categoryItem:Object):String {
             var value:Value = categoryItem[dimensionAxisItem.qualifiedName()];
             return dimensionFormatter.format(value.getValue());
-        }
-
-        public function createFilterRawData():FilterRawData {
-            var filterRawData:FilterRawData = new FilterRawData();
-            for (var i:int = 0; i < chart.selectedChartItems.length; i++) {
-                var obj:ChartItem = chart.selectedChartItems[i];
-                filterRawData.addPair(dimensionAxisItem, obj.item[dimensionAxisItem.key.createString()]);
-            }
-            return filterRawData;
         }
 
         protected var chartDef:ChartDefinition;
@@ -204,6 +185,25 @@
                 sortData(dataSet);
 
                 createChart();
+
+                var axisType:String;
+                if (chartDef is ColumnChartDefinition) {
+                    axisType = ColumnChartDefinition(chartDef).axisType;
+                } else if (chartDef is BarChartDefinition) {
+                    axisType = BarChartDefinition(chartDef).axisType;
+                }
+                if (axisType == "Linear") {
+                    measureAxis = new LinearAxis();
+                } else {
+                    measureAxis = new LogAxis();
+                }
+                measureAxis.title = "Blah";
+                measureAxis.labelFunction = renderAxis;
+
+                var mAxisRenderer:AxisRenderer = new AxisRenderer();
+                mAxisRenderer.setStyle("axisStroke", ChartUtil.axisStroke());
+                mAxisRenderer.axis = measureAxis;
+                assignMeasureAxis(measureAxis, chart, mAxisRenderer);
 
                 applyGeneralStyling();
 

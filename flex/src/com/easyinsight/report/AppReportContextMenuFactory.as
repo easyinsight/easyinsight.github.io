@@ -29,11 +29,11 @@ public class AppReportContextMenuFactory extends EventDispatcher implements IRep
     public function createReportContextMenu(insightDescriptor:InsightDescriptor, viewFactory:EmbeddedViewFactory, dObj:DisplayObject):ContextMenu {
         var navigateItem:ContextMenuItem = new ContextMenuItem("View " + insightDescriptor.name);
         navigateItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor)));
+            viewFactory.dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor)));
         });
         var editItem:ContextMenuItem = new ContextMenuItem("Edit " + insightDescriptor.name);
         editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-            dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(insightDescriptor)));
+            viewFactory.dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(insightDescriptor)));
         });
         var exportItem:ContextMenuItem = new ContextMenuItem("Export " + insightDescriptor.name);
         exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {

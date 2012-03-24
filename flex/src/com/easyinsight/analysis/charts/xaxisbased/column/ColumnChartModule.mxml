@@ -23,6 +23,7 @@
         import mx.charts.chartClasses.ChartBase;
         import mx.charts.chartClasses.DataTransform;
         import mx.charts.chartClasses.IAxisRenderer;
+        import mx.charts.chartClasses.NumericAxis;
         import mx.charts.chartClasses.Series;
         import mx.charts.series.ColumnSeries;
         import mx.charts.series.items.ColumnSeriesItem;
@@ -113,7 +114,7 @@
             CartesianChart(chart).horizontalAxisRenderer = axisRenderer;
         }
 
-        override protected function assignMeasureAxis(axis:LinearAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
+        override protected function assignMeasureAxis(axis:NumericAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
             CartesianChart(chart).verticalAxis = axis;
             CartesianChart(chart).verticalAxisRenderer = axisRenderer;
         }
@@ -128,6 +129,9 @@
             };
             columnSeries.dataProvider = dataSet;
             columnSeries.dataFunction = function(series:Series, item:Object, fieldName:String):Object {
+                if (measure == null) {
+                    return null;
+                }
                 if (fieldName == 'yValue')
                     return(item[measure.qualifiedName()].toNumber());
                 else if (fieldName == "xValue")

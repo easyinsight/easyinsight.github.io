@@ -14,6 +14,7 @@ public class ColumnChartDefinition extends XAxisDefinition{
     public var gradientColor:uint;
     public var useChartColor:Boolean;
     public var columnSort:String = ChartDefinition.SORT_UNSORTED;
+    public var axisType:String = "Linear";
 
     public function ColumnChartDefinition() {
         super();

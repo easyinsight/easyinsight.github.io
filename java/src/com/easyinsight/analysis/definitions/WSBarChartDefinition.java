@@ -15,6 +15,15 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
     private int gradientColor;
     private boolean useChartColor;
     private String columnSort;
+    private String axisType;
+
+    public String getAxisType() {
+        return axisType;
+    }
+
+    public void setAxisType(String axisType) {
+        this.axisType = axisType;
+    }
 
     public int getGradientColor() {
         return gradientColor;
@@ -63,6 +72,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         gradientColor = (int) findNumberProperty(properties, "gradientColor", 0);
         useChartColor = findBooleanProperty(properties, "useChartColor", false);
         columnSort = findStringProperty(properties, "columnSort", "Unsorted");
+        axisType = findStringProperty(properties, "axisType", "Linear");
     }
 
     @Override
@@ -72,6 +82,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         properties.add(new ReportNumericProperty("gradientColor", gradientColor));
         properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
         properties.add(new ReportStringProperty("columnSort", columnSort));
+        properties.add(new ReportStringProperty("axisType", columnSort));
         return properties;
     }
 }
