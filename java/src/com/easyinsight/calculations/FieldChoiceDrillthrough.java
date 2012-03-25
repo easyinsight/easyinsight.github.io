@@ -16,9 +16,15 @@ public class FieldChoiceDrillthrough extends Function {
     public Value evaluate() {
         DrillthroughCalculationMetadata drillthroughCalculationMetadata = (DrillthroughCalculationMetadata) calculationMetadata;
         String filterName = minusQuotes(0);
-
+        String target = minusQuotes(1);
+        AnalysisItem targetItem = null;
+        for (AnalysisItem analysisItem : drillthroughCalculationMetadata.getAnalysisItems()) {
+            if (target.equals(analysisItem.toDisplay())) {
+                targetItem = analysisItem;
+            }
+        }
         AnalysisItemFilterDefinition analysisItemFilterDefinition = new AnalysisItemFilterDefinition();
-        analysisItemFilterDefinition.setTargetItem(drillthroughCalculationMetadata.getField());
+        analysisItemFilterDefinition.setTargetItem(targetItem);
         analysisItemFilterDefinition.setFilterName(filterName);
 
         drillthroughCalculationMetadata.getDrillThroughFilters().add(analysisItemFilterDefinition);
