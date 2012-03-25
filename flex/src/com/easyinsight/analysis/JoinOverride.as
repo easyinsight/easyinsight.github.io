@@ -21,6 +21,7 @@ public class JoinOverride {
     public var targetOuterJoin:Boolean;
     public var sourceJoinOriginal:Boolean;
     public var targetJoinOriginal:Boolean;
+    public var marmotScript:String;
 
     public function JoinOverride() {
     }
@@ -37,6 +38,7 @@ public class JoinOverride {
         connection.targetOuterJoin = targetOuterJoin;
         connection.sourceJoinOnOriginal = sourceJoinOriginal;
         connection.targetJoinOnOriginal = targetJoinOriginal;
+        connection.marmotScript = marmotScript;
         return connection;
     }
 
