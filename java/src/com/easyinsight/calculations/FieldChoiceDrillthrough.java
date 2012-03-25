@@ -32,6 +32,6 @@ public class FieldChoiceDrillthrough extends Function {
     }
 
     public int getParameterCount() {
-        return 1;
+        return 2;
     }
 }
