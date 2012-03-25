@@ -158,6 +158,8 @@ public class FunctionFactory {
             return new UniqueField();
         } else if (s.equals("case")) {
             return new CaseFunction();
+        } else if (s.equals("compositejoin")) {
+            return new CompositeJoin();
         } else {
             return null;
         }
