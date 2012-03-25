@@ -2,8 +2,10 @@ package com.easyinsight.datafeeds.batchbook;
 
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.logging.LogClass;
-import nu.xom.*;
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.Node;
+import nu.xom.Nodes;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,22 +56,18 @@ public class BatchbookCommunicationsCache extends BatchbookBaseSource {
                     tagBuilder.deleteCharAt(tagBuilder.length() - 1);
                 }
                 String tags = tagBuilder.toString();
-                try {
-                    Document parties = runRestRequest("/service/communications/" + id + "/participants.xml", httpClient, new Builder(), batchbookCompositeSource.getUrl(),
-                            batchbookCompositeSource);
-                    Nodes partyNodes = parties.query("/participants/participant");
-                    List<CommunicationContact> communicationContacts = new ArrayList<CommunicationContact>();
-                    for (int j = 0; j < partyNodes.size(); j++) {
-                        Node partyNode = partyNodes.get(j);
-                        String partyID = queryField(partyNode, "contact_id/text()");
-                        String role = queryField(partyNode, "role/text()");
-                        communicationContacts.add(new CommunicationContact(partyID, role));
-                    }
-                    Communication communication = new Communication(communicationContacts, subject, tags, type, date, id, body);
-                    communications.add(communication);
-                } catch (Exception e) {
-                    LogClass.info(e.getMessage());
-                }
+                /*Document parties = runRestRequest("/service/communications/" + id + "/participants.xml", httpClient, new Builder(), batchbookCompositeSource.getUrl(),
+                        batchbookCompositeSource);
+                Nodes partyNodes = parties.query("/participants/participant");
+                List<CommunicationContact> communicationContacts = new ArrayList<CommunicationContact>();
+                for (int j = 0; j < partyNodes.size(); j++) {
+                    Node partyNode = partyNodes.get(j);
+                    String partyID = queryField(partyNode, "contact_id/text()");
+                    String role = queryField(partyNode, "role/text()");
+                    communicationContacts.add(new CommunicationContact(partyID, role));
+                }*/
+                Communication communication = new Communication(new ArrayList<CommunicationContact>(), subject, tags, type, date, id, body);
+                communications.add(communication);
             }
         } catch (ReportException re) {
             throw re;
