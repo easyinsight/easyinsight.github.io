@@ -101,6 +101,7 @@
                 saveJoin.targetOuterJoin = connection.targetOuterJoin;
                 saveJoin.sourceJoinOriginal = connection.sourceJoinOnOriginal;
                 saveJoin.targetJoinOriginal = connection.targetJoinOnOriginal;
+                saveJoin.marmotScript = connection.marmotScript;
                 saveJoins.addItem(saveJoin);
             }
             customConnectionMap[String(selectedDataSource.id)] = saveJoins;
@@ -144,6 +145,7 @@
                     saveJoin.sourceName = connection.sourceFeedName;
                     saveJoin.targetName = connection.targetFeedName;
                     saveJoin.dataSourceID = selectedDataSource.id;
+                    saveJoin.marmotScript = connection.marmotScript;
                     saveJoins.addItem(saveJoin);
                 }
                 customConnectionMap[String(selectedDataSource.id)] = saveJoins;
