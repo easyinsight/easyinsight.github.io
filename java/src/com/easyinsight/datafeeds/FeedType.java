@@ -141,6 +141,11 @@ public class FeedType {
     public static final FeedType XERO_INVOICES = new FeedType(129);
 
     public static final FeedType HARVEST_USER_ASSIGNMENTS = new FeedType(130);
+    
+    public static final FeedType CUSTOM_REST_LIVE = new FeedType(131);
+    public static final FeedType TWILIO_COMPOSITE = new FeedType(132);
+    public static final FeedType TWILIO_SOMETHING = new FeedType(133);
+    public static final FeedType BATCHBOOK_COMMUNICATION_PARTIES = new FeedType(134);
 
     private int type;
 
