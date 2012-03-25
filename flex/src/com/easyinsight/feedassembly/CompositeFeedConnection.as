@@ -19,6 +19,7 @@ import com.easyinsight.analysis.Key;
         public var targetOuterJoin:Boolean;
         public var sourceJoinOnOriginal:Boolean;
         public var targetJoinOnOriginal:Boolean;
+        public var marmotScript:String;
 
 		public function CompositeFeedConnection()
 			{

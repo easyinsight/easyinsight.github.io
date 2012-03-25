@@ -16,6 +16,7 @@ import java.util.*;
 
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.*;
+import org.antlr.runtime.RecognitionException;
 import org.apache.jcs.JCS;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.DijkstraShortestPath;
@@ -116,20 +117,34 @@ public class CompositeFeed extends Feed {
         }
 
         List<CompositeFeedNode> compositeFeedNodes = this.compositeFeedNodes;
-        List<CompositeFeedConnection> connections;
+        List<IJoin> connections;
 
         if (insightRequestMetadata.getJoinOverrides() != null && insightRequestMetadata.getJoinOverrides().size() > 0) {
-            connections = new ArrayList<CompositeFeedConnection>();
+            connections = new ArrayList<IJoin>();
             for (JoinOverride joinOverride : insightRequestMetadata.getJoinOverrides()) {
                 if (joinOverride.getDataSourceID() == getFeedID()) {
-                    connections.add(new CompositeFeedConnection(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID(),
+                    if (joinOverride.getMarmotScript() != null && !"".equals(joinOverride.getMarmotScript())) {
+                        try {
+                            List<IJoin> newJoins = new ReportCalculation(joinOverride.getMarmotScript()).applyJoinCalculation();
+                            for (IJoin newJoin : newJoins) {
+                                CompositeFeedCompositeConnection connection = (CompositeFeedCompositeConnection) newJoin;
+                                connection.reconcile(compositeFeedNodes, getFields());
+                            }
+                            connections.addAll(newJoins);
+                        } catch (RecognitionException e) {
+                            throw new ReportException(new GenericReportFault(e.getMessage()));
+                        }
+                    } else {
+                        connections.add(new CompositeFeedConnection(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID(),
                             ((DerivedKey) joinOverride.getTargetItem().getKey()).getFeedID(), joinOverride.getSourceItem(),
                             joinOverride.getTargetItem(), joinOverride.getSourceName(), joinOverride.getTargetName(), joinOverride.isSourceOuterJoin(),
                             joinOverride.isTargetOuterJoin(), joinOverride.isSourceJoinOriginal(), joinOverride.isTargetJoinOriginal()));
+                    }
                 }
             }
         } else {
-            connections = this.connections;
+            connections = new ArrayList<IJoin>();
+            connections.addAll(this.connections);
         }
 
         Map<Long, QueryStateNode> queryNodeMap = new HashMap<Long, QueryStateNode>();
@@ -203,7 +218,7 @@ public class CompositeFeed extends Feed {
             throw new InvalidFieldsException(itemSet);
         }*/
 
-        for (CompositeFeedConnection connection : connections) {
+        for (IJoin connection : connections) {
             QueryStateNode source = queryNodeMap.get(connection.getSourceFeedID());
             QueryStateNode target = queryNodeMap.get(connection.getTargetFeedID());
             Edge edge = new Edge(connection);
@@ -317,19 +332,19 @@ public class CompositeFeed extends Feed {
         }
 
         QueryStateNode firstVertex = null;
-        Map<Long, Collection<CompositeFeedConnection>> conns = new HashMap<Long, Collection<CompositeFeedConnection>>();
-        Map<CompositeFeedConnection, FilterDefinition> filterMap = new HashMap<CompositeFeedConnection, FilterDefinition>();
-        for (CompositeFeedConnection connection : connections) {
+        Map<Long, Collection<IJoin>> conns = new HashMap<Long, Collection<IJoin>>();
+        Map<IJoin, FilterDefinition> filterMap = new HashMap<IJoin, FilterDefinition>();
+        for (IJoin connection : connections) {
             if (neededNodes.containsKey(connection.getSourceFeedID()) && neededNodes.containsKey(connection.getTargetFeedID())) {
-                Collection<CompositeFeedConnection> sourceConnList = conns.get(connection.getSourceFeedID());
+                Collection<IJoin> sourceConnList = conns.get(connection.getSourceFeedID());
                 if (sourceConnList == null) {
-                    sourceConnList = new ArrayList<CompositeFeedConnection>();
+                    sourceConnList = new ArrayList<IJoin>();
                     conns.put(connection.getSourceFeedID(), sourceConnList);
                 }
                 sourceConnList.add(connection);
-                Collection<CompositeFeedConnection> targetConnList = conns.get(connection.getTargetFeedID());
+                Collection<IJoin> targetConnList = conns.get(connection.getTargetFeedID());
                 if (targetConnList == null) {
-                    targetConnList = new ArrayList<CompositeFeedConnection>();
+                    targetConnList = new ArrayList<IJoin>();
                     conns.put(connection.getTargetFeedID(), targetConnList);
                 }
                 targetConnList.add(connection);
@@ -350,7 +365,6 @@ public class CompositeFeed extends Feed {
 
         List<String> auditStrings = new ArrayList<String>();
 
-
         Map<Long, QueryData> map = new HashMap<Long, QueryData>();
 
         for (QueryStateNode queryStateNode : neededNodes.values()) {
@@ -364,8 +378,8 @@ public class CompositeFeed extends Feed {
                 QueryData sourceQueryData = map.get(sourceNode.feedID);
                 QueryStateNode targetNode = reducedGraph.getEdgeTarget(last);
                 if (sourceQueryData.dataSet == null) {
-                    Collection<CompositeFeedConnection> myConnections = conns.get(sourceNode.feedID);
-                    for (CompositeFeedConnection myConn : myConnections) {
+                    Collection<IJoin> myConnections = conns.get(sourceNode.feedID);
+                    for (IJoin myConn : myConnections) {
                         FilterDefinition filter = filterMap.get(myConn);
                         if (filter != null) {
                             if (insightRequestMetadata.isOptimized()) {
@@ -374,10 +388,12 @@ public class CompositeFeed extends Feed {
                         }
                     }
                     sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
+                    /*auditBuilder.append("<p>" + sourceNode.dataSourceName + " original data set</p>");
+                    auditBuilder.append(ExportService.dataSetToHTMLTable(sourceQueryData.neededItems, sourceQueryData.dataSet, conn, insightRequestMetadata));*/
                     if (insightRequestMetadata.isOptimized()) {
-                        for (CompositeFeedConnection myConn : myConnections) {
+                        for (IJoin myConn : myConnections) {
                             FilterDefinition filter = filterMap.get(myConn);
-                            if (filter == null) {
+                            if (filter == null && myConn instanceof CompositeFeedConnection) {
                                 QueryStateNode joinTargetNode;
                                 if (sourceNode.feedID == myConn.getSourceFeedID()) {
                                     joinTargetNode = queryNodeMap.get(myConn.getTargetFeedID());
@@ -385,7 +401,7 @@ public class CompositeFeed extends Feed {
                                     joinTargetNode = queryNodeMap.get(myConn.getSourceFeedID());
                                 }
                                 //System.out.println("defining filter between " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
-                                FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, joinTargetNode, myConn);
+                                FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, joinTargetNode, (CompositeFeedConnection) myConn);
                                 filterMap.put(myConn, joinFilter);
                             }
                         }
@@ -405,8 +421,8 @@ public class CompositeFeed extends Feed {
                     targetQueryData = swapData;
                 }
                 FilterDefinition joinFilter = null;
-                if (insightRequestMetadata.isOptimized()) {
-                    joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, last.connection);
+                if (insightRequestMetadata.isOptimized() && last.connection instanceof CompositeFeedConnection) {
+                    joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, (CompositeFeedConnection) last.connection);
                 }
                 if (!swapped) {
                     if (targetQueryData.dataSet == null) {
@@ -424,7 +440,6 @@ public class CompositeFeed extends Feed {
                     }
                 }
                 System.out.println("joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName);
-                //System.out.println("joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName);
                 MergeAudit mergeAudit;
                 if (last.connection.isTargetJoinOnOriginal()) {
                     mergeAudit = last.connection.merge(sourceQueryData.dataSet, targetNode.originalDataSet,
@@ -436,10 +451,13 @@ public class CompositeFeed extends Feed {
                         sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID);
                 }
                 dataSet = mergeAudit.getDataSet();
+
                 auditStrings.addAll(mergeAudit.getMergeStrings());
                 sourceQueryData.dataSet = dataSet;
                 sourceQueryData.neededItems.addAll(targetQueryData.neededItems);
                 sourceQueryData.ids.addAll(targetQueryData.ids);
+                /*auditBuilder.append("<h1>" + "After joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName + "</h1>");
+                auditBuilder.append(ExportService.dataSetToHTMLTable(sourceQueryData.neededItems, dataSet, conn, insightRequestMetadata));*/
                 for (Long id : sourceQueryData.ids) {
                     map.put(id, sourceQueryData);
                 }
@@ -451,8 +469,8 @@ public class CompositeFeed extends Feed {
                 QueryStateNode sourceNode = iter.next();
                 QueryData sourceQueryData = map.get(sourceNode.feedID);
                 if (sourceQueryData.dataSet == null) {
-                    Collection<CompositeFeedConnection> myConnections = conns.get(sourceNode.feedID);
-                    for (CompositeFeedConnection myConn : myConnections) {
+                    Collection<IJoin> myConnections = conns.get(sourceNode.feedID);
+                    for (IJoin myConn : myConnections) {
                         FilterDefinition filter = filterMap.get(myConn);
                         if (filter != null) {
                             if (insightRequestMetadata.isOptimized()) {
@@ -462,9 +480,9 @@ public class CompositeFeed extends Feed {
                     }
                     sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
                     if (insightRequestMetadata.isOptimized()) {
-                        for (CompositeFeedConnection myConn : myConnections) {
+                        for (IJoin myConn : myConnections) {
                             FilterDefinition filter = filterMap.get(myConn);
-                            if (filter == null) {
+                            if (filter == null && myConn instanceof CompositeFeedConnection) {
                                 QueryStateNode targetNode;
                                 if (sourceNode.feedID == myConn.getSourceFeedID()) {
                                     targetNode = queryNodeMap.get(myConn.getTargetFeedID());
@@ -472,7 +490,7 @@ public class CompositeFeed extends Feed {
                                     targetNode = queryNodeMap.get(myConn.getSourceFeedID());
                                 }
                                 //System.out.println("defining filter between " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
-                                FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, myConn);
+                                FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, (CompositeFeedConnection) myConn);
                                 filterMap.put(myConn, joinFilter);
                             }
                         }
@@ -502,8 +520,8 @@ public class CompositeFeed extends Feed {
                         targetQueryData = swapData;
                     }
                     FilterDefinition joinFilter = null;
-                    if (insightRequestMetadata.isOptimized()) {
-                        joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, last.connection);
+                    if (insightRequestMetadata.isOptimized() && last.connection instanceof CompositeFeedConnection) {
+                        joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, (CompositeFeedConnection) last.connection);
                     }
                     if (!swapped) {
                         if (targetQueryData.dataSet == null) {
@@ -538,6 +556,13 @@ public class CompositeFeed extends Feed {
             }
         }
         dataSet.setAudits(auditStrings);
+        /*try {
+            new SendGridEmail().sendEmail("jboe@easy-insight.com", "Data Source Audit", auditBuilder.toString(), "jboe@easy-insight.com", true, "Audit Test");
+        } catch (MessagingException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }*/
         if (!insightRequestMetadata.isOptimized()) {
             if (insightRequestMetadata.isLookupTableAggregate()) {
                 CompositeReportFinishPipeline pipeline = new CompositeReportFinishPipeline();
@@ -732,9 +757,9 @@ public class CompositeFeed extends Feed {
     }
 
     private static class Edge {
-        CompositeFeedConnection connection;
+        IJoin connection;
 
-        private Edge(CompositeFeedConnection connection) {
+        private Edge(IJoin connection) {
             this.connection = connection;
         }
     }

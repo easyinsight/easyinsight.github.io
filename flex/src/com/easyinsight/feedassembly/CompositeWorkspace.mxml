@@ -489,14 +489,6 @@
                 </mx:DataGrid>
             </mx:VBox>
         </mx:HBox>
-
-
-        <!--<mx:HBox paddingTop="5" paddingLeft="5" horizontalAlign="center" width="100%">
-            <mx:TextArea text="To join two data sources, use ctrl or cmd-select to select the two data sources, then right click and select Connect. Right click on joins to describe, test, or delete."
-                         borderStyle="none"
-                backgroundAlpha="0" editable="false" selectable="false" height="40" width="600" color="#000000" fontSize="12"/>
-            <mx:Text fontSize="14" id="failureText" visible="false"/>
-        </mx:HBox>-->
         <adobe:SpringGraph id="s" backgroundColor="#777777" lineColor="#6666ff"
                            edgeRenderer="{testEdgeRenderer}" itemRenderer="{new GraphFeedNodeFactory()}"
                            width="100%" height="100%" autoFit="true" dataProvider="{graph}"/>

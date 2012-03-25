@@ -20,7 +20,7 @@ import java.util.*;
  * Date: Jan 28, 2008
  * Time: 6:47:05 PM
  */
-public class CompositeFeedConnection implements Serializable {
+public class CompositeFeedConnection implements Serializable, IJoin {
     private Long sourceFeedID;
     private Long targetFeedID;
     private Key sourceJoin;

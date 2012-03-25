@@ -30,7 +30,11 @@
             rightJoin = _existingConnection.targetOuterJoin;
             leftOriginal = _existingConnection.sourceJoinOnOriginal;
             rightOriginal = _existingConnection.targetJoinOnOriginal;
+            marmotScript = _existingConnection.marmotScript;
         }
+        
+        [Bindable]
+        private var marmotScript:String;
 
         [Bindable]
         private var index:int;
@@ -79,6 +83,7 @@
             _existingConnection.targetOuterJoin = rightJoinCheckbox.selected;
             _existingConnection.sourceJoinOnOriginal = leftMatchCheckbox.selected;
             _existingConnection.targetJoinOnOriginal = rightMatchCheckbox.selected;
+            _existingConnection.marmotScript = marmotScriptArea.text;
             dispatchEvent(new JoinEditEvent(_existingConnection));
             PopUpManager.removePopUp(this);
         }
@@ -113,6 +118,12 @@
             <mx:CheckBox label="Only Keep Matching Rows From Target" id="rightJoinCheckbox" selected="{rightJoin}"/>
             <mx:CheckBox label="Match Source Against Original Data" id="leftMatchCheckbox" selected="{leftOriginal}"/>
             <mx:CheckBox label="Match Target Against Original Data" id="rightMatchCheckbox" selected="{rightOriginal}"/>
+            <mx:Form>
+                <mx:FormItem label="Code">
+                    <mx:TextArea width="300" height="50" text="{marmotScript}" editable="true" id="marmotScriptArea" borderStyle="inset" borderThickness="1"/>
+                </mx:FormItem>
+            </mx:Form>
+            
         </mx:VBox>
     </mx:ViewStack>
     <mx:HBox width="100%" horizontalAlign="center">

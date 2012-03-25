@@ -38,6 +38,17 @@ public class JoinOverride implements Cloneable, Serializable {
     @Column(name="data_source_id")
     private Long dataSourceID;
 
+    @Column(name="marmot_script")
+    private String marmotScript;
+
+    public String getMarmotScript() {
+        return marmotScript;
+    }
+
+    public void setMarmotScript(String marmotScript) {
+        this.marmotScript = marmotScript;
+    }
+
     public boolean isSourceJoinOriginal() {
         return sourceJoinOriginal;
     }

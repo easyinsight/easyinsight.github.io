@@ -8,6 +8,7 @@ import com.easyinsight.core.NamedKey;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
+import com.easyinsight.datafeeds.IJoin;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.pipeline.IComponent;
@@ -146,6 +147,30 @@ public class ReportCalculation {
         } else {
             return null;
         }
+    }
+
+    public List<IJoin> applyJoinCalculation() throws RecognitionException {
+        CompositeCalculationMetadata compositeCalculationMetadata = new CompositeCalculationMetadata();
+        ICalculationTreeVisitor visitor;
+        CalculationsParser.expr_return ret;
+        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
+        CommonTokenStream tokes = new CommonTokenStream();
+        tokes.setTokenSource(lexer);
+        CalculationsParser parser = new CalculationsParser(tokes);
+        parser.setTreeAdaptor(new NodeFactory());
+        ret = parser.expr();
+        CalculationTreeNode calculationTreeNode = (CalculationTreeNode) ret.getTree();
+        for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
+            if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
+                calculationTreeNode.deleteChild(i);
+                break;
+            }
+        }
+        visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory());
+        calculationTreeNode.accept(visitor);
+        ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, compositeCalculationMetadata);
+        calculationTreeNode.accept(rowVisitor);
+        return compositeCalculationMetadata.getJoins();
     }
 
     public List<FilterDefinition> apply(Map<String, Object> data, List<AnalysisItem> analysisItems, WSAnalysisDefinition report,
