@@ -160,6 +160,8 @@ public class FunctionFactory {
             return new CaseFunction();
         } else if (s.equals("compositejoin")) {
             return new CompositeJoin();
+        } else if (s.equals("fieldassign")) {
+            return new FieldAssign();
         } else {
             return null;
         }

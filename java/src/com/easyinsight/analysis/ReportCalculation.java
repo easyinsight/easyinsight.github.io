@@ -8,6 +8,8 @@ import com.easyinsight.core.NamedKey;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.IJoin;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.pipeline.CleanupComponent;
@@ -174,11 +176,13 @@ public class ReportCalculation {
     }
 
     public List<FilterDefinition> apply(Map<String, Object> data, List<AnalysisItem> analysisItems, WSAnalysisDefinition report,
-                                        AnalysisItem field) throws RecognitionException {
+                                        AnalysisItem field) throws RecognitionException, SQLException {
         DrillthroughCalculationMetadata drillthroughCalculationMetadata = new DrillthroughCalculationMetadata();
         drillthroughCalculationMetadata.setData(data);
         drillthroughCalculationMetadata.setField(field);
         drillthroughCalculationMetadata.setReport(report);
+        FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID());
+        drillthroughCalculationMetadata.setDataSourceFields(dataSource.getFields());
         drillthroughCalculationMetadata.setAnalysisItems(analysisItems);
         ICalculationTreeVisitor visitor;
         CalculationsParser.expr_return ret;

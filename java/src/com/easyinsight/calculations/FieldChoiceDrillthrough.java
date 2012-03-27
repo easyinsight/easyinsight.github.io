@@ -18,7 +18,7 @@ public class FieldChoiceDrillthrough extends Function {
         String filterName = minusQuotes(0);
         String target = minusQuotes(1);
         AnalysisItem targetItem = null;
-        for (AnalysisItem analysisItem : drillthroughCalculationMetadata.getAnalysisItems()) {
+        for (AnalysisItem analysisItem : drillthroughCalculationMetadata.getDataSourceFields()) {
             if (target.equals(analysisItem.toDisplay())) {
                 targetItem = analysisItem;
             }
