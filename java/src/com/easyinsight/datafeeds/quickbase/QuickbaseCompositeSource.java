@@ -1,10 +1,15 @@
 package com.easyinsight.datafeeds.quickbase;
 
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.CompositeFeedConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
@@ -44,6 +49,34 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
 
     private boolean supportIndex;
     private boolean preserveCredentials;
+
+    @Override
+    public void beforeSave(EIConnection conn) throws Exception {
+        Map<Long, FeedDefinition> childMap = new HashMap<Long, FeedDefinition>();
+        for (AnalysisItem analysisItem : getFields()) {
+            Key key = analysisItem.getKey();
+            //if (key.toBaseKey().indexed()) {
+            if (key instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                FeedDefinition child = childMap.get(derivedKey.getFeedID());
+                if (child == null) {
+                    child = new FeedStorage().getFeedDefinitionData(derivedKey.getFeedID(), conn);
+                    childMap.put(derivedKey.getFeedID(), child);
+                }
+                for (AnalysisItem item : child.getFields()) {
+                    if (item.getKey().getKeyID() == derivedKey.getParentKey().getKeyID()) {
+                        NamedKey namedKey = (NamedKey) item.getKey().toBaseKey();
+                        namedKey.setIndexed(key.toBaseKey().indexed());
+                    }
+                }
+            }
+            //}
+        }
+        for (FeedDefinition dataSource : childMap.values()) {
+            new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
+        }
+        super.beforeSave(conn);
+    }
 
     public boolean fullNightlyRefresh() {
         return true;

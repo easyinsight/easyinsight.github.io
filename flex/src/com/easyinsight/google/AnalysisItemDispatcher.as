@@ -21,7 +21,7 @@ public class AnalysisItemDispatcher extends EventDispatcher {
     public function AnalysisItemDispatcher(analysisItem:AnalysisItem) {
         this.analysisItem = analysisItem;
         var namedKey:NamedKey = analysisItem.key.toBaseKey() as NamedKey;
-        this.indexed = namedKey.indexed;
+        _indexed = namedKey.indexed;
     }
     
     public function get display():String {
@@ -36,6 +36,8 @@ public class AnalysisItemDispatcher extends EventDispatcher {
     public function set indexed(value:Boolean):void {
         if (_indexed == value) return;
         _indexed = value;
+        var namedKey:NamedKey = analysisItem.key.toBaseKey() as NamedKey;
+        namedKey.indexed = value;
         dispatchEvent(new Event("indexedChanged"));
     }
 }

@@ -52,7 +52,6 @@
         private var dataSources:ArrayCollection;
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-
             for each (var item:AnalysisItem in feedDefinition.fields) {
                 for each (var field:AnalysisItemDispatcher in _fields) {
                     if (item.analysisItemID == field.analysisItem.analysisItemID) {
