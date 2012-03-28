@@ -192,7 +192,7 @@ public class DataService {
                 }
             }
             for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-                if (analysisItem.getReportFieldExtension() != null) {
+                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
                     TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
                     AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
                     if (dateDimension != null) {
@@ -802,9 +802,9 @@ public class DataService {
             System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn);
-            if (analysisDefinition.isLogReport()) {
+            /*if (analysisDefinition.isLogReport()) {
                 new SendGridEmail().sendEmail("jboe@easy-insight.com", "Data Source Audit", reportRetrieval.getPipeline().toLogString(), "jboe@easy-insight.com", true, "Audit Test");
-            }
+            }*/
             results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             results.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
             return results;
