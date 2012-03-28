@@ -3,11 +3,11 @@
          height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" horizontalScrollPolicy="off"
         verticalGap="0">
     <mx:Script><![CDATA[
+        import com.easyinsight.filtering.AnalysisItemFilterDefinition;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.skin.ApplicationSkin;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.core.Container;
         import mx.core.UIComponent;
         import mx.events.FlexEvent;
@@ -60,7 +60,7 @@
                 setStyle("paddingBottom", 0);
             }
 
-            if (ApplicationSkin.instance().reportHeader) {
+            if (ApplicationSkin.instance().reportHeader && dashboard.borderThickness > 0) {
                 dashboardStyleArea.setStyle("backgroundColor", ApplicationSkin.instance().headerBackgroundColor);
             } else {
                 dashboardStyleArea.setStyle("backgroundColor", dashboard.backgroundColor);
@@ -77,18 +77,42 @@
                 dashboardStyleArea.setStyle("borderColor", dashboard.borderColor);
                 dashboardStyleArea.setStyle("dropShadowEnabled", true);
             }
-            var filterDefinitions:ArrayCollection = dashboard.filters;
+
+            var fObj:Object = new Object();
+            var paramObj:Object = new Object();
             if (_initialFilters != null) {
-                filterDefinitions.addAll(_initialFilters);
+                for each (var eFilter:FilterDefinition in _initialFilters) {
+                    if (eFilter.getType() == FilterDefinition.ANALYSIS_ITEM) {
+                        paramObj[eFilter.filterName] = eFilter;
+                    } else {
+                        fObj[eFilter.qualifiedName()] = eFilter;
+                    }
+                }
             }
-            this.filterDefinitions = filterDefinitions;
+            var toUse:ArrayCollection = new ArrayCollection();
+            for each (var filter:FilterDefinition in dashboard.filters) {
+                if (filter.getType() == FilterDefinition.ANALYSIS_ITEM) {
+                    var aFilter:AnalysisItemFilterDefinition = paramObj[filter.filterName];
+                    if (aFilter != null) {
+                        var ourFilter:AnalysisItemFilterDefinition = filter as AnalysisItemFilterDefinition;
+                        ourFilter.targetItem = aFilter.targetItem;
+                    }
+                    toUse.addItem(filter);
+                } else {
+                    var existing:FilterDefinition = fObj[filter.qualifiedName()];
+                    if (existing) {
+                        toUse.addItem(existing);
+                        existing.showOnReportView = filter.showOnReportView;
+                    } else {
+                        toUse.addItem(filter);
+                    }
+                }
+            }
             
             var visibleCount:int = 0;
-            if (dashboard.filters != null) {
-                for each (var filter:FilterDefinition in dashboard.filters) {
-                    if (filter.showOnReportView) {
-                        visibleCount++;
-                    }
+            for each (var visibleFilter:FilterDefinition in toUse) {
+                if (visibleFilter.showOnReportView) {
+                    visibleCount++;
                 }
             }
 
@@ -108,7 +132,7 @@
             Container(dashboardStyleArea).horizontalScrollPolicy = "off";
             UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent):void {
                 var filterMap:Object = new Object();
-                filterMap["master"] = dashboard.filters;
+                filterMap["master"] = toUse;
                 rootView.updateAdditionalFilters(filterMap);
                 rootView.initialRetrieve();
             });
