@@ -147,6 +147,11 @@ public class FeedType {
     public static final FeedType TWILIO_SOMETHING = new FeedType(133);
     public static final FeedType BATCHBOOK_COMMUNICATION_PARTIES = new FeedType(134);
 
+    public static final FeedType BASECAMP_NEXT_COMPOSITE = new FeedType(135);
+    public static final FeedType BASECAMP_NEXT_PROJECTS = new FeedType(136);
+    public static final FeedType BASECAMP_NEXT_TODOS = new FeedType(137);
+    public static final FeedType BASECAMP_NEXT_CALENDAR = new FeedType(138);
+
     private int type;
 
     public FeedType() {

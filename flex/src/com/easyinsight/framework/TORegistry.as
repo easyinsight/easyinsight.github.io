@@ -78,6 +78,7 @@ import com.easyinsight.customupload.XSSFExcelUploadFormat;
 import com.easyinsight.customupload.wizard.FieldUploadInfo;
 import com.easyinsight.customupload.wizard.FlatFileUploadContext;
 import com.easyinsight.datasources.BaseCampDataSource;
+import com.easyinsight.datasources.BasecampNextCompositeSource;
 import com.easyinsight.datasources.BatchbookDataSource;
 import com.easyinsight.datasources.CloudWatchDataSource;
 import com.easyinsight.datasources.ConstantContactDataSource;
@@ -216,6 +217,7 @@ public class TORegistry {
         var constantContact:ConstantContactDataSource;
         var campaignMonitor:CampaignMonitorDataSourceCreation;
         var qbSource:QuickbaseCompositeSource;
+        var basecampNextSource:BasecampNextCompositeSource;
         var clearDBSource:ClearDBCompositeSource;
         var clearDBDataSource:ClearDBDataSource;
         var connection:CompositeFeedConnection;
