@@ -116,6 +116,8 @@
                 }
             }
 
+            this.filterDefinitions = toUse;
+
             filterIndex = (visibleCount > 0) ? 1 : 0;
 
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
