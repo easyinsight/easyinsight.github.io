@@ -112,6 +112,7 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
 
     @Override
     protected void refreshDone() {
+        super.refreshDone();
         batchbookCommunicationsCache = null;
     }
 

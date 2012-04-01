@@ -34,7 +34,7 @@ public class BatchbookCommunicationsCache extends BatchbookBaseSource {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
         HttpClient httpClient = getHttpClient(batchbookCompositeSource.getBbApiKey(), "");
         try {
-            Document deals = runRestRequest("/service/communications.xml?limit=5000", httpClient, new Builder(), batchbookCompositeSource.getUrl(), batchbookCompositeSource);
+            Document deals = runRestRequest("/service/communications.xml?limit=5000&include_participants=true", httpClient, new Builder(), batchbookCompositeSource.getUrl(), batchbookCompositeSource);
             Nodes dealNodes = deals.query("/communications/communication");
             for (int i = 0; i < dealNodes.size(); i++) {
                 Node dealNode = dealNodes.get(i);
@@ -57,16 +57,16 @@ public class BatchbookCommunicationsCache extends BatchbookBaseSource {
                 }
                 String tags = tagBuilder.toString();
                 /*Document parties = runRestRequest("/service/communications/" + id + "/participants.xml", httpClient, new Builder(), batchbookCompositeSource.getUrl(),
-                        batchbookCompositeSource);
-                Nodes partyNodes = parties.query("/participants/participant");
+                        batchbookCompositeSource);*/
+                Nodes partyNodes = dealNode.query("participants/participant");
                 List<CommunicationContact> communicationContacts = new ArrayList<CommunicationContact>();
                 for (int j = 0; j < partyNodes.size(); j++) {
                     Node partyNode = partyNodes.get(j);
                     String partyID = queryField(partyNode, "contact_id/text()");
                     String role = queryField(partyNode, "role/text()");
                     communicationContacts.add(new CommunicationContact(partyID, role));
-                }*/
-                Communication communication = new Communication(new ArrayList<CommunicationContact>(), subject, tags, type, date, id, body);
+                }
+                Communication communication = new Communication(communicationContacts, subject, tags, type, date, id, body);
                 communications.add(communication);
             }
         } catch (ReportException re) {
