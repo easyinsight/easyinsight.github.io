@@ -9,9 +9,9 @@ import com.easyinsight.core.Value;
  */
 public class LabelJoin extends Function {
     public Value evaluate() {
-        String label = minusQuotes(0);
+        /*String label = minusQuotes(0);
         CompositeCalculationMetadata compositeCalculationMetadata = (CompositeCalculationMetadata) calculationMetadata;
-        compositeCalculationMetadata.getStartConnection().setBlockLabel(label);
+        compositeCalculationMetadata.getStartConnection().setBlockLabel(label);*/
         return null;
     }
 
