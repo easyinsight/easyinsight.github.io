@@ -16,7 +16,7 @@ package com.easyinsight.analysis
 		{
 			super();
             //setStyle("fontSize", 13);
-            setStyle("fontFamily", "Lucida Grande");
+            setStyle("fontFamily", "Tahoma");
 		}
 
         public function set eiColor(value:uint):void {

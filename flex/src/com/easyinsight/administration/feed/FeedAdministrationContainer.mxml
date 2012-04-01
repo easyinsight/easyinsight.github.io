@@ -9,8 +9,10 @@
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisChangedEvent;
+        import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.SavePromptWindow;
+        import com.easyinsight.code.DataSourceMarmotScriptWindow;
         import com.easyinsight.code.MarmotScriptEvent;
         import com.easyinsight.code.MarmotScriptWindow;
         import com.easyinsight.datasources.DataSourceInfo;
@@ -195,8 +197,9 @@
         private var concreteFieldsEditable:Boolean = false;
 
         private function editCode():void {
-            var window:MarmotScriptWindow = new MarmotScriptWindow();
+            var window:DataSourceMarmotScriptWindow = new DataSourceMarmotScriptWindow();
             window.script = feedDefinition.marmotScript;
+            window.afterScript = feedDefinition.refreshMarmotScript;
             window.addEventListener(MarmotScriptEvent.SAVE_SCRIPT, onScript, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
@@ -204,6 +207,7 @@
 
         private function onScript(event:MarmotScriptEvent):void {
             feedDefinition.marmotScript = event.script;
+            feedDefinition.refreshMarmotScript = event.afterScript;
         }
 
         public function cleanup():void {

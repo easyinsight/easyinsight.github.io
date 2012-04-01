@@ -22,7 +22,13 @@ public class RunReportServlet extends APIServlet {
     @Override
     protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
         String reportIDString = request.getParameter("reportID");
-        InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossibleByID(Long.parseLong(reportIDString));
+        InsightResponse insightResponse;
+        try {
+            long reportID = Long.parseLong(reportIDString);
+            insightResponse = new AnalysisService().openAnalysisIfPossibleByID(reportID);
+        } catch (NumberFormatException e) {
+            insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
+        }
         SecurityUtil.authorizeInsight(insightResponse.getInsightDescriptor().getId());
         WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
@@ -37,6 +43,10 @@ public class RunReportServlet extends APIServlet {
                 return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
             }
         });
+        result.append("\t<reportinfo>\r\n");
+        result.append("\t\t<name>").append(report.getName()).append("</name>\r\n");
+        result.append("\t\t<reporttype>").append(report.getReportType()).append("</reporttype>\r\n");
+        result.append("\t</reportinfo>\r\n");
         result.append("\t<rows>\r\n");
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         for (com.easyinsight.analysis.ListRow listRow : results.getRows()) {
@@ -60,8 +70,6 @@ public class RunReportServlet extends APIServlet {
             result.append("\t\t</row>\r\n");
         }
         result.append("\t</rows>\r\n");
-
-        System.out.println(result.toString());
         return new ResponseInfo(ResponseInfo.ALL_GOOD, result.toString());
     }
 }

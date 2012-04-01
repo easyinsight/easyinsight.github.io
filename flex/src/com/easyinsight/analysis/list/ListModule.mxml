@@ -89,8 +89,13 @@
         private var hits:ArrayCollection = new ArrayCollection();
 
         private function rowNumber(item:Object, iCol:int):String {
-            var index:int = dataGrid.dataProvider.getItemIndex(item) + 1;
-            return String(index);
+            try {
+                var index:int = dataGrid.dataProvider.getItemIndex(item) + 1;
+                return String(index);
+            } catch (e:Error) {
+
+            }
+            return "0";
         }
 
         private function onKeywordState(event:FlexEvent):void {
@@ -319,10 +324,13 @@
                     var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                     if (explicitWidth) columnHeaderObject.width = myHeader.width;
                     columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending, columnHeaderObject);
+                    if (listDef.multiLineHeaders) {
+                        columnHeaderObject.headerWordWrap = true;
+                    }
                     columnHeaderObject.headerText = myHeader.display;
                     columnHeaderObject.dataField = myHeader.qualifiedName();
                     var headerFactory:ClassFactory = new ClassFactory(ListViewHeaderRenderer);
-                    headerFactory.properties = { eiColor: def.headerTextColor };
+                    headerFactory.properties = { eiColor:def.headerTextColor };
                     columnHeaderObject.headerRenderer = headerFactory;
                     var factory:ClassFactory = new ClassFactory(getCellRendererClass(myHeader, myLookupTable));
                     var ext:TextReportFieldExtension = myHeader.reportFieldExtension as TextReportFieldExtension;
@@ -333,9 +341,9 @@
                         }
                     }
                     if (myLookupTable == null) {
-                        factory.properties = { analysisItem: myHeader, report: def, rolloverIcon: listDef.rolloverIcon ? handIcon : null };
+                        factory.properties = { analysisItem:myHeader, report:def, rolloverIcon:listDef.rolloverIcon ? handIcon : null };
                     } else {
-                        factory.properties = { analysisItem: myHeader, lookupTable: myLookupTable, pairMap: pairMap };
+                        factory.properties = { analysisItem:myHeader, lookupTable:myLookupTable, pairMap:pairMap };
                     }
                     columnHeaderObject.itemRenderer = factory;
                     columns[k + initColumn] = columnHeaderObject;
@@ -484,27 +492,27 @@
         }
 
         /*private function dragEnterHandler(event:DragEvent):void {
-            var newItem:AnalysisItemWrapper = event.dragSource.dataForFormat("treeDataGridItems")[0];
-            if (newItem.isAnalysisItem()) {
-                var targetGrid:AdvancedDataGrid = AdvancedDataGrid(event.currentTarget);
+         var newItem:AnalysisItemWrapper = event.dragSource.dataForFormat("treeDataGridItems")[0];
+         if (newItem.isAnalysisItem()) {
+         var targetGrid:AdvancedDataGrid = AdvancedDataGrid(event.currentTarget);
 
-                DragManager.acceptDragDrop(targetGrid);
-            }
-        }
+         DragManager.acceptDragDrop(targetGrid);
+         }
+         }
 
-        private function dragDropHandler(event:DragEvent):void {
-            event.preventDefault();
-            var newItem:AnalysisItemWrapper = event.dragSource.dataForFormat("treeDataGridItems")[0];
-            if (newItem.isAnalysisItem()) {
-                var targetGrid:AdvancedDataGrid = AdvancedDataGrid(event.currentTarget);
+         private function dragDropHandler(event:DragEvent):void {
+         event.preventDefault();
+         var newItem:AnalysisItemWrapper = event.dragSource.dataForFormat("treeDataGridItems")[0];
+         if (newItem.isAnalysisItem()) {
+         var targetGrid:AdvancedDataGrid = AdvancedDataGrid(event.currentTarget);
 
-                dispatchEvent(new ReportRendererEvent(ReportRendererEvent.ADD_ITEM, newItem.analysisItem));
-            }
-        }
+         dispatchEvent(new ReportRendererEvent(ReportRendererEvent.ADD_ITEM, newItem.analysisItem));
+         }
+         }
 
-        protected function dragOverHandler(event:DragEvent):void {
-            DragManager.showFeedback(DragManager.MOVE);
-        }*/
+         protected function dragOverHandler(event:DragEvent):void {
+         DragManager.showFeedback(DragManager.MOVE);
+         }*/
 
         protected function dragExitHandler(event:DragEvent):void {
 
@@ -588,7 +596,8 @@
         private var stackIndex:int = 0;
 
         public function clearContents():void {
-        }]]></mx:Script>
+        }
+        ]]></mx:Script>
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="updateLookupTable"/>
     </mx:RemoteObject>

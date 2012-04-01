@@ -258,7 +258,20 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     }
 
     protected void refreshDone() {
-
+        if (getRefreshMarmotScript() != null) {
+            StringTokenizer toker = new StringTokenizer(getRefreshMarmotScript(), "\r\n");
+            while (toker.hasMoreTokens()) {
+                String line = toker.nextToken();
+                try {
+                    new ReportCalculation(line).apply();
+                } catch (ReportException re) {
+                    throw re;
+                } catch (Exception e) {
+                    LogClass.error(e);
+                    throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of data source code " + line + ".", null));
+                }
+            }
+        }
     }
 
     public String retrievePassword() {

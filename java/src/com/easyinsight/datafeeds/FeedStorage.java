@@ -7,7 +7,6 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.userupload.*;
-import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
@@ -82,8 +81,8 @@ public class FeedStorage {
                 "CREATE_DATE, UPDATE_DATE, DESCRIPTION," +
                 "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, " +
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, INHERIT_ACCOUNT_API_SETTINGS," +
-                "CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE, last_refresh_start, marmotscript, concrete_fields_editable) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE, last_refresh_start, marmotscript, concrete_fields_editable, refresh_marmot_script) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -121,7 +120,8 @@ public class FeedStorage {
             insertDataFeedStmt.setTimestamp(i++, new Timestamp(feedDefinition.getLastRefreshStart().getTime()));
         }
         insertDataFeedStmt.setString(i++, feedDefinition.getMarmotScript());
-        insertDataFeedStmt.setBoolean(i, feedDefinition.isConcreteFieldsEditable());
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.isConcreteFieldsEditable());
+        insertDataFeedStmt.setString(i, feedDefinition.getRefreshMarmotScript());
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
         feedDefinition.setDataFeedID(feedID);
@@ -529,7 +529,8 @@ public class FeedStorage {
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, " +
                 "FEED_SIZE = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
                 "API_KEY = ?, unchecked_api_enabled = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ?," +
-                "CREATE_DATE = ?, UPDATE_DATE = ?, ACCOUNT_VISIBLE = ?, LAST_REFRESH_START = ?, MARMOTSCRIPT = ?, CONCRETE_FIELDS_EDITABLE = ? WHERE DATA_FEED_ID = ?");
+                "CREATE_DATE = ?, UPDATE_DATE = ?, ACCOUNT_VISIBLE = ?, LAST_REFRESH_START = ?, MARMOTSCRIPT = ?, CONCRETE_FIELDS_EDITABLE = ?, REFRESH_MARMOT_SCRIPT = ? " +
+                "WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         int i = 1;
         updateDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -559,6 +560,7 @@ public class FeedStorage {
         }
         updateDataFeedStmt.setString(i++, feedDefinition.getMarmotScript());
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isConcreteFieldsEditable());
+        updateDataFeedStmt.setString(i++, feedDefinition.getRefreshMarmotScript());
         updateDataFeedStmt.setLong(i, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
@@ -614,7 +616,7 @@ public class FeedStorage {
         PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, CREATE_DATE," +
                 "UPDATE_DATE, FEED_SIZE," +
                 "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, API_KEY, unchecked_api_enabled, " +
-                "VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, LAST_REFRESH_START, MARMOTSCRIPT, CONCRETE_FIELDS_EDITABLE " +
+                "VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, LAST_REFRESH_START, MARMOTSCRIPT, CONCRETE_FIELDS_EDITABLE, refresh_marmot_script " +
                 "FROM DATA_FEED WHERE " +
                 "DATA_FEED_ID = ?");
         queryFeedStmt.setLong(1, identifier);
@@ -658,7 +660,8 @@ public class FeedStorage {
                 feedDefinition.setLastRefreshStart(new Date(lastRefreshTime.getTime()));
             }
             feedDefinition.setMarmotScript(rs.getString(i++));
-            feedDefinition.setConcreteFieldsEditable(rs.getBoolean(i));
+            feedDefinition.setConcreteFieldsEditable(rs.getBoolean(i++));
+            feedDefinition.setRefreshMarmotScript(rs.getString(i));
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
             feedDefinition.customLoad(conn);
         } else {

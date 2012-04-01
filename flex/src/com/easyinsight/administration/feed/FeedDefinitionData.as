@@ -1,8 +1,8 @@
 package com.easyinsight.administration.feed
 {
-	import com.easyinsight.customupload.UploadPolicy;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.customupload.UploadPolicy;
 import com.easyinsight.datasources.DataSourceInfo;
-import com.easyinsight.feedassembly.CompositeFeedDefinition;
 	
 	import mx.collections.ArrayCollection;
 	
@@ -37,6 +37,7 @@ import com.easyinsight.feedassembly.CompositeFeedDefinition;
         public var marmotScript:String;
         public var concreteFieldsEditable:Boolean;
         public var dataSourceInfo:DataSourceInfo;
+        public var refreshMarmotScript:String;
 		
 		public function FeedDefinitionData()
 		{

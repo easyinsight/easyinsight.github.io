@@ -23,7 +23,8 @@ public class DrillthroughAddFilters extends Function {
                 filterValueDefinition.setField(analysisItem);
                 filterValueDefinition.setSingleValue(true);
                 filterValueDefinition.setEnabled(true);
-                filterValueDefinition.setToggleEnabled(true);
+                filterValueDefinition.setShowOnReportView(true);
+                filterValueDefinition.setToggleEnabled(false);
                 filterValueDefinition.setInclusive(true);
                 filterValueDefinition.setFilteredValues(Arrays.asList(drillthroughCalculationMetadata.getData().get(analysisItem.qualifiedName())));
                 drillthroughCalculationMetadata.getDrillThroughFilters().add(filterValueDefinition);

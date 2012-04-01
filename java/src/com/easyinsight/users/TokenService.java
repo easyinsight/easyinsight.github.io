@@ -2,6 +2,7 @@ package com.easyinsight.users;
 
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
+import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksCompositeSource;
 import com.easyinsight.datafeeds.harvest.HarvestCompositeSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
@@ -109,6 +110,26 @@ public class TokenService {
                 FlexContext.getHttpRequest().getSession().setAttribute("redirectTarget", redirectType);
                 FlexContext.getHttpRequest().getSession().setAttribute("dataSourceID", dataSource.getApiKey());
                 return new OAuthResponse(request.getLocationUri(), true);
+            } else if (type == FeedType.BASECAMP_NEXT_COMPOSITE.getType()) {
+                OAuthClientRequest request;
+                if (ConfigLoader.instance().isProduction()) {
+                    request = OAuthClientRequest
+                            .authorizationLocation("https://launchpad.37signals.com/authorization/new")
+                            .setClientId(BasecampNextCompositeSource.CLIENT_ID)
+                            .setRedirectURI("https://easy-insight.com/app/oauth")
+                            .buildQueryMessage();
+                } else {
+                    request = OAuthClientRequest
+                            .authorizationLocation("https://launchpad.37signals.com/authorization/new")
+                            .setClientId(BasecampNextCompositeSource.CLIENT_ID)
+                            .setRedirectURI("https://easy-insight.com/app/oauth")
+                            .buildQueryMessage();
+                }
+                FlexContext.getHttpRequest().getSession().setAttribute("redirectTarget", redirectType);
+                FlexContext.getHttpRequest().getSession().setAttribute("dataSourceID", dataSource.getApiKey());
+                String uri = request.getLocationUri();
+                uri = uri + "&type=web_server";
+                return new OAuthResponse(uri, true);
             } else if (type == FeedType.SALESFORCE.getType()) {
                 /*consumer = new DefaultOAuthConsumer(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY,
                         SalesforceBaseDataSource.SALESFORCE_SECRET_KEY);

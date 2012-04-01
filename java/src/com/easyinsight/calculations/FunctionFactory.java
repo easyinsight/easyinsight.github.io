@@ -2,6 +2,10 @@ package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.AggregationTypes;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -162,6 +166,10 @@ public class FunctionFactory {
             return new CompositeJoin();
         } else if (s.equals("fieldassign")) {
             return new FieldAssign();
+        } else if (s.equals("labeljoin")) {
+            return new LabelJoin();
+        } else if (s.equals("httpget")) {
+            return new GetFunction();
         } else {
             return null;
         }
