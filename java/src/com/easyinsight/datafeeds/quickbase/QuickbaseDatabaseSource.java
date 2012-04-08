@@ -156,7 +156,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         String applicationToken = quickbaseCompositeSource.getApplicationToken();
         String host = quickbaseCompositeSource.getHost();
         String fullPath = "https://" + host + "/db/" + databaseID;
-        if (databaseID.equals("beutk2zd6")) {
+        /*if (databaseID.equals("beutk2zd6")) {
             try {
                 return acsDataLogRetrieval(IDataStorage, conn, quickbaseCompositeSource, sessionTicket, applicationToken, fullPath, lastRefreshDate);
             } catch (ReportException e) {
@@ -171,7 +171,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     throw e;
                 }
             }
-        } else {
+        } else {*/
             try {
                 return normalRetrieval(IDataStorage, conn, quickbaseCompositeSource, sessionTicket, applicationToken, fullPath);
             } catch (ReportException e) {
@@ -186,16 +186,17 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     throw e;
                 }
             }
-        }
+        //}
     }
 
     @Override
     protected boolean clearsData(FeedDefinition parentSource) {
-        if (databaseID.equals("beutk2zd6")) {
+        /*if (databaseID.equals("beutk2zd6")) {
             return false;
         } else {
             return true;
-        }
+        }*/
+        return true;
     }
 
     @Override
@@ -466,20 +467,6 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    private static class InitEvalKey {
-        private String key;
-        private String provider;
-        private String date;
-    }
-
-    private static class InitEval {
-        private double initEvalsPMR;
-        private double initEvalsScheduled;
-        private double initEvalsCXNS;
-        private Date date;
-        private Value relatedProvider;
-    }
-
     private DataSet normalRetrieval(IDataStorage IDataStorage, EIConnection conn, QuickbaseCompositeSource quickbaseCompositeSource, String sessionTicket, String applicationToken, String fullPath) {
         HttpPost httpRequest = new HttpPost(fullPath);
         httpRequest.setHeader("Accept", "application/xml");
@@ -489,6 +476,9 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         StringBuilder columnBuilder = new StringBuilder();
         Map<String, Collection<AnalysisItem>> map = new HashMap<String, Collection<AnalysisItem>>();
         for (AnalysisItem analysisItem : getFields()) {
+            if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                continue;
+            }
             if (analysisItem.getKey().indexed()) {
                 String fieldID = analysisItem.getKey().toBaseKey().toKeyString().split("\\.")[1];
                 Collection<AnalysisItem> items = map.get(fieldID);
@@ -516,7 +506,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 } else {
                     requestBody = MessageFormat.format(REQUEST_2, sessionTicket, applicationToken, columnBuilder.toString(), String.valueOf(masterCount));
                 }
-                //System.out.println(requestBody);
+                System.out.println(requestBody);
                 byte[] contentBytes = requestBody.getBytes();
                 entity.setContent(new ByteArrayInputStream(contentBytes));
                 entity.setContentLength(contentBytes.length);
@@ -561,20 +551,8 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 }
                 IDataStorage.insertData(dataSet);
                 dataSet = new DataSet();
+                System.out.println("For " + getFeedName() + " count = " + count);
             } while (count == 1000);
-            /*Pipeline pipeline = new CompositeReportPipeline();
-            WSListDefinition analysisDefinition = new WSListDefinition();
-            List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
-            for (Collection<AnalysisItem> columnList : map.values()) {
-                columns.addAll(columnList);
-            }
-            analysisDefinition.setColumns(columns);
-            pipeline.setup(analysisDefinition, FeedRegistry.instance().getFeed(getDataFeedID(), conn), new InsightRequestMetadata());
-            dataSet = pipeline.toDataSet(dataSet);
-            for (AnalysisItem analysisItem : columns) {
-                dataSet.getDataSetKeys().replaceKey(analysisItem.createAggregateKey(), analysisItem.getKey());
-            }
-            IDataStorage.insertData(dataSet);*/
             return null;
         } catch (ReportException re) {
             throw re;
