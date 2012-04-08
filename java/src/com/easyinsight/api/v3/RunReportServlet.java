@@ -4,12 +4,14 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.export.ExportService;
 import com.easyinsight.security.SecurityUtil;
 import nu.xom.Document;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +33,33 @@ public class RunReportServlet extends APIServlet {
         }
         SecurityUtil.authorizeInsight(insightResponse.getInsightDescriptor().getId());
         WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
+        for (FilterDefinition filter : report.getFilterDefinitions()) {
+            if (filter.getFilterName() != null && !"".equals(filter.getFilterName())) {
+                if (filter instanceof FilterValueDefinition) {
+                    FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
+                    String param = request.getParameter(filter.getFilterName());
+                    if (param != null) {
+                        /*try {
+                            Integer paramInt = Integer.parseInt(param);
+                            filterValueDefinition.setFilteredValues(Arrays.asList((Object) paramInt));
+                        } catch (NumberFormatException nfe) {*/
+                            filterValueDefinition.setFilteredValues(Arrays.asList((Object) param));
+                        //}
+                    }
+                } else if (filter instanceof FilterDateRangeDefinition) {
+                    FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filter;
+                    String startParam = request.getParameter(filter.getFilterName() + "_start");
+                    String endParam = request.getParameter(filter.getFilterName() + "_end");
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                    if (startParam != null) {
+                        filterDateRangeDefinition.setStartDate(dateFormat.parse(startParam));
+                    }
+                    if (endParam != null) {
+                        filterDateRangeDefinition.setEndDate(dateFormat.parse(endParam));
+                    }
+                }
+            }
+        }
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         ListDataResults results = (ListDataResults) new DataService().list(report, insightRequestMetadata);
         StringBuilder result = new StringBuilder();
@@ -61,7 +90,11 @@ public class RunReportServlet extends APIServlet {
                             DateValue dateValue = (DateValue) value;
                             result.append(dateFormat.format(dateValue.getDate()));
                         } else {
-                            result.append(value.toString());
+                            if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && value.type() == Value.NUMBER) {
+                                result.append(String.valueOf(value.toDouble().intValue()));
+                            } else {
+                                result.append(value.toString());
+                            }
                         }
                         result.append("</value>");
                     }
