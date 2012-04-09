@@ -596,7 +596,7 @@ public class Account {
             successful = true;
         }
         AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
-        info.setAmount(String.valueOf(monthlyCharge()));
+        info.setAmount(String.valueOf(this.getBillingMonthOfYear() != null ? yearlyCharge() : monthlyCharge()));
         info.setAccountId(this.getAccountID());
         info.setResponse(params.get("response"));
         info.setResponseCode(params.get("response_code"));
