@@ -147,6 +147,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>UpdateRowsByPK</servlet-name>
+        <display-name>UpdateRowsByPK</display-name>
+        <servlet-class>com.easyinsight.api.v3.UpdateRowsPKServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>RunReport</servlet-name>
         <display-name>RunReport</display-name>
         <servlet-class>com.easyinsight.api.v3.RunReportServlet</servlet-class>
@@ -287,6 +294,11 @@
     <servlet-mapping>
         <servlet-name>UpdateRows</servlet-name>
         <url-pattern>/xml/updateRows</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>UpdateRowsByPK</servlet-name>
+        <url-pattern>/xml/updateRowsByPK</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
