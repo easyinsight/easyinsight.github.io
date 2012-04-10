@@ -23,6 +23,14 @@ public class Key implements Comparable<Key>, Serializable, Cloneable {
 
     public Key toBaseKey() { throw new UnsupportedOperationException(); }
 
+    public boolean isPrimaryKey() {
+        return false;
+    }
+
+    public void setPkName(String pkName) {
+
+    }
+
     public boolean hasDataSource(long dataSourceID) {
         return false;
     }
