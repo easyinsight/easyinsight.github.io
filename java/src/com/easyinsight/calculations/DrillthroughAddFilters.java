@@ -1,9 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
-import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.analysis.FilterValueDefinition;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.Value;
 
 import java.util.Arrays;
@@ -32,7 +29,10 @@ public class DrillthroughAddFilters extends Function {
         }
 
         for (FilterDefinition filterDefinition : drillthroughCalculationMetadata.getReport().getFilterDefinitions()) {
-            if (filterDefinition.isShowOnReportView() && filterDefinition instanceof FilterValueDefinition) {
+            if (filterDefinition.isShowOnReportView() && (filterDefinition instanceof FilterValueDefinition ||
+                    filterDefinition instanceof RollingFilterDefinition || filterDefinition instanceof FilterDateRangeDefinition ||
+                    filterDefinition instanceof FilterPatternDefinition || filterDefinition instanceof FlatDateFilter ||
+                    filterDefinition instanceof MultiFlatDateFilter)) {
                 FilterDefinition clone;
                 try {
                     clone = filterDefinition.clone();

@@ -9,6 +9,7 @@ import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
+import com.easyinsight.dataset.DataSet;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.security.*;
@@ -25,7 +26,9 @@ import java.util.*;
 import java.util.Date;
 
 import com.easyinsight.solutions.SolutionService;
+import com.easyinsight.storage.CachedCalculationTransform;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IDataTransform;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -173,6 +176,15 @@ public class AnalysisService {
         }
         return analysisItem;
     }
+    
+    private AnalysisItem findLabelItem(List<AnalysisItem> items) {
+        for (AnalysisItem item : items) {
+            if (item.isLabelColumn()) {
+                return item;
+            }
+        }
+        return null;
+    }
 
     private AnalysisItem findTargetItem(CompositeFeedConnection connection, List<AnalysisItem> items) {
         AnalysisItem analysisItem = null;
@@ -200,15 +212,17 @@ public class AnalysisService {
         }
         return analysisItem;
     }
-    
-    /*public void updateRow(ActualRow actualRow, long dataSourceID) {
+
+    public void addRow(ActualRow actualRow, long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            List<IDataTransform> transforms = new ReportCalculation("cache(\"ACS2\", \"Calc Weighted Procedures\", \"Wtd Procedures/Hr\")").apply(dataSource);
+            transforms.add(new CachedCalculationTransform(dataSource));
             DataStorage dataStorage = DataStorage.writeConnection(dataSource, conn);
             try {
-                dataStorage.updateRow(actualRow, dataSource.getFields());
+                dataStorage.addRow(actualRow, dataSource.getFields(), transforms);
                 dataStorage.commit();
             } catch (Exception e) {
                 dataStorage.rollback();
@@ -223,14 +237,202 @@ public class AnalysisService {
         } finally {
             Database.closeConnection(conn);
         }
-    }*/
+    }
+    
+    public void deleteRow(ActualRow actualRow, long dataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            DataStorage dataStorage = DataStorage.writeConnection(dataSource, conn);
+            try {
+                dataStorage.deleteRow(actualRow.getRowID());
+                dataStorage.commit();
+            } catch (Exception e) {
+                dataStorage.rollback();
+                throw e;
+            } finally {
+                dataStorage.closeConnection();
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+    
+    public void updateRow(ActualRow actualRow, long dataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            List<IDataTransform> transforms = new ReportCalculation("cache(\"ACS2\", \"Calc Weighted Procedures\", \"Wtd Procedures/Hr\")").apply(dataSource);
+            transforms.add(new CachedCalculationTransform(dataSource));
+            DataStorage dataStorage = DataStorage.writeConnection(dataSource, conn);
+            try {
+                dataStorage.updateRow(actualRow, dataSource.getFields(), transforms);
+                dataStorage.commit();
+            } catch (Exception e) {
+                dataStorage.rollback();
+                throw e;
+            } finally {
+                dataStorage.closeConnection();
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+    
+    public ActualRowSet setupAddRow(long dataSourceID, int offset) {
+        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+        insightRequestMetadata.setUtcOffset(offset);
+        try {
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID);
+            FeedDefinition useSource = resolveToName(dataSource, "Data Log");
+            Map<String, Collection<JoinLabelOption>> optionMap = new HashMap<String, Collection<JoinLabelOption>>();
+            DerivedAnalysisDimension calculation = new DerivedAnalysisDimension();
+            NamedKey key = new NamedKey("TmpCalculation");
+            calculation.setKey(key);
+            calculation.setDerivationCode("[Provider Name] + \"-\" + [Location Name]");
+            List<AnalysisItem> matchItems = new ArrayList<AnalysisItem>();
+            matchItems.add(calculation);
 
-    /*public ActualRowSet getActualRows(Map<String, Object> data, AnalysisItem analysisItem, WSAnalysisDefinition report, int offset) {
+            if (dataSource instanceof CompositeFeedDefinition) {
+                CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) dataSource;
+                for (IJoin connection : compositeFeedDefinition.getConnections()) {
+                    CompositeFeedConnection compositeFeedConnection = (CompositeFeedConnection) connection;
+                    AnalysisItem sourceItem = null;
+                    AnalysisItem targetItem = null;
+                    if (connection.getSourceFeedID() == useSource.getDataFeedID()) {
+                        sourceItem = findSourceItem(compositeFeedConnection, dataSource.getFields());
+                        targetItem = findTargetItem(compositeFeedConnection, dataSource.getFields());
+                    } else if (connection.getTargetFeedID() == useSource.getDataFeedID()) {
+                        sourceItem = findTargetItem(compositeFeedConnection, dataSource.getFields());
+                        targetItem = findSourceItem(compositeFeedConnection, dataSource.getFields());
+                    }
+                    matchItems.add(sourceItem);
+                    if (sourceItem != null && targetItem != null) {
+                        Collection<JoinLabelOption> options = new ArrayList<JoinLabelOption>();
+                        WSListDefinition target = new WSListDefinition();
+                        target.setDataFeedID(dataSource.getDataFeedID());
+                        target.setColumns(matchItems);
+                        target.setFilterDefinitions(new ArrayList<FilterDefinition>());
+                        EIConnection conn = Database.instance().getConnection();
+                        try {
+                            DataSet dataSet = DataService.listDataSet(target, new InsightRequestMetadata(), conn);
+                            for (IRow row : dataSet.getRows()) {
+                                Value sourceValue = row.getValue(sourceItem);
+                                Value calcValue = row.getValue(calculation);
+                                options.add(new JoinLabelOption(sourceValue, calcValue.toString()));
+                            }
+                        } finally {
+                            Database.closeConnection(conn);
+                        }
+                        optionMap.put(sourceItem.toDisplay(), options);
+                    }
+                }
+            }
+            ActualRowSet actualRowSet = new ActualRowSet();
+            actualRowSet.setDataSourceID(useSource.getDataFeedID());
+            List<AnalysisItem> validFields = new ArrayList<AnalysisItem>();
+            ActualRow actualRow = new ActualRow();
+            Map<String, Value> map = new HashMap<String, Value>();
+            for (AnalysisItem field : useSource.getFields()) {
+                if (field.isConcrete() && !field.isDerived()) {
+                    validFields.add(field);
+                }
+                map.put(field.qualifiedName(), new EmptyValue());
+            }
+
+            // we'll group them into forms...for each form, how many columns does it have
+            // defineForm(3, "")
+            
+            List<AnalysisItem> pool = new ArrayList<AnalysisItem>(validFields);
+            
+            List<ActualRowLayoutItem> forms = new ArrayList<ActualRowLayoutItem>();
+            forms.addAll(new ReportCalculation("defineform(2, 0, 300, 110, \"Related Provider\", \"Date\")").apply(pool));
+            forms.addAll(new ReportCalculation("defineform(3, 0, 120, 140, \"Visits Schd\", \"Walk-Ins\", \"MC/WC Schd\", \"Init Evals Schd\"," +
+                    "\"Init Evals CX/NS\", \"FUV CX/NS\", \"Hr-WK per FD\", \"Hr-Patient per FD\", \"Procedures/Day-FD\", \"Notes\")").apply(pool));
+            forms.addAll(new ReportCalculation("defineform(3, 0, 120, 140, \"Visits per PMR\", \"Visits-Override\", \"Charges-Override\", \"Adjustments\"," +
+                    "\"Payments-Override\", \"Expenses\", \"Net Income\", \"wRVU-Override\", \"RVU-Override\", \"Gross Payroll\", \"FTE Hrs for MNT\"," +
+                    "\"Payments-Bonus Override\", \"Bonus Base Override\", \"Bonus % Override\", \"Bonus Override\", \"Bonus-Splints\", \"HR-Override\"," +
+                    "\"Hr-Admin\", \"Hr-CME\", \"HR-PTO\", \"Hr-HOL\", \"Hr-Patient per PMR\", \"Hr-WK per PMR\", \"HR-WK-Override\", \"Hr-Paid\"," +
+                    "\"FUV per PMR\", \"FUV-Override\", \"Charges-CAP\", \"Charges-FFS\", \"Charges-Supplies\", \"Charges-Treament\", \"A/R\"," +
+                    "\"Payments-CAP\", \"Payments-FFS\", \"Payments-Supplies\", \"Payments-Treatment\", \"Referral-HT\", \"Referral-OT\"," +
+                    "\"Referral-PT\", \"Referral-SP\", \"Referral-Override\")").apply(pool));
+            forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*PT/OT*\")").apply(pool));
+            forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*Orthotics*\")").apply(pool));
+            forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*CA WC*\")").apply(pool));
+            forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*MediCal*\")").apply(pool));
+            forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*SPEECH*\")").apply(pool));
+
+            actualRow.setValues(map);
+            actualRowSet.setRows(Arrays.asList(actualRow));
+            actualRowSet.setAnalysisItems(validFields);
+            actualRowSet.setForms(forms);
+            actualRowSet.setOptions(optionMap);
+            return actualRowSet;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ActualRowSet getActualRows(Map<String, Object> data, AnalysisItem analysisItem, WSAnalysisDefinition report, int offset) {
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setUtcOffset(offset);
         try {
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID());
-            dataSource = resolveToDataSource(dataSource, analysisItem.getKey());
+            FeedDefinition useSource = resolveToDataSource(dataSource, analysisItem.getKey());
+            Map<String, Collection<JoinLabelOption>> optionMap = new HashMap<String, Collection<JoinLabelOption>>();
+            DerivedAnalysisDimension calculation = new DerivedAnalysisDimension();
+            NamedKey key = new NamedKey("TmpCalculation");
+            calculation.setKey(key);
+            calculation.setDerivationCode("[Provider Name] + \"-\" + [Location Name]");
+            List<AnalysisItem> matchItems = new ArrayList<AnalysisItem>();
+            matchItems.add(calculation);
+
+            if (dataSource instanceof CompositeFeedDefinition) {
+                CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) dataSource;
+                for (IJoin connection : compositeFeedDefinition.getConnections()) {
+                    CompositeFeedConnection compositeFeedConnection = (CompositeFeedConnection) connection;
+                    AnalysisItem sourceItem = null;
+                    AnalysisItem targetItem = null;
+                    if (connection.getSourceFeedID() == useSource.getDataFeedID()) {
+                        sourceItem = findSourceItem(compositeFeedConnection, dataSource.getFields());
+                        targetItem = findTargetItem(compositeFeedConnection, dataSource.getFields());
+                    } else if (connection.getTargetFeedID() == useSource.getDataFeedID()) {
+                        sourceItem = findTargetItem(compositeFeedConnection, dataSource.getFields());
+                        targetItem = findSourceItem(compositeFeedConnection, dataSource.getFields());
+                    }
+                    matchItems.add(sourceItem);
+                    if (sourceItem != null && targetItem != null) {
+                        Collection<JoinLabelOption> options = new ArrayList<JoinLabelOption>();
+                        WSListDefinition target = new WSListDefinition();
+                        target.setDataFeedID(dataSource.getDataFeedID());
+                        target.setColumns(matchItems);
+                        target.setFilterDefinitions(new ArrayList<FilterDefinition>());
+                        EIConnection conn = Database.instance().getConnection();
+                        try {
+                            DataSet dataSet = DataService.listDataSet(target, new InsightRequestMetadata(), conn);
+                            for (IRow row : dataSet.getRows()) {
+                                Value sourceValue = row.getValue(sourceItem);
+                                Value calcValue = row.getValue(calculation);
+                                options.add(new JoinLabelOption(sourceValue, calcValue.toString()));
+                            }
+                        } finally {
+                            Database.closeConnection(conn);
+                        }
+                        optionMap.put(sourceItem.toDisplay(), options);
+                    }
+                }
+            }
             List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
             filterValueDefinition.setField(analysisItem);
@@ -238,12 +440,43 @@ public class AnalysisService {
             filterValueDefinition.setEnabled(true);
             filterValueDefinition.setInclusive(true);
             filterValueDefinition.setToggleEnabled(true);
-            filterValueDefinition.setFilteredValues(Arrays.asList(data.get(analysisItem.qualifiedName())));
+            Value value = (Value) data.get(analysisItem.qualifiedName());
+            if (value instanceof NumericValue) {
+                String stringValue = ((Integer) value.toDouble().intValue()).toString();
+                value = new StringValue(stringValue);
+            }
+            filterValueDefinition.setFilteredValues(Arrays.asList((Object) value));
             filters.add(filterValueDefinition);
-            DataStorage dataStorage = DataStorage.readConnection(dataSource.getFields(), dataSource.getDataFeedID());
+            List<AnalysisItem> validFields = new ArrayList<AnalysisItem>();
+            for (AnalysisItem field : useSource.getFields()) {
+                if (field.isConcrete() && !field.isDerived()) {
+                    validFields.add(field);
+                }
+            }
+            DataStorage dataStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID());
             try {
-                ActualRowSet rowSet = dataStorage.allData(filters, dataSource.getFields(), null, insightRequestMetadata);
-                rowSet.setDataSourceID(dataSource.getDataFeedID());
+                ActualRowSet rowSet = dataStorage.allData(filters, useSource.getFields(), null, insightRequestMetadata);
+                rowSet.setOptions(optionMap);
+                rowSet.setDataSourceID(useSource.getDataFeedID());
+                List<AnalysisItem> pool = new ArrayList<AnalysisItem>(validFields);
+
+                List<ActualRowLayoutItem> forms = new ArrayList<ActualRowLayoutItem>();
+                forms.addAll(new ReportCalculation("defineform(2, 0, 300, 110, \"Related Provider\", \"Date\")").apply(pool));
+                forms.addAll(new ReportCalculation("defineform(3, 0, 120, 140, \"Visits Schd\", \"Walk-Ins\", \"MC/WC Schd\", \"Init Evals Schd\"," +
+                        "\"Init Evals CX/NS\", \"FUV CX/NS\", \"Hr-WK per FD\", \"Hr-Patient per FD\", \"Procedures/Day-FD\", \"Notes\")").apply(pool));
+                forms.addAll(new ReportCalculation("defineform(3, 0, 120, 140, \"Visits per PMR\", \"Visits-Override\", \"Charges-Override\", \"Adjustments\"," +
+                        "\"Payments-Override\", \"Expenses\", \"Net Income\", \"wRVU-Override\", \"RVU-Override\", \"Gross Payroll\", \"FTE Hrs for MNT\"," +
+                        "\"Payments-Bonus Override\", \"Bonus Base Override\", \"Bonus % Override\", \"Bonus Override\", \"Bonus-Splints\", \"HR-Override\"," +
+                        "\"Hr-Admin\", \"Hr-CME\", \"HR-PTO\", \"Hr-HOL\", \"Hr-Patient per PMR\", \"Hr-WK per PMR\", \"HR-WK-Override\", \"Hr-Paid\"," +
+                        "\"FUV per PMR\", \"FUV-Override\", \"Charges-CAP\", \"Charges-FFS\", \"Charges-Supplies\", \"Charges-Treament\", \"A/R\"," +
+                        "\"Payments-CAP\", \"Payments-FFS\", \"Payments-Supplies\", \"Payments-Treatment\", \"Referral-HT\", \"Referral-OT\"," +
+                        "\"Referral-PT\", \"Referral-SP\", \"Referral-Override\")").apply(pool));
+                forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*PT/OT*\")").apply(pool));
+                forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*Orthotics*\")").apply(pool));
+                forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*CA WC*\")").apply(pool));
+                forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*MediCal*\")").apply(pool));
+                forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*SPEECH*\")").apply(pool));
+                rowSet.setForms(forms);
                 return rowSet;
             } finally {
                 dataStorage.closeConnection();
@@ -252,7 +485,7 @@ public class AnalysisService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }*/
+    }
 
     private FeedDefinition resolveToDataSource(FeedDefinition dataSource, Key key) throws SQLException {
         if (key instanceof NamedKey) {
@@ -262,6 +495,29 @@ public class AnalysisService {
             long parentID = derivedKey.getFeedID();
             FeedDefinition parent = new FeedStorage().getFeedDefinitionData(parentID);
             return resolveToDataSource(parent, derivedKey.getParentKey());
+        }
+    }
+
+    private FeedDefinition resolveToName(FeedDefinition dataSource, String name) throws SQLException {
+        if (dataSource.getFeedName().equals(name)) {
+            return dataSource;
+        } else {
+            CompositeFeedDefinition def = (CompositeFeedDefinition) dataSource;
+            FeedDefinition match = null;
+            for (CompositeFeedNode node : def.getCompositeFeedNodes()) {
+                if (node.getDataSourceName().equals(name)) {
+                     match = new FeedStorage().getFeedDefinitionData(node.getDataFeedID());
+                }
+            }
+            if (match == null) {
+                for (CompositeFeedNode node : def.getCompositeFeedNodes()) {
+                    match = resolveToName(new FeedStorage().getFeedDefinitionData(node.getDataFeedID()), name);
+                    if (match != null) {
+                        break;
+                    }
+                }
+            }
+            return match;
         }
     }
 

@@ -1,4 +1,6 @@
 package com.easyinsight.analysis {
+import com.easyinsight.util.PopUpUtil;
+
 import flash.events.ContextMenuEvent;
 import flash.geom.Point;
 import flash.ui.ContextMenuItem;
@@ -8,10 +10,13 @@ import mx.controls.Alert;
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.Application;
 import mx.core.UITextField;
+import mx.managers.PopUpManager;
 
 public class AvailableFieldTextRenderer extends UITextField implements IListItemRenderer {
 
     private var wrapper:AnalysisItemWrapper;
+    private var _dataSourceID:int;
+    private var _calcRefactor:Boolean;
 
     public function AvailableFieldTextRenderer() {
         super();
@@ -25,6 +30,14 @@ public class AvailableFieldTextRenderer extends UITextField implements IListItem
     }
 
     public function validateSize(recursive:Boolean = false):void {
+    }
+
+    public function set dataSourceID(value:int):void {
+        _dataSourceID = value;
+    }
+
+    public function set calcRefactor(value:Boolean):void {
+        _calcRefactor = value;
     }
 
     public function get data():Object {
@@ -76,6 +89,19 @@ public class AvailableFieldTextRenderer extends UITextField implements IListItem
                 });
                 items.push(deleteItem);
             }
+            if (_calcRefactor && wrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE) && !wrapper.analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                var calculateItem:ContextMenuItem = new ContextMenuItem("Convert to Calculation");
+                var thisObj:AvailableFieldTextRenderer = this;
+                calculateItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+                    var window:CalculationConvertWindow = new CalculationConvertWindow();
+                    window.dataSourceID = _dataSourceID;
+                    window.field = wrapper.analysisItem;
+                    PopUpManager.addPopUp(window, thisObj, true);
+                    PopUpUtil.centerPopUp(window);
+                });
+                items.push(calculateItem);
+            }
+
             PopupMenuFactory.assignMenu(this, items);
         }
     }

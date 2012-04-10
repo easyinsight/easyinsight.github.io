@@ -198,6 +198,7 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.BASECAMP_NEXT_PROJECTS);
         feedTypes.add(FeedType.BASECAMP_NEXT_TODOS);
         feedTypes.add(FeedType.BASECAMP_NEXT_CALENDAR);
+        feedTypes.add(FeedType.BASECAMP_NEXT_PEOPLE);
         return feedTypes;
     }
 

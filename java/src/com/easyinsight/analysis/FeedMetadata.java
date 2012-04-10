@@ -30,6 +30,15 @@ public class FeedMetadata implements Serializable {
     private boolean customJoinsAllowed;
     private List<LookupTable> lookupTables;
     private List<IntentionSuggestion> suggestions;
+    private boolean allowRefactor;
+
+    public boolean isAllowRefactor() {
+        return allowRefactor;
+    }
+
+    public void setAllowRefactor(boolean allowRefactor) {
+        this.allowRefactor = allowRefactor;
+    }
 
     public int getDataSourceType() {
         return dataSourceType;

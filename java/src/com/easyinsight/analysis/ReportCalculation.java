@@ -16,6 +16,7 @@ import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.PipelineData;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.storage.IDataTransform;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -206,8 +207,10 @@ public class ReportCalculation {
         return drillthroughCalculationMetadata.getDrillThroughFilters();
     }
 
-    public void apply() throws SQLException {
+    public List<IDataTransform> apply(FeedDefinition dataSource) throws SQLException {
         try {
+            DataSourceCalculationMetadata dataSourceCalculationMetadata = new DataSourceCalculationMetadata();
+            dataSourceCalculationMetadata.setDataSource(dataSource);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
             CalculationsParser.expr_return ret;
@@ -226,8 +229,39 @@ public class ReportCalculation {
             }
             visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory());
             calculationTreeNode.accept(visitor);
-            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, null);
+            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, dataSourceCalculationMetadata);
             calculationTreeNode.accept(rowVisitor);
+            return dataSourceCalculationMetadata.getTransforms();
+        } catch (RecognitionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<ActualRowLayoutItem> apply(List<AnalysisItem> analysisItems) throws SQLException {
+        try {
+            FormCalculationMetadata dataSourceCalculationMetadata = new FormCalculationMetadata();
+            dataSourceCalculationMetadata.setAnalysisItemPool(analysisItems);
+            CalculationTreeNode calculationTreeNode;
+            ICalculationTreeVisitor visitor;
+            CalculationsParser.expr_return ret;
+            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
+            CommonTokenStream tokes = new CommonTokenStream();
+            tokes.setTokenSource(lexer);
+            CalculationsParser parser = new CalculationsParser(tokes);
+            parser.setTreeAdaptor(new NodeFactory());
+            ret = parser.expr();
+            calculationTreeNode = (CalculationTreeNode) ret.getTree();
+            for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
+                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
+                    calculationTreeNode.deleteChild(i);
+                    break;
+                }
+            }
+            visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory());
+            calculationTreeNode.accept(visitor);
+            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, dataSourceCalculationMetadata);
+            calculationTreeNode.accept(rowVisitor);
+            return dataSourceCalculationMetadata.getForms();
         } catch (RecognitionException e) {
             throw new RuntimeException(e);
         }

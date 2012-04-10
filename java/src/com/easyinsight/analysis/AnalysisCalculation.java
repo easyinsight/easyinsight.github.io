@@ -33,6 +33,22 @@ public class AnalysisCalculation extends AnalysisMeasure {
     @Column(name="recalculate_summary")
     private boolean recalculateSummary;
 
+    @Column(name="cached_calculation")
+    private boolean cachedCalculation;
+
+    @Override
+    public boolean persistable() {
+        return cachedCalculation;
+    }
+
+    public boolean isCachedCalculation() {
+        return cachedCalculation;
+    }
+
+    public void setCachedCalculation(boolean cachedCalculation) {
+        this.cachedCalculation = cachedCalculation;
+    }
+
     public boolean isRecalculateSummary() {
         return recalculateSummary;
     }
@@ -49,6 +65,13 @@ public class AnalysisCalculation extends AnalysisMeasure {
 
     public void setCalculationString(String calculationString) {
         this.calculationString = calculationString;
+    }
+
+    public String toKeySQL() {
+        if (!isCachedCalculation()) {
+            throw new RuntimeException("Attempt made to retrieve SQL for a derived analysis item.");
+        }
+        return getKey().toBaseKey().toSQL();
     }
 
     public boolean isApplyBeforeAggregation() {
@@ -70,6 +93,9 @@ public class AnalysisCalculation extends AnalysisMeasure {
     private transient Set<KeySpecification> specs;*/
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet) {
+        /*if (isCachedCalculation()) {
+            return super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet);
+        }*/
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
         Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
         if (allItems != null) {
@@ -208,11 +234,11 @@ public class AnalysisCalculation extends AnalysisMeasure {
 
     @Override
     public boolean isDerived() {
-        return true;
+        return !cachedCalculation;
     }
 
     public boolean blocksDBAggregation() {
-        return applyBeforeAggregation;
+        return applyBeforeAggregation && !cachedCalculation;
     }
 
     public boolean isCalculated() {

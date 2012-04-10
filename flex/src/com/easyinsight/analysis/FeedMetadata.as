@@ -24,6 +24,7 @@ import mx.collections.ArrayCollection;
     public var lookupTables:ArrayCollection;
     public var suggestions:ArrayCollection;
     public var dataSourceType:int;
+    public var allowRefactor:Boolean;
 		
 		public function FeedMetadata()
 			{

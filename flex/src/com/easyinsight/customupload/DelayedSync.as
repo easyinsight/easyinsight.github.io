@@ -17,6 +17,7 @@ import com.easyinsight.framework.User;
 import com.easyinsight.schedule.DailyScheduleType;
 import com.easyinsight.schedule.DataSourceRefreshActivity;
 import com.easyinsight.scorecard.DataSourceAsyncEvent;
+import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.SolutionKPIData;
 import com.easyinsight.util.CancelButton;
 import com.easyinsight.util.EISlimWindow;
@@ -143,7 +144,10 @@ public class DelayedSync extends EISlimWindow {
     }
 
     private function installed(event:Event):void {
-        User.getEventNotifier().dispatchEvent(new NavigationEvent("Home"));
+        var desc:DataSourceDescriptor = new DataSourceDescriptor();
+        desc.id = _dataSourceDefinition.dataFeedID;
+        desc.name = _dataSourceDefinition.feedName;
+        User.getEventNotifier().dispatchEvent(new NavigationEvent("Home", null, { dataSourceDescriptor: desc}));
         PopUpManager.removePopUp(this);
     }
 

@@ -52,6 +52,76 @@ public class FeedService {
         // this goes into a different data provider        
     }
 
+    private List<FeedDefinition> resolveToDataSource(Key key, EIConnection conn) throws SQLException {
+        List<FeedDefinition> dataSources = new ArrayList<FeedDefinition>();
+        if (key instanceof NamedKey) {
+            //dataSources.add(dataSource);
+        } else {
+            DerivedKey derivedKey = (DerivedKey) key;
+            long parentID = derivedKey.getFeedID();
+            FeedDefinition parent = new FeedStorage().getFeedDefinitionData(parentID, conn);
+            dataSources.add(parent);
+            dataSources.addAll(resolveToDataSource(derivedKey.getParentKey(), conn));
+        }
+        return dataSources;
+    }
+
+    public void convertToCalculation(AnalysisItem analysisItem, long dataSourceID, String calculation, boolean rowLevel, boolean cache) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            AnalysisCalculation analysisCalculation = new AnalysisCalculation();
+            analysisCalculation.setCalculationString(calculation);
+            analysisCalculation.setCachedCalculation(cache);
+            analysisCalculation.setKey(analysisItem.getKey().toBaseKey());
+            analysisCalculation.setDisplayName(analysisItem.getDisplayName());
+            analysisCalculation.setApplyBeforeAggregation(rowLevel);
+            analysisCalculation.setFilters(analysisItem.getFilters());
+            analysisCalculation.setLinks(analysisItem.getLinks());
+            // find all reports with this calculation and replace
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            List<FeedDefinition> dataSources = new ArrayList<FeedDefinition>();
+            dataSources.add(dataSource);
+            dataSources.addAll(resolveToDataSource(analysisItem.getKey(), conn));
+            FeedDefinition useSource = dataSources.get(dataSources.size() - 1);
+            for (FeedDefinition source : dataSources) {
+                Iterator<AnalysisItem> iter = source.getFields().iterator();
+                while (iter.hasNext()) {
+                    AnalysisItem analysisItem1 = iter.next();
+                    if (analysisItem.getType() == analysisItem1.getType() && analysisItem.getKey().toBaseKey().toKeyString().equals(analysisItem1.getKey().toBaseKey().toKeyString())) {
+                        iter.remove();
+                    }
+                }
+            }
+            useSource.getFields().add(analysisCalculation);
+            new DataSourceInternalService().updateFeedDefinition(useSource, conn);
+            for (FeedDefinition source : dataSources) {
+                List<InsightDescriptor> reports = new AnalysisStorage().getInsightDescriptorsForDataSource(SecurityUtil.getUserID(),
+                        SecurityUtil.getAccountID(), source.getDataFeedID(), conn);
+                Session session = Database.instance().createSession(conn);
+                for (InsightDescriptor report : reports) {
+                    AnalysisDefinition analysisDefinition = new AnalysisStorage().getPersistableReport(report.getId(), session);
+                    Map<String, AnalysisItem> copy = analysisDefinition.getReportStructure();
+                    for (Map.Entry<String, AnalysisItem> entry : copy.entrySet()) {
+                        if (entry.getValue().equals(analysisItem)) {
+                            analysisDefinition.getReportStructure().put(entry.getKey(), analysisCalculation);
+                        }
+                    }
+                    analysisStorage.saveAnalysis(analysisDefinition, session);
+                }
+                session.close();
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
     public DataSourceDescriptor autoCreateCompositeSource(DataSourceDescriptor source, DataSourceDescriptor target) {
         EIConnection conn = Database.instance().getConnection();
         try {

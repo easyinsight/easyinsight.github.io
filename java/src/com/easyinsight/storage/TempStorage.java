@@ -11,6 +11,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,13 +26,43 @@ public class TempStorage implements IDataStorage {
     private Map<Key, KeyMetadata> keys;
     private Database storageDatabase;
     private static DateDimCache dateDimCache = new DateDimCache();
+    private List<AnalysisItem> cachedCalculations = new ArrayList<AnalysisItem>();
+    private EIConnection coreDBConn;
+
+    private List<IDataTransform> transforms = new ArrayList<IDataTransform>();
 
     private String tableName;
 
-    public TempStorage(long feedID, Map<Key, KeyMetadata> keys, Database storageDatabase) {
+    public TempStorage(long feedID, Map<Key, KeyMetadata> keys, Database storageDatabase, List<AnalysisItem> cachedCalculations, List<IDataTransform> transforms,
+                       EIConnection conn) {
         this.keys = keys;
-        tableName = "dt" + feedID + System.currentTimeMillis();
+        this.tableName = "dt" + feedID + System.currentTimeMillis();
         this.storageDatabase = storageDatabase;
+        this.cachedCalculations = cachedCalculations;
+        this.transforms = transforms;
+        this.coreDBConn = conn;
+    }
+
+    public TempStorage(Map<Key, KeyMetadata> keys, Database storageDatabase, String tableName) {
+        this.keys = keys;
+        this.tableName = tableName;
+        this.storageDatabase = storageDatabase;
+    }
+
+    public List<AnalysisItem> getCachedCalculations() {
+        return cachedCalculations;
+    }
+
+    public void setCachedCalculations(List<AnalysisItem> cachedCalculations) {
+        this.cachedCalculations = cachedCalculations;
+    }
+
+    public List<IDataTransform> getTransforms() {
+        return transforms;
+    }
+
+    public void setTransforms(List<IDataTransform> transforms) {
+        this.transforms = transforms;
     }
 
     public String getTableName() {
@@ -100,6 +131,11 @@ public class TempStorage implements IDataStorage {
     }
 
     public void insertData(DataSet dataSet) throws Exception {
+        for (IRow row : dataSet.getRows()) {
+            for (IDataTransform transform : transforms) {
+                transform.handle(coreDBConn, row);
+            }
+        }
         StringBuilder columnBuilder = new StringBuilder();
         StringBuilder paramBuilder = new StringBuilder();
         Iterator<KeyMetadata> keyIter = keys.values().iterator();

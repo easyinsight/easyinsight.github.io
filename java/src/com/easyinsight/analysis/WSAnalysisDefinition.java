@@ -111,6 +111,16 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private int fontSize = 12;
     private double backgroundAlpha = 1;
 
+    private boolean rowsEditable;
+
+    public boolean isRowsEditable() {
+        return rowsEditable;
+    }
+
+    public void setRowsEditable(boolean rowsEditable) {
+        this.rowsEditable = rowsEditable;
+    }
+
     public boolean isLookupTableOptimization() {
         return lookupTableOptimization;
     }

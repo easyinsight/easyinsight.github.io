@@ -170,6 +170,10 @@ public class FunctionFactory {
             return new LabelJoin();
         } else if (s.equals("httpget")) {
             return new GetFunction();
+        } else if (s.equals("cache")) {
+            return new CacheFunction();
+        } else if (s.equals("defineform")) {
+            return new DefineForm();
         } else {
             return null;
         }

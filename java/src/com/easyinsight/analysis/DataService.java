@@ -6,7 +6,6 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -88,6 +87,7 @@ public class DataService {
             feedMetadata.setDataSourceInfo(feed.createSourceInfo(conn));
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
+            feedMetadata.setAllowRefactor("Therapy Works".equals(feed.getName()));
             feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
             List<LookupTable> lookupTables = new ArrayList<LookupTable>();
             for (AnalysisItem field : feedItems) {
@@ -851,7 +851,9 @@ public class DataService {
             if (drillThroughFilters != null) {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
-            return new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn).toPipeline();
+            ReportRetrieval reportRetrieval = new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn).toPipeline();
+            analysisDefinition.setRowsEditable("Therapy Works".equals(reportRetrieval.feed.getName()));
+            return reportRetrieval;
         }
 
         public StandardReportPipeline getPipeline() {
@@ -983,7 +985,12 @@ public class DataService {
             }
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
             for (AnalysisItem analysisItem : analysisItems) {
-                if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
+                if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
+                    if (analysisCalculation.isCachedCalculation()) {
+                        validQueryItems.add(analysisItem);
+                    }
+                } else if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
                     validQueryItems.add(analysisItem);
                 }
             }

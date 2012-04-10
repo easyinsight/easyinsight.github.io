@@ -15,6 +15,8 @@ public class ActualRowSet {
     public var rows:ArrayCollection;
     public var analysisItems:ArrayCollection;
     public var dataSourceID:int;
+    public var forms:ArrayCollection;
+    public var options:Object;
 
     public function ActualRowSet() {
     }

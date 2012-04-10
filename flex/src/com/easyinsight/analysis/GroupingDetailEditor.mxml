@@ -56,6 +56,7 @@
                 useKeyDimensionSelected = analysisDimension.keyDimension != null;
                 keyDimension = analysisDimension.keyDimension != null ? analysisDimension.keyDimension.display : null;
                 group = analysisDimension.group;
+                primaryKey = analysisDimension.keyColumn;
                 invalidateProperties();
             }
         }
@@ -71,10 +72,17 @@
             if (sortItem != null) {
                 analysisDimension.sortItem = sortItem;
             }
+            analysisDimension.keyColumn = primaryKeyCheckbox.selected;
         }
+        
+        [Bindable]
+        private var primaryKey:Boolean;
         ]]></mx:Script>
     <mx:FormItem label="Group: ">
         <mx:CheckBox id="groupCheckbox" selected="{group}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Primary Key: ">
+        <mx:CheckBox id="primaryKeyCheckbox" selected="{primaryKey}"/>
     </mx:FormItem>
     <mx:FormItem label="Sort By: ">
         <util:SmartComboBox dataProvider="{fields}" id="sortComboBox" labelField="display"

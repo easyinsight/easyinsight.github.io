@@ -36,11 +36,13 @@
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.rowedit.ActualRowEditWindow;
         import com.easyinsight.rowedit.ActualRowEvent;
+        import com.easyinsight.rowedit.ActualRowSet;
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ActionReportLog;
         import com.easyinsight.util.EIErrorEvent;
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.util.UserAudit;
 
         import mx.binding.utils.BindingUtils;
@@ -269,6 +271,7 @@
                 event.reportFault.popup(this, onProblem);
             } else {
                 EIGlobalTimer.instance().dataSourceTime = event.dataSourceInfo.lastDataTime;
+                showAddRow = event.analysisDefinition.rowsEditable;
                 dataSource = event.dataSourceInfo;
                 loading = false;
                 overlayIndex = 0;
@@ -565,7 +568,8 @@
                 }
                 showReportEditor = false;
             }
-            if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
+            var netFiltersSize:int = (_parameterFilters != null ? _parameterFilters.length : 0) + (report.filterDefinitions != null ? report.filterDefinitions.length : 0);
+            if (netFiltersSize > 0) {
 
                 var fObj:Object = new Object();
                 var paramObj:Object = new Object();
@@ -579,23 +583,30 @@
                     }
                 }
                 var toUse:ArrayCollection = new ArrayCollection();
-                for each (var filter:FilterDefinition in report.filterDefinitions) {
-                    if (filter.getType() == FilterDefinition.ANALYSIS_ITEM) {
-                        var aFilter:AnalysisItemFilterDefinition = paramObj[filter.filterName];
-                        if (aFilter != null) {
-                            var ourFilter:AnalysisItemFilterDefinition = filter as AnalysisItemFilterDefinition;
-                            ourFilter.targetItem = aFilter.targetItem;
-                        }
-                        toUse.addItem(filter);
-                    } else {
-                        var existing:FilterDefinition = fObj[filter.qualifiedName()];
-                        if (existing) {
-                            toUse.addItem(existing);
-                            existing.showOnReportView = filter.showOnReportView;
-                        } else {
+                if (report.filterDefinitions != null) {
+                    for each (var filter:FilterDefinition in report.filterDefinitions) {
+                        if (filter.getType() == FilterDefinition.ANALYSIS_ITEM) {
+                            var aFilter:AnalysisItemFilterDefinition = paramObj[filter.filterName];
+                            if (aFilter != null) {
+                                delete paramObj[filter.filterName];
+                                var ourFilter:AnalysisItemFilterDefinition = filter as AnalysisItemFilterDefinition;
+                                ourFilter.targetItem = aFilter.targetItem;
+                            }
                             toUse.addItem(filter);
+                        } else {
+                            var existing:FilterDefinition = fObj[filter.qualifiedName()];
+                            if (existing) {
+                                toUse.addItem(existing);
+                                delete fObj[filter.qualifiedName()];
+                                existing.showOnReportView = filter.showOnReportView;
+                            } else {
+                                toUse.addItem(filter);
+                            }
                         }
                     }
+                }
+                for each (var remaining:FilterDefinition in fObj) {
+                    toUse.addItem(remaining);
                 }
                 viewFactory.filterDefinitions = toUse;
                 filterDefinitions = toUse;
@@ -616,6 +627,9 @@
             stackTrace = event.error.getStackTrace();
             overlayIndex = 3;
         }
+
+        [Bindable]
+        private var showAddRow:Boolean;
 
         [Bindable]
         private var overlayIndex:int;
@@ -710,7 +724,23 @@
 
         [Bindable]
         private var showingFilters:Boolean = false;
+
+        private function addRow():void {
+            ProgressAlert.alert(this, "Setting up...", null, analysisService.setupAddRow);
+            analysisService.setupAddRow.send(report.dataFeedID, new Date().getTimezoneOffset());
+        }
+        
+        private function setupAddRow():void {
+            var rowSet:ActualRowSet = analysisService.setupAddRow.lastResult as ActualRowSet;
+            var window:ActualRowEditWindow = new ActualRowEditWindow();
+            window.actualRowSet = rowSet;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
         ]]></mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="setupAddRow" result="setupAddRow()"/>
+    </mx:RemoteObject>
     <mx:HBox width="100%" id="leftButtonBar" styleName="topButtonBar">
         <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="right" id="backButton"
                    toolTip="Close the report" label="Close Report" styleName="grayButton"/>
@@ -725,6 +755,7 @@
         <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
                    labelPlacement="right" id="editReportButton"
                    toolTip="Open this report in the report editor..." label="Edit Report" styleName="grayButton"/>
+        <mx:Button labelPlacement="right" label="Add Row..." styleName="grayButton" click="addRow()" visible="{showAddRow}"/>
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
     </mx:HBox>

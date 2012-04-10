@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:schedule="com.easyinsight.schedule.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.managers.PopUpManager;
+
+        public var field:AnalysisItem;
+        public var dataSourceID:int;
+        
+        private function convert():void {
+            ProgressAlert.alert(this, "Converting to calculation...", null, feedService.convertToCalculation);
+            feedService.convertToCalculation.send(field, dataSourceID,  calculationInput.text, rowLevelCheckbox.selected, cacheCheckbox.selected);
+        }
+
+        private function converted():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="convertToCalculation" result="converted()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" backgroundColor="#FFFFFF">
+        <mx:Form>
+            <mx:FormItem label="Calculation: " direction="horizontal" width="100%">
+                <schedule:CursorTextArea id="calculationInput"
+                                         width="300" height="100"
+                                         borderStyle="solid" borderThickness="1"/>
+            </mx:FormItem>
+            <mx:FormItem label="Row Level: ">
+                <mx:CheckBox id="rowLevelCheckbox"/>
+            </mx:FormItem>
+            <mx:FormItem label="Cache:">
+                <mx:CheckBox id="cacheCheckbox"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Convert" click="convert()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

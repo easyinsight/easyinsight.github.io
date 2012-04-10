@@ -82,6 +82,12 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="high_is_good")
     private boolean highIsGood;
 
+    @Column(name="key_column")
+    private boolean keyColumn;
+
+    @Column(name="label_column")
+    private boolean labelColumn;
+
     @Column(name="item_position")
     private int itemPosition;
 
@@ -123,6 +129,22 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem getSortItem() {
         return sortItem;
+    }
+
+    public boolean isLabelColumn() {
+        return labelColumn;
+    }
+
+    public void setLabelColumn(boolean labelColumn) {
+        this.labelColumn = labelColumn;
+    }
+
+    public boolean isKeyColumn() {
+        return keyColumn;
+    }
+
+    public void setKeyColumn(boolean keyColumn) {
+        this.keyColumn = keyColumn;
     }
 
     public void setSortItem(AnalysisItem sortItem) {
@@ -666,5 +688,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         for (FilterDefinition filterDefinition : getFilters()) {
             filterDefinition.timeshift(dataSource, filters);
         }
+    }
+
+    public boolean persistable() {
+        return isConcrete() && !isDerived();
     }
 }

@@ -33,6 +33,8 @@ import mx.formatters.Formatter;
         public var reportFieldExtension:ReportFieldExtension;
         public var marmotScript:String;
         public var sortItem:AnalysisItem;
+        public var keyColumn:Boolean;
+        public var labelColumn:Boolean;
 		
 		public function AnalysisItem() {
 			super();

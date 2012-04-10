@@ -28,9 +28,7 @@ public class InitRetrieval extends BasecampNextBaseSource {
             JSONObject accountObject = accountsArray.getJSONObject(i);
             String product = accountObject.getString("product");
             if ("bcx".equals(product)) {
-                String url = accountObject.getString("href");
-                url = url.substring(url.lastIndexOf("/") + 1);
-                return url;
+                return accountObject.getString("id");
             }
         }
         return null;

@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**

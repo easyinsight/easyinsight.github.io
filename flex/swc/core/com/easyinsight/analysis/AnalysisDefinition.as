@@ -93,6 +93,7 @@ import mx.collections.ArrayCollection;
         public var headerImage:ImageDescriptor;
         public var folder:int = EIDescriptor.MAIN_VIEWS_FOLDER;
         public var lookupTableOptimization:Boolean = false;
+        public var rowsEditable:Boolean;
 
 		public function AnalysisDefinition()
 		{

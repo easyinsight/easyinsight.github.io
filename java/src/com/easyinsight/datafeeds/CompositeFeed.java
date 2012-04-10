@@ -710,7 +710,12 @@ public class CompositeFeed extends Feed {
         }
 
         public void addItem(AnalysisItem analysisItem) {
-            if (!analysisItem.isDerived()) {
+            if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
+                if (analysisCalculation.isCachedCalculation()) {
+                    neededItems.add(analysisItem);
+                }
+            } else if (!analysisItem.isDerived()) {
                 neededItems.add(analysisItem);
             }
             queryData.neededItems.add(analysisItem);

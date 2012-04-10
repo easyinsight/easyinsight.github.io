@@ -17,6 +17,17 @@ public class Row implements IRow, Serializable {
 
     private DataSetKeys dataSetKeys;
 
+    private long rowID;
+
+
+    public long getRowID() {
+        return rowID;
+    }
+
+    public void setRowID(long rowID) {
+        this.rowID = rowID;
+    }
+
     public Row(DataSetKeys dataSetKeys) {
         valueMap = new Value[1];
         this.dataSetKeys = dataSetKeys;

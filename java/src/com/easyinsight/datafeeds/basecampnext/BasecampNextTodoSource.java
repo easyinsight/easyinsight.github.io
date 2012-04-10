@@ -7,6 +7,8 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
+import com.easyinsight.storage.IWhere;
+import com.easyinsight.storage.StringWhere;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -36,7 +38,9 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
     public static final String TODO_UPDATED_AT = "Todo Updated At";
     public static final String TODO_COMPLETED_AT = "Todo Completed At";
     public static final String TODO_ASSIGNEE = "Todo Assignee";
+    public static final String TODO_ASSIGNEE_ID = "Todo Assignee ID";
     public static final String TODO_COMPLETER = "Todo Completer";
+    public static final String TODO_COMPLETER_ID = "Todo Completer ID";
     public static final String TODO_URL = "Todo URL";
     public static final String TODO_DUE_AT = "Todo Due At";
     public static final String TODO_COUNT = "Todo Count";
@@ -55,7 +59,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(TODO_LIST_NAME, TODO_LIST_DESCRIPTION, TODO_LIST_ID, TODO_LIST_URL, TODO_LIST_UPDATED_AT,
                 TODO_NAME, TODO_ID, TODO_CREATED_AT, TODO_UPDATED_AT, TODO_COMPLETED_AT, TODO_ASSIGNEE,
-                TODO_COMPLETER, TODO_URL, TODO_DUE_AT, TODO_COUNT, TODO_LIST_PROJECT_ID);
+                TODO_COMPLETER, TODO_URL, TODO_DUE_AT, TODO_COUNT, TODO_LIST_PROJECT_ID, TODO_COMPLETER_ID, TODO_ASSIGNEE_ID);
     }
 
     @Override
@@ -69,7 +73,9 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
         analysisitems.add(new AnalysisDimension(keys.get(TODO_NAME)));
         analysisitems.add(new AnalysisDimension(keys.get(TODO_ID)));
         analysisitems.add(new AnalysisDimension(keys.get(TODO_ASSIGNEE)));
+        analysisitems.add(new AnalysisDimension(keys.get(TODO_ASSIGNEE_ID)));
         analysisitems.add(new AnalysisDimension(keys.get(TODO_COMPLETER)));
+        analysisitems.add(new AnalysisDimension(keys.get(TODO_COMPLETER_ID)));
         analysisitems.add(new AnalysisDimension(keys.get(TODO_URL)));
         analysisitems.add(new AnalysisDateDimension(keys.get(TODO_LIST_UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisitems.add(new AnalysisDateDimension(keys.get(TODO_CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
@@ -90,6 +96,16 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
     private static final DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
 
     @Override
+    protected String getUpdateKeyName() {
+        return TODO_LIST_PROJECT_ID;
+    }
+
+    @Override
+    protected boolean clearsData(FeedDefinition parentSource) {
+        return false;
+    }
+
+    @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             
@@ -98,7 +114,12 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject projectObject = jsonArray.getJSONObject(i);
                 String projectID = String.valueOf(projectObject.getInt("id"));
-                JSONArray todoListArray = runJSONRequest("projects/"+projectID+"/todolists.json", (BasecampNextCompositeSource) parentDefinition);
+                JSONArray todoListArray = runJSONRequest("projects/"+projectID+"/todolists.json", (BasecampNextCompositeSource) parentDefinition, lastRefreshDate);
+                if (todoListArray == null) {
+                    System.out.println("No need to retrieve todos for " + projectID);
+                    continue;
+                }
+                System.out.println("Retrieving todos for " + projectID);
                 for (int j = 0; j < todoListArray.length(); j++) {
 
                     JSONObject todoList = todoListArray.getJSONObject(j);
@@ -130,8 +151,14 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     JSONArray completedArray = todoMasterObject.getJSONArray("completed");
                     parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray);
                 }
+                if (lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
+                    IDataStorage.insertData(dataSet);
+                } else {
+                    StringWhere stringWhere = new StringWhere(keys.get(TODO_LIST_PROJECT_ID), projectID);
+                    IDataStorage.updateData(dataSet, Arrays.asList((IWhere) stringWhere));
+                }
             }
-            return dataSet;
+            return null;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -153,21 +180,15 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             Date updatedAt = parseDate(updatedAtString);
             Object obj = todoObject.get("assignee");
             String assigneeString = null;
-            if (obj instanceof JSONObject) {
+            if (obj != null && obj instanceof JSONObject) {
                 JSONObject assignee = (JSONObject) obj;
-
-                if (assignee != null) {
-                    assigneeString = assignee.getString("name");
-                }
+                assigneeString = assignee.getString("name");
             }
             String completer = null;
             Object obj2 = todoObject.get("completer");
-            if (obj2 instanceof JSONObject) {
+            if (obj2 != null && obj2 instanceof JSONObject) {
                 JSONObject completerObject = (JSONObject) obj2;
-
-                if (completerObject != null) {
-                    completer = completerObject.getString("name");
-                }
+                completer = completerObject.getString("name");
             }
             row.addValue(keys.get(TODO_LIST_NAME), todoListName);
             row.addValue(keys.get(TODO_LIST_ID), todoListID);

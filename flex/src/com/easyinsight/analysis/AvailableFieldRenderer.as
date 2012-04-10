@@ -14,6 +14,18 @@ public class AvailableFieldRenderer extends AdvancedDataGridGroupItemRenderer {
         addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
     }
 
+    private var _dataSourceID:int;
+
+    public function set dataSourceID(value:int):void {
+        _dataSourceID = value;
+    }
+
+    private var _calcRefactor:Boolean;
+
+    public function set calcRefactor(value:Boolean):void {
+        _calcRefactor = value;
+    }
+
     private function onDoubleClick(event:MouseEvent):void {
         dispatchEvent(new FieldDoubleClickEvent(data as AnalysisItemWrapper));
     }
@@ -22,6 +34,8 @@ public class AvailableFieldRenderer extends AdvancedDataGridGroupItemRenderer {
         super.commitProperties();
         this.data = data;
         AvailableFieldTextRenderer(label).data = data;
+        AvailableFieldTextRenderer(label).dataSourceID = _dataSourceID;
+        AvailableFieldTextRenderer(label).calcRefactor = _calcRefactor;
     }
 
     override protected function createLabel(childIndex:int):void {
