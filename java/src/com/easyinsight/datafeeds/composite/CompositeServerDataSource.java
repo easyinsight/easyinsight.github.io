@@ -108,8 +108,10 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             populateFields(conn);
         } else {
             for (CompositeFeedNode node : getCompositeFeedNodes()) {
-                IServerDataSourceDefinition definition = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
-                dataSources.add(definition);
+                FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
+                if (feedDefinition instanceof IServerDataSourceDefinition) {
+                    dataSources.add((IServerDataSourceDefinition) feedDefinition);
+                }
             }
         }
         sortSources(dataSources);
@@ -263,7 +265,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 try {
-                    new ReportCalculation(line).apply();
+                    new ReportCalculation(line).apply(this);
                 } catch (ReportException re) {
                     throw re;
                 } catch (Exception e) {
