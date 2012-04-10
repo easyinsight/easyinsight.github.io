@@ -43,10 +43,6 @@ public class UpdateRowsPKServlet extends APIServlet {
             if (baseRows.size() == 0) {
                 throw new ServiceRuntimeException("You need to specify a rows node with the update call.");
             }
-            Nodes whereRows = baseNode.query("wheres/where");
-            if (whereRows.size() == 0) {
-                throw new ServiceRuntimeException("You need to specify at least one where node with the update call.");
-            }
             Element rootNode = (Element) baseRows.get(0);
             Attribute dataSourceAttribute = rootNode.getAttribute("dataSourceName");
             if (dataSourceAttribute == null) {
