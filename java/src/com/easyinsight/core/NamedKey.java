@@ -1,9 +1,6 @@
 package com.easyinsight.core;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Column;
+import javax.persistence.*;
 
 /**
  * User: James Boe
@@ -52,8 +49,18 @@ public class NamedKey extends Key {
         this.name = name;
     }
 
+    @Transient
+    private transient String pkName;
+
+    public void setPkName(String pkName) {
+        this.pkName = pkName;
+    }
+
     @Override
     public String toSQL() {
+        if (pkName != null) {
+            return pkName;
+        }
         return "k" + getKeyID();
     }
 
