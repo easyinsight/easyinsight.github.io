@@ -164,6 +164,7 @@ public class UpdateRowsServlet extends APIServlet {
 
             }
 
+            System.out.println("Updating with a data set of size = " + dataSet.getRows().size());
             dataStorage = DataStorage.writeConnection(dataSource, conn, SecurityUtil.getAccountID());
             dataStorage.updateData(dataSet, wheres);
             dataStorage.commit();
