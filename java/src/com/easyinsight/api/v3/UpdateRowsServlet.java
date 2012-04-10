@@ -67,7 +67,7 @@ public class UpdateRowsServlet extends APIServlet {
             for (AnalysisItem field : dataSource.getFields()) {
                 fieldMap.put(field.getKey().toKeyString().toLowerCase(), field);
             }
-            Nodes rowNodes = document.query("/rows/row");
+            Nodes rowNodes = document.query("/update/rows/row");
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             DataSet dataSet = new DataSet();
