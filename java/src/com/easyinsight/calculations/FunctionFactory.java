@@ -174,6 +174,8 @@ public class FunctionFactory {
             return new CacheFunction();
         } else if (s.equals("defineform")) {
             return new DefineForm();
+        } else if (s.equals("fallthrough")) {
+            return new FallThroughJoin();
         } else {
             return null;
         }
