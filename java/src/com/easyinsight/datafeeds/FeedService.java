@@ -96,6 +96,13 @@ public class FeedService {
             useSource.getFields().add(analysisCalculation);
             new DataSourceInternalService().updateFeedDefinition(useSource, conn);
             for (FeedDefinition source : dataSources) {
+                AnalysisItem replacement = null;
+                for (AnalysisItem field : source.getFields()) {
+                    if (field.getKey().toBaseKey().toKeyString().equals(analysisItem.getKey().toBaseKey().toKeyString())) {
+                        replacement = field;
+                        break;
+                    }
+                }
                 List<InsightDescriptor> reports = new AnalysisStorage().getInsightDescriptorsForDataSource(SecurityUtil.getUserID(),
                         SecurityUtil.getAccountID(), source.getDataFeedID(), conn);
                 Session session = Database.instance().createSession(conn);
@@ -104,7 +111,7 @@ public class FeedService {
                     Map<String, AnalysisItem> copy = analysisDefinition.getReportStructure();
                     for (Map.Entry<String, AnalysisItem> entry : copy.entrySet()) {
                         if (entry.getValue().equals(analysisItem)) {
-                            analysisDefinition.getReportStructure().put(entry.getKey(), analysisCalculation);
+                            analysisDefinition.getReportStructure().put(entry.getKey(), replacement);
                         }
                     }
                     analysisStorage.saveAnalysis(analysisDefinition, session);

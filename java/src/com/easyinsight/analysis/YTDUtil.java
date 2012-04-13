@@ -32,24 +32,24 @@ public class YTDUtil {
         for (AnalysisItem analysisItem : yearsDefinition.getMeasures()) {
             realMeasures.add((AnalysisMeasure) analysisItem);
         }
-        Map<Integer, Map<AnalysisMeasure, Aggregation>> map = new HashMap<Integer, Map<AnalysisMeasure, Aggregation>>();
-        Set<Integer> years = new HashSet<Integer>();
+        Map<Value, Map<AnalysisMeasure, Aggregation>> map = new HashMap<Value, Map<AnalysisMeasure, Aggregation>>();
+        Set<Value> years = new HashSet<Value>();
         Calendar cal = Calendar.getInstance();
         for (IRow row : nowSet.getRows()) {
             Value year = row.getValue(timeDimension);
             if (year.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) year;
                 cal.setTime(dateValue.getDate());
-                int yearVal = cal.get(Calendar.YEAR);
+                /*int yearVal = cal.get(Calendar.YEAR);
                 if (yearVal < 2008) {
                     continue;
-                }
-                years.add(yearVal);
+                }*/
+                years.add(dateValue);
 
-                Map<AnalysisMeasure, Aggregation> yearMap = map.get(yearVal);
+                Map<AnalysisMeasure, Aggregation> yearMap = map.get(dateValue);
                 if (yearMap == null) {
                     yearMap = new HashMap<AnalysisMeasure, Aggregation>();
-                    map.put(yearVal, yearMap);
+                    map.put(dateValue, yearMap);
                     for (AnalysisMeasure analysisMeasure : measures) {
                         Aggregation aggregation = new AggregationFactory(analysisMeasure, false).getAggregation();
                         yearMap.put(analysisMeasure, aggregation);
@@ -61,8 +61,8 @@ public class YTDUtil {
                 }
             }
         }
-        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true);
-        components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false));
+        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true, new AnalysisItemRetrievalStructure());
+        components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false, new AnalysisItemRetrievalStructure()));
         Iterator<IComponent> iter = components.iterator();
         while (iter.hasNext()) {
             IComponent component = iter.next();
@@ -93,7 +93,7 @@ public class YTDUtil {
                 }
             }
         }
-        List<Integer> sortedYears = new ArrayList<Integer>(years);
+        List<Value> sortedYears = new ArrayList<Value>(years);
         Collections.sort(sortedYears);
         List<CompareYearsRow> rows = new ArrayList<CompareYearsRow>();
         Set<PercentChangeItem> percentChangeItems = new HashSet<PercentChangeItem>();
@@ -101,7 +101,7 @@ public class YTDUtil {
             CompareYearsRow compareYearsRow = new CompareYearsRow();
             compareYearsRow.setMeasure(analysisMeasure);
             for (int i = 0; i < sortedYears.size(); i++) {
-                Integer year = sortedYears.get(i);
+                Value year = sortedYears.get(i);
                 Value yearValue = map.get(year).get(analysisMeasure).getValue();
                 String formattedYear = String.valueOf(year);
                 CompareYearsResult compareYearsResult = new CompareYearsResult();
@@ -110,12 +110,12 @@ public class YTDUtil {
                 compareYearsResult.setPercentChange(false);
                 compareYearsRow.getResults().put(formattedYear, compareYearsResult);
                 if (i > 0) {
-                    Integer previousYear = sortedYears.get(i - 1);
+                    DateValue previousYear = (DateValue) sortedYears.get(i - 1);
                     Value previousYearValue = map.get(previousYear).get(analysisMeasure);
                     Value change = new NumericValue((yearValue.toDouble() - previousYearValue.toDouble()) / previousYearValue.toDouble() * 100);
                     CompareYearsResult percentChangeResult = new CompareYearsResult();
                     String formattedChange = String.valueOf(previousYear).substring(2, 4) + "-" + formattedYear.substring(2, 4) + "%";
-                    percentChangeItems.add(new PercentChangeItem(formattedChange, Integer.parseInt(formattedYear)));
+                    percentChangeItems.add(new PercentChangeItem(formattedChange, previousYear));
                     percentChangeResult.setHeader(new StringValue(formattedChange));
                     percentChangeResult.setPercentChange(true);
                     percentChangeResult.setValue(change);
@@ -127,7 +127,7 @@ public class YTDUtil {
         List<PercentChangeItem> sortablePercentChangeItemList = new ArrayList<PercentChangeItem>(percentChangeItems);
         Collections.sort(sortablePercentChangeItemList);
         List<String> headers = new ArrayList<String>();
-        for (Integer yearVal : sortedYears) {
+        for (Value yearVal : sortedYears) {
             String formattedYear = String.valueOf(yearVal);
             headers.add(formattedYear);
         }
@@ -143,15 +143,15 @@ public class YTDUtil {
 
     private static class PercentChangeItem implements Comparable<PercentChangeItem>{
         private String label;
-        private Integer tailYear;
+        private Value value;
 
-        private PercentChangeItem(String label, int tailYear) {
+        private PercentChangeItem(String label, Value tailYear) {
             this.label = label;
-            this.tailYear = tailYear;
+            this.value = tailYear;
         }
 
         public int compareTo(PercentChangeItem percentChangeItem) {
-            return percentChangeItem.tailYear.compareTo(tailYear);
+            return percentChangeItem.value.compareTo(value);
         }
 
         @Override
@@ -229,8 +229,8 @@ public class YTDUtil {
             }
 
         }
-        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true);
-        components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false));
+        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true, new AnalysisItemRetrievalStructure());
+        components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false, new AnalysisItemRetrievalStructure()));
         Iterator<IComponent> iter = components.iterator();
         while (iter.hasNext()) {
             IComponent component = iter.next();

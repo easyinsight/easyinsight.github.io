@@ -1,5 +1,6 @@
 package com.easyinsight.storage;
 
+import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
@@ -13,6 +14,11 @@ import com.easyinsight.core.*;
 import com.easyinsight.cache.Cache;
 import com.easyinsight.users.Account;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.Date;
@@ -23,6 +29,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
+import org.jets3t.service.S3ServiceException;
+import org.jets3t.service.impl.rest.httpclient.RestS3Service;
+import org.jets3t.service.model.S3Bucket;
+import org.jets3t.service.model.S3Object;
+import org.jets3t.service.security.AWSCredentials;
 
 /**
  * User: James Boe
@@ -1701,5 +1712,113 @@ public class DataStorage implements IDataStorage {
         actualRowSet.setAnalysisItems(validFields);
         actualRowSet.setRows(rows);
         return actualRowSet;
+    }
+
+    public File archive(@NotNull List<AnalysisItem> fields,
+                                InsightRequestMetadata insightRequestMetadata) throws SQLException, IOException, S3ServiceException {
+        Calendar cal = Calendar.getInstance();
+        Calendar shiftedCal = Calendar.getInstance();
+        int timeOffset = insightRequestMetadata.getUtcOffset() / 60;
+        String string;
+        if (timeOffset > 0) {
+            string = "GMT-"+Math.abs(timeOffset);
+        } else if (timeOffset < 0) {
+            string = "GMT+"+Math.abs(timeOffset);
+        } else {
+            string = "GMT";
+        }
+        TimeZone timeZone = TimeZone.getTimeZone(string);
+        shiftedCal.setTimeZone(timeZone);
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT ");
+        List<AnalysisItem> validFields = new ArrayList<AnalysisItem>();
+
+        File file = new File(System.currentTimeMillis() + ".csv");
+        System.out.println(file.getAbsolutePath());
+        FileOutputStream fos = new FileOutputStream(file);
+        BufferedOutputStream bos = new BufferedOutputStream(fos, 512);
+        CsvWriter csvWriter = new CsvWriter(bos, ',', Charset.forName("UTF-8"));
+        
+        for (AnalysisItem field : fields) {
+            if (field.persistable()) {
+                if (field.isKeyColumn()) {
+                    field.getKey().toBaseKey().setPkName(getTableName() + "_ID");
+                }
+                validFields.add(field);
+                sqlBuilder.append(field.getKey().toSQL());
+                sqlBuilder.append(",");
+            }
+
+        }
+        String[] fieldNames = new String[validFields.size()];
+        int fieldCounter = 0;
+        for (AnalysisItem analysisItem : validFields) {
+            fieldNames[fieldCounter++] = analysisItem.getKey().toBaseKey().toKeyString();
+        }
+        csvWriter.writeRecord(fieldNames);
+        String pk = getTableName() + "_ID";
+        sqlBuilder.append(pk);
+        //sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
+        sqlBuilder.append(" FROM ");
+        sqlBuilder.append(getTableName());
+
+
+
+        PreparedStatement queryStmt = storageConn.prepareStatement(sqlBuilder.toString(), java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+        queryStmt.setFetchSize(Integer.MIN_VALUE);
+
+        /*
+        stmt = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+stmt.setFetchSize(Integer.MIN_VALUE);
+         */
+        ResultSet dataRS = queryStmt.executeQuery();
+        int counter = 0;
+        while (dataRS.next()) {
+            int i = 1;
+            String[] records = new String[validFields.size()];
+            for (AnalysisItem analysisItem : validFields) {
+                if (analysisItem.persistable()) {
+                    KeyMetadata keyMetadata = keys.get(analysisItem.createAggregateKey(false));
+                    Value value;
+                    if (keyMetadata.getType() == Value.DATE) {
+                        Timestamp time = dataRS.getTimestamp(i++);
+                        if (dataRS.wasNull()) {
+                            value = new EmptyValue();
+                        } else {
+                            DateValue dateValue = new DateValue(new Date(time.getTime()));
+                            dateValue.calculate(cal);
+                            value = dateValue;
+                        }
+                    } else if (keyMetadata.getType() == Value.NUMBER) {
+                        double doubleValue = dataRS.getDouble(i++);
+                        if (dataRS.wasNull()) {
+                            value = new EmptyValue();
+                        } else {
+                            value = new NumericValue(doubleValue);
+                        }
+                    } else {
+                        String stringVavlue = dataRS.getString(i++);
+                        if (dataRS.wasNull()) {
+                            value = new EmptyValue();
+                        } else {
+                            value = new StringValue(stringVavlue);
+                        }
+                    }
+                    records[i - 2] = value.toString();
+                    //valueMap.put(analysisItem.qualifiedName(), value);
+                }
+            }
+            csvWriter.writeRecord(records);
+            counter++;
+            if (counter == 100) {
+                csvWriter.flush();
+                counter = 0;
+            }
+        }
+        dataRS.close();
+        csvWriter.flush();
+        csvWriter.close();
+        fos.close();
+        return file;
     }
 }

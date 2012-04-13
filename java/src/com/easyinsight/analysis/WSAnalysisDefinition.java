@@ -3,25 +3,19 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.definitions.WSKPIDefinition;
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
-import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ResultsBridge;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.io.Serializable;
 
 import com.easyinsight.preferences.ImageDescriptor;
-import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.Transient;
@@ -434,7 +428,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
-                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, columnSet);
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, columnSet, new AnalysisItemRetrievalStructure());
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID()) {
                     if (!columnSet.contains(item)) {
@@ -452,7 +446,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         if (retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : retrieveFilterDefinitions()) {
-                columnSet.addAll(filterDefinition.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, columnSet));
+                columnSet.addAll(filterDefinition.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, columnSet, new AnalysisItemRetrievalStructure()));
             }
         }
         for (AnalysisItem analysisItem : getLimitFields()) {

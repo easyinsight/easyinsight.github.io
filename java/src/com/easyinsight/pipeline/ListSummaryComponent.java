@@ -19,8 +19,8 @@ public class ListSummaryComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
 
         Set<AnalysisItem> reportItems = new HashSet<AnalysisItem>(pipelineData.getReportItems());
-        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true);
-        components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false));
+        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true, new AnalysisItemRetrievalStructure());
+        components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false, new AnalysisItemRetrievalStructure()));
 
         Iterator<IComponent> iter = components.iterator();
         while (iter.hasNext()) {

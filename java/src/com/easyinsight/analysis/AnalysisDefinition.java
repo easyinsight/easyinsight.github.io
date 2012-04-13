@@ -424,7 +424,7 @@ public class AnalysisDefinition implements Cloneable {
             for (AnalysisItem analysisItem : getAddedItems()) {
                 AnalysisItem clonedItem = replacementMap.addField(analysisItem, changingDataSource);
                 addedItems.add(clonedItem);
-                List<AnalysisItem> items = analysisItem.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
                 for (AnalysisItem item : items) {
                     replacementMap.addField(item, changingDataSource);
                 }
@@ -438,7 +438,7 @@ public class AnalysisDefinition implements Cloneable {
         reportItems.remove(null);
         for (AnalysisItem baseItem : reportItems) {
             replacementMap.addField(baseItem, changingDataSource);
-            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
+            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
             for (AnalysisItem item : items) {
                 replacementMap.addField(item, changingDataSource);
             }
@@ -447,7 +447,7 @@ public class AnalysisDefinition implements Cloneable {
         if (this.filterDefinitions != null) {
             for (FilterDefinition persistableFilterDefinition : this.filterDefinitions) {
                 filterDefinitions.add(persistableFilterDefinition.clone());
-                List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
+                List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
                 for (AnalysisItem item : filterItems) {
                     replacementMap.addField(item, changingDataSource);
                 }

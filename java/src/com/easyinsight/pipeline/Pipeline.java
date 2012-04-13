@@ -22,6 +22,7 @@ public abstract class Pipeline {
     private List<IComponent> components = new ArrayList<IComponent>();
     private PipelineData pipelineData;
     private ResultsBridge resultsBridge = new ListResultsBridge();
+    private AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure();
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(dataSource.getFields());
@@ -34,6 +35,10 @@ public abstract class Pipeline {
             resultsBridge = report.getCustomResultsBridge();
         }
         return this;
+    }
+
+    public AnalysisItemRetrievalStructure getStructure() {
+        return structure;
     }
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, Set<AnalysisItem> reportItems) {
@@ -91,7 +96,7 @@ public abstract class Pipeline {
                 if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
                     AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
                     if (analysisCalculation.getAggregation() == AggregationTypes.AVERAGE) {
-                        List<AnalysisItem> baseItems = analysisItem.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
+                        List<AnalysisItem> baseItems = analysisItem.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
                         allRequestedAnalysisItems.addAll(baseItems);
                         List<AnalysisItem> linkItems = analysisItem.addLinkItems(allFields);
                         allRequestedAnalysisItems.addAll(linkItems);
@@ -108,13 +113,13 @@ public abstract class Pipeline {
 
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                List<AnalysisItem> items = filterDefinition.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, allNeededAnalysisItems);
+                List<AnalysisItem> items = filterDefinition.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, allNeededAnalysisItems, structure);
                 allNeededAnalysisItems.addAll(items);
             }
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
-                List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, allNeededAnalysisItems);
+                List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, allNeededAnalysisItems, structure);
                 allNeededAnalysisItems.addAll(baseItems);
                 List<AnalysisItem> linkItems = item.addLinkItems(allFields);
                 allNeededAnalysisItems.addAll(linkItems);

@@ -92,10 +92,10 @@ public class AnalysisCalculation extends AnalysisMeasure {
     @Transient
     private transient Set<KeySpecification> specs;*/
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet) {
-        /*if (isCachedCalculation()) {
-            return super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet);
-        }*/
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
+        if (isCachedCalculation() && !structure.isOnStorage()) {
+            return super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure);
+        }
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
         Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
         if (allItems != null) {
@@ -153,7 +153,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
 
 
 
-        List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet);
+        List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure);
         //analysisItemList.add(this);
 
         if (!includeFilters && isApplyBeforeAggregation()) return analysisItemList;
@@ -168,7 +168,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet));
+                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure));
             }
         }
 
@@ -193,15 +193,15 @@ public class AnalysisCalculation extends AnalysisMeasure {
         return analysisItemList;
     }
 
-    protected List<AnalysisItem> measureFilters(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet) {
+    protected List<AnalysisItem> measureFilters(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> items;
         if (criteria == CleanupComponent.AGGREGATE_CALCULATIONS && !this.isApplyBeforeAggregation()) {
             items = new ArrayList<AnalysisItem>();
             for (FilterDefinition filterDefinition : getFilters()) {
-                items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet));
+                items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure));
             }
         } else {
-            items = super.measureFilters(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet);
+            items = super.measureFilters(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure);
         }
         return items;
     }

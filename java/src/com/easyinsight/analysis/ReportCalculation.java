@@ -87,7 +87,7 @@ public class ReportCalculation {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, new HashSet<AnalysisItem>()));
+                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure()));
             }
         }
 
@@ -132,7 +132,7 @@ public class ReportCalculation {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>()));
+                analysisItemList.addAll(analysisItem.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure()));
             }
         }
         if (analysisItemList.size() > 0) {

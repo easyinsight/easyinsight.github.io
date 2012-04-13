@@ -1,9 +1,6 @@
 package com.easyinsight.pipeline;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.DataResults;
-import com.easyinsight.analysis.FilterDateRangeDefinition;
-import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
@@ -74,7 +71,7 @@ public class DateRangePluginComponent implements IComponent {
     private boolean findItem(AnalysisItem field, List<AnalysisItem> allRequestedAnalysisItems, List<AnalysisItem> allFields) {
         int found = 0;
         for (AnalysisItem item : allRequestedAnalysisItems) {
-            List<AnalysisItem> items = item.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), false, false, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
+            List<AnalysisItem> items = item.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), false, false, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
             found += items.contains(field) ? 1 : 0;
         }
         return found > 0;

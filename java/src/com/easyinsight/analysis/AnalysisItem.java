@@ -447,11 +447,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return null;
     }
     
-    protected List<AnalysisItem> measureFilters(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet) {
+    protected List<AnalysisItem> measureFilters(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         if (includeFilters && getFilters().size() > 0) {
             for (FilterDefinition filterDefinition : getFilters()) {
-                items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet));
+                items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure));
             }
         }
         return items;
@@ -470,13 +470,13 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
 
         if (getSortItem() != null && analysisItemSet.contains(this)) {
             return new ArrayList<AnalysisItem>(analysisItemSet);
         }
         analysisItemSet.add(this);
-        analysisItemSet.addAll(measureFilters(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet));
+        analysisItemSet.addAll(measureFilters(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure));
         
         if (getLookupTableID() != null && getLookupTableID() > 0 && includeFilters) {
             LookupTable lookupTable = new FeedService().getLookupTable(getLookupTableID());
@@ -513,7 +513,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                 }
                 AnalysisItem analysisItem = findMatch(lookupTable.getSourceField(), displayMap, keyMap);
                 if (analysisItem != null && !analysisItemSet.contains(analysisItem)) {
-                    analysisItemSet.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet));
+                    analysisItemSet.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure));
                 }
             }
         }

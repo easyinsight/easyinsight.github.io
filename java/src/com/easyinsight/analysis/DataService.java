@@ -87,7 +87,7 @@ public class DataService {
             feedMetadata.setDataSourceInfo(feed.createSourceInfo(conn));
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
-            feedMetadata.setAllowRefactor("Therapy Works".equals(feed.getName()));
+            feedMetadata.setAllowRefactor("ACS2".equals(feed.getName()) || "Therapy Works".equals(feed.getName()));
             feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
             List<LookupTable> lookupTables = new ArrayList<LookupTable>();
             for (AnalysisItem field : feedItems) {
@@ -852,7 +852,7 @@ public class DataService {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
             ReportRetrieval reportRetrieval = new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn).toPipeline();
-            analysisDefinition.setRowsEditable("Therapy Works".equals(reportRetrieval.feed.getName()));
+            analysisDefinition.setRowsEditable("ACS2".equals(reportRetrieval.feed.getName()) || "Therapy Works".equals(reportRetrieval.feed.getName()));
             return reportRetrieval;
         }
 

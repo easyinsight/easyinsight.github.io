@@ -35,6 +35,9 @@ public class CachedCalculationTransform implements IDataTransform {
     }
 
     public void handle(EIConnection conn, IRow row) {
+        if (calculations.size() == 0) {
+            return;
+        }
         List<AnalysisItem> allItems = dataSource.getFields();
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
         Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();

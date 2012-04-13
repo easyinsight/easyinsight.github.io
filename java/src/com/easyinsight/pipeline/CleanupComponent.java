@@ -30,14 +30,14 @@ public class CleanupComponent implements IComponent {
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 if (filterDefinition.isEnabled() && !filterDefinition.isApplyBeforeAggregation()) {
-                    List<AnalysisItem> items = filterDefinition.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, cleanupCriteria, allNeededAnalysisItems);
+                    List<AnalysisItem> items = filterDefinition.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, cleanupCriteria, allNeededAnalysisItems, new AnalysisItemRetrievalStructure());
                     allNeededAnalysisItems.addAll(items);
                 }
             }
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
-                List<AnalysisItem> baseItems = item.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, cleanupCriteria, allNeededAnalysisItems);
+                List<AnalysisItem> baseItems = item.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, cleanupCriteria, allNeededAnalysisItems, new AnalysisItemRetrievalStructure());
                 allNeededAnalysisItems.addAll(baseItems);
                 List<AnalysisItem> linkItems = item.addLinkItems(pipelineData.getAllItems());
                 allNeededAnalysisItems.addAll(linkItems);

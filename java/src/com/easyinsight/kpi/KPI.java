@@ -152,7 +152,7 @@ public class KPI implements Cloneable {
             if (this.getFilters() != null) {
                 for (FilterDefinition persistableFilterDefinition : this.getFilters()) {
                     filterDefinitions.add(persistableFilterDefinition.clone());
-                    List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
+                    List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
                     for (AnalysisItem item : filterItems) {
                         if (replacementMap.get(item.getAnalysisItemID()) == null) {
                             AnalysisItem clonedFilterItem = item.clone();

@@ -22,7 +22,9 @@ public class CacheFunction extends Function {
     public Value evaluate() {
         EIConnection conn = Database.instance().getConnection();
         try {
-            //cache("ACS2", "Calc Weighted Procedures", "Weighted Procedures")
+            if (!(calculationMetadata instanceof DataSourceCalculationMetadata)) {
+                return null;
+            }
             DataSourceCalculationMetadata dataSourceCalculationMetadata = (DataSourceCalculationMetadata) calculationMetadata;
             
             String dataSourceName = minusQuotes(0);

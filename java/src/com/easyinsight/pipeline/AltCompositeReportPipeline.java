@@ -31,7 +31,7 @@ public class AltCompositeReportPipeline extends Pipeline {
                 } else if (lookupTable.getSourceField().hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                     Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
                     analysisItems.add(lookupTable.getSourceField());
-                    components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, true));
+                    components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, true, new AnalysisItemRetrievalStructure()));
                 }
                 components.add(new LookupTableComponent(lookupTable));
             }
@@ -39,7 +39,7 @@ public class AltCompositeReportPipeline extends Pipeline {
         for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new RangeComponent((AnalysisRangeDimension) range));
         }
-        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true));
+        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true, new AnalysisItemRetrievalStructure()));
         for (AnalysisItem item : joinItems) {
             for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, joinItems)) {
                 AnalysisList analysisList = (AnalysisList) tag;

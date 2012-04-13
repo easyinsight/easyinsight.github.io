@@ -34,7 +34,7 @@ public class StandardReportPipeline extends Pipeline {
                 } else if (lookupTable.getSourceField().hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                     Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
                     analysisItems.add(lookupTable.getSourceField());
-                    components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, true));
+                    components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, true, getStructure()));
                 }
                 components.add(new LookupTableComponent(lookupTable));
             }
@@ -44,7 +44,7 @@ public class StandardReportPipeline extends Pipeline {
         for (AnalysisItem item : allNeededAnalysisItems) {
             if (item.hasType(AnalysisItemTypes.CALCULATION) || item.hasType(AnalysisItemTypes.DERIVED_DIMENSION) ||
                     item.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-                items.addAll(item.getAnalysisItems(allItems, reportItems, false, false, CleanupComponent.AGGREGATE_CALCULATIONS, items));
+                items.addAll(item.getAnalysisItems(allItems, reportItems, false, false, CleanupComponent.AGGREGATE_CALCULATIONS, items, getStructure()));
             }
         }
 
@@ -54,7 +54,7 @@ public class StandardReportPipeline extends Pipeline {
             if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
         }
 
-        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true));
+        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true, getStructure()));
 
         if (report instanceof WSHeatMap) {
             WSHeatMap heatMap = (WSHeatMap) report;
@@ -120,7 +120,7 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new NormalizationComponent());
         components.add(new AggregationComponent());
 
-        List<IComponent> postAggCalculations = new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, false);
+        List<IComponent> postAggCalculations = new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, false, getStructure());
         components.addAll(postAggCalculations);
 
         // need another cleanup component here...
