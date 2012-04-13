@@ -19,6 +19,15 @@ public class Row implements IRow, Serializable {
 
     private long rowID;
 
+    private boolean marked;
+
+    public boolean isMarked() {
+        return marked;
+    }
+
+    public void setMarked(boolean marked) {
+        this.marked = marked;
+    }
 
     public long getRowID() {
         return rowID;

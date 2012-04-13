@@ -47,4 +47,8 @@ public interface IRow {
     void removeValue(Key key);
 
     void addValue(String s, Number value);
+
+    boolean isMarked();
+
+    void setMarked(boolean marked);
 }
