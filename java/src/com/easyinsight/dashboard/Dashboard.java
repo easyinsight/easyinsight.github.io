@@ -294,7 +294,7 @@ public class Dashboard implements Cloneable {
 
         for (FilterDefinition persistableFilterDefinition : this.filters) {
             filterDefinitions.add(persistableFilterDefinition.clone());
-            List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
+            List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
             for (AnalysisItem item : filterItems) {
                 if (replacementMap.get(item.getAnalysisItemID()) == null) {
                     AnalysisItem clonedItem = item.clone();
@@ -368,7 +368,7 @@ public class Dashboard implements Cloneable {
         eiDescs.addAll(getRootElement().allItems(dataSourceItems));
         for (FilterDefinition filterDefinition : filters) {
             eiDescs.add(new FilterDescriptor(filterDefinition));
-            List<AnalysisItem> items = filterDefinition.getAnalysisItems(dataSourceItems, new ArrayList<AnalysisItem>(), true, true, 0, new HashSet<AnalysisItem>());
+            List<AnalysisItem> items = filterDefinition.getAnalysisItems(dataSourceItems, new ArrayList<AnalysisItem>(), true, true, 0, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
             for (AnalysisItem item : items) {
                 eiDescs.add(new AnalysisItemDescriptor(item));
                 eiDescs.addAll(item.getKey().getDescriptors());

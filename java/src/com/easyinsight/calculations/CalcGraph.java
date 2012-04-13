@@ -19,11 +19,14 @@ import java.util.*;
 public class CalcGraph {
 
     public List<IComponent> doFunGraphStuff(Set<AnalysisItem> allNeededAnalysisItems, List<AnalysisItem> allItems, Set<AnalysisItem> reportItems,
-                                            boolean rowLevel) {
+                                            boolean rowLevel, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> derivedItems = new ArrayList<AnalysisItem>();
         for (AnalysisItem item : allNeededAnalysisItems) {
             if (item.hasType(AnalysisItemTypes.CALCULATION)) {
                 AnalysisCalculation calc = (AnalysisCalculation) item;
+                /*if (calc.isCachedCalculation()) {
+                    continue;
+                }*/
                 if (calc.isApplyBeforeAggregation() == rowLevel) derivedItems.add(item);
             } else if (rowLevel && item.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                 derivedItems.add(item);
@@ -42,7 +45,7 @@ public class CalcGraph {
                 nodeMap.put(item.createAggregateKey(), item);
             }
             for (AnalysisItem analysisItem : nodeMap.values()) {
-                List<AnalysisItem> requiredItems = analysisItem.getAnalysisItems(allItems, reportItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
+                List<AnalysisItem> requiredItems = analysisItem.getAnalysisItems(allItems, reportItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), structure);
                 for (AnalysisItem item : requiredItems) {
                     AnalysisItem requiredNode = nodeMap.get(item.createAggregateKey());
                     if (requiredNode != null && requiredNode != analysisItem) {
