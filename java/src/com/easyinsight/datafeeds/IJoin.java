@@ -30,4 +30,10 @@ public interface IJoin {
                      Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID);
 
     boolean isTargetJoinOnOriginal();
+
+    String getBlockLabel();
+
+    boolean isPostJoin();
+
+    void reconcile(List<CompositeFeedNode> compositeFeedNodes, List<AnalysisItem> fields);
 }

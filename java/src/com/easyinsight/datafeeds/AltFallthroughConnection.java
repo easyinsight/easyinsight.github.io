@@ -3,14 +3,12 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.Row;
-
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 
 import java.io.Serializable;
-
 import java.util.*;
 
 /**
@@ -18,14 +16,14 @@ import java.util.*;
  * Date: Jan 28, 2008
  * Time: 6:47:05 PM
  */
-public class CompositeFeedCompositeConnection implements Serializable, IJoin {
+public class AltFallthroughConnection implements Serializable, IJoin {
     
     private List<CompositePair> pairs;
     private String sourceName;
     private String targetName;
     private String label = "";
 
-    public CompositeFeedCompositeConnection(List<CompositePair> pairs, String sourceName, String targetName) {
+    public AltFallthroughConnection(List<CompositePair> pairs, String sourceName, String targetName) {
         this.pairs = pairs;
         this.sourceName = sourceName;
         this.targetName = targetName;
@@ -36,7 +34,7 @@ public class CompositeFeedCompositeConnection implements Serializable, IJoin {
     }
 
     public boolean isPostJoin() {
-        return false;
+        return true;
     }
 
     public void reconcile(List<CompositeFeedNode> nodes, List<AnalysisItem> fields) {
@@ -69,7 +67,7 @@ public class CompositeFeedCompositeConnection implements Serializable, IJoin {
     private String sourceFeedName;
     private String targetFeedName;
 
-    public CompositeFeedCompositeConnection() {
+    public AltFallthroughConnection() {
     }
 
     public List<AnalysisItem> getSourceItems() {
@@ -131,58 +129,69 @@ public class CompositeFeedCompositeConnection implements Serializable, IJoin {
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
                             Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID) {
 
-        Map<Map<Integer, Value>, List<IRow>> index = new HashMap<Map<Integer, Value>, List<IRow>>();
+        Map<Value, List<IRow>> index = new HashMap<Value, List<IRow>>();
         /*Collection<AnalysisItem> sourceItems = new ArrayList<AnalysisItem>();
         Collection<AnalysisItem> targetItems = new ArrayList<AnalysisItem>();*/
-        Collection<IRow> unjoinedRows = new ArrayList<IRow>();
+        /*Collection<IRow> unjoinedRows = new ArrayList<IRow>();
         List<IRow> sourceSetRows = sourceSet.getRows();
-        List<IRow> targetSetRows = dataSet.getRows();
-        for (IRow row : sourceSetRows) {
-            Map<Integer, Value> key = new HashMap<Integer, Value>();
-            for (int i = 0 ; i < sourceItems.size(); i++) {
-                AnalysisItem source = sourceItems.get(i);
-                Value joinDimensionValue = row.getValue(source);
-                key.put(i, joinDimensionValue);
-            }
-
-            List<IRow> rows = index.get(key);
-            if (rows == null) {
-                rows = new ArrayList<IRow>(1);
-                index.put(key, rows);
-            }
-            rows.add(row);
-        }
+        List<IRow> targetSetRows = dataSet.getRows();*/
         DataSet result = new DataSet();
-        Map<Map<Integer, Value>, List<IRow>> indexCopy = new HashMap<Map<Integer, Value>, List<IRow>>(index);
-        for (IRow row : targetSetRows) {
-            Map<Integer, Value> key = new HashMap<Integer, Value>();
-            for (int i = 0 ; i < targetItems.size(); i++) {
-                AnalysisItem source = targetItems.get(i);
-                Value joinDimensionValue = row.getValue(source);
-                key.put(i, joinDimensionValue);
+        for (int z = 0; z < sourceItems.size(); z ++) {
+            AnalysisItem myJoinDimension = sourceItems.get(z);
+            AnalysisItem fromJoinDimension = targetItems.get(z);
+            Collection<IRow> unjoinedRows = new ArrayList<IRow>();
+            List<IRow> sourceSetRows = sourceSet.getRows();
+            List<IRow> targetSetRows = dataSet.getRows();
+            for (IRow row : sourceSetRows) {
+                Value joinDimensionValue = row.getValue(myJoinDimension);
+                if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
+                } else {
+                    List<IRow> rows = index.get(joinDimensionValue);
+                    if (rows == null) {
+                        rows = new ArrayList<IRow>(1);
+                        index.put(joinDimensionValue, rows);
+                    }
+                    rows.add(row);
+                }
             }
-
-            indexCopy.remove(key);
-            List<IRow> sourceRows = index.get(key);
-            if (sourceRows == null) {
-                unjoinedRows.add(row);
-            } else {
-                for (IRow sourceRow : sourceRows) {
-                    sourceRow.merge(row, result);
+            
+            Map<Value, List<IRow>> indexCopy = new HashMap<Value, List<IRow>>(index);
+            Iterator<IRow> targetIter = targetSetRows.iterator();
+            while (targetIter.hasNext()) {
+                IRow row = targetIter.next();
+                Value joinDimensionValue = row.getValue(fromJoinDimension);
+                if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
+                } else {
+                    indexCopy.remove(joinDimensionValue);
+                    List<IRow> sourceRows = index.get(joinDimensionValue);
+                    if (sourceRows == null) {
+                    } else {
+                        targetIter.remove();
+                        for (IRow sourceRow : sourceRows) {
+                            sourceRow.setMarked(true);
+                            sourceRow.merge(row, result);
+                        }
+                    }
                 }
             }
 
-        }
 
-
-        for (List<IRow> rows : indexCopy.values()) {
-            for (IRow row : rows) {
+            /*for (List<IRow> rows : indexCopy.values()) {
+                for (IRow row : rows) {
+                    result.createRow().addValues(row);
+                }
+            }
+            for (IRow row : unjoinedRows) {
                 result.createRow().addValues(row);
+            }*/
+        }
+        
+        for (IRow row : sourceSet.getRows()) {
+            if (!row.isMarked()) {
+                result.addRow(row);
             }
         }
-        for (IRow row : unjoinedRows) {
-            result.createRow().addValues(row);
-        }
+
         return new MergeAudit("", result);
     }
 

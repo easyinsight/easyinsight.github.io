@@ -127,8 +127,8 @@ public class CompositeFeed extends Feed {
                         try {
                             List<IJoin> newJoins = new ReportCalculation(joinOverride.getMarmotScript()).applyJoinCalculation();
                             for (IJoin newJoin : newJoins) {
-                                CompositeFeedCompositeConnection connection = (CompositeFeedCompositeConnection) newJoin;
-                                connection.reconcile(compositeFeedNodes, getFields());
+                                //CompositeFeedCompositeConnection connection = (CompositeFeedCompositeConnection) newJoin;
+                                newJoin.reconcile(compositeFeedNodes, getFields());
                             }
                             connections.addAll(newJoins);
                         } catch (RecognitionException e) {
@@ -258,7 +258,15 @@ public class CompositeFeed extends Feed {
                 QueryStateNode nextNode = neededNodeIter.next();
                 List<Edge> neededEdges = DijkstraShortestPath.findPathBetween(graph, firstNode, nextNode);
                 if (neededEdges == null || neededEdges.get(0) == null) {
-                    throw new ReportException(new GenericReportFault("We weren't able to find a way to join data across the specified fields. Please adjust the report to try again."));
+                    boolean stillOkay = false;
+                    for (IJoin join : connections) {
+                        if (join.isPostJoin()) {
+                            stillOkay = true;
+                        }
+                    }
+                    if (!stillOkay) {
+                        throw new ReportException(new GenericReportFault("We weren't able to find a way to join data across the specified fields. Please adjust the report to try again."));    
+                    }
                 }
                 for (Edge edge : neededEdges) {
                     QueryStateNode precedingNode = graph.getEdgeSource(edge);
@@ -278,6 +286,7 @@ public class CompositeFeed extends Feed {
             }
             return dataSet;
         }
+
 
 
         UndirectedGraph<QueryStateNode, Edge> reducedGraph = new SimpleGraph<QueryStateNode, Edge>(Edge.class);
@@ -334,28 +343,34 @@ public class CompositeFeed extends Feed {
         QueryStateNode firstVertex = null;
         Map<Long, Collection<IJoin>> conns = new HashMap<Long, Collection<IJoin>>();
         Map<IJoin, FilterDefinition> filterMap = new HashMap<IJoin, FilterDefinition>();
+        List<IJoin> postJoins = new ArrayList<IJoin>();
         for (IJoin connection : connections) {
             if (neededNodes.containsKey(connection.getSourceFeedID()) && neededNodes.containsKey(connection.getTargetFeedID())) {
-                Collection<IJoin> sourceConnList = conns.get(connection.getSourceFeedID());
-                if (sourceConnList == null) {
-                    sourceConnList = new ArrayList<IJoin>();
-                    conns.put(connection.getSourceFeedID(), sourceConnList);
+                if (connection.isPostJoin()) {
+                    postJoins.add(connection);
+                } else {
+                    Collection<IJoin> sourceConnList = conns.get(connection.getSourceFeedID());
+                    if (sourceConnList == null) {
+                        sourceConnList = new ArrayList<IJoin>();
+                        conns.put(connection.getSourceFeedID(), sourceConnList);
+                    }
+                    sourceConnList.add(connection);
+                    Collection<IJoin> targetConnList = conns.get(connection.getTargetFeedID());
+                    if (targetConnList == null) {
+                        targetConnList = new ArrayList<IJoin>();
+                        conns.put(connection.getTargetFeedID(), targetConnList);
+                    }
+                    targetConnList.add(connection);
+                    Edge edge = new Edge(connection);
+                    QueryStateNode source = queryNodeMap.get(connection.getSourceFeedID());
+                    if (firstVertex == null) {
+                        firstVertex = source;
+                    }
+
+                    QueryStateNode target = queryNodeMap.get(connection.getTargetFeedID());
+                    //System.out.println("** adding edge of " + source.dataSourceName + " to " + target.dataSourceName);
+                    reducedGraph.addEdge(source, target, edge);
                 }
-                sourceConnList.add(connection);
-                Collection<IJoin> targetConnList = conns.get(connection.getTargetFeedID());
-                if (targetConnList == null) {
-                    targetConnList = new ArrayList<IJoin>();
-                    conns.put(connection.getTargetFeedID(), targetConnList);
-                }
-                targetConnList.add(connection);
-                Edge edge = new Edge(connection);
-                QueryStateNode source = queryNodeMap.get(connection.getSourceFeedID());
-                if (firstVertex == null) {
-                    firstVertex = source;
-                }
-                QueryStateNode target = queryNodeMap.get(connection.getTargetFeedID());
-                //System.out.println("** adding edge of " + source.dataSourceName + " to " + target.dataSourceName);
-                reducedGraph.addEdge(source, target, edge);
             }
         }
 
@@ -555,6 +570,13 @@ public class CompositeFeed extends Feed {
 
             }
         }
+
+        for (IJoin postJoin : postJoins) {
+            QueryStateNode queryStateNode = queryNodeMap.get(postJoin.getTargetFeedID());
+            DataSet targetSet = queryStateNode.produceDataSet(insightRequestMetadata);
+            dataSet = postJoin.merge(dataSet, targetSet, null, queryStateNode.neededItems, null, queryStateNode.dataSourceName, conn, 0, queryStateNode.feedID).getDataSet();
+        }
+
         dataSet.setAudits(auditStrings);
         /*try {
             new SendGridEmail().sendEmail("jboe@easy-insight.com", "Data Source Audit", auditBuilder.toString(), "jboe@easy-insight.com", true, "Audit Test");
@@ -702,7 +724,7 @@ public class CompositeFeed extends Feed {
                     break;
                 }
             }
-            List<AnalysisItem> items = analysisItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(analysisItem), false, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>());
+            List<AnalysisItem> items = analysisItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(analysisItem), false, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
             for (AnalysisItem item : items) {
                 addItem(item);
                 joinItems.add(item);

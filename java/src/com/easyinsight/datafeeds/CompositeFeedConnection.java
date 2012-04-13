@@ -37,6 +37,7 @@ public class CompositeFeedConnection implements Serializable, IJoin {
     private boolean targetJoinOnOriginal;
     private String sourceFeedName;
     private String targetFeedName;
+    private String label = "";
 
     public CompositeFeedConnection() {
     }
@@ -88,6 +89,22 @@ public class CompositeFeedConnection implements Serializable, IJoin {
 
     public boolean isTargetJoinOnOriginal() {
         return targetJoinOnOriginal;
+    }
+    
+    public void setBlockLabel(String label) {
+        this.label = label;
+    }
+
+    public String getBlockLabel() {
+        return label;
+    }
+
+    public boolean isPostJoin() {
+        return false;
+    }
+
+    public void reconcile(List<CompositeFeedNode> compositeFeedNodes, List<AnalysisItem> fields) {
+
     }
 
     public void setTargetJoinOnOriginal(boolean targetJoinOnOriginal) {
