@@ -127,7 +127,7 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     }
 
     public BasecampNextCompositeSource() {
-        setFeedName("Basecamp X");
+        setFeedName("Basecamp");
     }
 
     @Override
@@ -146,7 +146,7 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
                         OAuthClientRequest.TokenRequestBuilder tokenRequestBuilder = OAuthClientRequest.tokenLocation("https://launchpad.37signals.com/authorization/token").
                                 setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(CLIENT_ID).
                                 setClientSecret(CLIENT_SECRET).
-                                setRedirectURI("https://easy-insight.com/app/oauth").
+                                setRedirectURI("https://www.easy-insight.com/app/oauth").
                                 setCode(code);
                         tokenRequestBuilder.setParameter("type", "web_server");
                         request = tokenRequestBuilder.buildBodyMessage();
@@ -154,7 +154,7 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
                         OAuthClientRequest.TokenRequestBuilder tokenRequestBuilder = OAuthClientRequest.tokenLocation("https://launchpad.37signals.com/authorization/token").
                                 setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(CLIENT_ID).
                                 setClientSecret(CLIENT_SECRET).
-                                setRedirectURI("https://easy-insight.com/app/oauth").
+                                setRedirectURI("https://www.easy-insight.com/app/oauth").
                                 setCode(code);
                         tokenRequestBuilder.setParameter("type", "web_server");
                         request = tokenRequestBuilder.buildBodyMessage();

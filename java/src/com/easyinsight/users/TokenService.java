@@ -116,13 +116,13 @@ public class TokenService {
                     request = OAuthClientRequest
                             .authorizationLocation("https://launchpad.37signals.com/authorization/new")
                             .setClientId(BasecampNextCompositeSource.CLIENT_ID)
-                            .setRedirectURI("https://easy-insight.com/app/oauth")
+                            .setRedirectURI("https://www.easy-insight.com/app/oauth")
                             .buildQueryMessage();
                 } else {
                     request = OAuthClientRequest
                             .authorizationLocation("https://launchpad.37signals.com/authorization/new")
                             .setClientId(BasecampNextCompositeSource.CLIENT_ID)
-                            .setRedirectURI("https://easy-insight.com/app/oauth")
+                            .setRedirectURI("https://www.easy-insight.com/app/oauth")
                             .buildQueryMessage();
                 }
                 FlexContext.getHttpRequest().getSession().setAttribute("redirectTarget", redirectType);
