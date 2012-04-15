@@ -219,7 +219,7 @@ public class DataStorage implements IDataStorage {
     }
 
     private void validateSpace(Connection conn) throws SQLException, StorageLimitException {
-        if (systemUpdate) return;
+        /*if (systemUpdate) return;
         PreparedStatement queryStmt = conn.prepareStatement("select feed_persistence_metadata.size, feed_persistence_metadata.feed_id, data_feed.feed_type, data_feed.visible, " +
                 "data_feed.parent_source_id, data_feed.feed_name from feed_persistence_metadata, upload_policy_users, user, data_feed where " +
                 "data_feed.data_feed_id = upload_policy_users.feed_id and feed_persistence_metadata.feed_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id and " +
@@ -294,7 +294,8 @@ public class DataStorage implements IDataStorage {
             long mb = allowed / 1000000L;
             throw new ReportException(new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + " mb. You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier.", statsList));
         }
-        spaceAllowed.close();
+        spaceAllowed.close();*/
+
     }
 
     public int getVersion() {
