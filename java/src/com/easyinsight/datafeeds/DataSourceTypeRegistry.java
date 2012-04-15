@@ -2,10 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.datafeeds.admin.AdminStatsDataSource;
 import com.easyinsight.datafeeds.basecamp.*;
-import com.easyinsight.datafeeds.basecampnext.BasecampNextCalendarSource;
-import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
-import com.easyinsight.datafeeds.basecampnext.BasecampNextProjectSource;
-import com.easyinsight.datafeeds.basecampnext.BasecampNextTodoSource;
+import com.easyinsight.datafeeds.basecampnext.*;
 import com.easyinsight.datafeeds.batchbook.*;
 import com.easyinsight.datafeeds.campaignmonitor.CMClientSource;
 import com.easyinsight.datafeeds.campaignmonitor.CampaignMonitorDataSource;
@@ -211,6 +208,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.BASECAMP_NEXT_PROJECTS, BasecampNextProjectSource.class);
         registerType(FeedType.BASECAMP_NEXT_TODOS, BasecampNextTodoSource.class);
         registerType(FeedType.BASECAMP_NEXT_CALENDAR, BasecampNextCalendarSource.class);
+        registerType(FeedType.BASECAMP_NEXT_PEOPLE, BasecampNextPeopleSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
