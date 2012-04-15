@@ -32,6 +32,9 @@
                 case DataSourceType.BASECAMP:
                     result = new BasecampSolutionDetail();
                     break;
+                case DataSourceType.BASECAMP_NEXT:
+                    result = new BasecampNextSolutionDetail();
+                    break;
                 case DataSourceType.HIGHRISE:
                     result = new HighriseSolutionDetail();
                     break;
