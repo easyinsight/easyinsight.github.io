@@ -1,4 +1,5 @@
 package com.easyinsight.pseudocontext {
+import com.easyinsight.analysis.ActualRowExecutor;
 import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
@@ -16,6 +17,7 @@ import com.easyinsight.analysis.Link;
 import com.easyinsight.analysis.URLLink;
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.report.ReportNavigationEvent;
+import com.easyinsight.rowedit.ActualRowEvent;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.display.InteractiveObject;
@@ -107,7 +109,7 @@ public class StandardContextWindow {
                 items.push(defineDateLink(AnalysisItemTypes.WEEK_LEVEL, "Week of Year"));
             }
         }
-
+        //
         var copyItem:ContextMenuItem = new ContextMenuItem("Copy Value");
         copyItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copyValue);
         items.push(copyItem);
@@ -121,13 +123,24 @@ public class StandardContextWindow {
                 items.push(additionalItem);
             }
         }
+        if (report != null && report.rowsEditable) {
+            var allDataItem:ContextMenuItem = new ContextMenuItem("Edit Rows...");
+            allDataItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
+                var executor:ActualRowExecutor = new ActualRowExecutor(data, analysisItem, report);
+                executor.addEventListener(ActualRowEvent.ACTUAL_ROW_DATA, onActualRowData);
+                executor.send();
+            });
+            items.push(allDataItem);
+        }
         var menu:ContextMenu = new ContextMenu();
         menu.hideBuiltInItems();
         menu.customItems = items;
         passthroughObject.contextMenu = menu;
     }
 
-
+    private function onActualRowData(event:ActualRowEvent):void {
+        passthroughFunction.call(passthroughObject, event);
+    }
 
     private function defineDateLink(targetLevel:int, label:String):ContextMenuItem {
         var item:ContextMenuItem = new ContextMenuItem(label);
