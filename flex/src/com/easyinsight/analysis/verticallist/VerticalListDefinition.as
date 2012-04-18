@@ -8,6 +8,8 @@
 package com.easyinsight.analysis.verticallist {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisMeasure;
 
 import mx.collections.ArrayCollection;
 
@@ -34,11 +36,23 @@ public class VerticalListDefinition extends AnalysisDefinition {
         return AnalysisDefinition.VERTICAL_LIST;
     }
 
-    override public function getFields():ArrayCollection {
-        return new ArrayCollection();
+    override public function populate(fields:ArrayCollection):void {
+        this.measures = findItems(fields, AnalysisItemTypes.MEASURE);
+        var dimensions:ArrayCollection = findItems(fields, AnalysisItemTypes.DIMENSION);
+        if (dimensions.length > 0) {
+            column = dimensions.getItemAt(0) as AnalysisItem;
+        }
     }
 
-    override public function populate(fields:ArrayCollection):void {
+    override public function getFields():ArrayCollection {
+        var fields:Array = [];
+        if (column != null) {
+            fields.push(column);
+        }
+        for each (var measure:AnalysisMeasure in measures) {
+            fields.push(measure);
+        }
+        return new ArrayCollection(fields);
     }
 }
 }

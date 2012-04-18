@@ -9,6 +9,8 @@ package com.easyinsight.analysis.ytd {
 import com.easyinsight.analysis.AggregationTypes;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisMeasure;
 
 import mx.collections.ArrayCollection;
 
@@ -37,11 +39,23 @@ public class YTDDefinition extends AnalysisDefinition {
         return AnalysisDefinition.YTD;
     }
 
-    override public function getFields():ArrayCollection {
-        return new ArrayCollection();
+    override public function populate(fields:ArrayCollection):void {
+        this.measures = findItems(fields, AnalysisItemTypes.MEASURE);
+        var dimensions:ArrayCollection = findItems(fields, AnalysisItemTypes.DATE);
+        if (dimensions.length > 0) {
+            timeDimension = dimensions.getItemAt(0) as AnalysisItem;
+        }
     }
 
-    override public function populate(fields:ArrayCollection):void {
+    override public function getFields():ArrayCollection {
+        var fields:Array = [];
+        if (timeDimension != null) {
+            fields.push(timeDimension);
+        }
+        for each (var measure:AnalysisMeasure in measures) {
+            fields.push(measure);
+        }
+        return new ArrayCollection(fields);
     }
 }
 }
