@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.logging.LogClass;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +20,9 @@ public class ReplacementMap {
     public static ReplacementMap fromMap(Map<Long, AnalysisItem> fields) {
         ReplacementMap replacementMap = new ReplacementMap();
         replacementMap.replacementMap = fields;
+        for (AnalysisItem analysisItem : fields.values()) {
+            replacementMap.qualifiedNameReplacementMap.put(analysisItem.toDisplay() + "-" + analysisItem.getQualifiedSuffix(), analysisItem);
+        }
         return replacementMap;
     }
 
@@ -40,11 +45,19 @@ public class ReplacementMap {
     }
 
     public AnalysisItem getField(AnalysisItem analysisItem) {
+        AnalysisItem returnItem;
         if (analysisItem.getAnalysisItemID() > 0) {
-            return replacementMap.get(analysisItem.getAnalysisItemID());
+            returnItem = replacementMap.get(analysisItem.getAnalysisItemID());
+            if (returnItem == null) {
+                LogClass.error("Could not find " + analysisItem.toDisplay() + " by ID.");
+            }
         } else {
-            return qualifiedNameReplacementMap.get(analysisItem.toDisplay() + "-" + analysisItem.getQualifiedSuffix());
+            returnItem = qualifiedNameReplacementMap.get(analysisItem.toDisplay() + "-" + analysisItem.getQualifiedSuffix());
+            if (returnItem == null) {
+                LogClass.error("Could not find " + analysisItem.toDisplay() + " by name.");
+            }
         }
+        return returnItem;
     }
 
     private void cleanup(AnalysisItem analysisItem, boolean changingDataSource) {
