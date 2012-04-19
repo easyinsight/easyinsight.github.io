@@ -34,6 +34,9 @@ public class ReplacementMap {
     }
 
     public AnalysisItem addField(AnalysisItem analysisItem, boolean changingDataSource) throws CloneNotSupportedException {
+        if (analysisItem == null) {
+            return null;
+        }
         AnalysisItem exists = getField(analysisItem);
         if (exists == null) {
             exists = analysisItem.clone();
