@@ -115,7 +115,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             cal.set(Calendar.YEAR, 2011);
             cal.set(Calendar.DAY_OF_YEAR, 1);
             Date boundaryTime = cal.getTime();
-            IWhere where = new DateWhere(dateKey, boundaryTime, Comparison.LESS_THAN);
+            IWhere where = new DateWhere(dateKey, boundaryTime, Comparison.GREATER_THAN);
             dataStorage.deleteData(Arrays.asList(where));
         } else {
             dataStorage.truncate();
