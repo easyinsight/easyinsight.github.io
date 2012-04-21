@@ -104,6 +104,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
     protected void clearData(DataStorage dataStorage) throws SQLException {
         if (databaseID.equals("beutk2zd6")) {
+            System.out.println("Using this as the truncation method");
             Key dateKey = null;
             for (AnalysisItem analysisItem : getFields()) {
                 if ("Date".equals(analysisItem.toDisplay())) {
