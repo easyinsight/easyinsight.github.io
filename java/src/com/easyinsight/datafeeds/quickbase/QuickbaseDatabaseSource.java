@@ -111,9 +111,10 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 }
             }
             Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DAY_OF_YEAR, -60);
+            cal.set(Calendar.YEAR, 2011);
+            cal.set(Calendar.DAY_OF_YEAR, 1);
             Date boundaryTime = cal.getTime();
-            IWhere where = new DateWhere(dateKey, boundaryTime, Comparison.GREATER_THAN);
+            IWhere where = new DateWhere(dateKey, boundaryTime, Comparison.LESS_THAN);
             dataStorage.deleteData(Arrays.asList(where));
         } else {
             dataStorage.truncate();
@@ -197,6 +198,8 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             return true;
         }
     }
+
+
 
     @Override
     protected String getUpdateKeyName() {
@@ -297,12 +300,16 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             int count;
 
 
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.YEAR, 2011);
+            cal.set(Calendar.DAY_OF_YEAR, 1);
+            Date cutoffDate = cal.getTime();
             int masterCount;
             masterCount = 0;
             int newRows = 0;
             String query;
             if (lastRefreshDate == null) {
-                query = "";
+                query = ("{'2'.AF.'" + cutoffDate.getTime() + "'}");
             } else {
                 query = ("{'2'.AF.'" + lastRefreshDate.getTime() + "'}");
             }
