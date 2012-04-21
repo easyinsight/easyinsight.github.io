@@ -223,6 +223,10 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     protected String getUpdateKeyName() {
         return null;
     }
+    
+    protected void clearData(DataStorage dataStorage) throws SQLException {
+        dataStorage.truncate();
+    }
 
     public void applyTempLoad(EIConnection conn, long accountID, FeedDefinition parentDefinition, Date lastRefreshTime, String tempTable, boolean fullRefresh) throws Exception {
         DataStorage dataStorage = null;
@@ -235,7 +239,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             }
             boolean insert = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh;
             if (insert) {
-                dataStorage.truncate();
+                clearData(dataStorage);
                 dataStorage.insertFromSelect(tempTable);
             } else {
                 if (getUpdateKeyName() == null) {
@@ -286,6 +290,9 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
                 new DataSourceInternalService().updateFeedDefinition(this, conn, true, false);
             }
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
+            if (!dataStorage.isTableDefined()) {
+                dataStorage.createTable();
+            }
             System.out.println("Refreshing " + getDataFeedID() + " for account " + accountID + " at " + new Date());
             if (clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh) {
                 dataStorage.truncate(); 
