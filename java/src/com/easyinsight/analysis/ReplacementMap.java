@@ -21,6 +21,9 @@ public class ReplacementMap {
         ReplacementMap replacementMap = new ReplacementMap();
         replacementMap.replacementMap = fields;
         for (AnalysisItem analysisItem : fields.values()) {
+            if (analysisItem == null) {
+                continue;
+            }
             replacementMap.qualifiedNameReplacementMap.put(analysisItem.toDisplay() + "-" + analysisItem.getQualifiedSuffix(), analysisItem);
         }
         return replacementMap;
