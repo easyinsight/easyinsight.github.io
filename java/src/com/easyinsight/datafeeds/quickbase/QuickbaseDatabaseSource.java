@@ -310,7 +310,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             int newRows = 0;
             String query;
             if (lastRefreshDate == null) {
-                query = ("{'2'.AF.'" + cutoffDate.getTime() + "'}");
+                query = ("{'214'.AF.'" + cutoffDate.getTime() + "'}");
             } else {
                 query = ("{'2'.AF.'" + lastRefreshDate.getTime() + "'}");
             }
