@@ -54,14 +54,14 @@ public class ReplacementMap {
         AnalysisItem returnItem;
         if (analysisItem.getAnalysisItemID() > 0) {
             returnItem = replacementMap.get(analysisItem.getAnalysisItemID());
-            if (returnItem == null) {
+            /*if (returnItem == null) {
                 LogClass.error("Could not find " + analysisItem.toDisplay() + " by ID.");
-            }
+            }*/
         } else {
             returnItem = qualifiedNameReplacementMap.get(analysisItem.toDisplay() + "-" + analysisItem.getQualifiedSuffix());
-            if (returnItem == null) {
+            /*if (returnItem == null) {
                 LogClass.error("Could not find " + analysisItem.toDisplay() + " by name.");
-            }
+            }*/
         }
         return returnItem;
     }
