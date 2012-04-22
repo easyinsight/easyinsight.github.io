@@ -3,6 +3,7 @@
                       creationComplete="setup()"
                       xmlns:skin="com.easyinsight.skin.*" implements="com.easyinsight.listing.IPerspective">
     <mx:Script><![CDATA[
+        import com.easyinsight.administration.ArchiveWindow;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -125,6 +126,12 @@
 
         public function cleanup():void {
         }
+
+        private function archive():void {
+            var window:ArchiveWindow = new ArchiveWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="getScheduledActivities" result="gotActivities()"/>
@@ -136,6 +143,7 @@
             <mx:Button label="Add Report Delivery..." click="newReportDelivery()" styleName="grayButton" fontSize="12"/>
             <mx:Button label="Add Scorecard Delivery..." click="newScorecard()" styleName="grayButton" fontSize="12"/>
             <mx:Button label="Add Multi Report/Scorecard Delivery..." click="newGeneral()" styleName="grayButton" fontSize="12"/>
+            <mx:Button label="Archive" click="archive()" styleName="grayButton" fontSize="12"/>
         </mx:HBox>
         <mx:Canvas width="90%" maxHeight="200">
             <mx:VBox id="dataSourceWarnings"/>

@@ -1,5 +1,9 @@
 package com.easyinsight.export;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.easyinsight.analysis.DataService;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
@@ -10,6 +14,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedService;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.email.SendGridEmail;
@@ -35,6 +40,10 @@ import flex.messaging.FlexContext;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
+import org.jets3t.service.impl.rest.httpclient.RestS3Service;
+import org.jets3t.service.model.S3Bucket;
+import org.jets3t.service.model.S3Object;
+import org.jets3t.service.security.AWSCredentials;
 
 import java.io.*;
 
@@ -45,6 +54,8 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * User: James Boe
@@ -87,6 +98,51 @@ public class ExportService {
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
+        }
+    }
+
+    public void archive(long dataSourceID) {
+
+        try {
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID);
+            DataStorage dataStorage = DataStorage.readConnection(dataSource.getFields(), dataSource.getDataFeedID());
+            try {
+                File file = dataStorage.archive(dataSource.getFields(), new InsightRequestMetadata());
+
+                File archiveFile = new File(System.currentTimeMillis() + ".zip");
+                FileOutputStream archiveStream = new FileOutputStream(archiveFile);
+                ZipOutputStream zos = new ZipOutputStream(archiveStream);
+                ZipEntry zipEntry = new ZipEntry("data.csv");
+                zos.putNextEntry(zipEntry);
+                BufferedOutputStream bufOS = new BufferedOutputStream(zos, 1024);
+                byte[] buffer = new byte[1024];
+                InputStream bfis = new FileInputStream(file);
+                int nBytes;
+                while ((nBytes = bfis.read(buffer)) != -1) {
+                    bufOS.write(buffer, 0, nBytes);
+                }
+                bufOS.flush();
+                zos.flush();
+                zos.closeEntry();
+
+                bfis.close();
+
+                archiveStream.flush();
+
+                zos.close();
+
+                archiveStream.close();
+
+                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+                s3.putObject(new PutObjectRequest("archival1", "archive.zip", archiveFile));
+                archiveFile.delete();
+                file.delete();
+            } finally {
+                dataStorage.closeConnection();
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
         }
     }
 

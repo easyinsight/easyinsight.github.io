@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+
+        private function archived():void {
+            Alert.show("done");
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="exportService" destination="exportService">
+        <mx:method name="archive" result="archived()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:TextInput id="urlInput"/>
+        <mx:Button label="Archive" click="exportService.archive.send(urlInput.text)"/>
+        <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+    </mx:VBox>
+</util:EISlimWindow>
