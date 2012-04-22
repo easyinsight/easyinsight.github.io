@@ -143,7 +143,7 @@
             <mx:Button label="Add Report Delivery..." click="newReportDelivery()" styleName="grayButton" fontSize="12"/>
             <mx:Button label="Add Scorecard Delivery..." click="newScorecard()" styleName="grayButton" fontSize="12"/>
             <mx:Button label="Add Multi Report/Scorecard Delivery..." click="newGeneral()" styleName="grayButton" fontSize="12"/>
-            <mx:Button label="Archive" click="archive()" styleName="grayButton" fontSize="12"/>
+            <!--<mx:Button label="Archive" click="archive()" styleName="grayButton" fontSize="12"/>-->
         </mx:HBox>
         <mx:Canvas width="90%" maxHeight="200">
             <mx:VBox id="dataSourceWarnings"/>
