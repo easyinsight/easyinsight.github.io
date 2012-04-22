@@ -46,7 +46,7 @@ public class EmptyValue extends Value {
 
     @Override
     public String toString() {
-        return "";
+        return "(Empty)";
     }
 
     public int compareTo(Value value) {
