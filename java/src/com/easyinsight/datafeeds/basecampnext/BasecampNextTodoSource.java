@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.basecampnext;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -36,6 +37,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
     public static final String TODO_ID = "Todo ID";
     public static final String TODO_CREATED_AT = "Todo Created At";
     public static final String TODO_UPDATED_AT = "Todo Updated At";
+    public static final String TODO_COMPLETED = "Todo Completed";
     public static final String TODO_COMPLETED_AT = "Todo Completed At";
     public static final String TODO_ASSIGNEE = "Todo Assignee";
     public static final String TODO_ASSIGNEE_ID = "Todo Assignee ID";
@@ -59,7 +61,8 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(TODO_LIST_NAME, TODO_LIST_DESCRIPTION, TODO_LIST_ID, TODO_LIST_URL, TODO_LIST_UPDATED_AT,
                 TODO_NAME, TODO_ID, TODO_CREATED_AT, TODO_UPDATED_AT, TODO_COMPLETED_AT, TODO_ASSIGNEE,
-                TODO_COMPLETER, TODO_URL, TODO_DUE_AT, TODO_COUNT, TODO_LIST_PROJECT_ID, TODO_COMPLETER_ID, TODO_ASSIGNEE_ID);
+                TODO_COMPLETER, TODO_URL, TODO_DUE_AT, TODO_COUNT, TODO_LIST_PROJECT_ID, TODO_COMPLETER_ID, TODO_ASSIGNEE_ID,
+                TODO_COMPLETED);
     }
 
     @Override
@@ -75,14 +78,25 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
         analysisitems.add(new AnalysisDimension(keys.get(TODO_ASSIGNEE)));
         analysisitems.add(new AnalysisDimension(keys.get(TODO_ASSIGNEE_ID)));
         analysisitems.add(new AnalysisDimension(keys.get(TODO_COMPLETER)));
+        AnalysisDimension completed = new AnalysisDimension(keys.get(TODO_COMPLETED));
+        analysisitems.add(completed);
         analysisitems.add(new AnalysisDimension(keys.get(TODO_COMPLETER_ID)));
         analysisitems.add(new AnalysisDimension(keys.get(TODO_URL)));
+        analysisitems.add(new AnalysisMeasure(TODO_COUNT, AggregationTypes.SUM));
+        AnalysisCalculation timeToDue = new AnalysisCalculation();
+        timeToDue.getFormattingConfiguration().setFormattingType(FormattingConfiguration.MILLISECONDS);
+        timeToDue.setKey(new NamedKey("Time to Due"));
+        timeToDue.setCalculationString("equalto([Todo Completed], \"Completed\", 0, [Todo Due At] - now())");
+        AnalysisCalculation overdueTodoCount = new AnalysisCalculation();
+        overdueTodoCount.setKey(new NamedKey("Overdue Todo Count"));
+        overdueTodoCount.setCalculationString("equalto([Todo Completed], \"Completed\", 0, greaterthan([Todo Due At], 0, greaterthan([Todo Due At], now(), 0, 1), 0))");
+        analysisitems.add(timeToDue);
+        analysisitems.add(overdueTodoCount);
         analysisitems.add(new AnalysisDateDimension(keys.get(TODO_LIST_UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisitems.add(new AnalysisDateDimension(keys.get(TODO_CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisitems.add(new AnalysisDateDimension(keys.get(TODO_UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisitems.add(new AnalysisDateDimension(keys.get(TODO_COMPLETED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisitems.add(new AnalysisDateDimension(keys.get(TODO_DUE_AT), true, AnalysisDateDimension.DAY_LEVEL));
-        analysisitems.add(new AnalysisMeasure(TODO_COUNT, AggregationTypes.SUM));
         return analysisitems;
     }
     
@@ -92,8 +106,16 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
         }
         return null;
     }
+
+    private Date parseDueDate(String string) {
+        if (string != null && !"null".equals(string) && !"".equals(string)) {
+            return dueAtFormat.parseDateTime(string).toDate();
+        }
+        return null;
+    }
     
     private static final DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+    private static final DateTimeFormatter dueAtFormat = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     @Override
     protected String getUpdateKeyName() {
@@ -171,7 +193,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             String todoID = String.valueOf(todoObject.getInt("id"));
             String todoContent = todoObject.getString("content");
             String dueAtString = todoObject.getString("due_at");
-            Date dueAt = parseDate(dueAtString);
+            Date dueAt = parseDueDate(dueAtString);
             String completedAtString = todoObject.getString("completed_at");
             Date completedAt = parseDate(completedAtString);
             String createdAtString = todoObject.getString("created_at");
@@ -205,6 +227,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             row.addValue(keys.get(TODO_DUE_AT), dueAt);
             row.addValue(keys.get(TODO_ID), todoID);
             row.addValue(keys.get(TODO_NAME), todoContent);
+            row.addValue(keys.get(TODO_COMPLETED), completedAt != null ? "Completed" : "Not Completed");
         }
     }
 }
