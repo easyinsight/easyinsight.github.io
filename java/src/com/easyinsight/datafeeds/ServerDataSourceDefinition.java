@@ -295,7 +295,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             }
             System.out.println("Refreshing " + getDataFeedID() + " for account " + accountID + " at " + new Date());
             if (clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh) {
-                dataStorage.truncate(); 
+                clearData(dataStorage);
             }
             DataSet dataSet = getDataSet(keys, now, parentDefinition, dataStorage, conn, callDataID, lastRefreshTime);
             addData(dataStorage, dataSet);
