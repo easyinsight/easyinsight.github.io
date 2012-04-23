@@ -201,6 +201,7 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.FRESHBOOKS_PAYMENTS, FeedType.FRESHBOOKS_CLIENTS, FreshbooksPaymentSource.CLIENT_ID, FreshbooksClientSource.CLIENT_ID),
                 new ChildConnection(FeedType.FRESHBOOKS_PAYMENTS, FeedType.FRESHBOOKS_INVOICE, FreshbooksPaymentSource.INVOICE_ID, FreshbooksInvoiceSource.INVOICE_ID),
                 new ChildConnection(FeedType.FRESHBOOKS_PROJECTS, FeedType.FRESHBOOKS_CLIENTS, FreshbooksProjectSource.CLIENT_ID, FreshbooksClientSource.CLIENT_ID),
+                new ChildConnection(FeedType.FRESHBOOKS_TIME_ENTRIES, FeedType.FRESHBOOKS_PROJECTS, FreshbooksTimeEntrySource.PROJECT_ID, FreshbooksProjectSource.PROJECT_ID),
                 new ChildConnection(FeedType.FRESHBOOKS_TIME_ENTRIES, FeedType.FRESHBOOKS_STAFF, FreshbooksTimeEntrySource.STAFF_ID, FreshbooksStaffSource.STAFF_ID),
                 new ChildConnection(FeedType.FRESHBOOKS_TASKS, FeedType.FRESHBOOKS_TIME_ENTRIES, FreshbooksTaskSource.TASK_ID, FreshbooksTimeEntrySource.TASK_ID),
                 new ChildConnection(FeedType.FRESHBOOKS_LINE_ITEMS, FeedType.FRESHBOOKS_INVOICE, FreshbooksInvoiceLineSource.INVOICE_ID, FreshbooksInvoiceSource.INVOICE_ID));
