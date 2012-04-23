@@ -164,7 +164,7 @@ public class AnalysisService {
                         }
                     } else {
                         if (connection.getSourceItem() != null) {
-                            if (connection.getSourceItem().getKey().toKeyString().equals(item.getKey().toKeyString())) {
+                            if (connection.getSourceItem().toDisplay().equals(item.toDisplay())) {
                                 analysisItem = item;
                                 break;
                             }
@@ -173,6 +173,20 @@ public class AnalysisService {
                 }
             }
 
+        }
+        if (analysisItem == null && connection.getSourceItem() != null) {
+            for (AnalysisItem item : items) {
+                Key key = item.getKey();
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    if (derivedKey.getFeedID() == connection.getSourceFeedID()) {
+                        if (connection.getSourceItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
+                            analysisItem = item;
+                            break;
+                        }
+                    }
+                }
+            }
         }
         return analysisItem;
     }
@@ -200,7 +214,7 @@ public class AnalysisService {
                         }
                     } else {
                         if (connection.getTargetItem() != null) {
-                            if (connection.getTargetItem().getKey().toKeyString().equals(item.getKey().toKeyString())) {
+                            if (connection.getTargetItem().toDisplay().equals(item.toDisplay())) {
                                 analysisItem = item;
                                 break;
                             }
@@ -209,6 +223,20 @@ public class AnalysisService {
                 }
             }
 
+        }
+        if (analysisItem == null && connection.getTargetItem() != null) {
+            for (AnalysisItem item : items) {
+                Key key = item.getKey();
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    if (derivedKey.getFeedID() == connection.getTargetFeedID()) {
+                        if (connection.getTargetItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
+                            analysisItem = item;
+                            break;
+                        }
+                    }
+                }
+            }
         }
         return analysisItem;
     }
