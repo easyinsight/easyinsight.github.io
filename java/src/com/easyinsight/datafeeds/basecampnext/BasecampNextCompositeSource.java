@@ -63,10 +63,6 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
             OAuthClientRequest request = tokenRequestBuilder.buildBodyMessage();
             OAuthJSONAccessTokenResponse response = client.accessToken(request);
             accessToken = response.getAccessToken();
-            /*
-            {"expires_in":1209600,"access_token":"BAhbByIB4HsiZXhwaXJlc19hdCI6IjIwMjItMDMtMjlUMjI6NTI6MjVaIiwidXNlcl9pZHMiOlszMDkwODQsMjMxMjI3Niw5MTA4OTU5LDkxMDg5NjAsOTEwODk2MSwxMDY3ODkwOCwxMDY3ODkwN10sInZlcnNpb24iOjEsImNsaWVudF9pZCI6ImU2NjMwZGIxMWYzODFjZTQ2OTMwNTAxOGUxZTc3M2I2YWQ0YTZhMTQiLCJhcGlfZGVhZGJvbHQiOiI0Mzc2M2Y2MzhlMWQ4NWMzYzFlMjYxYzU5M2U0MzQ4ZCJ9dToJVGltZQ22ix7AAACQ0Q==--0b53f330cf9cf7eb213c9270e9098eac874d65ec"}
-             */
-            System.out.println("updated access token to " + accessToken + " and refresh token to " + refreshToken);
         } catch (Exception e) {
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize access.", this));
         }
@@ -165,23 +161,11 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
                     refreshToken = response.getRefreshToken();
                     try {
                         this.endpoint = new InitRetrieval().blah(this);
-                        /*
-                        {"expires_in":1209600,"refresh_token":"BAhbByIB4HsiZXhwaXJlc19hdCI6IjIwMjItMDMtMjlUMjI6NTI6MjVaIiwidXNlcl9pZHMiOlszMDkwODQsMjMxMjI3Niw5MTA4OTU5LDkxMDg5NjAsOTEwODk2MSwxMDY3ODkwOCwxMDY3ODkwN10sInZlcnNpb24iOjEsImNsaWVudF9pZCI6ImU2NjMwZGIxMWYzODFjZTQ2OTMwNTAxOGUxZTc3M2I2YWQ0YTZhMTQiLCJhcGlfZGVhZGJvbHQiOiI0Mzc2M2Y2MzhlMWQ4NWMzYzFlMjYxYzU5M2U0MzQ4ZCJ9dToJVGltZQ22ix7A+FmS0Q==--adb332ae16eefa72dbea4af605eab17dceed2d98","access_token":"BAhbByIB4HsiZXhwaXJlc19hdCI6IjIwMTItMDQtMTJUMjI6NTI6MjVaIiwidXNlcl9pZHMiOlszMDkwODQsMjMxMjI3Niw5MTA4OTU5LDkxMDg5NjAsOTEwODk2MSwxMDY3ODkwOCwxMDY3ODkwN10sInZlcnNpb24iOjEsImNsaWVudF9pZCI6ImU2NjMwZGIxMWYzODFjZTQ2OTMwNTAxOGUxZTc3M2I2YWQ0YTZhMTQiLCJhcGlfZGVhZGJvbHQiOiI0Mzc2M2Y2MzhlMWQ4NWMzYzFlMjYxYzU5M2U0MzQ4ZCJ9dToJVGltZQ2WDRzA60WS0Q==--6df1c09af7e849f7b1da382b8976e21a787f7308"}
-                        BAhbByIB4HsiZXhwaXJlc19hdCI6IjIwMTItMDQtMTJUMjI6NTI6MjVaIiwidXNlcl9pZHMiOlszMDkwODQsMjMxMjI3Niw5MTA4OTU5LDkxMDg5NjAsOTEwODk2MSwxMDY3ODkwOCwxMDY3ODkwN10sInZlcnNpb24iOjEsImNsaWVudF9pZCI6ImU2NjMwZGIxMWYzODFjZTQ2OTMwNTAxOGUxZTc3M2I2YWQ0YTZhMTQiLCJhcGlfZGVhZGJvbHQiOiI0Mzc2M2Y2MzhlMWQ4NWMzYzFlMjYxYzU5M2U0MzQ4ZCJ9dToJVGltZQ2WDRzA60WS0Q==--6df1c09af7e849f7b1da382b8976e21a787f7308
-                        BAhbByIB4HsiZXhwaXJlc19hdCI6IjIwMjItMDMtMjlUMjI6NTI6MjVaIiwidXNlcl9pZHMiOlszMDkwODQsMjMxMjI3Niw5MTA4OTU5LDkxMDg5NjAsOTEwODk2MSwxMDY3ODkwOCwxMDY3ODkwN10sInZlcnNpb24iOjEsImNsaWVudF9pZCI6ImU2NjMwZGIxMWYzODFjZTQ2OTMwNTAxOGUxZTc3M2I2YWQ0YTZhMTQiLCJhcGlfZGVhZGJvbHQiOiI0Mzc2M2Y2MzhlMWQ4NWMzYzFlMjYxYzU5M2U0MzQ4ZCJ9dToJVGltZQ22ix7A+FmS0Q==--adb332ae16eefa72dbea4af605eab17dceed2d98
-                         */
-                        System.out.println("end point = " + endpoint);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
                 }
-            } /*else if (refreshToken != null && !"".equals(refreshToken)) {
-                try {
-                    refreshTokenInfo();
-                } catch (OAuthProblemException e) {
-                    // no joy on refresh token
-                }
-            }*/
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
