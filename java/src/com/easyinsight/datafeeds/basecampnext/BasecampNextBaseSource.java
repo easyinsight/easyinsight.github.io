@@ -58,9 +58,9 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                         }
                         // Thu, 29 Mar 2012 20:18:58 GMT
                     }
-                    System.out.println("argh");
+                    //System.out.println("argh");
                 }
-                System.out.println(restMethod.getResponseBodyAsString());
+                //System.out.println(restMethod.getResponseBodyAsString());
                 jsonObject = new JSONArray(restMethod.getResponseBodyAsString());
                 successful = true;
             } catch (IOException e) {

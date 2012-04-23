@@ -120,7 +120,7 @@ public class BasecampNextCalendarSource extends BasecampNextBaseSource {
             }
             JSONArray projectArray = runJSONRequest("projects.json", (BasecampNextCompositeSource) parentDefinition);
             for (int i = 0; i < projectArray.length(); i++) {
-                JSONObject projectObject = jsonArray.getJSONObject(i);
+                JSONObject projectObject = projectArray.getJSONObject(i);
                 String projectID = String.valueOf(projectObject.getInt("id"));
 
                 try {
