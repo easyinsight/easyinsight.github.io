@@ -152,6 +152,7 @@ public class FeedType {
     public static final FeedType BASECAMP_NEXT_TODOS = new FeedType(137);
     public static final FeedType BASECAMP_NEXT_CALENDAR = new FeedType(138);
     public static final FeedType BASECAMP_NEXT_PEOPLE = new FeedType(139);
+    public static final FeedType BATCHBOOK_SUPER_TAG = new FeedType(140);
 
     private int type;
 
