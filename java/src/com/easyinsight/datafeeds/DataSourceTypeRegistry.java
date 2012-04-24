@@ -87,6 +87,7 @@ public class DataSourceTypeRegistry {
         exchangeTypes.add(FeedType.BATCHBOOK_COMPOSITE.getType());
         exchangeTypes.add(FeedType.ZENDESK_COMPOSITE.getType());
         exchangeTypes.add(FeedType.HARVEST_COMPOSITE.getType());
+        exchangeTypes.add(FeedType.BASECAMP_NEXT_COMPOSITE.getType());
     }
 
     public Set<Integer> getExchangeTypes() {
@@ -209,6 +210,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.BASECAMP_NEXT_TODOS, BasecampNextTodoSource.class);
         registerType(FeedType.BASECAMP_NEXT_CALENDAR, BasecampNextCalendarSource.class);
         registerType(FeedType.BASECAMP_NEXT_PEOPLE, BasecampNextPeopleSource.class);
+        registerType(FeedType.BATCHBOOK_SUPER_TAG, BatchbookSuperTagSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

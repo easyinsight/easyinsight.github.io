@@ -24,6 +24,9 @@ public class DataSourceBehavior {
             case DataSourceType.CAMPAIGN_MONITOR:
             case DataSourceType.ZENDESK:
             case DataSourceType.HARVEST_COMPOSITE:
+            case DataSourceType.QUICKBASE:
+            case DataSourceType.FRESHBOOKS:
+            case DataSourceType.BASECAMP_NEXT:
                 return true;
         }
         return false;
