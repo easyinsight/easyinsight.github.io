@@ -103,7 +103,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
     }
 
     protected void clearData(DataStorage dataStorage) throws SQLException {
-        if (databaseID.equals("beutk2zd6")) {
+        /*if (databaseID.equals("beutk2zd6")) {
             System.out.println("Using this as the truncation method");
             Key dateKey = null;
             for (AnalysisItem analysisItem : getFields()) {
@@ -117,9 +117,9 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             Date boundaryTime = cal.getTime();
             IWhere where = new DateWhere(dateKey, boundaryTime, Comparison.GREATER_THAN);
             dataStorage.deleteData(Arrays.asList(where));
-        } else {
+        } else {*/
             dataStorage.truncate();
-        }
+        //}
     }
 
     public String getDatabaseID() {
@@ -188,8 +188,15 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     throw e;
                 }
             }
-        }
+       }
     }
+
+    /*
+    greaterthan([Bonus Override], 0, [Bonus Override],
+        ([Payments-Override]-[Bonus Base])*
+            greaterthan([Bonus %], 0, ([Payments-Override]-[Bonus Base])*[Bonus %], 0)
+    )
+     */
 
     @Override
     protected boolean clearsData(FeedDefinition parentSource) {
@@ -310,7 +317,8 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
             int newRows = 0;
             String query;
             if (lastRefreshDate == null) {
-                query = ("{'214'.AF.'" + cutoffDate.getTime() + "'}");
+                //query = ("{'214'.AF.'" + cutoffDate.getTime() + "'}");
+                query = "";
             } else {
                 query = ("{'2'.AF.'" + lastRefreshDate.getTime() + "'}");
             }
