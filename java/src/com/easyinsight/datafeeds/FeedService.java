@@ -66,7 +66,7 @@ public class FeedService {
         return dataSources;
     }
 
-    public void convertToCalculation(AnalysisItem analysisItem, long dataSourceID, String calculation, boolean rowLevel, boolean cache) {
+    public void convertToCalculation(AnalysisMeasure analysisItem, long dataSourceID, String calculation, boolean rowLevel, boolean cache) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -78,6 +78,10 @@ public class FeedService {
             analysisCalculation.setApplyBeforeAggregation(rowLevel);
             analysisCalculation.setFilters(analysisItem.getFilters());
             analysisCalculation.setLinks(analysisItem.getLinks());
+            analysisCalculation.getFormattingConfiguration().setFormattingType(analysisItem.getFormattingConfiguration().getFormattingType());
+            analysisCalculation.setUnderline(analysisItem.isUnderline());
+            analysisCalculation.setMinPrecision(analysisItem.getMinPrecision());
+            analysisCalculation.setPrecision(analysisItem.getPrecision());
             // find all reports with this calculation and replace
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
             List<FeedDefinition> dataSources = new ArrayList<FeedDefinition>();
