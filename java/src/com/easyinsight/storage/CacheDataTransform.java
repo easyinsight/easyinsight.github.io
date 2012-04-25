@@ -65,9 +65,13 @@ public class CacheDataTransform implements IDataTransform {
         DataSet dataSet = new DataSet();
         IRow newRow = dataSet.createRow();
         Set<AnalysisItem> needToRetrieve = new HashSet<AnalysisItem>();
+        AnalysisItem joinDim = null;
         for (AnalysisItem analysisItem : items) {
             Key key = analysisItem.getKey();
             long id = resolveToDataSource(key);
+            if ("Related Provider".equals(analysisItem.toDisplay())) {
+                joinDim = analysisItem;
+            }
             if (id == baseSource.getDataFeedID()) {
                 String string = analysisItem.getType() + "-" + analysisItem.getKey().toBaseKey().toKeyString();
                 AnalysisItem lookup = baseMap.get(string);
@@ -75,9 +79,20 @@ public class CacheDataTransform implements IDataTransform {
                 System.out.println(string + " = " + value);
                 newRow.addValue(analysisItem.createAggregateKey(), value);
             } else {
-                System.out.println("need to retrieve " + analysisItem.toDisplay());
-                needToRetrieve.add(analysisItem);    
+                String string = analysisItem.getType() + "-" + analysisItem.getKey().toBaseKey().toKeyString();
+                AnalysisItem lookup = baseMap.get(string);
+                Value value = row.getValues().get(lookup.getKey());
+                if (value.type() == Value.EMPTY) {
+                    System.out.println("need to retrieve " + analysisItem.toDisplay());
+                    needToRetrieve.add(analysisItem);
+                } else {
+                    System.out.println("already have " + analysisItem.toDisplay() + " with value " + value + " in row");
+                    newRow.addValue(analysisItem.createAggregateKey(), value);
+                }
             }
+        }
+        if (!needToRetrieve.isEmpty()) {
+            needToRetrieve.add(joinDim);
         }
         Feed feed = FeedRegistry.instance().getFeed(dataSource.getDataFeedID());
         DataSet otherSet = feed.getAggregateDataSet(needToRetrieve, new ArrayList<FilterDefinition>(), new InsightRequestMetadata(), feed.getFields(), false, conn);
