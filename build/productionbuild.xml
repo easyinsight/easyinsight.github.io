@@ -344,7 +344,7 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="testVCS, compileJava, compileCoreSWC, apps, modules1, modules2, modules3, modules4, modules6, modules7, modules8">
+    <target name="compileFlex" depends="testVCS, compileJava, compileCoreSWC, quickmodules">
         <!-- <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
                output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
@@ -420,6 +420,7 @@
     <target name="modules7" depends="perspective.kpiwindow,perspective.datasourceadmin"/>
     <target name="modules8" depends="report.heatmap, report.gantt, report.form"/>
     <target name="apps" depends="compileFlexOptimized, app.embeddedreport, app.selenium, app.admin, app.embeddedlist"/>
+    <target name="quickmodules" depends="compileFlexOptimized,report.list,perspective.datasourceadmin"/>
 
     <target name="compileFlexOptimized">
         <buildSWF mainMXML="PrimaryWorkspace.mxml" swfName="PrimaryWorkspace" buildFile="core-optimized-config.xml"/>
