@@ -66,12 +66,21 @@ public class CacheDataTransform implements IDataTransform {
         IRow newRow = dataSet.createRow();
         Set<AnalysisItem> needToRetrieve = new HashSet<AnalysisItem>();
         AnalysisItem joinDim = null;
+        Object providerID = null;
         for (AnalysisItem analysisItem : allItems) {
-            if ("Related Provider".equals(analysisItem.toDisplay())) {
+            if ("Providers - Record ID#".equals(analysisItem.toDisplay())) {
                 joinDim = analysisItem;
+            } else if ("Related Provider".equals(analysisItem.toDisplay())) {
+                String string = analysisItem.getType() + "-" + analysisItem.getKey().toBaseKey().toKeyString();
+                AnalysisItem lookup = baseMap.get(string);
+                Value value = row.getValues().get(lookup.getKey());
+                providerID = value.toString();
             }
         }
+        System.out.println("related provider = " + providerID);
+
         for (AnalysisItem analysisItem : items) {
+            System.out.println("Looking for " + analysisItem.toDisplay());
             Key key = analysisItem.getKey();
             long id = resolveToDataSource(key);
 
@@ -86,11 +95,12 @@ public class CacheDataTransform implements IDataTransform {
                 needToRetrieve.add(analysisItem);
             }
         }
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         if (!needToRetrieve.isEmpty()) {
-            needToRetrieve.add(joinDim);
+            FilterValueDefinition filter = new FilterValueDefinition(joinDim, true, Arrays.asList(providerID));
         }
         Feed feed = FeedRegistry.instance().getFeed(dataSource.getDataFeedID());
-        DataSet otherSet = feed.getAggregateDataSet(needToRetrieve, new ArrayList<FilterDefinition>(), new InsightRequestMetadata(), feed.getFields(), false, conn);
+        DataSet otherSet = feed.getAggregateDataSet(needToRetrieve, filters, new InsightRequestMetadata(), feed.getFields(), false, conn);
         IRow otherRow = otherSet.getRow(0);
         for (AnalysisItem item : needToRetrieve) {
             System.out.println(item.toDisplay() + " = " + otherRow.getValue(item));
