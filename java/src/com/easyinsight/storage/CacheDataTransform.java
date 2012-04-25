@@ -66,12 +66,15 @@ public class CacheDataTransform implements IDataTransform {
         IRow newRow = dataSet.createRow();
         Set<AnalysisItem> needToRetrieve = new HashSet<AnalysisItem>();
         AnalysisItem joinDim = null;
-        for (AnalysisItem analysisItem : items) {
-            Key key = analysisItem.getKey();
-            long id = resolveToDataSource(key);
+        for (AnalysisItem analysisItem : allItems) {
             if ("Related Provider".equals(analysisItem.toDisplay())) {
                 joinDim = analysisItem;
             }
+        }
+        for (AnalysisItem analysisItem : items) {
+            Key key = analysisItem.getKey();
+            long id = resolveToDataSource(key);
+
             if (id == baseSource.getDataFeedID()) {
                 String string = analysisItem.getType() + "-" + analysisItem.getKey().toBaseKey().toKeyString();
                 AnalysisItem lookup = baseMap.get(string);
