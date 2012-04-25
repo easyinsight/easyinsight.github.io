@@ -79,16 +79,8 @@ public class CacheDataTransform implements IDataTransform {
                 System.out.println(string + " = " + value);
                 newRow.addValue(analysisItem.createAggregateKey(), value);
             } else {
-                String string = analysisItem.getType() + "-" + analysisItem.getKey().toBaseKey().toKeyString();
-                AnalysisItem lookup = baseMap.get(string);
-                Value value = row.getValues().get(lookup.getKey());
-                if (value.type() == Value.EMPTY) {
-                    System.out.println("need to retrieve " + analysisItem.toDisplay());
-                    needToRetrieve.add(analysisItem);
-                } else {
-                    System.out.println("already have " + analysisItem.toDisplay() + " with value " + value + " in row");
-                    newRow.addValue(analysisItem.createAggregateKey(), value);
-                }
+                System.out.println("need to retrieve " + analysisItem.toDisplay());
+                needToRetrieve.add(analysisItem);
             }
         }
         if (!needToRetrieve.isEmpty()) {
