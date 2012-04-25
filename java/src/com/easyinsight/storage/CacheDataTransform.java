@@ -95,17 +95,20 @@ public class CacheDataTransform implements IDataTransform {
                 needToRetrieve.add(analysisItem);
             }
         }
+        Feed feed = FeedRegistry.instance().getFeed(dataSource.getDataFeedID());
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         if (!needToRetrieve.isEmpty()) {
             FilterValueDefinition filter = new FilterValueDefinition(joinDim, true, Arrays.asList(providerID));
+            filters.add(filter);
+
+            DataSet otherSet = feed.getAggregateDataSet(needToRetrieve, filters, new InsightRequestMetadata(), feed.getFields(), false, conn);
+            IRow otherRow = otherSet.getRow(0);
+            for (AnalysisItem item : needToRetrieve) {
+                System.out.println(item.toDisplay() + " = " + otherRow.getValue(item));
+                newRow.addValue(item.createAggregateKey(), otherRow.getValue(item));
+            }
         }
-        Feed feed = FeedRegistry.instance().getFeed(dataSource.getDataFeedID());
-        DataSet otherSet = feed.getAggregateDataSet(needToRetrieve, filters, new InsightRequestMetadata(), feed.getFields(), false, conn);
-        IRow otherRow = otherSet.getRow(0);
-        for (AnalysisItem item : needToRetrieve) {
-            System.out.println(item.toDisplay() + " = " + otherRow.getValue(item));
-            newRow.addValue(item.createAggregateKey(), otherRow.getValue(item));
-        }
+
         WSListDefinition blah = new WSListDefinition();
         blah.setDataFeedID(dataSource.getDataFeedID());
         blah.setFilterDefinitions(new ArrayList<FilterDefinition>());
