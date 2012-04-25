@@ -72,8 +72,10 @@ public class CacheDataTransform implements IDataTransform {
                 String string = analysisItem.getType() + "-" + analysisItem.getKey().toBaseKey().toKeyString();
                 AnalysisItem lookup = baseMap.get(string);
                 Value value = row.getValues().get(lookup.getKey());
+                System.out.println(string + " = " + value);
                 newRow.addValue(analysisItem.createAggregateKey(), value);
             } else {
+                System.out.println("need to retrieve " + analysisItem.toDisplay());
                 needToRetrieve.add(analysisItem);    
             }
         }
@@ -81,6 +83,7 @@ public class CacheDataTransform implements IDataTransform {
         DataSet otherSet = feed.getAggregateDataSet(needToRetrieve, new ArrayList<FilterDefinition>(), new InsightRequestMetadata(), feed.getFields(), false, conn);
         IRow otherRow = otherSet.getRow(0);
         for (AnalysisItem item : needToRetrieve) {
+            System.out.println(item.toDisplay() + " = " + otherRow.getValue(item));
             newRow.addValue(item.createAggregateKey(), otherRow.getValue(item));
         }
         WSListDefinition blah = new WSListDefinition();
