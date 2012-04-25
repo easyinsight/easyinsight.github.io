@@ -61,6 +61,7 @@ public class CacheDataTransform implements IDataTransform {
             }
             items.add(analysisItem);
         }
+        System.out.println("*** " + calculation.getCalculationString());
         List<AnalysisItem> items = ReportCalculation.getAnalysisItems(calculation.getCalculationString(), allItems, keyMap, displayMap, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS);
         DataSet dataSet = new DataSet();
         IRow newRow = dataSet.createRow();
