@@ -105,7 +105,11 @@
                     actualRow.values[analysisItem.qualifiedName()] = new DateValue(dateField.selectedDate);
                 } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     var input:TextInput = comp as TextInput;
-                    actualRow.values[analysisItem.qualifiedName()] = new NumericValue(Number(input.text));
+                    if (input.text == "") {
+                        actualRow.values[analysisItem.qualifiedName()] = new NumericValue(Number(input.text));
+                    } else {
+                        actualRow.values[analysisItem.qualifiedName()] = new NumericValue(parseFloat(input.text));
+                    }
                 } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
                     var area:TextArea = comp as TextArea;
                     actualRow.values[analysisItem.qualifiedName()] = new StringValue(area.text);
