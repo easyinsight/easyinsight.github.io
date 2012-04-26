@@ -35,6 +35,7 @@ public class MultiCacheFunction extends Function {
             for (int i = 0; i < params.size(); i += 2) {
 
                 String sourceCalculationFieldName = minusQuotes(i);
+                System.out.println("source calculation = " + sourceCalculationFieldName);
                 AnalysisCalculation sourceCalculation = null;
                 for (AnalysisItem field : baseSource.getFields()) {
                     if (sourceCalculationFieldName.equals(field.toDisplay())) {
@@ -43,6 +44,7 @@ public class MultiCacheFunction extends Function {
                     }
                 }
                 String targetFieldName = minusQuotes(i + 1);
+                System.out.println("target field = " + targetFieldName);
                 AnalysisItem targetField = null;
                 for (AnalysisItem field : baseSource.getFields()) {
                     if (targetFieldName.equals(field.toDisplay())) {
