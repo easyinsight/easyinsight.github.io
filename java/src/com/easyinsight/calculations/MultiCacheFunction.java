@@ -32,7 +32,7 @@ public class MultiCacheFunction extends Function {
             DataSourceCalculationMetadata dataSourceCalculationMetadata = (DataSourceCalculationMetadata) calculationMetadata;
             FeedDefinition baseSource = dataSourceCalculationMetadata.getDataSource();
             Collection<MultiCacheInfo> infos = new ArrayList<MultiCacheInfo>();
-            for (int i = 0; i < paramCount(); i += 2) {
+            for (int i = 0; i < params.size(); i += 2) {
 
                 String sourceCalculationFieldName = minusQuotes(1);
                 AnalysisCalculation sourceCalculation = null;
