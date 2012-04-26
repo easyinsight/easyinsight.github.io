@@ -34,7 +34,7 @@ public class MultiCacheFunction extends Function {
             Collection<MultiCacheInfo> infos = new ArrayList<MultiCacheInfo>();
             for (int i = 0; i < params.size(); i += 2) {
 
-                String sourceCalculationFieldName = minusQuotes(1);
+                String sourceCalculationFieldName = minusQuotes(i);
                 AnalysisCalculation sourceCalculation = null;
                 for (AnalysisItem field : baseSource.getFields()) {
                     if (sourceCalculationFieldName.equals(field.toDisplay())) {
@@ -42,7 +42,7 @@ public class MultiCacheFunction extends Function {
                         break;
                     }
                 }
-                String targetFieldName = minusQuotes(2);
+                String targetFieldName = minusQuotes(i + 1);
                 AnalysisItem targetField = null;
                 for (AnalysisItem field : baseSource.getFields()) {
                     if (targetFieldName.equals(field.toDisplay())) {
