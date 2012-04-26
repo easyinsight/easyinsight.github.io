@@ -36,9 +36,6 @@ public class MultiCacheDataTransform implements IDataTransform {
         DataSet dataSet = new DataSet();
         IRow newRow = dataSet.createRow();
         newRow.addValues(row);
-        Object providerID = null;
-
-        System.out.println("related provider = " + providerID);
 
 
         Feed feed = FeedRegistry.instance().getFeed(baseSource.getDataFeedID());
@@ -54,6 +51,7 @@ public class MultiCacheDataTransform implements IDataTransform {
         }
         blah.setColumns(columns);
         CacheCalculationPipeline pipeline = new CacheCalculationPipeline(calculations);
+        System.out.println(dataSet);
         pipeline.setup(blah, feed, new InsightRequestMetadata());
         DataSet resultSet = pipeline.toDataSet(dataSet);
         IRow result = resultSet.getRow(0);
