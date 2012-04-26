@@ -312,6 +312,9 @@
                 dataSourceInfo = feedMetadata.dataSourceInfo;
                 this.exchangeSave = feedMetadata.exchangeSave;
                 this.admin = feedMetadata.dataSourceAdmin;
+                var cFactory:ClassFactory = new ClassFactory(AvailableFieldRenderer);
+                cFactory.properties = { dataSourceID: dataSourceID, calcRefactor: feedMetadata.allowRefactor };
+                rendererFactory = cFactory;
                 dataSourceName = this.feedMetadata.dataSourceName;
                 joinsCustomizable = this.feedMetadata.customJoinsAllowed;
 
@@ -482,7 +485,6 @@
                     dataService.dataFeedID = dataSourceID;
                 }
                 loading = true;
-                rendererFactory = new ClassFactory(AvailableFieldRenderer);
                 commandProcessor = new CommandProcessor();
                 addEventListener(FieldEditorEvent.FIELD_EDITOR_OPENED, onFieldEditorOpen);
                 addEventListener(FieldEditorEvent.FIELD_EDITOR_CLOSED, onFieldEditorClose);
@@ -955,6 +957,7 @@
             window.availableFields = availableFields;
             window.addEventListener(FieldEditorEvent.FIELD_EDITOR_OPENED, onFieldEditorOpen, false, 0, true);
             window.addEventListener(FieldEditorEvent.FIELD_EDITOR_CLOSED, onFieldEditorClose, false, 0, true);
+            window.addEventListener(ReportEditorFieldEvent.ITEM_COPY, fieldEventHandler.copyField, false, 0, true);
             window.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged, false, 0, true);
             PopUpManager.addPopUp(window, this);
             window.x = customFieldButton.x - 20;
