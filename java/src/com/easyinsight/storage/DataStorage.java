@@ -935,9 +935,11 @@ public class DataStorage implements IDataStorage {
             }
             
             String columnName = analysisItem.toKeySQL();
+            System.out.println("aggregate query = " + aggregateQuery);
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && aggregateQuery) {
                 AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
                 int aggregation = analysisMeasure.getQueryAggregation();
+                System.out.println("aggregation = " + aggregation);
                 if (aggregation == AggregationTypes.SUM) {
                     columnName = "SUM(" + columnName + ")";
                 } else if (aggregation == AggregationTypes.AVERAGE) {
