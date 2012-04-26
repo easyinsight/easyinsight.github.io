@@ -66,6 +66,6 @@ public class MultiCacheFunction extends Function {
     }
 
     public int getParameterCount() {
-        return 3;
+        return -1;
     }
 }

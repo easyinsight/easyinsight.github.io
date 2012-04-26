@@ -261,7 +261,7 @@ public abstract class Pipeline {
 
     public DataResults toList(DataSet dataSet, EIConnection conn) {
         for (IComponent component : components) {
-            System.out.println(component.getClass() + " - " + dataSet.getRows());
+            //System.out.println(component.getClass() + " - " + dataSet.getRows());
             /*if (pipelineData.getReport().isLogReport()) {
                 logger.append("<h1>" + component.getClass().getName() + "</h1>");
                 logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, conn, pipelineData.getInsightRequestMetadata()));
