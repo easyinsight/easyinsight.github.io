@@ -176,6 +176,8 @@ public class FunctionFactory {
             return new DefineForm();
         } else if (s.equals("fallthrough")) {
             return new FallThroughJoin();
+        } else if (s.equals("multicache")) {
+            return new MultiCacheFunction();
         } else {
             return null;
         }
