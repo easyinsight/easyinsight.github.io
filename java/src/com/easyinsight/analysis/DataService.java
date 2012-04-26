@@ -988,6 +988,7 @@ public class DataService {
                 if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
                     AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
                     if (analysisCalculation.isCachedCalculation()) {
+                        System.out.println("querying for " + analysisItem.toDisplay());
                         validQueryItems.add(analysisItem);
                     }
                 } else if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {

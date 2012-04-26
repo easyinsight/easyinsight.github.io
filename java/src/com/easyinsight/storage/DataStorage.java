@@ -745,6 +745,7 @@ public class DataStorage implements IDataStorage {
         createFromClause(version, fromBuilder);
         createWhereClause(filters, whereBuilder);
         createSQL(filters, limit, queryBuilder, selectBuilder, fromBuilder, whereBuilder, groupByBuilder, groupByItems);
+        System.out.println(queryBuilder.toString());
         PreparedStatement queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
