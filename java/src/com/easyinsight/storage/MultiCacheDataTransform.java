@@ -34,6 +34,8 @@ public class MultiCacheDataTransform implements IDataTransform {
         //System.out.println("*** " + calculation.getCalculationString());
 
         DataSet dataSet = new DataSet();
+        IRow newRow = dataSet.createRow();
+        newRow.addValues(row);
         Object providerID = null;
 
         System.out.println("related provider = " + providerID);
