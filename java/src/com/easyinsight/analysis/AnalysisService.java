@@ -406,7 +406,7 @@ public class AnalysisService {
                             Value sourceValue = row.getValue(sourceItem);
                             Value calcValue = row.getValue(calculation);
                             if (sourceValue.type() == Value.EMPTY || calcValue.type() == Value.EMPTY || sourceValue.toString().equals("(Empty)") ||
-                                    calcValue.toString().equals("(Empty)")) {
+                                    calcValue.toString().equals("(Empty)") || sourceValue.toString().equals("") || calcValue.toString().equals("")) {
                                 System.out.println("suppressing");
                             } else {
                                 options.add(new JoinLabelOption(sourceValue, calcValue.toString()));
