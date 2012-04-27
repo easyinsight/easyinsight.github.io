@@ -116,6 +116,14 @@
         <buildSWF mainMXML="EmbeddedInsight.mxml" swfName="EmbeddedInsight" buildFile="embedded-insight.xml"/>
     </target>
 
+    <target name="app.embeddeddashboard">
+        <buildSWF mainMXML="EmbeddedDashboard.mxml" swfName="EmbeddedDashboard" buildFile="embedded-dashboard.xml"/>
+    </target>
+
+    <target name="app.embeddedlist">
+        <buildSWF mainMXML="EmbeddedList.mxml" swfName="EmbeddedList" buildFile="embedded-list.xml"/>
+    </target>
+
     <target name="app.selenium">
         <buildSWF mainMXML="SeleniumReportView.mxml" swfName="SeleniumReportView" buildFile="selenium-report.xml"/>
     </target>
