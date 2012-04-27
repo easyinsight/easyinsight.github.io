@@ -6,7 +6,9 @@ import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.security.SecurityUtil;
+import nu.xom.Attribute;
 import nu.xom.Document;
+import nu.xom.Element;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
@@ -76,33 +78,35 @@ public class RunReportServlet extends APIServlet {
         result.append("\t\t<name>").append(report.getName()).append("</name>\r\n");
         result.append("\t\t<reporttype>").append(report.getReportType()).append("</reporttype>\r\n");
         result.append("\t</reportinfo>\r\n");
-        result.append("\t<rows>\r\n");
+        Element root = new Element("rows");
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         for (com.easyinsight.analysis.ListRow listRow : results.getRows()) {
-            result.append("\t\t<row>\r\n");
+            Element row = new Element("row");
             for (AnalysisItem analysisItem : items) {
                 for (int i = 0; i < results.getHeaders().length; i++) {
                     AnalysisItem headerItem = results.getHeaders()[i];
                     if (headerItem == analysisItem) {
                         com.easyinsight.core.Value value = listRow.getValues()[i];
-                        result.append("\t\t\t<value field=\"").append(headerItem.toDisplay()).append("\">");
+                        Element val = new Element("value");
+                        val.addAttribute(new Attribute("field", headerItem.toDisplay()));
                         if (value.type() == Value.DATE) {
                             DateValue dateValue = (DateValue) value;
-                            result.append(dateFormat.format(dateValue.getDate()));
+                            val.appendChild(dateFormat.format(dateValue.getDate()));
                         } else {
                             if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && value.type() == Value.NUMBER) {
-                                result.append(String.valueOf(value.toDouble().intValue()));
+                                val.appendChild(String.valueOf(value.toDouble().intValue()));
                             } else {
-                                result.append(value.toString());
+                                val.appendChild(value.toString());
                             }
                         }
-                        result.append("</value>");
+                        row.appendChild(val);
                     }
                 }
             }
-            result.append("\t\t</row>\r\n");
+            root.appendChild(row);
         }
-        result.append("\t</rows>\r\n");
+        System.out.println(root.toXML());
+        result.append(root.toXML());
         return new ResponseInfo(ResponseInfo.ALL_GOOD, result.toString());
     }
 }
