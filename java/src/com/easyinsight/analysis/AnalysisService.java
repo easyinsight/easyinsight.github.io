@@ -407,9 +407,10 @@ public class AnalysisService {
                             Value calcValue = row.getValue(calculation);
                             if (sourceValue.type() == Value.EMPTY || calcValue.type() == Value.EMPTY || sourceValue.toString().equals("(Empty)") ||
                                     calcValue.toString().equals("(Empty)")) {
-                                continue;
+                                System.out.println("suppressing");
+                            } else {
+                                options.add(new JoinLabelOption(sourceValue, calcValue.toString()));
                             }
-                            options.add(new JoinLabelOption(sourceValue, calcValue.toString()));
                         }
                     } finally {
                         Database.closeConnection(conn);
