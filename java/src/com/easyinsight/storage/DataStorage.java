@@ -752,7 +752,6 @@ public class DataStorage implements IDataStorage {
         createFromClause(version, fromBuilder);
         createWhereClause(filters, whereBuilder);
         createSQL(filters, limit, queryBuilder, selectBuilder, fromBuilder, whereBuilder, groupByBuilder, groupByItems);
-        System.out.println(queryBuilder.toString());
         PreparedStatement queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
@@ -942,11 +941,9 @@ public class DataStorage implements IDataStorage {
             }
             
             String columnName = analysisItem.toKeySQL();
-            System.out.println("aggregate query = " + aggregateQuery);
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && aggregateQuery) {
                 AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
                 int aggregation = analysisMeasure.getQueryAggregation();
-                System.out.println("aggregation = " + aggregation);
                 if (aggregation == AggregationTypes.SUM) {
                     columnName = "SUM(" + columnName + ")";
                 } else if (aggregation == AggregationTypes.AVERAGE) {
@@ -1534,7 +1531,6 @@ public class DataStorage implements IDataStorage {
         sqlBuilder.append(" VALUES ( ");
         sqlBuilder.append(paramBuilder.toString());
         sqlBuilder.append(" ) ");
-        System.out.println(sqlBuilder.toString());
         PreparedStatement insertStmt = storageConn.prepareStatement(sqlBuilder.toString());
         int i = 1;
         for (AnalysisItem field : fields) {
@@ -1564,7 +1560,6 @@ public class DataStorage implements IDataStorage {
         }
         sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
         sqlBuilder.append(" WHERE ").append(getTableName()).append("_ID").append(" = ?");
-        System.out.println(sqlBuilder.toString());
         PreparedStatement updateStmt = storageConn.prepareStatement(sqlBuilder.toString());
         int i = 1;
         for (AnalysisItem field : fields) {
@@ -1575,7 +1570,6 @@ public class DataStorage implements IDataStorage {
         }
         updateStmt.setLong(i, rowID);
         int rows = updateStmt.executeUpdate();
-        System.out.println(rows);
     }
 
     public void updateRow(ActualRow actualRow, List<AnalysisItem> fields, List<IDataTransform> transforms) throws SQLException {
@@ -1603,7 +1597,6 @@ public class DataStorage implements IDataStorage {
         }
         sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
         sqlBuilder.append(" WHERE ").append(getTableName()).append("_ID").append(" = ?");
-        System.out.println(sqlBuilder.toString());
         PreparedStatement updateStmt = storageConn.prepareStatement(sqlBuilder.toString());
         int i = 1;
         for (AnalysisItem field : fields) {
@@ -1614,7 +1607,6 @@ public class DataStorage implements IDataStorage {
         }
         updateStmt.setLong(i, row.getRowID());
         int rows = updateStmt.executeUpdate();
-        System.out.println(rows);
     }
 
     public void deleteRow(long rowID) throws SQLException {
@@ -1693,7 +1685,6 @@ public class DataStorage implements IDataStorage {
             for (AnalysisItem analysisItem : fields) {
                 if (analysisItem.persistable()) {
                     KeyMetadata keyMetadata = keys.get(analysisItem.createAggregateKey(false));
-                    System.out.println("Retrieving " + analysisItem.toDisplay() + " with type = " + keyMetadata.getType());
                     Value value;
                     if (keyMetadata.getType() == Value.DATE) {
                         Timestamp time = dataRS.getTimestamp(i++);
@@ -1751,7 +1742,6 @@ public class DataStorage implements IDataStorage {
         List<AnalysisItem> validFields = new ArrayList<AnalysisItem>();
 
         File file = new File(System.currentTimeMillis() + ".csv");
-        System.out.println(file.getAbsolutePath());
         FileOutputStream fos = new FileOutputStream(file);
         BufferedOutputStream bos = new BufferedOutputStream(fos, 512);
         CsvWriter csvWriter = new CsvWriter(bos, ',', Charset.forName("UTF-8"));
