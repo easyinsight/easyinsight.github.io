@@ -70,12 +70,10 @@ public class FeedService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            AnalysisCalculation analysisCalculation = new AnalysisCalculation();
-            analysisCalculation.setCalculationString(calculation);
-            analysisCalculation.setCachedCalculation(cache);
+            AnalysisMeasure analysisCalculation = new AnalysisMeasure();
             analysisCalculation.setKey(analysisItem.getKey().toBaseKey());
             analysisCalculation.setDisplayName(analysisItem.getDisplayName());
-            analysisCalculation.setApplyBeforeAggregation(rowLevel);
+            analysisCalculation.setAggregation(AggregationTypes.SUM);
             analysisCalculation.setFilters(analysisItem.getFilters());
             analysisCalculation.setLinks(analysisItem.getLinks());
             analysisCalculation.getFormattingConfiguration().setFormattingType(analysisItem.getFormattingConfiguration().getFormattingType());

@@ -89,7 +89,7 @@ public class AvailableFieldTextRenderer extends UITextField implements IListItem
                 });
                 items.push(deleteItem);
             }
-            if (_calcRefactor && wrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE) && !wrapper.analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+            if (_calcRefactor && wrapper.analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
                 var calculateItem:ContextMenuItem = new ContextMenuItem("Convert to Calculation");
                 var thisObj:AvailableFieldTextRenderer = this;
                 calculateItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
