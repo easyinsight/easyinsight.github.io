@@ -405,6 +405,9 @@ public class AnalysisService {
                         for (IRow row : dataSet.getRows()) {
                             Value sourceValue = row.getValue(sourceItem);
                             Value calcValue = row.getValue(calculation);
+                            if (sourceValue.type() == Value.EMPTY || calcValue.type() == Value.EMPTY) {
+                                continue;
+                            }
                             options.add(new JoinLabelOption(sourceValue, calcValue.toString()));
                         }
                     } finally {
