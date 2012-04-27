@@ -186,8 +186,15 @@ public class DataStorage implements IDataStorage {
                 keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
             }
         }
-        if (dataStorage.cachedCalculations.size() > 0) {
+        /*if (dataStorage.cachedCalculations.size() > 0) {
             dataStorage.transforms.add(new CachedCalculationTransform(feedDefinition));
+        }*/
+        if (feedDefinition.getMarmotScript() != null && !"".equals(feedDefinition.getMarmotScript())) {
+            StringTokenizer toker = new StringTokenizer(feedDefinition.getMarmotScript(), "\r\n");
+            while (toker.hasMoreTokens()) {
+                String line = toker.nextToken();
+                dataStorage.transforms.addAll(new ReportCalculation(line).apply(feedDefinition));
+            }
         }
         dataStorage.metadata = getMetadata(feedDefinition.getDataFeedID(), conn);
         dataStorage.tableDefined = dataStorage.metadata != null;
