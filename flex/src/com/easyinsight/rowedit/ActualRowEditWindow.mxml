@@ -31,6 +31,7 @@
             super.createChildren();
             if (actualRowSet != null) {
                 var actualRow:ActualRow = actualRowSet.rows.getItemAt(0) as ActualRow;
+                showDelete = actualRow.rowID > 0;
                 var forms:ArrayCollection = actualRowSet.forms;
                 for each (var item:ActualRowLayoutItem in forms) {
                     var hbox:HBox = new HBox();
@@ -141,6 +142,9 @@
             ProgressAlert.alert(this, "Deleting row...", null, analysisService.deleteRow);
             analysisService.deleteRow.send(actualRow, actualRowSet.dataSourceID);
         }
+
+        [Bindable]
+        private var showDelete:Boolean;
         
         private function updated():void {
             PopUpManager.removePopUp(this);
@@ -161,7 +165,7 @@
         </mx:VBox>
         <mx:HBox width="100%" horizontalAlign="center">
             <util:SaveButton label="Save" click="save()"/>
-            <util:SaveButton label="Delete" click="deleteRow()"/>
+            <util:SaveButton label="Delete" click="deleteRow()" enabled="{showDelete}"/>
             <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
