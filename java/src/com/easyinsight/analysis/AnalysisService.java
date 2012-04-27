@@ -394,7 +394,7 @@ public class AnalysisService {
                 }
                 matchItems.add(sourceItem);
                 if (sourceItem != null && targetItem != null) {
-                    Collection<JoinLabelOption> options = new ArrayList<JoinLabelOption>();
+                    List<JoinLabelOption> options = new ArrayList<JoinLabelOption>();
                     WSListDefinition target = new WSListDefinition();
                     target.setDataFeedID(dataSource.getDataFeedID());
                     target.setColumns(matchItems);
@@ -410,6 +410,12 @@ public class AnalysisService {
                     } finally {
                         Database.closeConnection(conn);
                     }
+                    Collections.sort(options, new Comparator<JoinLabelOption>() {
+
+                        public int compare(JoinLabelOption joinLabelOption, JoinLabelOption joinLabelOption1) {
+                            return joinLabelOption.getDisplayName().compareTo(joinLabelOption1.getDisplayName());
+                        }
+                    });
                     optionMap.put(sourceItem.toDisplay(), options);
                 }
             }
