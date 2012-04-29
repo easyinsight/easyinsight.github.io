@@ -24,6 +24,10 @@ public class ResponseInfo {
         return code;
     }
 
+    public String getXml() {
+        return xml;
+    }
+
     public String toResponse() {
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><response><code>" + code + "</code>" + xml + "</response>";
     }

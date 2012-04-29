@@ -160,12 +160,12 @@
         <load-on-startup>4</load-on-startup>
     </servlet>
 
-    <!--<servlet>
+    <servlet>
         <servlet-name>RunReportJSON</servlet-name>
         <display-name>RunReportJSON</display-name>
         <servlet-class>com.easyinsight.api.v3.RunReportJSONServlet</servlet-class>
         <load-on-startup>4</load-on-startup>
-    </servlet>-->
+    </servlet>
 
     <servlet>
         <servlet-name>Commit</servlet-name>
@@ -321,10 +321,10 @@
         <url-pattern>/xml/RunReport</url-pattern>
     </servlet-mapping>
 
-    <!--<servlet-mapping>
+    <servlet-mapping>
         <servlet-name>RunReportJSON</servlet-name>
         <url-pattern>/json/RunReport</url-pattern>
-    </servlet-mapping>-->
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>DeleteDataSource</servlet-name>
