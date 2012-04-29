@@ -242,6 +242,7 @@ public class AnalysisService {
     }
 
     public void addRow(ActualRow actualRow, long dataSourceID) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -276,6 +277,7 @@ public class AnalysisService {
     }
     
     public void deleteRow(ActualRow actualRow, long dataSourceID) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -300,6 +302,7 @@ public class AnalysisService {
     }
     
     public void updateRow(ActualRow actualRow, long dataSourceID) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -334,6 +337,7 @@ public class AnalysisService {
     }
     
     public ActualRowSet setupAddRow(long dataSourceID, int offset) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setUtcOffset(offset);
         try {
@@ -429,6 +433,7 @@ public class AnalysisService {
     }
 
     public ActualRowSet getActualRows(Map<String, Object> data, AnalysisItem analysisItem, WSAnalysisDefinition report, int offset) {
+        SecurityUtil.authorizeFeedAccess(report.getDataFeedID());
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setUtcOffset(offset);
         try {
