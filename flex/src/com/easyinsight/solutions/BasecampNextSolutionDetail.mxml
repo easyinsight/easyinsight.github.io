@@ -34,7 +34,7 @@
                 <mx:Spacer width="100%"/>
                 <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="620"
                              height="60"
-                             text="Want the ability to perform custom Basecamp reporting? Whether it's simple reports on time tracking or in depth business intelligence analysis, Easy Insight can get you that visibility in a couple of clicks!"
+                             text="Want to get the most out your Basecamp account? Whether it's simple reports on todos or in depth business intelligence analysis, Easy Insight can take your project management to the next level in a couple of clicks!"
                              fontSize="14"/>
                 <mx:Spacer width="100%"/>
 
@@ -45,13 +45,9 @@
                            id="installButton"/>
             </mx:Box>
             <mx:HRule width="100%" strokeColor="#333333"/>
-            <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10" horizontalGap="50">
-                <mx:Image source="../assets/basecamp/ReportEditorSmall.jpg" height="150"/>
-                <mx:Image source="../assets/basecamp/GanttChartSmall.png" height="150"/>
-            </mx:HBox>
             <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"
                          height="120"
-                         text="Easy Insight provides you with the tools to quickly perform Basecamp reporting. You can create custom lists and charts across your projects, milestones, todo lists, and time tracking hours. Need to look at data across subject matters, like time tracking hours over a hierarchy of Project, Milestone, and Todo List? No problem! Our ad hoc report editor enables you to easily drag and drop the fields you want into the reports you want, filter the results to refine the view, and export the data to Excel, iGoogle, and more. You can even set up recurring email delivery of reports to provide a daily or weekly update on project status to a wider team."
+                         text="Easy Insight provides you with the tools to quickly perform Basecamp reporting. You can create custom lists and charts across your projects, milestones and todo lists. Need to look at data across subject matters, like a breakdown of todos through a hierarchy of Project, Milestone, and Todo List? No problem! Our ad hoc report editor enables you to easily drag and drop the fields you want into the reports you want, filter the results to refine the view, and export the data to Excel, PDF, and more. You can even set up recurring email delivery of reports to provide a daily or weekly update on project status to a wider team."
                          fontSize="14"/>
 
         </mx:VBox>
