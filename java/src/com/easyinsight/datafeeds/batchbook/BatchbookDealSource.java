@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.batchbook;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -70,6 +71,22 @@ public class BatchbookDealSource extends BatchbookBaseSource {
         analysisItems.add(new AnalysisMeasure(keys.get(DEAL_COUNT), AggregationTypes.SUM));
         analysisItems.add(new AnalysisDateDimension(keys.get(DEAL_CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(DEAL_UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
+        BatchbookCompositeSource batchbookCompositeSource = (BatchbookCompositeSource) parentDefinition;
+        try {
+            Map<String, List<String>> superTags = batchbookCompositeSource.getOrCreateSuperTags();
+            for (String superTag : superTags.keySet()) {
+                String name = "Deal " + superTag;
+                Key key = keys.get(name);
+                if (key == null) {
+                    key = new NamedKey(name);
+                }
+                analysisItems.add(new AnalysisDimension(key));
+            }
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return analysisItems;
     }
 
@@ -95,13 +112,35 @@ public class BatchbookDealSource extends BatchbookBaseSource {
                 row.addValue(keys.get(DEAL_COUNT), 1);
                 row.addValue(keys.get(DEAL_CREATED_AT), dateFormat.parse(queryField(dealNode, "created_at/text()")));
                 row.addValue(keys.get(DEAL_UPDATED_AT), dateFormat.parse(queryField(dealNode, "updated_at/text()")));
-                Nodes tagNodes = dealNode.query("tags/tag/name/text()");
+
+                Nodes tagNodes = dealNode.query("tags/tag");
                 StringBuilder tagBuilder = new StringBuilder();
                 for (int j = 0; j < tagNodes.size(); j++) {
-                    String tag = tagNodes.get(j).getValue();
-                    tagBuilder.append(tag).append(",");
+                    Node tagNode = tagNodes.get(j);
+                    String name = queryField(tagNode, "name/text()");
+                    boolean superTag = Boolean.parseBoolean(queryField(tagNode, "supertag"));
+                    if (superTag) {
+                        Map<String, String> map = new HashMap<String, String>();
+                        String id = queryField(tagNode, "id/text()");
+                        map.put("SuperTagRecordID", id);
+                        row.addValue(keys.get("Deal " + name), id);
+                        List<String> fields = batchbookCompositeSource.getOrCreateSuperTags().get(name);
+                        for (String field : fields) {
+                            String fieldValue = queryField(tagNode, "fields/" + field.replaceAll(" ", "_").toLowerCase() + "/text()");
+                            map.put(field, fieldValue);
+                        }
+                        List<Map<String, String>> list = batchbookCompositeSource.getSuperTagMap().get(name);
+                        if (list == null) {
+                            list = new ArrayList<Map<String, String>>();
+                            batchbookCompositeSource.getSuperTagMap().put(name, list);
+                        }
+                        list.add(map);
+                    } else {
+                        tagBuilder.append(name).append(",");
+                    }
+
                 }
-                if (tagNodes.size() > 0) {
+                if (tagBuilder.length() > 0) {
                     tagBuilder.deleteCharAt(tagBuilder.length() - 1);
                 }
                 row.addValue(keys.get(TAGS), tagBuilder.toString());

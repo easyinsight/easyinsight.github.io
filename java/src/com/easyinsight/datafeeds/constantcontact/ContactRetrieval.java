@@ -65,9 +65,11 @@ public class ContactRetrieval {
             contacts.add(new Contact(email, null, null, firstName + " " + lastName, firstName, lastName, companyName, jobTitle,
                     csvReader.get("Home Phone"), csvReader.get("Work Phone"), csvReader.get("City"), csvReader.get("State"), csvReader.get("Country"),
                     csvReader.get("Postal"), null,
-                    "Custom field 1", "Custom field 2", "Custom field 3", "Custom field 4", "Custom field 5", "Custom field 6",
-                    "Custom field 7", "Custom field 8", "Custom field 9", "Custom field 10", "Custom field 11", "Custom field 12",
-                    "Custom field 13", "Custom field 14", "Custom field 15", null, null, null, dateAdded, dateAdded, csvReader.get("Added By")));
+                    csvReader.get("Custom field 1"), csvReader.get("Custom field 2"), csvReader.get("Custom field 3"), csvReader.get("Custom field 4"),
+                    csvReader.get("Custom field 5"), csvReader.get("Custom field 6"),
+                    csvReader.get("Custom field 7"), csvReader.get("Custom field 8"), csvReader.get("Custom field 9"), csvReader.get("Custom field 10"),
+                    csvReader.get("Custom field 11"), csvReader.get("Custom field 12"),
+                    csvReader.get("Custom field 13"), csvReader.get("Custom field 14"), csvReader.get("Custom field 15"), null, null, null, dateAdded, dateAdded, csvReader.get("Added By")));
         }
 
 

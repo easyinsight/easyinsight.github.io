@@ -1,14 +1,15 @@
 package com.easyinsight.datafeeds.batchbook;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.datafeeds.DataSourceMigration;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.core.Key;
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.users.Account;
+import nu.xom.ParsingException;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -114,9 +115,38 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
     protected void refreshDone() {
         super.refreshDone();
         batchbookCommunicationsCache = null;
+        superTags = null;
+        superTagMap.clear();
+    }
+
+    protected void sortSources(List<IServerDataSourceDefinition> children) {
+        Collections.sort(children, new Comparator<IServerDataSourceDefinition>() {
+
+            public int compare(IServerDataSourceDefinition feedDefinition, IServerDataSourceDefinition feedDefinition1) {
+                if (feedDefinition.getFeedType().getType() == FeedType.BATCHBOOK_SUPER_TAG.getType()) {
+                    return 1;
+                }
+                return 0;
+            }
+        });
     }
 
     private BatchbookCommunicationsCache batchbookCommunicationsCache;
+
+    private Map<String, List<String>> superTags;
+
+    private Map<String, List<Map<String, String>>> superTagMap = new HashMap<String, List<Map<String,String>>>();
+
+    public Map<String, List<Map<String, String>>> getSuperTagMap() {
+        return superTagMap;
+    }
+
+    public Map<String, List<String>> getOrCreateSuperTags() throws ParsingException {
+        if (superTags == null) {
+            superTags = new BatchbookSuperTagRetrieval().getSuperTags(this);
+        }
+        return superTags;
+    }
 
     public BatchbookCommunicationsCache getOrCreateCache() {
         if (batchbookCommunicationsCache == null) {
@@ -162,6 +192,53 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
         insertStmt.execute();
     }
 
+    protected List<CompositeFeedConnection> getAdditionalConnections() throws SQLException {
+        Map<Long, FeedDefinition> map = new HashMap<Long, FeedDefinition>();
+        for (CompositeFeedNode child : getCompositeFeedNodes()) {
+            FeedDefinition childDef = new FeedStorage().getFeedDefinitionData(child.getDataFeedID());
+            map.put(child.getDataFeedID(), childDef);
+        }
+        List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
+        long dealID = 0;
+        long companyID = 0;
+        long partyID = 0;
+        for (CompositeFeedNode node : getCompositeFeedNodes()) {
+            if (node.getDataSourceType() == FeedType.BATCHBOOK_DEALS.getType()) {
+                dealID = node.getDataFeedID();
+            } else if (node.getDataSourceType() == FeedType.BATCHBOOK_COMPANIES.getType()) {
+                companyID = node.getDataFeedID();
+            } else if (node.getDataSourceType() == FeedType.BATCHBOOK_PEOPLE.getType()) {
+                partyID = node.getDataFeedID();
+            }
+        }
+        for (CompositeFeedNode node : getCompositeFeedNodes()) {
+            if (node.getDataSourceType() == FeedType.BATCHBOOK_SUPER_TAG.getType()) {
+                {
+                    FeedDefinition sourceDef = map.get(dealID);
+                    FeedDefinition targetDef = map.get(node.getDataFeedID());
+                    Key sourceKey = sourceDef.getField("Deal " + node.getDataSourceName());
+                    Key targetKey = targetDef.getField(node.getDataSourceName() + " Record ID");
+                    connections.add(new CompositeFeedConnection(dealID, node.getDataFeedID(), sourceKey, targetKey));
+                }
+                {
+                    FeedDefinition sourceDef = map.get(companyID);
+                    FeedDefinition targetDef = map.get(node.getDataFeedID());
+                    Key sourceKey = sourceDef.getField("Company " + node.getDataSourceName());
+                    Key targetKey = targetDef.getField(node.getDataSourceName() + " Record ID");
+                    connections.add(new CompositeFeedConnection(companyID, node.getDataFeedID(), sourceKey, targetKey));
+                }
+                {
+                    FeedDefinition sourceDef = map.get(partyID);
+                    FeedDefinition targetDef = map.get(node.getDataFeedID());
+                    Key sourceKey = sourceDef.getField("Party " + node.getDataSourceName());
+                    Key targetKey = targetDef.getField(node.getDataSourceName() + " Record ID");
+                    connections.add(new CompositeFeedConnection(partyID, node.getDataFeedID(), sourceKey, targetKey));
+                }
+            }
+        }
+        return connections;
+    }
+
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
@@ -171,6 +248,25 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
         rs.next();
         setUrl(rs.getString(1));
         setBbApiKey(rs.getString(2));
+    }
+
+    @Override
+    protected List<IServerDataSourceDefinition> obtainChildDataSources(EIConnection conn) throws Exception {
+        List<IServerDataSourceDefinition> defaultChildren = super.obtainChildDataSources(conn);
+        Map<String, List<String>> superTags = new BatchbookSuperTagRetrieval().getSuperTags(this);
+        for (IServerDataSourceDefinition existing : defaultChildren) {
+            superTags.remove(existing.getFeedName());
+        }
+        for (String remainingTag : superTags.keySet()) {
+            BatchbookSuperTagSource source = new BatchbookSuperTagSource();
+            source.setFeedName(remainingTag);
+            newDefinition(source, conn, "", getUploadPolicy());
+            CompositeFeedNode node = new CompositeFeedNode();
+            node.setDataFeedID(source.getDataFeedID());
+            getCompositeFeedNodes().add(node);
+            defaultChildren.add(source);
+        }
+        return defaultChildren;
     }
 
     @Override

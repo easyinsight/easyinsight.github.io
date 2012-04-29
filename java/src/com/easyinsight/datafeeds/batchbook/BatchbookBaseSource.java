@@ -12,9 +12,6 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
 /**
  * User: jamesboe
  * Date: 1/17/11
@@ -40,12 +37,14 @@ public abstract class BatchbookBaseSource extends ServerDataSourceDefinition {
 
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, FeedDefinition parentDefinition) throws ParsingException, ReportException {
         HttpMethod restMethod = new GetMethod(url + path);
+        System.out.println(url + path);
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
         Document doc;
 
         try {
             client.executeMethod(restMethod);
+            System.out.println(restMethod.getResponseBodyAsString());
             doc = builder.build(restMethod.getResponseBodyAsStream());
             return doc;
         } catch (ParsingException pe) {

@@ -88,7 +88,7 @@ public class BatchbookSuperTagSource extends BatchbookBaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         BatchbookCompositeSource batchbookCompositeSource = (BatchbookCompositeSource) parentDefinition;
         DataSet dataSet = new DataSet();
-        /*List<Map<String, String>> list = batchbookCompositeSource.getSuperTagMap().get(getFeedName());
+        List<Map<String, String>> list = batchbookCompositeSource.getSuperTagMap().get(getFeedName());
         if (list != null) {
             for (Map<String, String> map : list) {
                 IRow row = dataSet.createRow();
@@ -102,7 +102,7 @@ public class BatchbookSuperTagSource extends BatchbookBaseSource {
                     row.addValue(key, entry.getValue());
                 }
             }
-        }*/
+        }
         return dataSet;
     }
 
