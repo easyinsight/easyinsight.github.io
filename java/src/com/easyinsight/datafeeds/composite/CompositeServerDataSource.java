@@ -136,7 +136,12 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             CompositeFeedConnection connection = childConnection.createConnection(sourceDef, targetDef);
             connections.add(connection);
         }
+        connections.addAll(getAdditionalConnections());
         return connections;
+    }
+
+    protected List<CompositeFeedConnection> getAdditionalConnections() throws SQLException {
+        return new ArrayList<CompositeFeedConnection>();
     }
 
     public void newDefinition(IServerDataSourceDefinition definition, EIConnection conn, String userName, UploadPolicy uploadPolicy) throws Exception {
@@ -228,7 +233,10 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
             beforeRefresh(lastRefreshTime);
+            int nodeSize = getCompositeFeedNodes().size();
             List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn);
+            int afterNodeSize = getCompositeFeedNodes().size();
+            changed = nodeSize != afterNodeSize;
             Map<Long, Map<String, Key>> keyMap = new HashMap<Long, Map<String, Key>>();
             for (IServerDataSourceDefinition source : sources) {
                 ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;

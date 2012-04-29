@@ -47,6 +47,15 @@ public class CompositeFeedConnection implements Serializable, IJoin {
         this.targetFeedID = targetFeedID;
     }
 
+    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, Key sourceJoin, Key targetJoin) {
+        this.sourceFeedID = sourceFeedID;
+        this.targetFeedID = targetFeedID;
+        this.sourceJoin = sourceJoin;
+        sourceJoins = Arrays.asList(sourceJoin);
+        this.targetJoin = targetJoin;
+        targetJoins = Arrays.asList(targetJoin);
+    }
+
     public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, Key sourceJoin, Key targetJoin, String sourceName, String targetName,
                                    boolean sourceOuterJoin, boolean targetOuterJoin, boolean sourceJoinOnOriginal, boolean targetJoinOnOriginal) {
         this.sourceFeedID = sourceFeedID;
