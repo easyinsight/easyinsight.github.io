@@ -60,6 +60,7 @@ public class DataService {
             timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed);
             return feed.getMetadata(analysisItem, insightRequestMetadata, conn);
         } catch (ReportException re) {
+            LogClass.error(re);
             AnalysisItemResultMetadata metadata = new AnalysisItemResultMetadata();
             metadata.setReportFault(re.getReportFault());
             return metadata;

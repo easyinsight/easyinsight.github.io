@@ -20,20 +20,20 @@ public class UserThreadMutex {
     }
 
     public void acquire(long userID) throws InterruptedException {
-        Semaphore semaphore = mutexMap.get(userID);
+        /*Semaphore semaphore = mutexMap.get(userID);
         if (semaphore == null) {
             semaphore = new Semaphore(1);
             mutexMap.put(userID, semaphore);
             semaphore.acquire();
         } else {
             semaphore.acquire();
-        }
+        }*/
     }
 
     public void release(long userID) {
-        Semaphore semaphore = mutexMap.get(userID);
+        /*Semaphore semaphore = mutexMap.get(userID);
         if (semaphore != null) {
             semaphore.release();
-        }
+        }*/
     }
 }
