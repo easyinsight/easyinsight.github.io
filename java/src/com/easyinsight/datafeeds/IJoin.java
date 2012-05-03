@@ -27,7 +27,7 @@ public interface IJoin {
     List<AnalysisItem> getTargetItems();
 
     MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
-                     Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID);
+                     Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID, int operations);
 
     boolean isTargetJoinOnOriginal();
 

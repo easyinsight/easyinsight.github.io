@@ -13,6 +13,7 @@ import java.util.List;
 public class MergeAudit {
     private List<String> mergeStrings;
     private DataSet dataSet;
+    private int operations;
 
     public MergeAudit(String mergeString, DataSet dataSet) {
         this.mergeStrings = Arrays.asList(mergeString);
@@ -22,6 +23,14 @@ public class MergeAudit {
     public MergeAudit(List<String> mergeStrings, DataSet dataSet) {
         this.mergeStrings = mergeStrings;
         this.dataSet = dataSet;
+    }
+
+    public int getOperations() {
+        return operations;
+    }
+
+    public void setOperations(int operations) {
+        this.operations = operations;
     }
 
     public List<String> getMergeStrings() {
