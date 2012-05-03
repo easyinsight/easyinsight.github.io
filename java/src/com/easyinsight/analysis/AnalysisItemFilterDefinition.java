@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -57,6 +58,17 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
 
     public void setTargetItem(AnalysisItem targetItem) {
         this.targetItem = targetItem;
+    }
+
+    public void calculationItems(Map<String, List<AnalysisItem>> map) {
+        if (getFilterName() != null && !"".equals(getFilterName())) {
+            List<AnalysisItem> items = map.get(getFilterName());
+            if (items == null) {
+                items = new ArrayList<AnalysisItem>();
+                map.put(getFilterName(), items);
+            }
+            items.add(getTargetItem());
+        }
     }
 
     @Override

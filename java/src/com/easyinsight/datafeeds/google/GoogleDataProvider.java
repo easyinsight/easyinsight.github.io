@@ -471,8 +471,8 @@ public class GoogleDataProvider {
             }
             String label = field.query("label/text()").get(0).getValue();
             Nodes mastagNodes = field.query("mastag/text()");
-            if ("MO Store".equals(label) || unique || mastagNodes.size() > 0 || "text".equals(fieldType) || "checkbox".equals(fieldType) || "phone".equals(fieldType) ||
-                    "userid".equals(fieldType)) {
+            if (unique || mastagNodes.size() > 0 || "text".equals(fieldType) || "checkbox".equals(fieldType) || "phone".equals(fieldType) ||
+                    "userid".equals(fieldType) || "email".equals(fieldType)) {
                 items.add(new AnalysisDimension(namedKey, label));
             } else if ("recordid".equals(fieldType)) {
                 AnalysisDimension dim = new AnalysisDimension(namedKey, label);
@@ -492,8 +492,10 @@ public class GoogleDataProvider {
                 items.add(new AnalysisMeasure(namedKey, label, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
             } else if ("duration".equals(fieldType)) {
                 items.add(new AnalysisMeasure(namedKey, label, AggregationTypes.SUM, true, FormattingConfiguration.MILLISECONDS));
-            } else if ("float".equals(fieldType)) {
+            } else if ("float".equals(fieldType) || "percent".equals(fieldType)) {
                 items.add(new AnalysisMeasure(namedKey, label, AggregationTypes.SUM));
+            } else {
+                System.out.println("Unrecognized type = " + fieldType + " for " + fieldID);
             }
         }
 

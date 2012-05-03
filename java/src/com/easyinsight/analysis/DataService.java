@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 
 
 /**
@@ -376,6 +377,11 @@ public class DataService {
 
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters) {
+        try {
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeInsight(reportID);
@@ -405,17 +411,27 @@ public class DataService {
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public static DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
-        ReportRetrieval reportRetrieval;
         try {
-            reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            return null;
         }
-        return reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+        try {
+            ReportRetrieval reportRetrieval;
+            try {
+                reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            return reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+        } finally {
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+        }
     }
 
     public static ExtendedDataSet extendedListDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
@@ -515,6 +531,11 @@ public class DataService {
 
     public EmbeddedCompareYearsDataResults getEmbeddedCompareYearsResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
                                                         List<FilterDefinition> drillthroughFilters) {
+        try {
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -546,10 +567,16 @@ public class DataService {
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public CompareYearsDataResults getCompareYearsResults(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
+        try {
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -575,11 +602,17 @@ public class DataService {
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public EmbeddedYTDDataResults getEmbeddedYTDResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
                                                         List<FilterDefinition> drillthroughFilters) {
+        try {
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -615,10 +648,16 @@ public class DataService {
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public YTDDataResults getYTDResults(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
+        try {
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -648,10 +687,16 @@ public class DataService {
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public TrendDataResults getTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        try {
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
@@ -713,12 +758,18 @@ public class DataService {
             return embeddedDataResults;
         } finally {
             Database.closeConnection(conn);
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
 
 
     public CrossTabDataResults getCrosstabDataResults(WSCrosstabDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        try {
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
@@ -763,10 +814,16 @@ public class DataService {
             return embeddedDataResults;
         } finally {
             Database.closeConnection(conn);
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public VerticalDataResults getVerticalDataResults(WSCombinedVerticalListDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        try {
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         try {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
@@ -792,10 +849,17 @@ public class DataService {
             VerticalDataResults embeddedDataResults = new VerticalDataResults();
             embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
             return embeddedDataResults;
+        } finally {
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        try {
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
@@ -819,6 +883,7 @@ public class DataService {
             return embeddedDataResults;
         } finally {
             Database.closeConnection(conn);
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
@@ -958,7 +1023,9 @@ public class DataService {
                     }
                 }
             }
-            Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields);
+            AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure();
+            structure.setReport(analysisDefinition);
+            Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields, structure);
             if (analysisDefinition.isDataSourceFields()) {
                 Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
                 for (AnalysisItem field : feed.getFields()) {

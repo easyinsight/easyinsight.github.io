@@ -24,20 +24,22 @@ public class CleanupComponent implements IComponent {
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
+        AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure();
+        structure.setReport(pipelineData.getReport());
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
         Set<AnalysisItem> allRequestedAnalysisItems = pipelineData.getAllRequestedItems();
         WSAnalysisDefinition report = pipelineData.getReport();
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 if (filterDefinition.isEnabled() && !filterDefinition.isApplyBeforeAggregation()) {
-                    List<AnalysisItem> items = filterDefinition.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, cleanupCriteria, allNeededAnalysisItems, new AnalysisItemRetrievalStructure());
+                    List<AnalysisItem> items = filterDefinition.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, cleanupCriteria, allNeededAnalysisItems, structure);
                     allNeededAnalysisItems.addAll(items);
                 }
             }
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
-                List<AnalysisItem> baseItems = item.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, cleanupCriteria, allNeededAnalysisItems, new AnalysisItemRetrievalStructure());
+                List<AnalysisItem> baseItems = item.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, cleanupCriteria, allNeededAnalysisItems, structure);
                 allNeededAnalysisItems.addAll(baseItems);
                 List<AnalysisItem> linkItems = item.addLinkItems(pipelineData.getAllItems());
                 allNeededAnalysisItems.addAll(linkItems);

@@ -29,7 +29,7 @@ public class AggregationComponent implements IComponent {
             derivedItems.addAll(item.getDerivedItems());
         }
         List<AnalysisItem> list = new ArrayList<AnalysisItem>(pipelineData.getReportItems());
-        ListTransform listTransform = dataSet.listTransform(list, skipAggregations, pipelineData.getUniqueItems());
+        ListTransform listTransform = dataSet.listTransform(list, skipAggregations, pipelineData.getUniqueItems(), pipelineData.getReport().getFieldToUniqueMap());
         return listTransform.aggregate(derivedItems);
     }
 

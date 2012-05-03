@@ -35,5 +35,7 @@ public interface IJoin {
 
     boolean isPostJoin();
 
+    boolean isOptimized();
+
     void reconcile(List<CompositeFeedNode> compositeFeedNodes, List<AnalysisItem> fields);
 }

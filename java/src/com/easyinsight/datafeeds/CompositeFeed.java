@@ -397,7 +397,7 @@ public class CompositeFeed extends Feed {
                     for (IJoin myConn : myConnections) {
                         FilterDefinition filter = filterMap.get(myConn);
                         if (filter != null) {
-                            if (insightRequestMetadata.isOptimized()) {
+                            if (insightRequestMetadata.isOptimized() || myConn.isOptimized()) {
                                 sourceNode.addFilter(filter);
                             }
                         }
@@ -441,14 +441,14 @@ public class CompositeFeed extends Feed {
                 }
                 if (!swapped) {
                     if (targetQueryData.dataSet == null) {
-                        if (insightRequestMetadata.isOptimized()) {
+                        if (insightRequestMetadata.isOptimized() || last.connection.isOptimized()) {
                             targetNode.addFilter(joinFilter);
                         }
                         targetQueryData.dataSet = targetNode.produceDataSet(insightRequestMetadata);
                     }
                 } else {
                     if (sourceQueryData.dataSet == null) {
-                        if (insightRequestMetadata.isOptimized()) {
+                        if (insightRequestMetadata.isOptimized() || last.connection.isOptimized()) {
                             sourceNode.addFilter(joinFilter);
                         }
                         sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
@@ -585,7 +585,7 @@ public class CompositeFeed extends Feed {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }*/
-        if (!insightRequestMetadata.isOptimized()) {
+        if (!insightRequestMetadata.isOptimized() && !insightRequestMetadata.isTraverseAllJoins()) {
             if (insightRequestMetadata.isLookupTableAggregate()) {
                 CompositeReportFinishPipeline pipeline = new CompositeReportFinishPipeline();
                 WSListDefinition analysisDefinition = new WSListDefinition();
@@ -766,7 +766,7 @@ public class CompositeFeed extends Feed {
             DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
 
             Pipeline pipeline;
-            if (getDataSource().getFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
+            if (!insightRequestMetadata.isTraverseAllJoins() && getDataSource().getFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
                 pipeline = new CompositeReportPipeline();
             } else {
                 pipeline = new AltCompositeReportPipeline(joinItems);

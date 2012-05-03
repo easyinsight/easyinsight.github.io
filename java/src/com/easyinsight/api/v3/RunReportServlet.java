@@ -80,7 +80,6 @@ public class RunReportServlet extends APIServlet {
             }
             root.appendChild(row);
         }
-        System.out.println(root.toXML());
         result.append(root.toXML());
         return new ResponseInfo(ResponseInfo.ALL_GOOD, result.toString());
     }

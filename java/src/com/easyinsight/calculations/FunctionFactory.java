@@ -160,6 +160,8 @@ public class FunctionFactory {
             return new FieldChoiceDrillthrough();
         } else if (s.equals("uniquefield")) {
             return new UniqueField();
+        } else if (s.equals("assignunique")) {
+            return new AssignUniqueField();
         } else if (s.equals("case")) {
             return new CaseFunction();
         } else if (s.equals("compositejoin")) {

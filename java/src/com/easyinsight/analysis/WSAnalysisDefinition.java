@@ -417,7 +417,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return filters;
     }
 
-    public Set<AnalysisItem> getColumnItems(List<AnalysisItem> allItems) {
+    public Set<AnalysisItem> getColumnItems(List<AnalysisItem> allItems, AnalysisItemRetrievalStructure structure) {
         Set<AnalysisItem> columnSet = new HashSet<AnalysisItem>();
         Set<AnalysisItem> analysisItems = getAllAnalysisItems();
         analysisItems.remove(null);
@@ -428,7 +428,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
-                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, columnSet, new AnalysisItemRetrievalStructure());
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, columnSet, structure);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID()) {
                     if (!columnSet.contains(item)) {
@@ -634,6 +634,17 @@ public abstract class WSAnalysisDefinition implements Serializable {
     @Transient
     private transient Map<Long, AnalysisItem> uniqueIteMap = new HashMap<Long, AnalysisItem>();
 
+    @Transient
+    private transient Map<String, AnalysisItem> fieldToUniqueMap = new HashMap<String, AnalysisItem>();
+
+    public Map<String, AnalysisItem> getFieldToUniqueMap() {
+        return fieldToUniqueMap;
+    }
+
+    public void setFieldToUniqueMap(Map<String, AnalysisItem> fieldToUniqueMap) {
+        this.fieldToUniqueMap = fieldToUniqueMap;
+    }
+
     public Map<Long, AnalysisItem> getUniqueIteMap() {
         return uniqueIteMap;
     }
@@ -757,9 +768,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return new ArrayList<Intention>();
     }
 
-    public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {
+    public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems, AnalysisItemRetrievalStructure structure) {
         List<EIDescriptor> allItems = new ArrayList<EIDescriptor>();
-        Set<AnalysisItem> items = getColumnItems(dataSourceItems);
+        Set<AnalysisItem> items = getColumnItems(dataSourceItems, structure);
         for (AnalysisItem analysisItem : items) {
             allItems.add(new AnalysisItemDescriptor(analysisItem));
             if (analysisItem.getFilters() != null) {

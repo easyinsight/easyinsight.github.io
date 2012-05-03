@@ -7,6 +7,15 @@ package com.easyinsight.analysis;
  */
 public class AnalysisItemRetrievalStructure {
     private boolean onStorage;
+    private WSAnalysisDefinition report;
+
+    public WSAnalysisDefinition getReport() {
+        return report;
+    }
+
+    public void setReport(WSAnalysisDefinition report) {
+        this.report = report;
+    }
 
     public boolean isOnStorage() {
         return onStorage;

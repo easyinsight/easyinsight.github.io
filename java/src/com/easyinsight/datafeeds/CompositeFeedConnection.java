@@ -38,6 +38,7 @@ public class CompositeFeedConnection implements Serializable, IJoin {
     private String sourceFeedName;
     private String targetFeedName;
     private String label = "";
+    private boolean optimized;
 
     public CompositeFeedConnection() {
     }
@@ -86,6 +87,14 @@ public class CompositeFeedConnection implements Serializable, IJoin {
         this.targetOuterJoin = targetOuterJoin;
         this.sourceJoinOnOriginal = sourceJoinOnOriginal;
         this.targetJoinOnOriginal = targetJoinOnOriginal;
+    }
+
+    public boolean isOptimized() {
+        return optimized;
+    }
+
+    public void setOptimized(boolean optimized) {
+        this.optimized = optimized;
     }
 
     public boolean isSourceJoinOnOriginal() {

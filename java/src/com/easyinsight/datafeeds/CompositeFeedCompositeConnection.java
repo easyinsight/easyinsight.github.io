@@ -39,6 +39,10 @@ public class CompositeFeedCompositeConnection implements Serializable, IJoin {
         return false;
     }
 
+    public boolean isOptimized() {
+        return false;
+    }
+
     public void reconcile(List<CompositeFeedNode> nodes, List<AnalysisItem> fields) {
         
         for (CompositeFeedNode node : nodes) {

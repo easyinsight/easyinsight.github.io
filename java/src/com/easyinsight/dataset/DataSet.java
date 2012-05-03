@@ -98,7 +98,7 @@ public class DataSet implements Serializable {
         return 0;
     }
 
-    public ListTransform listTransform(List<AnalysisItem> columns, Set<Integer> skipAggregations, Map<Long, AnalysisItem> uniqueItems) {
+    public ListTransform listTransform(List<AnalysisItem> columns, Set<Integer> skipAggregations, Map<Long, AnalysisItem> uniqueItems, Map<String, AnalysisItem> fieldToUniques) {
         ListTransform listTransform = new ListTransform(skipAggregations);
         Collection<AnalysisDimension> ourDimensions = new ArrayList<AnalysisDimension>();
         Collection<AnalysisDimension> ungroupedDimensions = new ArrayList<AnalysisDimension>();
@@ -120,6 +120,11 @@ public class DataSet implements Serializable {
                     if (id != 0) {
                         AnalysisItem dim = uniqueItems.get(id);
                         keyMapping.put(column, dim);
+                    } else {
+                        AnalysisItem dim = fieldToUniques.get(column.toDisplay());
+                        if (dim != null) {
+                            keyMapping.put(column, dim);
+                        }
                     }
                 }
             }

@@ -54,6 +54,11 @@ public class CalculationLogic {
                 }
                 items.add(analysisItem);
             }
+            if (report.getFilterDefinitions() != null) {
+                for (FilterDefinition filter : report.getFilterDefinitions()) {
+                    filter.calculationItems(displayMap);
+                }
+            }
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
             calculationTreeNode.accept(visitor);
 

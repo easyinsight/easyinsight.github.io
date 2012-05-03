@@ -251,4 +251,8 @@ public class FilterDefinition implements Serializable, Cloneable {
             }
         }
     }
+
+    public void calculationItems(Map<String, List<AnalysisItem>> map) {
+
+    }
 }

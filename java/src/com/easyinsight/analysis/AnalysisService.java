@@ -770,7 +770,7 @@ public class AnalysisService {
         }
     }
 
-    public String validateCalculation(String calculationString, long dataSourceID, List<AnalysisItem> reportItems) {
+    public String validateCalculation(String calculationString, long dataSourceID, List<AnalysisItem> reportItems, WSAnalysisDefinition report) {
         SecurityUtil.authorizeFeed(dataSourceID, Roles.SUBSCRIBER);
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -807,6 +807,11 @@ public class AnalysisService {
                             displayMap.put(analysisItem.toDisplay(), items);
                         }
                         items.add(analysisItem);
+                    }
+                }
+                if (report != null && report.getFilterDefinitions() != null) {
+                    for (FilterDefinition filter : report.getFilterDefinitions()) {
+                        filter.calculationItems(displayMap);
                     }
                 }
                 visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());

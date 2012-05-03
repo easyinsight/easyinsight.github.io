@@ -37,6 +37,10 @@ public class AltFallthroughConnection implements Serializable, IJoin {
         return true;
     }
 
+    public boolean isOptimized() {
+        return false;
+    }
+
     public void reconcile(List<CompositeFeedNode> nodes, List<AnalysisItem> fields) {
         
         for (CompositeFeedNode node : nodes) {
