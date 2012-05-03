@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 /**
  * User: jamesboe
@@ -9,7 +10,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="range_option")
-public class RangeOption implements Cloneable {
+public class RangeOption implements Cloneable, Serializable {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="range_option_id")
