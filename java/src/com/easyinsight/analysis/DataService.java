@@ -55,6 +55,7 @@ public class DataService {
             insightRequestMetadata.setUtcOffset(utfOffset);
             if (report != null) {
                 insightRequestMetadata.setJoinOverrides(report.getJoinOverrides());
+                insightRequestMetadata.setTraverseAllJoins(report.isFullJoins());
             }
             timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed);
             return feed.getMetadata(analysisItem, insightRequestMetadata, conn);

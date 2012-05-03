@@ -210,6 +210,8 @@ public abstract class Feed implements Serializable {
             throw new RuntimeException(e);
         }
         tempList.setColumns(columns);
+        tempList.setJoinOverrides(insightRequestMetadata.getJoinOverrides());
+        tempList.setFullJoins(insightRequestMetadata.isTraverseAllJoins());
         DataSet dataSet = DataService.listDataSet(tempList, insightRequestMetadata, conn);
         for (FilterDefinition filter : filters) {
             MaterializedFilterDefinition mFilter = filter.materialize(insightRequestMetadata);
