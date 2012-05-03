@@ -84,6 +84,8 @@ public class ContactRetrieval {
 
         id = id.replace("http://", "https://");
 
+        id = id.substring(0, 45) + ccSource.getCcUserName() + id.substring(id.indexOf("/activities"));
+
         boolean found = false;
 
         OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
