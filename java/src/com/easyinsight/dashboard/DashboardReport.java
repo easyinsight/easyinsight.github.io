@@ -2,6 +2,7 @@ package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemRetrievalStructure;
 import com.easyinsight.analysis.AnalysisStorage;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.core.InsightDescriptor;
@@ -141,7 +142,7 @@ public class DashboardReport extends DashboardElement {
     public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {
         List<EIDescriptor> descs = new ArrayList<EIDescriptor>();
         descs.add(report);
-        descs.addAll(new AnalysisStorage().getAnalysisDefinition(report.getId()).allItems(dataSourceItems));
+        descs.addAll(new AnalysisStorage().getAnalysisDefinition(report.getId()).allItems(dataSourceItems, new AnalysisItemRetrievalStructure()));
         return descs;
     }
 }
