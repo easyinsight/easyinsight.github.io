@@ -11,6 +11,8 @@ package com.easyinsight.analysis {
 public class AnalysisItemResultMetadata
 {
 
+    public var reportFault:Object;
+
     public function AnalysisItemResultMetadata()
     {
     }

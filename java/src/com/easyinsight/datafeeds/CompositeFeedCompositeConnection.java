@@ -133,7 +133,7 @@ public class CompositeFeedCompositeConnection implements Serializable, IJoin {
     }
 
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
-                            Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID) {
+                            Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID, int operations) {
 
         Map<Map<Integer, Value>, List<IRow>> index = new HashMap<Map<Integer, Value>, List<IRow>>();
         /*Collection<AnalysisItem> sourceItems = new ArrayList<AnalysisItem>();

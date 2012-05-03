@@ -131,7 +131,7 @@ public class AltFallthroughConnection implements Serializable, IJoin {
     }
 
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
-                            Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID) {
+                            Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID, int operations) {
 
         Map<Value, List<IRow>> index = new HashMap<Value, List<IRow>>();
         /*Collection<AnalysisItem> sourceItems = new ArrayList<AnalysisItem>();

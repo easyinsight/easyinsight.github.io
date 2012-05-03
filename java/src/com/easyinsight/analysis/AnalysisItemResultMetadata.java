@@ -13,6 +13,15 @@ import java.io.Serializable;
 public class AnalysisItemResultMetadata implements Serializable {
 
     private int version;
+    private ReportFault reportFault;
+
+    public ReportFault getReportFault() {
+        return reportFault;
+    }
+
+    public void setReportFault(ReportFault reportFault) {
+        this.reportFault = reportFault;
+    }
 
     public int getVersion() {
         return version;

@@ -2,9 +2,12 @@ package com.easyinsight.filtering {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemResultMetadata;
+import com.easyinsight.analysis.ReportFault;
 
 import com.easyinsight.analysis.Value;
 import com.easyinsight.skin.ImageConstants;
+import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -20,6 +23,7 @@ import mx.controls.LinkButton;
 import mx.controls.ProgressBar;
 import mx.core.UIComponent;
 import mx.events.DropdownEvent;
+import mx.managers.PopUpManager;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -324,7 +328,13 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
 
     }
 
-    private function processMetadata(analysisDimensionResultMetadata:AnalysisDimensionResultMetadata):void {
+    private function processMetadata(metadata:AnalysisItemResultMetadata):void {
+        if (metadata.reportFault != null) {
+            var window:UIComponent = ReportFault(metadata.reportFault).createFaultWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+        var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = metadata as AnalysisDimensionResultMetadata;
         var valueObj:Dictionary = new Dictionary();
         if (analysisDimensionResultMetadata != null && analysisDimensionResultMetadata.values != null) {
             for each (var value:Value in analysisDimensionResultMetadata.values) {
@@ -390,8 +400,8 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
     }
 
     private function gotMetadata(event:ResultEvent):void {
-        var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
-                AnalysisDimensionResultMetadata;
+        var analysisDimensionResultMetadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
+                AnalysisItemResultMetadata;
         processMetadata(analysisDimensionResultMetadata);
     }
 

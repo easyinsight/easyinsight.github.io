@@ -1,13 +1,13 @@
 package com.easyinsight.datafeeds;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.Row;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.users.Account;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -296,7 +296,7 @@ public class CompositeFeedConnection implements Serializable, IJoin {
     }
 
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
-                            Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID) {
+                            Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID, int operations) {
         Key myJoinDimension = null;
         if (sourceItem == null) {
             for (AnalysisItem item : sourceFields) {
@@ -366,12 +366,22 @@ public class CompositeFeedConnection implements Serializable, IJoin {
         Collection<IRow> unjoinedRows = new ArrayList<IRow>();
         List<IRow> sourceSetRows = sourceSet.getRows();
         List<IRow> targetSetRows = dataSet.getRows();
+        int accountType;
+        try {
+            accountType = SecurityUtil.getAccountTier();
+        } catch (Exception e) {
+            accountType = Account.BASIC;
+        }
         Iterator<IRow> sourceIter = sourceSetRows.iterator();
         while (sourceIter.hasNext()) {
             IRow row = sourceIter.next();
             Value joinDimensionValue = row.getValue(myJoinDimension);
             if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
                 if (!sourceOuterJoin) {
+                    operations++;
+                    if (operations % 100000 == 0) {
+                        validateOperation(operations, accountType);
+                    }
                     unjoinedRows.add(row);
                 }
             } else {
@@ -379,6 +389,10 @@ public class CompositeFeedConnection implements Serializable, IJoin {
                 if (rows == null){
                     rows = new ArrayList<IRow>(1);
                     index.put(joinDimensionValue, rows);
+                }
+                operations++;
+                if (operations % 100000 == 0) {
+                    validateOperation(operations, accountType);
                 }
                 rows.add(row);
             }
@@ -391,6 +405,10 @@ public class CompositeFeedConnection implements Serializable, IJoin {
             Value joinDimensionValue = row.getValue(fromJoinDimension);
             if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
                 if (!targetOuterJoin) {
+                    operations++;
+                    if (operations % 100000 == 0) {
+                        validateOperation(operations, accountType);
+                    }
                     unjoinedRows.add(row);
                 }
             } else {
@@ -398,10 +416,18 @@ public class CompositeFeedConnection implements Serializable, IJoin {
                 List<IRow> sourceRows = index.get(joinDimensionValue);
                 if (sourceRows == null) {
                     if (!targetOuterJoin) {
+                        operations++;
+                        if (operations % 100000 == 0) {
+                            validateOperation(operations, accountType);
+                        }
                         unjoinedRows.add(row);
                     }
                 } else {
                     for (IRow sourceRow : sourceRows) {
+                        operations++;
+                        if (operations % 100000 == 0) {
+                            validateOperation(operations, accountType);
+                        }
                         sourceRow.merge(row, result);
                     }
                 }
@@ -417,7 +443,25 @@ public class CompositeFeedConnection implements Serializable, IJoin {
         for (IRow row : unjoinedRows) {
             result.createRow().addValues(row);
         }
-        return new MergeAudit(mergeString, result);
+        MergeAudit mergeAudit = new MergeAudit(mergeString, result);
+        mergeAudit.setOperations(operations);
+        return mergeAudit;
+    }
+
+    private void validateOperation(int operationCount, int accountType) {
+        if (accountType == Account.BASIC) {
+            if (operationCount > 5000000) {
+                throw new ReportException(new GenericReportFault("The query requesting data was too complex."));
+            }
+        } else if (accountType == Account.PLUS) {
+            if (operationCount > 5000000) {
+                throw new ReportException(new GenericReportFault("The query requesting data was too complex."));
+            }
+        } else {
+            if (operationCount > 5000000) {
+                throw new ReportException(new GenericReportFault("The query requesting data was too complex."));
+            }
+        }
     }
 
     private List<Key> removeSourceKeys;
