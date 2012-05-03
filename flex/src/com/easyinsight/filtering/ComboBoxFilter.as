@@ -1,4 +1,5 @@
 package com.easyinsight.filtering {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 import com.easyinsight.analysis.AnalysisItem;
 
@@ -59,8 +60,11 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
         dispatchEvent(new Event("filterEnabledChanged"));
     }
 
-    public function ComboBoxFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
+    private var _report:AnalysisDefinition;
+
+    public function ComboBoxFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition) {
         super();
+        this._report = report;
         this._feedID = feedID;
         this._analysisItem = analysisItem;
         this.reportID = reportID;
@@ -99,7 +103,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID);
+            dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report);
         }
     }
 
@@ -203,7 +207,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID);
+            dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report);
         } else {
             processMetadata(_filterDefinition.cachedValues as AnalysisDimensionResultMetadata);
         }

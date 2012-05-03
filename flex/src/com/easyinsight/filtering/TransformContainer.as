@@ -1,6 +1,7 @@
 package com.easyinsight.filtering
 {
 import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.NamedKey;
 import com.easyinsight.commands.CommandEvent;
 import com.easyinsight.analysis.AnalysisItem;
@@ -39,6 +40,7 @@ public class TransformContainer extends HBox
     private var filterTile:FlowBox;
     private var _feedID:int;
     private var _reportID:int;
+    private var _report:AnalysisDefinition;
     private var _dashboardID:int;
     private var noFilters:Boolean = true;
     // private var dropHereBox:VBox;
@@ -58,6 +60,10 @@ public class TransformContainer extends HBox
         this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);
         //setStyle("borderThickness", 1);
         //setStyle("borderStyle", "solid");
+    }
+
+    public function set report(value:AnalysisDefinition):void {
+        _report = value;
     }
 
     public function set reportID(value:int):void {
@@ -218,7 +224,7 @@ public class TransformContainer extends HBox
                 if (filterValueDefinition.autoComplete) {
                     filter = new AutoCompleteFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
                 } else {
-                    filter = new ComboBoxFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
+                    filter = new ComboBoxFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report);
                 }
             } else {
                 filter = new MultiValueFilter(_feedID, filterDefinition.field);
@@ -363,6 +369,7 @@ public class TransformContainer extends HBox
         } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
             var dimWindow:GroupingFilterWindow = new GroupingFilterWindow();
             dimWindow.item = analysisItem;
+            dimWindow.report = _report;
             dimWindow.feedID = _feedID;
             dimWindow.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);
             PopUpManager.addPopUp(dimWindow, this, true);
@@ -559,7 +566,7 @@ public class TransformContainer extends HBox
                     filterValueDefinition.inclusive = includeFilter;
                     filterDefinition = filterValueDefinition;
                     if (values.length == 1 && includeFilter) {
-                        filter = new ComboBoxFilter(_feedID, key, _reportID, _dashboardID);
+                        filter = new ComboBoxFilter(_feedID, key, _reportID, _dashboardID, _report);
                     } else {
                         filter = new MultiValueFilter(_feedID, key);
                     }

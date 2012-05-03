@@ -19,7 +19,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.Semaphore;
 
 
 /**
@@ -33,6 +32,11 @@ public class DataService {
     private FeedRegistry feedRegistry = FeedRegistry.instance();
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID) {
+        return getAnalysisItemMetadata(feedID, analysisItem, utfOffset, reportID, dashboardID, null);
+    }
+
+    public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
+                                                              WSAnalysisDefinition report) {
         EIConnection conn = Database.instance().getConnection();
         try {
             if (reportID > 0) {
@@ -49,6 +53,9 @@ public class DataService {
             Feed feed = feedRegistry.getFeed(feedID, conn);
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setUtcOffset(utfOffset);
+            if (report != null) {
+                insightRequestMetadata.setJoinOverrides(report.getJoinOverrides());
+            }
             timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed);
             return feed.getMetadata(analysisItem, insightRequestMetadata, conn);
         } catch (Exception e) {

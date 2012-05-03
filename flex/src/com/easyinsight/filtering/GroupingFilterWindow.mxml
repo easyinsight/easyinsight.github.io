@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF" borderThickness="1" cornerRadius="15" dropShadowEnabled="true"
         borderStyle="solid">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
 
         import mx.managers.PopUpManager;
@@ -19,7 +20,7 @@
         }
 
         private function addComboBox():void {
-            var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, _item, 0, 0);
+            var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, _item, 0, 0, _report);
             dispatchEvent(new FilterCreationEvent(comboBoxFilter));
             PopUpManager.removePopUp(this);
         }
@@ -32,6 +33,13 @@
 
         private var _item:AnalysisItem;
         private var _feedID:int;
+
+        private var _report:AnalysisDefinition;
+
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
 
         [Bindable]
         private var stackIndex:int;
