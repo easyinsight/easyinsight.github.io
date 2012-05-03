@@ -7,6 +7,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
@@ -102,7 +103,12 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
     
     private Date parseDate(String string) {
         if (string != null && !"null".equals(string) && !"".equals(string)) {
-            return format.parseDateTime(string).toDate();
+            try {
+                return format.parseDateTime(string).toDate();
+            } catch (Exception e) {
+                LogClass.error("Parse failure on " + string);
+                return null;
+            }
         }
         return null;
     }
@@ -149,7 +155,12 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     String todoListName = todoList.getString("name");
                     String todoListDescription = todoList.getString("description");
                     String todoListURL = todoList.getString("url");
-                    Date todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
+                    Date todoListUpdatedAt = null;
+                    try {
+                        todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
+                    } catch (Exception e) {
+                        LogClass.error("Parse failure on " + todoList.getString("updated_at"));
+                    }
                     JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition);
                     JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
                     JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
@@ -165,7 +176,12 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     String todoListName = todoList.getString("name");
                     String todoListDescription = todoList.getString("description");
                     String todoListURL = todoList.getString("url");
-                    Date todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
+                    Date todoListUpdatedAt = null;
+                    try {
+                        todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
+                    } catch (Exception e) {
+                        LogClass.error("Parse failure on " + todoList.getString("updated_at"));
+                    }
                     JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition);
                     JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
                     JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
