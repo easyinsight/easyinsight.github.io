@@ -77,6 +77,10 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
             } catch (ReportException re) {
                 throw re;
             } catch (Throwable e) {
+                try {
+                    System.out.println("https://basecamp.com/"+parentDefinition.getEndpoint()+"/api/v1/" + path + " = " + restMethod.getResponseBodyAsString());
+                } catch (IOException e1) {
+                }
                 throw new RuntimeException(e);
             }
         } while (!successful && retryCount < 10);
