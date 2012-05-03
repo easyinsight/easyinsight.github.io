@@ -454,11 +454,11 @@ public class CompositeFeedConnection implements Serializable, IJoin {
                 throw new ReportException(new GenericReportFault("The query requesting data was too complex."));
             }
         } else if (accountType == Account.PLUS) {
-            if (operationCount > 5000000) {
+            if (operationCount > 7500000) {
                 throw new ReportException(new GenericReportFault("The query requesting data was too complex."));
             }
         } else {
-            if (operationCount > 5000000) {
+            if (operationCount > 10000000) {
                 throw new ReportException(new GenericReportFault("The query requesting data was too complex."));
             }
         }
