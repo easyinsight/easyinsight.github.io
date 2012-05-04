@@ -121,9 +121,11 @@ public class DataSet implements Serializable {
                         AnalysisItem dim = uniqueItems.get(id);
                         keyMapping.put(column, dim);
                     } else {
-                        AnalysisItem dim = fieldToUniques.get(column.toDisplay());
-                        if (dim != null) {
-                            keyMapping.put(column, dim);
+                        if (fieldToUniques != null) {
+                            AnalysisItem dim = fieldToUniques.get(column.toDisplay());
+                            if (dim != null) {
+                                keyMapping.put(column, dim);
+                            }
                         }
                     }
                 }
