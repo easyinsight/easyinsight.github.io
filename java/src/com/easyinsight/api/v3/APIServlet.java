@@ -276,6 +276,21 @@ public abstract class APIServlet extends HttpServlet {
         while (rs.next()) {
             dataSourceIDs.put(rs.getLong(1), rs.getBoolean(2));
         }
+        if (dataSourceIDs.size() == 0) {
+            PreparedStatement accountQueryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.UNCHECKED_API_ENABLED" +
+                    " FROM UPLOAD_POLICY_USERS, DATA_FEED, user WHERE " +
+                    "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.account_id = ? AND DATA_FEED.ACCOUNT_VISIBLE = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND (DATA_FEED.FEED_NAME = ? OR " +
+                    "DATA_FEED.API_KEY = ?) AND DATA_FEED.VISIBLE = ?");
+            accountQueryStmt.setLong(1, SecurityUtil.getAccountID());
+            accountQueryStmt.setBoolean(2, true);
+            accountQueryStmt.setString(3, dataSourceName);
+            accountQueryStmt.setString(4, dataSourceName);
+            accountQueryStmt.setBoolean(5, true);
+            ResultSet accountRS = accountQueryStmt.executeQuery();
+            while (accountRS.next()) {
+                dataSourceIDs.put(accountRS.getLong(1), accountRS.getBoolean(2));
+            }
+        }
         return dataSourceIDs;
     }
 }
