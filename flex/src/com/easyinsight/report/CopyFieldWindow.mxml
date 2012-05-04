@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.ReportEditorFieldEvent;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var availableFields:ArrayCollection;
+
+        private function copy():void {
+            dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_COPY, AnalysisItemWrapper(fieldBox.selectedItem)));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:Label text="Choose a field to copy:"/>
+    <mx:ComboBox dataProvider="{availableFields}" id="fieldBox" labelField="displayName" rowCount="15"/>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Copy" click="copy()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>
