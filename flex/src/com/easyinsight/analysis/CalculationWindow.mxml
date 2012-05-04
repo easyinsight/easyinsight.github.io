@@ -23,6 +23,12 @@
         [Bindable]
         private var failureMessage:String;
 
+        private var _report:AnalysisDefinition;
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
+
         [Bindable]
         protected var calcText:String;
 
@@ -94,7 +100,7 @@
 
         public function save(dataSourceID:int):void {
             calculationInput.errorString = null;
-            analysisService.validateCalculation.send(calculationInput.text, dataSourceID, items);
+            analysisService.validateCalculation.send(calculationInput.text, dataSourceID, items, _report);
         }
 
         public function validatedCalculation():void {

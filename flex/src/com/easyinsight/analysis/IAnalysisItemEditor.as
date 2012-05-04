@@ -11,5 +11,6 @@ public interface IAnalysisItemEditor {
     function validate():Boolean;
     function higlight():void;
     function normal():void;
+    function set report(analysisDefinition:AnalysisDefinition):void;
 }
 }

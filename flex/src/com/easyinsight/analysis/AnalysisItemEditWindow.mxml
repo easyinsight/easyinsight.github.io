@@ -30,6 +30,8 @@
 
         private var editor:IAnalysisItemEditor;
 
+        public var report:AnalysisDefinition;
+
         private var _dataSourceID:int;
 
         public static const BASE:int = 1;
@@ -144,6 +146,7 @@
                 editor.dataSourceID = _dataSourceID;
                 editor.analysisItem = _analysisItem;
                 editor.analysisItems = _analysisItems;
+                editor.report = report;
             }
             UIComponent(editor).addEventListener(FlexEvent.UPDATE_COMPLETE, onEvent);
             Container(editor).label = "Item";

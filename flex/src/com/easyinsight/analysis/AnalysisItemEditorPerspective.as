@@ -32,5 +32,8 @@ public class AnalysisItemEditorPerspective extends ModulePerspective implements 
 
     public function normal():void {
     }
+
+    public function set report(analysisDefinition:AnalysisDefinition):void {
+    }
 }
 }

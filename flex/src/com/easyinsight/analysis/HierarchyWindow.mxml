@@ -94,6 +94,9 @@
 
         public function normal():void {
         }
+
+        public function set report(analysisDefinition:AnalysisDefinition):void {
+        }
         ]]></mx:Script>
 
     <mx:VBox horizontalAlign="center" width="220" height="300">

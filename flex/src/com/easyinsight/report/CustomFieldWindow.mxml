@@ -14,6 +14,7 @@
         import com.easyinsight.analysis.DerivedGroupingWindow;
         import com.easyinsight.analysis.FieldEditorEvent;
         import com.easyinsight.analysis.HierarchyWindow;
+        import com.easyinsight.analysis.ReportEditorFieldEvent;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -56,6 +57,7 @@
         private function createCalculation():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             window.editorClass = CalculationMeasureWindow;
+            window.report = _analysisDefinition;
             window.dataSourceID = _dataSourceID;
             window.analysisItems = _wrappers;
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
@@ -73,6 +75,7 @@
         private function createCalculatedGrouping():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             window.editorClass = DerivedGroupingWindow;
+            window.report = _analysisDefinition;
             window.dataSourceID = _dataSourceID;
             window.analysisItems = _wrappers;
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
@@ -86,6 +89,7 @@
         private function createCalculatedDate():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             window.editorClass = DerivedDateWindow;
+            window.report = _analysisDefinition;
             window.dataSourceID = _dataSourceID;
             window.analysisItems = _wrappers;
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
@@ -119,6 +123,20 @@
             PopUpUtil.centerPopUp(window);
             PopUpManager.removePopUp(this);
         }
+
+        private function copyField():void {
+            var window:CopyFieldWindow = new CopyFieldWindow();
+            window.availableFields = _wrappers;
+            window.addEventListener(ReportEditorFieldEvent.ITEM_COPY, passThrough, false, 0, true);
+            window.addEventListener(Event.CLOSE, onClose, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
         ]]></mx:Script>
         <mx:HBox>
             <report:BigButton imageClass="@Embed(source='../../../../assets/text_formula.png')"
@@ -129,6 +147,10 @@
                               headerText="Create a Custom Grouping"
                               description="Define a custom grouping such as Channel or Project Owner"
                     click="createCalculatedGrouping()"/>
+            <report:BigButton imageClass="@Embed(source='../../../../assets/code.png')"
+                              headerText="Copy a Field"
+                              description="Copy and edit an existing field"
+                              click="copyField()"/>
         </mx:HBox>
         <mx:HBox>
             <report:BigButton imageClass="@Embed(source='../../../../assets/calendar.png')"
