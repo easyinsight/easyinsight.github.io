@@ -54,7 +54,7 @@ public class CalculationLogic {
                 }
                 items.add(analysisItem);
             }
-            if (report.getFilterDefinitions() != null) {
+            if (report != null && report.getFilterDefinitions() != null) {
                 for (FilterDefinition filter : report.getFilterDefinitions()) {
                     filter.calculationItems(displayMap);
                 }
