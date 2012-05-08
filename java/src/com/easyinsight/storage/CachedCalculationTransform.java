@@ -64,7 +64,7 @@ public class CachedCalculationTransform implements IDataTransform {
         for (AnalysisItem analysisItem : allItems) {
             Value value = row.getValue(analysisItem.getKey());
             if (value != null && value.toDouble() != null && value.toDouble() != 0) {
-                System.out.println(analysisItem.toDisplay() + ": " + value.toDouble());
+
             }
             newRow.addValue(analysisItem.createAggregateKey(), row.getValue(analysisItem.getKey()));
         }
@@ -84,7 +84,7 @@ public class CachedCalculationTransform implements IDataTransform {
         IRow result = resultSet.getRow(0);
         for (AnalysisItem calculation : calculations) {
             Value targetValue = result.getValue(calculation);
-            System.out.println(targetValue);
+
             row.addValue(calculation.getKey(), targetValue);
         }
     }

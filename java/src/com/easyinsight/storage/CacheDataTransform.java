@@ -61,7 +61,7 @@ public class CacheDataTransform implements IDataTransform {
             }
             items.add(analysisItem);
         }
-        System.out.println("*** " + calculation.getCalculationString());
+
         List<AnalysisItem> items = ReportCalculation.getAnalysisItems(calculation.getCalculationString(), allItems, keyMap, displayMap, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS);
         DataSet dataSet = new DataSet();
         IRow newRow = dataSet.createRow();
@@ -81,10 +81,10 @@ public class CacheDataTransform implements IDataTransform {
                 }
             }
         }
-        System.out.println("related provider = " + providerID);
+
 
         for (AnalysisItem analysisItem : items) {
-            System.out.println("Looking for " + analysisItem.toDisplay());
+
             Key key = analysisItem.getKey();
             long id = resolveToDataSource(key);
 
@@ -92,10 +92,10 @@ public class CacheDataTransform implements IDataTransform {
                 String string = analysisItem.getType() + "-" + analysisItem.getKey().toBaseKey().toKeyString();
                 AnalysisItem lookup = baseMap.get(string);
                 Value value = row.getValues().get(lookup.getKey());
-                System.out.println(string + " = " + value);
+
                 newRow.addValue(analysisItem.createAggregateKey(), value);
             } else {
-                System.out.println("need to retrieve " + analysisItem.toDisplay());
+
                 needToRetrieve.add(analysisItem);
             }
         }
@@ -110,7 +110,7 @@ public class CacheDataTransform implements IDataTransform {
             DataSet otherSet = feed.getAggregateDataSet(needToRetrieve, filters, new InsightRequestMetadata(), feed.getFields(), false, conn);
             IRow otherRow = otherSet.getRow(0);
             for (AnalysisItem item : needToRetrieve) {
-                System.out.println(item.toDisplay() + " = " + otherRow.getValue(item));
+
                 newRow.addValue(item.createAggregateKey(), otherRow.getValue(item));
             }
         }
@@ -124,7 +124,7 @@ public class CacheDataTransform implements IDataTransform {
         DataSet resultSet = pipeline.toDataSet(dataSet);
         IRow result = resultSet.getRow(0);
         Value targetValue = result.getValue(calculation);
-        System.out.println("result value = " + targetValue + " for " + endField.getKey().toKeyString());
+
         row.addValue(endField.getKey(), targetValue);
     }
 
