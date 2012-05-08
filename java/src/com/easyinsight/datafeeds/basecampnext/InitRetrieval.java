@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.basecampnext;
 
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.logging.LogClass;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,6 +32,8 @@ public class InitRetrieval extends BasecampNextBaseSource {
                 return accountObject.getString("id");
             }
         }
-        return null;
+        LogClass.error("No Basecamp Next product found - JSON: " + jsonObject.toString());
+        throw new RuntimeException("No Basecamp account found");
+//        return null;
     }
 }
