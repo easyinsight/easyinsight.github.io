@@ -104,6 +104,7 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
                         String amountOutstandingString = queryField(invoice, "amount_outstanding/text()");
                         String paidString = queryField(invoice, "paid/text()");
                         String invoiceDateString = queryField(invoice, "date/text()");
+                        String poNumber = queryField(invoice, "po_number/text()");
                         Date invoiceDate = df.parse(invoiceDateString);
                         IRow row = dataSet.createRow();
                         String discount = queryField(invoice, "discount/text()");
@@ -111,6 +112,7 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
                         addValue(row, FreshbooksInvoiceSource.INVOICE_NUMBER, invoiceNumber, keys);
                         addValue(row, FreshbooksInvoiceSource.CLIENT_ID, clientID, keys);
                         addValue(row, FreshbooksInvoiceSource.STATUS, status, keys);
+                        addValue(row, FreshbooksInvoiceSource.PO_NUMBER, poNumber, keys);
                         if (amountString != null) addValue(row, FreshbooksInvoiceSource.AMOUNT, Double.parseDouble(amountString), keys);
                         if (amountString != null) addValue(row, FreshbooksInvoiceSource.AMOUNT_OUTSTANDING, Double.parseDouble(amountOutstandingString), keys);
                         if (amountString != null) addValue(row, FreshbooksInvoiceSource.AMOUNT_PAID, Double.parseDouble(paidString), keys);

@@ -63,6 +63,7 @@ public class FreshbooksInvoiceFeed extends FreshbooksFeed {
                         String invoiceNumber = queryField(invoice, "number/text()");
                         String clientID = queryField(invoice, "client_id/text()");
                         String status = queryField(invoice, "status/text()");
+                        String poNumber = queryField(invoice, "po_number/text()");
                         String amountString = queryField(invoice, "amount/text()");
                         String amountOutstandingString = queryField(invoice, "amount_outstanding/text()");
                         String paidString = queryField(invoice, "paid/text()");
@@ -74,6 +75,7 @@ public class FreshbooksInvoiceFeed extends FreshbooksFeed {
                         addValue(row, FreshbooksInvoiceSource.INVOICE_NUMBER, invoiceNumber, keys);
                         addValue(row, FreshbooksInvoiceSource.CLIENT_ID, clientID, keys);
                         addValue(row, FreshbooksInvoiceSource.STATUS, status, keys);
+                        addValue(row, FreshbooksInvoiceSource.PO_NUMBER, poNumber, keys);
                         if (amountString != null) addValue(row, FreshbooksInvoiceSource.AMOUNT, Double.parseDouble(amountString), keys);
                         if (amountString != null) addValue(row, FreshbooksInvoiceSource.AMOUNT_OUTSTANDING, Double.parseDouble(amountOutstandingString), keys);
                         if (amountString != null) addValue(row, FreshbooksInvoiceSource.AMOUNT_PAID, Double.parseDouble(paidString), keys);
