@@ -29,7 +29,12 @@ public class InitRetrieval extends BasecampNextBaseSource {
             JSONObject accountObject = accountsArray.getJSONObject(i);
             String product = accountObject.getString("product");
             if ("bcx".equals(product)) {
-                return accountObject.getString("id");
+                String s = accountObject.getString("id");
+                if(s == null) {
+                    LogClass.error("No Basecamp Next product found - JSON: " + jsonObject.toString());
+                    throw new RuntimeException("No Basecamp account found");
+                }
+                return s;
             }
         }
         LogClass.error("No Basecamp Next product found - JSON: " + jsonObject.toString());
