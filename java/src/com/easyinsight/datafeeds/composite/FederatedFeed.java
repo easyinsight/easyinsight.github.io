@@ -36,9 +36,9 @@ public class FederatedFeed extends Feed {
                 for (AnalysisItem analysisItem : analysisItems) {
                     boolean matched = false;
                     for (FieldMapping fieldMapping : source.getFieldMappings()) {
-                        if (fieldMapping.getFederatedKey().equals(analysisItem.toDisplay())) {
+                        if (fieldMapping.getFederatedKey().equals(analysisItem.toOriginalDisplayName())) {
                             for (AnalysisItem field : feed.getDataSource().getFields()) {
-                                if (field.toDisplay().equals(fieldMapping.getSourceKey())) {
+                                if (field.toOriginalDisplayName().equals(fieldMapping.getSourceKey())) {
                                     matched = true;
                                     childAnalysisItems.add(field);
                                     map.put(field, analysisItem);
@@ -48,7 +48,7 @@ public class FederatedFeed extends Feed {
                     }
                     if (!matched) {
                         for (AnalysisItem field : feed.getDataSource().getFields()) {
-                            if (field.toDisplay().equals(analysisItem.toDisplay())) {
+                            if (field.toOriginalDisplayName().equals(analysisItem.toOriginalDisplayName())) {
                                 childAnalysisItems.add(field);
                                 map.put(field, analysisItem);
                             }
