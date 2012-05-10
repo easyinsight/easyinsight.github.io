@@ -396,7 +396,7 @@ public class AnalysisService {
                     sourceItem = findTargetItem(compositeFeedConnection, dataSource.getFields());
                     targetItem = findSourceItem(compositeFeedConnection, dataSource.getFields());
                 }
-                matchItems.add(sourceItem);
+                matchItems.add(targetItem);
                 if (sourceItem != null && targetItem != null) {
                     List<JoinLabelOption> options = new ArrayList<JoinLabelOption>();
                     WSListDefinition target = new WSListDefinition();
@@ -407,7 +407,7 @@ public class AnalysisService {
                     try {
                         DataSet dataSet = DataService.listDataSet(target, new InsightRequestMetadata(), conn);
                         for (IRow row : dataSet.getRows()) {
-                            Value sourceValue = row.getValue(sourceItem);
+                            Value sourceValue = row.getValue(targetItem);
                             Value calcValue = row.getValue(calculation);
                             if (sourceValue.type() == Value.EMPTY || calcValue.type() == Value.EMPTY || sourceValue.toString().equals("(Empty)") ||
                                     calcValue.toString().contains("(Empty)") || sourceValue.toString().equals("") || calcValue.toString().equals("")) {

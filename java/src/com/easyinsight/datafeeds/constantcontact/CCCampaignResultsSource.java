@@ -126,7 +126,9 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                                     Element eventElement = (Element) eventNodes.get(j);
                                     Attribute attribute = eventElement.getAttribute("href");
 
-                                    Document eventDetailDoc = query("https://api.constantcontact.com" + attribute.getValue(), ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+                                    String string = "https://api.constantcontact.com" + attribute.getValue();
+                                    string = string.substring(0, 45) + ccSource.getCcUserName() + string.substring(string.indexOf("/campaigns"));
+                                    Document eventDetailDoc = query(string, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
                                     boolean hasMoreEvents;
                                     do {
                                         hasMoreEvents = false;
@@ -206,7 +208,9 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                                             if (relAttribute != null && "next".equals(relAttribute.getValue())) {
                                                 String linkURL = link.getAttribute("href").getValue();
                                                 hasMoreEvents = true;
-                                                eventDetailDoc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+                                                String linkURLString = "https://api.constantcontact.com" + linkURL;
+                                                linkURLString = linkURLString.substring(0, 45) + ccSource.getCcUserName() + linkURLString.substring(linkURLString.indexOf("/campaigns"));
+                                                eventDetailDoc = query(linkURLString, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
                                                 break;
                                             }
                                         }
