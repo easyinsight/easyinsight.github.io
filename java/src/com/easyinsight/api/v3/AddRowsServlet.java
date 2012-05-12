@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,9 +82,14 @@ public class AddRowsServlet extends APIServlet {
                         } else {
                             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                                 try {
-                                    row.addValue(analysisItem.getKey(), dateFormat.parse(value));
-                                } catch (ParseException e) {
-                                    throw new ServiceRuntimeException("We couldn't parse the date value of " + value + " that you passed in with " + nodeName + ". Date values should match the pattern of yyyy-MM-dd'T'HH:mm:ss.");
+                                    long ms = Long.parseLong(value);
+                                    row.addValue(analysisItem.getKey(), new Date(ms));
+                                } catch (NumberFormatException nfe) {
+                                    try {
+                                        row.addValue(analysisItem.getKey(), dateFormat.parse(value));
+                                    } catch (ParseException e) {
+                                        throw new ServiceRuntimeException("We couldn't parse the date value of " + value + " that you passed in with " + nodeName + ". Date values should match the pattern of yyyy-MM-dd'T'HH:mm:ss.");
+                                    }
                                 }
                             } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                                 try {
