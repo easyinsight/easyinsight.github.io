@@ -3,6 +3,7 @@
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.export.ExportService" %>
 <%@ page import="com.easyinsight.analysis.*" %>
+<%@ page import="com.easyinsight.export.DeliveryScheduledTask" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
 <html>
@@ -47,24 +48,9 @@
                     com.easyinsight.analysis.InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossibleByID(reportID);
                     if (insightResponse.getStatus() == com.easyinsight.analysis.InsightResponse.SUCCESS) {
                         WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
-                        if (report.getReportType() == WSAnalysisDefinition.LIST || report.getReportType() == WSAnalysisDefinition.TREE ||
-                                report.getReportType() == WSAnalysisDefinition.CROSSTAB) {
-                            ListDataResults dataResults = (ListDataResults) new DataService().list(report, new InsightRequestMetadata());
-                            InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-                            out.println(ExportService.listReportToHTMLTable(report, dataResults, conn, insightRequestMetadata));
-                        } else {
-                            session.setAttribute("report", report);
-                            %>
-                                <div id="reportImage">
-                                    <div id="waitingLogo" style="text-align:center;width:100%;padding: 30px 0px;">
-                                        <img src="/images/scorecard/ajax-loader.gif" />
-                                        <p>Please wait...images may take up to 30 seconds to load.</p></div>
-                                </div>
-                            <%
-
-                            //out.println("<div id=\"reportImage\"/>");
-                            //out.println("<img src=\"/app/htmlimage\" alt=\"" + report.getName() + "\"/>");
-                        }
+                        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                        String html = DeliveryScheduledTask.createHTMLTable(conn, report, insightRequestMetadata, true);
+                        out.println(html);
                     }
                 } finally {
                     Database.closeConnection(conn);
