@@ -86,16 +86,11 @@ public class MultiValueFilter extends HBox implements IFilter {
         //}
 
         var labelText:UIComponent;
-        if (_filterEditable) {
-            labelText = new LinkButton();
-            labelText.setStyle("fontSize", 12);
-            labelText.addEventListener(MouseEvent.CLICK, edit);
-            labelText.setStyle("textDecoration", "underline");
-            LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
-        } else {
-            labelText = new Label();
-            Label(labelText).text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
-        }
+        labelText = new LinkButton();
+        labelText.setStyle("fontSize", 12);
+        labelText.addEventListener(MouseEvent.CLICK, edit);
+        labelText.setStyle("textDecoration", "underline");
+        LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         addChild(labelText);
 
         /*if (editButton == null) {
