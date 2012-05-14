@@ -72,7 +72,9 @@ public class UserService {
         try {
             URL url = getClass().getClassLoader().getResource("version.properties");
             Properties properties = new Properties();
-            properties.load(new FileInputStream(new File(url.getFile())));
+            FileInputStream fis = new FileInputStream(new File(url.getFile()));
+            properties.load(fis);
+            fis.close();
             BasicInfo basicInfo = new BasicInfo();
             basicInfo.setVersion((String) properties.get("ei.version"));
             if (ConfigLoader.instance().isProduction()) {
