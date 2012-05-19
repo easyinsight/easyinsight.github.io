@@ -4,6 +4,7 @@ package com.easyinsight.api.v3;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.ReportCalculation;
 import com.easyinsight.api.ServiceRuntimeException;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.database.EIConnection;
@@ -18,10 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -101,7 +99,15 @@ public class UpdateRowsPKServlet extends APIServlet {
                         }
                     }
                 }
-                dataStorage.updateRow(row, dataSource.getFields(), new ArrayList<IDataTransform>(), rowID);
+                List<IDataTransform> transforms = new ArrayList<IDataTransform>();
+                if (dataSource.getMarmotScript() != null && !"".equals(dataSource.getMarmotScript())) {
+                    StringTokenizer toker = new StringTokenizer(dataSource.getMarmotScript(), "\r\n");
+                    while (toker.hasMoreTokens()) {
+                        String line = toker.nextToken();
+                        transforms.addAll(new ReportCalculation(line).apply(dataSource));
+                    }
+                }
+                dataStorage.updateRow(row, dataSource.getFields(), transforms, rowID);
             }
             dataStorage.commit();
             return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
