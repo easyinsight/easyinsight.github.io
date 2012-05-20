@@ -113,6 +113,10 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
         return null;
     }
 
+    public static void main(String[] args) {
+        System.out.println(format.parseDateTime("2012-05-01T10:32:45Z"));
+    }
+
     private Date parseDueDate(String string) {
         if (string != null && !"null".equals(string) && !"".equals(string)) {
             return dueAtFormat.parseDateTime(string).toDate();
@@ -197,6 +201,8 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                 }
             }
             return null;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

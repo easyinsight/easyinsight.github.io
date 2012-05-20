@@ -44,7 +44,6 @@ public abstract class BatchbookBaseSource extends ServerDataSourceDefinition {
 
         try {
             client.executeMethod(restMethod);
-            System.out.println(restMethod.getResponseBodyAsString());
             doc = builder.build(restMethod.getResponseBodyAsStream());
             return doc;
         } catch (ParsingException pe) {

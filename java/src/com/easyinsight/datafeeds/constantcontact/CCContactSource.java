@@ -202,6 +202,8 @@ public class CCContactSource extends ConstantContactBaseSource {
                 row.addValue(CONTACT_COUNT, 1);
             }
             return ds;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

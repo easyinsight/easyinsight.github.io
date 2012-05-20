@@ -117,6 +117,7 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
         batchbookCommunicationsCache = null;
         superTags = null;
         superTagMap.clear();
+        superTagID = 0;
     }
 
     protected void sortSources(List<IServerDataSourceDefinition> children) {
@@ -136,6 +137,12 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
     private Map<String, List<String>> superTags;
 
     private Map<String, List<Map<String, String>>> superTagMap = new HashMap<String, List<Map<String,String>>>();
+
+    private int superTagID = 0;
+
+    public int getSuperTagID() {
+        return superTagID++;
+    }
 
     public Map<String, List<Map<String, String>>> getSuperTagMap() {
         return superTagMap;

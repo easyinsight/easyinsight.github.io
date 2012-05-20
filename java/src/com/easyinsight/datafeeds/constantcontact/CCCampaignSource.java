@@ -69,6 +69,8 @@ public class CCCampaignSource extends ConstantContactBaseSource {
                 row.addValue(CAMPAIGN_COUNT, 1);
             }
             return dataSet;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

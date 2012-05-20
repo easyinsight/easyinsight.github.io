@@ -121,7 +121,7 @@ public class BatchbookDealSource extends BatchbookBaseSource {
                     boolean superTag = Boolean.parseBoolean(queryField(tagNode, "supertag"));
                     if (superTag) {
                         Map<String, String> map = new HashMap<String, String>();
-                        String id = queryField(tagNode, "id/text()");
+                        String id = String.valueOf(batchbookCompositeSource.getSuperTagID());
                         map.put("SuperTagRecordID", id);
                         row.addValue(keys.get("Deal " + name), id);
                         List<String> fields = batchbookCompositeSource.getOrCreateSuperTags().get(name);

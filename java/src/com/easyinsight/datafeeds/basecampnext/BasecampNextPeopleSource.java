@@ -71,6 +71,8 @@ public class BasecampNextPeopleSource extends BasecampNextBaseSource {
                 row.addValue(keys.get(PERSON_UPDATED_AT), format.parseDateTime(projectObject.getString("updated_at")).toDate());
             }
             return dataSet;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

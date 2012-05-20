@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.basecampnext;
 
+import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import org.apache.commons.httpclient.Header;
@@ -29,6 +30,9 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
     }
 
     protected JSONArray runJSONRequest(String path, BasecampNextCompositeSource parentDefinition, @Nullable Date lastRefreshDate) {
+        if (parentDefinition.getEndpoint() == null) {
+            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight access to your Basecamp account.", parentDefinition));
+        }
         HttpClient client = new HttpClient();
         DateFormat df = new SimpleDateFormat("EEE',' dd MMM yyyy HH:mm:ss Z");
         HttpMethod restMethod = new GetMethod("https://basecamp.com/"+parentDefinition.getEndpoint()+"/api/v1/" + path);
