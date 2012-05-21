@@ -22,7 +22,11 @@
             inactiveIncluded = ds.includeInactive;
             milestoneCommentsIncluded = ds.includeMilestoneComments;
             todoCommentsIncluded = ds.includeTodoComments;
+            joinProjects = ds.companyProjectJoinMode;
         }
+
+        [Bindable]
+        private var joinProjects:Boolean;
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:BaseCampDataSource = feedDefinition as BaseCampDataSource;
@@ -31,6 +35,7 @@
             ds.includeMilestoneComments = milestoneCommentsCheckbox.selected;
             ds.includeTodoComments = todoCommentsCheckbox.selected;
             ds.includeInactive = inactiveCheckbox.selected;
+            ds.companyProjectJoinMode = joinCheckbox.selected;
         }
 
         public function validate():Boolean {
@@ -55,6 +60,10 @@
         <mx:FormItem label="Include Todo Comments:" direction="horizontal">
             <mx:CheckBox id="todoCommentsCheckbox" selected="{todoCommentsIncluded}"/>
             <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on todo comments, you can save dramatic time on your synchronization by not pulling that field across into Easy Insight. Please note that for performance reasons, only comments associated to open todo items will be pulled across if you enable this option."/>
+        </mx:FormItem>
+        <mx:FormItem label="Join Projects to All Companies" direction="horizontal">
+            <mx:CheckBox id="joinCheckbox" selected="{joinProjects}"/>
+            <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="Easy Insight used to join your projects to all companies capable of seeing those projects. We recently changed to instead match Basecamp's behavior and only show the primary company for that project. If you wish to enable the old behavior, check this checkbox."/>
         </mx:FormItem>
 	</mx:Form>
 </mx:VBox>

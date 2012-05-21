@@ -15,6 +15,7 @@ public class BaseCampDataSource extends CompositeServerDataSource {
     public var includeMilestoneComments:Boolean;
     public var includeTodoComments:Boolean;
     public var incrementalRefresh:Boolean;
+    public var companyProjectJoinMode:Boolean;
     public var token:String;
 
     public function BaseCampDataSource() {

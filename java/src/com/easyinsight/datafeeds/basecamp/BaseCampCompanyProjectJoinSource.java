@@ -13,10 +13,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Node;
-import nu.xom.Nodes;
+import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,47 +50,10 @@ public class BaseCampCompanyProjectJoinSource extends BaseCampBaseSource {
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
         try {
-            Document account = runRestRequest("/account.xml", client, builder, url, null, false, parentDefinition, false);
-            String accountName = account.query("/account/name/text()").get(0).getValue();
-            Document projects = runRestRequest("/projects.xml", client, builder, url, null, false, parentDefinition, false);
-            Nodes projectNodes = projects.query("/projects/project");
-            for(int i = 0;i < projectNodes.size();i++) {
-                Node curProject = projectNodes.get(i);
-                String projectName = queryField(curProject, "name/text()");
-                String projectStatus = queryField(curProject, "status/text()");
-                if ("template".equals(projectStatus)) {
-                    continue;
-                }
-                if (!source.isIncludeArchived() && "archived".equals(projectStatus)) {
-                    continue;
-                }
-                if (!source.isIncludeInactive() && "inactive".equals(projectStatus)) {
-                    continue;
-                }
-                loadingProgress(i, projectNodes.size(), "Synchronizing with additional metadata of " + projectName + "...", callDataID);
-                String projectID = queryField(curProject, "id/text()");
-                Document companies = runRestRequest("/projects/" + projectID + "/companies.xml", client, builder, url, null, false, parentDefinition, false);
-                Nodes companyNodes = companies.query("/companies/company");
-                int companyCount = 0;
-                String ourCompanyID = null;
-                for (int companyIndex = 0; companyIndex < companyNodes.size(); companyIndex++) {
-                    Node companyNode = companyNodes.get(companyIndex);
-                    String companyID = queryField(companyNode, "id/text()");
-                    String companyName = queryField(companyNode, "name/text()");
-                    if (accountName.equals(companyName)) {
-                        ourCompanyID = companyID;
-                        continue;
-                    }
-                    IRow row = ds.createRow();
-                    row.addValue(COMPANY_ID, companyID);
-                    row.addValue(PROJECT_ID, projectID);
-                    companyCount++;
-                }
-                if (companyCount == 0) {
-                    IRow row = ds.createRow();
-                    row.addValue(COMPANY_ID, ourCompanyID);
-                    row.addValue(PROJECT_ID, projectID);
-                }
+            if (source.isCompanyProjectJoinMode()) {
+                oldApproach(parentDefinition, callDataID, source, url, ds, client, builder);
+            } else {
+                newApproach(parentDefinition, source, url, ds, client, builder);
             }
         } catch (ReportException re) {
             throw re;
@@ -101,6 +61,75 @@ public class BaseCampCompanyProjectJoinSource extends BaseCampBaseSource {
             throw new RuntimeException(e);
         }
         return ds;
+    }
+
+    private void oldApproach(FeedDefinition parentDefinition, String callDataID, BaseCampCompositeSource source, String url, DataSet ds, HttpClient client, Builder builder) throws BaseCampLoginException, ParsingException {
+        Document account = runRestRequest("/account.xml", client, builder, url, null, false, parentDefinition, false);
+        String accountName = account.query("/account/name/text()").get(0).getValue();
+        Document projects = runRestRequest("/projects.xml", client, builder, url, null, false, parentDefinition, false);
+        Nodes projectNodes = projects.query("/projects/project");
+        for(int i = 0;i < projectNodes.size();i++) {
+            Node curProject = projectNodes.get(i);
+            String projectName = queryField(curProject, "name/text()");
+            String projectStatus = queryField(curProject, "status/text()");
+            if ("template".equals(projectStatus)) {
+                continue;
+            }
+            if (!source.isIncludeArchived() && "archived".equals(projectStatus)) {
+                continue;
+            }
+            if (!source.isIncludeInactive() && "inactive".equals(projectStatus)) {
+                continue;
+            }
+            loadingProgress(i, projectNodes.size(), "Synchronizing with additional metadata of " + projectName + "...", callDataID);
+            String projectID = queryField(curProject, "id/text()");
+            Document companies = runRestRequest("/projects/" + projectID + "/companies.xml", client, builder, url, null, false, parentDefinition, false);
+            Nodes companyNodes = companies.query("/companies/company");
+            int companyCount = 0;
+            String ourCompanyID = null;
+            for (int companyIndex = 0; companyIndex < companyNodes.size(); companyIndex++) {
+                Node companyNode = companyNodes.get(companyIndex);
+                String companyID = queryField(companyNode, "id/text()");
+                String companyName = queryField(companyNode, "name/text()");
+                if (accountName.equals(companyName)) {
+                    ourCompanyID = companyID;
+                    continue;
+                }
+                IRow row = ds.createRow();
+                row.addValue(COMPANY_ID, companyID);
+                row.addValue(PROJECT_ID, projectID);
+                companyCount++;
+            }
+            if (companyCount == 0) {
+                IRow row = ds.createRow();
+                row.addValue(COMPANY_ID, ourCompanyID);
+                row.addValue(PROJECT_ID, projectID);
+            }
+        }
+    }
+
+    private void newApproach(FeedDefinition parentDefinition, BaseCampCompositeSource source, String url, DataSet ds, HttpClient client, Builder builder) throws BaseCampLoginException, ParsingException {
+        Document projects = runRestRequest("/projects.xml", client, builder, url, null, false, parentDefinition, false);
+        Nodes projectNodes = projects.query("/projects/project");
+        for(int i = 0;i < projectNodes.size();i++) {
+            Node curProject = projectNodes.get(i);
+            String projectID = queryField(curProject, "id/text()");
+            String projectStatus = queryField(curProject, "status/text()");
+            Node companyNode = curProject.query("company").get(0);
+            String companyID = queryField(companyNode, "id/text()");
+            if ("template".equals(projectStatus)) {
+                continue;
+            }
+            if (!source.isIncludeArchived() && "archived".equals(projectStatus)) {
+                continue;
+            }
+            if (!source.isIncludeInactive() && "inactive".equals(projectStatus)) {
+                continue;
+            }
+            IRow row = ds.createRow();
+            row.addValue(COMPANY_ID, companyID);
+            row.addValue(PROJECT_ID, projectID);
+        }
     }
 
     @NotNull
