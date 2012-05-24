@@ -194,7 +194,7 @@ public class Crosstab {
                     if (value == null) {
                         value = new EmptyValue();
                     }
-                    array[j + crosstabDefinition.getColumns().size() + rowOffset][i + crosstabDefinition.getRows().size() + k] = new CrosstabValue(value, null);
+                    array[j + crosstabDefinition.getColumns().size() + rowOffset][i + crosstabDefinition.getRows().size() + k] = new CrosstabValue(value, null, analysisItem);
                 }
             }
         }
@@ -224,7 +224,7 @@ public class Crosstab {
                     if (sumValue != null) {
                         sum = sumValue;
                     }
-                    array[rowSections.size() + crosstabDefinition.getColumns().size() + rowOffset][(i * crosstabDefinition.getMeasures().size()) + j + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
+                    array[rowSections.size() + crosstabDefinition.getColumns().size() + rowOffset][(i * crosstabDefinition.getMeasures().size()) + j + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true, analysisMeasure);
                 }
             } else {
                 Value sectionValue = columnSection.values.get(0);
@@ -265,7 +265,7 @@ public class Crosstab {
                         sum = aggregateValue.toDouble();
                     }
                 }
-                array[j + crosstabDefinition.getColumns().size() + rowOffset][columnSections.size() + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
+                array[j + crosstabDefinition.getColumns().size() + rowOffset][columnSections.size() + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true, crosstabDefinition.getMeasures().get(0));
             }
         }
 

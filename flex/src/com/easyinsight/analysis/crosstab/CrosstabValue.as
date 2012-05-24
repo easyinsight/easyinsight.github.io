@@ -17,6 +17,7 @@ public class CrosstabValue {
     public var header:AnalysisItem;
     public var headerLabel:Boolean;
     public var summaryValue:Boolean;
+    public var measure:AnalysisItem;
 
     public function CrosstabValue() {
     }

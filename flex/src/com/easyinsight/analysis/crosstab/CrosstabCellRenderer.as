@@ -17,11 +17,9 @@ import flash.text.TextFormat;
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
 import mx.core.UITextField;
-import mx.formatters.Formatter;
 
 public class CrosstabCellRenderer extends UIComponent implements IListItemRenderer {
 
-    private var _formatter:Formatter;
     private var _cellProperty:String;
 
     private var text:UITextField;
@@ -49,10 +47,6 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
     override protected function createChildren():void {
         super.createChildren();
         addChild(text);
-    }
-
-    public function set formatter(value:Formatter):void {
-        _formatter = value;
     }
 
     public function set cellProperty(value:String):void {
@@ -100,7 +94,11 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
         crosstabValue = value[_cellProperty];
         if (crosstabValue != null) {
             if (crosstabValue.header == null) {
-                text.text = _formatter.format(crosstabValue.value);
+                if (crosstabValue.measure != null) {
+                    text.text = crosstabValue.measure.getFormatter().format(crosstabValue.value);
+                } else {
+                    text.text = "";
+                }
             } else {
                 if (crosstabValue.headerLabel) {
                     text.text = String(crosstabValue.value.getValue());

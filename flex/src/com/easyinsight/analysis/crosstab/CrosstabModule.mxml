@@ -25,7 +25,9 @@
                 var columnCount:int = additionalProperties["columnCount"];
                 var columns:Array = [];
 
-                var measureFormatter:Formatter = AnalysisMeasure(crosstabDefinition.measures.getItemAt(0)).getFormatter();
+                //var measureFormatter:Formatter = AnalysisMeasure(crosstabDefinition.measures.getItemAt(0)).getFormatter();
+
+
 
                 for (var i:int = 0; i < columnCount; i++) {
                     var maxWidth:int = 0;
@@ -36,7 +38,11 @@
                         }
                         var text:String;
                         if (crosstabValue.header == null) {
-                            text = measureFormatter.format(crosstabValue.value);
+                            if (crosstabValue.measure == null) {
+                                text = "";
+                            } else {
+                                text = crosstabValue.measure.getFormatter().format(crosstabValue.value);
+                            }
                         } else if (crosstabValue.headerLabel) {
                             text = String(crosstabValue.value.getValue());
                         } else {
@@ -48,7 +54,7 @@
                     }
                     var column:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                     var factory:ClassFactory = new ClassFactory(CrosstabCellRenderer);
-                    factory.properties = { formatter: measureFormatter, cellProperty: String(i), report: crosstabDefinition };
+                    factory.properties = { cellProperty: String(i), report: crosstabDefinition };
                     column.dataField = String(i);
                     column.width = maxWidth;
                     column.itemRenderer = factory;

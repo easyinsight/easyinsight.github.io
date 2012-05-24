@@ -10,6 +10,7 @@ import com.easyinsight.core.Value;
 public class CrosstabValue {
     private Value value;
     private AnalysisItem header;
+    private AnalysisItem measure;
     private boolean headerLabel;
     private boolean summaryValue;
 
@@ -21,11 +22,34 @@ public class CrosstabValue {
         this.header = header;
     }
 
+    public CrosstabValue(Value value, AnalysisItem header, AnalysisItem measure) {
+        this.value = value;
+        this.header = header;
+        this.measure = measure;
+    }
+
     public CrosstabValue(Value value, AnalysisItem header, boolean headerLabel, boolean summaryValue) {
         this.value = value;
         this.header = header;
         this.headerLabel = headerLabel;
         this.summaryValue = summaryValue;
+    }
+
+
+    public CrosstabValue(Value value, AnalysisItem header, boolean headerLabel, boolean summaryValue, AnalysisItem measure) {
+        this.value = value;
+        this.header = header;
+        this.headerLabel = headerLabel;
+        this.summaryValue = summaryValue;
+        this.measure = measure;
+    }
+
+    public AnalysisItem getMeasure() {
+        return measure;
+    }
+
+    public void setMeasure(AnalysisItem measure) {
+        this.measure = measure;
     }
 
     public boolean isHeaderLabel() {
