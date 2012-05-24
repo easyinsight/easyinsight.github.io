@@ -43,10 +43,11 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     protected void beforeRefresh(Date lastRefreshTime) {
         super.beforeRefresh(lastRefreshTime);
 
-
         if (lastRefreshTime != null) {
             try {
                 refreshTokenInfo();
+            } catch (ReportException re) {
+                throw re;
             } catch (Exception e) {
                 throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), this));
             }
@@ -64,7 +65,7 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
             OAuthJSONAccessTokenResponse response = client.accessToken(request);
             accessToken = response.getAccessToken();
         } catch (Exception e) {
-            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize access.", this));
+            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize access to Basecamp.", this));
         }
     }
 
