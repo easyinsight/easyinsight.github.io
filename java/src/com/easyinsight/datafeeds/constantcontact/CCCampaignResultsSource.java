@@ -95,17 +95,20 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, final IDataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
+        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
+        ThreadPoolExecutor tpe = new ThreadPoolExecutor(15, 15, 5000, TimeUnit.MINUTES, queue);
         try {
             final ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
 
             List<Campaign> campaigns = ccSource.getOrCreateCampaignCache().getOrCreateCampaigns(ccSource);
 
+            for (int i = 0; i < campaigns.size(); i++) {
+                Campaign campaign = campaigns.get(i);
+                campaign.setCamapignNumber(i);
+            }
+
             final CountDownLatch latch = new CountDownLatch(campaigns.size());
 
-            BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
-
-            ThreadPoolExecutor tpe = new ThreadPoolExecutor(2, 5, 5000, TimeUnit.MILLISECONDS, queue);
-            
             for (final Campaign campaign : campaigns) {
                 tpe.execute(new Runnable() {
 
@@ -118,8 +121,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                         } else {
                             try {
                                 String eventsURL = "https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns/" + campaign.getId() + "/events/?pageSize=200";
-                                System.out.println(eventsURL);
-                                System.out.println("campaign name = " + campaign.getName());
+
                                 Document eventsDoc = query(eventsURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
                                 Nodes eventNodes = eventsDoc.query("/service/workspace/collection");
                                 for (int j = 0; j < eventNodes.size(); j++) {
@@ -210,6 +212,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                                                 hasMoreEvents = true;
                                                 String linkURLString = "https://api.constantcontact.com" + linkURL;
                                                 linkURLString = linkURLString.substring(0, 45) + ccSource.getCcUserName() + linkURLString.substring(linkURLString.indexOf("/campaigns"));
+
                                                 eventDetailDoc = query(linkURLString, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
                                                 break;
                                             }
@@ -223,16 +226,24 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                             }
 
                         }
+                        System.out.println("finished " + campaign.getCamapignNumber());
                         latch.countDown();
                     }
                 });
             }
 
             latch.await();
-            tpe.shutdown();
             return null;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            tpe.shutdown();
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new Date(1336608000000L));
     }
 }

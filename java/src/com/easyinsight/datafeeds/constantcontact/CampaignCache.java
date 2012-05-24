@@ -54,7 +54,9 @@ public class CampaignCache extends ConstantContactBaseSource {
                     if (attribute != null && "next".equals(attribute.getValue())) {
                         String linkURL = link.getAttribute("href").getValue();
                         hasMoreData = true;
-                        doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+                        String linkURLString = "https://api.constantcontact.com" + linkURL;
+                        linkURLString = linkURLString.substring(0, 45) + ccSource.getCcUserName() + linkURLString.substring(linkURLString.indexOf("/campaigns"));
+                        doc = query(linkURLString, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
                         break;
                     }
                 }

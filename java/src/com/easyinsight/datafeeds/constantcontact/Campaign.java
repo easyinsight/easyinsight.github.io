@@ -13,6 +13,7 @@ public class Campaign {
     private String status;
     private Date date;
     private String url;
+    private int camapignNumber;
 
     public Campaign(String name, String id, String status, Date date, String url) {
         this.name = name;
@@ -20,6 +21,14 @@ public class Campaign {
         this.status = status;
         this.date = date;
         this.url = url;
+    }
+
+    public int getCamapignNumber() {
+        return camapignNumber;
+    }
+
+    public void setCamapignNumber(int camapignNumber) {
+        this.camapignNumber = camapignNumber;
     }
 
     public String getName() {
