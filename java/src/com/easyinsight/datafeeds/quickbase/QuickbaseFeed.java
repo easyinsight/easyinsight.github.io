@@ -144,7 +144,7 @@ public class QuickbaseFeed extends Feed {
             String key = filter.getField().getKey().toBaseKey().toKeyString().split("\\.")[1];
             if (filter instanceof FilterValueDefinition) {
                 FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
-                if (filterValueDefinition.getFilteredValues().size() > 0) {
+                if (filterValueDefinition.getFilteredValues().size() == 1) {
                     String value = filterValueDefinition.getFilteredValues().get(0).toString();
                     queryBuilder.append("{'" + key + "'.CT.'" + value + "'}");
                     queryBuilder.append(" AND ");
