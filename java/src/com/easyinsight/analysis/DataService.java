@@ -58,9 +58,8 @@ public class DataService {
                 insightRequestMetadata.setTraverseAllJoins(report.isFullJoins());
             }
             timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed);
-            return feed.getMetadata(analysisItem, insightRequestMetadata, conn);
+            return feed.getMetadata(analysisItem, insightRequestMetadata, conn, report);
         } catch (ReportException re) {
-            LogClass.error(re);
             AnalysisItemResultMetadata metadata = new AnalysisItemResultMetadata();
             metadata.setReportFault(re.getReportFault());
             return metadata;
@@ -101,7 +100,6 @@ public class DataService {
             feedMetadata.setDataSourceInfo(feed.createSourceInfo(conn));
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
-            feedMetadata.setAllowRefactor("ACS2".equals(feed.getName()) || "Therapy Works".equals(feed.getName()));
             feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
             List<LookupTable> lookupTables = new ArrayList<LookupTable>();
             for (AnalysisItem field : feedItems) {
@@ -466,9 +464,10 @@ public class DataService {
             results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             return results;
         } catch (ReportException dae) {
-            ListDataResults embeddedDataResults = new ListDataResults();
+            throw dae;
+            /*ListDataResults embeddedDataResults = new ListDataResults();
             embeddedDataResults.setReportFault(dae.getReportFault());
-            return embeddedDataResults;
+            return embeddedDataResults;*/
         } catch (Throwable e) {
             LogClass.error(e);
             ListDataResults embeddedDataResults = new ListDataResults();
@@ -1068,7 +1067,6 @@ public class DataService {
                 if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
                     AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
                     if (analysisCalculation.isCachedCalculation()) {
-                        System.out.println("querying for " + analysisItem.toDisplay());
                         validQueryItems.add(analysisItem);
                     }
                 } else if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
