@@ -1,10 +1,12 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: James Boe
@@ -29,6 +31,14 @@ public class ListDefinitionState extends AnalysisDefinitionState {
 
     @Column(name="summarize_all")
     private boolean summarizeAll = false;
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("listDefinitionState");
+        element.addAttribute(new Attribute("showRowNumbers", String.valueOf(showRowNumbers)));
+        element.addAttribute(new Attribute("summarizeAll", String.valueOf(summarizeAll)));
+        return element;
+    }
 
     public long getDefinitionID() {
         return definitionID;

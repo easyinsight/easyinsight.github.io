@@ -4,6 +4,9 @@ import com.easyinsight.analysis.AnalysisDefinitionState;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.WSGaugeDefinition;
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 import javax.persistence.*;
 import java.util.List;
@@ -22,6 +25,14 @@ public class GaugeDefinitionState extends AnalysisDefinitionState {
 
     @Column(name="max_value")
     private double maxValue;
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("gaugeDefinitionState");
+        element.addAttribute(new Attribute("gaugeType", String.valueOf(gaugeType)));
+        element.addAttribute(new Attribute("maxValue", String.valueOf(maxValue)));
+        return element;
+    }
 
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="gauge_report_id")

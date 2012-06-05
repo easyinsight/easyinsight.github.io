@@ -1,6 +1,9 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 import javax.persistence.*;
 import java.util.List;
@@ -34,6 +37,14 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
 
     @Column(name="elevation_angle")
     private double elevationAngle;
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("chartDefinitionState");
+        element.addAttribute(new Attribute("chartFamily", String.valueOf(chartFamily)));
+        element.addAttribute(new Attribute("chartType", String.valueOf(chartType)));
+        return element;
+    }
 
     public static final int COLUMN_FAMILY = 1;
     public static final int BAR_FAMILY = 2;

@@ -1,12 +1,14 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSDiagramDefinition;
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: jamesboe
@@ -26,6 +28,14 @@ public class DiagramDefinitionState extends AnalysisDefinitionState {
 
     @Column (name="day_window")
     private String dayWindow;
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("diagramReport");
+        element.addAttribute(new Attribute("filterName", String.valueOf(filterName)));
+        element.addAttribute(new Attribute("dayWindow", String.valueOf(dayWindow)));
+        return element;
+    }
 
     @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
     @JoinTable(name = "diagram_report_to_diagram_report_link",

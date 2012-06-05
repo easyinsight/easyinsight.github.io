@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -57,5 +59,9 @@ public abstract class AnalysisDefinitionState implements Cloneable {
 
     public void afterLoad() {
         
+    }
+
+    public Element toXML(XMLMetadata xmlMetadata) {
+        return null;
     }
 }

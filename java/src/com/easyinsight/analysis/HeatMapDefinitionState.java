@@ -1,6 +1,9 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSHeatMap;
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 import javax.persistence.*;
 import java.util.List;
@@ -44,6 +47,21 @@ public class HeatMapDefinitionState extends AnalysisDefinitionState {
 
     @Column(name="display_type")
     private int displayType;
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("heatMapState");
+        element.addAttribute(new Attribute("mapType", String.valueOf(mapType)));
+        element.addAttribute(new Attribute("longitude", String.valueOf(longitude)));
+        element.addAttribute(new Attribute("latitude", String.valueOf(latitude)));
+        element.addAttribute(new Attribute("zoomLevel", String.valueOf(zoomLevel)));
+        element.addAttribute(new Attribute("minLong", String.valueOf(minLong)));
+        element.addAttribute(new Attribute("maxLong", String.valueOf(maxLong)));
+        element.addAttribute(new Attribute("minLat", String.valueOf(minLat)));
+        element.addAttribute(new Attribute("maxLat", String.valueOf(maxLat)));
+        element.addAttribute(new Attribute("displayType", String.valueOf(displayType)));
+        return element;
+    }
 
     public int getDisplayType() {
         return displayType;

@@ -1,17 +1,22 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.EIDescriptor;
-import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.analysis.gauge.GaugeDefinitionState;
+import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.core.Key;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Node;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 import org.hibernate.annotations.MapKey;
 
@@ -420,11 +425,15 @@ public class AnalysisDefinition implements Cloneable {
 
         Collection<AnalysisItem> reportItems = getReportStructure().values();
 
+        AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure();
+        structure.setReport(this.createBlazeDefinition());
+
         if (getAddedItems() != null) {
+
             for (AnalysisItem analysisItem : getAddedItems()) {
                 AnalysisItem clonedItem = replacementMap.addField(analysisItem, changingDataSource);
                 addedItems.add(clonedItem);
-                List<AnalysisItem> items = analysisItem.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), structure);
                 for (AnalysisItem item : items) {
                     replacementMap.addField(item, changingDataSource);
                 }
@@ -438,7 +447,7 @@ public class AnalysisDefinition implements Cloneable {
         reportItems.remove(null);
         for (AnalysisItem baseItem : reportItems) {
             replacementMap.addField(baseItem, changingDataSource);
-            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
+            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), structure);
             for (AnalysisItem item : items) {
                 replacementMap.addField(item, changingDataSource);
             }
@@ -447,7 +456,7 @@ public class AnalysisDefinition implements Cloneable {
         if (this.filterDefinitions != null) {
             for (FilterDefinition persistableFilterDefinition : this.filterDefinitions) {
                 filterDefinitions.add(persistableFilterDefinition.clone());
-                List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
+                List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), structure);
                 for (AnalysisItem item : filterItems) {
                     replacementMap.addField(item, changingDataSource);
                 }
@@ -645,24 +654,141 @@ public class AnalysisDefinition implements Cloneable {
         return drillIDs;
     }
 
-    public String toXML() {
-        String xml = "<report type=\"" + getReportType() + "\">";
-        xml += "<fields>";
-        for (AnalysisItem field : reportStructure.values()) {
-            xml += field.toXML();
+    public static AnalysisDefinition fromXML(Element root, XMLImportMetadata xmlImportMetadata) {
+        int reportType = Integer.parseInt(root.getAttribute("type").getValue());
+        AnalysisDefinition report = new AnalysisDefinition();
+        report.setTitle(root.getAttribute("name").getValue());
+        report.setUrlKey(root.getAttribute("urlKey").getValue() + "2");
+        String dataSourceURLKey = root.getAttribute("dataSourceUrlKey").getValue();
+        FeedDefinition dataSource = xmlImportMetadata.dataSourceForURLKey(dataSourceURLKey);
+        xmlImportMetadata.setDataSource(dataSource);
+        report.setReportType(reportType);
+        report.setDataFeedID(dataSource.getDataFeedID());
+        report.setAnalysisDefinitionState(createReport(reportType));
+        report.setAccountVisible(Boolean.parseBoolean(root.getAttribute("accountVisible").getValue()));
+        report.setPubliclyVisible(Boolean.parseBoolean(root.getAttribute("publiclyVisible").getValue()));
+        report.setMarketplaceVisible(Boolean.parseBoolean(root.getAttribute("exchangeVisible").getValue()));
+        Nodes fieldNodes = root.query("fields/analysisItem");
+        Map<String, AnalysisItem> reportStructure = new HashMap<String, AnalysisItem>();
+        for (int i = 0; i < fieldNodes.size(); i++) {
+            Element fieldNode = (Element) fieldNodes.get(i);
+            AnalysisItem analysisItem = AnalysisItem.fromXML(fieldNode, xmlImportMetadata);
+            String structureID = fieldNode.getAttribute("structureID").getValue();
+            reportStructure.put(structureID, analysisItem);
         }
-        xml += "</fields>";
-        xml += "<filters>";
+        report.setMarmotScript(root.getAttribute("marmotScript").getValue());
+        report.setDescription(root.getAttribute("description").getValue());
+        Nodes filterNodes = root.query("filters/filter");
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        for (int i = 0; i < filterNodes.size(); i++) {
+            Element filterNode = (Element) filterNodes.get(i);
+            filters.add(FilterDefinition.fromXML(filterNode, xmlImportMetadata));
+        }
+        List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
+        Nodes joinNodes = root.query("");
+        for (int i = 0; i < joinNodes.size(); i++) {
+
+        }
+        report.setFilterDefinitions(filters);
+        report.setReportStructure(reportStructure);
+        return report;
+    }
+
+
+
+    public String toXML(XMLMetadata xmlMetadata) {
+        Element root = new Element("report");
+        DateFormat df = new SimpleDateFormat("yyy-MM-dd hh:mm:ss");
+        root.addAttribute(new Attribute("type", String.valueOf(getReportType())));
+        root.addAttribute(new Attribute("name", getTitle()));
+        root.addAttribute(new Attribute("urlKey", getUrlKey()));
+        root.addAttribute(new Attribute("dataSourceUrlKey", xmlMetadata.urlKeyForDataSourceID(getDataFeedID())));
+        root.addAttribute(new Attribute("dateCreated", df.format(dateCreated)));
+        root.addAttribute(new Attribute("dateUpdated", df.format(dateUpdated)));
+        root.addAttribute(new Attribute("publiclyVisible", String.valueOf(isPubliclyVisible())));
+        root.addAttribute(new Attribute("accountVisible", String.valueOf(isAccountVisible())));
+        root.addAttribute(new Attribute("exchangeVisible", String.valueOf(isMarketplaceVisible())));
+        Element fields = new Element("fields");
+        root.appendChild(fields);
+        for (Map.Entry<String, AnalysisItem> entry : reportStructure.entrySet()) {
+            Element field = entry.getValue().toXML(xmlMetadata);
+            fields.appendChild(field);
+            field.addAttribute(new Attribute("structureID", entry.getKey()));
+        }
+        Element filters = new Element("filters");
+        root.appendChild(filters);
         for (FilterDefinition filterDefinition : getFilterDefinitions()) {
-            xml += filterDefinition.toXML();
+            filters.appendChild(filterDefinition.toXML(xmlMetadata));
         }
-        xml += "</filters>";
-        xml += "<addedFields>";
+        Element additionalFields = new Element("additionalFields");
+        root.appendChild(additionalFields);
         for (AnalysisItem additionalField : getAddedItems()) {
-            xml += additionalField.toXML();
+            additionalFields.appendChild(additionalField.toXML(xmlMetadata));
         }
-        xml += "</addedFields>";
-        xml += "</report>";
-        return xml;
+        Element marmotScript = new Element("marmotScript");
+        root.appendChild(marmotScript);
+        marmotScript.appendChild(this.marmotScript != null ? this.marmotScript : "");
+        Element reportRunMarmotScript = new Element("reportRunMarmotScript");
+        root.appendChild(reportRunMarmotScript);
+        reportRunMarmotScript.appendChild(this.reportRunMarmotScript != null ? this.reportRunMarmotScript : "");
+        Element stateElement = analysisDefinitionState.toXML(xmlMetadata);
+        if (stateElement != null) {
+            root.appendChild(stateElement);
+        }
+        Element joinOverridesElement = new Element("joinOverrides");
+        for (JoinOverride joinOverride : joinOverrides) {
+            joinOverridesElement.appendChild(joinOverride.toXML(xmlMetadata));
+        }
+        Element descriptionElement = new Element("description");
+        root.appendChild(descriptionElement);
+        descriptionElement.appendChild(description);
+        Element reportPropertiesElement = new Element("reportProperties");
+        root.appendChild(reportPropertiesElement);
+        for (ReportProperty reportProperty : properties) {
+            Element propertyXML = reportProperty.toXML();
+            if (propertyXML != null) {
+                reportPropertiesElement.appendChild(propertyXML);
+            }
+        }
+        return root.toXML();
+    }
+
+    private static AnalysisDefinitionState createReport(int reportType) {
+        switch (reportType) {
+            case WSAnalysisDefinition.LIST:
+                return new ListDefinitionState();
+            case WSAnalysisDefinition.CROSSTAB:
+                return new CrosstabDefinitionState();
+            case WSAnalysisDefinition.TREE:
+                return new TreeDefinitionState();
+            case WSAnalysisDefinition.AREA:
+            case WSAnalysisDefinition.BAR:
+            case WSAnalysisDefinition.COLUMN:
+            case WSAnalysisDefinition.LINE:
+            case WSAnalysisDefinition.PIE:
+            case WSAnalysisDefinition.BUBBLE:
+            case WSAnalysisDefinition.PLOT:
+            case WSAnalysisDefinition.STACKED_BAR:
+            case WSAnalysisDefinition.STACKED_COLUMN:
+                return new ChartDefinitionState();
+            case WSAnalysisDefinition.GAUGE:
+                return new GaugeDefinitionState();
+            case WSAnalysisDefinition.TREE_MAP:
+                return new TreeMapDefinitionState();
+            case WSAnalysisDefinition.TREND:
+                return new TrendDefinitionState();
+            case WSAnalysisDefinition.TREND_GRID:
+                return new TrendGridDefinitionState();
+            case WSAnalysisDefinition.VERTICAL_LIST:
+                return new VerticalListDefinitionState();
+            case WSAnalysisDefinition.HEATMAP:
+                return new HeatMapDefinitionState();
+            case WSAnalysisDefinition.DIAGRAM:
+                return new DiagramDefinitionState();
+            case WSAnalysisDefinition.FORM:
+                return new FormDefinitionState();
+        }
+
+        return null;
     }
 }
