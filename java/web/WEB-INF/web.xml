@@ -1,9 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
-<web-app>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee web-app_2_4.xsd"
+         version="2.4">
 
     <display-name>app</display-name>
     <description>Application</description>
+    
+    <context-param>
+        <param-name>loginPage</param-name>
+        <param-value>/login.jsp</param-value>
+    </context-param>
+
+    <filter>
+        <filter-name>Auth</filter-name>
+        <filter-class>com.easyinsight.html.AuthFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>FixedDashboard</filter-name>
+        <filter-class>com.easyinsight.html.FixedDashboardFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>Auth</filter-name>
+        <url-pattern>/html/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>FixedDashboard</filter-name>
+        <url-pattern>/html/*</url-pattern>
+    </filter-mapping>
 
     <filter>
         <filter-name>UrlRewriteFilter</filter-name>
@@ -80,6 +108,13 @@
         <servlet-name>Excel</servlet-name>
         <display-name>Excel</display-name>
         <servlet-class>com.easyinsight.export.ExcelServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ExportExcel</servlet-name>
+        <display-name>ExportExcel</display-name>
+        <servlet-class>com.easyinsight.export.ExportExcelServlet</servlet-class>
         <load-on-startup>3</load-on-startup>
     </servlet>
 
@@ -175,6 +210,20 @@
     </servlet>
 
     <servlet>
+        <servlet-name>HtmlExport</servlet-name>
+        <display-name>HtmlExport</display-name>
+        <servlet-class>com.easyinsight.html.HtmlExportServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ReportHeader</servlet-name>
+        <display-name>ReportHeader</display-name>
+        <servlet-class>com.easyinsight.html.ReportHeaderImageServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>BeginTransaction</servlet-name>
         <display-name>BeginTransaction</display-name>
         <servlet-class>com.easyinsight.api.v3.BeginTransactionServlet</servlet-class>
@@ -199,6 +248,27 @@
         <servlet-name>OAuth</servlet-name>
         <display-name>OAuth</display-name>
         <servlet-class>com.easyinsight.users.OAuthServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ColumnChart</servlet-name>
+        <display-name>ColumnChart</display-name>
+        <servlet-class>com.easyinsight.html.ColumnChartServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>DataSourceRefresh</servlet-name>
+        <display-name>DataSourceRefresh</display-name>
+        <servlet-class>com.easyinsight.html.DataSourceRefreshServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>RefreshStatus</servlet-name>
+        <display-name>RefreshStatus</display-name>
+        <servlet-class>com.easyinsight.html.RefreshStatusServlet</servlet-class>
         <load-on-startup>4</load-on-startup>
     </servlet>
 
@@ -302,8 +372,28 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>HtmlExport</servlet-name>
+        <url-pattern>/htmlExport</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>BeginTransaction</servlet-name>
         <url-pattern>/xml/beginTransaction</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ColumnChart</servlet-name>
+        <url-pattern>/columnChart</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>DataSourceRefresh</servlet-name>
+        <url-pattern>/refreshDataSource</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>RefreshStatus</servlet-name>
+        <url-pattern>/refreshStatus</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
@@ -356,6 +446,11 @@
         <url-pattern>/htmlimage</url-pattern>
     </servlet-mapping>
 
+    <servlet-mapping>
+        <servlet-name>ReportHeader</servlet-name>
+        <url-pattern>/reportHeader</url-pattern>
+    </servlet-mapping>
+
     <!--<servlet-mapping>
         <servlet-name>DefineTable</servlet-name>
         <url-pattern>/defineTable</url-pattern>
@@ -369,6 +464,11 @@
     <servlet-mapping>
         <servlet-name>Excel</servlet-name>
         <url-pattern>/excel</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ExportExcel</servlet-name>
+        <url-pattern>/exportExcel</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

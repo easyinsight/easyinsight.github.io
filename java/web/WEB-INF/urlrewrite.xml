@@ -43,6 +43,31 @@
     </rule>
 
     <rule>
+        <from>/html/report/([0-9]+)</from>
+        <to>/html/report.jsp?reportID=$1</to>
+    </rule>
+
+    <rule>
+        <from>/html/dashboard/([0-9]+)</from>
+        <to>/html/dashboard.jsp?dashboardID=$1</to>
+    </rule>
+
+    <rule>
+        <from>/html/fixedDashboard/([0-9]+)</from>
+        <to>/html/fixedDashboard.jsp?dashboardID=$1</to>
+    </rule>
+
+    <rule>
+        <from>/html/reports/([0-9]+)</from>
+        <to>/html/reports.jsp?dataSourceID=$1</to>
+    </rule>
+
+    <!--<rule>
+        <from>/html/</from>
+        <to>/html/index.jsp</to>
+    </rule>-->
+
+    <rule>
         <from>/xml/reports/([A-Za-z0-9]+)</from>
         <to>/xml/RunReport?reportID=$1</to>
     </rule>
