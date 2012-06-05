@@ -251,7 +251,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     analysisDefinition.setName(deliveryInfo.getLabel());
                 }
                 updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
-                String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, true);
+                String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, true, true);
                 if (table != null) {
                     return new DeliveryResult(table);
                 }
@@ -443,7 +443,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         updateReportWithCustomFilters(analysisDefinition, customFilters);
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                         insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData);
+                        String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData, true);
                         if (table != null) {
                             sendNoAttachEmails(conn, table, activityID, subject, body, htmlEmail, ScheduledActivity.REPORT_DELIVERY);
                         }
@@ -505,38 +505,38 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
     }
 
-    private String createHTMLTable(EIConnection conn, WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean sendIfNoData) throws SQLException {
+    public static String createHTMLTable(EIConnection conn, WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean sendIfNoData, boolean includeTitle) throws SQLException {
         String table;
         if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
             DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
             if (dataSet.getRows().size() == 0 && !sendIfNoData) {
                 return null;
             }
-            table = ExportService.verticalListToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata);
+            table = ExportService.verticalListToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST_COMBINED) {
             List<DataSet> dataSets = DataService.getEmbeddedVerticalDataSets((WSCombinedVerticalListDefinition) analysisDefinition,
                     insightRequestMetadata, conn);
             table = ExportService.combinedVerticalListToHTMLTable(analysisDefinition, dataSets, conn, insightRequestMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.YTD) {
-            table = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata);
+            table = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
-            table = ExportService.compareYearsToHTMLTable(analysisDefinition, conn, insightRequestMetadata);
+            table = ExportService.compareYearsToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
             DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
             if (dataSet.getRows().size() == 0 && !sendIfNoData) {
                 return null;
             }
-            table = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata);
+            table = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
-            table = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, sendIfNoData);
+            table = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, sendIfNoData, includeTitle);
         } else {
             ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
             if (listDataResults.getRows().length == 0 && !sendIfNoData) {
                 return null;
             }
-            table = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata);
+            table = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle);
         }
         return table;
     }

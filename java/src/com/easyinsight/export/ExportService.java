@@ -40,10 +40,6 @@ import flex.messaging.FlexContext;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
-import org.jets3t.service.impl.rest.httpclient.RestS3Service;
-import org.jets3t.service.model.S3Bucket;
-import org.jets3t.service.model.S3Object;
-import org.jets3t.service.security.AWSCredentials;
 
 import java.io.*;
 
@@ -361,6 +357,7 @@ public class ExportService {
 
     public void emailReport(WSAnalysisDefinition analysisDefinition, int format, InsightRequestMetadata insightRequestMetadata, String email, String subject, String body,
                             byte[] pdfBytes, int width, int height) {
+        boolean includeTitle = true;
         if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
@@ -375,25 +372,25 @@ public class ExportService {
                 String html;
                 if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
                     DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.verticalListToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata);
+                    html = ExportService.verticalListToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST_COMBINED) {
                     List<DataSet> dataSets = DataService.getEmbeddedVerticalDataSets((WSCombinedVerticalListDefinition) analysisDefinition,
                             insightRequestMetadata, conn);
                     html = ExportService.combinedVerticalListToHTMLTable(analysisDefinition, dataSets, conn, insightRequestMetadata);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.YTD) {
-                    html = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata);
+                    html = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
-                    html = ExportService.compareYearsToHTMLTable(analysisDefinition, conn, insightRequestMetadata);
+                    html = ExportService.compareYearsToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                     DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata);
+                    html = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
-                    html = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, true);
+                    html = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, true, includeTitle);
                 } else {
                     ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata);
+                    html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle);
                 }
                 String htmlBody = body + html;
                 new SendGridEmail().sendNoAttachmentEmail(email, subject, htmlBody, true, "reports@easy-insight.com", "Easy Insight");
@@ -417,7 +414,7 @@ public class ExportService {
         }
     }
 
-    public static String crosstabReportToHTMLTable(WSAnalysisDefinition analysisDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+    public static String crosstabReportToHTMLTable(WSAnalysisDefinition analysisDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
         Crosstab crosstab = new Crosstab();
@@ -428,7 +425,7 @@ public class ExportService {
         String headerCell = "background: #333333; color: #FFFFFF;" + tdStyle + "left";
         String summaryCell = "background: #555555; color: #FFFFFF;" + tdStyle + "right";
         String dataCell = tdStyle + "right";
-        if (analysisDefinition.getName() != null) {
+        if (includeTitle && analysisDefinition.getName() != null) {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(analysisDefinition.getName()).append("</h0>").append("</div>");
         }
         sb.append("<table style=\"").append(tableStyle).append("\">\r\n");
@@ -936,8 +933,10 @@ public class ExportService {
             insertStmt.setString(4, anonID);
             insertStmt.execute();
             long id = Database.instance().getAutoGenKey(insertStmt);
-            FlexContext.getHttpRequest().getSession().setAttribute("imageID", id);
-            FlexContext.getHttpRequest().getSession().setAttribute("anonID", anonID);
+            if (FlexContext.getHttpRequest() != null) {
+                FlexContext.getHttpRequest().getSession().setAttribute("imageID", id);
+                FlexContext.getHttpRequest().getSession().setAttribute("anonID", anonID);
+            }
             return bytes;
         } finally {
             Database.closeConnection(conn);
@@ -1155,7 +1154,7 @@ public class ExportService {
         return new VListInfo(dColl, columns);
     }
 
-    public static String kpiReportToHtmlTable(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean sendIfNoData) throws SQLException {
+    public static String kpiReportToHtmlTable(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean sendIfNoData, boolean includeTitle) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSKPIDefinition kpiReport = (WSKPIDefinition) listDefinition;
         TrendDataResults trendDataResults = DataService.getTrendDataResults(kpiReport, insightRequestMetadata, conn);
@@ -1165,7 +1164,7 @@ public class ExportService {
         List<TrendOutcome> outcomes = trendDataResults.getTrendOutcomes();
         StringBuilder sb = new StringBuilder();
         
-        if (listDefinition.getName() != null) {
+        if (includeTitle && listDefinition.getName() != null) {
             sb.append("<div style=\""+headerLabelStyle+"\">").append("<h0>").append(listDefinition.getName()).append("</h0></div>");
         }
         sb.append("<table style=\""+tableStyle+"\">");
@@ -1213,21 +1212,21 @@ public class ExportService {
         return sb.toString();
     }
 
-    public static String verticalListToHTMLTable(WSAnalysisDefinition listDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+    public static String verticalListToHTMLTable(WSAnalysisDefinition listDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSVerticalListDefinition verticalList = (WSVerticalListDefinition) listDefinition;
         VListInfo vListInfo = getVListInfo(verticalList, dataSet);
         return vListToTable(vListInfo, exportMetadata);
     }
 
-    public static String compareYearsToHTMLTable(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+    public static String compareYearsToHTMLTable(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSCompareYearsDefinition verticalList = (WSCompareYearsDefinition) report;
         ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
         YearStuff ytdStuff = YTDUtil.getYearStuff(verticalList, dataSet.getDataSet(), dataSet.getPipelineData(), dataSet.getReportItems());
 
         StringBuilder sb = new StringBuilder();
-        if (report.getName() != null) {
+        if (includeTitle && report.getName() != null) {
             sb.append("<div style=\""+headerLabelStyle+"\">").append("<h0>").append(report.getName()).append("</h0></div>");
         }
         sb.append("<table>");
@@ -1261,7 +1260,7 @@ public class ExportService {
         return sb.toString();
     }
 
-    public static String ytdToHTMLTable(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+    public static String ytdToHTMLTable(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSYTDDefinition verticalList = (WSYTDDefinition) listDefinition;
         ExtendedDataSet dataSet = DataService.extendedListDataSet(verticalList, insightRequestMetadata, conn);
@@ -1277,7 +1276,7 @@ public class ExportService {
         }
 
         StringBuilder sb = new StringBuilder();
-        if (listDefinition.getName() != null) {
+        if (includeTitle && listDefinition.getName() != null) {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(listDefinition.getName()).append("</h0>").append("</div>");
         }
         sb.append("<table>");
@@ -2125,14 +2124,14 @@ public class ExportService {
     }
 
     private static final String headerLabelStyle = "text-align:center;padding-top:15px;padding-bottom:15px;font-size:14px";
-    private static final String tableStyle = "font-size:12px;font-family:Lucida Grande,serif;border-collapse:collapse;border-style:solid;border-width:1px;border-spacing:0;border-color:#000000";
+    private static final String tableStyle = "font-size:12px;font-family:Lucida Grande,serif;border-collapse:collapse;border-style:solid;border-width:1px;border-spacing:0;border-color:#000000;width:100%";
     private static final String thStyle = "border-style:solid;padding:6px;border-width:1px;border-color:#000000";
     private static final String headerTRStyle = "background-color:#EEEEEE";
     private static final String trStyle = "padding:0px;margin:0px";
     private static final String summaryTRStyle = "padding:0px;margin:0px;background-color:#F4F4F4";
     private static final String tdStyle = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
 
-    public static String listReportToHTMLTable(WSAnalysisDefinition report, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+    public static String listReportToHTMLTable(WSAnalysisDefinition report, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
         if (listDataResults.getReportFault() != null) {
             return listDataResults.getReportFault().toString();
         }
@@ -2158,7 +2157,7 @@ public class ExportService {
         
 
 
-        if (report.getName() != null) {
+        if (includeTitle && report.getName() != null) {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(report.getName()).append("</h0>").append("</div>");
         }
         sb.append("<table style=\"").append(tableStyle).append("\">");
