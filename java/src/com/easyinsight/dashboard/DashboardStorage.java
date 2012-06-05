@@ -25,6 +25,11 @@ import java.util.List;
  * Time: 5:41:34 PM
  */
 public class DashboardStorage {
+
+    public String urlKeyForID(long id) {
+        return null;
+    }
+
     public void saveDashboard(Dashboard dashboard) throws Exception {
         EIConnection conn = Database.instance().getConnection();
         try {

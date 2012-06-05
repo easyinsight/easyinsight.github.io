@@ -1,9 +1,6 @@
 package com.easyinsight.dashboard;
 
-import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemRetrievalStructure;
-import com.easyinsight.analysis.AnalysisStorage;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.EIConnection;
@@ -144,5 +141,26 @@ public class DashboardReport extends DashboardElement {
         descs.add(report);
         descs.addAll(new AnalysisStorage().getAnalysisDefinition(report.getId()).allItems(dataSourceItems, new AnalysisItemRetrievalStructure()));
         return descs;
+    }
+
+    public String toHTML() {
+        StringBuilder sb = new StringBuilder();
+        WSAnalysisDefinition reportDefinition = new AnalysisService().openAnalysisDefinition(report.getId());
+        String div = "reportTarget" + report.getId();
+        sb.append("<script type=\"text/javascript\">\n").append("function renderReport").append(report.getId()).append("() {");
+        sb.append("var strParams = \"\";\n" +
+                "            for (var filterValue in filterBase) {\n" +
+                "                var value = filterBase[filterValue];\n" +
+                "                strParams += filterValue + \"=\" + value + \"&\";\n").append("}\n");
+        sb.append(reportDefinition.toHTML(div));
+        sb.append("}");
+        sb.append("$(document).ready(").append("renderReport").append(report.getId()).append("());");
+        sb.append("</script>\n");
+        sb.append("<div id=\"").append(div).append("\"></div>");
+        /*sb.append("<script type=\"text/javascript\">\n" +
+                "                    $(document).ready(refreshReport('#reportTarget"+report.getId()+"', "+report.getId()+"));\n" +
+                "                </script>\n" +
+                "                <div id=\"reportTarget"+report.getId()+"\"></div>");*/
+        return sb.toString();
     }
 }

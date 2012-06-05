@@ -117,7 +117,10 @@ public class DashboardStack extends DashboardElement {
         insertStmt.setString(7, selectionType);
         insertStmt.execute();
         long gridID = Database.instance().getAutoGenKey(insertStmt);
+        int position = 0;
+
         for (DashboardStackItem gridItem : gridItems) {
+            gridItem.setPosition(position++);
             gridItem.save(conn, gridID);
         }
         insertStmt.close();
@@ -222,5 +225,47 @@ public class DashboardStack extends DashboardElement {
         for (DashboardStackItem gridItem : gridItems) {
             gridItem.getDashboardElement().updateReportIDs(reportReplacementMap);
         }
+    }
+
+    @Override
+    public String toHTML() {
+        StringBuilder sb = new StringBuilder();
+        if (gridItems.size() > 1) {
+            sb.append("<div class=\"tabbable\">");
+            sb.append("<ul class=\"nav nav-pills\">");
+            for (int i = 0; i < gridItems.size(); i++) {
+                DashboardStackItem item = gridItems.get(i);
+                if (i == 0) {
+                    sb.append("<li class=\"active\">");
+                } else {
+                    sb.append("<li>");
+                }
+                String label;
+                if (item.getDashboardElement() instanceof DashboardReport) {
+                    label = ((DashboardReport) item.getDashboardElement()).getReport().getName();
+                } else {
+                    label = item.getDashboardElement().getLabel();
+                }
+                sb.append("<a data-toggle=\"tab\" href=\"#"+i+"\">").append(label).append("</a>");
+                sb.append("</li>");
+            }
+            sb.append("</ul>");
+            sb.append("<div class=\"tab-content\">");
+            for (int i = 0; i < gridItems.size(); i++) {
+                DashboardStackItem item = gridItems.get(i);
+                if (i == 0) {
+                    sb.append("<div class=\"tab-pane active\" id=\""+i+"\">");
+                } else {
+                    sb.append("<div class=\"tab-pane\" id=\""+i+"\">");
+                }
+                sb.append(item.getDashboardElement().toHTML());
+                sb.append("</div>");
+            }
+            sb.append("</div>");
+            sb.append("</div>");
+        } else {
+            sb.append(gridItems.get(0).getDashboardElement().toHTML());
+        }
+        return sb.toString();
     }
 }

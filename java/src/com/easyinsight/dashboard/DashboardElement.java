@@ -48,6 +48,10 @@ public abstract class DashboardElement implements Cloneable {
     private int preferredWidth;
     private int preferredHeight;
 
+    public String toHTML() {
+        return "";
+    }
+
     public int getPreferredWidth() {
         return preferredWidth;
     }

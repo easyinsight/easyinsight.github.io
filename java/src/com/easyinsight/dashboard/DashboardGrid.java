@@ -198,4 +198,30 @@ public class DashboardGrid extends DashboardElement {
         }
         return descs;
     }
+
+    public String toHTML() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table style=\"width:100%\">\r\n");
+        for (int i = 0; i < rows; i++) {
+            sb.append("<tr style=\"width:100%\">\r\n");
+            for (int j = 0; j < columns; j++) {
+                sb.append("<td style=\"width:50%\">\r\n");
+                DashboardGridItem item = findItem(i, j);
+                sb.append(item.getDashboardElement().toHTML());
+                sb.append("</td>\r\n");
+            }
+            sb.append("</tr>\r\n");
+        }
+        sb.append("</table>\r\n");
+        return sb.toString();
+    }
+
+    private DashboardGridItem findItem(int x, int y) {
+        for (DashboardGridItem e : gridItems) {
+            if (e.getRowIndex() == x && e.getColumnIndex() == y) {
+                return e;
+            }
+        }
+        return null;
+    }
 }
