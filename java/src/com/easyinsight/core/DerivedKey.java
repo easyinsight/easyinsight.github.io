@@ -1,6 +1,7 @@
 package com.easyinsight.core;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * User: James Boe
@@ -23,6 +24,13 @@ public class DerivedKey extends Key {
     public DerivedKey(Key parentKey, long feedID) {
         this.parentKey = parentKey;
         this.feedID = feedID;
+    }
+
+    @Override
+    public List<EIDescriptor> getDescriptors() {
+        List<EIDescriptor> descs = super.getDescriptors();
+        descs.addAll(parentKey.getDescriptors());
+        return descs;
     }
 
     public boolean hasDataSource(long dataSourceID) {
@@ -81,6 +89,10 @@ public class DerivedKey extends Key {
 
     public String toKeyString() {
         return toBaseKey().toKeyString();
+    }
+
+    public String urlKeyString(XMLMetadata xmlMetadata) {
+        return xmlMetadata.urlKeyForDataSourceID(feedID) + "-" + parentKey.urlKeyString(xmlMetadata);
     }
 
     @Override

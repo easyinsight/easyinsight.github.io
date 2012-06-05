@@ -24,6 +24,10 @@ public class NamedKey extends Key {
         this.name = name;
     }
 
+    public String urlKeyString(XMLMetadata xmlMetadata) {
+        return name;
+    }
+
     @Override
     public boolean matchesOrContains(Key key) {
         return name.equals(key.toKeyString());

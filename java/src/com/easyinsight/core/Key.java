@@ -70,4 +70,8 @@ public class Key implements Comparable<Key>, Serializable, Cloneable {
         key.keyID = 0;
         return key;
     }
+
+    public String urlKeyString(XMLMetadata xmlMetadata) {
+        return null;
+    }
 }
