@@ -13,6 +13,8 @@
 
         import com.easyinsight.framework.Constants;
         import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.LoginObject;
+        import com.easyinsight.framework.LoginResponse;
         import com.easyinsight.framework.TORegistry;
         //import com.easyinsight.framework.TORegistry2;
 
@@ -110,18 +112,33 @@
         [Bindable]
         private var stackIndex:int = 0;
 
+        private var loginObject:LoginObject;
+
+        private function onLogin(event:LoginEvent):void {
+            var authResult:UserServiceResponse = event.authResponse;
+            if (authResult.accountState == Account.DELINQUENT || authResult.accountState == Account.BILLING_FAILED) {
+
+            } else {
+                quietLogin(authResult, false);
+            }
+        }
+
         private function sessionCheck():void {
-            var authResult:UserServiceResponse = userService.isSessionLoggedIn.lastResult as UserServiceResponse;
-            if (authResult != null) {
-                if (authResult.accountState == Account.DELINQUENT) {
-                    //toLogin(1);
-                } else {
-                    quietLogin(authResult, false);
-                    //toMain();
+            var loginResponse:LoginResponse = userService.isSessionLoggedIn.lastResult as LoginResponse;
+            if (loginResponse != null && loginResponse.token != null) {
+                loginObject = new LoginObject();
+                loginObject.addEventListener(LoginEvent.LOGIN, onLogin);
+                loginObject.authenticate(loginResponse.token, loginResponse.userIDString, loginResponse.userServiceResponse);
+            } else if (loginResponse != null) {
+                var authResult:UserServiceResponse = loginResponse.userServiceResponse;
+                if (authResult != null) {
+                    if (authResult.accountState == Account.DELINQUENT || authResult.accountState == Account.BILLING_FAILED) {
+                    } else {
+                        quietLogin(authResult, false);
+                    }
                 }
             } else {
                 analysisService.openAnalysisIfPossible.send(urlKey);
-
             }
         }
 
@@ -166,9 +183,9 @@
     <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
         <mx:Box/>
         <framework:LoginComponent loginEvent2="stackIndex = 2"/>
-        <dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
+        <!--<dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
                                       dataSourceID="{dataSourceID}" reportType="{reportType}"
                                       showToolbar="{showToolbar}"
-                                        showFilters="{showFilters}" />
+                                        showFilters="{showFilters}" />-->
     </mx:ViewStack>
 </mx:Application>

@@ -10,6 +10,12 @@
 
         import com.easyinsight.framework.User;
 
+        import mx.rpc.AsyncResponder;
+
+        import mx.rpc.AsyncToken;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+
         [Bindable]
         private var message:String;
 
@@ -30,8 +36,15 @@
         public function logout():void {
             User.destroy();
             CookieUtil.deleteCookie("eisession");
-            ServerConfig.getChannelSet(authService.destination).logout();
+            var token:AsyncToken = ServerConfig.getChannelSet(authService.destination).logout();
+            token.addResponder(new AsyncResponder(logoutResultEvent, logoutFaultEvent));
+        }
+
+        private function logoutResultEvent(event:ResultEvent, token:Object = null):void {
             User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
+        }
+
+        private function logoutFaultEvent(event:FaultEvent, token:Object = null):void {
         }
         ]]>
 	</mx:Script>

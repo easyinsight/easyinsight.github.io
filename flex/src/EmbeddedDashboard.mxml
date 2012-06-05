@@ -12,6 +12,8 @@
 
         import com.easyinsight.framework.Constants;
         import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.LoginObject;
+        import com.easyinsight.framework.LoginResponse;
         import com.easyinsight.framework.TORegistry;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
@@ -62,14 +64,30 @@
         [Bindable]
         private var stackIndex:int = 0;
 
+        private function onLogin(event:LoginEvent):void {
+            var authResult:UserServiceResponse = event.authResponse;
+            if (authResult.accountState == Account.DELINQUENT || authResult.accountState == Account.BILLING_FAILED) {
+
+            } else {
+                quietLogin(authResult);
+            }
+        }
+
+        private var loginObject:LoginObject;
+
         private function sessionCheck():void {
-            var authResult:UserServiceResponse = userService.isSessionLoggedIn.lastResult as UserServiceResponse;
-            if (authResult != null) {
-                if (authResult.accountState == Account.DELINQUENT) {
-                    //toLogin(1);
-                } else {
-                    quietLogin(authResult);
-                    //toMain();
+            var loginResponse:LoginResponse = userService.isSessionLoggedIn.lastResult as LoginResponse;
+            if (loginResponse != null && loginResponse.token != null) {
+                loginObject = new LoginObject();
+                loginObject.addEventListener(LoginEvent.LOGIN, onLogin);
+                loginObject.authenticate(loginResponse.token, loginResponse.userIDString, loginResponse.userServiceResponse);
+            } else if (loginResponse != null) {
+                var authResult:UserServiceResponse = loginResponse.userServiceResponse;
+                if (authResult != null) {
+                    if (authResult.accountState == Account.DELINQUENT || authResult.accountState == Account.BILLING_FAILED) {
+                    } else {
+                        quietLogin(authResult);
+                    }
                 }
             } else {
                 dashboardService.canAccessDashboard.send(urlKey);

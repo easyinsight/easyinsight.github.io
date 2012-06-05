@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" 
-        xmlns:framework="com.easyinsight.framework.*"
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml"
+        xmlns:framework="com.easyinsight.framework.*" xmlns:util="com.easyinsight.util.*"
         backgroundColor="#EEEEEE" creationComplete="setup()" width="100%" height="100%" horizontalAlign="center"
         verticalAlign="middle">
     <mx:Metadata>
@@ -17,13 +17,13 @@
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.messaging.config.ServerConfig;
 
         public static const DELINQUENT:int = 1;
         public static const REACTIVATE:int = 2;
         public static const NEEDS_ACTIVATION:int = 4;
         public static const INITIAL_USER_SETUP:int = 5;
+        public static const BILLING_FAILED:int = 6;
 
         [Bindable]
         private var panelIndex:int;
@@ -37,6 +37,8 @@
                 panelIndex = 2;
             } else if (_initState == INITIAL_USER_SETUP) {
                 panelIndex = 6;
+            } else if (_initState == BILLING_FAILED) {
+                panelIndex = 7;
             } else {
                 loginComponent.setupFocus();
             }
@@ -88,6 +90,8 @@
             } else if (event.authResponse.firstLogin) {
                 dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
                 panelIndex = 6;
+            } else if (event.authResponse.accountState == Account.BILLING_FAILED) {
+                panelIndex = 7;
             } else {
                 dispatchEvent(event);
             }
@@ -167,14 +171,17 @@
                      paddingTop="10" paddingBottom="10"
                      paddingLeft="10" paddingRight="10" cornerRadius="10"
                      borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
+                <mx:HBox>
+                    <mx:Image source=""/>
+                </mx:HBox>
                 <mx:Image source="{moneyIcon}"/>
                 <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
                              fontSize="18"
-                             text="Your trial has expired. You'll need to enter billing information to continue using Easy Insight."
+                             text="Your 30 day free trial has expired. You'll need to enter billing information to continue using Easy Insight."
                              width="350" height="80"/>
                 <mx:HBox width="100%" horizontalAlign="center">
                     <mx:Button label="Enter Billing" click="toBilling()" fontSize="18" styleName="grayButton"/>
-                    <mx:Button label="Log Out" click="logout()" fontSize="18" styleName="grayButton"/>
+                    <util:CancelButton label="Log Out" click="logout()" fontSize="18"/>
                 </mx:HBox>
             </mx:VBox>
         </mx:Box>
@@ -251,6 +258,27 @@
                      paddingLeft="10" paddingRight="10" cornerRadius="10"
                      borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
                 <framework:InitialLoginWindow kpiTutorialNext="dispatchEvent(new Event('allDone'));"/>
+            </mx:VBox>
+        </mx:Box>
+
+        <!-- 7, recurring billing failed -->
+        <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+            <mx:VBox horizontalAlign="center" verticalAlign="middle"
+                     paddingTop="10" paddingBottom="10"
+                     paddingLeft="10" paddingRight="10" cornerRadius="10"
+                     borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
+                <mx:HBox>
+                    <mx:Image source=""/>
+                </mx:HBox>
+                <mx:Image source="{moneyIcon}"/>
+                <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
+                             fontSize="18"
+                             text="Recurring billing failed for your account. You'll need to reenter billing information to continue using Easy Insight."
+                             width="350" height="80"/>
+                <mx:HBox width="100%" horizontalAlign="center">
+                    <mx:Button label="Enter Billing" click="toBilling()" fontSize="18" styleName="grayButton"/>
+                    <util:CancelButton label="Log Out" click="logout()" fontSize="18"/>
+                </mx:HBox>
             </mx:VBox>
         </mx:Box>
     </mx:ViewStack>
