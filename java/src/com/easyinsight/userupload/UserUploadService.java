@@ -177,11 +177,6 @@ public class UserUploadService {
                     return name1.compareTo(name2);
                 }
             });
-
-            /*MyDataTree myDataTree = new MyDataTree(results, false);
-            myDataTree.setDashboardCount(dashboardCount);
-            myDataTree.setDataSourceCount(dataSourceCount);
-            myDataTree.setReportCount(reportCount);*/
             conn.commit();
             return dataSourceDescriptor.getChildren();
         } catch (Throwable e) {
