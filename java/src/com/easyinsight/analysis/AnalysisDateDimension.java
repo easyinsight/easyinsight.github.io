@@ -2,6 +2,8 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
 import com.easyinsight.security.SecurityUtil;
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -30,6 +32,15 @@ public class AnalysisDateDimension extends AnalysisDimension {
 
     @Column(name="output_date_format")
     private String outputDateFormat;
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("dateLevel", String.valueOf(dateLevel)));
+        element.addAttribute(new Attribute("customDateFormat", String.valueOf(customDateFormat)));
+        element.addAttribute(new Attribute("outputDateFormat", String.valueOf(outputDateFormat)));
+        return element;
+    }
 
     private transient DateFormat cachedDateFormat;
 
@@ -166,6 +177,8 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 tempDate = cachedDateFormat.parse(Long.toString(numberValue.toDouble().longValue()));
             }
         } catch (ParseException e) {
+        } catch (IllegalArgumentException iae) {
+            throw new ReportException(new AnalysisItemFault(iae.getMessage(), this));
         }
         Value resultValue;
         if (tempDate != null) {

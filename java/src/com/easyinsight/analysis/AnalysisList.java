@@ -1,9 +1,8 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.Key;
-import com.easyinsight.core.Value;
-import com.easyinsight.core.StringValue;
-import com.easyinsight.core.EmptyValue;
+import com.easyinsight.core.*;
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -26,6 +25,14 @@ public class AnalysisList extends AnalysisDimension {
     private String delimiter;
     @Column(name="expanded")
     private boolean expanded = false;
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("delimiter", delimiter));
+        element.addAttribute(new Attribute("expanded", String.valueOf(expanded)));
+        return element;
+    }
 
     public AnalysisList() {
     }

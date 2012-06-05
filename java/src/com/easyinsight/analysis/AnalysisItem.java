@@ -7,17 +7,13 @@ import javax.persistence.Table;
 import java.util.*;
 import java.io.Serializable;
 
-import com.easyinsight.core.DerivedKey;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.NamedKey;
-import com.easyinsight.core.Value;
+import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
-import com.easyinsight.datafeeds.Feed;
-import com.easyinsight.datafeeds.FeedService;
-import com.easyinsight.datafeeds.FeedNode;
-import com.easyinsight.datafeeds.AnalysisItemNode;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.pipeline.IComponent;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 /**
@@ -319,6 +315,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public abstract int getType();
+
+    public abstract int actualType();
 
     public boolean hasType(int type) {
         return (getType() & type) == type;
@@ -672,16 +670,32 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return new ArrayList<IComponent>();
     }
 
-    public String toXML() {
-        String xml = "<analysisItem key=\""+key.toDisplayName()+"\" display=\""+toDisplay()+"\" id=\""+analysisItemID+"\">";
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element root = new Element("analysisItem");
+        root.addAttribute(new Attribute("display", getDisplayName() != null ? getDisplayName() : ""));
+        root.addAttribute(new Attribute("type", String.valueOf(actualType())));
+        root.addAttribute(new Attribute("key", key.urlKeyString(xmlMetadata)));
+        root.addAttribute(new Attribute("concrete", String.valueOf(concrete)));
+        root.appendChild(formattingConfiguration.toXML());
+        Element filters = new Element("filters");
+        root.appendChild(filters);
         for (FilterDefinition filterDefinition : getFilters()) {
-            xml += filterDefinition.toXML();
+            filters.appendChild(filterDefinition.toXML(xmlMetadata));
         }
+        Element links = new Element("links");
+        root.appendChild(links);
         for (Link link : getLinks()) {
-            xml += link.toXML();
+            links.appendChild(link.toXML(xmlMetadata));
         }
-        xml += "</analysisItem>";
-        return xml;
+        if (reportFieldExtension != null) {
+            root.appendChild(reportFieldExtension.toXML(xmlMetadata));
+        }
+
+        // Marie Fox, Music something, 720-287-1205
+        // Jason Elder, Active Network, 901-869-5013
+
+
+        return root;
     }
 
     public void timeshift(Feed dataSource, Collection<FilterDefinition> filters) {
@@ -692,5 +706,107 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public boolean persistable() {
         return isConcrete() && !isDerived();
+    }
+
+    public static AnalysisItem fromXML(Element fieldNode, XMLImportMetadata xmlImportMetadata) {
+        int type = Integer.parseInt(fieldNode.getAttribute("type").getValue());
+        AnalysisItem analysisItem;
+        switch (type) {
+            case AnalysisItemTypes.DIMENSION:
+                analysisItem = new AnalysisDimension();
+                break;
+            case AnalysisItemTypes.CALCULATION:
+                analysisItem = new AnalysisCalculation();
+                break;
+            case AnalysisItemTypes.COMPLEX_MEASURE:
+                analysisItem = new ComplexAnalysisMeasure();
+                break;
+            case AnalysisItemTypes.DATE_DIMENSION:
+                analysisItem = new AnalysisDateDimension();
+                break;
+            case AnalysisItemTypes.DERIVED_DATE:
+                analysisItem = new DerivedAnalysisDateDimension();
+                break;
+            case AnalysisItemTypes.DERIVED_DIMENSION:
+                analysisItem = new DerivedAnalysisDimension();
+                break;
+            case AnalysisItemTypes.HIERARCHY:
+                analysisItem = new AnalysisHierarchyItem();
+                break;
+            case AnalysisItemTypes.LATITUDE:
+                analysisItem = new AnalysisLatitude();
+                break;
+            case AnalysisItemTypes.LONGITUDE:
+                analysisItem = new AnalysisLongitude();
+                break;
+            case AnalysisItemTypes.LISTING:
+                analysisItem = new AnalysisList();
+                break;
+            case AnalysisItemTypes.MEASURE:
+                analysisItem = new AnalysisMeasure();
+                break;
+            case AnalysisItemTypes.RANGE_DIMENSION:
+                analysisItem = new AnalysisRangeDimension();
+                break;
+            case AnalysisItemTypes.REAGGREGATE_MEASURE:
+                analysisItem = new ReaggregateAnalysisMeasure();
+                break;
+            case AnalysisItemTypes.SIX_SIGMA_MEASURE:
+                analysisItem = new SixSigmaMeasure();
+                break;
+            case AnalysisItemTypes.STEP:
+                analysisItem = new AnalysisStep();
+                break;
+            case AnalysisItemTypes.TEXT:
+                analysisItem = new AnalysisText();
+                break;
+            case AnalysisItemTypes.ZIP_CODE:
+                analysisItem = new AnalysisZipCode();
+                break;
+            default:
+                throw new RuntimeException("Unknown type " + type);
+        }
+
+        String displayName = fieldNode.getAttribute("display").getValue();
+        if (!"".equals(displayName)) {
+            analysisItem.setDisplayName(displayName);
+        }
+        analysisItem.setConcrete(Boolean.parseBoolean(fieldNode.getAttribute("concrete").getValue()));
+
+        // so a derived key is going to be XXXXX:Blah or XXXXX:YYYYY:Blah
+
+        String keyString = fieldNode.getAttribute("key").getValue();
+        String[] keyParts = keyString.split("-");
+        String baseKey = keyParts[keyParts.length - 1];
+
+        List<FeedDefinition> dataSources = new ArrayList<FeedDefinition>();
+        for (int i = 0; i < keyParts.length; i++) {
+            String keyPart = keyParts[i];
+            if (i < (keyParts.length - 1)) {
+                dataSources.add(xmlImportMetadata.dataSourceForURLKey(keyPart));
+            } else {
+
+            }
+        }
+        dataSources.add(0, xmlImportMetadata.getDataSource());
+        FeedDefinition baseSource = dataSources.get(dataSources.size() - 1);
+        AnalysisItem baseItem = baseSource.findAnalysisItemByKey(baseKey);
+        //Key parentKey = baseItem.getKey();
+        if (dataSources.size() > 1) {
+            for (int i = dataSources.size() - 2; i >= 0; i--) {
+                FeedDefinition parentSource = dataSources.get(i);
+                for (AnalysisItem item : parentSource.getFields()) {
+                    if (item.getKey() instanceof DerivedKey) {
+                        DerivedKey derivedKey = (DerivedKey) item.getKey();
+                        if (derivedKey.getParentKey().equals(baseItem.getKey())) {
+                            baseItem = item;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        analysisItem.setKey(baseItem.getKey());
+        return analysisItem;
     }
 }

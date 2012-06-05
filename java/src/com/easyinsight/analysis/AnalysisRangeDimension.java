@@ -71,6 +71,33 @@ public class AnalysisRangeDimension extends AnalysisDimension {
         return lowerBound;
     }
 
+    /*public boolean requiresDataEarly() {
+        return true;
+    }
+
+    public Value transformValue(Value value) {
+        Value transformedValue;
+        try {
+            Double doubleValue = value.toDouble();
+            transformedValue = new StringValue(range.getRange(doubleValue));
+        } catch (NumberFormatException e) {
+            transformedValue = new EmptyValue();
+        }
+        return transformedValue;
+    }
+
+    public void handleEarlyData(List<IRow> rows) {
+        Collection<Double> doubleValues = new ArrayList<Double>();
+        for (IRow row : rows) {
+            Value value = row.getValue(getKey());
+            Double doubleValue = value.toDouble();
+            if (doubleValue != null) {
+                doubleValues.add(doubleValue);
+            }
+        }
+        range = new Range(doubleValues, THRESHOLD);
+    }*/
+
     @Override
     public AnalysisItemResultMetadata createResultMetadata() {
         return new AnalysisRangeResultMetadata();

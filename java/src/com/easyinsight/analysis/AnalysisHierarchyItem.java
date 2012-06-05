@@ -167,7 +167,7 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         return result;
     }
 
-    @Override
+    /*@Override
     public String toXML() {
         String xml = "<hierarchy>" + super.toXML();
         for (HierarchyLevel level : hierarchyLevels) {
@@ -175,5 +175,5 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         }
         xml += "</hierarchy>";
         return xml;
-    }
+    }*/
 }

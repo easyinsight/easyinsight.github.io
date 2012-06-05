@@ -5,6 +5,8 @@ import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
+import com.easyinsight.logging.LogClass;
+import com.easyinsight.pipeline.CleanupComponent;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 
@@ -25,6 +27,17 @@ import java.util.*;
 public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
     @Column(name="derivation_code")
     private String derivationCode;
+
+    @Column(name="apply_before_aggregation")
+    private boolean applyBeforeAggregation;
+
+    public boolean isApplyBeforeAggregation() {
+        return applyBeforeAggregation;
+    }
+
+    public void setApplyBeforeAggregation(boolean applyBeforeAggregation) {
+        this.applyBeforeAggregation = applyBeforeAggregation;
+    }
 
     public String getDerivationCode() {
         return derivationCode;
@@ -83,7 +96,14 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
             if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
                 throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + toDisplay() + ".", this));
             }
-            throw new RuntimeException(e.getMessage() + " in calculating " + derivationCode, e);
+            LogClass.error("On calculating " + derivationCode, e);
+            String message;
+            if (e.getMessage() == null) {
+                message = "Internal error";
+            } else {
+                message = e.getMessage();
+            }
+            throw new ReportException(new AnalysisItemFault(message + " in calculating " + derivationCode, this));
         }
         VariableListVisitor variableVisitor = new VariableListVisitor();
         tree.accept(variableVisitor);
@@ -94,10 +114,12 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
 
         analysisItemList.add(this);
 
-        if (!includeFilters) return analysisItemList;
+        if (!includeFilters && isApplyBeforeAggregation()) return analysisItemList;
+
+        if (!isApplyBeforeAggregation() && !hasCriteria(criteria, CleanupComponent.AGGREGATE_CALCULATIONS)) return analysisItemList;
 
         for (KeySpecification spec : specs) {
-            AnalysisItem analysisItem = null;
+            AnalysisItem analysisItem;
             try {
                 analysisItem = spec.findAnalysisItem(keyMap, displayMap);
             } catch (CloneNotSupportedException e) {

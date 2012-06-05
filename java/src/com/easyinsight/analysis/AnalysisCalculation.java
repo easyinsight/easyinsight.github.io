@@ -3,11 +3,13 @@ package com.easyinsight.analysis;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.logging.LogClass;
 
 import javax.persistence.*;
 
 import com.easyinsight.pipeline.CleanupComponent;
+import nu.xom.Element;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -148,7 +150,14 @@ public class AnalysisCalculation extends AnalysisMeasure {
                 if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
                     throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + toDisplay() + ".", this));
                 }
-                throw new RuntimeException(e.getMessage() + " in calculating " + calculationString, e);
+                LogClass.error("On calculating " + calculationString, e);
+                String message;
+                if (e.getMessage() == null) {
+                    message = "Internal error";
+                } else {
+                    message = e.getMessage();
+                }
+                throw new ReportException(new AnalysisItemFault(message + " in calculating " + calculationString, this));
             }
 
             VariableListVisitor variableVisitor = new VariableListVisitor();
@@ -251,7 +260,11 @@ public class AnalysisCalculation extends AnalysisMeasure {
     }
 
     @Override
-    public String toXML() {
-        return "<calculation formula=\"" + calculationString + "\">" + super.toXML() + "</calculation>";
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        Element calculation = new Element("calculation");
+        calculation.appendChild(calculationString);
+        element.appendChild(calculation);
+        return element;
     }
 }

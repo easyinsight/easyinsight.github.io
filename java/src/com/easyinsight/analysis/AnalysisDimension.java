@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Collection;
 
 import com.easyinsight.database.Database;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 /**
@@ -27,6 +29,18 @@ public class AnalysisDimension extends AnalysisItem {
 
     @Column(name="summary")
     private boolean summary = false;
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("groupBy", String.valueOf(group)));
+        element.addAttribute(new Attribute("summary", String.valueOf(summary)));
+        if (keyDimension != null) {
+            Element keyDimensionElement = new Element("keyDimension");
+            keyDimensionElement.appendChild(keyDimension.toXML(null));
+        }
+        return element;
+    }
 
     public AnalysisDimension() {
     }
@@ -68,6 +82,11 @@ public class AnalysisDimension extends AnalysisItem {
     }
 
     public int getType() {
+        return AnalysisItemTypes.DIMENSION;
+    }
+
+    @Override
+    public int actualType() {
         return AnalysisItemTypes.DIMENSION;
     }
 
@@ -157,17 +176,5 @@ public class AnalysisDimension extends AnalysisItem {
             keyDimension.reportSave(session);
             session.save(keyDimension);
         }
-    }
-
-
-
-    @Override
-    public String toXML() {
-        String xml = "<analysisDimension>" + super.toXML();
-        if (keyDimension != null) {
-            xml += "<keyDimension>" + keyDimension.toXML() + "</keyDimension>";
-        }
-        xml += "</analysisDimension>";
-        return xml;
     }
 }

@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.generated.CalculationsParser;
+import com.easyinsight.logging.LogClass;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 
@@ -97,7 +98,14 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
             if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
                 throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + toDisplay() + ".", this));
             }
-            throw new RuntimeException(e.getMessage() + " in calculating " + derivationCode, e);
+            LogClass.error("On calculating " + derivationCode, e);
+            String message;
+            if (e.getMessage() == null) {
+                message = "Internal error";
+            } else {
+                message = e.getMessage();
+            }
+            throw new ReportException(new AnalysisItemFault(message + " in calculating " + derivationCode, this));
         }
         VariableListVisitor variableVisitor = new VariableListVisitor();
         tree.accept(variableVisitor);

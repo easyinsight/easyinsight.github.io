@@ -1,6 +1,8 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 import javax.persistence.*;
 
@@ -28,10 +30,26 @@ public class AnalysisMeasure extends AnalysisItem {
     @Column(name="min_precision")
     private int minPrecision;
 
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("aggregation", String.valueOf(aggregation)));
+        element.addAttribute(new Attribute("rowCountField", String.valueOf(rowCountField)));
+        element.addAttribute(new Attribute("underline", String.valueOf(underline)));
+        element.addAttribute(new Attribute("precision", String.valueOf(precision)));
+        element.addAttribute(new Attribute("minPrecision", String.valueOf(minPrecision)));
+        return element;
+    }
+
     public AnalysisMeasure() {
     }
 
     public int getType() {
+        return AnalysisItemTypes.MEASURE;
+    }
+
+    @Override
+    public int actualType() {
         return AnalysisItemTypes.MEASURE;
     }
 
@@ -181,10 +199,5 @@ public class AnalysisMeasure extends AnalysisItem {
         int result = super.hashCode();
         result = 31 * result + aggregation;
         return result;
-    }
-
-    @Override
-    public String toXML() {
-        return "<analysisMeasure>" + super.toXML() + "</analysisMeasure>";
     }
 }

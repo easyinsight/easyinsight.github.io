@@ -11,4 +11,9 @@ public class AnalysisImage extends AnalysisItem {
     public int getType() {
         return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
+
+    @Override
+    public int actualType() {
+        return AnalysisItemTypes.IMAGE;
+    }
 }
