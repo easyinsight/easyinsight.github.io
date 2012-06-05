@@ -18,6 +18,9 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.logging.SecurityLogger;
 import org.hibernate.Session;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 /**
  * User: James Boe
  * Date: Aug 12, 2008
@@ -30,6 +33,20 @@ public class SecurityUtil {
 
     public static void populateThreadLocal(String userName, long userID, long accountID, int accountType, boolean accountAdmin, int firstDayOfWeek, String persona) {
         threadLocal.set(new UserPrincipal(userName, accountID, userID, accountType, accountAdmin, firstDayOfWeek, persona));
+    }
+
+    public static void populateThreadLocalFromSession(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        String userName = (String) session.getAttribute("userName");
+        Long userID = (Long) session.getAttribute("userID");
+        Long accountID = (Long) session.getAttribute("accountID");
+        Integer accountType = (Integer) session.getAttribute("accountType");
+        Integer dayOfWeek = (Integer) session.getAttribute("dayOfWeek");
+        if (dayOfWeek == null) {
+            dayOfWeek = 1;
+        }
+        com.easyinsight.security.SecurityUtil.populateThreadLocal(userName, userID,
+                accountID, accountType, false, dayOfWeek, null);
     }
 
     public static void setSecurityProvider(ISecurityProvider securityProvider) {
