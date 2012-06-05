@@ -11,7 +11,7 @@
         ApplicationSkin applicationSkin = (ApplicationSkin) session.getAttribute("uiSettings");
         String headerStyle = "width:100%;overflow: hidden;padding: 10px;";
         String headerTextStyle = "width: 100%;text-align: center;font-size: 14px;padding-top: 10px;";
-        if (applicationSkin.isReportHeader()) {
+        if (applicationSkin != null && applicationSkin.isReportHeader()) {
             int reportBackgroundColor = applicationSkin.getReportBackgroundColor();
             headerStyle += "background-color: " + String.format("#%06X", (0xFFFFFF & reportBackgroundColor));
             headerTextStyle += "color: " + String.format("#%06X", (0xFFFFFF & applicationSkin.getReportTextColor()));
