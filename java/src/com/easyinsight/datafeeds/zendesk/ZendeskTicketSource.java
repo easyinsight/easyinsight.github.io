@@ -138,6 +138,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                     items.add(new AnalysisMeasure(customKey, title, AggregationTypes.SUM));
                 }
             }
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

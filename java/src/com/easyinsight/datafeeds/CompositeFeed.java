@@ -81,23 +81,6 @@ public class CompositeFeed extends Feed {
         return filters;
     }
 
-    private AnalysisItemResultMetadata findMetadataForComposite(DerivedKey derivedKey, AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
-        AnalysisItemResultMetadata metadata = null;
-        for (CompositeFeedNode compositeFeedNode : getCompositeFeedNodes()) {
-            if (compositeFeedNode.getDataFeedID() == derivedKey.getFeedID()) {
-                metadata = FeedRegistry.instance().getFeed(compositeFeedNode.getDataFeedID(), conn).getMetadata(analysisItem, insightRequestMetadata, conn);
-            }
-        }
-        if (metadata == null) {
-            Key parentKey = derivedKey.getParentKey();
-            if (parentKey instanceof DerivedKey) {
-                DerivedKey parentDerivedKey = (DerivedKey) parentKey;
-                metadata = findMetadataForComposite(parentDerivedKey, analysisItem, insightRequestMetadata, conn);
-            }
-        }
-        return metadata;
-    }
-
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
             return getDataSet(analysisItems, filters, insightRequestMetadata, conn);
@@ -492,6 +475,7 @@ public class CompositeFeed extends Feed {
                         FilterDefinition filter = filterMap.get(myConn);
                         if (filter != null) {
                             if (insightRequestMetadata.isOptimized()) {
+                                System.out.println("adding filter for " + sourceNode.dataSourceName);
                                 sourceNode.addFilter(filter);
                             }
                         }
@@ -507,7 +491,7 @@ public class CompositeFeed extends Feed {
                                 } else {
                                     targetNode = queryNodeMap.get(myConn.getSourceFeedID());
                                 }
-                                //System.out.println("defining filter between " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
+                                System.out.println("defining filter between " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
                                 FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, (CompositeFeedConnection) myConn);
                                 filterMap.put(myConn, joinFilter);
                             }
@@ -529,6 +513,7 @@ public class CompositeFeed extends Feed {
                     QueryData targetQueryData = map.get(targetNode.feedID);
                     boolean swapped = false;
                     if (last.connection.getSourceFeedID() != sourceNode.feedID) {
+                        System.out.println("Swapping " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
                         swapped = true;
                         QueryStateNode swap = sourceNode;
                         sourceNode = targetNode;
@@ -633,11 +618,20 @@ public class CompositeFeed extends Feed {
         }
         filterValueDefinition.setInclusive(true);
         if (connection.getSourceJoin() == null) {
-            filterValueDefinition.setFilteredValues(obtainValues(dataSet, connection.getSourceItem()));
+            filterValueDefinition.setFilteredValues(obtainValues(dataSet, findFieldForItem(sourceNode.neededItems, connection.getSourceItem())));
         } else {
             filterValueDefinition.setFilteredValues(obtainValues(dataSet, findFieldForKey(sourceNode.neededItems, connection.getSourceJoin(), sourceNode.feedID)));
         }
         return filterValueDefinition;
+    }
+
+    private AnalysisItem findFieldForItem(Collection<AnalysisItem> analysisItems, AnalysisItem matchItem) {
+        for (AnalysisItem item : analysisItems) {
+            if (item.getKey().toKeyString().equals(matchItem.getKey().toKeyString())) {
+                return item;
+            }
+        }
+        return null;
     }
 
     private List<Object> obtainValues(DataSet dataSet, AnalysisItem analysisItem) {

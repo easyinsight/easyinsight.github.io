@@ -35,10 +35,10 @@ public class AnalysisBasedFeed extends Feed {
         return feed.getFields();
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws ReportException {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
         Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
-        return feed.getMetadata(analysisItem, null, conn);
+        return feed.getMetadata(analysisItem, null, conn, report);
     }
 
     @Override

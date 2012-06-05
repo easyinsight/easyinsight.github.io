@@ -37,8 +37,8 @@ public class RedirectFeed extends Feed implements Serializable {
     }
 
     @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
-        return FeedRegistry.instance().getFeed(redirectID, conn).getMetadata(analysisItem, insightRequestMetadata, conn);
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws ReportException {
+        return FeedRegistry.instance().getFeed(redirectID, conn).getMetadata(analysisItem, insightRequestMetadata, conn, report);
     }
 
     @Override

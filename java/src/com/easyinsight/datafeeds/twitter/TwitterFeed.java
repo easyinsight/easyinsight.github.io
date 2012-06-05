@@ -44,7 +44,7 @@ public class TwitterFeed extends Feed {
     private ArrayList<String> searches;
 
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws ReportException {
         if(dataSet == null)
             return null;
         if(Arrays.asList(TwitterDataSource.PUBLISHED, TwitterDataSource.UPDATED).contains(analysisItem.getKey().toKeyString())) {
