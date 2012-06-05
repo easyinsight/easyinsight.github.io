@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
          width="100%" borderStyle="none" xmlns:easyinsight="com.easyinsight.*" horizontalGap="0" verticalAlign="middle"
-        creationComplete="setup()" height="68">
+        creationComplete="setup()" height="68" implements="com.easyinsight.listing.IHeaderBar">
     <mx:Metadata>
         [Event(name="listingChange", type="com.easyinsight.listing.ListingChangeEvent")]
         [Event(name="launchQuickSearch", type="com.easyinsight.listing.LaunchQuickSearchEvent")]
