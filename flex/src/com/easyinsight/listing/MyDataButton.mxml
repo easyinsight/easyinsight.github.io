@@ -6,11 +6,13 @@
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.feedassembly.CompositeCreator;
+        import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.skin.ApplicationSkinWindow;
         import com.easyinsight.skin.HomeConfigWindow;
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
 
@@ -56,6 +58,11 @@
                 removeComposite.target = compositeFeedButton;
                 ops.push(removeComposite);
             }
+            if (!User.getInstance().analyst) {
+                var removeConfig:RemoveChild = new RemoveChild();
+                removeConfig.target = customizeButton;
+                ops.push(removeConfig);
+            }
             showState.overrides = ops;
             states = [ showState ];
             this.currentState = "buttonConfig";
@@ -72,17 +79,30 @@
             PopUpManager.addPopUp(applicationSkinWindow, this, true);
             PopUpUtil.centerPopUp(applicationSkinWindow);
         }
+
+        private function htmlView():void {
+            ProgressAlert.alert(this, "Saving preferences...", null, userService.switchHtmlFlex);
+            userService.switchHtmlFlex.send(true);
+        }
+
+        private function switched():void {
+            navigateToURL(new URLRequest("/app/html"), "_self");
+        }
         ]]></mx:Script>
     <mx:RemoteObject id="adminService" destination="admin">
         <mx:method name="getRecentActions" result="gotRecentActions()"/>
     </mx:RemoteObject>
+    <mx:RemoteObject id="userService" destination="login">
+        <mx:method name="switchHtmlFlex" result="switched()"/>
+    </mx:RemoteObject>
+    <mx:Button label="Switch to HTML View" click="htmlView()" labelPlacement="right" fontSize="12" styleName="grayButton" width="180"/>
     <mx:Button toolTip="Create composite data source..." click="createCompositeFeed()"
                id="compositeFeedButton" icon="{joinIcon}"
                label="Join Data Sources..." labelPlacement="right" fontSize="12" styleName="grayButton"
                width="180"/>
     <mx:Button toolTip="Customize Page..." click="customizeMyData()" icon="{configIcon}"
                label="Customize Page..." labelPlacement="right" fontSize="12" styleName="grayButton"
-               width="180"/>
+               width="180" id="customizeButton"/>
     <mx:HRule width="180"/>
     <mx:Label text="Recent Actions" fontSize="16" fontWeight="bold"/>
     <mx:List dataProvider="{recentActions}" backgroundAlpha="0" borderStyle="none" height="100%"
