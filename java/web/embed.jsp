@@ -8,16 +8,9 @@
     String width = request.getParameter("width");
     String height = request.getParameter("height");
     String reportID = request.getParameter("analysisID");
-        System.out.println("REPORT ID = " + reportID);
     String dataSourceID = request.getParameter("dataSourceID");
     String reportType = request.getParameter("reportType");
-        int type = Integer.parseInt(reportType);
-        String swf;
-        if (type == WSAnalysisDefinition.LIST) {
-            swf = "EmbeddedList";
-        } else {
-            swf = "EmbeddedInsight";
-        }
+        String swf = "EmbeddedInsight";
     String reportName = request.getParameter("reportName");
     String showToolbar = request.getParameter("showToolbar");
         String showFilters = request.getParameter("showFilters");
