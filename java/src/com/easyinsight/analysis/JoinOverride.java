@@ -1,10 +1,15 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
+import com.easyinsight.datafeeds.FeedStorage;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.SQLException;
 
 /**
  * User: jamesboe
@@ -40,6 +45,21 @@ public class JoinOverride implements Cloneable, Serializable {
 
     @Column(name="marmot_script")
     private String marmotScript;
+
+    public String toXML(XMLMetadata xmlMetadata) {
+        Element joinOverride = new Element("joinOverride");
+        Element sourceItem = new Element("sourceItem");
+        joinOverride.appendChild(sourceItem);
+        sourceItem.appendChild(sourceItem.toXML());
+        Element targetItem = new Element("targetItem");
+        joinOverride.appendChild(targetItem);
+        targetItem.appendChild(targetItem.toXML());
+        joinOverride.addAttribute(new Attribute("dataSourceID", xmlMetadata.urlKeyForDataSourceID(dataSourceID)));
+        Element marmotScript = new Element("marmotScript");
+        joinOverride.appendChild(marmotScript);
+        marmotScript.appendChild(this.marmotScript != null ? this.marmotScript : "");
+        return joinOverride.toXML();
+    }
 
     public String getMarmotScript() {
         return marmotScript;

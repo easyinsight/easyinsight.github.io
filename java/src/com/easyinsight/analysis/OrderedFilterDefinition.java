@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -39,11 +41,9 @@ public class OrderedFilterDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toXML() {
-        String xml = "<orderedFilter>";
-        xml += getField().toXML();
-        xml += "</orderedFilter>";
-        return xml;
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        return element;
     }
 
     @Override

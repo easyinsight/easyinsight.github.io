@@ -1,7 +1,9 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.pipeline.FirstValueComponent;
 import com.easyinsight.pipeline.IComponent;
+import nu.xom.Element;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -74,10 +76,8 @@ public class FirstValueFilter extends FilterDefinition {
     }
 
     @Override
-    public String toXML() {
-        String xml = "<firstValueFilter>";
-        xml += getField().toXML();
-        xml += "</firstValueFilter>";
-        return xml;
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        return element;
     }
 }

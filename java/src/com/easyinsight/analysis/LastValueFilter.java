@@ -1,7 +1,9 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.LastValueComponent;
+import nu.xom.Element;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -77,10 +79,8 @@ public class LastValueFilter extends FilterDefinition {
     }
 
     @Override
-    public String toXML() {
-        String xml = "<lastValueFilter>";
-        xml += getField().toXML();
-        xml += "</lastValueFilter>";
-        return xml;
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        return element;
     }
 }

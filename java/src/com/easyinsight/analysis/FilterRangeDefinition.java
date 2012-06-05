@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -46,11 +48,9 @@ public class FilterRangeDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toXML() {
-        String xml = "<rangeFilter>";
-        xml += getField().toXML();
-        xml += "</rangeFilter>";
-        return xml;
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        return element;
     }
 
     public boolean isCurrentStartValueDefined() {

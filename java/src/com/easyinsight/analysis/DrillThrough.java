@@ -1,6 +1,10 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.Dashboard;
+import com.easyinsight.dashboard.DashboardStorage;
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 import javax.persistence.*;
 import java.util.Map;
@@ -79,7 +83,17 @@ public class DrillThrough extends Link {
         }
     }
 
-    public String toXML() {
-        return "<drillThrough/>";
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("drillThrough");
+        element.addAttribute(new Attribute("miniWindow", String.valueOf(miniWindow)));
+        element.addAttribute(new Attribute("defaultLink", String.valueOf(isDefaultLink())));
+        element.addAttribute(new Attribute("codeGenerated", String.valueOf(isCodeGenerated())));
+        if (reportID != null) {
+            element.addAttribute(new Attribute("reportID", xmlMetadata.urlKeyForReportID(reportID)));
+        }
+        if (dashboardID != null) {
+            element.addAttribute(new Attribute("dashbordID", xmlMetadata.urlKeyForDashboardID(dashboardID)));
+        }
+        return element;
     }
 }

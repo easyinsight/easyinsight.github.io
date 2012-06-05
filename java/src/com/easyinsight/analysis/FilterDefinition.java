@@ -1,9 +1,13 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.pipeline.FilterComponent;
 import com.easyinsight.pipeline.IComponent;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -21,6 +25,23 @@ import java.util.*;
 @Table(name="filter")
 @Inheritance(strategy= InheritanceType.JOINED)
 public class FilterDefinition implements Serializable, Cloneable {
+
+    public static final int VALUE = 1;
+    public static final int RANGE = 2;
+    public static final int DATE = 3;
+    public static final int ROLLING_DATE = 4;
+    public static final int LAST_VALUE = 5;
+    public static final int PATTERN = 6;
+    public static final int FIRST_VALUE = 7;
+    public static final int ORDERED = 8;
+    public static final int OR = 9;
+    public static final int NULL = 10;
+    public static final int NAMED_REF = 11;
+    public static final int FLAT_DATE = 12;
+    public static final int ANALYSIS_ITEM = 13;
+    public static final int MULTI_FLAT_DATE = 14;
+    public static final int MONTH_CUTOFF = 15;
+    
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem field;
@@ -52,6 +73,10 @@ public class FilterDefinition implements Serializable, Cloneable {
     private boolean trendFilter;
 
     public FilterDefinition() {
+    }
+
+    public int type() {
+        return 0;
     }
 
     public boolean isTrendFilter() {
@@ -238,8 +263,42 @@ public class FilterDefinition implements Serializable, Cloneable {
         return components;
     }
 
-    public String toXML() {
-        throw new UnsupportedOperationException();
+    public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+
+    }
+
+    public static FilterDefinition fromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        int filterType = Integer.parseInt(element.getAttribute("type").getValue());
+        FilterDefinition filterDefinition;
+        switch (filterType) {
+            case FilterDefinition.VALUE:
+                filterDefinition = new FilterValueDefinition();
+                break;
+            default:
+                throw new RuntimeException();
+        }
+        filterDefinition.customFromXML(element, xmlImportMetadata);
+        return filterDefinition;
+    }
+
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element filterElement = new Element("filter");
+        filterElement.addAttribute(new Attribute("type", String.valueOf(type())));
+        filterElement.addAttribute(new Attribute("enabled", String.valueOf(enabled)));
+        filterElement.addAttribute(new Attribute("applyBeforeAggregation", String.valueOf(applyBeforeAggregation)));
+        filterElement.addAttribute(new Attribute("intrinsic", String.valueOf(intrinsic)));
+        filterElement.addAttribute(new Attribute("showOnReportView", String.valueOf(showOnReportView)));
+        filterElement.addAttribute(new Attribute("templateFilter", String.valueOf(templateFilter)));
+        filterElement.addAttribute(new Attribute("toggleEnabled", String.valueOf(toggleEnabled)));
+        filterElement.addAttribute(new Attribute("trendFilter", String.valueOf(trendFilter)));
+        filterElement.addAttribute(new Attribute("minimumRole", String.valueOf(minimumRole)));
+        filterElement.addAttribute(new Attribute("filterName", filterName));
+        if (getField() != null) {
+            Element fieldElement = new Element("field");
+            filterElement.appendChild(fieldElement);
+            fieldElement.appendChild(getField().toXML(xmlMetadata));
+        }
+        return filterElement;
     }
 
     public void timeshift(Feed dataSource, Collection<FilterDefinition> filters) {
@@ -254,5 +313,28 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     public void calculationItems(Map<String, List<AnalysisItem>> map) {
 
+    }
+
+    public String toHTML(WSAnalysisDefinition report) {
+        if (!isToggleEnabled()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("<div>");
+            sb.append("<input type=\"checkbox\" id=\"filter"+getFilterID()+"enabled\" onchange=\"filterEnable('filter"+getFilterID()+"')\" checked=\"on\"/>");
+            sb.append(label());
+            sb.append("</div>");
+            return sb.toString();
+        } else {
+            return "";
+        }
+    }
+
+    public String label() {
+        if (getFilterName() != null && !"".equals(getFilterName())) {
+            return getFilterName() + ":";
+        }
+        if (getField() != null) {
+            return getField().toDisplay() + ":";
+        }
+        return "";
     }
 }

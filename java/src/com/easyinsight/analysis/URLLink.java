@@ -1,7 +1,8 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.Key;
-import com.easyinsight.calculations.Resolver;
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -63,7 +64,13 @@ public class URLLink extends Link {
     }
 
     @Override
-    public String toXML() {
-        return "<urlLink url=\""+url + "\"/>";
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("urlLink");
+        element.addAttribute(new Attribute("defaultLink", String.valueOf(isDefaultLink())));
+        element.addAttribute(new Attribute("codeGenerated", String.valueOf(isCodeGenerated())));
+        Element url = new Element("url");
+        element.appendChild(url);
+        url.appendChild(getUrl());
+        return element;
     }
 }

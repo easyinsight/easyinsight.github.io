@@ -1,5 +1,10 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.Value;
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Column;
@@ -129,10 +134,89 @@ public class RollingFilterDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toXML() {
-        String xml = "<rollingFilter>";
-        xml += getField().toXML();
-        xml += "</rollingFilter>";
-        return xml;
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("interval", String.valueOf(interval)));
+        return element;
+    }
+
+    @Override
+    public String toHTML(WSAnalysisDefinition report) {
+        StringBuilder sb = new StringBuilder();
+        String filterName = "filter"+getFilterID();
+        String onChange = "changeRolling"+getFilterID()+"();updateRollingFilter('filter" + getFilterID() + "')";
+        String customOnChange = "updateRollingFilter(\\'filter" + getFilterID() + "\\')";
+        sb.append("<script type=\"text/javascript\">\n");
+        sb.append("function changeRolling"+getFilterID()+"() {");
+        sb.append("var menu = document.getElementById('" + filterName + "');");
+        sb.append("if (menu.value == '" + MaterializedRollingFilterDefinition.CUSTOM + "') {");
+        String direction = "<select style=\"margin-left:10px;width:80px\" onchange=\""+customOnChange+"\" id=\"customDirection" + filterName + "\">" +
+                "<option value=\""+RollingFilterDefinition.LAST+"\">Last</option>" +
+                "<option value=\""+RollingFilterDefinition.NEXT+"\">Next</option>" +
+                "<option value=\""+RollingFilterDefinition.BEFORE+"\">Before</option>" +
+                "<option value=\""+RollingFilterDefinition.AFTER+"\">After</option>" +
+                "</select>";
+        direction = addSelected(direction, String.valueOf(getCustomBeforeOrAfter()));
+        String intervalAmount = "<select style=\"margin-left:10px;width:80px\" onchange=\""+customOnChange + "\" id=\"customInterval" + filterName + "\">" +
+                "<option value=\"2\">Days</option>" +
+                "<option value=\"3\">Weeks</option>" +
+                "<option value=\"4\">Months</option>" +
+                "<option value=\"5\">Years</option></select>";
+        intervalAmount = addSelected(intervalAmount, String.valueOf(getCustomIntervalType()));
+        String customOptionHTML = direction +
+                "<input style=\"margin-left:10px;width:50px;height:28px\" onchange=\""+customOnChange +"\" type=\"text\" id=\"customValue" + filterName + "\" value=\""+getCustomIntervalAmount()+"\"/>" +
+                intervalAmount;
+        sb.append("$('#rolling"+getFilterID()+"')").append(".html('"+customOptionHTML+"');");
+        sb.append("} else {");
+        sb.append("$('#rolling"+getFilterID()+"')").append(".html('');");
+        sb.append("}");
+        sb.append("}");
+        sb.append("</script>");
+        sb.append("<div>");
+        sb.append("<select style=\"width:130px\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
+        StringBuilder optionBuilder = new StringBuilder();
+        optionBuilder.append("<option value=\"19\">All</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.DAY+"\">Last Day</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.WEEK+"\">Last 7 Days</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.MONTH+"\">Last 30 Days</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.QUARTER+"\">Last 90 Days</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.YEAR+"\">Last 365 Days</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.DAY_TO_NOW+"\">Today</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.WEEK_TO_NOW+"\">Week to Date</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.MONTH_TO_NOW+"\">Month to Date</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.QUARTER_TO_NOW+"\">Quarter to Date</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.YEAR_TO_NOW+"\">Year to Date</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.LAST_FULL_DAY+"\">Last Full Day</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.LAST_FULL_WEEK+"\">Last Full Week</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.LAST_FULL_MONTH+"\">Last Full Month</option>");
+        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.CUSTOM+"\">Custom</option>");
+        optionBuilder.append("</select>");
+        sb.append(addSelected(optionBuilder.toString(), String.valueOf(getInterval())));
+        sb.append("<div style=\"float:right\" id=\"rolling"+getFilterID()+"\">");
+        sb.append("</div>");
+        sb.append("<script type=\"text/javascript\">\n");
+        sb.append("$(document).ready(changeRolling"+getFilterID()+"());\n");
+        sb.append("</script>");
+        sb.append("</div>");
+        return sb.toString();
+    }
+
+    private String addSelected(String string, String value) {
+        boolean found = true;
+        int startIndex = 0;
+        do {
+            int optionIndex = string.indexOf("value=\"", startIndex);
+            if (optionIndex == -1) {
+                found = false;
+            } else {
+                startIndex = optionIndex + 1;
+                int closeParanIndex = string.indexOf("\"", startIndex + 6);
+                String valueString = string.substring(startIndex + 6, closeParanIndex);
+                if (value.equals(valueString)) {
+                    return string.substring(0, closeParanIndex + 1) + " selected=\"selected\" " + string.substring(closeParanIndex + 1);
+                }
+            }
+        } while (found);
+        return string;
     }
 }

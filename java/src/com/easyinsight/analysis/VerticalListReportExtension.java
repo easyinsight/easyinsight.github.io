@@ -1,9 +1,12 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 /**
  * User: jamesboe
@@ -15,6 +18,13 @@ import javax.persistence.Transient;
 public class VerticalListReportExtension extends ReportFieldExtension {
     @Column(name="line_above")
     private boolean lineAbove;
+
+    @Override
+    public String toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("verticalListReportFieldExtension");
+        element.addAttribute(new Attribute("lineAbove", String.valueOf(lineAbove)));
+        return element.toXML();
+    }
 
     public boolean isLineAbove() {
         return lineAbove;

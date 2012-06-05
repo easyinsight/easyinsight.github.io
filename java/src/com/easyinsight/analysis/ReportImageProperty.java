@@ -1,6 +1,8 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.preferences.ImageDescriptor;
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -57,5 +59,13 @@ public class ReportImageProperty extends ReportProperty {
         imageDescriptor.setId(imageID);
         imageDescriptor.setName(imageName);
         return imageDescriptor;
+    }
+
+    @Override
+    public Element toXML() {
+        Element element = new Element("reportImageProperty");
+        element.addAttribute(new Attribute("propertyName", getPropertyName()));
+        element.appendChild(String.valueOf(imageID));
+        return element;
     }
 }

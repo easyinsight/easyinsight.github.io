@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -48,5 +49,9 @@ public class ReportFieldExtension implements Cloneable, Serializable {
 
     public void updateIDs(ReplacementMap replacementMap) {
 
+    }
+
+    public String toXML(XMLMetadata xmlMetadata) {
+        return null;
     }
 }

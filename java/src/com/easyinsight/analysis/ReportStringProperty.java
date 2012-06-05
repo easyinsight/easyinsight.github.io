@@ -1,5 +1,8 @@
 package com.easyinsight.analysis;
 
+import nu.xom.Attribute;
+import nu.xom.Element;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -42,5 +45,13 @@ public class ReportStringProperty extends ReportProperty {
         if (value == null) {
             value = "";
         }
+    }
+
+    @Override
+    public Element toXML() {
+        Element element = new Element("reportStringProperty");
+        element.addAttribute(new Attribute("propertyName", getPropertyName()));
+        element.appendChild(value);
+        return element;
     }
 }

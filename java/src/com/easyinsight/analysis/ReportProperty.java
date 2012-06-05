@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import nu.xom.Element;
+
 import javax.persistence.*;
 
 /**
@@ -59,5 +61,9 @@ public class ReportProperty implements Cloneable {
 
     public void cleanup() {
 
+    }
+
+    public Element toXML() {
+        return null;
     }
 }

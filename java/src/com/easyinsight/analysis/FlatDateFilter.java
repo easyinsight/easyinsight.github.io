@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -65,5 +66,37 @@ public class FlatDateFilter extends FilterDefinition {
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         preparedStatement.setInt(start++, value);
         return start;
+    }
+
+    @Override
+    public String toHTML(WSAnalysisDefinition report) {
+        StringBuilder sb = new StringBuilder();
+        String filterName = "filter"+getFilterID();
+        String onChange = "updateFilter('filter" + getFilterID() + "')";
+        sb.append(label());
+        sb.append("<select id=\"").append(filterName).append("\" onchange=\"").append(onChange).append("\">");
+        AnalysisDateDimensionResultMetadata metadata = (AnalysisDateDimensionResultMetadata) new DataService().getAnalysisItemMetadata(report.getDataFeedID(), getField(), 0, 0, 0, report);
+        Date earliestDate = metadata.getEarliestDate();
+        Date latestDate = metadata.getEarliestDate();
+        Calendar cal = Calendar.getInstance();
+
+        cal.setTime(earliestDate);
+        int startYear = cal.get(Calendar.YEAR);
+        cal.setTime(latestDate);
+        int endYear = cal.get(Calendar.YEAR);
+        List<String> stringList = new ArrayList<String>();
+        for (int i = startYear; i <= endYear; i++) {
+            stringList.add(String.valueOf(i));
+        }
+
+        for (String value : stringList) {
+            if (value.equals(String.valueOf(value))) {
+                sb.append("<option selected=\"selected\">").append(value).append("</option>");
+            } else {
+                sb.append("<option>").append(value).append("</option>");
+            }
+        }
+        sb.append("</select>");
+        return sb.toString();
     }
 }

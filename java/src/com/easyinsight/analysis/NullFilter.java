@@ -1,15 +1,13 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.pipeline.FirstValueComponent;
-import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Element;
 
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * User: jamesboe
@@ -36,11 +34,9 @@ public class NullFilter extends FilterDefinition {
     }
 
     @Override
-    public String toXML() {
-        String xml = "<nullFilter>";
-        xml += getField().toXML();
-        xml += "</nullFilter>";
-        return xml;
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        return element;
     }
 
     @Override

@@ -1,5 +1,8 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Element;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -36,10 +39,8 @@ public class LastNFilterDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toXML() {
-        String xml = "<lastNFilter>";
-        xml += getField().toXML();
-        xml += "</lastNFilter>";
-        return xml;
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        return element;
     }
 }

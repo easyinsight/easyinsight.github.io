@@ -1,5 +1,10 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 
 import javax.persistence.Entity;
@@ -58,11 +63,18 @@ public class FilterPatternDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toXML() {
-        String xml = "<patternFilter>";
-        xml += getField().toXML();
-        xml += "</patternFilter>";
-        return xml;
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("regularExpression", String.valueOf(regex)));
+        element.addAttribute(new Attribute("caseSensitive", String.valueOf(caseSensitive)));
+        element.appendChild(pattern);
+        return element;
+    }
+
+    public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        setRegex(Boolean.parseBoolean(element.getAttribute("regularExpression").getValue()));
+        setCaseSensitive(Boolean.parseBoolean(element.getAttribute("caseSensitive").getValue()));
+        pattern = element.getValue();
     }
 
     public String getPattern() {

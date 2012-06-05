@@ -1,11 +1,15 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.pipeline.DateRangePluginComponent;
 import com.easyinsight.pipeline.IComponent;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -247,10 +251,23 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toXML() {
-        String xml = "<dateRangeFilter>";
-        xml += getField().toXML();
-        xml += "</dateRangeFilter>";
-        return xml;
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        return element;
+    }
+
+    @Override
+    public String toHTML(WSAnalysisDefinition report) {
+        StringBuilder sb = new StringBuilder();
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        sb.append("<script type=\"text/javascript\">\n" +
+                "\t$(function() {\n" +
+                "\t\t$( \"#datepicker1\" ).datepicker();\n" +
+                "\t\t$( \"#datepicker2\" ).datepicker();\n" +
+                "\t});\n" +
+                "\t</script>");
+        sb.append("<div><input type=\"text\" id=\"datepicker1\" value=\"").append(df.format(getStartDate())).append("\"/>").
+                append("<input type=\"text\" id=\"datepicker2\" value=\"").append(df.format(getEndDate())).append("\"/></div>");
+        return sb.toString();
     }
 }

@@ -1,6 +1,9 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -308,10 +311,73 @@ public class FilterValueDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toXML() {
-        String xml = "<valueFilter>";
-        xml += getField().toXML();
-        xml += "</valueFilter>";
-        return xml;
+    public int type() {
+        return FilterDefinition.VALUE;
+    }
+
+    public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        setInclusive(Boolean.parseBoolean(element.getAttribute("inclusive").getValue()));
+        setSingleValue(Boolean.parseBoolean(element.getAttribute("singleValue").getValue()));
+        setAutoComplete(Boolean.parseBoolean(element.getAttribute("autoComplete").getValue()));
+        setAllOption(Boolean.parseBoolean(element.getAttribute("allOption").getValue()));
+        setExcludeEmpty(Boolean.parseBoolean(element.getAttribute("excludeEmpty").getValue()));
+        Nodes valueNodes = element.query("values/value/text()");
+        filteredValues = new ArrayList<Object>();
+        for (int i = 0; i < valueNodes.size(); i++) {
+            filteredValues.add(valueNodes.get(i).getValue());
+        }
+    }
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("inclusive", String.valueOf(inclusive)));
+        element.addAttribute(new Attribute("singleValue", String.valueOf(singleValue)));
+        element.addAttribute(new Attribute("autoComplete", String.valueOf(autoComplete)));
+        element.addAttribute(new Attribute("allOption", String.valueOf(allOption)));
+        element.addAttribute(new Attribute("excludeEmpty", String.valueOf(excludeEmpty)));
+        Element values = new Element("values");
+        element.appendChild(values);
+        for (Object valueObject : filteredValues) {
+            Element valueElement = new Element("value");
+            valueElement.appendChild(valueObject.toString());
+        }
+        // if@ualberta.com, 780-492-9120
+        return element;
+    }
+
+    @Override
+    public String toHTML(WSAnalysisDefinition report) {
+        StringBuilder sb = new StringBuilder();
+        String filterName = "filter"+getFilterID();
+        String onChange = "updateFilter('filter" + getFilterID() + "')";
+        sb.append(label());
+        sb.append("<select style=\"margin-left:5px;margin-top:5px;margin-right:5px\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
+        AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(report.getDataFeedID(), getField(), 0, 0, 0, report);
+        if (metadata.getReportFault() != null) {
+            return "";
+        }
+        AnalysisDimensionResultMetadata dimensionMetadata = (AnalysisDimensionResultMetadata) metadata;
+        List<String> stringList = new ArrayList<String>();
+        for (Value value : dimensionMetadata.getValues()) {
+            stringList.add(value.toString());
+        }
+        Collections.sort(stringList);
+        if (isAllOption()) {
+            stringList.add(0, "All");
+        }
+        if (isExcludeEmpty()) {
+            stringList.remove("");
+        }
+        String existingChoice = getFilteredValues().get(0).toString();
+        for (String value : stringList) {
+            if (value.equals(existingChoice)) {
+                sb.append("<option selected=\"selected\">").append(value).append("</option>");
+            } else {
+                sb.append("<option>").append(value).append("</option>");
+            }
+        }
+        sb.append("</select>");
+        return sb.toString();
     }
 }

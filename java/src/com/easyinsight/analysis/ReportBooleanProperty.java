@@ -1,5 +1,8 @@
 package com.easyinsight.analysis;
 
+import nu.xom.Attribute;
+import nu.xom.Element;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -36,5 +39,13 @@ public class ReportBooleanProperty extends ReportProperty {
 
     public void setValue(boolean value) {
         this.value = value;
+    }
+
+    @Override
+    public Element toXML() {
+        Element element = new Element("reportBooleanProperty");
+        element.addAttribute(new Attribute("propertyName", getPropertyName()));
+        element.appendChild(String.valueOf(value));
+        return element;
     }
 }

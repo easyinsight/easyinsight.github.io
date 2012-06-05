@@ -1,5 +1,8 @@
 package com.easyinsight.analysis;
 
+import nu.xom.Attribute;
+import nu.xom.Element;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.text.NumberFormat;
@@ -80,6 +83,12 @@ public class FormattingConfiguration implements Serializable, Cloneable {
 
     public void setTextUom(String textUom) {
         this.textUom = textUom;
+    }
+
+    public Element toXML() {
+        Element element = new Element("formattingConfiguration");
+        element.addAttribute(new Attribute("formattingType", String.valueOf(formattingType)));
+        return element;
     }
 
     class PercentNumberFormat extends NumberFormat {

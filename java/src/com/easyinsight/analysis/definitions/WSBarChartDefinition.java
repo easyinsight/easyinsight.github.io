@@ -1,8 +1,14 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -84,5 +90,62 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         properties.add(new ReportStringProperty("columnSort", columnSort));
         properties.add(new ReportStringProperty("axisType", columnSort));
         return properties;
+    }
+
+    @Override
+    public String javaScriptIncludes() {
+        return "<script type=\"text/javascript\" src=\"/js/jquery.jqplot.min.js\"></script>\n" +
+                "    <script type=\"text/javascript\" src=\"/js/plugins/jqplot.barRenderer.min.js\"></script>\n" +
+                "    <script type=\"text/javascript\" src=\"/js/plugins/jqplot.categoryAxisRenderer.min.js\"></script>\n" +
+                "    <script type=\"text/javascript\" src=\"/js//plugins/jqplot.pointLabels.min.js\"></script>\n" +
+                "    <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery.jqplot.min.css\" />";
+    }
+
+    @Override
+    public String toHTML(String targetDiv) {
+        String color;
+        if (useChartColor) {
+            color = String.format("#%06X", (0xFFFFFF & chartColor));
+        } else {
+            color = "#FF0000";
+        }
+
+        JSONObject params;
+        try {
+            Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
+            jsonParams.put("seriesColors", new JSONArray(Arrays.asList("'" + color + "'")));
+            JSONObject seriesDefaults = new JSONObject();
+            seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
+            JSONObject rendererOptions = new JSONObject();
+            rendererOptions.put("fillToZero", "true");
+            rendererOptions.put("barDirection", "'horizontal'");
+            seriesDefaults.put("rendererOptions", rendererOptions);
+            jsonParams.put("seriesDefaults", seriesDefaults);
+            JSONObject grid = new JSONObject();
+            grid.put("background", "'#FFFFFF'");
+            jsonParams.put("grid", grid);
+            JSONObject axes = new JSONObject();
+            JSONObject xAxis = new JSONObject();
+            JSONObject tickOptions = new JSONObject();
+            tickOptions.put("formatString", "'%d'");
+            xAxis.put("tickOptions", tickOptions);
+            xAxis.put("pad", 1.05);
+            axes.put("xaxis", xAxis);
+            JSONObject yAxis = new JSONObject();
+            yAxis.put("renderer", "$.jqplot.CategoryAxisRenderer");
+            //yAxis.put("ticks", "data['ticks']");
+            axes.put("yaxis", yAxis);
+            jsonParams.put("axes", axes);
+            params = new JSONObject(jsonParams);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        String argh = params.toString();
+        argh = argh.replaceAll("\"", "");
+
+
+        return "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+"&'+ strParams, function(data) {\n" +
+                "                var s1 = data[\"values\"];\n" +
+                "                var plot1 = $.jqplot('"+targetDiv+"', [s1], " + argh + ");afterRefresh();\n})";
     }
 }

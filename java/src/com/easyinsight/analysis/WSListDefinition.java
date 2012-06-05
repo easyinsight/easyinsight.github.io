@@ -32,6 +32,15 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private int summaryRowBackgroundColor;
     private String defaultColumnAlignment;
     private boolean rolloverIcon;
+    private boolean multiLineHeaders;
+
+    public boolean isMultiLineHeaders() {
+        return multiLineHeaders;
+    }
+
+    public void setMultiLineHeaders(boolean multiLineHeaders) {
+        this.multiLineHeaders = multiLineHeaders;
+    }
 
     public boolean isRolloverIcon() {
         return rolloverIcon;
@@ -216,6 +225,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         summaryRowTextColor = (int) findNumberProperty(properties, "summaryRowTextColor", 0x000000);
         summaryRowBackgroundColor = (int) findNumberProperty(properties, "summaryRowBackgroundColor", 0x6699ff);
         rolloverIcon = findBooleanProperty(properties, "rolloverIcon", false);
+        multiLineHeaders = findBooleanProperty(properties, "multiLineHeaders", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -229,6 +239,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("summaryRowTextColor", summaryRowTextColor));
         properties.add(new ReportNumericProperty("summaryRowBackgroundColor", summaryRowBackgroundColor));
         properties.add(new ReportBooleanProperty("rolloverIcon", rolloverIcon));
+        properties.add(new ReportBooleanProperty("multiLineHeaders", multiLineHeaders));
         return properties;
     }
 

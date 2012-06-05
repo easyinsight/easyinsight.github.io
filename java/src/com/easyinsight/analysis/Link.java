@@ -1,6 +1,8 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.Dashboard;
+import nu.xom.Element;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -94,7 +96,7 @@ public class Link implements Cloneable, Serializable {
         
     }
 
-    public String toXML() {
+    public Element toXML(XMLMetadata xmlMetadata) {
         return null;
     }
 }

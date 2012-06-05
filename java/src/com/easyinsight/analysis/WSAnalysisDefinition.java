@@ -794,4 +794,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         return allItems;
     }
+
+    public String javaScriptIncludes() {
+        return "";
+    }
+
+    public String toHTML(String targetDiv) {
+        return "$.get('/app/htmlExport?reportID="+getAnalysisID()+"&'+ strParams, function(data) {\n" +
+                "                $('#"+targetDiv+"').html(data)\nafterRefresh();\n" +
+                "            });";
+    }
 }

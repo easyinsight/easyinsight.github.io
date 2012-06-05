@@ -1,6 +1,8 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -124,8 +126,9 @@ public class OrFilter extends FilterDefinition {
     }
 
     @Override
-    public String toXML() {
-        return "";
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        return element;
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {

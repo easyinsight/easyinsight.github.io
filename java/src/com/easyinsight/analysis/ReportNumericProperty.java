@@ -1,5 +1,8 @@
 package com.easyinsight.analysis;
 
+import nu.xom.Attribute;
+import nu.xom.Element;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -41,5 +44,13 @@ public class ReportNumericProperty extends ReportProperty {
         if (Double.isNaN(value) || Double.isInfinite(value)) {
             value = 0;
         }
+    }
+
+    @Override
+    public Element toXML() {
+        Element element = new Element("reportNumericProperty");
+        element.addAttribute(new Attribute("propertyName", getPropertyName()));
+        element.appendChild(String.valueOf(value));
+        return element;
     }
 }

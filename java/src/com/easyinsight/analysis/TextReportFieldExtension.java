@@ -1,5 +1,9 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -25,6 +29,17 @@ public class TextReportFieldExtension extends ReportFieldExtension {
 
     @Column(name="sortable")
     private boolean sortable = true;
+
+    @Override
+    public String toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("textReportFieldExtension");
+        element.addAttribute(new Attribute("align", align));
+        element.addAttribute(new Attribute("size", String.valueOf(size)));
+        element.addAttribute(new Attribute("size", String.valueOf(fixedWidth)));
+        element.addAttribute(new Attribute("size", String.valueOf(wordWrap)));
+        element.addAttribute(new Attribute("size", String.valueOf(sortable)));
+        return element.toXML();
+    }
 
     public boolean isSortable() {
         return sortable;

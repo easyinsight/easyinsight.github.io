@@ -1,15 +1,17 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.Value;
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
+import nu.xom.Element;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -138,5 +140,43 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
             analysisItems.add(targetItem);
         }
         return analysisItems;
+    }
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        Element targetItemXML = targetItem.toXML(xmlMetadata);
+        element.appendChild(targetItemXML);
+        Element availableItemsElement = new Element("availableItems");
+        element.appendChild(availableItemsElement);
+        for (AnalysisItem analysisItem : availableItems) {
+            availableItemsElement.appendChild(analysisItem.toXML(xmlMetadata));
+        }
+        return element;
+    }
+
+    public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        Nodes nodes = element.query("availableItems/");
+        for (int i = 0; i < nodes.size(); i++) {
+
+        }
+    }
+
+    @Override
+    public String toHTML(WSAnalysisDefinition report) {
+        StringBuilder sb = new StringBuilder();
+        String filterName = "filter"+getFilterID();
+        String onChange = "updateFilter('filter" + getFilterID() + "')";
+        sb.append(label());
+        sb.append("<select id=\""+filterName+"\" onchange=\""+onChange+"\">");
+        for (AnalysisItem analysisItem : getAvailableItems()) {
+            if (availableItems.equals(targetItem)) {
+                sb.append("<option selected=\"selected\" value=\""+analysisItem.getAnalysisItemID()+"\">").append(analysisItem.toDisplay()).append("</option>");
+            } else {
+                sb.append("<option value=\""+analysisItem.getAnalysisItemID()+"\">").append(analysisItem.toDisplay()).append("</option>");
+            }
+        }
+        sb.append("</select>");
+        return sb.toString();
     }
 }

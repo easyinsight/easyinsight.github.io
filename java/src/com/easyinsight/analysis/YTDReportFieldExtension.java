@@ -1,6 +1,9 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -20,6 +23,17 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
 
     @Column(name="line_above")
     private boolean lineAbove;
+
+    @Override
+    public String toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("ytdReportFieldExtension");
+        element.addAttribute(new Attribute("lineAbove", String.valueOf(lineAbove)));
+        if (benchmark != null) {
+            Element benchmark = new Element("benchmark");
+            benchmark.appendChild(benchmark.toXML());
+        }
+        return element.toXML();
+    }
 
     public boolean isLineAbove() {
         return lineAbove;
