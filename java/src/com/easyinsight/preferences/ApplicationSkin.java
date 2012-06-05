@@ -3,6 +3,7 @@ package com.easyinsight.preferences;
 import com.easyinsight.analysis.*;
 import com.easyinsight.logging.LogClass;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  * Date: Nov 17, 2010
  * Time: 10:26:46 PM
  */
-public class ApplicationSkin {
+public class ApplicationSkin implements Serializable {
     
     public static final int APPLICATION = 1;
     public static final int ACCOUNT = 2;
