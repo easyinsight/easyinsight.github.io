@@ -106,8 +106,8 @@ public class Account {
     @Column(name="billing_information_given")
     private Boolean billingInformationGiven;
     
-    /*@Column(name="billing_failures")
-    private int billingFailures;*/
+    @Column(name="billing_failures")
+    private int billingFailures;
 
     @Column(name="marketplace_enabled")
     private boolean marketplaceEnabled;
@@ -188,13 +188,13 @@ public class Account {
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
 
-    /*public int getBillingFailures() {
+    public int getBillingFailures() {
         return billingFailures;
     }
 
     public void setBillingFailures(int billingFailures) {
         this.billingFailures = billingFailures;
-    }*/
+    }
 
     public int getPricingModel() {
         return pricingModel;
@@ -587,11 +587,16 @@ public class Account {
         }
         boolean successful;
         if(!params.get("response").equals("1")) {
-            setAccountState(Account.DELINQUENT);
+            if (getBillingFailures() >= 7) {
+                setAccountState(Account.BILLING_FAILED);
+            } else {
+                billingFailures++;
+            }
             LogClass.info("Billing failed!");
             successful = false;
         }
         else {
+            billingFailures = 0;
             LogClass.info("Success!");
             successful = true;
         }
@@ -615,13 +620,28 @@ public class Account {
                 }
             }
         } else {
-            String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information to resume service.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
-            for (User user : getUsers()) {
-                if (user.isInvoiceRecipient()) {
-                    try {
-                        new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
-                    } catch (Exception e) {
-                        LogClass.error(e);
+            if (accountState == Account.BILLING_FAILED) {
+                String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information to resume service.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
+                for (User user : getUsers()) {
+                    if (user.isInvoiceRecipient()) {
+                        try {
+                            new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
+                        } catch (Exception e) {
+                            LogClass.error(e);
+                        }
+                    }
+                }
+            } else {
+                if (billingFailures == 1) {
+                    String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information within the next seven days.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
+                    for (User user : getUsers()) {
+                        if (user.isInvoiceRecipient()) {
+                            try {
+                                new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
+                            } catch (Exception e) {
+                                LogClass.error(e);
+                            }
+                        }
                     }
                 }
             }
@@ -682,7 +702,7 @@ public class Account {
     public String billingIntroParagraph() {
         if (accountState == Account.TRIAL) {
             return "Please input your billing information below. Your first billing cycle will start upon completion of any remaining trial time. Easy Insight does not offer any type of refund after billing.";    
-        } else if (accountState == Account.DELINQUENT || accountState == Account.CLOSING || accountState == Account.CLOSED) {
+        } else if (accountState == Account.DELINQUENT || accountState == Account.CLOSING || accountState == Account.CLOSED || accountState == Account.BILLING_FAILED) {
             return "Please input your billing information below. Your card will be billed upon submit. Easy Insight does not offer any type of refund after billing.";
         } else if (accountState == Account.ACTIVE) {
             return "Please input your updated billing information below. The new card will be billed as per your normal billing cycle. Easy Insight does not offer any type of refund after billing.";

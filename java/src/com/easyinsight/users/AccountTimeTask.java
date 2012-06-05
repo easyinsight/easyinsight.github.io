@@ -18,7 +18,7 @@ import java.util.Date;
 @PrimaryKeyJoinColumn(name="scheduled_task_id")
 public class AccountTimeTask extends ScheduledTask {
     protected void execute(Date now, EIConnection conn) throws Exception {
-        new AccountActivityStorage().updateAccountTimes(now, conn);
-        new AccountActivityStorage().executeSalesEmails(conn);
+        //new AccountActivityStorage().updateAccountTimes(now, conn);
+        //new AccountActivityStorage().executeSalesEmails(conn);
     }
 }

@@ -1,10 +1,16 @@
 package com.easyinsight.users;
 
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.util.RandomTextGenerator;
 import org.jetbrains.annotations.Nullable;
 import org.hibernate.Session;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -14,6 +20,48 @@ import java.util.ArrayList;
  * Time: 1:04:33 PM
  */
 public class InternalUserService {
+
+    public User validateCookie(String cookie, String userName, EIConnection conn, Session session) throws SQLException {
+
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.USER_ID FROM USER_SESSION, USER WHERE USER_SESSION.user_id = user.user_id and " +
+                    "user_session.session_number = ? AND user.username = ?");
+            queryStmt.setString(1, cookie);
+            queryStmt.setString(2, userName);
+            ResultSet rs = queryStmt.executeQuery();
+            long userID = 0;
+            if (rs.next()) {
+                userID = rs.getLong(1);
+            }
+            queryStmt.close();
+        if (userID == 0) {
+            return null;
+        }
+        return (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+
+    }
+
+    public String createCookie(long userID) throws SQLException {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            return createCookie(userID, conn);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public String createCookie(long userID, EIConnection conn) throws SQLException {
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM USER_SESSION WHERE USER_ID = ?");
+        clearStmt.setLong(1, userID);
+        clearStmt.executeUpdate();
+        String sessionCookie = RandomTextGenerator.generateText(30);
+        PreparedStatement saveCookieStmt = conn.prepareStatement("INSERT INTO USER_SESSION (USER_ID, SESSION_NUMBER," +
+                "USER_SESSION_DATE) VALUES (?, ?, ?)");
+        saveCookieStmt.setLong(1, userID);
+        saveCookieStmt.setString(2, sessionCookie);
+        saveCookieStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+        saveCookieStmt.execute();
+        return sessionCookie;
+    }
     
     @Nullable
     public User retrieveUser(String userName) {

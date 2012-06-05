@@ -1,6 +1,7 @@
 package com.easyinsight.users;
 
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.groups.Group;
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.preferences.UserDLS;
@@ -727,6 +728,7 @@ public class UserAccountAdminService {
                 if (SecurityUtil.getAccountID() != user.getAccount().getAccountID()) {
                     throw new SecurityException();
                 }
+
                 session.delete(user);
             }
             PreparedStatement addUserToReportStmt = conn.prepareStatement("INSERT INTO USER_TO_ANALYSIS (USER_ID, ANALYSIS_ID, RELATIONSHIP_TYPE, OPEN) VALUES (?, ?, ?, ?)");
@@ -851,19 +853,20 @@ public class UserAccountAdminService {
             long size = qRS.getLong(1);
             long dataSourceID = qRS.getLong(2);
             int type = qRS.getInt(3);
+            if (type == FeedType.COMPOSITE.getType()) {
+                continue;
+            }
             boolean visible = qRS.getBoolean(4);
             long parentSourceID = qRS.getLong(5);
             String feedName = qRS.getString(6);
             DataSourceStats dataSourceStats = statsMap.get(dataSourceID);
             if (dataSourceStats == null) {
                 dataSourceStats = new DataSourceStats();
-                statsMap.put(dataSourceID, dataSourceStats);
             }
             dataSourceStats.setSize(size);
             dataSourceStats.setVisible(visible);
             dataSourceStats.setDataSourceID(dataSourceID);
-            dataSourceStats.setName(feedName);
-            statsMap.put(dataSourceID, dataSourceStats);
+            dataSourceStats.setName(feedName + " - " + dataSourceID);
             if (parentSourceID > 0) {
                 DataSourceStats parent = statsMap.get(parentSourceID);
                 if (parent == null) {
@@ -871,6 +874,8 @@ public class UserAccountAdminService {
                     statsMap.put(parentSourceID, parent);
                 }
                 parent.getChildStats().add(dataSourceStats);
+            } else {
+                statsMap.put(dataSourceID, dataSourceStats);
             }
         }
         List<DataSourceStats> statsList = new ArrayList<DataSourceStats>();

@@ -86,6 +86,12 @@ public class User {
     @JoinColumn (name="account_id")
     private Account account;
 
+    @Column(name="time_zone")
+    private int timezone;
+
+    @Column(name="html_or_flex")
+    private boolean htmlOrFlex;
+
     public User() {
     }
 
@@ -111,6 +117,22 @@ public class User {
         userTransferObject.setInvoiceRecipient(invoiceRecipient);
         userTransferObject.setAnalyst(analyst);
         return userTransferObject;
+    }
+
+    public int getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(int timezone) {
+        this.timezone = timezone;
+    }
+
+    public boolean isHtmlOrFlex() {
+        return htmlOrFlex;
+    }
+
+    public void setHtmlOrFlex(boolean htmlOrFlex) {
+        this.htmlOrFlex = htmlOrFlex;
     }
 
     public boolean isRefreshReports() {

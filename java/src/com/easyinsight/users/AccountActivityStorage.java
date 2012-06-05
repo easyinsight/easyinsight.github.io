@@ -119,27 +119,31 @@ public class AccountActivityStorage {
         return date;
     }
 
-    public void updateAccountTimes(Date date, Connection conn) {
+    /*public void updateAccountTimes(Date date, Connection conn) {
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT account_id, account_state, state_change_time from " +
-                    "account_timed_state where date(state_change_time) = ? order by state_change_time");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT account_id, account_state, state_change_time from account_timed_state");
             PreparedStatement updateAccountStmt = conn.prepareStatement("UPDATE account SET account_state = ? WHERE " +
                     "account_id = ?");
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
             cal.add(Calendar.DAY_OF_YEAR, -1);
-            queryStmt.setDate(1, new java.sql.Date(cal.getTimeInMillis()));
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long accountID = rs.getLong(1);
                 int accountType = rs.getInt(2);
-                updateAccountStmt.setInt(1, accountType);
-                updateAccountStmt.setLong(2, accountID);
-                updateAccountStmt.executeUpdate();
+                Date stateChangeTime = rs.getTimestamp(3);
+                Calendar stateCal = Calendar.getInstance();
+                stateCal.setTime(stateChangeTime);
+                if (stateCal.get(Calendar.YEAR) == cal.get(Calendar.YEAR) &&
+                        stateCal.get(Calendar.DAY_OF_YEAR) == cal.get(Calendar.DAY_OF_YEAR)) {
+                    updateAccountStmt.setInt(1, accountType);
+                    updateAccountStmt.setLong(2, accountID);
+                    updateAccountStmt.executeUpdate();
+                }
             }
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
+    }*/
 }

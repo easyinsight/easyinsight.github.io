@@ -34,6 +34,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import flex.messaging.FlexContext;
 
+import javax.servlet.http.HttpSession;
+
 
 /**
  * User: jboe
@@ -541,6 +543,45 @@ public class UserService {
         return (results.size() > 0);
     }
 
+    private UserInfo retrieveUser(long userID) {
+        try {
+            User user = null;
+            ApplicationSkin applicationSkin = null;
+            EIConnection conn = Database.instance().getConnection();
+            Session session = Database.instance().createSession(conn);
+            List results;
+            try {
+                conn.setAutoCommit(false);
+                results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
+                if (results.size() > 0) {
+                    user = (User) results.get(0);
+                    if (user.getPersonaID() != null) {
+                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, user.getAccount()));
+                    }
+                    user.setLastLoginDate(new Date());
+                    session.update(user);
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID());
+                }
+                session.flush();
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw new RuntimeException(e);
+            } finally {
+                conn.setAutoCommit(true);
+                session.close();
+                Database.closeConnection(conn);
+            }
+            UserInfo userInfo = new UserInfo();
+            userInfo.user = user;
+            userInfo.settings = applicationSkin;
+            return userInfo;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     private UserInfo retrieveUser() {
         long userID = SecurityUtil.getUserID();
         try {
@@ -793,14 +834,81 @@ public class UserService {
         String personaName;
     }
 
-    public UserServiceResponse isSessionLoggedIn() {
+    public LoginResponse isSessionLoggedIn() {
         UserPrincipal existing = (UserPrincipal) FlexContext.getFlexSession().getUserPrincipal();
         if (existing == null) {
+            HttpSession session = FlexContext.getHttpRequest().getSession();
+            if (session != null) {
+                Long userID = (Long) session.getAttribute("userID");
+                if (userID != null) {
+                    String random = RandomTextGenerator.generateText(40);
+                    session.setAttribute("establishID", random);
+                    UserInfo userInfo = retrieveUserNoSecurity(userID);
+                    User user = userInfo.user;
+                    return new LoginResponse(random, String.valueOf(userID), UserServiceResponse.createResponseWithUISettings(user, userInfo.settings, userInfo.personaName));
+                }
+            }
             return null;
         } else {
             UserInfo userInfo = retrieveUser();
             User user = userInfo.user;
-            return UserServiceResponse.createResponseWithUISettings(user, userInfo.settings, userInfo.personaName);
+            return new LoginResponse(UserServiceResponse.createResponseWithUISettings(user, userInfo.settings, userInfo.personaName));
+        }
+    }
+
+    public void switchHtmlFlex(boolean mode) {
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+            user.setHtmlOrFlex(mode);
+            session.update(user);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    private UserInfo retrieveUserNoSecurity(long userID) {
+        try {
+            User user = null;
+            ApplicationSkin applicationSkin = null;
+            EIConnection conn = Database.instance().getConnection();
+            Session session = Database.instance().createSession(conn);
+            List results;
+            try {
+                conn.setAutoCommit(false);
+                results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
+                if (results.size() > 0) {
+                    user = (User) results.get(0);
+                    if (user.getPersonaID() != null) {
+                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, user.getAccount()));
+                    }
+                    user.setLastLoginDate(new Date());
+                    session.update(user);
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID());
+                }
+                session.flush();
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw new RuntimeException(e);
+            } finally {
+                conn.setAutoCommit(true);
+                session.close();
+                Database.closeConnection(conn);
+            }
+            UserInfo userInfo = new UserInfo();
+            userInfo.user = user;
+            userInfo.settings = applicationSkin;
+            return userInfo;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -837,6 +945,35 @@ public class UserService {
             Database.closeConnection(conn);
         }
         return userServiceResponse;
+    }
+    
+    public UserServiceResponse htmlEstablish(String token, String userIDString) {
+        EIConnection conn = Database.instance().getConnection();
+        Session hibernateSession = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            UserServiceResponse userServiceResponse = null;
+            HttpSession session = FlexContext.getHttpRequest().getSession();
+            String establishID = (String) session.getAttribute("establishID");
+            if (userIDString.equals(establishID)) {
+                long userID = Long.parseLong(token);
+                List results = hibernateSession.createQuery("from User where userID = ?").setLong(0, userID).list();
+                if (results.size() > 0) {
+                    User user = (User) results.get(0);
+                    userServiceResponse = UserServiceResponse.createResponse(user, hibernateSession, conn);
+                }
+            }
+            hibernateSession.flush();
+            conn.commit();
+            return userServiceResponse;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            hibernateSession.close();
+            Database.closeConnection(conn);
+        }
     }
 
     public UserServiceResponse sessionCookieCheck(String cookie, String userName, boolean clearCookie) {
@@ -920,7 +1057,7 @@ public class UserService {
             if(results.size() > 0) {
                 User user = (User) results.get(0);
                 int state = user.getAccount().getAccountState();
-                delinquent = (state == Account.DELINQUENT || state == Account.CLOSED);
+                delinquent = (state == Account.DELINQUENT || state == Account.CLOSED || state == Account.BILLING_FAILED);
             }
         }
         finally {
