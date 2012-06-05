@@ -151,7 +151,7 @@
                     <li><a href="/app/html/reports/<%= report.getDataFeedID() %>">Reports and Dashboards</a></li>
                 </ul>
             </div>
-            <div class="btn-group pull-left">
+            <div class="nav-collapse btn-group pull-left">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
                     Export the Report
                     <span class="caret"></span>
@@ -161,7 +161,7 @@
                     <li><button class="btn" type="button" onclick="$('#emailReportWindow').modal(true, true, true)" style="padding:5px;margin:5px;width:150px">Email the Report</button></li>
                 </ul>
             </div>
-            <div class="btn-group pull-left">
+            <div class="nav-collapse btn-group pull-left">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
                     Refresh Data
                     <span class="caret"></span>
