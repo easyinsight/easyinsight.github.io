@@ -3,6 +3,7 @@ package com.easyinsight.admin;
 import com.easyinsight.analysis.*;
 import com.easyinsight.audit.*;
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -260,7 +261,9 @@ public class AdminService {
             if (rs.next()) {
                 long analysisID = rs.getLong(1);
                 AnalysisDefinition report = new AnalysisStorage().getPersistableReport(analysisID, session);
-                return report.toXML();
+                XMLMetadata xmlMetadata = new XMLMetadata();
+                xmlMetadata.setConn(conn);
+                return report.toXML(xmlMetadata);
             } else {
                 throw new RuntimeException("Couldn't find report " + urlKey);
             }
