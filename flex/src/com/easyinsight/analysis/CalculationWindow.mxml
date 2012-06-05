@@ -318,6 +318,9 @@
         protected var html:Boolean;
 
         [Bindable]
+        protected var dateApplyBeforeAggregation:Boolean = true;
+
+        [Bindable]
         protected var wordWrap:Boolean;
 
         public function higlight():void {
@@ -439,6 +442,9 @@
                             <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
                         </mx:ArrayCollection>
                     </util:SmartComboBox>
+                </mx:FormItem>
+                <mx:FormItem label="Apply Before Aggregation:">
+                    <mx:CheckBox id="dateApplyBeforeAggregationCheckbox" selected="{dateApplyBeforeAggregation}"/>
                 </mx:FormItem>
             </mx:Form>
             <mx:Form>

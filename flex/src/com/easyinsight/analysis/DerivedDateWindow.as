@@ -18,6 +18,7 @@ public class DerivedDateWindow extends CalculationWindow {
             calcText = derivedGrouping.derivationCode;
             calcName = derivedGrouping.display;
             dateLevel = derivedGrouping.dateLevel;
+            dateApplyBeforeAggregation = derivedGrouping.applyBeforeAggregation;
         } else {
             dateLevel = AnalysisItemTypes.DAY_LEVEL;
         }
@@ -45,6 +46,7 @@ public class DerivedDateWindow extends CalculationWindow {
         }
         derivedGrouping.dateLevel = int(dateBox.selectedItem.data);
         derivedGrouping.derivationCode = calculationInput.text;
+        derivedGrouping.applyBeforeAggregation = dateApplyBeforeAggregationCheckbox.selected;
         return derivedGrouping;
     }
 }
