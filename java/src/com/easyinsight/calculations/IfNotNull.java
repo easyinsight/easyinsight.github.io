@@ -10,11 +10,15 @@ import com.easyinsight.core.Value;
  */
 public class IfNotNull extends Function {
     public Value evaluate() {
-        for (int i = 0; i < params.size(); i += 2) {
-            Value v = params.get(i);
-            if (v.type() != Value.EMPTY && !"".equals(v.toString().trim())) {
-                return minusQuotes(params.get(i + 1));
+        try {
+            for (int i = 0; i < params.size(); i += 2) {
+                Value v = params.get(i);
+                if (v.type() != Value.EMPTY && !"".equals(v.toString().trim())) {
+                    return minusQuotes(params.get(i + 1));
+                }
             }
+        } catch (IndexOutOfBoundsException e) {
+            throw new FunctionException("The notnull() function requires an even number of parameters.");
         }
         return EmptyValue.EMPTY_VALUE;
     }
