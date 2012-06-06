@@ -1,0 +1,56 @@
+.signInBar {
+    text-align: left;
+    padding-top: 5px;
+    width: 400px;
+}
+
+#rememberMe {
+    text-align: left;
+    color: #666666;
+    font-size: 12px;
+}
+
+.signInBar > a {
+    color:#666666;
+}
+
+.signInBar > a:visited {
+    color:#666666;
+}
+
+.signInBar > a:hover {
+    color:#666666;
+}
+
+.signInBar > a:active {
+    color:#666666;
+}
+
+body {
+    width:100%;
+    text-align:center;
+    margin:0 auto;
+    background-color: #F2EDED;
+    font-family: 'Cabin',Arial,sans-serif;
+}
+
+.formArea {
+    position:absolute;
+    top:50%;
+    height:300px;
+    margin-top:150px;
+    background-image:url('login_background2.png');
+    background-repeat: no-repeat;
+    padding-top:10px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.formAreaP {
+    text-align: left;
+}
+
+.promptLabel {
+    font-weight: bold;
+    color: #333333;
+}
