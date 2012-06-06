@@ -4,9 +4,11 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -137,5 +139,58 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportNumericProperty("strokeWeight", strokeWeight));
         return properties;
+    }
+
+    @Override
+    public String javaScriptIncludes() {
+        return "<script type=\"text/javascript\" src=\"/js/jquery.jqplot.min.js\"></script>\n" +
+                "    <script type=\"text/javascript\" src=\"/js/plugins/jqplot.barRenderer.min.js\"></script>\n" +
+                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.dateAxisRenderer.min.js\"></script>\n"+
+                "    <script type=\"text/javascript\" src=\"/js//plugins/jqplot.pointLabels.min.js\"></script>\n" +
+                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasTextRenderer.min.js\"></script>\n" +
+                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasAxisTickRenderer.min.js\"></script>\n"+
+                "    <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery.jqplot.min.css\" />";
+    }
+
+    @Override
+    public String toHTML(String targetDiv) {
+
+        JSONObject params;
+        try {
+            Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
+
+            JSONObject seriesDefaults = new JSONObject();
+            //seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
+            //JSONObject rendererOptions = new JSONObject();
+            //rendererOptions.put("fillToZero", "true");
+            //seriesDefaults.put("rendererOptions", rendererOptions);
+            //jsonParams.put("seriesDefaults", seriesDefaults);
+            JSONObject grid = new JSONObject();
+            grid.put("background", "'#FFFFFF'");
+            jsonParams.put("grid", grid);
+            JSONObject axes = new JSONObject();
+            JSONObject xAxis = new JSONObject();
+            xAxis.put("renderer", "$.jqplot.DateAxisRenderer");
+            //JSONObject xAxisTicketOptions = new JSONObject();
+            //xAxis.put("tickOptions", xAxisTicketOptions);
+            axes.put("xaxis", xAxis);
+            //JSONObject yAxis = new JSONObject();
+            //JSONObject tickOptions = new JSONObject();
+            //tickOptions.put("formatString", "'%d'");
+            //yAxis.put("tickOptions", tickOptions);
+            //axes.put("yaxis", yAxis);
+            jsonParams.put("axes", axes);
+            params = new JSONObject(jsonParams);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        String argh = params.toString();
+        argh = argh.replaceAll("\"", "");
+
+        argh = "$.getJSON('/app/twoAxisChart?reportID="+getAnalysisID()+"&'+ strParams, function(data) {afterRefresh();\n" +
+                "                var s1 = data[\"values\"];\n" +
+                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");\n})";
+        System.out.println(argh);
+        return argh;
     }
 }

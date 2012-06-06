@@ -73,4 +73,39 @@ public class MultiFlatDateFilter extends FilterDefinition {
         return start;*/
         return start;
     }
+
+    @Override
+    public String toHTML(WSAnalysisDefinition report) {
+        StringBuilder sb = new StringBuilder();
+        String divID = "filter" + getFilterID() + "div";
+        sb.append("<div id=\"").append(divID).append("\" class=\"modal hide\">");
+        sb.append("<div class=\"modal-body\">");
+        sb.append("<div class=\"control-group\">");
+        sb.append("<label class=\"control-label\" for=\"multiSelect\">Available Values</label>");
+        sb.append("<div class=\"controls\">");
+        /*int size = Math.min(15, dimensionMetadata.getValues().size());
+        sb.append("<select multiple=\"multiple\" id=\"multiSelect\" size=\""+size+"\" style=\"width:400px\"");
+        for (Value value : dimensionMetadata.getValues()) {
+            if (filteredValues.contains(value)) {
+                sb.append("<option selected=\"selected\">").append(value).append("</option>");
+            } else {
+                sb.append("<option>").append(value).append("</option>");
+            }
+        }*/
+        sb.append("</select>");
+        sb.append("</div>");
+        sb.append("</div>");
+        sb.append("</div>");
+        sb.append("<div class=\"modal-footer\">\n" +
+                "        <button class=\"btn\" onclick=\"\">Send</button>\n" +
+                "        <button class=\"btn\" data-dismiss=\"modal\" type=\"button\">Cancel</button>\n" +
+                "    </div>");
+        sb.append("</div>");
+        sb.append("<div style=\"margin-left:5px;margin-top:8px;margin-right:5px\">");
+        if (!isToggleEnabled()) {
+            sb.append(checkboxHTML());
+        }
+        sb.append("<a href=\"#"+divID+"\" data-toggle=\"modal\">").append(label()).append("</a></div>");
+        return sb.toString();
+    }
 }

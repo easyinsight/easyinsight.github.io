@@ -7,7 +7,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
-    <link type="text/css" rel="stylesheet" media="screen" href="/app/login.css"/>
+    <link type="text/css" rel="stylesheet" media="screen" href="/css/login.css"/>
     <script type="text/javascript" src="/js/jquery.min.js"></script>
     <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <link href='https://fonts.googleapis.com/css?family=Cabin:regular,bold' rel='stylesheet' type='text/css'>

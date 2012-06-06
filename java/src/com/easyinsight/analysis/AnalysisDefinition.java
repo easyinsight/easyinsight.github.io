@@ -426,7 +426,7 @@ public class AnalysisDefinition implements Cloneable {
         Collection<AnalysisItem> reportItems = getReportStructure().values();
 
         AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure();
-        structure.setReport(this.createBlazeDefinition());
+        structure.setBaseReport(this);
 
         if (getAddedItems() != null) {
 

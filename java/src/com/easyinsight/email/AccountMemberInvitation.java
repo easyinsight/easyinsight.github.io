@@ -19,8 +19,7 @@ public class AccountMemberInvitation {
 
     private static final String resetPasswordText =
             "You are receiving this email because you have requested to reset your password.:\r\n\r\n" +
-            "To reset your password, use the following link:  https://www.easy-insight.com/app/#resetPassword={0}\r\n\r\n"+
-            "Or enter the value of {0} into Manually Enter Reset Key in the Forgot Password section of the login page on Easy Insight at https://www.easy-insight.com/app.\r\n\rn"+
+            "To reset your password, use the following link:  https://www.easy-insight.com/app/passwordReset/{0}\r\n\r\n"+
             "This email was sent from an automated account. Please do not reply to this address.";
 
     private static final String remindUserNameText =

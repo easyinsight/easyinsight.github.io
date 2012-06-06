@@ -15,6 +15,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,7 +39,14 @@ public class HtmlServlet extends HttpServlet {
                         FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
                         String value = req.getParameter("filter" + filter.getFilterID());
                         if (value != null) {
-                            filterValueDefinition.setFilteredValues(Arrays.asList((Object) value));
+                            if (filterValueDefinition.isSingleValue()) {
+                                filterValueDefinition.setFilteredValues(Arrays.asList((Object) value));
+                            } else {
+                                String[] values = value.split(",");
+                                List<Object> valueList = new ArrayList<Object>();
+                                Collections.addAll(valueList, values);
+                                filterValueDefinition.setFilteredValues(valueList);
+                            }
                         }
                     } else if (filter instanceof RollingFilterDefinition) {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;

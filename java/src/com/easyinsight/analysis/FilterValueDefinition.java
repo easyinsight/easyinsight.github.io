@@ -349,35 +349,74 @@ public class FilterValueDefinition extends FilterDefinition {
     @Override
     public String toHTML(WSAnalysisDefinition report) {
         StringBuilder sb = new StringBuilder();
-        String filterName = "filter"+getFilterID();
-        String onChange = "updateFilter('filter" + getFilterID() + "')";
-        sb.append(label());
-        sb.append("<select style=\"margin-left:5px;margin-top:5px;margin-right:5px\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
         AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(report.getDataFeedID(), getField(), 0, 0, 0, report);
         if (metadata.getReportFault() != null) {
             return "";
         }
         AnalysisDimensionResultMetadata dimensionMetadata = (AnalysisDimensionResultMetadata) metadata;
-        List<String> stringList = new ArrayList<String>();
-        for (Value value : dimensionMetadata.getValues()) {
-            stringList.add(value.toString());
-        }
-        Collections.sort(stringList);
-        if (isAllOption()) {
-            stringList.add(0, "All");
-        }
-        if (isExcludeEmpty()) {
-            stringList.remove("");
-        }
-        String existingChoice = getFilteredValues().get(0).toString();
-        for (String value : stringList) {
-            if (value.equals(existingChoice)) {
-                sb.append("<option selected=\"selected\">").append(value).append("</option>");
-            } else {
-                sb.append("<option>").append(value).append("</option>");
+        String filterName = "filter"+getFilterID();
+        if (singleValue) {
+
+            String onChange = "updateFilter('filter" + getFilterID() + "')";
+            if (!isToggleEnabled()) {
+                sb.append(checkboxHTML());
             }
+            sb.append(label());
+            sb.append("<select style=\"margin-left:5px;margin-top:5px;margin-right:5px\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
+
+
+            List<String> stringList = new ArrayList<String>();
+            for (Value value : dimensionMetadata.getValues()) {
+                stringList.add(value.toString());
+            }
+            Collections.sort(stringList);
+            if (isAllOption()) {
+                stringList.add(0, "All");
+            }
+            if (isExcludeEmpty()) {
+                stringList.remove("");
+            }
+            String existingChoice = getFilteredValues().get(0).toString();
+            for (String value : stringList) {
+                if (value.equals(existingChoice)) {
+                    sb.append("<option selected=\"selected\">").append(value).append("</option>");
+                } else {
+                    sb.append("<option>").append(value).append("</option>");
+                }
+            }
+            sb.append("</select>");
+
+        } else {
+            String divID = "filter" + getFilterID() + "div";
+            sb.append("<div id=\"").append(divID).append("\" class=\"modal hide\">");
+            sb.append("<div class=\"modal-body\">");
+            sb.append("<div class=\"control-group\">");
+            sb.append("<label class=\"control-label\" for=\""+filterName+"\">Available Values</label>");
+            sb.append("<div class=\"controls\">");
+            int size = Math.min(15, dimensionMetadata.getValues().size());
+            sb.append("<select multiple=\"multiple\" id=\""+filterName+"\" size=\""+size+"\" style=\"width:400px\"");
+            for (Value value : dimensionMetadata.getValues()) {
+                if (filteredValues.contains(value)) {
+                    sb.append("<option selected=\"selected\">").append(value).append("</option>");
+                } else {
+                    sb.append("<option>").append(value).append("</option>");
+                }
+            }
+            sb.append("</select>");
+            sb.append("</div>");
+            sb.append("</div>");
+            sb.append("</div>");
+            sb.append("<div class=\"modal-footer\">\n" +
+                    "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiFilter('"+filterName+"')\">Send</button>\n" +
+                    "        <button class=\"btn\" data-dismiss=\"modal\" type=\"button\">Cancel</button>\n" +
+                    "    </div>");
+            sb.append("</div>");
+            sb.append("<div style=\"margin-left:5px;margin-top:8px;margin-right:5px\">");
+            if (!isToggleEnabled()) {
+                sb.append(checkboxHTML());
+            }
+            sb.append("<a href=\"#"+divID+"\" data-toggle=\"modal\">").append(label()).append("</a></div>");
         }
-        sb.append("</select>");
         return sb.toString();
     }
 }

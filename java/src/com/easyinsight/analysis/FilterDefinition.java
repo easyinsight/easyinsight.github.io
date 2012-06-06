@@ -319,13 +319,17 @@ public class FilterDefinition implements Serializable, Cloneable {
         if (!isToggleEnabled()) {
             StringBuilder sb = new StringBuilder();
             sb.append("<div>");
-            sb.append("<input type=\"checkbox\" id=\"filter"+getFilterID()+"enabled\" onchange=\"filterEnable('filter"+getFilterID()+"')\" checked=\"on\"/>");
+            sb.append(checkboxHTML());
             sb.append(label());
             sb.append("</div>");
             return sb.toString();
         } else {
             return "";
         }
+    }
+
+    protected String checkboxHTML() {
+        return "<input style=\"margin-right:5px\" type=\"checkbox\" id=\"filter"+getFilterID()+"enabled\" onchange=\"filterEnable('filter"+getFilterID()+"')\" checked=\"on\"/>";
     }
 
     public String label() {

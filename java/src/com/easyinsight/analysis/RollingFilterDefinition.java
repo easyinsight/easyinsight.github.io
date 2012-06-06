@@ -173,7 +173,8 @@ public class RollingFilterDefinition extends FilterDefinition {
         sb.append("}");
         sb.append("</script>");
         sb.append("<div>");
-        sb.append("<select style=\"width:130px\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
+        sb.append(label());
+        sb.append("<select style=\"margin-left:5px;margin-top:5px;margin-right:5px;width:130px\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
         StringBuilder optionBuilder = new StringBuilder();
         optionBuilder.append("<option value=\"19\">All</option>");
         optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.DAY+"\">Last Day</option>");

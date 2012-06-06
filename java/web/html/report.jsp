@@ -72,6 +72,12 @@
             refreshReport();
         }
 
+        function updateMultiFilter(name) {
+            var selects = $("#"+name).val();
+            filterBase[name] = selects;
+            refreshReport();
+        }
+
         function refreshDataSource() {
             $("#refreshDiv").show();
             $.getJSON('/app/refreshDataSource?dataSourceID=<%= report.getDataFeedID() %>', function(data) {
@@ -193,7 +199,7 @@
 </div>
 <div class="modal hide fade" id="exportModalWindow">
     <div class="modal-header">
-        <button class="close" data-dismiss="modal">×</button>
+        <button data-dismiss="modal">×</button>
         <h3>Export Options</h3>
     </div>
     <div class="modal-body">
@@ -232,7 +238,7 @@
         <a href="#" class="btn" onclick="">Send</a>
     </div>
 </div>
-<% if (applicationSkin.isReportHeader()) { %>
+<% if (applicationSkin != null && applicationSkin.isReportHeader()) { %>
 <div style="<%= headerStyle %>">
     <div style="background-color: #FFFFFF;padding: 5px;float:left">
     <%

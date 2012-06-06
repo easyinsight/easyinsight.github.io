@@ -118,11 +118,11 @@ public class AnalysisCalculation extends AnalysisMeasure {
                 }
                 items.add(analysisItem);
             }
-            if (structure.getReport() != null && structure.getReport().getFilterDefinitions() != null) {
-                for (FilterDefinition filter : structure.getReport().getFilterDefinitions()) {
-                    filter.calculationItems(displayMap);
-                }
+
+            for (FilterDefinition filter : structure.getFilters()) {
+                filter.calculationItems(displayMap);
             }
+
         }
         CalculationTreeNode tree;
         Set<KeySpecification> specs;

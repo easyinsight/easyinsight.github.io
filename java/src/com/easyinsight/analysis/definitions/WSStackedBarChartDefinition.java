@@ -1,11 +1,10 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -90,5 +89,68 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         Set<AnalysisItem> columnList = super.getAllAnalysisItems();
         columnList.add(stackItem);
         return columnList;
+    }
+
+    @Override
+    public String javaScriptIncludes() {
+        return "<script type=\"text/javascript\" src=\"/js/jquery.jqplot.min.js\"></script>\n" +
+                "    <script type=\"text/javascript\" src=\"/js/plugins/jqplot.barRenderer.min.js\"></script>\n" +
+                "    <script type=\"text/javascript\" src=\"/js/plugins/jqplot.categoryAxisRenderer.min.js\"></script>\n" +
+                "    <script type=\"text/javascript\" src=\"/js//plugins/jqplot.pointLabels.min.js\"></script>\n" +
+                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasTextRenderer.min.js\"></script>\n" +
+                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasAxisTickRenderer.min.js\"></script>\n"+
+                "    <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery.jqplot.min.css\" />";
+    }
+
+    @Override
+    public String toHTML(String targetDiv) {
+
+        JSONObject params;
+        try {
+            Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
+            JSONObject legendObj = new JSONObject();
+            legendObj.put("show", "true");
+            legendObj.put("placement", "'outside'");
+            legendObj.put("location", "'e'");
+            jsonParams.put("legend", legendObj);
+            jsonParams.put("series", "data['series']");
+            jsonParams.put("stackSeries", "true");
+            //jsonParams.put("seriesColors", new JSONArray(Arrays.asList("'" + color + "'")));
+            JSONObject seriesDefaults = new JSONObject();
+            seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
+            JSONObject rendererOptions = new JSONObject();
+            rendererOptions.put("barDirection", "'horizontal'");
+            //rendererOptions.put("fillToZero", "true");
+            seriesDefaults.put("rendererOptions", rendererOptions);
+            jsonParams.put("seriesDefaults", seriesDefaults);
+            JSONObject grid = new JSONObject();
+            grid.put("background", "'#FFFFFF'");
+            jsonParams.put("grid", grid);
+            JSONObject axes = new JSONObject();
+            JSONObject xAxis = new JSONObject();
+            xAxis.put("renderer", "$.jqplot.CategoryAxisRenderer");
+            xAxis.put("tickRenderer", "$.jqplot.CanvasAxisTickRenderer");
+            JSONObject xAxisTicketOptions = new JSONObject();
+            xAxisTicketOptions.put("angle", -15);
+            xAxis.put("tickOptions", xAxisTicketOptions);
+            xAxis.put("ticks", "data['ticks']");
+            axes.put("yaxis", xAxis);
+            JSONObject yAxis = new JSONObject();
+            yAxis.put("pad", 1.05);
+            JSONObject tickOptions = new JSONObject();
+            tickOptions.put("formatString", "'%d'");
+            yAxis.put("tickOptions", tickOptions);
+            axes.put("xaxis", yAxis);
+            jsonParams.put("axes", axes);
+            params = new JSONObject(jsonParams);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        String argh = params.toString();
+        argh = argh.replaceAll("\"", "");
+        System.out.println(argh);
+        return "$.getJSON('/app/stackedChart?reportID="+getAnalysisID()+"&'+ strParams, function(data) {\n" +
+                "                var s1 = data[\"values\"];\n" +
+                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";
     }
 }

@@ -259,6 +259,27 @@
     </servlet>
 
     <servlet>
+        <servlet-name>TwoAxisChart</servlet-name>
+        <display-name>TwoAxisChart</display-name>
+        <servlet-class>com.easyinsight.html.LineChartServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>StackedChart</servlet-name>
+        <display-name>StackedChart</display-name>
+        <servlet-class>com.easyinsight.html.StackedColumnChartServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>BubbleChart</servlet-name>
+        <display-name>BubbleChart</display-name>
+        <servlet-class>com.easyinsight.html.BubbleChartServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>DataSourceRefresh</servlet-name>
         <display-name>DataSourceRefresh</display-name>
         <servlet-class>com.easyinsight.html.DataSourceRefreshServlet</servlet-class>
@@ -384,6 +405,21 @@
     <servlet-mapping>
         <servlet-name>ColumnChart</servlet-name>
         <url-pattern>/columnChart</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>TwoAxisChart</servlet-name>
+        <url-pattern>/twoAxisChart</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BubbleChart</servlet-name>
+        <url-pattern>/bubbleChart</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StackedChart</servlet-name>
+        <url-pattern>/stackedChart</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
