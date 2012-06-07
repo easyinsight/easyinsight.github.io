@@ -130,6 +130,7 @@ public class Query {
 
     public ResultSet executeQuery(Connection conn) throws SQLException {
         PreparedStatement statement = conn.prepareStatement(getQuery());
+        statement.setFetchSize(Integer.MIN_VALUE);
         return statement.executeQuery();
     }
 
@@ -226,6 +227,7 @@ public class Query {
                         case Types.NCHAR:
                         case Types.NVARCHAR:
                         case Types.VARCHAR:
+                        case Types.LONGVARCHAR:
                             dataSourceFactory.addGrouping(rs.getMetaData().getColumnName(column));
                             break;
 
@@ -235,7 +237,7 @@ public class Query {
                             dataSourceFactory.addDate(rs.getMetaData().getColumnName(column));
                             break;
                         default:
-                            throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(column) + ") is not supported in Easy Insight.");
+                            throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(column) + ") is not supported in Easy Insight. Type value: " + rs.getMetaData().getColumnType(column));
                 }
             }
 
@@ -269,6 +271,7 @@ public class Query {
                         case Types.NCHAR:
                         case Types.NVARCHAR:
                         case Types.VARCHAR:
+                        case Types.LONGVARCHAR:
                             row.addValue(key, rs.getString(column));
                             break;
 
@@ -285,7 +288,7 @@ public class Query {
                             row.addValue(key, date);
                             break;
                         default:
-                            throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(column) + ") is not supported in Easy Insight.");
+                            throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(column) + ") is not supported in Easy Insight. Type value: " + rs.getMetaData().getColumnType(column));
                     }
                 }
             }

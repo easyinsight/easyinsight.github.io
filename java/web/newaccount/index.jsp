@@ -1,3 +1,5 @@
+<%@ page import="org.apache.ws.security.util.StringUtil" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
@@ -79,11 +81,8 @@
     <div id="contentHeaderStart"></div>
     <div id="midContent">
         <form method="post" id="profileForm" action="accountCreation.jsp">
-            <input type="hidden" id="tier" name="tier" value="<%=request.getParameter("tier")%>"/>
+            <input type="hidden" id="tier" name="tier" value="<%=StringEscapeUtils.escapeHtml(request.getParameter("tier"))%>"/>
             <input type="hidden" id="wasSubmit" name="wasSubmit" value="1"/>
-            <input type="hidden" id="connectionID" name="connectionID"
-                   value="<%=request.getParameter("connectionID")%>"/>
-
             <div>
                 <p style="text-align:center;font-size:32px;font-weight:bold;width: 100%">Start Using Easy Insight
                     Now!</p>
@@ -125,7 +124,7 @@
                                 First Name
                             </td>
                             <td><input style="font-size:14px;width:400px" id="firstName" type="text"
-                                       value="<%=request.getSession().getAttribute("firstName") == null ? "" : request.getSession().getAttribute("firstName")%>"
+                                       value="<%= request.getSession().getAttribute("firstName") == null ? "" : StringEscapeUtils.escapeHtml(request.getSession().getAttribute("firstName").toString())%>"
                                        name="firstName"/></td>
                         </tr>
                         <tr>
@@ -133,7 +132,7 @@
                                 Last Name
                             </td>
                             <td><input style="font-size:14px;width:400px" id="lastName" type="text"
-                                       value="<%=request.getSession().getAttribute("lastName") == null ? "" : request.getSession().getAttribute("lastName")%>"
+                                       value="<%=request.getSession().getAttribute("lastName") == null ? "" : StringEscapeUtils.escapeHtml(request.getSession().getAttribute("lastName").toString()) %>"
                                        name="lastName"/></td>
                         </tr>
                         <tr>
@@ -141,7 +140,7 @@
                                 Company
                             </td>
                             <td><input style="font-size:14px;width:400px" id="company" type="text"
-                                       value="<%=request.getSession().getAttribute("company") == null ? "" : request.getSession().getAttribute("company")%>"
+                                       value="<%=request.getSession().getAttribute("company") == null ? "" : StringEscapeUtils.escapeHtml(request.getSession().getAttribute("company").toString())%>"
                                        name="company"/></td>
                         </tr>
                         <tr>
@@ -149,7 +148,7 @@
                                 Email
                             </td>
                             <td><input style="font-size:14px;width:400px" id="email" type="text"
-                                       value="<%=request.getSession().getAttribute("email") == null ? "" : request.getSession().getAttribute("email")%>"
+                                       value="<%=request.getSession().getAttribute("email") == null ? "" : StringEscapeUtils.escapeHtml(request.getSession().getAttribute("email").toString())%>"
                                        name="email"/></td>
                         </tr>
                         <tr>
@@ -244,7 +243,7 @@
             </div>
         </div>
         <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-            Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+            Copyright ï¿½2008-2010 Easy Insight, LLC. All rights reserved.
         </div>
     </div>
 </div>
