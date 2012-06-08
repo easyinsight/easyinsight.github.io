@@ -26,6 +26,7 @@
                 com.easyinsight.users.Account account = user.getAccount();
                 long accountID = account.getAccountID();
                 session.setAttribute("accountID", accountID);
+                session.setAttribute("accountAdmin", user.isAccountAdmin());
                 session.setAttribute("userID", user.getUserID());
                 session.setAttribute("accountType", account.getAccountType());
                 session.setAttribute("userName", userName);
