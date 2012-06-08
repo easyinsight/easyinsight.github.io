@@ -67,6 +67,20 @@ public class EasyInsightLoginCommand implements LoginCommand {
                     session.setAttribute("guestUser", userServiceResponse.isGuestUser());
                     return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
                         userServiceResponse.isAccountAdmin(), userServiceResponse.getFirstDayOfWeek(), userServiceResponse.getPersonaName());
+                } else {
+                    userServiceResponse = userService.htmlEstablish(password, userName);
+                    if (userServiceResponse != null) {
+                        HttpSession session = FlexContext.getHttpRequest().getSession();
+                        session.setAttribute("userID", userServiceResponse.getUserID());
+                        session.setAttribute("accountID", userServiceResponse.getAccountID());
+                        session.setAttribute("userName", userServiceResponse.getUserName());
+                        session.setAttribute("accountType", userServiceResponse.getAccountType());
+                        session.setAttribute("accountAdmin", userServiceResponse.isAccountAdmin());
+                        session.setAttribute("nonCookieLogin", true);
+                        session.setAttribute("guestUser", userServiceResponse.isGuestUser());
+                        return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
+                                userServiceResponse.isAccountAdmin(), userServiceResponse.getFirstDayOfWeek(), userServiceResponse.getPersonaName());
+                    }
                 }
             }
             return null;
