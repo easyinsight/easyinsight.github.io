@@ -183,9 +183,9 @@
     <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
         <mx:Box/>
         <framework:LoginComponent loginEvent2="stackIndex = 2"/>
-        <!--<dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
+        <dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
                                       dataSourceID="{dataSourceID}" reportType="{reportType}"
                                       showToolbar="{showToolbar}"
-                                        showFilters="{showFilters}" />-->
+                                        showFilters="{showFilters}" />
     </mx:ViewStack>
 </mx:Application>
