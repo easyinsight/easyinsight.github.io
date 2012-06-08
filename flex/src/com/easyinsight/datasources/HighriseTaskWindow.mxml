@@ -2,6 +2,7 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         creationComplete="onCreation()" >
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -10,15 +11,19 @@
         [Bindable]
         public var tokens:ArrayCollection;
 
+        private var changed:Boolean = false;
+
         private function onCreation():void {
             addEventListener(HighriseTokenEvent.DELETE_TOKEN, onDeleteToken);
         }
 
         private function onDeleteToken(event:HighriseTokenEvent):void {
+            changed = true;
             tokens.removeItemAt(tokens.getItemIndex(event.token));
         }
 
         private function addToken():void {
+            changed = true;
             var window:HighriseTokenWindow = new HighriseTokenWindow();
             window.addEventListener(HighriseTokenEvent.ADD_TOKEN, onNewToken, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
@@ -27,6 +32,13 @@
 
         private function onNewToken(event:HighriseTokenEvent):void {
             tokens.addItem(event.token);
+        }
+
+        private function closeWindow():void {
+            if (changed) {
+                dispatchEvent(new AnalysisChangedEvent());
+            }
+            PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
     <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" width="700" height="60" selectable="false" focusEnabled="false"
@@ -39,5 +51,5 @@
             <util:EIDataGridColumn headerText="" dataField="token" itemRenderer="com.easyinsight.datasources.HighriseTokenControls" width="100"/>
         </mx:columns>
     </mx:DataGrid>
-    <util:SaveButton label="Close" click="PopUpManager.removePopUp(this)"/>
+    <util:SaveButton label="Close" click="closeWindow()"/>
 </util:EISlimWindow>

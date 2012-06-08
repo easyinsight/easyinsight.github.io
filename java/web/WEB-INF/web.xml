@@ -19,12 +19,22 @@
     </filter>
 
     <filter>
+        <filter-name>NoCache</filter-name>
+        <filter-class>com.easyinsight.html.NoCacheFilter</filter-class>
+    </filter>
+
+    <filter>
         <filter-name>FixedDashboard</filter-name>
         <filter-class>com.easyinsight.html.FixedDashboardFilter</filter-class>
     </filter>
 
     <filter-mapping>
         <filter-name>Auth</filter-name>
+        <url-pattern>/html/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>NoCache</filter-name>
         <url-pattern>/html/*</url-pattern>
     </filter-mapping>
 
@@ -115,6 +125,13 @@
         <servlet-name>ExportExcel</servlet-name>
         <display-name>ExportExcel</display-name>
         <servlet-class>com.easyinsight.export.ExportExcelServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>EmailReport</servlet-name>
+        <display-name>EmailReport</display-name>
+        <servlet-class>com.easyinsight.export.EmailServlet</servlet-class>
         <load-on-startup>3</load-on-startup>
     </servlet>
 
@@ -395,6 +412,11 @@
     <servlet-mapping>
         <servlet-name>HtmlExport</servlet-name>
         <url-pattern>/htmlExport</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>EmailReport</servlet-name>
+        <url-pattern>/emailReport</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

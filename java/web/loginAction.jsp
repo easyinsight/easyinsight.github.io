@@ -24,20 +24,22 @@
                 response.sendRedirect("login.jsp?error=true");
             } else {
                 com.easyinsight.users.Account account = user.getAccount();
+                long accountID = account.getAccountID();
+                session.setAttribute("accountID", accountID);
+                session.setAttribute("userID", user.getUserID());
+                session.setAttribute("accountType", account.getAccountType());
+                session.setAttribute("userName", userName);
+                session.setAttribute("dayOfWeek", account.getFirstDayOfWeek());
+                session.setAttribute("uiSettings", ApplicationSkinSettings.retrieveSkin(user.getUserID(), hibernateSession, accountID));
                 if (account.getAccountState() == Account.CLOSED) {
-                    response.sendRedirect("/billing/billing.jsp");
+                    response.sendRedirect("/app/billing/billing.jsp");
                 } else if (account.getAccountState() == Account.DELINQUENT) {
-                    response.sendRedirect("/billing/billing.jsp");
+                    response.sendRedirect("/app/billing/billing.jsp");
                 } else if (account.getAccountState() == Account.BILLING_FAILED) {
-                    response.sendRedirect("/billing/billing.jsp");
+                    response.sendRedirect("/app/billing/billing.jsp");
                 } else {
-                    long accountID = account.getAccountID();
-                    session.setAttribute("accountID", accountID);
-                    session.setAttribute("userID", user.getUserID());
-                    session.setAttribute("accountType", account.getAccountType());
-                    session.setAttribute("userName", userName);
-                    session.setAttribute("dayOfWeek", account.getFirstDayOfWeek());
-                    session.setAttribute("uiSettings", ApplicationSkinSettings.retrieveSkin(user.getUserID(), hibernateSession, accountID));
+
+
                     String urlHash = request.getParameter("urlhash");
                     String rememberMe = request.getParameter("rememberMeCheckbox");
                     if ("on".equals(rememberMe)) {

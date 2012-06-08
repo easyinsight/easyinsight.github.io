@@ -9,7 +9,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -83,8 +82,8 @@ public class HtmlServlet extends HttpServlet {
                         }
                     } else if (filter instanceof MultiFlatDateFilter) {
                         MultiFlatDateFilter multiFlatDateFilter = (MultiFlatDateFilter) filter;
-                        String startMonthString = req.getParameter("startMonth");
-                        String endMonthString = req.getParameter("endMonth");
+                        String startMonthString = req.getParameter("filter" + filter.getFilterID() + "start");
+                        String endMonthString = req.getParameter("filter" + filter.getFilterID() + "end");
                         List<DateLevelWrapper> levels = new ArrayList<DateLevelWrapper>();
                         if (startMonthString != null && endMonthString != null) {
                             int startMonth = Integer.parseInt(startMonthString);
@@ -94,8 +93,9 @@ public class HtmlServlet extends HttpServlet {
                                 wrapper.setDateLevel(i);
                                 levels.add(wrapper);
                             }
+                            multiFlatDateFilter.setLevels(levels);
                         }
-                        multiFlatDateFilter.setLevels(levels);
+
                     } else if (filter instanceof FilterDateRangeDefinition) {
                         FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filter;
                         String startDate = req.getParameter("filter" + filter.getFilterID() + "start");

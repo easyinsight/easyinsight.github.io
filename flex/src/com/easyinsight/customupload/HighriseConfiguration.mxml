@@ -2,6 +2,7 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.datasources.HighRiseDataSource;
         import com.easyinsight.datasources.HighriseTaskWindow;
 
@@ -55,8 +56,13 @@
         private function configureTasks():void {
             var window:HighriseTaskWindow = new HighriseTaskWindow();
             window.tokens = additionalTokens;
+            window.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, passThrough, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
         }
 
         public function validate():Boolean {

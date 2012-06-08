@@ -10,13 +10,6 @@
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page import="com.easyinsight.config.ConfigLoader" %>
 <%@ page import="java.util.*" %>
-<%--
-  Created by IntelliJ IDEA.
-  User: abaldwin
-  Date: Jun 21, 2009
-  Time: 11:36:48 AM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
 <%
@@ -28,13 +21,13 @@
         if(request.getParameter("username") != null && request.getParameter("password") != null) {
             List results = s.createQuery("from User where userName = ?").setString(0, request.getParameter("username")).list();
             if(results.size() != 1) {
-                response.sendRedirect("login.jsp?error=true");
+                response.sendRedirect("../login.jsp?error=true");
                 return;
             }
             user =(User) results.get(0);
             String encryptedPass = PasswordService.getInstance().encrypt(request.getParameter("password"), user.getHashSalt(), user.getHashType());
             if(!encryptedPass.equals(user.getPassword())) {
-               response.sendRedirect("login.jsp?error=true");
+               response.sendRedirect("../login.jsp?error=true");
                return;
             }
             account = user.getAccount();
@@ -44,7 +37,7 @@
         }
         if(account == null) {
             if(request.getSession().getAttribute("accountID")== null) {
-                response.sendRedirect("login.jsp?error=true");
+                response.sendRedirect("../login.jsp?error=true");
                 return;
             }
             accountID = (Long) request.getSession().getAttribute("accountID");
@@ -67,7 +60,7 @@
 
     String amount = "1.00";
     String type = "auth";
-    if(account.getAccountState() == Account.DELINQUENT) {
+    if(account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED) {
         if(monthly) {
             amount = String.valueOf(account.monthlyCharge());
         } else {
@@ -176,7 +169,6 @@
         <% if(request.getParameter("error") != null) { %>
             <p><span class="error"><%
                 String errorCode = request.getParameter("response_code");
-                String responseString = request.getParameter("responsetext");
                 if ("200".equals(errorCode)) out.println("The transaction was declined by the credit card processor. If this error continues, contact support@easy-insight.com.");
                 else if ("204".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
                 else if ("220".equals(errorCode)) out.println("There was an error with your billing information. Please double check the payment information below. If this error continues, contact support@easy-insight.com.");

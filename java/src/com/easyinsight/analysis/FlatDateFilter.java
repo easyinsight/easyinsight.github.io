@@ -74,10 +74,10 @@ public class FlatDateFilter extends FilterDefinition {
         String filterName = "filter"+getFilterID();
         String onChange = "updateFilter('filter" + getFilterID() + "')";
         sb.append(label());
-        sb.append("<select id=\"").append(filterName).append("\" onchange=\"").append(onChange).append("\">");
+        sb.append("<select style=\"margin-left:5px;margin-top:5px;margin-right:5px\" id=\"").append(filterName).append("\" onchange=\"").append(onChange).append("\">");
         AnalysisDateDimensionResultMetadata metadata = (AnalysisDateDimensionResultMetadata) new DataService().getAnalysisItemMetadata(report.getDataFeedID(), getField(), 0, 0, 0, report);
         Date earliestDate = metadata.getEarliestDate();
-        Date latestDate = metadata.getEarliestDate();
+        Date latestDate = metadata.getLatestDate();
         Calendar cal = Calendar.getInstance();
 
         cal.setTime(earliestDate);
