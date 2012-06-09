@@ -76,7 +76,7 @@
         private var accountType:int;
 
         private function toBilling():void {
-            navigateToURL(new URLRequest('billing/billing.jsp'), '_self');
+            navigateToURL(new URLRequest('billing'), '_self');
         }
 
         private function loginHandler(event:LoginEvent):void {
