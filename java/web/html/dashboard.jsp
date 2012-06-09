@@ -129,7 +129,7 @@
                 <ul class="nav">
                     <li><a href="/app/html">Data Sources</a></li>
                     <li><a href="/app/html/reports/<%= dataSourceURLKey %>">Reports and Dashboards</a></li>
-                    <li><a href="flashAppAction.jsp">Full Interface</a></li>
+                    <li><a href="/app/html/flashAppAction.jsp">Full Interface</a></li>
                 </ul>
             </div><!--/.nav-collapse -->
         </div>
