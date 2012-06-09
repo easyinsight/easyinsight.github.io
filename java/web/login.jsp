@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="org.hibernate.Session" %>
@@ -6,7 +7,7 @@
 <%@ page import="com.easyinsight.users.UserServiceResponse" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
-<html>
+<html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">

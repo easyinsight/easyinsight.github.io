@@ -1,15 +1,23 @@
+<!DOCTYPE html>
 <%@ page import="com.easyinsight.dashboard.DashboardService" %>
 <%@ page import="com.easyinsight.dashboard.Dashboard" %>
 <%@ page import="com.easyinsight.preferences.ApplicationSkin" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
-<html>
+<html lang="en">
 <%
     String userName = (String) session.getAttribute("userName");
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
-        long dashboardID = Long.parseLong(request.getParameter("dashboardID"));
+        String dashboardIDString = request.getParameter("dashboardID");
+        long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
+        if (dashboardID == 0) {
+            throw new com.easyinsight.security.SecurityException();
+        }
         Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
+        String dataSourceURLKey = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
         ApplicationSkin applicationSkin = (ApplicationSkin) session.getAttribute("uiSettings");
         String headerStyle = "width:100%;overflow: hidden;padding: 10px;";
         String headerTextStyle = "width: 100%;text-align: center;font-size: 14px;padding-top: 10px;";
@@ -24,6 +32,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+    <title>Easy Insight &mdash; <%= StringEscapeUtils.escapeHtml(dashboard.getName()) %></title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
 
@@ -107,7 +116,7 @@
             </a>
             <div class="btn-group pull-right">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= userName %>
+                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
@@ -119,7 +128,8 @@
             <div class="nav-collapse">
                 <ul class="nav">
                     <li><a href="/app/html">Data Sources</a></li>
-                    <li><a href="/app/html/reports/<%= dashboard.getDataSourceID() %>">Reports and Dashboards</a></li>
+                    <li><a href="/app/html/reports/<%= dataSourceURLKey %>">Reports and Dashboards</a></li>
+                    <li><a href="flashAppAction.jsp">Full Interface</a></li>
                 </ul>
             </div><!--/.nav-collapse -->
         </div>
@@ -135,7 +145,7 @@
         %>
     </div>
     <div style="<%= headerTextStyle %>">
-        <%= dashboard.getName() %>
+        <%= StringEscapeUtils.escapeHtml(dashboard.getName()) %>
     </div>
 </div>
 <div class="container">

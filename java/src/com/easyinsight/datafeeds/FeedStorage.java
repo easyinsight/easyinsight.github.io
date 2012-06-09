@@ -693,13 +693,14 @@ public class FeedStorage {
     }
 
     private DataSourceDescriptor createDescriptor(long dataFeedID, String feedName, Integer userRole,
-                                            long size, int feedType, Date lastDataTime, Date creationDate, String owner, boolean accountVisible) throws SQLException {
+                                            long size, int feedType, Date lastDataTime, Date creationDate, String owner, boolean accountVisible, String urlKey) throws SQLException {
         DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(feedName, dataFeedID, feedType, accountVisible);
         dataSourceDescriptor.setSize(size);
         dataSourceDescriptor.setLastDataTime(lastDataTime);
         dataSourceDescriptor.setRole(userRole);
         dataSourceDescriptor.setCreationDate(creationDate);
         dataSourceDescriptor.setAuthor(owner);
+        dataSourceDescriptor.setUrlKey(urlKey);
         return dataSourceDescriptor;
     }
 
@@ -708,7 +709,7 @@ public class FeedStorage {
         Connection conn = Database.instance().getConnection();
         long userID = SecurityUtil.getUserID();
         try {
-            StringBuilder queryBuilder = new StringBuilder("SELECT FEED_NAME, FEED_TYPE, ROLE " +
+            StringBuilder queryBuilder = new StringBuilder("SELECT FEED_NAME, FEED_TYPE, ROLE, API_KEY " +
                     "FROM DATA_FEED LEFT JOIN UPLOAD_POLICY_USERS ON DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = ?" +
                     " WHERE DATA_FEED.DATA_FEED_ID = ?");
             PreparedStatement queryStmt = conn.prepareStatement(queryBuilder.toString());
@@ -722,7 +723,7 @@ public class FeedStorage {
                 if (rs.wasNull()) {
                     role = Roles.NONE;
                 }
-                feedDescriptor = createDescriptor(feedID, feedName, role, 0, feedType, null, null, null, false);
+                feedDescriptor = createDescriptor(feedID, feedName, role, 0, feedType, null, null, null, false, rs.getString(4));
             }
             queryStmt.close();
         } finally {
@@ -736,7 +737,7 @@ public class FeedStorage {
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                    "DATA_FEED.FEED_TYPE, ROLE " +
+                    "DATA_FEED.FEED_TYPE, ROLE, API_KEY " +
                     " FROM UPLOAD_POLICY_USERS, DATA_FEED WHERE " +
                     "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.PARENT_SOURCE_ID = ?");
             queryStmt.setLong(1, userID);
@@ -748,7 +749,7 @@ public class FeedStorage {
                 int feedType = rs.getInt(3);
                 int userRole = rs.getInt(4);
 
-                DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, 0, feedType, null, null, null, false);
+                DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, 0, feedType, null, null, null, false, rs.getString(5));
                 descriptorList.add(feedDescriptor);
             }
             queryStmt.close();
@@ -778,7 +779,7 @@ public class FeedStorage {
     public List<DataSourceDescriptor> getDataSourcesForGroup(long userID, long groupID, EIConnection conn) throws SQLException {
         List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, DATA_FEED.account_visible " +
+                "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, DATA_FEED.account_visible, DATA_FEED.api_key " +
                 " FROM (upload_policy_groups, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) WHERE " +
                 "upload_policy_groups.group_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID AND DATA_FEED.VISIBLE = ?");
         PreparedStatement childQueryStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.SIZE FROM FEED_PERSISTENCE_METADATA, DATA_FEED WHERE FEED_PERSISTENCE_METADATA.FEED_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.PARENT_SOURCE_ID = ?");
@@ -801,7 +802,7 @@ public class FeedStorage {
             while (childRS.next()) {
                 size += childRS.getLong(1);
             }
-            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, Roles.SUBSCRIBER, size, feedType, lastDataTime, null, null, rs.getBoolean(6));
+            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, Roles.SUBSCRIBER, size, feedType, lastDataTime, null, null, rs.getBoolean(6), rs.getString(7));
             dataSources.add(feedDescriptor);
         }
         queryStmt.close();
@@ -836,7 +837,7 @@ public class FeedStorage {
 
     private void getMyDataSources(long userID, EIConnection conn, RolePrioritySet<DataSourceDescriptor> descriptorList) throws SQLException {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, ROLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, DATA_FEED.create_date, DATA_FEED.account_visible" +
+                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, ROLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, DATA_FEED.create_date, DATA_FEED.account_visible, DATA_FEED.api_key" +
                     " FROM (UPLOAD_POLICY_USERS, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) WHERE " +
                     "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.VISIBLE = ?");
         PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT FIRST_NAME, NAME FROM USER, UPLOAD_POLICY_USERS WHERE UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
@@ -872,7 +873,7 @@ public class FeedStorage {
                 creationDate = new Date(createDate.getTime());
             }
 
-            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, lastDataTime, creationDate, name, rs.getBoolean(8));
+            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, lastDataTime, creationDate, name, rs.getBoolean(8), rs.getString(9));
             descriptorList.add(feedDescriptor);
         }
         queryStmt.close();
@@ -882,7 +883,7 @@ public class FeedStorage {
     private void getAccountDataSources(EIConnection conn, long accountID, RolePrioritySet<DataSourceDescriptor> descriptorList) throws SQLException {
 
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, DATA_FEED.create_date, DATA_FEED.account_visible " +
+                "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, DATA_FEED.create_date, DATA_FEED.account_visible, DATA_FEED.api_key " +
                 " FROM (upload_policy_users, USER, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) WHERE " +
                 "upload_policy_users.user_id = user.user_id AND user.account_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.account_visible = ? AND data_feed.visible = ?");
         PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT FIRST_NAME, NAME FROM USER, UPLOAD_POLICY_USERS WHERE UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
@@ -916,7 +917,7 @@ public class FeedStorage {
             if (createDate != null) {
                 creationDate = new Date(createDate.getTime());
             }
-            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, Roles.SHARER, feedSize, feedType, lastDataTime, creationDate, name, rs.getBoolean(7));
+            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, Roles.SHARER, feedSize, feedType, lastDataTime, creationDate, name, rs.getBoolean(7), rs.getString(8));
             descriptorList.add(feedDescriptor);
         }
         queryStmt.close();
@@ -925,7 +926,7 @@ public class FeedStorage {
 
     private void getGroupDataSources(long userID, EIConnection conn, RolePrioritySet<DataSourceDescriptor> descriptorList) throws SQLException {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, group_to_user_join.binding_type, DATA_FEED.create_date, DATA_FEED.account_visible " +
+                "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, group_to_user_join.binding_type, DATA_FEED.create_date, DATA_FEED.account_visible, DATA_FEED.api_key " +
                 " FROM (upload_policy_groups, group_to_user_join, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
                 "upload_policy_groups.group_id = group_to_user_join.group_id AND GROUP_TO_USER_JOIN.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID AND DATA_FEED.VISIBLE = ?");
         PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT FIRST_NAME, NAME FROM USER, UPLOAD_POLICY_USERS WHERE UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
@@ -958,11 +959,37 @@ public class FeedStorage {
             if (createDate != null) {
                 creationDate = new Date(createDate.getTime());
             }
-            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, rs.getInt(6), feedSize, feedType, lastDataTime, creationDate, name, rs.getBoolean(8));
+            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, rs.getInt(6), feedSize, feedType, lastDataTime, creationDate, name, rs.getBoolean(8), rs.getString(9));
             descriptorList.add(feedDescriptor);
         }
         queryStmt.close();
         findOwnerStmt.close();
+    }
+
+    public long dataSourceIDForDataSource(String urlKey) throws SQLException {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE API_KEY = ?");
+            stmt.setString(1, urlKey);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            return rs.getLong(1);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public String dataSourceURLKeyForDataSource(long dataSourceID) throws SQLException {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT API_KEY FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+            stmt.setLong(1, dataSourceID);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            return rs.getString(1);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
 

@@ -1,13 +1,28 @@
+<!DOCTYPE html>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.preferences.ApplicationSkin" %>
 <%@ page import="com.easyinsight.analysis.*" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
-<html>
+<html lang="en">
 <%
     String userName = (String) session.getAttribute("userName");
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
-        WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(Long.parseLong(request.getParameter("reportID")));
+        String reportIDString = request.getParameter("reportID");
+        InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
+        long reportID;
+        if (insightResponse.getStatus() == InsightResponse.SUCCESS) {
+            reportID = insightResponse.getInsightDescriptor().getId();
+        } else {
+            throw new com.easyinsight.security.SecurityException();
+        }
+        WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID);
+        if (report == null) {
+            throw new RuntimeException("Attempt made to load report " + reportID + " which doesn't exist.");
+        }
+        String dataSourceURLKey = new FeedStorage().dataSourceURLKeyForDataSource(report.getDataFeedID());
         ApplicationSkin applicationSkin = (ApplicationSkin) session.getAttribute("uiSettings");
         String headerStyle = "width:100%;overflow: hidden;padding: 10px;";
         String headerTextStyle = "width: 100%;text-align: center;font-size: 14px;padding-top: 10px;";
@@ -22,7 +37,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Easy Insight &mdash; <%= report.getName() %></title>
+    <title>Easy Insight &mdash; <%= StringEscapeUtils.escapeHtml(report.getName()) %></title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
@@ -161,7 +176,7 @@
             </a>
             <div class="btn-group pull-right">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= userName %>
+                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
@@ -174,7 +189,8 @@
             <div class="nav-collapse pull-left">
                 <ul class="nav">
                     <li><a href="/app/html">Data Sources</a></li>
-                    <li><a href="/app/html/reports/<%= report.getDataFeedID() %>">Reports and Dashboards</a></li>
+                    <li><a href="/app/html/reports/<%= dataSourceURLKey %>">Reports and Dashboards</a></li>
+                    <li><a href="flashAppAction.jsp">Full Interface</a></li>
                 </ul>
             </div>
             <div class="nav-collapse btn-group pull-left">
@@ -276,12 +292,12 @@
     %>
     </div>
     <div style="<%= headerTextStyle %>">
-        <%= report.getName() %>
+        <%= StringEscapeUtils.escapeHtml(report.getName()) %>
     </div>
 </div>
 <% } else { %>
 <div style="<%= headerTextStyle %>">
-    <%= report.getName() %>
+    <%= StringEscapeUtils.escapeHtml(report.getName()) %>
 </div>
 <% } %>
     <div class="container">

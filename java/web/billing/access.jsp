@@ -1,6 +1,8 @@
+<!DOCTYPE html>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
+<html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
@@ -44,7 +46,7 @@
             <%--<a class="brand" href="#"><img src="/images/logo3.jpg"/></a>--%>
             <div class="btn-group pull-right">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= userName %>
+                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">

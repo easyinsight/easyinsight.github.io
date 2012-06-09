@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <%@ page import="com.easyinsight.core.EIDescriptor" %>
@@ -8,8 +9,9 @@
 <%@ page import="java.util.Collection" %>
 <%@ page import="com.easyinsight.audit.ActionReportLog" %>
 <%@ page import="com.easyinsight.audit.ActionDashboardLog" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
-<html>
+<html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
@@ -47,7 +49,7 @@
             <%--<a class="brand" href="#"><img src="/images/logo3.jpg"/></a>--%>
             <div class="btn-group pull-right">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= userName %>
+                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
@@ -65,21 +67,6 @@
 </div>
 <div class="container-fluid">
     <div class="row-fluid">
-        <div class="span12">
-            <ul class="breadcrumb">
-                <li>
-                    <a href="#">Home</a> <span class="divider">/</span>
-                </li>
-                <li>
-                    <a href="#">Library</a> <span class="divider">/</span>
-                </li>
-                <li class="active">Data</li>
-            </ul>
-        </div>
-    </div>
-</div>
-<div class="container-fluid">
-    <div class="row-fluid">
         <div class="span3">
             <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
             <div class="well sidebar-nav">
@@ -90,10 +77,10 @@
                         for (ActionLog actionLog : actions) {
                             if (actionLog instanceof ActionReportLog && actionLog.getActionType() == ActionReportLog.VIEW) {
                                 ActionReportLog actionReportLog = (ActionReportLog) actionLog;
-                                out.println("<li><a href=\"report/" + actionReportLog.getInsightDescriptor().getId() + "\">View " + actionReportLog.getInsightDescriptor().getName() + "</a></li>");
+                                out.println("<li><a href=\"report/" + actionReportLog.getInsightDescriptor().getUrlKey() + "\">View " + actionReportLog.getInsightDescriptor().getName() + "</a></li>");
                             } else if (actionLog instanceof ActionDashboardLog && actionLog.getActionType() == ActionDashboardLog.VIEW) {
                                 ActionDashboardLog actionDashboardLog = (ActionDashboardLog) actionLog;
-                                out.println("<li><a href=\"dashboard/" + actionDashboardLog.getDashboardDescriptor().getId() + "\">View " + actionDashboardLog.getDashboardDescriptor().getName() + "</a></li>");
+                                out.println("<li><a href=\"dashboard/" + actionDashboardLog.getDashboardDescriptor().getUrlKey() + "\">View " + actionDashboardLog.getDashboardDescriptor().getName() + "</a></li>");
                             }
                         }
                     %>
@@ -119,7 +106,7 @@
                     }
                 });
                 for (DataSourceDescriptor dataSource : dataSources) {
-                    out.println("<tr><td><a href=\"reports/" + dataSource.getId() + "\">" + dataSource.getName() + "</a></td></tr>");
+                    out.println("<tr><td><a href=\"reports/" + dataSource.getUrlKey() + "\">" + dataSource.getName() + "</a></td></tr>");
                 }
                 /*if (dataSources.size() == 0) {
                     out.println("<li>You haven't defined any data sources yet.</li>");

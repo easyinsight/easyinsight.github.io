@@ -1,15 +1,11 @@
-<%@ page import="com.easyinsight.analysis.WSAnalysisDefinition" %>
-<%@ page import="com.easyinsight.analysis.AnalysisStorage" %>
-<%@ page import="com.easyinsight.analysis.FilterDefinition" %>
+<!DOCTYPE html>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
-<%@ page import="com.easyinsight.preferences.ApplicationSkin" %>
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <%@ page import="com.easyinsight.core.EIDescriptor" %>
 <%@ page import="java.util.Comparator" %>
 <%@ page import="java.util.Collections" %>
 <%@ page import="com.easyinsight.core.InsightDescriptor" %>
 <%@ page import="java.util.List" %>
-<%@ page import="com.easyinsight.analysis.AnalysisService" %>
 <%@ page import="com.easyinsight.userupload.UserUploadService" %>
 <%@ page import="com.easyinsight.dashboard.DashboardDescriptor" %>
 <%@ page import="com.easyinsight.audit.ActionLog" %>
@@ -17,8 +13,15 @@
 <%@ page import="java.util.Collection" %>
 <%@ page import="com.easyinsight.audit.ActionReportLog" %>
 <%@ page import="com.easyinsight.audit.ActionDashboardLog" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.ResultSet" %>
+<%@ page import="com.easyinsight.datafeeds.FeedService" %>
+<%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
-<html>
+<html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
@@ -53,7 +56,7 @@
             </a>
             <div class="btn-group pull-right">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= userName %>
+                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
@@ -65,7 +68,8 @@
             <div class="nav-collapse">
                 <ul class="nav">
                     <li><a href="/app/html">Data Sources</a></li>
-                    <li class="Active"><a href="#">Reports and Dashboards</a></li>
+                    <li class="active"><a href="#">Reports and Dashboards</a></li>
+                    <li><a href="flashAppAction.jsp">Full Interface</a></li>
                 </ul>
             </div><!--/.nav-collapse -->
         </div>
@@ -83,10 +87,10 @@
                         for (ActionLog actionLog : actions) {
                             if (actionLog instanceof ActionReportLog && actionLog.getActionType() == ActionReportLog.VIEW) {
                                 ActionReportLog actionReportLog = (ActionReportLog) actionLog;
-                                out.println("<li><a href=\"report/" + actionReportLog.getInsightDescriptor().getId() + "\">View " + actionReportLog.getInsightDescriptor().getName() + "</a></li>");
+                                out.println("<li><a href=\"report/" + actionReportLog.getInsightDescriptor().getUrlKey() + "\">View " + actionReportLog.getInsightDescriptor().getName() + "</a></li>");
                             } else if (actionLog instanceof ActionDashboardLog && actionLog.getActionType() == ActionDashboardLog.VIEW) {
                                 ActionDashboardLog actionDashboardLog = (ActionDashboardLog) actionLog;
-                                out.println("<li><a href=\"dashboard/" + actionDashboardLog.getDashboardDescriptor().getId() + "\">View " + actionDashboardLog.getDashboardDescriptor().getName() + "</a></li>");
+                                out.println("<li><a href=\"dashboard/" + actionDashboardLog.getDashboardDescriptor().getUrlKey() + "\">View " + actionDashboardLog.getDashboardDescriptor().getName() + "</a></li>");
                             }
                         }
                     %>
@@ -101,7 +105,9 @@
                 </tr>
                 </thead>
             <%
-                long dataSourceID = Long.parseLong(request.getParameter("dataSourceID"));
+                String dataSourceKey = request.getParameter("dataSourceID");
+                long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
+
                 List<EIDescriptor> descriptors = new UserUploadService().getFeedAnalysisTreeForDataSource(new DataSourceDescriptor(null, dataSourceID, 0, false));
                 Collections.sort(descriptors, new Comparator<EIDescriptor>() {
 
@@ -113,9 +119,9 @@
                 });
                 for (EIDescriptor descriptor : descriptors) {
                     if (descriptor instanceof InsightDescriptor) {
-                        out.println("<tr><td><a href=\"../report/" + descriptor.getId() + "\">" + descriptor.getName() + "</td></tr>");
+                        out.println("<tr><td><a href=\"../report/" + descriptor.getUrlKey() + "\">" + descriptor.getName() + "</td></tr>");
                     } else if (descriptor instanceof DashboardDescriptor) {
-                        out.println("<tr><td><a href=\"../dashboard/" + descriptor.getId() + "\">" + descriptor.getName() + "</td></tr>");
+                        out.println("<tr><td><a href=\"../dashboard/" + descriptor.getUrlKey() + "\">" + descriptor.getName() + "</td></tr>");
                     }
                 }
             %>

@@ -117,6 +117,7 @@ public class UserUploadService {
     }
 
     public List<EIDescriptor> getFeedAnalysisTreeForDataSource(DataSourceDescriptor dataSourceDescriptor) {
+        SecurityUtil.authorizeFeedAccess(dataSourceDescriptor.getId());
         long userID = SecurityUtil.getUserID();
         long accountID = SecurityUtil.getAccountID();
         EIConnection conn = Database.instance().getConnection();

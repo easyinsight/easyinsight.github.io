@@ -1,9 +1,11 @@
+<!DOCTYPE html>
 <%@ page import="com.easyinsight.dashboard.DashboardService" %>
 <%@ page import="com.easyinsight.dashboard.Dashboard" %>
 <%@ page import="com.easyinsight.preferences.ApplicationSkin" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
-<html>
+<html lang="en">
 <%
     String userName = (String) session.getAttribute("userName");
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
@@ -24,6 +26,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+    <title>Easy Insight &mdash; <%= StringEscapeUtils.escapeHtml(dashboard.getName()) %></title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
 
@@ -129,7 +132,7 @@
         %>
     </div>
     <div style="<%= headerTextStyle %>">
-        <%= dashboard.getName() %>
+        <%= StringEscapeUtils.escapeHtml(dashboard.getName()) %>
     </div>
 </div>
 <div class="container">

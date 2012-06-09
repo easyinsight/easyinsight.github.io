@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <%@ page import="java.text.DateFormat" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="com.easyinsight.users.Account" %>
@@ -7,8 +8,9 @@
 <%@ page import="com.easyinsight.config.ConfigLoader" %>
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
+<html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
@@ -77,7 +79,7 @@
 
         String amount = "1.00";
         String type = "auth";
-        if(account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED) {
+        if(account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED || account.getAccountState() == Account.CLOSED) {
             if(monthly) {
                 amount = String.valueOf(account.monthlyCharge());
             } else {
@@ -122,7 +124,7 @@
             <%--<a class="brand" href="#"><img src="/images/logo3.jpg"/></a>--%>
             <div class="btn-group pull-right">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= userName %>
+                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">

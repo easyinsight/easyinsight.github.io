@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <%@ page import="com.easyinsight.users.UserService" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="org.hibernate.Session" %>
@@ -98,6 +99,7 @@
         return;
     } else if (ua.matches("ipad")) {
         response.sendRedirect("/app/html");
+        return;
     }
     %>
 
