@@ -59,7 +59,7 @@
         System.out.println("Saved account billing info.");
 
         if(!hashed.equals(request.getParameter("hash")) || !request.getParameter("response").equals("1")) {
-            response.sendRedirect("billing.jsp?error=true&responseCode=" + request.getParameter("response_code"));
+            response.sendRedirect("index.jsp?error=true&responseCode=" + request.getParameter("response_code"));
         }
         else if (request.getParameter("response").equals("1")) {
             conn.setSavepoint();

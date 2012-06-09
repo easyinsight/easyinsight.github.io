@@ -1,6 +1,7 @@
 <%@ page import="com.easyinsight.users.UserService" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%
+    request.getSession().removeAttribute("errorString");
     String userName = request.getParameter("userName");
     String password = request.getParameter("password");
     String passwordConfirm = request.getParameter("confirmPassword");
@@ -22,6 +23,8 @@
         request.getSession().setAttribute("errorString", errorString);
         response.sendRedirect("passwordReset.jsp?error=true");
     } else {
+        request.getSession().removeAttribute("resetPassword");
+        request.getSession().removeAttribute("errorString");
         new UserService().resetPassword((String) request.getSession().getAttribute("resetPassword"), userName, password);
         response.sendRedirect("login.jsp");
     }

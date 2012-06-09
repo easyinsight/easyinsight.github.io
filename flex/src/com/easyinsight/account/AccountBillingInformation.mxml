@@ -5,7 +5,7 @@
     </mx:Metadata>
     <mx:VBox verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true" id="coreBox">
         <mx:Label text="In order to finish upgrading your account, you must input your billing information. Click below to go to the billing information page." fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-        <mx:HBox><mx:Button label="Enter Billing Information" click="flash.net.navigateToURL(new URLRequest('billing/billing.jsp'), '_self')" /><mx:Button label="Go Back" click="dispatchEvent(new PreviousPageEvent())" /> </mx:HBox>
+        <mx:HBox><mx:Button label="Enter Billing Information" click="flash.net.navigateToURL(new URLRequest('billing'), '_self')" /><mx:Button label="Go Back" click="dispatchEvent(new PreviousPageEvent())" /> </mx:HBox>
     </mx:VBox>
     <mx:Script><![CDATA[
         import flash.net.URLRequest;
