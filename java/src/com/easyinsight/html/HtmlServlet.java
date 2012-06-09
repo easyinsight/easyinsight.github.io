@@ -119,6 +119,9 @@ public class HtmlServlet extends HttpServlet {
                 }
                 InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                 doStuff(req, resp, insightRequestMetadata, conn, report);
+                resp.setHeader("Cache-Control","no-cache"); //HTTP 1.1
+                resp.setHeader("Pragma","no-cache"); //HTTP 1.0
+                resp.setDateHeader ("Expires", 0); //prevents caching at the proxy server
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
