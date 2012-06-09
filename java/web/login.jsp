@@ -103,7 +103,9 @@
                 <%
                     if (request.getParameter("error") != null) {
                 %>
-                <p class="formAreaP" style="font-size: 12px;padding: 0;margin-bottom: 5px">We didn't recognize the username or password you entered.</p>
+        <fieldset class="control-group error">
+            <label class="formAreaP control-label" style="font-size: 12px;padding: 0;margin-bottom: 5px">We didn't recognize the username or password you entered.</label>
+        </fieldset>
                 <%
                     }
                 %>
