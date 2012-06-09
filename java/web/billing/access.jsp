@@ -1,76 +1,86 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: abaldwin
-  Date: Jun 25, 2009
-  Time: 8:00:43 PM
-  To change this template use File | Settings | File Templates.
---%>
+<%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-<!-- InstanceBeginEditable name="doctitle" -->
-            <title>Easy Insight - Billing Complete</title>
-<!-- InstanceEndEditable -->
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link href="/website.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="/history/history.css" />
-    <link rel="icon" type="image/ico" href="/favicon.ico"/>
-    <script src="/AC_OETags.js" language="javascript"></script>
-    <script src="/history/history.js" language="javascript"></script>
-    <!-- InstanceBeginEditable name="head" -->
-    <!-- InstanceEndEditable -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Easy Insight Sign In</title>
+    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
+
+    <style type="text/css">
+        body {
+            padding-top: 45px;
+            padding-bottom: 40px;
+        }
+    </style>
+    <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
 </head>
+<%
+
+
+
+%>
 <body>
-<div id="allPage">
-    <div id="header">
-        <div id="navigationElements">
-            <div id="topLinks" style="width:100%">
-                <a href="/contactus.html">contact us</a><div></div>
-                <a href="http://jamesboe.blogspot.com/">blog</a><div></div>
-                <a href="/index.html">home</a>
+<%
+    String userName = (String) session.getAttribute("userName");
+    com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+    try {
+
+%>
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container-fluid">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <%--<a class="brand" href="#"><img src="/images/logo3.jpg"/></a>--%>
+            <div class="btn-group pull-right">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="icon-user"></i> <%= userName %>
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
+                </ul>
             </div>
-            <div id="mainLinks" style="width:100%">
-                <a href="/company.html">COMPANY</a><div></div>
-                <a href="/consulting.html">CONSULTING</a><div></div>
-                <!--<a href="index.html">COMMUNITY</a><div></div>-->
-                <a href="/solutions.html">SOLUTIONS</a><div></div>
-                <a href="/product.html">PRODUCT</a><div></div>
-                <a href="/index.html">HOME</a>
+            <div class="nav-collapse">
+                <ul class="nav">
+                    <li class="active"><a href="#">Billing Configuration</a></li>
+                    <li><a href="../html/flashAppAction.jsp">Back to Full Interface</a></li>
+                </ul>
             </div>
         </div>
-        <div id="logo">
-            <img src="/logo2.PNG" alt="Easy Insight Logo"/>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span12">
+            <div style="width:100%;text-align: center">
+                <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
+            </div>
+        </div>
+        <div class="span12">
+            <div class="well" style="text-align:center">
+                <h3>Administrator Privileges Required</h3>
+                <p>You do not have access to change your billing information. Only an account admin can change the billing information on the account.</p>
+            </div>
+
         </div>
     </div>
-    <img src="/redbar.PNG" alt="Red Bar"/>
-    <div id="centerPage">
-        <!-- InstanceBeginEditable name="content" -->
-        <p> You do not have access to change your billing information. Only an account admin can change the billing information. </p>
-        <P><a href="/app">Go back to Main Application</a> </p>
-        <p><a href="/app/#page=account">Go to Account Settings</a></p>
-
-        <!-- InstanceEndEditable -->
-    </div>
-
-    <div id="footer">
-        <div style="width:400px">
-          &copy; 2009 Easy Insight LLC. All rights reserved.
-        </div>
-        <div>
-          <a href="/index.html">Home</a>
-        </div>
-        <div>
-          <a href="/sitemap.html">Site Map</a>
-        </div>
-        <div>
-          <a href="/privacy.html">Privacy Policy</a>
-        </div>
-        <div>
-          <a href="/tos.html">Terms of Service</a>
-        </div>
-    </div>
-
 </div>
 
-    </body>
+<%
+    } finally {
+        SecurityUtil.clearThreadLocal();
+    }
+%>
+</body>
 </html>

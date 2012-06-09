@@ -57,9 +57,24 @@
             <div class="nav-collapse">
                 <ul class="nav">
                     <li class="active"><a href="#">Data Sources</a></li>
-                    <li class="active"><a href="flashAppAction.jsp">Full Interface</a></li>
+                    <li><a href="flashAppAction.jsp">Full Interface</a></li>
                 </ul>
             </div><!--/.nav-collapse -->
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span12">
+            <ul class="breadcrumb">
+                <li>
+                    <a href="#">Home</a> <span class="divider">/</span>
+                </li>
+                <li>
+                    <a href="#">Library</a> <span class="divider">/</span>
+                </li>
+                <li class="active">Data</li>
+            </ul>
         </div>
     </div>
 </div>

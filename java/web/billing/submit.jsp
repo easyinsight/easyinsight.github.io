@@ -13,6 +13,7 @@
 <%@ page import="java.util.Date" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.TimeZone" %>
+<%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -73,7 +74,7 @@
                 response.sendRedirect("access.jsp");
 
             // Set up billing day of month
-            if(account.getAccountState() == Account.DELINQUENT) {
+            if(account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED) {
                 account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
                 if(yearly)
                     account.setBillingMonthOfYear(c.get(Calendar.MONTH));
@@ -141,53 +142,84 @@
 %>
 <html>
 <head>
-<!-- InstanceBeginEditable name="doctitle" -->
-            <title>Easy Insight - Billing Complete</title>
-<!-- InstanceEndEditable -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Easy Insight Sign In</title>
+    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
+
+    <style type="text/css">
+        body {
+            padding-top: 45px;
+            padding-bottom: 40px;
+        }
+    </style>
     <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link type="text/css" rel="stylesheet" media="screen" href="/css/base.css" />
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
 </head>
-<body style="width:100%;text-align:center;margin:0px auto;">
-    <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
-    	<div id="topBar">
-        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
-        <div class="signupHeadline">
-            <a href="https://www.easy-insight.com/app/">Customer Login</a>
-            <a href="/app/newaccount/">Pricing &amp; Signup</a>
-            <a href="/contactus.html">Contacts</a>
-        </div>
-    </div>
-    <div class="headline">
-        <a class="inactive" href="/product.html">Features</a>
-        <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/webanalytics.html">Solutions</a>
-        <a class="inactive" href="/customers.html">Customers</a>
-        <a class="inactive" href="/partners.html">Partners</a>
-        <a class="inactive" href="/company.html">Company</a>
-    </div>
-            <div style="width:100%;background-color:#FFFFFF">
-        <p> You have successfully set up your billing account. You will not be billed until your free trial has expired. </p>
-        <p><a href="/app/#page=account">Go Back</a></p>
-                </div>
-        <!-- InstanceEndEditable -->
-    <div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">
-        <div style="float:right;padding-right:200px;">
-            <span style="font-weight:bold;font-size:12px">Security and Privacy</span>
-            <ul>
-                <li><a href="/terms.html">Terms of Service</a></li>
-                <li><a href="/privacy.html">Privacy Policy</a></li>
-            </ul>
-        </div>
-        <div style="padding-left:180px;">
-            <span style="font-weight:bold;font-size:12px;">About</span>
-            <ul>
-                <li><a href="/company.html">Company Overview</a></li>
-                <li><a href="/whoweare.html">Who We Are</a></li>
-                <li><a href="/contactus.html">Contact Us</a></li>
-            </ul>
+<%
+
+
+
+%>
+<body>
+<%
+    String userName = (String) session.getAttribute("userName");
+    com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+    try {
+
+%>
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container-fluid">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <%--<a class="brand" href="#"><img src="/images/logo3.jpg"/></a>--%>
+            <div class="btn-group pull-right">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="icon-user"></i> <%= userName %>
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
+                </ul>
+            </div>
+            <div class="nav-collapse">
+                <ul class="nav">
+                    <li class="active"><a href="index.jsp">Billing Configuration</a></li>
+                    <li><a href="../html/flashAppAction.jsp">Back to Full Interface</a></li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
-    </body>
+<div class="container">
+    <div class="row">
+        <div class="span12">
+            <div style="width:100%;text-align: center">
+                <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
+            </div>
+        </div>
+        <div class="span12">
+            <div class="well" style="text-align:center">
+                <h3>Billing Successful!</h3>
+                <p>You have successfully set up your billing account. You will not be billed until your free trial has expired.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%
+    } finally {
+        SecurityUtil.clearThreadLocal();
+    }
+%>
+</body>
 </html>

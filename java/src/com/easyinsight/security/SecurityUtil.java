@@ -35,6 +35,17 @@ public class SecurityUtil {
         threadLocal.set(new UserPrincipal(userName, accountID, userID, accountType, accountAdmin, firstDayOfWeek, persona));
     }
 
+    public static void populateSession(HttpSession session, UserServiceResponse userServiceResponse) {
+        session.setAttribute("userName", userServiceResponse.getUserName());
+        session.setAttribute("userID", userServiceResponse.getUserID());
+        session.setAttribute("accountID", userServiceResponse.getAccountID());
+        session.setAttribute("accountAdmin", userServiceResponse.isAccountAdmin());
+        session.setAttribute("accountID", userServiceResponse.getAccountID());
+        session.setAttribute("dayOfWeek", userServiceResponse.getFirstDayOfWeek());
+        session.setAttribute("persona", userServiceResponse.getPersonaName());
+        session.setAttribute("accountType", userServiceResponse.getAccountType());
+    }
+
     public static void populateThreadLocalFromSession(HttpServletRequest request) {
         HttpSession session = request.getSession();
         String userName = (String) session.getAttribute("userName");

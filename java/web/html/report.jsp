@@ -72,6 +72,16 @@
             refreshReport();
         }
 
+        function updateMultiMonth(name) {
+            var startName = name + "start";
+            var endName = name + "end";
+            var startMonth = $("#"+startName).val();
+            var endMonth = $("#"+endName).val();
+            filterBase[name + "start"] = startMonth;
+            filterBase[name + "end"] = endMonth;
+            refreshReport();
+        }
+
         function updateMultiFilter(name) {
             var selects = $("#"+name).val();
             filterBase[name] = selects;
@@ -99,6 +109,16 @@
                 $("#problemHTML").show();
                 $("#problemHTML").html(data["problemHTML"]);
             }
+        }
+
+        function email() {
+            var format = $('input:radio[name=emailGroup]:checked').val();
+            var recipient = $('#input01').val();
+            var subject = $('#input02').val();
+            var body = $('#input03').value;
+            $.getJSON('/app/emailReport?reportID=<%= report.getAnalysisID()%>&format=' + format + "&recipient="+recipient + "&subject=" + subject + "&body=" + body, function(data) {
+                alert('Email sent.');
+            });
         }
 
         function again(callDataID) {
@@ -215,6 +235,13 @@
     <div class="modal-body">
     <form class="form-horizontal">
         <div class="control-group">
+            <%--<label class="control-label" for="input01">Which format?</label>--%>
+            <div class="controls">
+                <input type="radio" name="emailGroup" value="4">HTML
+                <input type="radio" name="emailGroup" value="1">Excel
+            </div>
+        </div>
+        <div class="control-group">
             <label class="control-label" for="input01">Who will this email go to?</label>
             <div class="controls">
                 <input type="text" class="input-xlarge" id="input01">
@@ -235,7 +262,7 @@
     </form>
     </div>
     <div class="modal-footer">
-        <a href="#" class="btn" onclick="">Send</a>
+        <button class="btn" data-dismiss="modal" onclick="email()">Send</button>
     </div>
 </div>
 <% if (applicationSkin != null && applicationSkin.isReportHeader()) { %>

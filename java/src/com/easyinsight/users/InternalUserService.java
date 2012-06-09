@@ -21,7 +21,8 @@ import java.util.ArrayList;
  */
 public class InternalUserService {
 
-    public User validateCookie(String cookie, String userName, EIConnection conn, Session session) throws SQLException {
+    @Nullable
+    public UserServiceResponse validateCookie(String cookie, String userName, EIConnection conn, Session session) throws SQLException {
 
             PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.USER_ID FROM USER_SESSION, USER WHERE USER_SESSION.user_id = user.user_id and " +
                     "user_session.session_number = ? AND user.username = ?");
@@ -36,8 +37,8 @@ public class InternalUserService {
         if (userID == 0) {
             return null;
         }
-        return (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
-
+        User user = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+        return UserServiceResponse.createResponse(user, session, conn);
     }
 
     public String createCookie(long userID) throws SQLException {

@@ -701,12 +701,27 @@ public class Account {
 
     public String billingIntroParagraph() {
         if (accountState == Account.TRIAL) {
-            return "Please input your billing information below. Your first billing cycle will start upon completion of any remaining trial time. Easy Insight does not offer any type of refund after billing.";    
-        } else if (accountState == Account.DELINQUENT || accountState == Account.CLOSING || accountState == Account.CLOSED || accountState == Account.BILLING_FAILED) {
-            return "Please input your billing information below. Your card will be billed upon submit. Easy Insight does not offer any type of refund after billing.";
+            return "Please input your billing information below. Your first billing cycle will start upon completion of any remaining trial time. Easy Insight does not offer any type of refund after billing.";
+        } else if (accountState == Account.DELINQUENT || accountState == Account.CLOSING || accountState == Account.CLOSED) {
+            return "Your free 30 day trial has expired. Please input your billing information below. Your card will be billed upon submit. Easy Insight does not offer any type of refund after billing.";
+        } else if (accountState == Account.BILLING_FAILED) {
+            return "Recurring billing for your account failed. Please input updated billing information below. Your card will be billed upon submit. Easy Insight does not offer any type of refund after billing.";
         } else if (accountState == Account.ACTIVE) {
             return "Please input your updated billing information below. The new card will be billed as per your normal billing cycle. Easy Insight does not offer any type of refund after billing.";
         }
         return "Please input your billing information below. Your card will be billed upon submit. Easy Insight does not offer any type of refund after billing.";
+    }
+
+    public String billingHeader() {
+        if (accountState == Account.TRIAL) {
+            return "";
+        } else if (accountState == Account.DELINQUENT) {
+            return "Your Free Trial Has Expired";
+        } else if (accountState == Account.BILLING_FAILED) {
+            return "Recurring Billing Failed";
+        } else if (accountState == Account.ACTIVE) {
+            return "";
+        }
+        return "";
     }
 }

@@ -3,6 +3,8 @@
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page import="com.easyinsight.users.InternalUserService" %>
+<%@ page import="com.easyinsight.users.UserServiceResponse" %>
+<%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html>
 <head>
@@ -51,20 +53,15 @@
         Session hibernateSession = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
-            User user = new InternalUserService().validateCookie(cookieValue, userName, conn, hibernateSession);
-            if (user != null) {
-                long accountID = user.getAccount().getAccountID();
-                session.setAttribute("accountID", accountID);
-                session.setAttribute("userID", user.getUserID());
-                session.setAttribute("accountType", user.getAccount().getAccountType());
-                session.setAttribute("userName", userName);
-                session.setAttribute("dayOfWeek", user.getAccount().getFirstDayOfWeek());
+            UserServiceResponse userServiceResponse = new InternalUserService().validateCookie(cookieValue, userName, conn, hibernateSession);
+            if (userServiceResponse != null) {
+                SecurityUtil.populateSession(session, userServiceResponse);
                 response.addCookie(new Cookie("eiUserName", userName));
-                response.addCookie(new Cookie("eiRememberMe", new InternalUserService().createCookie(user.getUserID(), conn)));
+                response.addCookie(new Cookie("eiRememberMe", new InternalUserService().createCookie(userServiceResponse.getUserID(), conn)));
                 response.sendRedirect("/app/");
             }
             conn.commit();
-            if (user != null) {
+            if (userServiceResponse != null) {
                 return;
             }
         } catch (Exception e) {

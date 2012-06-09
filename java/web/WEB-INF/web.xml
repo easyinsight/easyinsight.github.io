@@ -31,11 +31,13 @@
     <filter-mapping>
         <filter-name>Auth</filter-name>
         <url-pattern>/html/*</url-pattern>
+        <url-pattern>/billing/*</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
         <filter-name>NoCache</filter-name>
         <url-pattern>/html/*</url-pattern>
+        <url-pattern>/billing/*</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
