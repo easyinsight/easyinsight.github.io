@@ -23,6 +23,10 @@ public class AuthFilter implements Filter {
             if (session != null) {
                 authorized = (session.getAttribute("accountID") != null);
             }
+            if(!authorized) {
+                session = ((HttpServletRequest) servletRequest).getSession(true);
+                session.setAttribute("loginRedirect", ((HttpServletRequest) servletRequest).getRequestURI());
+            }
         }
         if (authorized) {
             filterChain.doFilter(servletRequest, servletResponse);

@@ -34,11 +34,14 @@
                 tokenCookie.setMaxAge(60 * 60 * 24 * 30);
                 response.addCookie(tokenCookie);
             }
-            if (urlHash == null) {
-                response.sendRedirect("/app/");
-            } else {
-                response.sendRedirect("/app/" + urlHash);
+            String redirectUrl = "/app/";
+            if(session.getAttribute("loginRedirect") != null) {
+               redirectUrl = ((String) session.getAttribute("loginRedirect"));
+               session.removeAttribute("loginRedirect");
             }
+            if(urlHash != null)
+               redirectUrl = redirectUrl + urlHash;
+            response.sendRedirect(redirectUrl);
         }
     }
 %>
