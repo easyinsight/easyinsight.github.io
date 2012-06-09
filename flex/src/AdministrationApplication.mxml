@@ -40,6 +40,9 @@
         import com.easyinsight.administration.ReportTestWindow;
         import com.easyinsight.administration.UpdateZipsWindow;
         import com.easyinsight.customupload.UploadExternalSource;
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.LoginObject;
+        import com.easyinsight.framework.LoginResponse;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
         import com.easyinsight.skin.GlobalSkinWindow;
@@ -151,12 +154,30 @@
         }
 
 
-        private function sessionCheck():void {
-            var authResult:UserServiceResponse = authService.isSessionLoggedIn.lastResult as UserServiceResponse;
-            if (authResult != null && authResult.accountType == Account.ENTERPRISE + 1) {
+        private function onLogin(event:LoginEvent):void {
+            var authResult:UserServiceResponse = event.authResponse;
+            if (authResult.accountType == Account.ADMINISTRATOR) {
                 User.initializeUser(authResult);
                 User.getInstance().userName = authResult.userName;
                 currentState = "loggedIn";
+            }
+        }
+
+        private var loginObject:LoginObject;
+
+        private function sessionCheck():void {
+            var loginResponse:LoginResponse = authService.isSessionLoggedIn.lastResult as LoginResponse;
+            if (loginResponse != null && loginResponse.token != null) {
+                loginObject = new LoginObject();
+                loginObject.addEventListener(LoginEvent.LOGIN, onLogin);
+                loginObject.authenticate(loginResponse.token, loginResponse.userIDString, loginResponse.userServiceResponse);
+            } else if (loginResponse != null) {
+                var authResult:UserServiceResponse = loginResponse.userServiceResponse;
+                if (authResult.accountType == Account.ADMINISTRATOR) {
+                    User.initializeUser(authResult);
+                    User.getInstance().userName = authResult.userName;
+                    currentState = "loggedIn";
+                }
             }
         }
 
@@ -218,12 +239,5 @@
             </mx:FormItem>
         </mx:Form>
     </mx:VBox>
-
-    <!-- <mx:Canvas id="coreCanvas" width="100%" height="100%">
-		<mx:TabNavigator id="coreTabNavigator" width="100%" creationPolicy="all" tabChildrenChange="tabChanged()">
-			<genres:GenreAdministrationPanel label="Catalog" id="catalogAdmin"/>
-			<mx:HBox label="System Health" id="systemHealth"/>
-		</mx:TabNavigator>	
-	</mx:Canvas>-->
 
 </mx:Application>

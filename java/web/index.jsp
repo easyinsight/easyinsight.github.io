@@ -55,7 +55,7 @@
         return;
     }
     long userID = (Long) session.getAttribute("userID");
-    EIConnection conn = Database.instance().getConnection();
+    /*EIConnection conn = Database.instance().getConnection();
     try {
         PreparedStatement ps = conn.prepareStatement("SELECT html_or_flex FROM USER WHERE user_id = ?");
         ps.setLong(1, userID);
@@ -68,7 +68,7 @@
         }
     } finally {
         Database.closeConnection(conn);
-    }
+    }*/
     String versionDir = new com.easyinsight.users.UserService().getBuildPath().getVersion();
     boolean isSubdomain = request.getParameterMap().containsKey("subdomain");
     String subdomain = request.getParameter("subdomain");
