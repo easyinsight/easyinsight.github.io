@@ -47,6 +47,9 @@ public class PDFServlet extends HttpServlet {
                     resp.setContentLength(bytes.length);
                     reportName = URLEncoder.encode(reportName, "UTF-8");
                     resp.setHeader("Content-disposition","attachment; filename=" + reportName+".pdf" );
+                    resp.setHeader("Cache-Control","no-cache"); //HTTP 1.1
+                    resp.setHeader("Pragma","no-cache"); //HTTP 1.0
+                    resp.setDateHeader ("Expires", 0); //prevents caching at the proxy server
                     resp.getOutputStream().write(bytes);
                     resp.getOutputStream().flush();
                 }

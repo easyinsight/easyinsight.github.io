@@ -24,6 +24,7 @@ public class HtmlExportServlet extends HtmlServlet {
             html = re.getReportFault().toHTML();
         }
         response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
         response.getOutputStream().write(html.getBytes());
         response.getOutputStream().flush();
     }
