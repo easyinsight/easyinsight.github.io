@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.Value;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
@@ -163,12 +162,14 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toHTML(WSAnalysisDefinition report) {
+    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
         String filterName = "filter"+getFilterID();
-        String onChange = "updateFilter('filter" + getFilterID() + "')";
-        sb.append(label());
-        sb.append("<select id=\""+filterName+"\" onchange=\""+onChange+"\">");
+        String key = filterHTMLMetadata.getFilterKey();
+        String function = filterHTMLMetadata.createOnChange();
+        String onChange = "updateFilter('" + filterName + "','" + key + "', " + function + ")";
+        sb.append(label(true));
+        sb.append("<select class=\"filterSelect\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
         for (AnalysisItem analysisItem : getAvailableItems()) {
             if (availableItems.equals(targetItem)) {
                 sb.append("<option selected=\"selected\" value=\""+analysisItem.getAnalysisItemID()+"\">").append(analysisItem.toDisplay()).append("</option>");

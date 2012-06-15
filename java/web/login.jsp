@@ -83,7 +83,17 @@
 
             <form class="well" method="post" action="loginAction.jsp" style="width:100%" id="loginForm" onsubmit="preserveHash()">
                 <div style="width:100%;text-align: center">
+                    <%
+                        if (request.getParameter("subdomain") != null) {
+                            %>
+                    <img src="/whiteLabelImage" alt="Logo Image"/>
+                    <%
+                        } else {
+                    %>
                     <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
+                    <%
+                        }
+                    %>
                 </div>
 
                 <input type="hidden" id="urlhash" name="urlhash"/>

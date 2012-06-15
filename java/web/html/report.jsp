@@ -41,6 +41,7 @@
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
+
     <link href="/css/dark-hive/jquery-ui-1.8.20.custom.css" rel="stylesheet">
 
     <style type="text/css">
@@ -58,6 +59,7 @@
         }
     </style>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
     <%= report.javaScriptIncludes() %>
     <script type="text/javascript">
@@ -68,39 +70,70 @@
             refreshReport();
         });
 
-        function updateFilter(name) {
+        function updateFilter(name, key, refreshFunction) {
             var optionMenu = document.getElementById(name);
             var chosenOption = optionMenu.options[optionMenu.selectedIndex];
-            filterBase[name] = chosenOption.value;
-            refreshReport();
+            var keyedFilter = filterBase[key];
+            if (keyedFilter == null) {
+                keyedFilter = {};
+                filterBase[key] = keyedFilter;
+            }
+            keyedFilter[name] = chosenOption.value;
+            refreshFunction();
         }
 
-        function updateRollingFilter(name) {
+        function updateRollingFilter(name, key, refreshFunction) {
             var optionMenu = document.getElementById(name);
             var chosenOption = optionMenu.value;
-            if (chosenOption == '18') {
-                filterBase[name + "direction"] = document.getElementById('customDirection' + name).value;
-                filterBase[name + "value"] = document.getElementById('customValue' + name).value;
-                filterBase[name + "interval"] = document.getElementById('customInterval' + name).value;
+            var keyedFilter = filterBase[key];
+            if (keyedFilter == null) {
+                keyedFilter = {};
+                filterBase[key] = keyedFilter;
             }
-            filterBase[name] = chosenOption;
-            refreshReport();
+            if (chosenOption == '18') {
+                keyedFilter[name + "direction"] = document.getElementById('customDirection' + name).value;
+                keyedFilter[name + "value"] = document.getElementById('customValue' + name).value;
+                keyedFilter[name + "interval"] = document.getElementById('customInterval' + name).value;
+            }
+            keyedFilter[name] = chosenOption;
+            refreshFunction();
         }
 
-        function updateMultiMonth(name) {
+        function updateMultiMonth(name, key, refreshFunction) {
             var startName = name + "start";
             var endName = name + "end";
             var startMonth = $("#"+startName).val();
             var endMonth = $("#"+endName).val();
-            filterBase[name + "start"] = startMonth;
-            filterBase[name + "end"] = endMonth;
-            refreshReport();
+            var keyedFilter = filterBase[key];
+            if (keyedFilter == null) {
+                keyedFilter = {};
+                filterBase[key] = keyedFilter;
+            }
+            keyedFilter[name + "start"] = startMonth;
+            keyedFilter[name + "end"] = endMonth;
+            refreshFunction();
         }
 
-        function updateMultiFilter(name) {
+        function updateMultiFilter(name, key, refreshFunction) {
+            var keyedFilter = filterBase[key];
+            if (keyedFilter == null) {
+                keyedFilter = {};
+                filterBase[key] = keyedFilter;
+            }
             var selects = $("#"+name).val();
-            filterBase[name] = selects;
-            refreshReport();
+            keyedFilter[name] = selects;
+            refreshFunction();
+        }
+
+        function filterEnable(name, key, refreshFunction) {
+            var keyedFilter = filterBase[key];
+            if (keyedFilter == null) {
+                keyedFilter = {};
+                filterBase[key] = keyedFilter;
+            }
+            keyedFilter[name + "enabled"] = document.getElementById(name + 'enabled').checked;
+
+            refreshFunction();
         }
 
         function refreshDataSource() {
@@ -144,17 +177,15 @@
             }, 5000);
         }
 
-        function filterEnable(name) {
-            filterBase[name + "enabled"] = document.getElementById(name + 'enabled').checked;
-            refreshReport();
-        }
-
         function refreshReport() {
             $('#refreshingReport').modal(true, true, true);
             var strParams = "";
-            for (var filterValue in filterBase) {
-                var value = filterBase[filterValue];
-                strParams += filterValue + "=" + value + "&";
+            for (var key in filterBase) {
+                var keyedFilter = filterBase[key];
+                for (var filterValue in keyedFilter) {
+                    var value = keyedFilter[filterValue];
+                    strParams += filterValue + "=" + value + "&";
+                }
             }
             <%= report.toHTML("reportTarget") %>
         }
@@ -317,7 +348,7 @@
             <%
                 for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
                     if (filterDefinition.isShowOnReportView()) {
-                        out.println("<div style=\"float:left\">" + filterDefinition.toHTML(report) + "</div>");
+                        out.println("<div class=\"filterDiv\">" + filterDefinition.toHTML(new FilterHTMLMetadata(report)) + "</div>");
                     }
                 }
             %>

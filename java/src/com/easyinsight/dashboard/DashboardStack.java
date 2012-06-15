@@ -2,16 +2,15 @@ package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.analysis.FilterHTMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.scorecard.Scorecard;
 import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.*;
 
 /**
@@ -153,6 +152,7 @@ public class DashboardStack extends DashboardElement {
                 DashboardStackItem item = new DashboardStackItem();
                 item.setPosition(itemRS.getInt(3));
                 item.setDashboardElement(DashboardStorage.getElement(conn, gridElementID, elementType));
+                item.getDashboardElement().setParentElement(dashboardGrid);
                 items.add(item);
             }
             gridItemStmt.close();
@@ -227,18 +227,50 @@ public class DashboardStack extends DashboardElement {
         }
     }
 
+    public String refreshFunction() {
+        if (gridItems.size() == 1) {
+            String refreshFunction = gridItems.get(0).getDashboardElement().refreshFunction();
+            return refreshFunction.substring(0, refreshFunction.length() - 2);
+        } else {
+            String stackID = "stack" + getElementID();
+            return "update" + stackID;
+        }
+    }
+
     @Override
-    public String toHTML() {
+    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
+        //sb.append("<div>");
+        String stackID = "stack" + getElementID();
+        if (getFilters() != null) {
+            for (FilterDefinition filter : getFilters()) {
+                if (filter.isShowOnReportView()) {
+                    FilterHTMLMetadata metadata = new FilterHTMLMetadata(filterHTMLMetadata.getDashboard());
+                    if (gridItems.size() > 1) {
+                        metadata.setOnChange("update" + stackID + "");
+                    } else {
+                        String refreshFunction = gridItems.get(0).getDashboardElement().refreshFunction();
+                        refreshFunction = refreshFunction.substring(0, refreshFunction.length() - 2);
+                        metadata.setOnChange(refreshFunction);
+                    }
+
+                    //
+
+                    //metadata.setOnChange("update" + stackID + "");
+                    metadata.setFilterKey(stackID);
+                    sb.append("<div class=\"filterDiv\">").append(filter.toHTML(metadata)).append("</div>");
+                }
+            }
+        }
         if (gridItems.size() > 1) {
             sb.append("<div class=\"tabbable\">");
-            sb.append("<ul class=\"nav nav-pills\">");
+            sb.append("<ul style=\"text-align:right\" class=\"nav nav-pills\" id=\"").append(stackID).append("\">");
             for (int i = 0; i < gridItems.size(); i++) {
                 DashboardStackItem item = gridItems.get(i);
                 if (i == 0) {
-                    sb.append("<li class=\"active\">");
+                    sb.append("<li style=\"float:none;display:inline-block;\" class=\"active\">");
                 } else {
-                    sb.append("<li>");
+                    sb.append("<li style=\"float:none;display:inline-block;\">");
                 }
                 String label;
                 if (item.getDashboardElement() instanceof DashboardReport) {
@@ -246,11 +278,22 @@ public class DashboardStack extends DashboardElement {
                 } else {
                     label = item.getDashboardElement().getLabel();
                 }
-                sb.append("<a data-toggle=\"tab\" href=\"#"+i+"\">").append(label).append("</a>");
+                sb.append("<a data-toggle=\"tab\" href=\"#ds").append(item.getDashboardElement().getElementID()).append("\">").append(label).append("</a>");
                 sb.append("</li>");
             }
             sb.append("</ul>");
             sb.append("<div class=\"tab-content\">");
+            for (int i = 0; i < gridItems.size(); i++) {
+                DashboardStackItem item = gridItems.get(i);
+                if (i == 0) {
+                    sb.append("<div class=\"tab-pane active\"");
+                } else {
+                    sb.append("<div class=\"tab-pane\"");
+                }
+                sb.append(" id=\"").append("ds").append(item.getDashboardElement().getElementID()).append("\"></div>");
+            }
+            sb.append("</div>");
+            /*sb.append("<div class=\"tab-content\">");
             for (int i = 0; i < gridItems.size(); i++) {
                 DashboardStackItem item = gridItems.get(i);
                 if (i == 0) {
@@ -260,12 +303,64 @@ public class DashboardStack extends DashboardElement {
                 }
                 sb.append(item.getDashboardElement().toHTML());
                 sb.append("</div>");
+            }*/
+            sb.append("</div>");
+            String globalVar = "var state" + stackID + " = 'ds" + gridItems.get(0).getDashboardElement().getElementID() + "';\n";
+            String update = "function update" + stackID + "() {\n";
+            for (int i = 0; i < gridItems.size(); i++) {
+                DashboardStackItem item = gridItems.get(i);
+                if (i == 0) {
+                    update += "if (state" + stackID + " == 'ds" + item.getDashboardElement().getElementID() + "') {\n";
+                } else {
+                    update += "else if (state" + stackID + " == 'ds" + item.getDashboardElement().getElementID() + "') {\n";
+                }
+                update += item.getDashboardElement().refreshFunction()+"\n";
+                update += "}\n";
             }
-            sb.append("</div>");
-            sb.append("</div>");
+            update += "}";
+
+            sb.append("\n<script type=\"text/javascript\">\n");
+            sb.append(globalVar);
+            sb.append(update);
+            sb.append("    $(function() {\n" +
+                    "        $('#ds"+gridItems.get(0).getDashboardElement().getElementID()+"').load('/app/dashboardPiece?dashboardElementID="+gridItems.get(0).getDashboardElement().getElementID()+"&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"', function() {\n" +
+                    "            $('#"+stackID+"').tab(); //initialize tabs\n" +
+                    "        });    \n" +
+                    "        $('#"+stackID+"').bind('show', function(e) {    \n" +
+                    "           var pattern=/#.+/gi //use regex to get anchor(==selector)\n" +
+                    "           var contentID = e.target.toString().match(pattern)[0]; //get anchor         \n" +
+                    "            $(contentID).load('/app/dashboardPiece?dashboardElementID=' + contentID.replace('#', '')+'&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"', function(){\n" +
+                    "                $('#"+stackID+"').tab(); //reinitialize tabs\n" +
+                    "state" + stackID + " = contentID.replace('#', '');\n" +
+                    "            });\n" +
+                    "        });\n" +
+                    "    });\n" +
+                    "</script>");
         } else {
-            sb.append(gridItems.get(0).getDashboardElement().toHTML());
+            sb.append("<div style=\"float:left;clear:left;width:100%;height:100%\">");
+            sb.append(gridItems.get(0).getDashboardElement().toHTML(filterHTMLMetadata));
+            sb.append("</div>");
         }
+        //sb.append("</div>");
         return sb.toString();
+    }
+
+    @Override
+    public Collection<? extends FilterDefinition> filtersForReport(long reportID) {
+        for (DashboardStackItem stackItem : getGridItems()) {
+            Collection<? extends FilterDefinition> filters = stackItem.getDashboardElement().filtersForReport(reportID);
+            if (filters != null) {
+                return filters;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void populateFilters(List<FilterDefinition> parentFilters) {
+        if (getFilters() != null) {
+            parentFilters.addAll(getFilters());
+        }
+        super.populateFilters(parentFilters);
     }
 }

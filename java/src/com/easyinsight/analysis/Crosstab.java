@@ -238,6 +238,8 @@ public class Crosstab {
         }
 
         if (crosstabDefinition.getMeasures().size() == 1) {
+            AggregationFactory totalAggregationFactory = new AggregationFactory((AnalysisMeasure) crosstabDefinition.getMeasures().get(0), false);
+            Aggregation totalAggregation = totalAggregationFactory.getAggregation();
             for (int j = 0; j < rowSections.size(); j++) {
                 Section rowSection = rowSections.get(j);
                 double sum = 0;
@@ -266,7 +268,9 @@ public class Crosstab {
                     }
                 }
                 array[j + crosstabDefinition.getColumns().size() + rowOffset][columnSections.size() + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true, crosstabDefinition.getMeasures().get(0));
+                totalAggregation.addValue(new NumericValue(sum));
             }
+            array[rowSections.size() + rowOffset + crosstabDefinition.getColumns().size()][columnSections.size() + crosstabDefinition.getRows().size()] = new CrosstabValue(totalAggregation.getValue(), null, false, true, crosstabDefinition.getMeasures().get(0));
         }
 
 

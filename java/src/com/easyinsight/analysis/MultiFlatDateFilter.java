@@ -77,7 +77,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
     }
 
     @Override
-    public String toHTML(WSAnalysisDefinition report) {
+    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
         String divID = "filter" + getFilterID() + "div";
         String filterName = "filter" + getFilterID();
@@ -120,13 +120,13 @@ public class MultiFlatDateFilter extends FilterDefinition {
         sb.append("</div>");
         sb.append("</div>");
         sb.append("<div class=\"modal-footer\">\n" +
-                "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiMonth('"+filterName+"')\">Save</button>\n" +
+                "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiMonth('"+filterName+"','"+filterHTMLMetadata.getFilterKey()+"',"+filterHTMLMetadata.createOnChange()+")\">Save</button>\n" +
                 "        <button class=\"btn\" data-dismiss=\"modal\" type=\"button\">Cancel</button>\n" +
                 "    </div>");
         sb.append("</div>");
-        sb.append("<div style=\"margin-left:5px;margin-top:8px;margin-right:5px\">");
+        sb.append("<div class=\"filterLabel\">");
         if (!isToggleEnabled()) {
-            sb.append(checkboxHTML());
+            sb.append(checkboxHTML(filterHTMLMetadata.getFilterKey(), filterHTMLMetadata.createOnChange()));
         }
         /*String flatLabel;
         if (getLevels().isEmpty()) {
@@ -143,7 +143,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
                 flatLabel = firstMonth + " to " + endMonth;
             }
         }*/
-        sb.append("<a href=\"#"+divID+"\" data-toggle=\"modal\">").append(label()).append("</a></div>");
+        sb.append("<a href=\"#"+divID+"\" data-toggle=\"modal\">").append(label(false)).append("</a></div>");
         return sb.toString();
     }
 }

@@ -143,19 +143,58 @@ public class DashboardReport extends DashboardElement {
         return descs;
     }
 
-    public String toHTML() {
+    public String refreshFunction() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("renderReport").append(report.getId()).append("()");
+        return sb.toString();
+    }
+
+
+    @Override
+    public Collection<? extends FilterDefinition> filtersForReport(long reportID) {
+        if (reportID == report.getId()) {
+            List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
+            populateFilters(filterDefinitions);
+            return filterDefinitions;
+        }
+        return null;
+    }
+
+    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
+
+        // recurse back up to the top level...
+
+
+
         StringBuilder sb = new StringBuilder();
         WSAnalysisDefinition reportDefinition = new AnalysisService().openAnalysisDefinition(report.getId());
         String div = "reportTarget" + report.getId();
         sb.append("<script type=\"text/javascript\">\n").append("function renderReport").append(report.getId()).append("() {");
+
+        // not only do we need the report's filters, we need all filters in the chain above this report
+
         sb.append("var strParams = \"\";\n" +
-                "            for (var filterValue in filterBase) {\n" +
-                "                var value = filterBase[filterValue];\n" +
-                "                strParams += filterValue + \"=\" + value + \"&\";\n").append("}\n");
+                "            for (var key in filterBase) {\n" +
+                "                var keyedFilter = filterBase[key];\n" +
+                "                for (var filterValue in keyedFilter) {\n" +
+                "                    var value = keyedFilter[filterValue];\n" +
+                "                    strParams += filterValue + \"=\" + value + \"&\";\n" +
+                "                }\n" +
+                "strParams += 'dashboardID="+filterHTMLMetadata.getDashboard().getId() + "&';\n"+
+                "            }");
         sb.append(reportDefinition.toHTML(div));
         sb.append("}");
+        // $(document).ready(refreshReport('reportTarget517'))
+        // refreshReport('div,
         sb.append("$(document).ready(").append("renderReport").append(report.getId()).append("());");
         sb.append("</script>\n");
+        sb.append("<div class=\"filterDiv\">");
+        for (FilterDefinition filterDefinition : reportDefinition.getFilterDefinitions()) {
+            if (filterDefinition.isShowOnReportView()) {
+                sb.append(filterDefinition.toHTML(new FilterHTMLMetadata(reportDefinition)));
+            }
+        }
+        sb.append("</div>");
         sb.append("<div id=\"").append(div).append("\"></div>");
         /*sb.append("<script type=\"text/javascript\">\n" +
                 "                    $(document).ready(refreshReport('#reportTarget"+report.getId()+"', "+report.getId()+"));\n" +

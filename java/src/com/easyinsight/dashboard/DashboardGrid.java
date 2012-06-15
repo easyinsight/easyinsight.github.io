@@ -2,6 +2,7 @@ package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.FilterHTMLMetadata;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -199,7 +200,7 @@ public class DashboardGrid extends DashboardElement {
         return descs;
     }
 
-    public String toHTML() {
+    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
         sb.append("<table style=\"width:100%\">\r\n");
         for (int i = 0; i < rows; i++) {
@@ -207,7 +208,7 @@ public class DashboardGrid extends DashboardElement {
             for (int j = 0; j < columns; j++) {
                 sb.append("<td style=\"width:50%\">\r\n");
                 DashboardGridItem item = findItem(i, j);
-                sb.append(item.getDashboardElement().toHTML());
+                sb.append(item.getDashboardElement().toHTML(filterHTMLMetadata));
                 sb.append("</td>\r\n");
             }
             sb.append("</tr>\r\n");

@@ -376,4 +376,8 @@ public class Dashboard implements Cloneable {
         }
         return eiDescs;
     }
+
+    public Collection<? extends FilterDefinition> filtersForReport(long reportID) {
+        return getRootElement().filtersForReport(reportID);
+    }
 }

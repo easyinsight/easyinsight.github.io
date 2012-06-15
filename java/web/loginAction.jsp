@@ -21,6 +21,8 @@
             response.sendRedirect("/app/billing/billing.jsp");
         } else if (userServiceResponse.getAccountState() == Account.BILLING_FAILED) {
             response.sendRedirect("/app/billing/billing.jsp");
+        } else if (userServiceResponse.getAccountState() == Account.INACTIVE) {
+            response.sendRedirect("/app/reactivate.jsp");
         } else {
             String urlHash = request.getParameter("urlhash");
             String rememberMe = request.getParameter("rememberMeCheckbox");

@@ -69,13 +69,14 @@ public class FlatDateFilter extends FilterDefinition {
     }
 
     @Override
-    public String toHTML(WSAnalysisDefinition report) {
+    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
         String filterName = "filter"+getFilterID();
-        String onChange = "updateFilter('filter" + getFilterID() + "')";
-        sb.append(label());
+        String onChange = "updateFilter('filter" + getFilterID() + "','"+filterHTMLMetadata.getFilterKey()+"',"+filterHTMLMetadata.createOnChange()+")";
+        sb.append(label(true));
         sb.append("<select style=\"margin-left:5px;margin-top:5px;margin-right:5px\" id=\"").append(filterName).append("\" onchange=\"").append(onChange).append("\">");
-        AnalysisDateDimensionResultMetadata metadata = (AnalysisDateDimensionResultMetadata) new DataService().getAnalysisItemMetadata(report.getDataFeedID(), getField(), 0, 0, 0, report);
+        AnalysisDateDimensionResultMetadata metadata = (AnalysisDateDimensionResultMetadata) new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(),
+                getField(), 0, 0, 0, filterHTMLMetadata.getReport());
         Date earliestDate = metadata.getEarliestDate();
         Date latestDate = metadata.getLatestDate();
         Calendar cal = Calendar.getInstance();

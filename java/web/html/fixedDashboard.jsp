@@ -138,7 +138,7 @@
 <div class="container">
     <div class="row">
         <div class="span12">
-            <%= dashboard.getRootElement().toHTML() %>
+            <%= dashboard.getRootElement().toHTML(filterHTMLMetadata) %>
         </div>
     </div>
 </div>

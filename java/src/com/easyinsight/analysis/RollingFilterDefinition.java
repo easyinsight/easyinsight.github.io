@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.Value;
 import com.easyinsight.core.XMLMetadata;
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -141,11 +140,13 @@ public class RollingFilterDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toHTML(WSAnalysisDefinition report) {
+    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
         String filterName = "filter"+getFilterID();
-        String onChange = "changeRolling"+getFilterID()+"();updateRollingFilter('filter" + getFilterID() + "')";
-        String customOnChange = "updateRollingFilter(\\'filter" + getFilterID() + "\\')";
+        String key = filterHTMLMetadata.getFilterKey();
+        String function = filterHTMLMetadata.createOnChange();
+        String onChange = "changeRolling"+getFilterID()+"();updateRollingFilter('filter" + getFilterID() + "','" + key + "', " + function + ")";
+        String customOnChange = "updateRollingFilter(\\'filter" + getFilterID() + "\\', \\'"+key + "\\',\\'"+function+"\\')";
         sb.append("<script type=\"text/javascript\">\n");
         sb.append("function changeRolling"+getFilterID()+"() {");
         sb.append("var menu = document.getElementById('" + filterName + "');");
@@ -173,8 +174,8 @@ public class RollingFilterDefinition extends FilterDefinition {
         sb.append("}");
         sb.append("</script>");
         sb.append("<div>");
-        sb.append(label());
-        sb.append("<select style=\"margin-left:5px;margin-top:5px;margin-right:5px;width:130px\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
+        sb.append(label(true));
+        sb.append("<select class=\"filterSelect\" style=\"width:130px\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
         StringBuilder optionBuilder = new StringBuilder();
         optionBuilder.append("<option value=\"19\">All</option>");
         optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.DAY+"\">Last Day</option>");

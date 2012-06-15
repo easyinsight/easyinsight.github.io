@@ -3,6 +3,7 @@ package com.easyinsight.dashboard;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.analysis.FilterHTMLMetadata;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -45,10 +46,20 @@ public abstract class DashboardElement implements Cloneable {
     private int headerBackgroundColor;
     private double headerBackgroundAlpha;
 
+    private DashboardElement parentElement;
+
     private int preferredWidth;
     private int preferredHeight;
 
-    public String toHTML() {
+    public DashboardElement getParentElement() {
+        return parentElement;
+    }
+
+    public void setParentElement(DashboardElement parentElement) {
+        this.parentElement = parentElement;
+    }
+
+    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         return "";
     }
 
@@ -191,7 +202,7 @@ public abstract class DashboardElement implements Cloneable {
     public void loadElement(long elementID, EIConnection conn) throws SQLException {
         PreparedStatement loadStmt = conn.prepareStatement("SELECT LABEL, FILTER_BORDER_STYLE, FILTER_BORDER_COLOR, filter_background_color, filter_background_alpha," +
                 "padding_left, padding_right, padding_top, padding_bottom, header_image_id, user_image.image_name, header_background_color, header_background_alpha," +
-                "preferred_width, preferred_height from dashboard_element " +
+                "preferred_width, preferred_height, dashboard_element_id from dashboard_element " +
                 "left join user_image on dashboard_element.header_image_id = user_image.user_image_id where " +
                 "dashboard_element_id = ?");
         loadStmt.setLong(1, elementID);
@@ -222,7 +233,8 @@ public abstract class DashboardElement implements Cloneable {
         setHeaderBackgroundColor(rs.getInt(i++));
         setHeaderBackgroundAlpha(rs.getDouble(i++));
         setPreferredWidth(rs.getInt(i++));
-        setPreferredHeight(rs.getInt(i));
+        setPreferredHeight(rs.getInt(i++));
+        setElementID(rs.getLong(i));
         loadStmt.close();
     }
 
@@ -286,5 +298,19 @@ public abstract class DashboardElement implements Cloneable {
 
     public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {
         return new ArrayList<EIDescriptor>();
+    }
+
+    public String refreshFunction() {
+        return "";
+    }
+
+    public void populateFilters(List<FilterDefinition> parentFilters) {
+        if (getParentElement() != null) {
+            getParentElement().populateFilters(parentFilters);
+        }
+    }
+
+    public Collection<? extends FilterDefinition> filtersForReport(long reportID) {
+        return null;
     }
 }

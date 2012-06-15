@@ -138,4 +138,15 @@ public class OrFilter extends FilterDefinition {
         }
         return items;
     }
+
+    @Override
+    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<div class=\"orFilterBox\">");
+        for (FilterDefinition filter : filters) {
+            sb.append(filter.toHTML(filterHTMLMetadata));
+        }
+        sb.append("</div>");
+        return sb.toString();
+    }
 }

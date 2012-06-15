@@ -315,12 +315,14 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     }
 
-    public String toHTML(WSAnalysisDefinition report) {
+    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         if (!isToggleEnabled()) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<div>");
-            sb.append(checkboxHTML());
-            sb.append(label());
+            String key = filterHTMLMetadata.getFilterKey();
+            String function = filterHTMLMetadata.createOnChange();
+            sb.append("<div class=\"filterLabel\">");
+            sb.append(checkboxHTML(key, function));
+            sb.append(label(false));
             sb.append("</div>");
             return sb.toString();
         } else {
@@ -328,16 +330,21 @@ public class FilterDefinition implements Serializable, Cloneable {
         }
     }
 
-    protected String checkboxHTML() {
-        return "<input style=\"margin-right:5px\" type=\"checkbox\" id=\"filter"+getFilterID()+"enabled\" onchange=\"filterEnable('filter"+getFilterID()+"')\" checked=\"on\"/>";
+    protected String checkboxHTML(String key, String function) {
+        String str = "<input style=\"margin-right:5px\" type=\"checkbox\" id=\"filter"+getFilterID()+"enabled\" onchange=\"filterEnable('filter"+getFilterID()+"', '"+key+"',"+function+")\"";
+        if (isEnabled()) {
+            str += " checked=\"on\"";
+        }
+        str += "/>";
+        return str;
     }
 
-    public String label() {
+    public String label(boolean colon) {
         if (getFilterName() != null && !"".equals(getFilterName())) {
-            return getFilterName() + ":";
+            return getFilterName() + (colon ? ":" : "");
         }
         if (getField() != null) {
-            return getField().toDisplay() + ":";
+            return getField().toDisplay() + (colon ? ":" : "");
         }
         return "";
     }

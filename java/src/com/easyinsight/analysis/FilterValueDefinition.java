@@ -347,9 +347,9 @@ public class FilterValueDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toHTML(WSAnalysisDefinition report) {
+    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
-        AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(report.getDataFeedID(), getField(), 0, 0, 0, report);
+        AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, 0, 0, filterHTMLMetadata.getReport());
         if (metadata.getReportFault() != null) {
             return "";
         }
@@ -357,12 +357,16 @@ public class FilterValueDefinition extends FilterDefinition {
         String filterName = "filter"+getFilterID();
         if (singleValue) {
 
-            String onChange = "updateFilter('filter" + getFilterID() + "')";
+            String onChange;
+            String key = filterHTMLMetadata.getFilterKey();
+            String function = filterHTMLMetadata.createOnChange();
+            onChange = "updateFilter('" + filterName + "','" + key + "', " + function + ")";
+
             if (!isToggleEnabled()) {
-                sb.append(checkboxHTML());
+                sb.append(checkboxHTML(filterHTMLMetadata.getFilterKey(), filterHTMLMetadata.createOnChange()));
             }
-            sb.append(label());
-            sb.append("<select style=\"margin-left:5px;margin-top:5px;margin-right:5px\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
+            sb.append(label(true));
+            sb.append("<select class=\"filterSelect\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
 
 
             List<String> stringList = new ArrayList<String>();
@@ -394,7 +398,7 @@ public class FilterValueDefinition extends FilterDefinition {
             sb.append("<label class=\"control-label\" for=\""+filterName+"\">Available Values</label>");
             sb.append("<div class=\"controls\">");
             int size = Math.min(15, dimensionMetadata.getValues().size());
-            sb.append("<select multiple=\"multiple\" id=\""+filterName+"\" size=\""+size+"\" style=\"width:400px\"");
+            sb.append("<select multiple=\"multiple\" id=\""+filterName+"\" size=\""+size+"\" style=\"width:400px\">");
             for (Value value : dimensionMetadata.getValues()) {
                 if (filteredValues.contains(value)) {
                     sb.append("<option selected=\"selected\">").append(value).append("</option>");
@@ -407,15 +411,15 @@ public class FilterValueDefinition extends FilterDefinition {
             sb.append("</div>");
             sb.append("</div>");
             sb.append("<div class=\"modal-footer\">\n" +
-                    "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiFilter('"+filterName+"')\">Send</button>\n" +
+                    "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiFilter('"+filterName+"','"+filterHTMLMetadata.getFilterKey()+"',"+filterHTMLMetadata.createOnChange()+")\">Send</button>\n" +
                     "        <button class=\"btn\" data-dismiss=\"modal\" type=\"button\">Cancel</button>\n" +
                     "    </div>");
             sb.append("</div>");
-            sb.append("<div style=\"margin-left:5px;margin-top:8px;margin-right:5px\">");
+            sb.append("<div class=\"filterLabel\">");
             if (!isToggleEnabled()) {
-                sb.append(checkboxHTML());
+                sb.append(checkboxHTML(filterHTMLMetadata.getFilterKey(), filterHTMLMetadata.createOnChange()));
             }
-            sb.append("<a href=\"#"+divID+"\" data-toggle=\"modal\">").append(label()).append("</a></div>");
+            sb.append("<a href=\"#"+divID+"\" data-toggle=\"modal\">").append(label(false)).append("</a></div>");
         }
         return sb.toString();
     }

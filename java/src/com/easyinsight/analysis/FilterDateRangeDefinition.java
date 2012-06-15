@@ -257,7 +257,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toHTML(WSAnalysisDefinition report) {
+    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
         DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
         sb.append("<script type=\"text/javascript\">\n" +

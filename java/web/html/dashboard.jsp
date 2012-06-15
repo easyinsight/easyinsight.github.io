@@ -5,6 +5,7 @@
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
+<%@ page import="com.easyinsight.analysis.FilterHTMLMetadata" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -17,11 +18,12 @@
             throw new com.easyinsight.security.SecurityException();
         }
         Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
+        session.setAttribute("dashboard", dashboard);
         String dataSourceURLKey = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
         ApplicationSkin applicationSkin = (ApplicationSkin) session.getAttribute("uiSettings");
         String headerStyle = "width:100%;overflow: hidden;padding: 10px;";
         String headerTextStyle = "width: 100%;text-align: center;font-size: 14px;padding-top: 10px;";
-        if (applicationSkin.isReportHeader()) {
+        if (applicationSkin != null && applicationSkin.isReportHeader()) {
             int reportBackgroundColor = applicationSkin.getReportBackgroundColor();
             headerStyle += "background-color: " + String.format("#%06X", (0xFFFFFF & reportBackgroundColor));
             headerTextStyle += "color: " + String.format("#%06X", (0xFFFFFF & applicationSkin.getReportTextColor()));
@@ -42,13 +44,14 @@
             padding-bottom: 40px;
         }
     </style>
-    <link href="../assets/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
     <script type="text/javascript" src="/js/jquery.jqplot.min.js"></script>
     <script type="text/javascript" src="/js/plugins/jqplot.barRenderer.min.js"></script>
     <script type="text/javascript" src="/js/plugins/jqplot.categoryAxisRenderer.min.js"></script>
     <script type="text/javascript" src="/js//plugins/jqplot.pointLabels.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/jquery.jqplot.min.css" />
+    <link href="/css/app.css" rel="stylesheet">
     <script type="text/javascript">
 
         var filterBase = {};
@@ -59,11 +62,16 @@
          });
          });*/
 
-        function updateFilter(name) {
+        function updateFilter(name, key, refreshFunction) {
             var optionMenu = document.getElementById(name);
             var chosenOption = optionMenu.options[optionMenu.selectedIndex];
-            filterBase[name] = chosenOption.value;
-            refreshReport();
+            var keyedFilter = filterBase[key];
+            if (keyedFilter == null) {
+                keyedFilter = {};
+                filterBase[key] = keyedFilter;
+            }
+            keyedFilter[name] = chosenOption.value;
+            refreshFunction();
         }
 
         function refreshDataSource() {
@@ -85,6 +93,9 @@
             }
         }
 
+        function afterRefresh() {
+        }
+
         function again(callDataID) {
             setTimeout(function() {
                 $.getJSON('../refreshStatus?callDataID=' + callDataID, function(data) {
@@ -94,11 +105,6 @@
         }
 
         function refreshReport(targetDiv, reportID) {
-            /*var strParams = "";
-             for (var filterValue in filterBase) {
-             var value = filterBase[filterValue];
-             strParams += filterValue + "=" + value + "&";
-             }*/
             $.get('../htmlExport?reportID='+reportID, function(data) {
                 $(targetDiv).html(data)
             });
@@ -139,7 +145,7 @@
     <div style="background-color: #FFFFFF;padding: 5px;float:left">
         <%
 
-            if (applicationSkin.getReportHeaderImage() != null) {
+            if (applicationSkin != null && applicationSkin.getReportHeaderImage() != null) {
                 out.println("<img src=\"/app/reportHeader\"/>");
             }
         %>
@@ -151,7 +157,7 @@
 <div class="container">
     <div class="row">
         <div class="span12">
-            <%= dashboard.getRootElement().toHTML() %>
+            <%= dashboard.getRootElement().toHTML(new FilterHTMLMetadata(dashboard)) %>
         </div>
     </div>
 </div>
