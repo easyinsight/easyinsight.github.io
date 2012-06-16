@@ -642,4 +642,37 @@ public class AdminService {
         //SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         return new AdminProcessor().getHealthInfo();
     }
+
+    public void delinquentToExpired() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement stmt = conn.prepareStatement("SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_STATE = ?");
+            stmt.setInt(1, Account.DELINQUENT);
+            PreparedStatement billing = conn.prepareStatement("SELECT COUNT(*) FROM ACCOUNT_CREDIT_CARD_BILLING_INFO WHERE ACCOUNT_ID = ?");
+            PreparedStatement update = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_ID = ?");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                long accountID = rs.getLong(1);
+                billing.setLong(1, accountID);
+                ResultSet billingResults = billing.executeQuery();
+                if (billingResults.next()) {
+                    int count = billingResults.getInt(1);
+                    if (count > 0) {
+                        update.setInt(1, Account.BILLING_FAILED);
+                        update.setLong(2, accountID);
+                        update.executeUpdate();
+                    }
+                }
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
 }

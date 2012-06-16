@@ -23,9 +23,14 @@
         request.getSession().setAttribute("errorString", errorString);
         response.sendRedirect("passwordReset.jsp?error=true");
     } else {
-        request.getSession().removeAttribute("resetPassword");
         request.getSession().removeAttribute("errorString");
-        new UserService().resetPassword((String) request.getSession().getAttribute("resetPassword"), userName, password);
-        response.sendRedirect("login.jsp");
+        boolean success = new UserService().resetPassword((String) session.getAttribute("resetPassword"), userName, password);
+        if (success) {
+            request.getSession().removeAttribute("resetPassword");
+            response.sendRedirect("login.jsp?passwordReset=true");
+        } else {
+            request.getSession().setAttribute("errorString", "Something was wrong with your password reset. You may wish to generate another reset email. If you still have problems, please contact support@easy-insight.com.");
+            response.sendRedirect("passwordReset.jsp?error=true");
+        }
     }
 %>

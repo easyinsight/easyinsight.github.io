@@ -724,4 +724,12 @@ public class Account {
         }
         return "";
     }
+
+    public String successMessage() {
+        if (accountState == Account.TRIAL) {
+            return "You have successfully set up your billing account. You will not be billed until your free trial has expired.";
+        } else {
+            return "You have successfully set up your billing account. Your account is now active and accessible again!";
+        }
+    }
 }

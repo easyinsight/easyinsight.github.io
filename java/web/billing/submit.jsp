@@ -22,6 +22,7 @@
     String hashed = BillingUtil.MD5Hash(hashStr);
 
     EIConnection conn = Database.instance().getConnection();
+    String postBillingMessage;
     conn.setAutoCommit(false);
     Session s = Database.instance().createSession(conn);
     try {
@@ -33,6 +34,8 @@
 
         user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
         account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+
+        postBillingMessage = account.successMessage();
 
         System.out.println("Creating account billing info...");
         AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
@@ -205,7 +208,7 @@
         <div class="span12">
             <div class="well" style="text-align:center">
                 <h3>Billing Successful!</h3>
-                <p>You have successfully set up your billing account. You will not be billed until your free trial has expired.</p>
+                <p><%= postBillingMessage %></p>
             </div>
         </div>
     </div>

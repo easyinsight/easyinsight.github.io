@@ -21,8 +21,10 @@
     <script type="text/javascript" src="/js/bootstrap.js"></script>
 </head>
 <%
-    String resetPassword = request.getParameter("resetPassword");
-    request.getSession().setAttribute("resetPassword", resetPassword);
+    String resetPassword = request.getParameter("passwordReset");
+    if (resetPassword != null) {
+        session.setAttribute("resetPassword", resetPassword);
+    }
 %>
 <body>
 <div class="container">

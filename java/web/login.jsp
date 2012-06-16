@@ -115,6 +115,12 @@
             <label class="formAreaP control-label" style="font-size: 12px;padding: 0;margin-bottom: 5px">We didn't recognize the username or password you entered.</label>
         </fieldset>
                 <%
+                    } else if (request.getParameter("passwordReset") != null) {
+                        %>
+        <fieldset class="control-group">
+            <label class="formAreaP control-label" style="font-size: 12px;padding: 0;margin-bottom: 5px">Your password has been reset.</label>
+        </fieldset>
+                        <%
                     }
                 %>
                 <label class="checkbox">

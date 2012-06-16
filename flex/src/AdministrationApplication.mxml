@@ -86,9 +86,7 @@
         }
 
         private function nuke():void {
-            var window:DataSourceDeleteWindow = new DataSourceDeleteWindow();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+            adminService.delinquentToExpired.send();
         }
 
         private function reportTest():void {
@@ -221,6 +219,7 @@
         <mx:method name="threadDump"/>
         <mx:method name="constantContactSync"/>
         <mx:method name="clearOrphanData"/>
+        <mx:method name="delinquentToExpired"/>
     </mx:RemoteObject>
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
     <mx:VBox id="coreBox" width="100%" height="100%" horizontalAlign="center">
