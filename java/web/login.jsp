@@ -118,7 +118,7 @@
                     } else if (request.getParameter("passwordReset") != null) {
                         %>
         <fieldset class="control-group">
-            <label class="formAreaP control-label" style="font-size: 12px;padding: 0;margin-bottom: 5px">Your password has been reset.</label>
+            <label class="formAreaP control-label" style="font-size: 12px;padding: 0;margin-bottom: 5px;color: #009900">Your password has been reset.</label>
         </fieldset>
                         <%
                     }
