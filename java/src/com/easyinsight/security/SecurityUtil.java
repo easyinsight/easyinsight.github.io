@@ -53,12 +53,13 @@ public class SecurityUtil {
         Long accountID = (Long) session.getAttribute("accountID");
         Integer accountType = (Integer) session.getAttribute("accountType");
         Integer dayOfWeek = (Integer) session.getAttribute("dayOfWeek");
+        String persona = (String) session.getAttribute("persona");
         Boolean accountAdmin = (Boolean) session.getAttribute("accountAdmin");
         if (dayOfWeek == null) {
             dayOfWeek = 1;
         }
         com.easyinsight.security.SecurityUtil.populateThreadLocal(userName, userID,
-                accountID, accountType, accountAdmin, dayOfWeek, null);
+                accountID, accountType, accountAdmin, dayOfWeek, persona);
     }
 
     public static void setSecurityProvider(ISecurityProvider securityProvider) {
