@@ -41,7 +41,6 @@
         <from>/me.xml</from>
         <to>/xml/Me</to>
     </rule>
-
     <rule>
         <from>/html/report/([A-Za-z0-9]+)</from>
         <to>/html/report.jsp?reportID=$1</to>

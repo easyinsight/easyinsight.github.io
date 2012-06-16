@@ -15,36 +15,42 @@ import java.sql.SQLException;
 
 /**
  * User: jamesboe
- * Date: 5/24/12
- * Time: 9:26 AM
+ * Date: 6/16/12
+ * Time: 11:07 AM
  */
-public class AuthFilter implements Filter {
-
+public class ValidActivationFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
+
     }
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        boolean authorized = false;
-        if (servletRequest instanceof HttpServletRequest) {
+        String alternateDestination = null;
+        EIConnection conn = Database.instance().getConnection();
+        try {
             HttpSession session = ((HttpServletRequest) servletRequest).getSession(false);
-            if (session != null) {
-                authorized = (session.getAttribute("accountID") != null);
+            PreparedStatement ps = conn.prepareStatement("SELECT account_state FROM ACCOUNT WHERE account_id = ?");
+            ps.setLong(1, (Long) session.getAttribute("accountID"));
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            int accountState = rs.getInt(1);
+            if (accountState != Account.INACTIVE) {
+                alternateDestination = "/app";
             }
-            if(!authorized) {
-                session = ((HttpServletRequest) servletRequest).getSession(true);
-                session.setAttribute("loginRedirect", ((HttpServletRequest) servletRequest).getRequestURI());
-            } else {
-
-            }
+            ps.close();
+        } catch (SQLException se) {
+            throw new RuntimeException(se);
+        } finally {
+            Database.closeConnection(conn);
         }
-        if (authorized) {
+        if (alternateDestination == null) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
             HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-            httpServletResponse.sendRedirect("/app/login.jsp");
+            httpServletResponse.sendRedirect(alternateDestination);
         }
     }
 
     public void destroy() {
+
     }
 }

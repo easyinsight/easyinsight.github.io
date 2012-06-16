@@ -28,10 +28,40 @@
         <filter-class>com.easyinsight.html.FixedDashboardFilter</filter-class>
     </filter>
 
+    <filter>
+        <filter-name>ValidAccountFilter</filter-name>
+        <filter-class>com.easyinsight.html.ValidAccountFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>ValidActivationFilter</filter-name>
+        <filter-class>com.easyinsight.html.ValidActivationFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>ValidBillingFilter</filter-name>
+        <filter-class>com.easyinsight.html.ValidBillingFilter</filter-class>
+    </filter>
+
     <filter-mapping>
         <filter-name>Auth</filter-name>
         <url-pattern>/html/*</url-pattern>
         <url-pattern>/billing/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>ValidAccountFilter</filter-name>
+        <url-pattern>/html/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>ValidBillingFilter</filter-name>
+        <url-pattern>/billing/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>ValidActivationFilter</filter-name>
+        <url-pattern>/activation/*</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
@@ -243,6 +273,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>DashboardPiece</servlet-name>
+        <display-name>DashboardPiece</display-name>
+        <servlet-class>com.easyinsight.html.DashboardPieceServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>BeginTransaction</servlet-name>
         <display-name>BeginTransaction</display-name>
         <servlet-class>com.easyinsight.api.v3.BeginTransactionServlet</servlet-class>
@@ -309,6 +346,13 @@
         <servlet-name>RefreshStatus</servlet-name>
         <display-name>RefreshStatus</display-name>
         <servlet-class>com.easyinsight.html.RefreshStatusServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>WhiteLabelImage</servlet-name>
+        <display-name>WhiteLabelImage</display-name>
+        <servlet-class>com.easyinsight.html.WhiteLabelImageServlet</servlet-class>
         <load-on-startup>4</load-on-startup>
     </servlet>
 
@@ -384,6 +428,11 @@
     <servlet-mapping>
         <servlet-name>DefineDataSource</servlet-name>
         <url-pattern>/xml/defineDataSource</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>WhiteLabelImage</servlet-name>
+        <url-pattern>/whiteLabelImage</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
@@ -504,6 +553,11 @@
     <servlet-mapping>
         <servlet-name>HtmlImage</servlet-name>
         <url-pattern>/htmlimage</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>DashboardPiece</servlet-name>
+        <url-pattern>/dashboardPiece</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
