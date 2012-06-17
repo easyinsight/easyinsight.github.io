@@ -36,7 +36,7 @@
                 tokenCookie.setMaxAge(60 * 60 * 24 * 30);
                 response.addCookie(tokenCookie);
             }
-            String redirectUrl = "/app/index.jsp";
+            String redirectUrl = "https://www.easy-insight.com/app/";
             if(session.getAttribute("loginRedirect") != null) {
                redirectUrl = ((String) session.getAttribute("loginRedirect"));
                session.removeAttribute("loginRedirect");
