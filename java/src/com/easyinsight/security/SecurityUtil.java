@@ -37,6 +37,7 @@ public class SecurityUtil {
 
     public static void populateSession(HttpSession session, UserServiceResponse userServiceResponse) {
         session.setAttribute("userName", userServiceResponse.getUserName());
+        System.out.println("Setting user name to " + userServiceResponse.getUserName());
         session.setAttribute("userID", userServiceResponse.getUserID());
         session.setAttribute("accountID", userServiceResponse.getAccountID());
         session.setAttribute("accountAdmin", userServiceResponse.isAccountAdmin());
