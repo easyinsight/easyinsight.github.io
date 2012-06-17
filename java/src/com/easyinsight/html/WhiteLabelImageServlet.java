@@ -51,6 +51,7 @@ public class WhiteLabelImageServlet extends HttpServlet {
                     resp.setContentLength(byteCount);
                     resp.getOutputStream().flush();
                 }
+                queryStmt.close();
             } catch (Exception e) {
                 LogClass.error(e);
                 conn.rollback();
