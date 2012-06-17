@@ -30,6 +30,10 @@ import mx.core.UIComponent;
 import mx.effects.Effect;
 import mx.managers.PopUpManager;
 import mx.messaging.config.ServerConfig;
+import mx.rpc.AsyncResponder;
+import mx.rpc.AsyncToken;
+import mx.rpc.events.FaultEvent;
+import mx.rpc.events.ResultEvent;
 
 import org.efflex.mx.viewStackEffects.CubePapervision3D;
 import org.efflex.mx.viewStackEffects.Fade;
@@ -209,15 +213,26 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             logoutButton = new Button();
             logoutButton.label = "Log Out";
             logoutButton.styleName = "grayButton";
-            logoutButton.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
-                User.destroy();
-                CookieUtil.deleteCookie("eisession");
-                ServerConfig.getChannelSet("dashboardService").logout();
-                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
-            });
+            logoutButton.addEventListener(MouseEvent.CLICK, logout);
             headerArea.addChild(logoutButton);
         }
         return headerbar;
+    }
+
+    private function logout(event:MouseEvent):void {
+
+        User.destroy();
+        CookieUtil.deleteCookie("eisession");
+        var token:AsyncToken = ServerConfig.getChannelSet("dashboardService").logout();
+        token.addResponder(new AsyncResponder(logoutResultEvent, logoutFaultEvent));
+    }
+
+    private function logoutFaultEvent(event:FaultEvent, token:Object = null):void {
+    }
+
+
+    private function logoutResultEvent(event:ResultEvent, token:Object = null):void {
+        User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
     }
 
     private function share(event:MouseEvent):void {
