@@ -6,6 +6,7 @@
 <%@ page import="com.easyinsight.users.InternalUserService" %>
 <%@ page import="com.easyinsight.users.UserServiceResponse" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -86,7 +87,7 @@
                     <%
                         if (request.getParameter("subdomain") != null) {
                             %>
-                    <img src="/whiteLabelImage" alt="Logo Image"/>
+                    <img src="<%= RedirectUtil.getURL(request, "/app/whiteLabelImage") %>" alt="Logo Image"/>
                     <%
                         } else {
                     %>

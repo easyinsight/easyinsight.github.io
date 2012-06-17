@@ -5,6 +5,7 @@
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
 <%@ page import="com.easyinsight.users.Account" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <!-- saved from url=(0014)about:internet -->
 <html lang="en">
 
@@ -52,7 +53,7 @@
 
 <%
     if (session.getAttribute("accountID") == null) {
-        response.sendRedirect("/app/login.jsp");
+        response.sendRedirect(RedirectUtil.getURL(request, "/app/login.jsp"));
         return;
     }
     long userID = (Long) session.getAttribute("userID");
@@ -67,20 +68,20 @@
         int accountState = rs.getInt(2);
         ps.close();
         if (accountState == Account.CLOSED) {
-            response.sendRedirect("/app/billing/billing.jsp");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/billing.jsp"));
             return;
         } else if (accountState == Account.DELINQUENT) {
-            response.sendRedirect("/app/billing/billing.jsp");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/billing.jsp"));
             return;
         } else if (accountState == Account.BILLING_FAILED) {
-            response.sendRedirect("/app/billing/billing.jsp");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/billing.jsp"));
             return;
         } else if (accountState == Account.INACTIVE) {
-            response.sendRedirect("/app/activation/reactivate.jsp");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/activation/reactivate.jsp"));
             return;
         }
         if (htmlOrFlex) {
-            response.sendRedirect("/app/html");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/html"));
             return;
         }
     } finally {
@@ -94,7 +95,7 @@
         try {
             s = Database.instance().createSession();
             if (s.createQuery("from Account where subdomain = ? and subdomain_enabled = true").setString(0, subdomain).list().size() != 1) {
-                response.sendRedirect("https://www.easy-insight.com/app/");
+                response.sendRedirect(RedirectUtil.getURL(request, "/app/"));
             }
         } finally {
             if (s != null)
