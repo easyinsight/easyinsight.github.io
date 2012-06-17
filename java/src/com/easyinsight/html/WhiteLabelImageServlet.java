@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -25,7 +27,6 @@ public class WhiteLabelImageServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String subdomain = req.getParameter("subdomain");
         if (subdomain != null) {
-            byte[] bytes = null;
             EIConnection conn = Database.instance().getConnection();
             try {
                 conn.setAutoCommit(false);
@@ -33,12 +34,21 @@ public class WhiteLabelImageServlet extends HttpServlet {
                 queryStmt.setString(1, subdomain);
                 ResultSet rs = queryStmt.executeQuery();
                 if(rs.next()) {
-                    bytes = rs.getBytes(1);
+                    InputStream in = rs.getBinaryStream(1);
                     conn.commit();
-                    resp.setContentLength(bytes.length);
                     resp.setContentType("image/png");
                     resp.setHeader("Content-disposition","inline; filename=" + subdomain + ".png" );
-                    resp.getOutputStream().write(bytes);
+                    OutputStream out = resp.getOutputStream();
+
+                    // Copy the contents of the file to the output stream
+                    byte[] buf = new byte[1024];
+                    int byteCount = 0;
+                    int count;
+                    while ((count = in.read(buf)) >= 0) {
+                        out.write(buf, 0, count);
+                        byteCount += count;
+                    }
+                    resp.setContentLength(byteCount);
                     resp.getOutputStream().flush();
                 }
             } catch (Exception e) {
