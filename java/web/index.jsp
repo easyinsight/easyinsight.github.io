@@ -52,7 +52,7 @@
 
 <%
     if (session.getAttribute("accountID") == null) {
-        response.sendRedirect("login.jsp");
+        response.sendRedirect("/app/login.jsp");
         return;
     }
     long userID = (Long) session.getAttribute("userID");
