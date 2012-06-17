@@ -3,6 +3,7 @@
 <%@ page import="com.easyinsight.users.UserService" %>
 <%@ page import="com.easyinsight.users.UserServiceResponse" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%
     String userName = request.getParameter("userName");
@@ -16,13 +17,13 @@
     } else {
         SecurityUtil.populateSession(session, userServiceResponse);
         if (userServiceResponse.getAccountState() == Account.CLOSED) {
-            response.sendRedirect("/app/billing/billing.jsp");
+            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/billing.jsp"));
         } else if (userServiceResponse.getAccountState() == Account.DELINQUENT) {
-            response.sendRedirect("/app/billing/billing.jsp");
+            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/billing.jsp"));
         } else if (userServiceResponse.getAccountState() == Account.BILLING_FAILED) {
-            response.sendRedirect("/app/billing/billing.jsp");
+            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/billing.jsp"));
         } else if (userServiceResponse.getAccountState() == Account.INACTIVE) {
-            response.sendRedirect("/app/activation/reactivate.jsp");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/activation/reactivate.jsp"));
         } else {
             String urlHash = request.getParameter("urlhash");
             String rememberMe = request.getParameter("rememberMeCheckbox");
@@ -36,7 +37,7 @@
                 tokenCookie.setMaxAge(60 * 60 * 24 * 30);
                 response.addCookie(tokenCookie);
             }
-            String redirectUrl = "https://www.easy-insight.com/app/";
+            String redirectUrl = RedirectUtil.getURL(request, "/app/");
             if(session.getAttribute("loginRedirect") != null) {
                redirectUrl = ((String) session.getAttribute("loginRedirect"));
                session.removeAttribute("loginRedirect");
