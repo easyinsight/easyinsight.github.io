@@ -15,9 +15,7 @@
     <meta name="author" content="">
     <title>Easy Insight Sign In</title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
-    <link href="/css/bootstrap.css" rel="stylesheet">
-    <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
 
     <style type="text/css">
         body {
@@ -25,8 +23,8 @@
             padding-bottom: 40px;
         }
     </style>
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.js"></script>
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
     <script type="text/javascript">
         function preserveHash() {
             $('input[name=urlhash]').val(window.location.hash);
