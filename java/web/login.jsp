@@ -81,7 +81,7 @@
 
         <div class="span6 offset3">
 
-            <form class="well" method="post" action="loginAction.jsp" style="width:100%" id="loginForm" onsubmit="preserveHash()">
+            <form class="well" method="post" action="/app/loginAction.jsp" style="width:100%" id="loginForm" onsubmit="preserveHash()">
                 <div style="width:100%;text-align: center">
                     <%
                         if (request.getParameter("subdomain") != null) {
