@@ -617,7 +617,7 @@ public class CompositeFeed extends Feed {
             filterValueDefinition.setField(target);
         }
         filterValueDefinition.setInclusive(true);
-        if (connection.getSourceJoin() == null) {
+        if (connection.getSourceJoin() == null && connection.getSourceItem() != null) {
             filterValueDefinition.setFilteredValues(obtainValues(dataSet, findFieldForItem(sourceNode.neededItems, connection.getSourceItem())));
         } else {
             filterValueDefinition.setFilteredValues(obtainValues(dataSet, findFieldForKey(sourceNode.neededItems, connection.getSourceJoin(), sourceNode.feedID)));
