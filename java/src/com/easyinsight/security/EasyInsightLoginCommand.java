@@ -34,28 +34,28 @@ public class EasyInsightLoginCommand implements LoginCommand {
         if (userServiceResponse.isSuccessful()) {
             HttpSession session = FlexContext.getHttpRequest().getSession();
             SecurityUtil.populateSession(session, userServiceResponse);
-            return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
+            return new UserPrincipal(userServiceResponse.getUserName(), userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
                     userServiceResponse.isAccountAdmin(), userServiceResponse.getFirstDayOfWeek(), userServiceResponse.getPersonaName());
         } else {
             userServiceResponse = userService.sessionCookieCheck(password, userName, true);
             if (userServiceResponse != null && userServiceResponse.isSuccessful()) {
                 HttpSession session = FlexContext.getHttpRequest().getSession();
                 SecurityUtil.populateSession(session, userServiceResponse);
-                return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
+                return new UserPrincipal(userServiceResponse.getUserName(), userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
                     userServiceResponse.isAccountAdmin(), userServiceResponse.getFirstDayOfWeek(), userServiceResponse.getPersonaName());
             } else {
                 userServiceResponse = userService.seleniumCheck(userName, password);
                 if (userServiceResponse != null) {
                     HttpSession session = FlexContext.getHttpRequest().getSession();
                     SecurityUtil.populateSession(session, userServiceResponse);
-                    return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
+                    return new UserPrincipal(userServiceResponse.getUserName(), userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
                         userServiceResponse.isAccountAdmin(), userServiceResponse.getFirstDayOfWeek(), userServiceResponse.getPersonaName());
                 } else {
                     userServiceResponse = userService.htmlEstablish(password, userName);
                     if (userServiceResponse != null) {
                         HttpSession session = FlexContext.getHttpRequest().getSession();
                         SecurityUtil.populateSession(session, userServiceResponse);
-                        return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
+                        return new UserPrincipal(userServiceResponse.getUserName(), userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
                                 userServiceResponse.isAccountAdmin(), userServiceResponse.getFirstDayOfWeek(), userServiceResponse.getPersonaName());
                     }
                 }
