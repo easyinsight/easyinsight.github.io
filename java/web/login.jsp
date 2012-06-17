@@ -129,8 +129,8 @@
                 </label>
                 <button class="btn btn-inverse" type="submit" value="Sign In">Sign In</button>
                 <div class="signInBar" style="padding-top: 10px">
-                    <a href="newaccount" style="font-size: 12px">No account yet?</a>
-                    <a href="forgot.jsp" style="font-size: 12px;float:right">Forgot your password?</a>
+                    <a href="<%= RedirectUtil.getURL(request, "newaccount")%>" style="font-size: 12px">No account yet?</a>
+                    <a href="<%= RedirectUtil.getURL(request, "forgot.jsp")%>" style="font-size: 12px;float:right">Forgot your password?</a>
                 </div>
             </form>
         </div>
