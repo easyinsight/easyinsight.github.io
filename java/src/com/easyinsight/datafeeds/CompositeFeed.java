@@ -618,9 +618,19 @@ public class CompositeFeed extends Feed {
         }
         filterValueDefinition.setInclusive(true);
         if (connection.getSourceJoin() == null && connection.getSourceItem() != null) {
-            filterValueDefinition.setFilteredValues(obtainValues(dataSet, findFieldForItem(sourceNode.neededItems, connection.getSourceItem())));
+            AnalysisItem analysisItem = findFieldForItem(sourceNode.neededItems, connection.getSourceItem());
+            if (analysisItem != null) {
+                filterValueDefinition.setFilteredValues(obtainValues(dataSet, analysisItem));
+            } else {
+                return null;
+            }
         } else if (connection.getSourceJoin() != null) {
-            filterValueDefinition.setFilteredValues(obtainValues(dataSet, findFieldForKey(sourceNode.neededItems, connection.getSourceJoin(), sourceNode.feedID)));
+            AnalysisItem analysisItem = findFieldForKey(sourceNode.neededItems, connection.getSourceJoin(), sourceNode.feedID);
+            if (analysisItem != null) {
+                filterValueDefinition.setFilteredValues(obtainValues(dataSet, analysisItem));
+            } else {
+                return null;
+            }
         } else {
             return null;
         }
