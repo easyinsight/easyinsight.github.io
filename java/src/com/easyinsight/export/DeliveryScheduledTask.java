@@ -536,6 +536,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
             if (listDataResults.getRows().length == 0 && !sendIfNoData) {
                 return null;
             }
+            if (listDataResults.getReportFault() != null) {
+                return null;
+            }
             table = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle);
         }
         return table;
