@@ -63,6 +63,7 @@ public class UpdateRowsPKServlet extends APIServlet {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             DataSet dataSet = new DataSet();
             dataStorage = DataStorage.writeConnection(dataSource, conn, SecurityUtil.getAccountID());
+            List<AnalysisItem> items = new ArrayList<AnalysisItem>();
             for (int i = 0; i < rowNodes.size(); i++) {
                 System.out.println("Inspecting row...");
                 Element rowNode = (Element) rowNodes.get(i);
@@ -77,6 +78,7 @@ public class UpdateRowsPKServlet extends APIServlet {
                         if (analysisItem == null) {
                             throw new ServiceRuntimeException("No field was found in the data source definition matching the key of " + nodeName + ".");
                         }
+                        items.add(analysisItem);
                         String value = columnNode.getValue().trim();
                         if ("".equals(value)) {
                             row.addValue(analysisItem.getKey(), new EmptyValue());
@@ -107,7 +109,7 @@ public class UpdateRowsPKServlet extends APIServlet {
                         transforms.addAll(new ReportCalculation(line).apply(dataSource));
                     }
                 }
-                dataStorage.updateRow(row, dataSource.getFields(), transforms, rowID);
+                dataStorage.updateRow(row, items, transforms, rowID);
             }
             dataStorage.commit();
             return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
