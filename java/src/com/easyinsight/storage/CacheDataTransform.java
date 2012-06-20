@@ -36,6 +36,10 @@ public class CacheDataTransform implements IDataTransform {
         this.baseSource = baseSource;
     }
 
+    public AnalysisItem getEndField() {
+        return endField;
+    }
+
     public void handle(EIConnection conn, IRow row) {
         List<AnalysisItem> allItems = dataSource.getFields();
         Map<String, AnalysisItem> baseMap = new HashMap<String, AnalysisItem>();

@@ -1545,6 +1545,10 @@ public class DataStorage implements IDataStorage {
     public void updateRow(IRow row, List<AnalysisItem> fields, List<IDataTransform> transforms, long rowID) throws SQLException {
         DataSet dataSet = new DataSet();
         for (IDataTransform transform : transforms) {
+            if (transform instanceof CacheDataTransform) {
+                CacheDataTransform cacheDataTransform = (CacheDataTransform) transform;
+                fields.add(cacheDataTransform.getEndField());
+            }
             transform.handle((EIConnection) coreDBConn, row);
         }
         StringBuilder sqlBuilder = new StringBuilder();
