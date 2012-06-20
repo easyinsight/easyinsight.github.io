@@ -791,7 +791,7 @@ public class DataStorage implements IDataStorage {
                 if (keyMetadata != null) {
                     if (keyMetadata.getType() == Value.DATE) {
                         AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
-                        if (optimized && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL)) {
+                        if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL)) {
                             int month = dataRS.getInt(i++);
                             int year = dataRS.getInt(i++);
                             Calendar cal = Calendar.getInstance();
