@@ -1549,10 +1549,15 @@ public class DataStorage implements IDataStorage {
                 CacheDataTransform cacheDataTransform = (CacheDataTransform) transform;
                 Value updated = row.getValue(cacheDataTransform.getEndField());
                 if (updated.type() != Value.EMPTY) {
+                    System.out.println("using calculation of " + cacheDataTransform.getEndField().toDisplay());
                     fields.add(cacheDataTransform.getEndField());
                 }
             }
             transform.handle((EIConnection) coreDBConn, row);
+        }
+        System.out.println("new row gives us...");
+        for (AnalysisItem field : fields) {
+            System.out.println("\t" + field.toDisplay() + " = " + row.getValue(field));
         }
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("UPDATE ");
