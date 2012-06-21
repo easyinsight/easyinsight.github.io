@@ -1639,7 +1639,7 @@ public class DataStorage implements IDataStorage {
         //sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
         sqlBuilder.append(" FROM ");
         sqlBuilder.append(getTableName());
-        sqlBuilder.append("WHERE ").append(pk).append(" = ?");
+        sqlBuilder.append(" WHERE ").append(pk).append(" = ?");
         PreparedStatement queryStmt = storageConn.prepareStatement(sqlBuilder.toString());
         queryStmt.setLong(1, rowID);
         ResultSet dataRS = queryStmt.executeQuery();
