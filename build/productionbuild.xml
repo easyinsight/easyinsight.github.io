@@ -344,7 +344,7 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="testVCS, compileJava, compileCoreSWC, apps, modules2">
+    <target name="compileFlex" depends="testVCS, compileJava, compileCoreSWC, apps, modules1, modules2, modules3, modules4, modules6, modules7, modules8">
     </target>
 
     <target name="quickArchive" depends="compileJava, compileFlexOptimized">
