@@ -1547,7 +1547,10 @@ public class DataStorage implements IDataStorage {
         for (IDataTransform transform : transforms) {
             if (transform instanceof CacheDataTransform) {
                 CacheDataTransform cacheDataTransform = (CacheDataTransform) transform;
-                fields.add(cacheDataTransform.getEndField());
+                Value updated = row.getValue(cacheDataTransform.getEndField());
+                if (updated.type() != Value.EMPTY) {
+                    fields.add(cacheDataTransform.getEndField());
+                }
             }
             transform.handle((EIConnection) coreDBConn, row);
         }
