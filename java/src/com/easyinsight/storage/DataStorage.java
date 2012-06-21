@@ -1548,14 +1548,14 @@ public class DataStorage implements IDataStorage {
             transform.handle((EIConnection) coreDBConn, row);
         }
         System.out.println("new row gives us...");
-        for (AnalysisItem field : fields) {
+        /*for (AnalysisItem field : fields) {
             System.out.println("\t" + field.toDisplay() + " = " + row.getValue(field));
-        }
+        }*/
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("UPDATE ");
         sqlBuilder.append(getTableName());
         sqlBuilder.append(" SET ");
-        for (AnalysisItem field : fields) {
+        for (AnalysisItem field : allFields) {
             if (field.persistable()) {
                 KeyMetadata keyMetadata = keys.get(field.getKey());
                 sqlBuilder.append(keyMetadata.createUpdateClause());
@@ -1566,7 +1566,7 @@ public class DataStorage implements IDataStorage {
         sqlBuilder.append(" WHERE ").append(getTableName()).append("_ID").append(" = ?");
         PreparedStatement updateStmt = storageConn.prepareStatement(sqlBuilder.toString());
         int i = 1;
-        for (AnalysisItem field : fields) {
+        for (AnalysisItem field : allFields) {
             if (field.persistable()) {
                 KeyMetadata keyMetadata = keys.get(field.getKey());
                 i = setValue(updateStmt, i, keyMetadata, row.getValues().get(field.getKey()));
