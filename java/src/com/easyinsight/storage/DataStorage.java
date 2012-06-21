@@ -1542,17 +1542,9 @@ public class DataStorage implements IDataStorage {
         insertStmt.execute();
     }
 
-    public void updateRow(IRow row, List<AnalysisItem> fields, List<IDataTransform> transforms, long rowID) throws SQLException {
-        DataSet dataSet = new DataSet();
+    public void updateRow(IRow row, List<AnalysisItem> fields, List<IDataTransform> transforms, long rowID, List<AnalysisItem> allFields) throws SQLException {
+        rowByID(rowID, allFields, row);
         for (IDataTransform transform : transforms) {
-            if (transform instanceof CacheDataTransform) {
-                CacheDataTransform cacheDataTransform = (CacheDataTransform) transform;
-                Value updated = row.getValue(cacheDataTransform.getEndField());
-                if (updated.type() != Value.EMPTY) {
-                    System.out.println("using calculation of " + cacheDataTransform.getEndField().toDisplay());
-                    fields.add(cacheDataTransform.getEndField());
-                }
-            }
             transform.handle((EIConnection) coreDBConn, row);
         }
         System.out.println("new row gives us...");
@@ -1626,6 +1618,67 @@ public class DataStorage implements IDataStorage {
         PreparedStatement deleteStmt = storageConn.prepareStatement("DELETE FROM " + getTableName() + " WHERE " + getTableName() + "_ID = ?");
         deleteStmt.setLong(1, rowID);
         deleteStmt.executeUpdate();
+    }
+
+    private void rowByID(long rowID, List<AnalysisItem> fields, IRow row) throws SQLException {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT ");
+        List<AnalysisItem> validFields = new ArrayList<AnalysisItem>();
+        for (AnalysisItem field : fields) {
+            if (field.persistable()) {
+                if (field.isKeyColumn()) {
+                    field.getKey().toBaseKey().setPkName(getTableName() + "_ID");
+                }
+                validFields.add(field);
+                sqlBuilder.append(field.getKey().toSQL());
+                sqlBuilder.append(",");
+            }
+        }
+        String pk = getTableName() + "_ID";
+        sqlBuilder.append(pk);
+        //sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
+        sqlBuilder.append(" FROM ");
+        sqlBuilder.append(getTableName());
+        sqlBuilder.append("WHERE ").append(pk).append(" = ?");
+        PreparedStatement queryStmt = storageConn.prepareStatement(sqlBuilder.toString());
+        queryStmt.setLong(1, rowID);
+        ResultSet dataRS = queryStmt.executeQuery();
+        dataRS.next();
+        int i = 1;
+
+        for (AnalysisItem analysisItem : fields) {
+            if (analysisItem.persistable()) {
+                Value existing = row.getValue(analysisItem.getKey());
+                if (existing == null) {
+                    KeyMetadata keyMetadata = keys.get(analysisItem.createAggregateKey(false));
+                    Value value;
+                    if (keyMetadata.getType() == Value.DATE) {
+                        Timestamp time = dataRS.getTimestamp(i++);
+                        if (dataRS.wasNull()) {
+                            value = new EmptyValue();
+                        } else {
+                            DateValue dateValue = new DateValue(new Date(time.getTime()));
+                            value = dateValue;
+                        }
+                    } else if (keyMetadata.getType() == Value.NUMBER) {
+                        double doubleValue = dataRS.getDouble(i++);
+                        if (dataRS.wasNull()) {
+                            value = new EmptyValue();
+                        } else {
+                            value = new NumericValue(doubleValue);
+                        }
+                    } else {
+                        String stringVavlue = dataRS.getString(i++);
+                        if (dataRS.wasNull()) {
+                            value = new EmptyValue();
+                        } else {
+                            value = new StringValue(stringVavlue);
+                        }
+                    }
+                    row.addValue(analysisItem.getKey(), value);
+                }
+            }
+        }
     }
 
     public ActualRowSet allData(@NotNull Collection<FilterDefinition> filters, @NotNull List<AnalysisItem> fields, @Nullable Integer limit,

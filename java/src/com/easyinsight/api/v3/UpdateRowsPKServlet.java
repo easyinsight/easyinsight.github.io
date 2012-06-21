@@ -110,7 +110,7 @@ public class UpdateRowsPKServlet extends APIServlet {
                         transforms.addAll(new ReportCalculation(line).apply(dataSource));
                     }
                 }
-                dataStorage.updateRow(row, items, transforms, rowID);
+                dataStorage.updateRow(row, items, transforms, rowID, dataSource.getFields());
             }
             dataStorage.commit();
             return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
