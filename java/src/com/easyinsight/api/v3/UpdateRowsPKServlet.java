@@ -63,8 +63,9 @@ public class UpdateRowsPKServlet extends APIServlet {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             DataSet dataSet = new DataSet();
             dataStorage = DataStorage.writeConnection(dataSource, conn, SecurityUtil.getAccountID());
-            List<AnalysisItem> items = new ArrayList<AnalysisItem>();
+
             for (int i = 0; i < rowNodes.size(); i++) {
+                List<AnalysisItem> items = new ArrayList<AnalysisItem>();
                 System.out.println("Inspecting row...");
                 Element rowNode = (Element) rowNodes.get(i);
                 Long rowID = Long.parseLong(rowNode.getAttribute("rowID").getValue());
