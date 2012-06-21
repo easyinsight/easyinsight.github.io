@@ -1649,7 +1649,7 @@ public class DataStorage implements IDataStorage {
         for (AnalysisItem analysisItem : fields) {
             if (analysisItem.persistable()) {
                 Value existing = row.getValue(analysisItem.getKey());
-                if (existing == null) {
+                if (existing.type() == Value.EMPTY) {
                     KeyMetadata keyMetadata = keys.get(analysisItem.createAggregateKey(false));
                     Value value;
                     if (keyMetadata.getType() == Value.DATE) {
