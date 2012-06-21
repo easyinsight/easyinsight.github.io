@@ -1582,6 +1582,7 @@ public class DataStorage implements IDataStorage {
         }
         updateStmt.setLong(i, rowID);
         int rows = updateStmt.executeUpdate();
+        System.out.println(rows + " rows updated");
     }
 
     public void updateRow(ActualRow actualRow, List<AnalysisItem> fields, List<IDataTransform> transforms) throws SQLException {
