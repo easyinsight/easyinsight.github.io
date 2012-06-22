@@ -1654,7 +1654,7 @@ public class DataStorage implements IDataStorage {
         for (AnalysisItem analysisItem : fields) {
             if (analysisItem.persistable()) {
 
-                KeyMetadata keyMetadata = keys.get(analysisItem.createAggregateKey(false));
+                KeyMetadata keyMetadata = keys.get(analysisItem.getKey());
                 Value value;
                 if (keyMetadata.getType() == Value.DATE) {
                     Timestamp time = dataRS.getTimestamp(i++);
