@@ -1542,8 +1542,11 @@ public class DataStorage implements IDataStorage {
         insertStmt.execute();
     }
 
-    public void updateRow(IRow row, List<AnalysisItem> fields, List<IDataTransform> transforms, long rowID, List<AnalysisItem> allFields) throws SQLException {
-        rowByID(rowID, allFields, row);
+    public void updateRow(IRow newRow, List<AnalysisItem> fields, List<IDataTransform> transforms, long rowID, List<AnalysisItem> allFields) throws SQLException {
+        IRow row = rowByID(rowID, allFields);
+        for (AnalysisItem field : fields) {
+            row.addValue(field.getKey(), newRow.getValues().get(field.getKey()));
+        }
         for (IDataTransform transform : transforms) {
             transform.handle((EIConnection) coreDBConn, row);
         }
@@ -1620,7 +1623,9 @@ public class DataStorage implements IDataStorage {
         deleteStmt.executeUpdate();
     }
 
-    private void rowByID(long rowID, List<AnalysisItem> fields, IRow row) throws SQLException {
+    private IRow rowByID(long rowID, List<AnalysisItem> fields) throws SQLException {
+        DataSet dataSet = new DataSet();
+        IRow existingDataRow = dataSet.createRow();
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ");
         List<AnalysisItem> validFields = new ArrayList<AnalysisItem>();
@@ -1648,37 +1653,37 @@ public class DataStorage implements IDataStorage {
 
         for (AnalysisItem analysisItem : fields) {
             if (analysisItem.persistable()) {
-                Value existing = row.getValue(analysisItem.getKey());
-                if (existing.type() == Value.EMPTY) {
-                    KeyMetadata keyMetadata = keys.get(analysisItem.createAggregateKey(false));
-                    Value value;
-                    if (keyMetadata.getType() == Value.DATE) {
-                        Timestamp time = dataRS.getTimestamp(i++);
-                        if (dataRS.wasNull()) {
-                            value = new EmptyValue();
-                        } else {
-                            DateValue dateValue = new DateValue(new Date(time.getTime()));
-                            value = dateValue;
-                        }
-                    } else if (keyMetadata.getType() == Value.NUMBER) {
-                        double doubleValue = dataRS.getDouble(i++);
-                        if (dataRS.wasNull()) {
-                            value = new EmptyValue();
-                        } else {
-                            value = new NumericValue(doubleValue);
-                        }
+
+                KeyMetadata keyMetadata = keys.get(analysisItem.createAggregateKey(false));
+                Value value;
+                if (keyMetadata.getType() == Value.DATE) {
+                    Timestamp time = dataRS.getTimestamp(i++);
+                    if (dataRS.wasNull()) {
+                        value = new EmptyValue();
                     } else {
-                        String stringVavlue = dataRS.getString(i++);
-                        if (dataRS.wasNull()) {
-                            value = new EmptyValue();
-                        } else {
-                            value = new StringValue(stringVavlue);
-                        }
+                        DateValue dateValue = new DateValue(new Date(time.getTime()));
+                        value = dateValue;
                     }
-                    row.addValue(analysisItem.getKey(), value);
+                } else if (keyMetadata.getType() == Value.NUMBER) {
+                    double doubleValue = dataRS.getDouble(i++);
+                    if (dataRS.wasNull()) {
+                        value = new EmptyValue();
+                    } else {
+                        value = new NumericValue(doubleValue);
+                    }
+                } else {
+                    String stringVavlue = dataRS.getString(i++);
+                    if (dataRS.wasNull()) {
+                        value = new EmptyValue();
+                    } else {
+                        value = new StringValue(stringVavlue);
+                    }
                 }
+                existingDataRow.addValue(analysisItem.getKey(), value);
+
             }
         }
+        return existingDataRow;
     }
 
     public ActualRowSet allData(@NotNull Collection<FilterDefinition> filters, @NotNull List<AnalysisItem> fields, @Nullable Integer limit,
