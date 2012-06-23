@@ -96,7 +96,6 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                 if (key == null) {
                     key = new NamedKey(entry.getKey());
                 }
-                System.out.println("Key = " + entry.getKey() + " for " + entry.getValue());
                 analysisItems.add(new AnalysisDimension(key, "Contact " + entry.getValue()));
             }
         } catch (ReportException re) {
