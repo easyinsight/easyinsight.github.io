@@ -1,6 +1,8 @@
 package com.easyinsight.datasources {
 import com.easyinsight.customupload.BasecampNextDataSourceCreation;
 
+import flash.events.EventDispatcher;
+
 import mx.collections.ArrayCollection;
 
 [Bindable]
@@ -27,6 +29,16 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
 
     override public function configClass():Class {
         return BasecampNextDataSourceCreation;
+    }
+
+    override public function requiresMoreSetupAfterAuth():Boolean {
+        return true;
+    }
+
+    override public function moreSetup():IPostOAuth {
+        var picker:BasecampNextAccountRetrieval = new BasecampNextAccountRetrieval();
+        picker.dataSource = this;
+        return picker;
     }
 }
 }

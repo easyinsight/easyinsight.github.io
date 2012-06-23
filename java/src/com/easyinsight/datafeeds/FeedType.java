@@ -1,11 +1,13 @@
 package com.easyinsight.datafeeds;
 
+import java.io.Serializable;
+
 /**
  * User: James Boe
  * Date: Apr 27, 2008
  * Time: 3:43:23 PM
  */
-public class FeedType {
+public class FeedType implements Serializable {
     public static final FeedType GOOGLE = new FeedType(1);
     public static final FeedType STATIC = new FeedType(2);
     public static final FeedType COMPOSITE = new FeedType(3);
@@ -153,6 +155,7 @@ public class FeedType {
     public static final FeedType BASECAMP_NEXT_CALENDAR = new FeedType(138);
     public static final FeedType BASECAMP_NEXT_PEOPLE = new FeedType(139);
     public static final FeedType BATCHBOOK_SUPER_TAG = new FeedType(140);
+    public static final FeedType JSON = new FeedType(141);
 
     private int type;
 

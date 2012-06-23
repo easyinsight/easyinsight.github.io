@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,23 +23,21 @@ public class InitRetrieval extends BasecampNextBaseSource {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public String blah(BasecampNextCompositeSource parent) throws JSONException {
+    public List<BasecampNextAccount> getAccounts(BasecampNextCompositeSource parent) throws JSONException {
         JSONObject jsonObject = rawJSONRequestForObject("https://launchpad.37signals.com/authorization.json", parent);
         JSONArray accountsArray = jsonObject.getJSONArray("accounts");
+        List<BasecampNextAccount> accounts = new ArrayList<BasecampNextAccount>();
         for (int i = 0; i < accountsArray.length(); i++) {
             JSONObject accountObject = accountsArray.getJSONObject(i);
             String product = accountObject.getString("product");
             if ("bcx".equals(product)) {
                 String s = accountObject.getString("id");
-                if(s == null) {
-                    LogClass.error("No Basecamp Next product found - JSON: " + jsonObject.toString());
-                    throw new RuntimeException("No Basecamp account found");
-                }
-                return s;
+                BasecampNextAccount account = new BasecampNextAccount();
+                account.setName(accountObject.getString("name"));
+                account.setId(s);
+                accounts.add(account);
             }
         }
-        LogClass.error("No Basecamp Next product found - JSON: " + jsonObject.toString());
-        throw new RuntimeException("No Basecamp account found");
-//        return null;
+        return accounts;
     }
 }

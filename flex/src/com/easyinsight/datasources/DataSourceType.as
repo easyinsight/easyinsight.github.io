@@ -44,6 +44,7 @@ public class DataSourceType {
     public static const ZENDESK:int = 97;
     public static const SAMPLE:int = 115;
     public static const BASECAMP_NEXT:int = 135;
+    public static const JSON:int = 141;
 
     public static const OWNER:int = 1;
     public static const EDITOR:int = 2;

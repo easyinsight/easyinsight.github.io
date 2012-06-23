@@ -4,6 +4,8 @@ import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.dashboard.DashboardStorage;
+import com.easyinsight.datafeeds.basecampnext.BasecampNextAccount;
+import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
@@ -935,6 +937,15 @@ public class UserUploadService {
             throw new MalformedCredentialsException();
         c.setPassword(s.substring(0, i));
         return c;
+    }
+
+    public Collection<BasecampNextAccount> getBasecampAccounts(BasecampNextCompositeSource dataSource) {
+        try {
+            return dataSource.getBasecampAccounts();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     public CredentialsResponse completeInstallation(final FeedDefinition dataSource) {

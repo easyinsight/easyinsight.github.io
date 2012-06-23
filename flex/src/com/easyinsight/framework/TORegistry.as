@@ -86,6 +86,7 @@ import com.easyinsight.datasources.FreshbooksDataSource;
 import com.easyinsight.datasources.HarvestDataSource;
 import com.easyinsight.datasources.HighRiseDataSource;
 import com.easyinsight.datasources.HighriseAdditionalToken;
+import com.easyinsight.datasources.JSONDataSource;
 import com.easyinsight.datasources.LinkedInDataSource;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.SampleDataSource;
@@ -285,6 +286,7 @@ public class TORegistry {
         var dext:DiagramReportFieldExtension;
         var joinOverride:JoinOverride;
         var qds:QuickbaseDatabaseSource;
+        var json:JSONDataSource;
     }
 }
 }

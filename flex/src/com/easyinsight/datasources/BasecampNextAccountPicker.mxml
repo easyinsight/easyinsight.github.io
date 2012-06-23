@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="uploadService.getBasecampAccounts.send(dataSource)">
+    <mx:Script><![CDATA[
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var accounts:ArrayCollection;
+
+        public var dataSource:BasecampNextCompositeSource;
+
+        private function gotAccounts():void {
+            this.accounts = uploadService.getBasecampAccounts.lastResult as ArrayCollection;
+        }
+
+        private function chooseAccount():void {
+            var account:BasecampNextAccount = accountComboBox.selectedItem as BasecampNextAccount;
+            dataSource.endpoint = account.id;
+            dispatchEvent(new Event(Event.COMPLETE));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="getBasecampAccounts" result="gotAccounts()"/>
+    </mx:RemoteObject>
+    <mx:Label text="Choose the Basecamp account you wish to use:"/>
+    <mx:ComboBox id="accountComboBox" dataProvider="{accounts}" labelField="name"/>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Use This Account" click="chooseAccount()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+
+</util:EISlimWindow>

@@ -14,11 +14,6 @@
 <%@ page import="com.easyinsight.audit.ActionReportLog" %>
 <%@ page import="com.easyinsight.audit.ActionDashboardLog" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
-<%@ page import="com.easyinsight.database.Database" %>
-<%@ page import="com.easyinsight.database.EIConnection" %>
-<%@ page import="java.sql.PreparedStatement" %>
-<%@ page import="java.sql.ResultSet" %>
-<%@ page import="com.easyinsight.datafeeds.FeedService" %>
 <%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">

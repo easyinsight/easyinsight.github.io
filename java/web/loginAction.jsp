@@ -17,11 +17,11 @@
     } else {
         SecurityUtil.populateSession(session, userServiceResponse);
         if (userServiceResponse.getAccountState() == Account.CLOSED) {
-            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/billing.jsp"));
+            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/index.jsp"));
         } else if (userServiceResponse.getAccountState() == Account.DELINQUENT) {
-            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/billing.jsp"));
+            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/index.jsp"));
         } else if (userServiceResponse.getAccountState() == Account.BILLING_FAILED) {
-            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/billing.jsp"));
+            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/index.jsp"));
         } else if (userServiceResponse.getAccountState() == Account.INACTIVE) {
             response.sendRedirect(RedirectUtil.getURL(request, "/app/activation/reactivate.jsp"));
         } else {

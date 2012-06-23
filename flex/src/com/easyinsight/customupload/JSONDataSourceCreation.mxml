@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.JSONDataSource;
+
+        [Bindable]
+        private var url:String;
+        [Bindable]
+        private var dataSourceName:String;
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var obj:JSONDataSource = new JSONDataSource();
+            obj.url = urlInput.text;
+            obj.feedName = nameInput.text;
+            return obj;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:JSONDataSource = feedDefinition as JSONDataSource;
+            url = ds.url;
+            dataSourceName = ds.feedName;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:JSONDataSource = feedDefinition as JSONDataSource;
+            ds.url = urlInput.text;
+            ds.feedName = nameInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <mx:Label text="Data Source Name:" width="250" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="nameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+    </mx:HBox>
+    <mx:HBox>
+        <mx:Label text="JSON URL:" width="250" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+    </mx:HBox>
+</mx:VBox>

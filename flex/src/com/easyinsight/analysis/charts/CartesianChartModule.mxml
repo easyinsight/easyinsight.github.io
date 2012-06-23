@@ -182,7 +182,7 @@
 
                 var firstMeasure:AnalysisMeasure = getMeasures().getItemAt(0) as AnalysisMeasure;
 
-                sortData(dataSet);
+
 
                 createChart();
 
@@ -232,7 +232,7 @@
 
                 measureAxis.title = (chartDef.yAxisLabel != null && chartDef.yAxisLabel != "") ? chartDef.yAxisLabel : firstMeasure.display;
 
-
+                sortData(dataSet);
 
                 chart.dataProvider = dataSet;
                 dimensionAxis.dataProvider = dataSet;

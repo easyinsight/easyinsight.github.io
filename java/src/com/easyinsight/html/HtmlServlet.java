@@ -3,7 +3,6 @@ package com.easyinsight.html;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardService;
-import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.SecurityUtil;
@@ -12,7 +11,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -42,12 +40,16 @@ public class HtmlServlet extends HttpServlet {
                 // and retrieving information thereof
 
                 List<FilterDefinition> filters = report.getFilterDefinitions();
-                HttpSession session = req.getSession();
                 String dashboardIDString = req.getParameter("dashboardID");
                 if (dashboardIDString != null) {
                     long dashboardID = Long.parseLong(dashboardIDString);
                     Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
                     filters.addAll(dashboard.filtersForReport(reportID));
+                }
+
+                List<FilterDefinition> drillthroughFilters = (List<FilterDefinition>) req.getSession().getAttribute("drillthroughFiltersFor" + report.getAnalysisID());
+                if (drillthroughFilters != null) {
+                    filters.addAll(drillthroughFilters);
                 }
 
                 for (FilterDefinition filter : filters) {
@@ -135,6 +137,10 @@ public class HtmlServlet extends HttpServlet {
                     }
                 }
                 InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                if (req.getParameter("timezoneOffset") != null) {
+                    int timezoneOffset = Integer.parseInt(req.getParameter("timezoneOffset"));
+                    insightRequestMetadata.setUtcOffset(timezoneOffset);
+                }
                 doStuff(req, resp, insightRequestMetadata, conn, report);
                 resp.setHeader("Cache-Control","no-cache"); //HTTP 1.1
                 resp.setHeader("Pragma","no-cache"); //HTTP 1.0

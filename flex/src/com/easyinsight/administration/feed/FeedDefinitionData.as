@@ -3,8 +3,11 @@ package com.easyinsight.administration.feed
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.customupload.UploadPolicy;
 import com.easyinsight.datasources.DataSourceInfo;
-	
-	import mx.collections.ArrayCollection;
+import com.easyinsight.datasources.IPostOAuth;
+
+import flash.events.EventDispatcher;
+
+import mx.collections.ArrayCollection;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.datafeeds.FeedDefinition")]
@@ -55,5 +58,13 @@ import com.easyinsight.datasources.DataSourceInfo;
         public function allowFieldEdit():Boolean {
             return getFeedType() == DataFeedType.STATIC;
         }
-	}
+
+        public function requiresMoreSetupAfterAuth():Boolean {
+            return false;
+        }
+
+        public function moreSetup():IPostOAuth {
+            return null;
+        }
+    }
 }

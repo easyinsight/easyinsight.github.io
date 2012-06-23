@@ -4,6 +4,7 @@
 <%@ page import="com.easyinsight.analysis.*" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
+<%@ page import="java.util.List" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -21,6 +22,10 @@
         WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID);
         if (report == null) {
             throw new RuntimeException("Attempt made to load report " + reportID + " which doesn't exist.");
+        }
+        List<FilterDefinition> drillthroughFilters = (List<FilterDefinition>) session.getAttribute("drillthroughFiltersFor" + report.getAnalysisID());
+        if (drillthroughFilters != null) {
+            report.getFilterDefinitions().addAll(drillthroughFilters);
         }
         String dataSourceURLKey = new FeedStorage().dataSourceURLKeyForDataSource(report.getDataFeedID());
         ApplicationSkin applicationSkin = (ApplicationSkin) session.getAttribute("uiSettings");
@@ -134,6 +139,13 @@
             keyedFilter[name + "enabled"] = document.getElementById(name + 'enabled').checked;
 
             refreshFunction();
+        }
+
+        function drillThrough(params) {
+            $.getJSON('/app/drillThrough?' + params, function(data) {
+                var url = data["url"];
+                window.location.href = url;
+            });
         }
 
         function refreshDataSource() {

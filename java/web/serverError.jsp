@@ -20,21 +20,21 @@
             padding-bottom: 40px;
         }
     </style>
-    <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
 </head>
 <body>
 <%
-    Exception exception = (Exception) request.getAttribute("javax.servlet.error.exception");
-    if (exception != null) {
-        LogClass.error(exception);
-    }
+
     String userName = (String) session.getAttribute("userName");
     if (userName != null) {
         com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     }
 
+    Exception exception = (Exception) request.getAttribute("javax.servlet.error.exception");
+    if (exception != null) {
+        LogClass.error(exception);
+    }
     try {
 
 %>

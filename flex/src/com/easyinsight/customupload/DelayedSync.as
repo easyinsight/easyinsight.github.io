@@ -12,6 +12,7 @@ import com.easyinsight.administration.feed.CredentialsResponse;
 import com.easyinsight.administration.feed.FeedDefinitionData;
 import com.easyinsight.analysis.ReportFault;
 import com.easyinsight.datasources.DataSourceBehavior;
+import com.easyinsight.datasources.IPostOAuth;
 import com.easyinsight.framework.NavigationEvent;
 import com.easyinsight.framework.User;
 import com.easyinsight.schedule.DailyScheduleType;
@@ -21,9 +22,11 @@ import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.SolutionKPIData;
 import com.easyinsight.util.CancelButton;
 import com.easyinsight.util.EISlimWindow;
+import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
 
 import flash.events.Event;
+import flash.events.EventDispatcher;
 
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
@@ -33,6 +36,7 @@ import mx.containers.VBox;
 import mx.controls.Alert;
 import mx.controls.Label;
 import mx.controls.ProgressBar;
+import mx.core.IFlexDisplayObject;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -66,13 +70,29 @@ public class DelayedSync extends EISlimWindow {
         this.width = 550;
     }
 
+    private var setupObj:IPostOAuth;
+
     override protected function createChildren():void {
         super.createChildren();
+        if (_dataSourceDefinition.requiresMoreSetupAfterAuth()) {
+            setupObj = _dataSourceDefinition.moreSetup();
+            EventDispatcher(setupObj).addEventListener(Event.COMPLETE, onSetupDone);
+            EventDispatcher(setupObj).addEventListener(Event.CANCEL, onCancel);
+            setupObj.retrieve(this);
+        } else {
+            ProgressAlert.alert(this, "Determining synchronization requirements...", null, uploadService.completeInstallation);
+            uploadService.completeInstallation.send(_dataSourceDefinition);
+        }
+    }
+
+    private function onSetupDone(event:Event):void {
+        EventDispatcher(setupObj).removeEventListener(Event.COMPLETE, onSetupDone);
+        setupObj = null;
         ProgressAlert.alert(this, "Determining synchronization requirements...", null, uploadService.completeInstallation);
         uploadService.completeInstallation.send(_dataSourceDefinition);
     }
 
-    private function onCancel(event:MouseEvent):void {
+    private function onCancel(event:Event):void {
         if (timer != null) {
             timer.stop();
         }

@@ -20,6 +20,7 @@ import com.easyinsight.datafeeds.harvest.*;
 import com.easyinsight.datafeeds.highrise.*;
 /*import com.easyinsight.datafeeds.kashoo.KashooBusinessSource;
 import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;*/
+import com.easyinsight.datafeeds.json.JSONDataSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.marketo.MarketoDataSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
@@ -211,6 +212,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.BASECAMP_NEXT_CALENDAR, BasecampNextCalendarSource.class);
         registerType(FeedType.BASECAMP_NEXT_PEOPLE, BasecampNextPeopleSource.class);
         registerType(FeedType.BATCHBOOK_SUPER_TAG, BatchbookSuperTagSource.class);
+        registerType(FeedType.JSON, JSONDataSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

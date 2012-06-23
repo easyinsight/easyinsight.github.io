@@ -68,13 +68,13 @@
         int accountState = rs.getInt(2);
         ps.close();
         if (accountState == Account.CLOSED) {
-            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/billing.jsp"));
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/index.jsp"));
             return;
         } else if (accountState == Account.DELINQUENT) {
-            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/billing.jsp"));
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/index.jsp"));
             return;
         } else if (accountState == Account.BILLING_FAILED) {
-            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/billing.jsp"));
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/index.jsp"));
             return;
         } else if (accountState == Account.INACTIVE) {
             response.sendRedirect(RedirectUtil.getURL(request, "/app/activation/reactivate.jsp"));

@@ -3,6 +3,7 @@
         borderStyle="none" borderThickness="0">
     <mx:Script><![CDATA[
         import com.easyinsight.datasources.DataSourceType;
+        import com.easyinsight.datasources.JSONDataSource;
         import com.easyinsight.listing.IPerspective;
 
         private var _solution:Solution;
@@ -69,6 +70,9 @@
                     break;
                 case DataSourceType.CLEARDB:
                     result = new ClearDBSolutionDetail();
+                    break;
+                case DataSourceType.JSON:
+                    result = new JSONSolutionDetail();
                     break;
                 case DataSourceType.BATCHBOOK:
                     result = new BatchbookSolutionDetail();

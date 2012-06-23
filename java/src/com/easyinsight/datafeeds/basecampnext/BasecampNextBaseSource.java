@@ -65,6 +65,9 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     //System.out.println("argh");
                 }
                 //System.out.println(restMethod.getResponseBodyAsString());
+                if (restMethod.getStatusCode() == 404 && path.endsWith("projects.json")) {
+                    throw new ReportException(new DataSourceConnectivityReportFault("We were unable to retrieve the list of projects for this Basecamp account. Check that you created this connection under the right 37Signals user, and if so, that your Basecamp account is still active. If this problem persists, contact support@easy-insight.com.", parentDefinition));
+                }
                 jsonObject = new JSONArray(restMethod.getResponseBodyAsString());
                 successful = true;
             } catch (IOException e) {

@@ -160,11 +160,11 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
                     OAuthJSONAccessTokenResponse response = client.accessToken(request);
                     accessToken = response.getAccessToken();
                     refreshToken = response.getRefreshToken();
-                    try {
+                    /*try {
                         this.endpoint = new InitRetrieval().blah(this);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
-                    }
+                    }*/
                 }
             }
         } catch (Exception e) {
@@ -206,5 +206,13 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     protected Collection<ChildConnection> getLiveChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.BASECAMP_NEXT_PROJECTS, FeedType.BASECAMP_NEXT_TODOS, BasecampNextProjectSource.PROJECT_ID, BasecampNextTodoSource.TODO_LIST_PROJECT_ID),
                 new ChildConnection(FeedType.BASECAMP_NEXT_PROJECTS, FeedType.BASECAMP_NEXT_CALENDAR, BasecampNextProjectSource.PROJECT_ID, BasecampNextCalendarSource.CALENDAR_EVENT_PROJECT_ID));
+    }
+
+    public Collection<BasecampNextAccount> getBasecampAccounts() {
+        try {
+            return new InitRetrieval().getAccounts(this);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
