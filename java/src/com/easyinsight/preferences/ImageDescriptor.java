@@ -2,6 +2,7 @@ package com.easyinsight.preferences;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 /**
  * User: jamesboe
@@ -11,7 +12,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="image_data")
-public class ImageDescriptor {
+public class ImageDescriptor implements Serializable {
     private long id;
     private String name;
 
