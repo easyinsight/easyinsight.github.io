@@ -188,10 +188,10 @@ public class DashboardReport extends DashboardElement {
         // refreshReport('div,
         sb.append("$(document).ready(").append("renderReport").append(report.getId()).append("());");
         sb.append("</script>\n");
-        sb.append("<div class=\"filterDiv\">");
+        sb.append("<div style-\"font-size:12px;margin-right:10px\">");
         for (FilterDefinition filterDefinition : reportDefinition.getFilterDefinitions()) {
             if (filterDefinition.isShowOnReportView()) {
-                sb.append(filterDefinition.toHTML(new FilterHTMLMetadata(reportDefinition)));
+                sb.append(filterDefinition.toHTML(new FilterHTMLMetadata(filterHTMLMetadata.getDashboard(), reportDefinition)));
             }
         }
         sb.append("</div>");

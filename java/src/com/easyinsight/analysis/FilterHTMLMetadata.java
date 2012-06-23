@@ -28,6 +28,11 @@ public class FilterHTMLMetadata {
         return "refreshReport";
     }
 
+    public FilterHTMLMetadata(Dashboard dashboard, WSAnalysisDefinition report) {
+        this.dashboard = dashboard;
+        this.report = report;
+    }
+
     public List<FilterDefinition> getFilters() {
         return filters;
     }
