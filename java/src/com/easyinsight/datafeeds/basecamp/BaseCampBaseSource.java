@@ -74,7 +74,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
             try {
                 client.executeMethod(restMethod);
                 if (logRequest) {
-                    //System.out.println(restMethod.getResponseBodyAsString());
+                    System.out.println(restMethod.getResponseBodyAsString());
                 }
                 doc = builder.build(restMethod.getResponseBodyAsStream());
                 String rootValue = doc.getRootElement().getValue();
@@ -83,7 +83,10 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                 }
 
                 if(pageInfo != null) {
-                    pageInfo.MaxPages = Integer.parseInt(restMethod.getResponseHeader("X-Pages").getValue());
+                    Header xPagesHeader = restMethod.getResponseHeader("X-Pages");
+                    if (xPagesHeader != null) {
+                        pageInfo.MaxPages = Integer.parseInt(xPagesHeader.getValue());
+                    }
                 }
                 successful = true;
             } catch (IOException e) {
