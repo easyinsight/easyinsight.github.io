@@ -136,6 +136,16 @@ public class ConfigLoader {
         return databasePassword;
     }
 
+    private String localURL;
+
+    public String getLocalURL() {
+        return localURL;
+    }
+
+    public void setLocalURL(String localURL) {
+        this.localURL = localURL;
+    }
+
     private ConfigLoader() {
         try {
             URL url = getClass().getClassLoader().getResource("eiconfig.properties");
@@ -157,6 +167,8 @@ public class ConfigLoader {
             googlePassword = (String) properties.get("google.password");
 
             taskRunner = Boolean.valueOf((String) properties.get("taskrunner"));
+
+            localURL = (String) properties.get("localurl");
 
             production = Boolean.valueOf((String) properties.get("production"));
             
