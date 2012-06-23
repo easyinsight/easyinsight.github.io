@@ -99,7 +99,6 @@ public class CacheDataTransform implements IDataTransform {
 
                 newRow.addValue(analysisItem.createAggregateKey(), value);
             } else {
-                System.out.println("looks like we need to retrieve " + analysisItem.toDisplay());
                 needToRetrieve.add(analysisItem);
             }
         }

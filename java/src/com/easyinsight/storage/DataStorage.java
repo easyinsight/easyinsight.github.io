@@ -1550,10 +1550,7 @@ public class DataStorage implements IDataStorage {
         for (IDataTransform transform : transforms) {
             transform.handle((EIConnection) coreDBConn, row);
         }
-        System.out.println("new row gives us...");
-        /*for (AnalysisItem field : fields) {
-            System.out.println("\t" + field.toDisplay() + " = " + row.getValue(field));
-        }*/
+
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("UPDATE ");
         sqlBuilder.append(getTableName());
@@ -1577,7 +1574,6 @@ public class DataStorage implements IDataStorage {
         }
         updateStmt.setLong(i, rowID);
         int rows = updateStmt.executeUpdate();
-        System.out.println(rows + " rows updated");
     }
 
     public void updateRow(ActualRow actualRow, List<AnalysisItem> fields, List<IDataTransform> transforms) throws SQLException {
