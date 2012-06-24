@@ -143,8 +143,8 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
 
-
-        return "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+"&'+ strParams, function(data) {\n" +
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        return "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
                 "                var s1 = data[\"values\"];\n" +
                 "                var plot1 = $.jqplot('"+targetDiv+"', [s1], " + argh + ");afterRefresh();\n})";
     }

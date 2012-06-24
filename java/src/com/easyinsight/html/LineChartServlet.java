@@ -28,37 +28,60 @@ public class LineChartServlet extends HtmlServlet {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
 
         JSONObject object = new JSONObject();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         // need series, need ticks
         WSTwoAxisDefinition twoAxisDefinition = (WSTwoAxisDefinition) report;
-        AnalysisItem measure = twoAxisDefinition.getMeasure();
-        AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
-        AnalysisItem yAxis = twoAxisDefinition.getYaxis();
-
-        Map<String, JSONArray> series = new HashMap<String, JSONArray>();
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
-        for (IRow row : dataSet.getRows()) {
-            String yAxisValue = row.getValue(yAxis).toString();
-            JSONArray array = series.get(yAxisValue);
-            if (array == null) {
-                array = new JSONArray();
-                series.put(yAxisValue, array);
-            }
-            JSONArray values = new JSONArray();
-            DateValue dateValue = (DateValue) row.getValue(date);
-            values.put(dateFormat.format(dateValue.getDate()));
-            values.put(row.getValue(measure).toDouble());
-            array.put(values);
-        }
-
         JSONArray blahArray = new JSONArray();
-        for (Map.Entry<String, JSONArray> entry : series.entrySet()) {
-            blahArray.put(entry.getValue());
+        JSONArray labelArray = new JSONArray();
+        if (twoAxisDefinition.isMultiMeasure()) {
+            List<AnalysisItem> measures = twoAxisDefinition.getMeasures();
+            AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
+            for (AnalysisItem measure : measures) {
+                JSONArray measureArray = new JSONArray();
+                labelArray.put(measure.toDisplay());
+                blahArray.put(measureArray);
+                for (IRow row : dataSet.getRows()) {
+                    DateValue dateValue = (DateValue) row.getValue(date);
+                    JSONArray values = new JSONArray();
+                    measureArray.put(values);
+                    values.put(dateFormat.format(dateValue.getDate()));
+                    values.put(row.getValue(measure).toDouble());
+                }
+            }
+        } else {
+            AnalysisItem measure = twoAxisDefinition.getMeasure();
+            AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
+            AnalysisItem yAxis = twoAxisDefinition.getYaxis();
+
+            Map<String, JSONArray> series = new HashMap<String, JSONArray>();
+
+
+
+            for (IRow row : dataSet.getRows()) {
+                String yAxisValue = row.getValue(yAxis).toString();
+                JSONArray array = series.get(yAxisValue);
+                if (array == null) {
+                    array = new JSONArray();
+                    series.put(yAxisValue, array);
+                }
+                JSONArray values = new JSONArray();
+                DateValue dateValue = (DateValue) row.getValue(date);
+                values.put(dateFormat.format(dateValue.getDate()));
+                values.put(row.getValue(measure).toDouble());
+                array.put(values);
+            }
+
+
+            for (Map.Entry<String, JSONArray> entry : series.entrySet()) {
+                labelArray.put(entry.getKey());
+                blahArray.put(entry.getValue());
+            }
         }
+
         // object.put("ticks", ticks);
 
         object.put("values", blahArray);
+        object.put("labels", labelArray);
 
         response.setContentType("application/json");
         String argh = object.toString();

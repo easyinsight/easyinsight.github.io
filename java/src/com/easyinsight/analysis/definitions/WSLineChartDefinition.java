@@ -149,7 +149,9 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
                 "    <script type=\"text/javascript\" src=\"/js//plugins/jqplot.pointLabels.min.js\"></script>\n" +
                 "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasTextRenderer.min.js\"></script>\n" +
                 "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasAxisTickRenderer.min.js\"></script>\n"+
-                "    <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery.jqplot.min.css\" />";
+                "    <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery.jqplot.min.css\" />\n"+
+                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.highlighter.min.js\"></script>\n" +
+                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.cursor.min.js\"></script>";
     }
 
     @Override
@@ -171,8 +173,20 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
             JSONObject axes = new JSONObject();
             JSONObject xAxis = new JSONObject();
             xAxis.put("renderer", "$.jqplot.DateAxisRenderer");
-            //JSONObject xAxisTicketOptions = new JSONObject();
-            //xAxis.put("tickOptions", xAxisTicketOptions);
+
+            JSONObject xAxisTicketOptions = new JSONObject();
+            AnalysisDateDimension date = (AnalysisDateDimension) this.getXaxis();
+            if (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
+                xAxisTicketOptions.put("formatString", "'%b %#d'");
+            } else if (date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+                xAxisTicketOptions.put("formatString", "'%b'");
+            } else if (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
+                xAxisTicketOptions.put("formatString", "'%b'");
+            } else {
+                xAxisTicketOptions.put("formatString", "'%b %#d'");
+            }
+
+            xAxis.put("tickOptions", xAxisTicketOptions);
             axes.put("xaxis", xAxis);
             //JSONObject yAxis = new JSONObject();
             //JSONObject tickOptions = new JSONObject();
@@ -180,15 +194,28 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
             //yAxis.put("tickOptions", tickOptions);
             //axes.put("yaxis", yAxis);
             jsonParams.put("axes", axes);
+            JSONObject highlighter = new JSONObject();
+            highlighter.put("show", true);
+            highlighter.put("sizeAdjust", 7.5);
+            jsonParams.put("highlighter", highlighter);
+            JSONObject cursor = new JSONObject();
+            cursor.put("show", false);
+            jsonParams.put("cursor", cursor);
+            JSONObject legend = new JSONObject();
+            legend.put("show", "true");
+            legend.put("labels", "labels");
+            jsonParams.put("legend", legend);
             params = new JSONObject(jsonParams);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
-
-        argh = "$.getJSON('/app/twoAxisChart?reportID="+getAnalysisID()+"&'+ strParams, function(data) {afterRefresh();\n" +
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        argh = "$.getJSON('/app/twoAxisChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {afterRefresh();\n" +
+                "$('#"+targetDiv+"').empty();\n"+
                 "                var s1 = data[\"values\"];\n" +
+                "                var labels = data[\"labels\"];\n" +
                 "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");\n})";
         System.out.println(argh);
         return argh;

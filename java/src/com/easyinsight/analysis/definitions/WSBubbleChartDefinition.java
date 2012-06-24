@@ -118,8 +118,8 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
         }
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
-
-        argh = "$.getJSON('/app/bubbleChart?reportID="+getAnalysisID()+"&'+ strParams, function(data) {afterRefresh();\n" +
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        argh = "$.getJSON('/app/bubbleChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {afterRefresh();\n" +
                 "                var s1 = data[\"values\"];\n" +
                 "                var plot1 = $.jqplot('"+targetDiv+"', [ s1 ], " + argh + ");\n})";
         System.out.println(argh);

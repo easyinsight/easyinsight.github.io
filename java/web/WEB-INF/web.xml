@@ -231,6 +231,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>DrillThrough</servlet-name>
+        <display-name>DrillThrough</display-name>
+        <servlet-class>com.easyinsight.html.DrillthroughServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>UpdateRowsByPK</servlet-name>
         <display-name>UpdateRowsByPK</display-name>
         <servlet-class>com.easyinsight.api.v3.UpdateRowsPKServlet</servlet-class>
@@ -563,6 +570,11 @@
     <servlet-mapping>
         <servlet-name>ReportHeader</servlet-name>
         <url-pattern>/reportHeader</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>DrillThrough</servlet-name>
+        <url-pattern>/drillThrough</url-pattern>
     </servlet-mapping>
 
     <!--<servlet-mapping>

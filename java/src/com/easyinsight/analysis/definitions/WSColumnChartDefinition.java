@@ -147,8 +147,8 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         }
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
-        System.out.println(argh);
-        return "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+"&'+ strParams, function(data) {\n" +
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        return "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
                 "                var s1 = data[\"values\"];\n" +
                 "                var plot1 = $.jqplot('"+targetDiv+"', [s1], " + argh + ");afterRefresh();\n})";
 
