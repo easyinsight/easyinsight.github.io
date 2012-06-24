@@ -28,15 +28,17 @@ public class StandardReportPipeline extends Pipeline {
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
-                if (lookupTable.getSourceField().hasType(AnalysisItemTypes.LISTING)) {
-                    AnalysisList analysisList = (AnalysisList) lookupTable.getSourceField();
-                    if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
-                } else if (lookupTable.getSourceField().hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
-                    Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
-                    analysisItems.add(lookupTable.getSourceField());
-                    components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, true, getStructure()));
+                if (lookupTable != null && lookupTable.getSourceField() != null) {
+                    if (lookupTable.getSourceField().hasType(AnalysisItemTypes.LISTING)) {
+                        AnalysisList analysisList = (AnalysisList) lookupTable.getSourceField();
+                        if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
+                    } else if (lookupTable.getSourceField().hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                        Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
+                        analysisItems.add(lookupTable.getSourceField());
+                        components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, true, getStructure()));
+                    }
+                    components.add(new LookupTableComponent(lookupTable));
                 }
-                components.add(new LookupTableComponent(lookupTable));
             }
         }
 
