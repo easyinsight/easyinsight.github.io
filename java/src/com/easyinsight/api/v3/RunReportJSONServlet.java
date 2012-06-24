@@ -44,10 +44,10 @@ public class RunReportJSONServlet extends JSONServlet {
                 return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
             }
         });
-        JSONWriter rows = jsonStringer.object();
+        JSONWriter rows = jsonStringer.array();
 
-        JSONWriter rowsWriter = rows.key("rows").array();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        //JSONWriter rowsWriter = rows.key("rows").array();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         for (ListRow listRow : results.getRows()) {
             JSONWriter row = rows.object();
             for (AnalysisItem analysisItem : items) {
@@ -59,6 +59,8 @@ public class RunReportJSONServlet extends JSONServlet {
                         if (value.type() == Value.DATE) {
                             DateValue dateValue = (DateValue) value;
                             valueString = dateFormat.format(dateValue.getDate());
+                        } else if (value.type() == Value.EMPTY) {
+                            valueString = "";
                         } else {
                             valueString = value.toString();
                         }
@@ -68,8 +70,9 @@ public class RunReportJSONServlet extends JSONServlet {
             }
             row.endObject();
         }
-        rowsWriter.endArray();
-        rows.endObject();
+        rows.endArray();
+
+        // zgcBLUnaFuJaRuwUrrDW
 
         System.out.println(jsonStringer.toString());
         return new ResponseInfo(ResponseInfo.ALL_GOOD, jsonStringer.toString());

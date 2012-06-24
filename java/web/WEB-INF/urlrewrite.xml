@@ -76,6 +76,11 @@
         <to>/xml/RunReport?reportID=$1</to>
     </rule>
 
+    <rule>
+        <from>/reports/([A-Za-z0-9]+).json</from>
+        <to>/json/RunReport?reportID=$1</to>
+    </rule>
+
     <!--<rule>
         <from>/json/reports/([0-9]+)</from>
         <to>/json/RunReport?reportID=$1</to>
