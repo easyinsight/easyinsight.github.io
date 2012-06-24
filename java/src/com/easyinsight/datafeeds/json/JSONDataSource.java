@@ -90,12 +90,13 @@ public class JSONDataSource extends ServerDataSourceDefinition {
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> fieldList = new ArrayList<AnalysisItem>();
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
             HttpClient client = new HttpClient();
             HttpMethod restMethod = new GetMethod(url);
             restMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
             client.executeMethod(restMethod);
             JSONArray array = new JSONArray(restMethod.getResponseBodyAsString());
+
             if (array.length() == 0) {
 
             } else {
@@ -145,7 +146,7 @@ public class JSONDataSource extends ServerDataSourceDefinition {
         }
         DataSet dataSet = new DataSet();
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
             HttpClient client = new HttpClient();
             HttpMethod restMethod = new GetMethod(url);
             restMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
