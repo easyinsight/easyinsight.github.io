@@ -182,6 +182,10 @@ public abstract class Pipeline {
             }
             allNeededAnalysisItems.addAll(uniqueFields.values());
         }
+
+        if (!report.getAdditionalGroupingItems().isEmpty()) {
+            allNeededAnalysisItems.addAll(report.getAdditionalGroupingItems());
+        }
         /*EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement query = conn.prepareStatement("SELECT analysis_item_id FROM data_source_to_unique_field WHERE data_source_id = ? and child_source_id = ?");
@@ -265,7 +269,7 @@ public abstract class Pipeline {
 
     public DataResults toList(DataSet dataSet, EIConnection conn) {
         for (IComponent component : components) {
-            //System.out.println(component.getClass() + " - " + dataSet.getRows());
+            //System.out.println(component.getClass() + " - " + dataSet.getRows().size());
             /*if (pipelineData.getReport().isLogReport()) {
                 logger.append("<h1>" + component.getClass().getName() + "</h1>");
                 logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, conn, pipelineData.getInsightRequestMetadata()));

@@ -31,11 +31,17 @@ public class UniqueField extends Function {
         if (match == null) {
             throw new FunctionException("Could not find field " + field + ".");
         }
+        AnalysisItem clone;
+        try {
+            clone = match.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
         long id = toID(match.getKey());
         if (report.getUniqueIteMap() == null) {
             report.setUniqueIteMap(new HashMap<Long, AnalysisItem>());
         }
-        report.getUniqueIteMap().put(id, match);
+        report.getUniqueIteMap().put(id, clone);
         return null;
     }
 

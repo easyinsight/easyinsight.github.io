@@ -66,7 +66,17 @@
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <link href="/css/app.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
-    <%= report.javaScriptIncludes() %>
+    <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
+    <%
+        List<String> jsIncludes = report.javaScriptIncludes();
+        for (String jsInclude : jsIncludes) {
+            out.println("<script type=\"text/javascript\" src=\"" + jsInclude + "\"></script>");
+        }
+        List<String> cssIncludes = report.cssIncludes();
+        for (String cssInclude : cssIncludes) {
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\""+cssInclude+"\" />");
+        }
+    %>
     <script type="text/javascript">
 
         var filterBase = {};

@@ -6,6 +6,9 @@
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
 <%@ page import="com.easyinsight.analysis.FilterHTMLMetadata" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.HashSet" %>
+<%@ page import="java.util.Set" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -46,11 +49,17 @@
     </style>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
-    <script type="text/javascript" src="/js/jquery.jqplot.min.js"></script>
-    <script type="text/javascript" src="/js/plugins/jqplot.barRenderer.min.js"></script>
-    <script type="text/javascript" src="/js/plugins/jqplot.categoryAxisRenderer.min.js"></script>
-    <script type="text/javascript" src="/js//plugins/jqplot.pointLabels.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/css/jquery.jqplot.min.css" />
+    <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
+    <%
+        Set<String> jsIncludes = new HashSet<String>(dashboard.getRootElement().jsIncludes());
+        for (String jsInclude : jsIncludes) {
+            out.println("<script type=\"text/javascript\" src=\"" + jsInclude + "\"></script>");
+        }
+        Set<String> cssIncludes = new HashSet<String>(dashboard.getRootElement().cssIncludes());
+        for (String cssInclude : cssIncludes) {
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\""+cssInclude+"\" />");
+        }
+    %>
     <link href="/css/app.css" rel="stylesheet">
     <script type="text/javascript">
 
