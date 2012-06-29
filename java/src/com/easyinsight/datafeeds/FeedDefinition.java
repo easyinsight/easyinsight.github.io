@@ -22,6 +22,8 @@ import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.io.Serializable;
 
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,6 +62,20 @@ public class FeedDefinition implements Cloneable, Serializable {
     private String refreshMarmotScript;
     private boolean concreteFieldsEditable;
     private DataSourceInfo dataSourceInfo;
+
+    public String toXML() {
+        Element dataSource = new Element("dataSource");
+        dataSource.addAttribute(new Attribute("urlKey", apiKey));
+        dataSource.addAttribute(new Attribute("accountVisible", String.valueOf(accountVisible)));
+        Element fields = new Element("fields");
+        dataSource.appendChild(fields);
+        for (AnalysisItem analysisItem : getFields()) {
+            Element field = new Element("field");
+            fields.appendChild(field);
+            field.appendChild(analysisItem.toXML(null));
+        }
+        return dataSource.toXML();
+    }
 
     public String getRefreshMarmotScript() {
         return refreshMarmotScript;
@@ -327,6 +343,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setName(getFeedName());
         feed.setVisible(isVisible());
         feed.setType(getDataSourceType());
+        feed.setFeedType(getFeedType());
         feed.setExchangeSave(new DataSourceTypeRegistry().isExchangeType(getFeedType().getType()));
         return feed;
     }
@@ -653,6 +670,14 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public boolean fullNightlyRefresh() {
+        return false;
+    }
+
+    public boolean preserveDataOnMigrate() {
+        return true;
+    }
+
+    public boolean requiresPostOAuthSetup() {
         return false;
     }
 }
