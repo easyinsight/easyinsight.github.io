@@ -929,7 +929,8 @@ public class DataService {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
             ReportRetrieval reportRetrieval = new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn).toPipeline();
-            analysisDefinition.setRowsEditable("ACS2".equals(reportRetrieval.feed.getName()) || "Therapy Works".equals(reportRetrieval.feed.getName()));
+            analysisDefinition.setRowsEditable(reportRetrieval.getFeed().getFeedType().getType() == FeedType.STATIC.getType() ||
+                "ACS2".equals(reportRetrieval.getFeed().getName()) || "Therapy Works".equals(reportRetrieval.getFeed().getName()));
             return reportRetrieval;
         }
 
@@ -951,6 +952,9 @@ public class DataService {
 
         private ReportRetrieval toPipeline() throws SQLException {
             feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
+            if (analysisDefinition.getAdditionalGroupingItems() == null) {
+                analysisDefinition.setAdditionalGroupingItems(new ArrayList<AnalysisItem>());
+            }
             if (insightRequestMetadata == null) {
                 insightRequestMetadata = new InsightRequestMetadata();
             }
