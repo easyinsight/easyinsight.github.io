@@ -499,8 +499,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
             }
             columnSet.addAll(uniqueFields);
         }
-        if (!getAdditionalGroupingItems().isEmpty()) {
-            columnSet.addAll(getAdditionalGroupingItems());
+        if (!additionalGroupingItems.isEmpty()) {
+            columnSet.addAll(additionalGroupingItems);
         }
 
         return columnSet;
