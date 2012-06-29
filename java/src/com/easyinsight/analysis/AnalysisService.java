@@ -252,7 +252,6 @@ public class AnalysisService {
                 StringTokenizer toker = new StringTokenizer(dataSource.getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
-                    //new ReportCalculation("cache(\"ACS2\", \"Calc Weighted Procedures\", \"Wtd Procedures/Hr\")").apply(dataSource)
                     transforms.addAll(new ReportCalculation(line).apply(dataSource));
                 }
             }
@@ -312,7 +311,6 @@ public class AnalysisService {
                 StringTokenizer toker = new StringTokenizer(dataSource.getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
-                    //new ReportCalculation("cache(\"ACS2\", \"Calc Weighted Procedures\", \"Wtd Procedures/Hr\")").apply(dataSource)
                     transforms.addAll(new ReportCalculation(line).apply(dataSource));
                 }
             }
@@ -343,9 +341,16 @@ public class AnalysisService {
         try {
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID);
             // TODO: fix
-            FeedDefinition useSource = resolveToName(dataSource, "Data Log");
+            FeedDefinition useSource;
+            if (dataSource.getFeedName().equals("Therapy Works")) {
+                useSource = resolveToName(dataSource, "Data Log");
+            } else {
+                useSource = dataSource;
+            }
             Map<String, Collection<JoinLabelOption>> optionMap = new HashMap<String, Collection<JoinLabelOption>>();
-            createOptionMap(dataSource, useSource, optionMap);
+            if ("Data Log".equals(useSource.getFeedName())) {
+                createOptionMap(dataSource, useSource, optionMap);
+            }
             ActualRowSet actualRowSet = new ActualRowSet();
             actualRowSet.setDataSourceID(useSource.getDataFeedID());
             List<AnalysisItem> validFields = new ArrayList<AnalysisItem>();
@@ -360,8 +365,18 @@ public class AnalysisService {
 
             List<AnalysisItem> pool = new ArrayList<AnalysisItem>(validFields);
 
-            // TODO: fix
-            List<ActualRowLayoutItem> forms = createForms(pool);
+            List<ActualRowLayoutItem> forms;
+            if ("Data Log".equals(useSource.getFeedName())) {
+                forms = createForms(pool);
+            } else {
+                forms = new ArrayList<ActualRowLayoutItem>();
+                ActualRowLayoutItem actualRowLayoutItem = new ActualRowLayoutItem();
+                actualRowLayoutItem.setAnalysisItems(pool);
+                actualRowLayoutItem.setColumns(3);
+                actualRowLayoutItem.setColumnWidth(120);
+                actualRowLayoutItem.setFormLabelWidth(140);
+                forms.add(actualRowLayoutItem);
+            }
 
             actualRow.setValues(map);
             actualRowSet.setRows(Arrays.asList(actualRow));
@@ -439,7 +454,9 @@ public class AnalysisService {
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID());
             FeedDefinition useSource = resolveToDataSource(dataSource, analysisItem.getKey());
             Map<String, Collection<JoinLabelOption>> optionMap = new HashMap<String, Collection<JoinLabelOption>>();
-            createOptionMap(dataSource, useSource, optionMap);
+            if ("Data Log".equals(useSource.getFeedName())) {
+                createOptionMap(dataSource, useSource, optionMap);
+            }
             List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
             filterValueDefinition.setField(analysisItem);
@@ -467,8 +484,18 @@ public class AnalysisService {
                 rowSet.setDataSourceID(useSource.getDataFeedID());
                 List<AnalysisItem> pool = new ArrayList<AnalysisItem>(validFields);
 
-                // TODO: fix
-                List<ActualRowLayoutItem> forms = createForms(pool);
+                List<ActualRowLayoutItem> forms;
+                if ("Data Log".equals(useSource.getFeedName())) {
+                    forms = createForms(pool);
+                } else {
+                    forms = new ArrayList<ActualRowLayoutItem>();
+                    ActualRowLayoutItem actualRowLayoutItem = new ActualRowLayoutItem();
+                    actualRowLayoutItem.setColumns(3);
+                    actualRowLayoutItem.setColumnWidth(120);
+                    actualRowLayoutItem.setFormLabelWidth(140);
+                    actualRowLayoutItem.setAnalysisItems(pool);
+                    forms.add(actualRowLayoutItem);
+                }
 
                 rowSet.setForms(forms);
                 return rowSet;
@@ -535,9 +562,18 @@ public class AnalysisService {
         }
     }
 
-    public DrillThroughResponse drillThrough(DrillThrough drillThrough, Map<String, Object> data, AnalysisItem analysisItem,
+    public DrillThroughResponse drillThrough(DrillThrough drillThrough, Object dataObj, AnalysisItem analysisItem,
                                              WSAnalysisDefinition report) {
         try {
+            Map<String, Object> data;
+            if (dataObj instanceof Map) {
+                data = (Map<String, Object>) dataObj;
+            } else if (dataObj instanceof TrendOutcome) {
+                TrendOutcome trendOutcome = (TrendOutcome) dataObj;
+                data = new HashMap<String, Object>(trendOutcome.getDimensions());
+            } else {
+                throw new RuntimeException();
+            }
             List<FilterDefinition> filters;
             if (drillThrough.getMarmotScript() != null && !"".equals(drillThrough.getMarmotScript())) {
 
