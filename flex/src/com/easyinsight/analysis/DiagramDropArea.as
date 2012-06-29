@@ -35,7 +35,7 @@ public class DiagramDropArea extends MeasureDropArea {
         }
 
         super.analysisItem = analysisItem;
-        if (analysisItem != null && analysisItem.reportFieldExtension == null) {
+        if (analysisItem != null && (analysisItem.reportFieldExtension == null || !(analysisItem.reportFieldExtension is DiagramReportFieldExtension))) {
             analysisItem.reportFieldExtension = new DiagramReportFieldExtension();
             editEvent(null, AnalysisItemEditWindow.EXTENSION);
         }
