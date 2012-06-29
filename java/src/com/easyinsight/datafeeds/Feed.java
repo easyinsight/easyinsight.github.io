@@ -36,6 +36,7 @@ public abstract class Feed implements Serializable {
     private String urlKey;
     private Map<String, String> properties;
     private String marmotScript;
+    private FeedType feedType;
 
     public void setMarmotScript(String marmotScript) {
         this.marmotScript = marmotScript;
@@ -175,6 +176,9 @@ public abstract class Feed implements Serializable {
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         WSListDefinition tempList = new WSListDefinition();
+        if (report != null) {
+            tempList.setMarmotScript(report.getMarmotScript());
+        }
         tempList.setFilterDefinitions(new ArrayList<FilterDefinition>());
         if (report != null && report.getAddedItems() != null && report.getAddedItems().size() > 0) {
             tempList.setAddedItems(report.getAddedItems());
@@ -275,5 +279,13 @@ public abstract class Feed implements Serializable {
         versionStmt.close();
         scheduleStmt.close();
         return dataSourceInfo;
+    }
+
+    public void setFeedType(FeedType feedType) {
+        this.feedType = feedType;
+    }
+
+    public FeedType getFeedType() {
+        return feedType;
     }
 }
