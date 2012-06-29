@@ -6,10 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -94,14 +91,13 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
     }
 
     @Override
-    public String javaScriptIncludes() {
-        return "<script type=\"text/javascript\" src=\"/js/jquery.jqplot.min.js\"></script>\n" +
-                "    <script type=\"text/javascript\" src=\"/js/plugins/jqplot.barRenderer.min.js\"></script>\n" +
-                "    <script type=\"text/javascript\" src=\"/js/plugins/jqplot.categoryAxisRenderer.min.js\"></script>\n" +
-                "    <script type=\"text/javascript\" src=\"/js//plugins/jqplot.pointLabels.min.js\"></script>\n" +
-                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasTextRenderer.min.js\"></script>\n" +
-                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasAxisTickRenderer.min.js\"></script>\n"+
-                "    <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery.jqplot.min.css\" />";
+    public List<String> javaScriptIncludes() {
+        List<String> includes = super.javaScriptIncludes();
+        includes.add("/js/plugins/jqplot.barRenderer.min.js");
+        includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
+        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
+        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        return includes;
     }
 
     @Override

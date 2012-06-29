@@ -28,7 +28,7 @@ public class AssignUniqueField extends Function {
         if (match == null) {
             throw new FunctionException("Could not find field " + field + ".");
         }
-        long id = toID(match.getKey());
+        //long id = toID(match.getKey());
         if (report.getFieldToUniqueMap() == null) {
             report.setFieldToUniqueMap(new HashMap<String, AnalysisItem>());
         }

@@ -50,14 +50,13 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
     }
 
     @Override
-    public String javaScriptIncludes() {
-        return "<script type=\"text/javascript\" src=\"/js/jquery.jqplot.js\"></script>\n" +
-                "    <script type=\"text/javascript\" src=\"/js/plugins/jqplot.barRenderer.min.js\"></script>\n" +
-                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.dateAxisRenderer.min.js\"></script>\n"+
-                "    <script type=\"text/javascript\" src=\"/js//plugins/jqplot.pointLabels.min.js\"></script>\n" +
-                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasTextRenderer.min.js\"></script>\n" +
-                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasAxisTickRenderer.min.js\"></script>\n"+
-                "    <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery.jqplot.min.css\" />";
+    public List<String> javaScriptIncludes() {
+        List<String> includes = super.javaScriptIncludes();
+        includes.add("/js/plugins/jqplot.barRenderer.min.js");
+        includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
+        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
+        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        return includes;
     }
 
     @Override

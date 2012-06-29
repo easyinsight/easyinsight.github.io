@@ -142,16 +142,14 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     }
 
     @Override
-    public String javaScriptIncludes() {
-        return "<script type=\"text/javascript\" src=\"/js/jquery.jqplot.min.js\"></script>\n" +
-                "    <script type=\"text/javascript\" src=\"/js/plugins/jqplot.barRenderer.min.js\"></script>\n" +
-                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.dateAxisRenderer.min.js\"></script>\n"+
-                "    <script type=\"text/javascript\" src=\"/js//plugins/jqplot.pointLabels.min.js\"></script>\n" +
-                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasTextRenderer.min.js\"></script>\n" +
-                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasAxisTickRenderer.min.js\"></script>\n"+
-                "    <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery.jqplot.min.css\" />\n"+
-                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.highlighter.min.js\"></script>\n" +
-                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.cursor.min.js\"></script>";
+    public List<String> javaScriptIncludes() {
+        List<String> includes = super.javaScriptIncludes();
+        includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
+        includes.add("/js/plugins/jqplot.highlighter.min.js");
+        includes.add("/js/plugins/jqplot.cursor.min.js");
+        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
+        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        return includes;
     }
 
     @Override
@@ -204,6 +202,9 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
             JSONObject legend = new JSONObject();
             legend.put("show", "true");
             legend.put("labels", "labels");
+            JSONArray seriesColors = new JSONArray(Arrays.asList("'#a6bc59'", "'#597197'", "'#xd6ab2a'", "'#d86068'", "'#5d9942'",
+                    "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'"));
+            jsonParams.put("seriesColors", seriesColors);
             jsonParams.put("legend", legend);
             params = new JSONObject(jsonParams);
         } catch (JSONException e) {

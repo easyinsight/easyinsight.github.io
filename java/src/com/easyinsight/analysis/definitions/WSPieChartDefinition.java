@@ -7,10 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -51,12 +48,12 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
     }
 
     @Override
-    public String javaScriptIncludes() {
-        return "<script type=\"text/javascript\" src=\"/js/jquery.jqplot.min.js\"></script>\n" +
-                "<script class=\"include\" type=\"text/javascript\" src=\"/js/plugins/jqplot.pieRenderer.min.js\"></script>\n"+
-                "    <script type=\"text/javascript\" src=\"/js/plugins/jqplot.pointLabels.min.js\"></script>\n" +
-                "<script type=\"text/javascript\" src=\"/js/plugins/jqplot.canvasTextRenderer.min.js\"></script>\n" +
-                "    <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery.jqplot.min.css\" />";
+    public List<String> javaScriptIncludes() {
+        List<String> includes = super.javaScriptIncludes();
+        includes.add("/js/plugins/jqplot.pieRenderer.min.js");
+        includes.add("/js/plugins/jqplot.pointLabels.min.js");
+        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
+        return includes;
     }
 
     @Override
@@ -84,7 +81,9 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        System.out.println(targetDiv);
         return "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
+                "$('#"+targetDiv+"').empty();\n"+
                 "                var s1 = data[\"values\"];\n" +
                 "                var plot1 = $.jqplot('"+targetDiv+"', [s1], " + argh + ");afterRefresh();\n})";
     }

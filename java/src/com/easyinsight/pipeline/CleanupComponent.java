@@ -75,6 +75,7 @@ public class CleanupComponent implements IComponent {
             if (pipelineData.getUniqueItems() != null) {
                 allNeededAnalysisItems.addAll(pipelineData.getUniqueItems().values());
             }
+            allNeededAnalysisItems.addAll(pipelineData.getReport().getAdditionalGroupingItems());
         }
         pipelineData.setReportItems(allNeededAnalysisItems);
         return dataSet;

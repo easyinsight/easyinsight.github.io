@@ -5,6 +5,7 @@ import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.MinMaxComponent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,5 +138,19 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         properties.add(new ReportStringProperty("xAxisLabel", xAxisLabel));
         properties.add(new ReportStringProperty("yAxisLabel", yAxisLabel));
         return properties;
+    }
+
+    @Override
+    public List<String> javaScriptIncludes() {
+        List<String> includes = super.javaScriptIncludes();
+        //includes.add("/js/jquery.jqplot.js");
+        includes.add("/js/plugins/jqplot.pointLabels.min.js");
+        return includes;
+    }
+
+    public List<String> cssIncludes() {
+        List<String> includes = new ArrayList<String>();
+        includes.add("/css/jquery.jqplot.min.css");
+        return includes;
     }
 }

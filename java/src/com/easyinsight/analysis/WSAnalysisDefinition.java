@@ -499,35 +499,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
             }
             columnSet.addAll(uniqueFields);
         }
-        /*EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement query = conn.prepareStatement("SELECT analysis_item_id FROM data_source_to_unique_field WHERE data_source_id = ? and child_source_id = ?");
-            for (Long id : ids) {
-                query.setLong(1, getDataFeedID());
-                query.setLong(2, id);
-                ResultSet rs = query.executeQuery();
-                if (rs.next()) {
-                    long uniqueID = rs.getLong(1);
-                    if (!rs.wasNull()) {
-                        Session session = Database.instance().createSession(conn);
-                        AnalysisDimension uniqueItem = (AnalysisDimension) session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, uniqueID).list().get(0);
-                        uniqueItem.afterLoad();
-                        for (AnalysisItem field : allItems) {
-                            if (field.getKey().toBaseKey().equals(uniqueItem.getKey().toBaseKey()) && field.getType() == uniqueItem.getType()) {
-                                uniqueFields.add(field);
-                                AnalysisDimension dim = (AnalysisDimension) field;
-                                dim.setGroup(false);
-                            }
-                        }
-                    }
-                }
-            }
-            query.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
-        } finally {
-            Database.closeConnection(conn);
-        }*/
+        if (!getAdditionalGroupingItems().isEmpty()) {
+            columnSet.addAll(getAdditionalGroupingItems());
+        }
 
         return columnSet;
     }
@@ -635,7 +609,18 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private transient Map<Long, AnalysisItem> uniqueIteMap = new HashMap<Long, AnalysisItem>();
 
     @Transient
+    private transient List<AnalysisItem> additionalGroupingItems = new ArrayList<AnalysisItem>();
+
+    @Transient
     private transient Map<String, AnalysisItem> fieldToUniqueMap = new HashMap<String, AnalysisItem>();
+
+    public List<AnalysisItem> getAdditionalGroupingItems() {
+        return additionalGroupingItems;
+    }
+
+    public void setAdditionalGroupingItems(List<AnalysisItem> additionalGroupingItems) {
+        this.additionalGroupingItems = additionalGroupingItems;
+    }
 
     public Map<String, AnalysisItem> getFieldToUniqueMap() {
         return fieldToUniqueMap;
@@ -795,8 +780,12 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return allItems;
     }
 
-    public String javaScriptIncludes() {
-        return "";
+    public List<String> javaScriptIncludes() {
+        return new ArrayList<String>();
+    }
+
+    public List<String> cssIncludes() {
+        return new ArrayList<String>();
     }
 
     public String toHTML(String targetDiv) {

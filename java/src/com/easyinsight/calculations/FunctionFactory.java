@@ -180,6 +180,12 @@ public class FunctionFactory {
             return new FallThroughJoin();
         } else if (s.equals("multicache")) {
             return new MultiCacheFunction();
+        } else if (s.equals("date")) {
+            return new DateFunction();
+        } else if (s.equals("nowdate")) {
+            return new NowDate();
+        } else if (s.equals("additionalgrouping")) {
+            return new AdditionalGroupingField();
         } else {
             return null;
         }
