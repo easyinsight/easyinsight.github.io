@@ -313,4 +313,12 @@ public abstract class DashboardElement implements Cloneable {
     public Collection<? extends FilterDefinition> filtersForReport(long reportID) {
         return null;
     }
+
+    public List<String> jsIncludes() {
+        return new ArrayList<String>();
+    }
+
+    public List<String> cssIncludes() {
+        return new ArrayList<String>();
+    }
 }

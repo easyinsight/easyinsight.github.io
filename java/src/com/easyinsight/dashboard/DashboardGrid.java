@@ -200,8 +200,20 @@ public class DashboardGrid extends DashboardElement {
         return descs;
     }
 
+    @Override
+    public String refreshFunction() {
+        return "updateGrid" + getElementID() + "()";
+    }
+
     public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
+        sb.append("\n<script type=\"text/javascript\">\n");
+        sb.append("function updateGrid").append(getElementID()).append("() {\n");
+        for (DashboardGridItem e : gridItems) {
+            sb.append("\t").append(e.getDashboardElement().refreshFunction()).append(";\n");
+        }
+        sb.append("}\n");
+        sb.append("</script>\n");
         sb.append("<table style=\"width:100%\">\r\n");
         for (int i = 0; i < rows; i++) {
             sb.append("<tr style=\"width:100%\">\r\n");
@@ -224,5 +236,21 @@ public class DashboardGrid extends DashboardElement {
             }
         }
         return null;
+    }
+
+    public List<String> jsIncludes() {
+        List<String> includes = super.jsIncludes();
+        for (DashboardGridItem stackItem : getGridItems()) {
+            includes.addAll(stackItem.getDashboardElement().jsIncludes());
+        }
+        return includes;
+    }
+
+    public List<String> cssIncludes() {
+        List<String> includes = super.cssIncludes();
+        for (DashboardGridItem stackItem : getGridItems()) {
+            includes.addAll(stackItem.getDashboardElement().cssIncludes());
+        }
+        return includes;
     }
 }

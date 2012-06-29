@@ -149,6 +149,15 @@ public class DashboardReport extends DashboardElement {
         return sb.toString();
     }
 
+    public List<String> jsIncludes() {
+        WSAnalysisDefinition reportDefinition = new AnalysisService().openAnalysisDefinition(report.getId());
+        return reportDefinition.javaScriptIncludes();
+    }
+
+    public List<String> cssIncludes() {
+        WSAnalysisDefinition reportDefinition = new AnalysisService().openAnalysisDefinition(report.getId());
+        return reportDefinition.cssIncludes();
+    }
 
     @Override
     public Collection<? extends FilterDefinition> filtersForReport(long reportID) {

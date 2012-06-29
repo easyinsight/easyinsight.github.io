@@ -345,6 +345,22 @@ public class DashboardStack extends DashboardElement {
         return sb.toString();
     }
 
+    public List<String> jsIncludes() {
+        List<String> includes = super.jsIncludes();
+        for (DashboardStackItem stackItem : getGridItems()) {
+            includes.addAll(stackItem.getDashboardElement().jsIncludes());
+        }
+        return includes;
+    }
+
+    public List<String> cssIncludes() {
+        List<String> includes = super.cssIncludes();
+        for (DashboardStackItem stackItem : getGridItems()) {
+            includes.addAll(stackItem.getDashboardElement().cssIncludes());
+        }
+        return includes;
+    }
+
     @Override
     public Collection<? extends FilterDefinition> filtersForReport(long reportID) {
         for (DashboardStackItem stackItem : getGridItems()) {
