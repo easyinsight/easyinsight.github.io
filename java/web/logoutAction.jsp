@@ -1,4 +1,4 @@
-<%
+<%@ page import="com.easyinsight.html.RedirectUtil" %><%
     session.invalidate();
-    response.sendRedirect("login.jsp");
+    response.sendRedirect(RedirectUtil.getURL(request, "login.jsp"));
 %>
