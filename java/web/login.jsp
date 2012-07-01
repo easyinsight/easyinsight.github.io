@@ -33,7 +33,7 @@
 </head>
 <%
     if(request.getSession().getAttribute("accountID") != null) {
-        response.sendRedirect("index.jsp");
+        response.sendRedirect(RedirectUtil.getURL(request, "index.jsp"));
         return;
     }
     Cookie[] cookies = request.getCookies();
@@ -58,7 +58,15 @@
                 SecurityUtil.populateSession(session, userServiceResponse);
                 response.addCookie(new Cookie("eiUserName", userName));
                 response.addCookie(new Cookie("eiRememberMe", new InternalUserService().createCookie(userServiceResponse.getUserID(), conn)));
-                response.sendRedirect("/app/");
+                String redirectUrl = RedirectUtil.getURL(request, "/app/");
+                if(session.getAttribute("loginRedirect") != null) {
+                    redirectUrl = ((String) session.getAttribute("loginRedirect"));
+                    session.removeAttribute("loginRedirect");
+                }
+                String urlHash = request.getParameter("urlhash");
+                if(urlHash != null)
+                    redirectUrl = redirectUrl + urlHash;
+                response.sendRedirect(redirectUrl);
             }
             conn.commit();
             if (userServiceResponse != null) {

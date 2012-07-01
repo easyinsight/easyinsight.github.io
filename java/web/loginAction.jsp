@@ -37,14 +37,18 @@
                 tokenCookie.setMaxAge(60 * 60 * 24 * 30);
                 response.addCookie(tokenCookie);
             }
-            String redirectUrl = RedirectUtil.getURL(request, "/app/");
-            if(session.getAttribute("loginRedirect") != null) {
-               redirectUrl = ((String) session.getAttribute("loginRedirect"));
-               session.removeAttribute("loginRedirect");
+            if (userServiceResponse.isFirstLogin()) {
+                response.sendRedirect(RedirectUtil.getURL(request, "/app/user/initialUserSetup.jsp"));
+            } else {
+                String redirectUrl = RedirectUtil.getURL(request, "/app/");
+                if(session.getAttribute("loginRedirect") != null) {
+                   redirectUrl = ((String) session.getAttribute("loginRedirect"));
+                   session.removeAttribute("loginRedirect");
+                }
+                if(urlHash != null)
+                   redirectUrl = redirectUrl + urlHash;
+                response.sendRedirect(redirectUrl);
             }
-            if(urlHash != null)
-               redirectUrl = redirectUrl + urlHash;
-            response.sendRedirect(redirectUrl);
         }
     }
 %>
