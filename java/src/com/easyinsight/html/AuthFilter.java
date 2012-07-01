@@ -41,7 +41,7 @@ public class AuthFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
             HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-            httpServletResponse.sendRedirect("/app/login.jsp");
+            httpServletResponse.sendRedirect(RedirectUtil.getURL((HttpServletRequest) servletRequest, "/app/login.jsp"));
         }
     }
 
