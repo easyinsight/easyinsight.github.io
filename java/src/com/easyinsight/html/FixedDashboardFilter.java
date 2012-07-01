@@ -22,7 +22,7 @@ public class FixedDashboardFilter implements Filter {
             Long fixedDashboardID = (Long) session.getAttribute("fixedDashboardID");
             if (fixedDashboardID != null && fixedDashboardID > 0) {
                 HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-                httpServletResponse.sendRedirect(RedirectUtil.getURL((HttpServletRequest) servletRequest, "/html/fixedDashboard/" + fixedDashboardID));
+                httpServletResponse.sendRedirect(RedirectUtil.getURL((HttpServletRequest) servletRequest, "/app/html/fixedDashboard/" + fixedDashboardID));
                 return;
             }
         }

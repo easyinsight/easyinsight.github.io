@@ -33,7 +33,7 @@
 </head>
 <%
     if(request.getSession().getAttribute("accountID") != null) {
-        response.sendRedirect(RedirectUtil.getURL(request, "index.jsp"));
+        response.sendRedirect(RedirectUtil.getURL(request, "/app/index.jsp"));
         return;
     }
     Cookie[] cookies = request.getCookies();
