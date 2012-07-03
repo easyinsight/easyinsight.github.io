@@ -55,16 +55,15 @@
         <div class="signupHeadline">
             <a href="/app/">Customer Login</a>
             <a href="/app/newaccount/">Free Trial</a>
+            <a href="contactus.html">Contact Us</a>
         </div>
     </div>
     <div class="headline">
         <a class="inactive" href="/product.html">Features</a>
         <a class="inactive" href="/data.html">Connections</a>
         <a class="inactive" href="/pricing.html">Pricing</a>
-        <a class="inactive" href="/partners.html">Partners</a>
-        <a class="inactive" href="/company.html">Company</a>
-        <a class="inactive" href="/contactus.html">Contact Us</a>
-        <div style="float:right;color: #FFEEEE;padding-right: 20px">1-720-285-8652</div>
+        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
+        <a class="inactive" href="/api.html">Developers</a>
     </div>
     <div id="contentHeaderStart"></div>
         <div id="midContent">
@@ -80,53 +79,52 @@
         </div>
     <div id="contentHeaderEnd"></div>
     		<!-- InstanceEndEditable -->
-<div id="footer" style="margin:0px;width:100%;height:60px">
-                <div id="linkLine"
-                        style="margin:0px;padding:12px 0px;width:100%;text-align:left">
-                    <div style="float:left;padding-left:10px;">
-                        <a href="/documentation/toc.html">Documentation</a>
-                    </div>
-                    <div style="float:left;padding-left:40px;">
-                        |
-                    </div>
-                    <div style="float:left;padding-left:40px;">
-                        <a href="/app/newaccount/">Pricing</a>
-                    </div>
-                    <div style="float:left;padding-left:40px;">
-                        |
-                    </div>
-                    <div style="float:left;padding-left:40px;">
-                        <a href="/developers.html">Developers</a>
-                    </div>
-                    <div style="float:left;padding-left:35px;">
-                        |
-                    </div>
-                    <div style="float:left;padding-left:40px;">
-                        <a href="/privacy.html">Privacy Policy</a>
-                    </div>
-                    <div style="float:left;padding-left:40px;">
-                        |
-                    </div>
-                    <div style="float:left;padding-left:40px;">
-                        <a href="/terms.html">Terms of Service</a>
-                    </div>
-                    <div style="float:left;padding-left:40px;">
-                        |
-                    </div>
-                    <div style="float:left;padding-left:40px;">
-                        <a href="/partners.html">Partners</a>
-                    </div>
-                    <div style="float:left;padding-left:40px;">
-                        |
-                    </div>
-                    <div style="float:left;padding-left:40px;">
-                        <a href="/contactus.html">Contact Us</a>
-                    </div>
-                </div>
-                <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-                    Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
-                </div>
+    <div id="footer">
+        <div id="linkLine">
+            <div style="padding-left:15px;">
+                <a href="/documentation/toc.html">Documentation</a>
             </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/pricing.html">Pricing</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/api.html">Developers</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/privacy.html">Privacy Policy</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/terms.html">Terms of Service</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/partners.html">Partners</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/contactus.html">Contact Us</a>
+            </div>
+        </div>
+        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+        </div>
+    </div>
 		</div>
 <script type="text/javascript">
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
