@@ -59,13 +59,13 @@
 
         private function onFilterEdit(event:FilterEditEvent):void {
             _filterDefinition = event.filterDefinition;
-            coreBox.removeChildAt(1);
+            filterDetailBox.removeAllChildren();
             _detailClass = event.editorClass;
             filterDetailEditor = new _detailClass();
             filterDetailEditor.filterDefinition = _filterDefinition;
             filterDetailEditor.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit);
             filterDetailEditor.feedID = _feedID;
-            coreBox.addChildAt(filterDetailEditor as DisplayObject, 1);
+            filterDetailBox.addChild(filterDetailEditor as DisplayObject);
             rebuild = true;
         }
 
