@@ -616,8 +616,22 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (isDerived()) {
             throw new RuntimeException("Attempt made to retrieve SQL for a derived analysis item.");
         }
+        if (pkKeyName != null) {
+            return pkKeyName;
+        }
         return getKey().toBaseKey().toSQL();
-    }    
+    }
+
+    @Transient
+    private transient String pkKeyName;
+
+    public String getPkKeyName() {
+        return pkKeyName;
+    }
+
+    public void setPkKeyName(String pkKeyName) {
+        this.pkKeyName = pkKeyName;
+    }
 
     public boolean isCalculated() {
         return false;

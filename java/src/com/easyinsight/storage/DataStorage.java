@@ -713,7 +713,7 @@ public class DataStorage implements IDataStorage {
                     continue;
                 }
                 if (analysisItem.isKeyColumn()) {
-                    key.getKey().toBaseKey().setPkName(getTableName() + "_ID");
+                    analysisItem.setPkKeyName(getTableName() + "_ID");
                 }
                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                     keys.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
@@ -1628,7 +1628,7 @@ public class DataStorage implements IDataStorage {
         for (AnalysisItem field : fields) {
             if (field.persistable()) {
                 if (field.isKeyColumn()) {
-                    field.getKey().toBaseKey().setPkName(getTableName() + "_ID");
+                    field.setPkKeyName(getTableName() + "_ID");
                 }
                 validFields.add(field);
                 sqlBuilder.append(field.getKey().toSQL());
@@ -1708,7 +1708,7 @@ public class DataStorage implements IDataStorage {
                     }
                 }
                 if (field.isKeyColumn()) {
-                    field.getKey().toBaseKey().setPkName(getTableName() + "_ID");
+                    field.setPkKeyName(getTableName() + "_ID");
                 }
                 validFields.add(field);
                 sqlBuilder.append(field.getKey().toSQL());
@@ -1816,7 +1816,7 @@ public class DataStorage implements IDataStorage {
         for (AnalysisItem field : fields) {
             if (field.persistable()) {
                 if (field.isKeyColumn()) {
-                    field.getKey().toBaseKey().setPkName(getTableName() + "_ID");
+                    field.setPkKeyName(getTableName() + "_ID");
                 }
                 validFields.add(field);
                 sqlBuilder.append(field.getKey().toSQL());
