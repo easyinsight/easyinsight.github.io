@@ -321,6 +321,9 @@
         protected var dateApplyBeforeAggregation:Boolean = true;
 
         [Bindable]
+        protected var groupingApplyBeforeAggregation:Boolean = true;
+
+        [Bindable]
         protected var wordWrap:Boolean;
 
         public function higlight():void {
@@ -453,6 +456,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="HTML">
                     <mx:CheckBox id="htmlCheckbox" selected="{html}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Apply Before Aggregation:">
+                    <mx:CheckBox id="groupingApplyBeforeAggregationCheckbox" selected="{groupingApplyBeforeAggregation}"/>
                 </mx:FormItem>
             </mx:Form>
          </mx:ViewStack>

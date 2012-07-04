@@ -31,6 +31,17 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
     @Column(name="html")
     private boolean html;
 
+    @Column(name="apply_before_aggregation")
+    private boolean applyBeforeAggregation;
+
+    public boolean isApplyBeforeAggregation() {
+        return applyBeforeAggregation;
+    }
+
+    public void setApplyBeforeAggregation(boolean applyBeforeAggregation) {
+        this.applyBeforeAggregation = applyBeforeAggregation;
+    }
+
     public boolean isWordWrap() {
         return wordWrap;
     }

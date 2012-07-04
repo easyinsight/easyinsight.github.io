@@ -18,6 +18,7 @@ public class DerivedGroupingWindow extends CalculationWindow {
             calcText = derivedGrouping.derivationCode;
             calcName = derivedGrouping.display;
             wordWrap = derivedGrouping.wordWrap;
+            groupingApplyBeforeAggregation = derivedGrouping.applyBeforeAggregation;
             html = derivedGrouping.html;
         }
         detailIndex = 3;
@@ -43,6 +44,7 @@ public class DerivedGroupingWindow extends CalculationWindow {
         }
         derivedGrouping.derivationCode = calculationInput.text;
         derivedGrouping.html = htmlCheckbox.selected;
+        derivedGrouping.applyBeforeAggregation = groupingApplyBeforeAggregationCheckbox.selected;
         derivedGrouping.wordWrap = wordWrapCheckbox.selected;
         return derivedGrouping;
     }

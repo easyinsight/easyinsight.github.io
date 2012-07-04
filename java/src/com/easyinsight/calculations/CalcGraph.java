@@ -28,10 +28,12 @@ public class CalcGraph {
                     continue;
                 }*/
                 if (calc.isApplyBeforeAggregation() == rowLevel) derivedItems.add(item);
-            } else if (rowLevel && item.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
-                derivedItems.add(item);
-            } else if (rowLevel && item.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-                derivedItems.add(item);
+            } else if (item.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                DerivedAnalysisDimension calc = (DerivedAnalysisDimension) item;
+                if (calc.isApplyBeforeAggregation() == rowLevel) derivedItems.add(item);
+            } else if (item.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+                DerivedAnalysisDateDimension calc = (DerivedAnalysisDateDimension) item;
+                if (calc.isApplyBeforeAggregation() == rowLevel) derivedItems.add(item);
             } else if (!rowLevel && item.hasType(AnalysisItemTypes.REAGGREGATE_MEASURE)) {
                 derivedItems.add(item);
             }
