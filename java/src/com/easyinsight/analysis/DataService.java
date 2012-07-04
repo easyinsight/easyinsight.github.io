@@ -929,7 +929,7 @@ public class DataService {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
             ReportRetrieval reportRetrieval = new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn).toPipeline();
-            analysisDefinition.setRowsEditable(reportRetrieval.getFeed().getFeedType().getType() == FeedType.STATIC.getType() ||
+            analysisDefinition.setRowsEditable((reportRetrieval.getFeed().getFeedType().getType() == FeedType.STATIC.getType() && reportRetrieval.getFeed().getName().contains("Survey")) ||
                 "ACS2".equals(reportRetrieval.getFeed().getName()) || "Therapy Works".equals(reportRetrieval.getFeed().getName()));
             return reportRetrieval;
         }
