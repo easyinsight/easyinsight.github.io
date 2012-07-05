@@ -4,7 +4,7 @@
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
         new UserService().switchHtmlFlex(false);
-        response.sendRedirect(RedirectUtil.getRe"/app");
+        response.sendRedirect(RedirectUtil.getURL(request, "/app"));
     } finally {
         SecurityUtil.clearThreadLocal();
     }
