@@ -9,7 +9,7 @@ package com.easyinsight.analysis
 	public class DerivedAnalysisDateDimension extends AnalysisDateDimension
 	{
 		public var derivationCode:String;
-        public var applyBeforeAggregation:Boolean;
+        public var applyBeforeAggregation:Boolean = true;
 		
 		public function DerivedAnalysisDateDimension()
 		{

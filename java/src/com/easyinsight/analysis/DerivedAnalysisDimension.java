@@ -32,7 +32,7 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
     private boolean html;
 
     @Column(name="apply_before_aggregation")
-    private boolean applyBeforeAggregation;
+    private boolean applyBeforeAggregation = true;
 
     public boolean isApplyBeforeAggregation() {
         return applyBeforeAggregation;
