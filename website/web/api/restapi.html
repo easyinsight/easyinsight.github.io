@@ -300,6 +300,7 @@
         &lt;dataSourceName&gt;Your Data Source Name&lt;/dataSourceName&gt;
         &lt;operation&gt;add&lt;/operation&gt;
     &lt;/beginTransaction&gt;
+
 </code></pre>
 
 <p> The call will return a transaction ID in the response, which you can then use to load data into the data source,
@@ -310,6 +311,7 @@
         &lt;code&gt;200&lt;/code&gt;
         &lt;transactionID&gt;A Unique Key for the transaction&lt;/transactionID&gt;
     &lt;/response&gt;
+
 </code></pre>
 
 <p>You can then use that transaction ID to load records just like addRows/replaceRows above, but XML POST to https://www.easy-insight.com/app/xml/loadRows :</p>
@@ -322,6 +324,7 @@
             &lt;OrderDate&gt;2010-11-12T12:00:00&lt;/OrderDate&gt;
         &lt;/row&gt;
     &lt;/rows&gt;
+
 </code></pre>
 
 <p> When you are finished, all of the data will be copied into the data source by commiting the data with an XML POST to https://www.easy-insight.com/app/xml/commit :</p>
@@ -330,6 +333,7 @@
     &lt;commit&gt;
         &lt;transactionID&gt;Given Transaction ID&lt;/transactionID&gt;
     &lt;/commit&gt;
+
 </code></pre>
 
 </div>
