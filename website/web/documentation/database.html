@@ -20,139 +20,166 @@
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
-<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
-<div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:108px"></div>
-    <div style="width:1000px;margin:0 auto;">
-        <div id="topBar">
-            <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+<div id="topMenuDiv"></div>
+<div id="blackIntroDiv"></div>
+<div style="width:1000px;margin:0 auto;">
+    <div id="topBar">
+        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
 
-            <div class="signupHeadline">
-                <a href="/app/">Customer Login</a>
-                <a href="/app/htmlreport/">Mobile Login</a>
-                <a href="/app/newaccount/">Sign Up</a>
-                <a href="/contactus.html">Contact Us</a>
-            </div>
+        <div class="signupHeadline">
+            <a href="/app/">Customer Login</a>
+            <a href="/app/newaccount/">Free Trial</a>
+            <a href="contactus.html">Contact Us</a>
         </div>
+    </div>
     <div class="headline">
         <a class="inactive" href="/product.html">Features</a>
         <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/webanalytics.html">Solutions</a>
-        <a class="inactive" href="/customers.html">Customers</a>
-        <a class="inactive" href="/partners.html">Partners</a>
-        <a class="inactive" href="/company.html">Company</a>
+        <a class="inactive" href="/pricing.html">Pricing</a>
+        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
+        <a class="inactive" href="/api.html">Developers</a>
     </div>
-            <div id="coreContent">
+    <div id="coreContent">
         <div class="coreContentBlock">
             <h2 class="coreContentHeader">Database Documentation</h2>
+
             <p class="coreContentParagraph">
-Need help connecting to databases in Easy Insight? Here's the documentation to guide you through the process.
+                Need help connecting to databases in Easy Insight? Here's the documentation to guide you through the
+                process.
             </p>
         </div>
         <div style="padding-top:50px;padding-right:50px;margin:0px;float:right">
             <img src="/images/documents.png" alt="Documentation Image"/>
         </div>
     </div>
-            <div id="contentHeaderStart"></div>
-        <div id="midContent">
-                <h2>Table of Contents</h2>
-                <ul>
-                    <li><a href="database.html#r1">How do I connect to relational databases with Easy Insight?</a></li>
-                    <li><a href="database.html#r2">Where do I download the client?</a></li>
-                    <li><a href="database.html#r2">How do I install the client?</a></li>
-                    <li><a href="database.html#r3">How do I set up the client to connect to Easy Insight?</a></li>
-                    <li><a href="database.html#r4">How do I define a connection to a database?</a></li>
-                    <li><a href="database.html#r5">How do I define a query?</a></li>
-                </ul>
-                <h2><a name="r1">How do I connect to relational databases with Easy Insight?</a></h2>
-                <p>
-                    Easy Insight offers connections to MySQL, SQL Server, and Oracle. Given that most databases sit behind the firewall, Easy Insight provides a client you can download into your system and use to publish the data off into Easy Insight.
-                </p>
-                <h2><a name="r2">Where do I download the client?</a></h2>
-                <p>
-                    You can download the client from the Connections page of Easy Insight. Click on MySQL, SQL Server, or Oracle from the Connections page, then click Get Started Now to download the client.
-                </p>
-                <h2><a name="r3">How do I install the client?</a></h2>
-                <p>
-                    The client is a Java web application, delivered as a WAR file. You can easily add the client to any Java application server. For example, if you're using Apache Tomcat, you can just drop the web application into the /webapps directory of the Tomcat server. Once installed, you can connect to the client by opening your browser to http://[your application server address]:[app server port]/eidbconnection. 
-                </p>
-                <h2><a name="r4">How do I set up the client to connect to Easy Insight?</a></h2>
-                <p>
-                    The first time you hit the client, you'll first be prompted to set up login credentials for the client itself. Once that's done, you'll need to add the key/secret key for your Easy Insight account. You can find your key/secret key under "My API Information" under the Developers section of Easy Insight.
-                </p>
-                <h2><a name="r5">How do I define a connection to a database?</a></h2>
-                <p>
-                    Once connected, you need to point the client at a relational database. Click over to Data Sources, click New Connection, and fill in the connection information for your database. Click Create once done.
-                </p>
-                <h2><a name="r6">How do I define a query?</a></h2>
-                <p>
-                    Now that you have a database connection, you can set up a query to publish data across into Easy Insight. Click New Query to start building out a query. Data Source Name is the data source in Easy Insight you'll be publishing the data into. You can choose to Replace whatever data's already in the data source or Append the results on top of whatever's there.
-                </p>
-                <p>
-                    As far as the query itself, it'll be a SELECT statement which pulls back some set of data, which is then sent into Easy Insight. For example:
-                </p>
+    <div id="contentHeaderStart"></div>
+    <div id="midContent">
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="database.html#r1">How do I connect to relational databases with Easy Insight?</a></li>
+            <li><a href="database.html#r2">Where do I download the client?</a></li>
+            <li><a href="database.html#r2">How do I install the client?</a></li>
+            <li><a href="database.html#r3">How do I set up the client to connect to Easy Insight?</a></li>
+            <li><a href="database.html#r4">How do I define a connection to a database?</a></li>
+            <li><a href="database.html#r5">How do I define a query?</a></li>
+        </ul>
+        <h2><a name="r1">How do I connect to relational databases with Easy Insight?</a></h2>
+
+        <p>
+            Easy Insight offers connections to MySQL, SQL Server, and Oracle. Given that most databases sit behind the
+            firewall, Easy Insight provides a client you can download into your system and use to publish the data off
+            into Easy Insight.
+        </p>
+
+        <h2><a name="r2">Where do I download the client?</a></h2>
+
+        <p>
+            You can download the client from the Connections page of Easy Insight. Click on MySQL, SQL Server, or Oracle
+            from the Connections page, then click Get Started Now to download the client.
+        </p>
+
+        <h2><a name="r3">How do I install the client?</a></h2>
+
+        <p>
+            The client is a Java web application, delivered as a WAR file. You can easily add the client to any Java
+            application server. For example, if you're using Apache Tomcat, you can just drop the web application into
+            the /webapps directory of the Tomcat server. Once installed, you can connect to the client by opening your
+            browser to http://[your application server address]:[app server port]/eidbconnection.
+        </p>
+
+        <h2><a name="r4">How do I set up the client to connect to Easy Insight?</a></h2>
+
+        <p>
+            The first time you hit the client, you'll first be prompted to set up login credentials for the client
+            itself. Once that's done, you'll need to add the key/secret key for your Easy Insight account. You can find
+            your key/secret key under "My API Information" under the Developers section of Easy Insight.
+        </p>
+
+        <h2><a name="r5">How do I define a connection to a database?</a></h2>
+
+        <p>
+            Once connected, you need to point the client at a relational database. Click over to Data Sources, click New
+            Connection, and fill in the connection information for your database. Click Create once done.
+        </p>
+
+        <h2><a name="r6">How do I define a query?</a></h2>
+
+        <p>
+            Now that you have a database connection, you can set up a query to publish data across into Easy Insight.
+            Click New Query to start building out a query. Data Source Name is the data source in Easy Insight you'll be
+            publishing the data into. You can choose to Replace whatever data's already in the data source or Append the
+            results on top of whatever's there.
+        </p>
+
+        <p>
+            As far as the query itself, it'll be a SELECT statement which pulls back some set of data, which is then
+            sent into Easy Insight. For example:
+        </p>
                 <pre><code>
-SELECT COUNT(*) as AccountCount, account_type as AccountType from Account group by AccountType
+                    SELECT COUNT(*) as AccountCount, account_type as AccountType from Account group by AccountType
                 </code></pre>
-                <p>
-                    Operating against a hypothetical Account table, this query would produce two columns, AccountCount and AccountType. Clicking Create and Upload will send the results across into Easy Insight, creating a new data source for Easy Insight reporting with the same two columns.
-                </p>
+        <p>
+            Operating against a hypothetical Account table, this query would produce two columns, AccountCount and
+            AccountType. Clicking Create and Upload will send the results across into Easy Insight, creating a new data
+            source for Easy Insight reporting with the same two columns.
+        </p>
+    </div>
+    <div id="contentHeaderEnd"></div>
+    <div id="footer">
+        <div id="linkLine">
+            <div style="padding-left:15px;">
+                <a href="/company.html">Company</a>
             </div>
-        <div id="contentHeaderEnd"></div>
-        <div id="footer">
-            <div id="linkLine">
-                <div style="float:left;padding-left:10px;">
-                    <a href="/documentation/toc.html">Documentation</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/pricing.html">Pricing</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/api/index.html">Developers</a>
-                </div>
-                <div style="float:left;padding-left:35px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/privacy.html">Privacy Policy</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/terms.html">Terms of Service</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/partners.html">Partners</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/contactus.html">Contact Us</a>
-                </div>
+            <div>
+                |
             </div>
-            <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-                Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+            <div>
+                <a href="/pricing.html">Pricing</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/api.html">Developers</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/privacy.html">Privacy Policy</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/terms.html">Terms of Service</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/partners.html">Partners</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/contactus.html">Contact Us</a>
             </div>
         </div>
+        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+        </div>
     </div>
-    <script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</div>
+<script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
 
 <script type="text/javascript">
-var pageTracker = _gat._getTracker("UA-8316271-1");
-pageTracker._trackPageview();
+    var pageTracker = _gat._getTracker("UA-8316271-1");
+    pageTracker._trackPageview();
 </script>
 </body>
 <!-- InstanceEnd --></html>

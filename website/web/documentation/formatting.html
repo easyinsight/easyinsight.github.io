@@ -20,26 +20,24 @@
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
-<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
-<div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:108px"></div>
+<div id="topMenuDiv"></div>
+<div id="blackIntroDiv"></div>
 <div style="width:1000px;margin:0 auto;">
     <div id="topBar">
         <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
 
         <div class="signupHeadline">
             <a href="/app/">Customer Login</a>
-            <a href="/app/htmlreport/">Mobile Login</a>
-            <a href="/app/newaccount/">Sign Up</a>
-            <a href="/contactus.html">Contact Us</a>
+            <a href="/app/newaccount/">Free Trial</a>
+            <a href="contactus.html">Contact Us</a>
         </div>
     </div>
     <div class="headline">
         <a class="inactive" href="/product.html">Features</a>
         <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/webanalytics.html">Solutions</a>
-        <a class="inactive" href="/customers.html">Customers</a>
-        <a class="inactive" href="/partners.html">Partners</a>
-        <a class="inactive" href="/company.html">Company</a>
+        <a class="inactive" href="/pricing.html">Pricing</a>
+        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
+        <a class="inactive" href="/api.html">Developers</a>
     </div>
     <div id="coreContent">
         <div class="coreContentBlock">
@@ -64,69 +62,86 @@
 
         <h2><a name="r1">How do I filter a report to show any rows with tag A or tag B?</a></h2>
 
-        <p>Many of the Easy Insight data sources include reporting against tagged data. In order to optimally report against these tags, we've added special handling for filtering of these tags to get the reports you need.</p>
+        <p>Many of the Easy Insight data sources include reporting against tagged data. In order to optimally report
+            against these tags, we've added special handling for filtering of these tags to get the reports you
+            need.</p>
 
-        <p>One scenario is that you have tags A, B, and C in your system. If you want the report to retain any rows with tag A *or* tag B, create a multi value filter on the tag field. For example, if you're reporting against Highrise contacts, create a filter against the Contact - Tags field. When prompted for filter type, choose Multiple Value. In the filter window that appears, drag the appropriate tags into the "Included" section of the window. The result will include any rows where one or more of the filtered tags are present.</p>
+        <p>One scenario is that you have tags A, B, and C in your system. If you want the report to retain any rows with
+            tag A *or* tag B, create a multi value filter on the tag field. For example, if you're reporting against
+            Highrise contacts, create a filter against the Contact - Tags field. When prompted for filter type, choose
+            Multiple Value. In the filter window that appears, drag the appropriate tags into the "Included" section of
+            the window. The result will include any rows where one or more of the filtered tags are present.</p>
 
         <h2><a name="r2">How do I filter a report to show any rows with tag A and tag B?</a></h2>
 
-        <p>As an alternative scenario, you might want to only show contacts with tag A *and* tag B. For this scenario, create two single value filters on the same tag field and set them to the appropriate tag values. From these filters, the report will filter down to only show rows containing *both* of the selected tags.</p>
+        <p>As an alternative scenario, you might want to only show contacts with tag A *and* tag B. For this scenario,
+            create two single value filters on the same tag field and set them to the appropriate tag values. From these
+            filters, the report will filter down to only show rows containing *both* of the selected tags.</p>
 
         <h2><a name="r3">How do I create a custom fields out of tags?</a></h2>
 
-        <p>Finally, you can actually create custom fields out of tags if you so desire. For example, let's say you have Highrise contacts tagged as A, B, C, and D in your data. You want one custom field to show A or B for a given contact, and a second custom field to show C or D for a given contact.</p>
-        <p>Start by going to the Data tab and clicking Create New Derived Grouping. Name the custom field as you want.</p>
-        <p>For the actual calculation string, you'll use the <code>tags</code> function. For our A/B example, we'd use the following calculation:</p>
+        <p>Finally, you can actually create custom fields out of tags if you so desire. For example, let's say you have
+            Highrise contacts tagged as A, B, C, and D in your data. You want one custom field to show A or B for a
+            given contact, and a second custom field to show C or D for a given contact.</p>
+
+        <p>Start by going to the Data tab and clicking Create New Derived Grouping. Name the custom field as you
+            want.</p>
+
+        <p>For the actual calculation string, you'll use the <code>tags</code> function. For our A/B example, we'd use
+            the following calculation:</p>
         <pre><code>tags([Contact - Tags], "A", "B")</code></pre>
-        <p>Upon saving the calculation, we can add it to the report as a custom field. From there, we can do the exact same thing with the C and D tags, creating another derived grouping, naming it, and putting in a calculation string of:</p>
+        <p>Upon saving the calculation, we can add it to the report as a custom field. From there, we can do the exact
+            same thing with the C and D tags, creating another derived grouping, naming it, and putting in a calculation
+            string of:</p>
         <pre><code>tags([Contact - Tags], "C", "D")</code></pre>
-        <p>With that, we've created two distinct custom fields out of our tagged contents. The same functionality can be applied to any connection using tags, whether it's Highrise, Zendesk, or other data sources.</p>
+        <p>With that, we've created two distinct custom fields out of our tagged contents. The same functionality can be
+            applied to any connection using tags, whether it's Highrise, Zendesk, or other data sources.</p>
     </div>
     <div id="contentHeaderEnd"></div>
     <div id="footer">
         <div id="linkLine">
-            <div style="float:left;padding-left:10px;">
-                <a href="/documentation/toc.html">Documentation</a>
+            <div style="padding-left:15px;">
+                <a href="/company.html">Company</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/pricing.html">Pricing</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
-                <a href="/api/index.html">Developers</a>
+            <div>
+                <a href="/api.html">Developers</a>
             </div>
-            <div style="float:left;padding-left:35px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/privacy.html">Privacy Policy</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/terms.html">Terms of Service</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/partners.html">Partners</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/contactus.html">Contact Us</a>
             </div>
         </div>
         <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-            Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
         </div>
     </div>
 </div>

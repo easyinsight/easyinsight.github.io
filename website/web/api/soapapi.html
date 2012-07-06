@@ -20,197 +20,241 @@
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0 auto;">
-<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
-<div style="position:absolute;height:32px;background-color:#595555;width:100%;margin-top:108px"></div>
-<div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:140px"></div>
-    <div style="width:1000px;margin:0 auto;">
-        <div id="topBar">
-            <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+<div id="topMenuDiv"></div>
+<div id="subMenuDiv"></div>
+<div id="blackIntroWithSubMenuDiv"></div>
+<div style="width:1000px;margin:0 auto;">
+<div id="topBar">
+    <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
 
-            <div class="signupHeadline">
-                <a href="/app/">Customer Login</a>
-                <a href="/app/htmlreport/">Mobile Login</a>
-                <a href="/app/newaccount/">Sign Up</a>
-                <a href="/contactus.html">Contact Us</a>
-            </div>
-        </div>
-    <div class="headline">
-        <a class="inactive" href="/product.html">Features</a>
-        <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/webanalytics.html">Solutions</a>
-        <a class="inactive" href="/customers.html">Customers</a>
-        <a class="inactive" href="/partners.html">Partners</a>
-        <a class="inactive" href="/company.html">Company</a>
+    <div class="signupHeadline">
+        <a href="/app/">Customer Login</a>
+        <a href="/app/newaccount/">Free Trial</a>
+        <a href="contactus.html">Contact Us</a>
     </div>
+</div>
+<div class="headline">
+    <a class="inactive" href="/product.html">Features</a>
+    <a class="inactive" href="/data.html">Connections</a>
+    <a class="inactive" href="/pricing.html">Pricing</a>
+    <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
+    <a class="active" href="/api.html">Developers</a>
+</div>
 
-        <ul class="menuList">
+<ul class="menuList">
     <li class="first"><a href="index.html">API Introduction</a></li>
     <li><a href="restapi.html">REST API</a></li>
     <li><a href="soapapi.html">SOAP API</a></li>
     <li><a href="samples.html">Samples and Wrappers</a></li>
 </ul>
-            <div id="coreContent">
+<div id="coreContent">
         <div class="coreContentBlock">
             <h2 class="coreContentHeader">API Documentation</h2>
+
             <p class="coreContentParagraph">
-Need help using Easy Insight with the SOAP API? Here's the documentation to guide you through the process.
+                Need help using Easy Insight with the SOAP API? Here's the documentation to guide you through the
+                process.
             </p>
         </div>
         <div style="padding-top:50px;padding-right:50px;margin:0px;float:right">
             <img src="/images/documents.png" alt="Documentation Image"/>
         </div>
     </div>
-            <div id="contentHeaderStart"></div>
-        <div id="midContent">
-                <h2>Table of Contents</h2>
-                <ul>
-                    <li><a href="api.html#r1">What is the Easy Insight API?</a></li>
-                    <li><a href="api.html#r2">How do I use the Easy Insight API?</a></li>
-                    <li><a href="api.html#r3">What are the data types of the API?</a></li>
-                    <li><a href="api.html#r4">What are the operations of the API?</a></li>
-                    <li><a href="api.html#r5">Java Code Example</a></li>
-                </ul>
-                <h2><a name="r1">What is the Easy Insight API?</a></h2>
-                <p>Easy Insight offers a SOAP API for loading data. You can use this API to publish in any variety of custom data through a programmatic mechanism. We've designed
-                    this API to handle a variety of use cases and make it as easy as possible to get the results you need in Easy Insight as quickly as possible.
-                </p>
-                <h2><a name="r2">How do I use the Easy Insight API?</a></h2>
-                <p>
-                    The Easy Insight API is a SOAP web services API. The WSDL for the Easy Insight API is located at <a href="https://www.easy-insight.com/app/services/EIDataV2?wsdl">https://www.easy-insight.com/app/services/EIDataV2?wsdl</a>. You should be able to use any SOAP stack to generate client code against this WSDL.
-                </p>
-                <p>
-                    Once you have client code, you'll need to authenticate against the web service by basic authentication. As the username and password in your basic authentication setup, you need to use the key and secret key found under your "My API Information..." section of the API page in Easy Insight. You may need to enable API access to your account if you have not done so already. This can be done by an account administrator under My API Information or Account Settings.
-                </p>
-                <h2><a name="r3">What are the data types of the API?</a></h2>
-                <p>
-                    All of the calls pass across Row objects, along with various other parameters. Row contains three properties, all arrays.</p>
-                <p>
-                    The first array, stringPairs, contains StringPair objects. Use this array for any Grouping fields you may be passing into Easy Insight--string fields such as Customer, OrderID, or Project. StringPair itself contains a String key and a String value.
-                </p>
-                <p>
-                    The second array, numberPairs, contains NumberPair objects. Use this array for any Measure fields you may be passing into Easy Insight--numeric fields such as Revenue, Count, or Units. NumberPair itself contains a String key and a Double value. Do not pass numeric IDs such as CustomerID into this field--use StringPair for identifiers. Only use NumberPair for those fields which you'll want to sum, average, and so on.
-                </p>
-                <p>
-                    The third array, DatePairs, contains DatePair objects. Use thise array for any Date fields you may be passing into Easy Insight.
-                </p>
-                <h2><a name="r4">What are the operations of the API?</a></h2>
-                <ul>
-                    <li>addRow</li>
-                    <p>
-                        addRow adds a single row to a data source. The operation takes a data source name and a Row.
-                    </p>
-                    <li>addRows</li>
-                    <p>
-                        addRow adds multiple rows to a data source. The operation takes a data source name and an array of Rows.
-                    </p>
-                    <li>updateRow</li>
-                    <li>updateRows</li>
-                    <li>replaceRows</li>
-                    <li>deleteRows</li>
-                </ul>
-                <h2><a name="r5">Java Code Example</a></h2>
-                <p>
-                    Let's build an example of an API call. This call will add a row of hypothetical order data to Easy Insight. Our order data has three fields:
-                </p>
-                <ul>
-                    <li>Customer</li>
-                    <p>The name of the customer who made the order</p>
-                    <li>Units</li>
-                    <p>The number of units ordered by the customer</p>
-                    <li>Order Date</li>
-                    <p>When the order was made</p>
-                </ul>
-                <p>
-                    At this point, we have nothing set up in Easy Insight as far as data sources specific to this data. We're going to use the API to do everything for us.
-                </p>
-                <p>
-                    Your first step will be to generate client code against the WSDL found at <a href="https://www.easy-insight.com/app/services/EIDataV2?wsdl">https://www.easy-insight.com/app/services/EIDataV2?wsdl</a>. The exact process for this code generation will vary depending on your SOAP stack and IDE, but it should involve something along the lines of WSDL to Java. For the client code and authentication shown in this example, we'll be demonstrating with Metro (Jax-WS).
-                </p>
-                <p>
-                    Once you have the generated client code, you need to establish and authenticate the service connection to Easy Insight. The code shown below creates a Service object, retrieves the Port from the service, and sets the key/secret key (found under API Information) as the username/password in the basic auth credentials.
-                </p>
+<div id="contentHeaderStart"></div>
+<div id="midContent">
+    <h2>Table of Contents</h2>
+    <ul>
+        <li><a href="api.html#r1">What is the Easy Insight API?</a></li>
+        <li><a href="api.html#r2">How do I use the Easy Insight API?</a></li>
+        <li><a href="api.html#r3">What are the data types of the API?</a></li>
+        <li><a href="api.html#r4">What are the operations of the API?</a></li>
+        <li><a href="api.html#r5">Java Code Example</a></li>
+    </ul>
+    <h2><a name="r1">What is the Easy Insight API?</a></h2>
+
+    <p>Easy Insight offers a SOAP API for loading data. You can use this API to publish in any variety of custom
+        data through a programmatic mechanism. We've designed
+        this API to handle a variety of use cases and make it as easy as possible to get the results you need in
+        Easy Insight as quickly as possible.
+    </p>
+
+    <h2><a name="r2">How do I use the Easy Insight API?</a></h2>
+
+    <p>
+        The Easy Insight API is a SOAP web services API. The WSDL for the Easy Insight API is located at <a
+            href="https://www.easy-insight.com/app/services/EIDataV2?wsdl">https://www.easy-insight.com/app/services/EIDataV2?wsdl</a>.
+        You should be able to use any SOAP stack to generate client code against this WSDL.
+    </p>
+
+    <p>
+        Once you have client code, you'll need to authenticate against the web service by basic authentication. As
+        the username and password in your basic authentication setup, you need to use the key and secret key found
+        under your "My API Information..." section of the API page in Easy Insight. You may need to enable API
+        access to your account if you have not done so already. This can be done by an account administrator under
+        My API Information or Account Settings.
+    </p>
+
+    <h2><a name="r3">What are the data types of the API?</a></h2>
+
+    <p>
+        All of the calls pass across Row objects, along with various other parameters. Row contains three
+        properties, all arrays.</p>
+
+    <p>
+        The first array, stringPairs, contains StringPair objects. Use this array for any Grouping fields you may be
+        passing into Easy Insight--string fields such as Customer, OrderID, or Project. StringPair itself contains a
+        String key and a String value.
+    </p>
+
+    <p>
+        The second array, numberPairs, contains NumberPair objects. Use this array for any Measure fields you may be
+        passing into Easy Insight--numeric fields such as Revenue, Count, or Units. NumberPair itself contains a
+        String key and a Double value. Do not pass numeric IDs such as CustomerID into this field--use StringPair
+        for identifiers. Only use NumberPair for those fields which you'll want to sum, average, and so on.
+    </p>
+
+    <p>
+        The third array, DatePairs, contains DatePair objects. Use thise array for any Date fields you may be
+        passing into Easy Insight.
+    </p>
+
+    <h2><a name="r4">What are the operations of the API?</a></h2>
+    <ul>
+        <li>addRow</li>
+        <p>
+            addRow adds a single row to a data source. The operation takes a data source name and a Row.
+        </p>
+        <li>addRows</li>
+        <p>
+            addRow adds multiple rows to a data source. The operation takes a data source name and an array of Rows.
+        </p>
+        <li>updateRow</li>
+        <li>updateRows</li>
+        <li>replaceRows</li>
+        <li>deleteRows</li>
+    </ul>
+    <h2><a name="r5">Java Code Example</a></h2>
+
+    <p>
+        Let's build an example of an API call. This call will add a row of hypothetical order data to Easy Insight.
+        Our order data has three fields:
+    </p>
+    <ul>
+        <li>Customer</li>
+        <p>The name of the customer who made the order</p>
+        <li>Units</li>
+        <p>The number of units ordered by the customer</p>
+        <li>Order Date</li>
+        <p>When the order was made</p>
+    </ul>
+    <p>
+        At this point, we have nothing set up in Easy Insight as far as data sources specific to this data. We're
+        going to use the API to do everything for us.
+    </p>
+
+    <p>
+        Your first step will be to generate client code against the WSDL found at <a
+            href="https://www.easy-insight.com/app/services/EIDataV2?wsdl">https://www.easy-insight.com/app/services/EIDataV2?wsdl</a>.
+        The exact process for this code generation will vary depending on your SOAP stack and IDE, but it should
+        involve something along the lines of WSDL to Java. For the client code and authentication shown in this
+        example, we'll be demonstrating with Metro (Jax-WS).
+    </p>
+
+    <p>
+        Once you have the generated client code, you need to establish and authenticate the service connection to
+        Easy Insight. The code shown below creates a Service object, retrieves the Port from the service, and sets
+        the key/secret key (found under API Information) as the username/password in the basic auth credentials.
+    </p>
                 <pre><code>
-    BasicAuthEIV2APIService service = new BasicAuthEIV2APIService();
-    EIDataV2 port = service.getBasicAuthEIV2APIPort();
-    ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, key);
-    ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, secretKey);
-                    </code></pre>
-                <p>
-                    The next step is to create an actual Row object with the business data we described earlier. We'll create a Row, then add a StringPair, NumberPair, and DatePair to the row with the business data.
-                </p>
-                <pre><code>
-    Row row = new Row();
-    StringPair customerName = new StringPair();
-    customerName.setKey("Customer");
-    customerName.setValue("Joe Smith");
-    NumberPair orderUnits = new NumberPair();
-    orderUnits.setKey("Units");
-    orderUnits.setValue(100);
-    DatePair orderDate = new DatePair();
-    orderDate.setKey("Order Date");
-    GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
-    cal.setTime(new Date());
-    XMLGregorianCalendar xmlCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-    orderDate.setValue(xmlCalendar);
-    row.getStringPairs().add(customerName);
-    row.getNumberPairs().add(orderUnits);
-    row.getDatePairs().add(orderDate);
-                    </code></pre>
-                <p>
-                    Finally, we'll send the actual Row across to Easy Insight. The first parameter of the call is the name of the data source we're going to send the data into and the second parameter is the Row itself. The third parameter is the one slightly tricky one here--if you specify true for changeDataSourceToMatch, Easy Insight will automatically create and/or update the data source on the server side to match with the data you've sent in. For development purposes, setting this parameter to true can rapidly accelerate your development time. However, we recommend that you set the parameter to false once you have stable code--otherwise, you stand a risk of accidentally changing your data structure in adverse ways when you're past the normal development process.
-                </p>
-                <pre><code>
-    port.addRow("Data Source Name", row, true);
+                    BasicAuthEIV2APIService service = new BasicAuthEIV2APIService();
+                    EIDataV2 port = service.getBasicAuthEIV2APIPort();
+                    ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, key);
+                    ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, secretKey);
                 </code></pre>
-            </div>
-        <div id="contentHeaderEnd"></div>
-        <div id="footer">
-            <div id="linkLine">
-                <div style="float:left;padding-left:10px;">
-                    <a href="/documentation/toc.html">Documentation</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/pricing.html">Pricing</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/api/index.html">Developers</a>
-                </div>
-                <div style="float:left;padding-left:35px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/privacy.html">Privacy Policy</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/terms.html">Terms of Service</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/partners.html">Partners</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/contactus.html">Contact Us</a>
-                </div>
-            </div>
-            <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-                Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
-            </div>
+    <p>
+        The next step is to create an actual Row object with the business data we described earlier. We'll create a
+        Row, then add a StringPair, NumberPair, and DatePair to the row with the business data.
+    </p>
+                <pre><code>
+                    Row row = new Row();
+                    StringPair customerName = new StringPair();
+                    customerName.setKey("Customer");
+                    customerName.setValue("Joe Smith");
+                    NumberPair orderUnits = new NumberPair();
+                    orderUnits.setKey("Units");
+                    orderUnits.setValue(100);
+                    DatePair orderDate = new DatePair();
+                    orderDate.setKey("Order Date");
+                    GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
+                    cal.setTime(new Date());
+                    XMLGregorianCalendar xmlCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+                    orderDate.setValue(xmlCalendar);
+                    row.getStringPairs().add(customerName);
+                    row.getNumberPairs().add(orderUnits);
+                    row.getDatePairs().add(orderDate);
+                </code></pre>
+    <p>
+        Finally, we'll send the actual Row across to Easy Insight. The first parameter of the call is the name of
+        the data source we're going to send the data into and the second parameter is the Row itself. The third
+        parameter is the one slightly tricky one here--if you specify true for changeDataSourceToMatch, Easy Insight
+        will automatically create and/or update the data source on the server side to match with the data you've
+        sent in. For development purposes, setting this parameter to true can rapidly accelerate your development
+        time. However, we recommend that you set the parameter to false once you have stable code--otherwise, you
+        stand a risk of accidentally changing your data structure in adverse ways when you're past the normal
+        development process.
+    </p>
+                <pre><code>
+                    port.addRow("Data Source Name", row, true);
+                </code></pre>
+</div>
+<div id="contentHeaderEnd"></div>
+<div id="footer">
+    <div id="linkLine">
+        <div style="padding-left:15px;">
+            <a href="/company.html">Company</a>
+        </div>
+        <div>
+            |
+        </div>
+        <div>
+            <a href="/pricing.html">Pricing</a>
+        </div>
+        <div>
+            |
+        </div>
+        <div>
+            <a href="/api.html">Developers</a>
+        </div>
+        <div>
+            |
+        </div>
+        <div>
+            <a href="/privacy.html">Privacy Policy</a>
+        </div>
+        <div>
+            |
+        </div>
+        <div>
+            <a href="/terms.html">Terms of Service</a>
+        </div>
+        <div>
+            |
+        </div>
+        <div>
+            <a href="/partners.html">Partners</a>
+        </div>
+        <div>
+            |
+        </div>
+        <div>
+            <a href="/contactus.html">Contact Us</a>
         </div>
     </div>
+    <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+        Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+    </div>
+</div>
+</div>
     <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));

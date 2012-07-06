@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <!-- InstanceBegin template="/Templates/plaintemplate.dwt" codeOutsideHTMLIsLocked="false" -->
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -15,6 +15,7 @@
     <!-- InstanceEndEditable -->
     <link type="text/css" rel="stylesheet" media="screen" href="css/base.css"/>
     <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
+    <link href='https://fonts.googleapis.com/css?family=Cabin:regular,bold' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="/js/jquery.min.js"></script>
     <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
     <script type="text/javascript" src="/js/swfobject.js"></script>
@@ -23,148 +24,144 @@
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
 </head>
-<body style="width:100%;text-align:center;margin:0px auto;">
-<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
-<div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:108px"></div>
-<div style="width:1000px;margin:0 auto;">
-
+<body>
+<div id="topMenuDiv"></div>
+<div id="blackIntroDiv"></div>
+<div id="trialDiv"></div>
+<div id="pageBase">
     <div id="topBar">
         <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
         <div class="signupHeadline">
             <a href="/app/">Customer Login</a>
-            <a href="/app/htmlreport/">Mobile Login</a>
-            <a href="/app/newaccount/">Sign Up</a>
-            <a href="/contactus.html">Contact Us</a>
+            <a href="/app/newaccount/">Free Trial</a>
+            <a href="contactus.html">Contact Us</a>
         </div>
     </div>
     <div class="headline">
         <a class="inactive" href="/product.html">Features</a>
         <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/webanalytics.html">Solutions</a>
-        <a class="inactive" href="/customers.html">Customers</a>
-        <a class="inactive" href="/partners.html">Partners</a>
-        <a class="inactive" href="/company.html">Company</a>
+        <a class="inactive" href="/pricing.html">Pricing</a>
+        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
+        <a class="inactive" href="/api.html">Developers</a>
     </div>
-    <!-- InstanceBeginEditable name="submenu" -->
-    <!-- InstanceEndEditable -->
 
     <div id="coreContent">
         <div class="coreContentBlock">
-            <h2 class="coreContentHeader">Business Intelligence Made Easy</h2>
+            <h2 class="coreContentHeader">Drag. Drop. Done. Business Intelligence Made Easy.</h2>
             <p class="coreContentParagraph">
-                Whether it's simply better reporting against your SaaS system of choice or full organization analytics, Easy Insight gives you the best blend of power and ease of use, all delivered through the cloud.
+                Whether it's simply better reporting against your SaaS system of choice or full organization analytics, Easy Insight gives you the best blend of power and ease of use, all delivered through the cloud at an affordable price for the small business.
             </p>
         </div>
         <div style="padding-top:10px;margin:0px;float:right">
             <a href="http://www.youtube.com/watch?v=ltxcGbgUmto" class="vidbox" rel="vidbox"><img
-                    style="padding:0px 10px 10px" src="/images/IntroStart.jpg"
+                    style="padding:0px 10px 6px" src="/images/IntroStart.jpg"
                     alt="Introduction to Easy Insight Screencast"/></a>
             <div align="center" style="font-size:18px;color:#FFFFFF">Watch a Four Minute Demo</div>
         </div>
     </div>
+    <div id="trialBar">
+        <div id="trialBarLeft">30 Day Free Trial In 60 Seconds.</div>
+        <a href="/app/newaccount/"><img src="/images/TryEasyInsight.png"
+                                        alt="Easy Insight Free Trial"/></a>
+        <div id="trialBarRight">Questions? Call 1 (720) 285-8652</div>
+    </div>
     <div id="contentHeaderStart"></div>
         <div id="midContent">
             <div style="width:100%;position:relative;height:200px">
-                <div style="width:275px;float:left;padding-right:50px">
-                    <h2>Business Measurement</h2>
+                <div style="padding-top:35px;padding-left:10px;padding-right:30px;float:left;width:300px">
+                    <p class="customerQuoteText">Easy Insight has proven to be a hugely powerful
+                        system for us. Coupled with the incredibly fast and attentive support, it has enabled ChannelCreator to
+                        automate 90% of its reporting function and focus on our strength, selling our product.</p>
 
-                    <p>Whether you're a small consulting shop or a Fortune 500, you're flying blind without good measurement. Is
-                        that marketing campaign working? Are your projects on schedule? Easy Insight helps you track those key
-                        business metrics and achieve complete business visibility.</p>
+                    <p class="customerQuotePerson">Matt Ball, ChannelCreator Ltd.</p>
                 </div>
-                <div style="width:275px;float:left;padding-right:50px">
-                    <h2>Reporting and Analysis</h2>
+                <div style="width:570px;float:right;padding-right:30px">
+                    <h2>Add Intuitive Reporting to your SaaS Products</h2>
 
-                    <p>Once you have those key metrics, you need analysis to slice the data and visualize the results. Easy
-                        Insight gives you full SaaS BI power through an intuitive web interface, enabling you to perform ad hoc
-                        reporting and visualize your data through lists, trees, charts, maps, and more.</p>
+                    <p>Easy Insight quickly bolts onto your existing SaaS products such as 37Signals Basecamp and Highrise, FreshBooks, Harvest, Zendesk, and much more to provide you with full business intelligence capabilities. We provide a rich library of prebuilt reports and dashboards for each connection. A sophisticated report editor gives you the capability to take and modify any of those reports, as well as creating your own tabular lists, crosstabs, charts, and diagrams as you desire. You can easily apply filters to your reports to slice and dice the data to find the answers you need.</p>
                 </div>
-                <div style="width:275px;float:left">
-                    <h2>Share the Results</h2>
+            </div>
+            <hr/>
+            <div style="width:100%;position:relative;height:200px">
+                <div style="width:550px;float:left">
+                    <h2>On Demand and Secure</h2>
 
-                    <p>Rich collaboration functionality helps you share your reports with the rest of your organization. Row
-                        level security makes sure the right people see the right data and nothing more. Rich export
-                        functionality allows you to get your reports into Excel, onto another website, or other dashboards.</p>
+                    <p>No time wasted on installation and configuration here, simply start now to see immediate results. From
+                        basic reports to in depth business intelligence, it's all available to you with a free trial. There's
+                        no hardware to purchase and a dramatically lower total cost of ownership than traditional packages. Your team can easily collaborate on report development to facilitate quick insights. Whether you want simple, wide open sharing of data and reports throughout your small team or fine grained data level security for a larger organization, we can accomodate your data security needs.</p>
+                </div>
+                <div style="width:380px;float:right;padding-right:30px;padding-top: 20px">
+                    <img src="images/HighriseDashboard.jpg"/>
+                </div>
+            </div>
+            <hr/>
+            <div style="width:100%;position:relative;height:210px">
+                <div style="padding-top:35px;padding-left:10px;padding-right:30px;float:left;width:300px">
+                    <p class="customerQuoteText" style="padding-top: 40px">I am neither a database analyst nor SaaS engineer, but I am able to create the reports I need using EI's simple drag and drop interface. Job well done!</p>
+
+                    <p class="customerQuotePerson">Michael Aaron, Attention</p>
+                </div>
+                <div style="width:570px;float:right;padding-right:30px">
+                    <h2>Enterprise Grade Functionality</h2>
+
+                    <p>Once you have your basic reports together, there's no limit to where you can go with the functionality Easy Insight offers. Take advantage of our scripting and formula capabilities to create meaningful calculations such as financial or sales projections. Create a single view of your customer from the initial touch point of marketing through the sales process and on into project tracking, invoicing, and help systems. Once you have that single view, set it up for recurring email delivery to the customer owner in your organization as Excel or PDF so that you can catch any problems before they escalate and improve customer satisfaction.</p>
                 </div>
             </div>
             <hr/>
             <div class="customerBar">
-                <div style="padding-left:300px;color:#CC0033;padding-bottom:10px">Some of the companies who use Easy Insight:</div>
-                <a href="http://www.sponsorpay.com/"><img style="padding-bottom:11px" src="images/logos/SponsorPay.jpg" alt="SponsorPay Logo"/></a>
-                <a href="http://www.webdrive.co.nz/"><img src="images/logos/WebDrive.gif" alt="Web Drive Logo"/></a>
-                <a href="http://www.thecopia.com/"><img style="padding-bottom:9px" src="images/logos/Copia.gif" alt="Copia Logo"/></a>
-                <a href="http://perceptive.com/"><img src="images/logos/Perceptive.jpg" alt="Perceptive Informatics Logo"/></a>
-                <a href="http://www.justinsnutbutter.com/"><img src="images/logos/JNB.jpg" alt="Justin's Nut Butter Logo"/></a>
-            </div>
-            <hr/>
-            <div style="width:100%;position:relative;height:200px">
-                <div style="width:275px;float:left;padding-right:50px">
-                    <h2>On Demand and Secure</h2>
-
-                    <p>No time wasted on installation and configuration here, simply start now to see immediate results. From
-                        simple reports to in depth business intelligence, it's all available to you with a free trial. There's
-                        no hardware to purchase and a dramatically lower total cost of ownership than traditional packages.</p>
-                </div>
-                <div style="width:275px;float:left;padding-right:50px">
-                    <h2>SaaS BI</h2>
-
-                    <p>Have your data in flat files or spreadsheets? How about relational databases? Want to do Basecamp
-                        reporting? For any data source, Easy Insight gives you easy reporting and analysis on demand.</p>
-                </div>
-                <div style="width:275px;float:left">
-
-                    <h2>Open API</h2>
-
-                    <p>Want to publish your own data? Easy Insight offers a simple, easy to use web services API to meet your
-                        every need for publishing in custom data sets.</p>
-                </div>
+                <div>Some of the companies who use Easy Insight:</div>
+                <a href="http://www.sponsorpay.com/"><img style="padding-bottom:11px" src="/images/logos/SponsorPay.jpg" alt="SponsorPay Logo"/></a>
+                <a href="http://www.webdrive.co.nz/"><img src="/images/logos/WebDrive.gif" alt="Web Drive Logo"/></a>
+                <a href="http://www.thecopia.com/"><img style="padding-bottom:9px" src="/images/logos/Copia.gif" alt="Copia Logo"/></a>
+                <a href="http://attentionusa.com/"><img src="/images/attention.png" alt="Attention USA Logo"/></a>
+                <a href="http://www.scvngr.com/"><img src="/images/scvngr.jpg" alt="SCVNGR Logo"/></a>
             </div>
         </div>
     <div id="contentHeaderEnd"></div>
     <div id="footer">
         <div id="linkLine">
-            <div style="float:left;padding-left:10px;">
-                <a href="/documentation/toc.html">Documentation</a>
+            <div style="padding-left:15px;">
+                <a href="/company.html">Company</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/pricing.html">Pricing</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
-                <a href="/api/index.html">Developers</a>
+            <div>
+                <a href="/api.html">Developers</a>
             </div>
-            <div style="float:left;padding-left:35px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/privacy.html">Privacy Policy</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/terms.html">Terms of Service</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/partners.html">Partners</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/contactus.html">Contact Us</a>
             </div>
         </div>
         <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-            Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
         </div>
     </div>
 </div>

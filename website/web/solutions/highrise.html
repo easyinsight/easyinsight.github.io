@@ -26,46 +26,39 @@
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
     <script type="text/javascript">
-        $(function() {
+        $(function () {
             $('#midContent a').lightBox();
         });
     </script>
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
-<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
-<div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:108px"></div>
+<div id="topMenuDiv"></div>
+<div id="blackIntroDiv"></div>
+<div id="trialDiv"></div>
 <div style="width:1000px;margin:0 auto;">
     <div id="topBar">
         <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
 
         <div class="signupHeadline">
             <a href="/app/">Customer Login</a>
-            <a href="/app/htmlreport/">Mobile Login</a>
-            <a href="/app/newaccount/">Sign Up</a>
-            <a href="/contactus.html">Contact Us</a>
+            <a href="/app/newaccount/">Free Trial</a>
+            <a href="contactus.html">Contact Us</a>
         </div>
     </div>
     <div class="headline">
         <a class="inactive" href="/product.html">Features</a>
         <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/webanalytics.html">Solutions</a>
-        <a class="inactive" href="/customers.html">Customers</a>
-        <a class="inactive" href="/partners.html">Partners</a>
-        <a class="inactive" href="/company.html">Company</a>
+        <a class="inactive" href="/pricing.html">Pricing</a>
+        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
+        <a class="inactive" href="/api.html">Developers</a>
     </div>
     <div id="coreContent">
         <div class="coreContentBlock" style="padding-top:20px;">
-            <h2 class="coreContentHeader">Highrise Reporting and Analytics</h2>
+            <h2 class="coreContentHeader">Drag. Drop. Done. Highrise Reporting Made Easy.</h2>
 
-            <p class="coreContentParagraph">Want the ability to perform custom Highrise reporting? Whether it's simple
-                reports on your sales pipeline or in depth CRM analysis, Easy Insight can get you that visibility in a
-                couple of clicks! If you don't already have an account, you can get started with a 30 day free trial. No
-                credit card is required to start.</p>
-
-            <div class="connectionLinks">
-                <a href="/app/newaccount/">Get Started Now!</a>
-                <a href="http://www.easy-insight.com/documentation/highrise.html">View Highrise Documentation</a>
-            </div>
+            <p class="coreContentParagraph">Want custom Highrise reporting? Whether it's simple
+                daily emails on your sales pipeline, full CRM dashboards, or custom fields like deal close dates, Easy
+                Insight takes your Highrise system to the next level.</p>
         </div>
         <div style="padding-top:10px;margin:0px;float:right">
             <a href="http://www.youtube.com/watch?v=c-3Vjb2FUtU" class="vidbox" rel="vidbox"><img
@@ -74,6 +67,12 @@
 
             <div align="center" style="font-size:18px;color:#FFFFFF">See How Easy Insight Works with Highrise</div>
         </div>
+    </div>
+    <div id="trialBar">
+        <div id="trialBarLeft">30 Day Free Trial In 60 Seconds.</div>
+        <a href="/app/newaccount/"><img src="/images/TryEasyInsight.png"
+                                        alt="Easy Insight Free Trial"/></a>
+        <div id="trialBarRight">Questions? Call 1 (720) 285-8652</div>
     </div>
     <div id="contentHeaderStart"></div>
     <div id="midContent">
@@ -144,9 +143,9 @@
 
         <div style="padding-top:80px;padding-left:20px;padding-right:20px;padding-bottom:20px;float:right">
 
-            <a href="../images/ContactHeatMap.png"
-               title="You can combine your data with Google Maps if you specify zip codes in your contact or company addresses to see where you're achieving sales success in terms of geography."><img
-                    src="../images/ContactHeatMapSmall.png" alt="Heat map of contacts by location"/></a>
+            <a href="../images/HighriseDashboard.png"
+               title="You can easily build dashboards spanning multiple reports to create full visiblity of your Highrise system."><img
+                    src="../images/HighriseDashboard.jpg" alt="Simple dashboard of your Highrise data"/></a>
 
             <div align="center" style="font-size:12px;padding-top:10px;color:#353535">
                 Click Above to See Sample Highrise Reports
@@ -155,12 +154,31 @@
 
         <h2 style="padding-top:100px">Export, Email, and Embed</h2>
 
-        <p>You can export any report into Excel, PDF, and PNG to share in meetings or fit into current business processes. You can set up reports to deliver over email on a
+        <p style="padding-bottom: 40px">You can export any report into Excel, PDF, and PNG to share in meetings or fit
+            into current business
+            processes. You can set up reports to deliver over email on a
             scheduled basis so that you have a daily or weekly view of your hot leads. You can even embed reports into
             external dashboards so that they're visible to the rest of your organization. Extensive styling and
-            formatting capabilities make sure that you can display reports in terms of corporate style standards, including logo images and other custom branding.</p>
+            formatting capabilities make sure that you can display reports in terms of corporate style standards,
+            including logo images and other custom branding.</p>
+        <a href="/app/newaccount/"><img src="/images/TryEasyInsight3.png"
+                                        alt="Easy Insight Free Trial"/></a>
+        <hr/>
+        <div class="customerBar">
+            <div style="padding-left:300px;color:#CC0033;padding-bottom:10px">Some of the companies who use Easy
+                Insight:
+            </div>
+            <a href="http://www.sponsorpay.com/"><img style="padding-bottom:11px" src="/images/logos/SponsorPay.jpg"
+                                                      alt="SponsorPay Logo"/></a>
+            <a href="http://www.webdrive.co.nz/"><img src="/images/logos/WebDrive.gif" alt="Web Drive Logo"/></a>
+            <a href="http://www.thecopia.com/"><img style="padding-bottom:9px" src="/images/logos/Copia.gif"
+                                                    alt="Copia Logo"/></a>
+            <a href="http://attentionusa.com/"><img src="/images/attention.png" alt="Attention USA Logo"/></a>
+            <a href="http://www.scvngr.com/"><img src="/images/scvngr.jpg" alt="SCVNGR Logo"/></a>
+        </div>
+        <hr/>
 
-        <p style="padding-top:80px;padding-bottom:2px;margin:2px;" class="disclaimer">Highrise and 37signals are
+        <p style="padding-top:20px;padding-bottom:2px;margin:2px;" class="disclaimer">Highrise and 37signals are
             registered trademarks of 37signals, LLC.</p>
 
         <p style="padding-top:2px;margin:2px;" class="disclaimer">Easy Insight is in no way affiliated with 37signals
@@ -169,51 +187,50 @@
     </div>
     <!-- InstanceBeginEditable name="BottomContent" --><!-- InstanceEndEditable -->
 
-    <div id="footer" style="margin:0px;width:100%;height:60px">
-        <div id="linkLine"
-             style="margin:0px;padding:12px 0px;width:100%;text-align:left">
-            <div style="float:left;padding-left:10px;">
-                <a href="/documentation/toc.html">Documentation</a>
+    <div id="footer">
+        <div id="linkLine">
+            <div style="padding-left:15px;">
+                <a href="/company.html">Company</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/pricing.html">Pricing</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
-                <a href="/api/index.html">Developers</a>
+            <div>
+                <a href="/api.html">Developers</a>
             </div>
-            <div style="float:left;padding-left:35px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/privacy.html">Privacy Policy</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/terms.html">Terms of Service</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/partners.html">Partners</a>
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 |
             </div>
-            <div style="float:left;padding-left:40px;">
+            <div>
                 <a href="/contactus.html">Contact Us</a>
             </div>
         </div>
         <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-            Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
         </div>
     </div>
 </div>

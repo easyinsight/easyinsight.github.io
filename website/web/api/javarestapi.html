@@ -23,17 +23,17 @@
 <div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
 <div style="position:absolute;height:32px;background-color:#595555;width:100%;margin-top:108px"></div>
 <div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:140px"></div>
-    <div style="width:1000px;margin:0 auto;">
-        <div id="topBar">
-            <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+<div style="width:1000px;margin:0 auto;">
+    <div id="topBar">
+        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
 
-            <div class="signupHeadline">
-                <a href="/app/">Customer Login</a>
-                <a href="/app/htmlreport/">Mobile Login</a>
-                <a href="/app/newaccount/">Sign Up</a>
-                <a href="/contactus.html">Contact Us</a>
-            </div>
+        <div class="signupHeadline">
+            <a href="/app/">Customer Login</a>
+
+            <a href="/app/newaccount/">Sign Up</a>
+            <a href="/contactus.html">Contact Us</a>
         </div>
+    </div>
     <div class="headline">
         <a class="inactive" href="/product.html">Features</a>
         <a class="inactive" href="/data.html">Connections</a>
@@ -42,151 +42,177 @@
         <a class="inactive" href="/partners.html">Partners</a>
         <a class="inactive" href="/company.html">Company</a>
     </div>
-        <ul class="menuList">
-    <li class="first"><a href="index.html">API Introduction</a></li>
-    <li><a href="restapi.html">REST API</a></li>
-    <li><a href="soapapi.html">SOAP API</a></li>
-    <li><a href="samples.html">Samples and Wrappers</a></li>
-</ul>
-            <div id="coreContent">
+    <ul class="menuList">
+        <li class="first"><a href="index.html">API Introduction</a></li>
+        <li><a href="restapi.html">REST API</a></li>
+        <li><a href="soapapi.html">SOAP API</a></li>
+        <li><a href="samples.html">Samples and Wrappers</a></li>
+    </ul>
+    <div id="coreContent">
         <div class="coreContentBlock">
             <h2 class="coreContentHeader">API Documentation</h2>
+
             <p class="coreContentParagraph">
-Need help using Easy Insight with the REST API? Here's the documentation to guide you through the process.
+                Need help using Easy Insight with the REST API? Here's the documentation to guide you through the
+                process.
             </p>
         </div>
         <div style="padding-top:50px;padding-right:50px;margin:0px;float:right">
             <img src="/images/documents.png" alt="Documentation Image"/>
         </div>
     </div>
-            <div id="contentHeaderStart"></div>
-        <div id="midContent">
-                <h2>Table of Contents</h2>
-                <ul>
-                    <li><a href="javarestapi.html#r1">What is the Easy Insight Java Wrapper?</a></li>
-                    <li><a href="javarestapi.html#r2">Where can I get the library?</a></li>
-                    <li><a href="javarestapi.html#r3">What external libraries do I need?</a></li>
-                    <li><a href="javarestapi.html#r4">Okay, how do I use the wrapper to publish data?</a></li>
-                    <li><a href="javarestapi.html#r5">How about composite data sources?</a></li>
-                    <li><a href="javarestapi.html#r6">Is Javadoc for the library available?</a></li>
-                </ul>
-                <h2><a name="r1">What is the Easy Insight Java Wrapper?</a></h2>
-                <p>
-                    The Easy Insight Java Wrapper is a convenience library we've thrown together to enable you to easily publish data into Easy Insight from Java code.
-                </p>
-                <h2><a name="r2">Where can I get the library?</a></h2>
-                <p>
-                    Here! <a href="http://www.easy-insight.com/downloads/eirestapi.zip">Download the Easy Insight Java Wrapper</a>.
-                </p>
-                <h2><a name="r3">What external libraries do I need?</a></h2>
-                <p>
-                    Absolutely nothing--this wrapper library uses nothing but core JDK classes.
-                </p>
-                <h2><a name="r4">Okay, how do I use the wrapper to publish data?</a></h2>
-                <p>
-                    For this example, we're going to create a data source in Easy Insight and publish metrics out of the JVM into that data source.
-                </p>
-                <p>
-                    First, we need to define the data source. The entry point to the API is the APIUtil.defineDataSource() call, which takes the data source name and your credentials.
-                </p>
+    <div id="contentHeaderStart"></div>
+    <div id="midContent">
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="javarestapi.html#r1">What is the Easy Insight Java Wrapper?</a></li>
+            <li><a href="javarestapi.html#r2">Where can I get the library?</a></li>
+            <li><a href="javarestapi.html#r3">What external libraries do I need?</a></li>
+            <li><a href="javarestapi.html#r4">Okay, how do I use the wrapper to publish data?</a></li>
+            <li><a href="javarestapi.html#r5">How about composite data sources?</a></li>
+            <li><a href="javarestapi.html#r6">Is Javadoc for the library available?</a></li>
+        </ul>
+        <h2><a name="r1">What is the Easy Insight Java Wrapper?</a></h2>
+
+        <p>
+            The Easy Insight Java Wrapper is a convenience library we've thrown together to enable you to easily publish
+            data into Easy Insight from Java code.
+        </p>
+
+        <h2><a name="r2">Where can I get the library?</a></h2>
+
+        <p>
+            Here! <a href="http://www.easy-insight.com/downloads/eirestapi.zip">Download the Easy Insight Java
+            Wrapper</a>.
+        </p>
+
+        <h2><a name="r3">What external libraries do I need?</a></h2>
+
+        <p>
+            Absolutely nothing--this wrapper library uses nothing but core JDK classes.
+        </p>
+
+        <h2><a name="r4">Okay, how do I use the wrapper to publish data?</a></h2>
+
+        <p>
+            For this example, we're going to create a data source in Easy Insight and publish metrics out of the JVM
+            into that data source.
+        </p>
+
+        <p>
+            First, we need to define the data source. The entry point to the API is the APIUtil.defineDataSource() call,
+            which takes the data source name and your credentials.
+        </p>
                 <pre><code>
-    String myAPIKey = (Your Easy Insight username or API key);
-    String myAPISecretKey = (Your Easy Insight password or API secret key);
-    DataSourceFactory dataSourceFactory = APIUtil.defineDataSource("Sample JVM Data", myAPIKey, myAPISecretKey);
+                    String myAPIKey = (Your Easy Insight username or API key);
+                    String myAPISecretKey = (Your Easy Insight password or API secret key);
+                    DataSourceFactory dataSourceFactory = APIUtil.defineDataSource("Sample JVM Data", myAPIKey,
+                    myAPISecretKey);
                 </code></pre>
-                <p>
-                    Next, we need to add fields to the data source. There are a numble of calls available on DataSourceFactory to define different types of fields. We're going to add four fields to the data source:
-                </p>
-                <ul>
-                    <li>Host -- our host name or IP address. This'll be a Grouping field.</li>
-                    <li>Memory -- the memory used by the JVM. This'll be a Measure field.</li>
-                    <li>Threads -- the number of threads running in the JVM. This'll be a Measure field.</li>
-                    <li>Date -- the date/time at which we sent the data over.</li>
-                </ul>
+        <p>
+            Next, we need to add fields to the data source. There are a numble of calls available on DataSourceFactory
+            to define different types of fields. We're going to add four fields to the data source:
+        </p>
+        <ul>
+            <li>Host -- our host name or IP address. This'll be a Grouping field.</li>
+            <li>Memory -- the memory used by the JVM. This'll be a Measure field.</li>
+            <li>Threads -- the number of threads running in the JVM. This'll be a Measure field.</li>
+            <li>Date -- the date/time at which we sent the data over.</li>
+        </ul>
                 <pre><code>
-    dataSourceFactory.addGrouping("Host");
-    dataSourceFactory.addMeasure("Memory");
-    dataSourceFactory.addMeasure("Threads");
-    dataSourceFactory.addDate("Date");
+                    dataSourceFactory.addGrouping("Host");
+                    dataSourceFactory.addMeasure("Memory");
+                    dataSourceFactory.addMeasure("Threads");
+                    dataSourceFactory.addDate("Date");
                 </code></pre>
-                <p>
-                    Now that we've defined the fields, we need to actually make a call to Easy Insight to create or update the data source if it already exists in our account. We'll do that with:
-                </p>
+        <p>
+            Now that we've defined the fields, we need to actually make a call to Easy Insight to create or update the
+            data source if it already exists in our account. We'll do that with:
+        </p>
                 <pre><code>
-    DataSourceOperationFactory dataSourceOperationFactory = dataSourceFactory.defineDataSource();
+                    DataSourceOperationFactory dataSourceOperationFactory = dataSourceFactory.defineDataSource();
                 </code></pre>
-                <p>
-                    With the data source defined, we can actually add some data into the data source. There are several different operations available for adding new rows of data, replacing the entire data source contents with a new set of rows, or updating just a certain set of rows. For this example, we'll just add new rows to the data source:
-                </p>
+        <p>
+            With the data source defined, we can actually add some data into the data source. There are several
+            different operations available for adding new rows of data, replacing the entire data source contents with a
+            new set of rows, or updating just a certain set of rows. For this example, we'll just add new rows to the
+            data source:
+        </p>
                 <pre><code>
-    DataSourceTarget dataSourceTarget = dataSourceOperationFactory.addRowsOperation();
-    DataRow dataRow = dataSourceTarget.newRow();
-    dataRow.addValue("Host", InetAddress.getLocalHost().getHostAddress());
-    dataRow.addValue("Memory", Runtime.getRuntime().totalMemory());
-    dataRow.addValue("Threads", ManagementFactory.getThreadMXBean().getThreadCount());
-    dataRow.addValue("Date", new Date());
-    dataSourceTarget.flush();
+                    DataSourceTarget dataSourceTarget = dataSourceOperationFactory.addRowsOperation();
+                    DataRow dataRow = dataSourceTarget.newRow();
+                    dataRow.addValue("Host", InetAddress.getLocalHost().getHostAddress());
+                    dataRow.addValue("Memory", Runtime.getRuntime().totalMemory());
+                    dataRow.addValue("Threads", ManagementFactory.getThreadMXBean().getThreadCount());
+                    dataRow.addValue("Date", new Date());
+                    dataSourceTarget.flush();
                 </code></pre>
-                <p>
-                    At this point, the data source will be available to you under My Data in Easy Insight, with one row of data matching what we've sent.
-                </p>
-                <h2><a name="r5">How about composite data sources?</a></h2>
-                <p>
-                    You can also define composite data sources inside of the wrapper. If you look at the examples directory of the zip, check out APICompositeExample for a sample of how to do this.
-                </p>
-                <h2><a name="r6">Is Javadoc for the library available?</a></h2>
-                <p>
-                    Yep, check it out at <a href="http://www.easy-insight.com/documentation/javaapi">http://www.easy-insight.com/documentation/javaapi</a>.
-                </p>
+        <p>
+            At this point, the data source will be available to you under My Data in Easy Insight, with one row of data
+            matching what we've sent.
+        </p>
+
+        <h2><a name="r5">How about composite data sources?</a></h2>
+
+        <p>
+            You can also define composite data sources inside of the wrapper. If you look at the examples directory of
+            the zip, check out APICompositeExample for a sample of how to do this.
+        </p>
+
+        <h2><a name="r6">Is Javadoc for the library available?</a></h2>
+
+        <p>
+            Yep, check it out at <a href="http://www.easy-insight.com/documentation/javaapi">http://www.easy-insight.com/documentation/javaapi</a>.
+        </p>
+    </div>
+    <div id="contentHeaderEnd"></div>
+    <div id="footer">
+        <div id="linkLine">
+            <div style="padding-left:15px;">
+                <a href="/company.html">Company</a>
             </div>
-        <div id="contentHeaderEnd"></div>
-        <div id="footer">
-            <div id="linkLine">
-                <div style="float:left;padding-left:10px;">
-                    <a href="/documentation/toc.html">Documentation</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/pricing.html">Pricing</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/api/index.html">Developers</a>
-                </div>
-                <div style="float:left;padding-left:35px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/privacy.html">Privacy Policy</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/terms.html">Terms of Service</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/partners.html">Partners</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/contactus.html">Contact Us</a>
-                </div>
+            <div>
+                |
             </div>
-            <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-                Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+            <div>
+                <a href="/pricing.html">Pricing</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/api.html">Developers</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/privacy.html">Privacy Policy</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/terms.html">Terms of Service</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/partners.html">Partners</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/contactus.html">Contact Us</a>
             </div>
         </div>
+        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+        </div>
     </div>
+</div>
     <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));

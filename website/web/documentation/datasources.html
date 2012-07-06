@@ -18,116 +18,160 @@
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
-<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
-<div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:108px"></div>
-    <div style="width:1000px;margin:0 auto;">
-        <div id="topBar">
-            <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+<div id="topMenuDiv"></div>
+<div id="blackIntroDiv"></div>
+<div style="width:1000px;margin:0 auto;">
+    <div id="topBar">
+        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
 
-            <div class="signupHeadline">
-                <a href="/app/">Customer Login</a>
-                <a href="/app/htmlreport/">Mobile Login</a>
-                <a href="/app/newaccount/">Sign Up</a>
-                <a href="/contactus.html">Contact Us</a>
-            </div>
+        <div class="signupHeadline">
+            <a href="/app/">Customer Login</a>
+            <a href="/app/newaccount/">Free Trial</a>
+            <a href="contactus.html">Contact Us</a>
         </div>
+    </div>
     <div class="headline">
         <a class="inactive" href="/product.html">Features</a>
         <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/webanalytics.html">Solutions</a>
-        <a class="inactive" href="/customers.html">Customers</a>
-        <a class="inactive" href="/partners.html">Partners</a>
-        <a class="inactive" href="/company.html">Company</a>
+        <a class="inactive" href="/pricing.html">Pricing</a>
+        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
+        <a class="inactive" href="/api.html">Developers</a>
     </div>
-            <div id="coreContent">
+    <div id="coreContent">
         <div class="coreContentBlock">
             <h2 class="coreContentHeader">Connection Documentation</h2>
+
             <p class="coreContentParagraph">
-Need help connecting data in Easy Insight? Here's the documentation to guide you through the process.
+                Need help connecting data in Easy Insight? Here's the documentation to guide you through the process.
             </p>
         </div>
         <div style="padding-top:50px;padding-right:50px;margin:0px;float:right">
             <img src="/images/documents.png" alt="Documentation Image"/>
         </div>
     </div>
-            <div id="contentHeaderStart"></div>
-        <div id="midContent">
-                <h2><a href="toc.html">Table of Contents</a></h2>
-                <ul>
-                    <li><a href="datasources.html#r12">How do I combine data sources?</a></li>
-                    <li><a href="datasources.html#r13">How do I use lookup tables?</a></li>
-                    <li><a href="datasources.html#r14">How do I administer a data source?</a></li>
-                    <li><a href="datasources.html#r15">How do I schedule a data source to automatically refresh?</a></li>
-                </ul>
-                <h2><a name="r12">How do I combine data sources?</a></h2>
-                <p>Easy Insight provides you with the capability to combine any data sources. The key is that you need some common field between the data sources which Easy Insight can use to join the data sources. For example, you could join Basecamp and Highrise data by connecting Responsible Party from Basecamp with Deal Owner from Highrise to create a dashboard of unified todo items and deal data by owner.</p>
-                <img src="../images/docs/DataMart.jpg" style="float:left;padding:10px;" alt="Display of Reports under My Data" />
-                <p style="padding-top:25px;padding-bottom:15px">When you combine data sources, you'll create a new data source which represents the federation of those joined data sources. This new data source is referred to as a Composite Data Source. Navigate to the My Data page of Easy Insight. Click on Combine Sources. This action opens up a new screen with a list of available data sources down the left and a canvas to the right. You can drag drata sources from the left list into the canvas to add them to the composite data source. Once added, you can join data sources by selecting two, right clicking on one, and clicking Create Join. You'll be prompted to choose the two fields for the join. You can right click on the line between the data sources to test the join and make sure it seems valid--if none of the rows match between the two data sources, it's a problem. You can also delete joins from that right click context menu. In the screenshot to the left, you see a sample composite data source from our internal Easy Insight data which combines data from our Reports, Data Sources, Users, Accounts, and Sendgrid data sources, along with a couple of data sources which simply act as join tables.</p>
-                <h2><a name="r13">How do I use lookup tables?</a></h2>
-                <p>You can add custom fields to any data source in Easy Insight through the use of a lookup table. For example, you can add Billable Rate to your time tracking data from Basecamp to create a real time calculator on your billing amounts for the month or tie different link sources in Google Analytics to categories to better segment your visitor traffic data.</p>
-                <p>Navigate to the My Data page and click on the Lookup Table button. You'll be prompted to choose a data source, an existing field, the name of the new field, and the type of the new field. For example, to do the above Billable Rate example, you could choose Basecamp as the data source, Person Name as the source grouping, Billable Rate as the new field name, and Measure as the new field type.</p>
-                <p>Once you've set these initial parameters, you'll enter a new screen with a list down the left side of the screen of all distinct values of the source grouping. At this poiny, you can go through and fill in the matching lookup values for each grouping. Once you save the lookup table, this new field becomes available to reports just as any other field which is intrinsically part of the data source.</p>
-                <h2><a name="r14">How do I administer a data source?</a></h2>
-                <p>Navigate to the My Data page and click on the Administer Data Source icon to the far right of the data source name. From here, you can alter or add custom fields to a data source just as you do with new fields in the report editor. For more information on these available operations, see the report editor documentation.</p>
-                <h2><a name="r15">How do I schedule a data source to automatically refresh?</a></h2>
-                <p>Since Basecamp, Highrise, and Pivotal Tracker synchronize data into Easy Insight to provide quick ad hoc reports, you may find it helpful to set up an automatic refresh of the data source. You can schedule automatic data source refresh by going to My Data, clicking on Scheduling, and defining a new data source refresh. To minimize server impact, your account is limited to one refresh of each data source type--i.e. if you have multiple Basecamp data sources, you may only automatically refresh one. Available refresh intervals are Daily, Weekdays (Monday -> Friday, sorry, no business calendars yet), Monday/Wednesday/Friday, Tuesday/Thursday, Day of Week, and Day of Month. We encourage you to choose the minimal refresh interval for your reporting needs--depending on use of this functionality, we may have to gradually enforce additional throttling to ensure we don't present an adverse server load to the target servers. Refresh times are defined in terms of your locale time zone, so if your computer is running in Eastern Standard Time, you will define the refresh in terms of Eastern Standard Time. Times are presented on a 24 hour clock.</p>
+    <div id="contentHeaderStart"></div>
+    <div id="midContent">
+        <h2><a href="toc.html">Table of Contents</a></h2>
+        <ul>
+            <li><a href="datasources.html#r12">How do I combine data sources?</a></li>
+            <li><a href="datasources.html#r13">How do I use lookup tables?</a></li>
+            <li><a href="datasources.html#r14">How do I administer a data source?</a></li>
+            <li><a href="datasources.html#r15">How do I schedule a data source to automatically refresh?</a></li>
+        </ul>
+        <h2><a name="r12">How do I combine data sources?</a></h2>
+
+        <p>Easy Insight provides you with the capability to combine any data sources. The key is that you need some
+            common field between the data sources which Easy Insight can use to join the data sources. For example, you
+            could join Basecamp and Highrise data by connecting Responsible Party from Basecamp with Deal Owner from
+            Highrise to create a dashboard of unified todo items and deal data by owner.</p>
+        <img src="../images/docs/DataMart.jpg" style="float:left;padding:10px;" alt="Display of Reports under My Data"/>
+
+        <p style="padding-top:25px;padding-bottom:15px">When you combine data sources, you'll create a new data source
+            which represents the federation of those joined data sources. This new data source is referred to as a
+            Composite Data Source. Navigate to the My Data page of Easy Insight. Click on Combine Sources. This action
+            opens up a new screen with a list of available data sources down the left and a canvas to the right. You can
+            drag drata sources from the left list into the canvas to add them to the composite data source. Once added,
+            you can join data sources by selecting two, right clicking on one, and clicking Create Join. You'll be
+            prompted to choose the two fields for the join. You can right click on the line between the data sources to
+            test the join and make sure it seems valid--if none of the rows match between the two data sources, it's a
+            problem. You can also delete joins from that right click context menu. In the screenshot to the left, you
+            see a sample composite data source from our internal Easy Insight data which combines data from our Reports,
+            Data Sources, Users, Accounts, and Sendgrid data sources, along with a couple of data sources which simply
+            act as join tables.</p>
+
+        <h2><a name="r13">How do I use lookup tables?</a></h2>
+
+        <p>You can add custom fields to any data source in Easy Insight through the use of a lookup table. For example,
+            you can add Billable Rate to your time tracking data from Basecamp to create a real time calculator on your
+            billing amounts for the month or tie different link sources in Google Analytics to categories to better
+            segment your visitor traffic data.</p>
+
+        <p>Navigate to the My Data page and click on the Lookup Table button. You'll be prompted to choose a data
+            source, an existing field, the name of the new field, and the type of the new field. For example, to do the
+            above Billable Rate example, you could choose Basecamp as the data source, Person Name as the source
+            grouping, Billable Rate as the new field name, and Measure as the new field type.</p>
+
+        <p>Once you've set these initial parameters, you'll enter a new screen with a list down the left side of the
+            screen of all distinct values of the source grouping. At this poiny, you can go through and fill in the
+            matching lookup values for each grouping. Once you save the lookup table, this new field becomes available
+            to reports just as any other field which is intrinsically part of the data source.</p>
+
+        <h2><a name="r14">How do I administer a data source?</a></h2>
+
+        <p>Navigate to the My Data page and click on the Administer Data Source icon to the far right of the data source
+            name. From here, you can alter or add custom fields to a data source just as you do with new fields in the
+            report editor. For more information on these available operations, see the report editor documentation.</p>
+
+        <h2><a name="r15">How do I schedule a data source to automatically refresh?</a></h2>
+
+        <p>Since Basecamp, Highrise, and Pivotal Tracker synchronize data into Easy Insight to provide quick ad hoc
+            reports, you may find it helpful to set up an automatic refresh of the data source. You can schedule
+            automatic data source refresh by going to My Data, clicking on Scheduling, and defining a new data source
+            refresh. To minimize server impact, your account is limited to one refresh of each data source type--i.e. if
+            you have multiple Basecamp data sources, you may only automatically refresh one. Available refresh intervals
+            are Daily, Weekdays (Monday -> Friday, sorry, no business calendars yet), Monday/Wednesday/Friday,
+            Tuesday/Thursday, Day of Week, and Day of Month. We encourage you to choose the minimal refresh interval for
+            your reporting needs--depending on use of this functionality, we may have to gradually enforce additional
+            throttling to ensure we don't present an adverse server load to the target servers. Refresh times are
+            defined in terms of your locale time zone, so if your computer is running in Eastern Standard Time, you will
+            define the refresh in terms of Eastern Standard Time. Times are presented on a 24 hour clock.</p>
+    </div>
+    <div id="contentHeaderEnd"></div>
+    <div id="footer">
+        <div id="linkLine">
+            <div style="padding-left:15px;">
+                <a href="/company.html">Company</a>
             </div>
-        <div id="contentHeaderEnd"></div>
-        <div id="footer">
-            <div id="linkLine">
-                <div style="float:left;padding-left:10px;">
-                    <a href="/documentation/toc.html">Documentation</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/pricing.html">Pricing</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/api/index.html">Developers</a>
-                </div>
-                <div style="float:left;padding-left:35px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/privacy.html">Privacy Policy</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/terms.html">Terms of Service</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/partners.html">Partners</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/contactus.html">Contact Us</a>
-                </div>
+            <div>
+                |
             </div>
-            <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-                Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+            <div>
+                <a href="/pricing.html">Pricing</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/api.html">Developers</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/privacy.html">Privacy Policy</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/terms.html">Terms of Service</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/partners.html">Partners</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/contactus.html">Contact Us</a>
             </div>
         </div>
+        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+        </div>
     </div>
-    <script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</div>
+<script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
 
 <script type="text/javascript">
-var pageTracker = _gat._getTracker("UA-8316271-1");
-pageTracker._trackPageview();
+    var pageTracker = _gat._getTracker("UA-8316271-1");
+    pageTracker._trackPageview();
 </script>
 </body>
 <!-- InstanceEnd --></html>

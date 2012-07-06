@@ -22,28 +22,26 @@
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
 </head>
 <body style="width:100%;text-align:center;margin:0 auto;">
-<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
-<div style="position:absolute;height:32px;background-color:#595555;width:100%;margin-top:108px"></div>
-<div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:140px"></div>
+<div id="topMenuDiv"></div>
+<div id="subMenuDiv"></div>
+<div id="blackIntroWithSubMenuDiv"></div>
 <div style="width:1000px;margin:0 auto;">
 <div id="topBar">
     <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
 
     <div class="signupHeadline">
         <a href="/app/">Customer Login</a>
-        <a href="/app/htmlreport/">Mobile Login</a>
-        <a href="/app/newaccount/">Sign Up</a>
-        <a href="/contactus.html">Contact Us</a>
+        <a href="/app/newaccount/">Free Trial</a>
+        <a href="contactus.html">Contact Us</a>
     </div>
 </div>
 <div class="headline">
-        <a class="inactive" href="/product.html">Features</a>
-        <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/webanalytics.html">Solutions</a>
-        <a class="inactive" href="/customers.html">Customers</a>
-        <a class="inactive" href="/partners.html">Partners</a>
-        <a class="inactive" href="/company.html">Company</a>
-    </div>
+    <a class="inactive" href="/product.html">Features</a>
+    <a class="inactive" href="/data.html">Connections</a>
+    <a class="inactive" href="/pricing.html">Pricing</a>
+    <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
+    <a class="active" href="/api.html">Developers</a>
+</div>
 <ul class="menuList">
     <li class="first"><a href="index.html">API Introduction</a></li>
     <li><a href="restapi.html">REST API</a></li>
@@ -64,275 +62,275 @@
 </div>
 <div id="contentHeaderStart"></div>
 <div id="midContent">
-    <h2>Table of Contents</h2>
-    <ul>
-        <li><a href="xmlapi.html#r1">What is the Easy Insight XML API?</a></li>
-        <li><a href="xmlapi.html#r2">How do I authenticate?</a></li>
-        <li><a href="xmlapi.html#r3">How do I make requests?</a></li>
-        <li><a href="xmlapi.html#r4">What API calls are available?</a></li>
-        <li><a href="xmlapi.html#r5">How about a simple example?</a></li>
-        <li><a href="xmlapi.html#r6">Response codes reference</a></li>
-        <li><a href="xmlapi.html#r7">defineDataSource reference</a></li>
-        <li><a href="xmlapi.html#r8">defineCompositeDataSource reference</a></li>
-        <li><a href="xmlapi.html#r9">addRows reference</a></li>
-        <li><a href="xmlapi.html#r10">replaceRows reference</a></li>
-        <li><a href="xmlapi.html#r11">updateRows reference</a></li>
-    </ul>
-    <h2><a name="r1">What is the Easy Insight REST API?</a></h2>
+<h2>Table of Contents</h2>
+<ul>
+    <li><a href="xmlapi.html#r1">What is the Easy Insight XML API?</a></li>
+    <li><a href="xmlapi.html#r2">How do I authenticate?</a></li>
+    <li><a href="xmlapi.html#r3">How do I make requests?</a></li>
+    <li><a href="xmlapi.html#r4">What API calls are available?</a></li>
+    <li><a href="xmlapi.html#r5">How about a simple example?</a></li>
+    <li><a href="xmlapi.html#r6">Response codes reference</a></li>
+    <li><a href="xmlapi.html#r7">defineDataSource reference</a></li>
+    <li><a href="xmlapi.html#r8">defineCompositeDataSource reference</a></li>
+    <li><a href="xmlapi.html#r9">addRows reference</a></li>
+    <li><a href="xmlapi.html#r10">replaceRows reference</a></li>
+    <li><a href="xmlapi.html#r11">updateRows reference</a></li>
+</ul>
+<h2><a name="r1">What is the Easy Insight REST API?</a></h2>
 
-    <p>
-        The Easy Insight REST API is a simple REST API for publishing data into Easy Insight.
-    </p>
+<p>
+    The Easy Insight REST API is a simple REST API for publishing data into Easy Insight.
+</p>
 
-    <h2><a name="r2">How do I authenticate?</a></h2>
+<h2><a name="r2">How do I authenticate?</a></h2>
 
-    <p>
-        The API uses basic HTTP authentication. You can either use your Easy Insight username and password or API key
-        and secret key (recommended for security).
-    </p>
+<p>
+    The API uses basic HTTP authentication. You can either use your Easy Insight username and password or API key
+    and secret key (recommended for security).
+</p>
 
-    <h2><a name="r3">How do I make requests?</a></h2>
+<h2><a name="r3">How do I make requests?</a></h2>
 
-    <p>
-        The specifics will depend on your programming language, but as a general rule, you'll be making HTTP POSTs of
-        XML to the URLs listed below. Make sure to set 'Content-Type' and 'Accept' headers to 'application/XML' to
-        identify the request and response formats.
-    </p>
+<p>
+    The specifics will depend on your programming language, but as a general rule, you'll be making HTTP POSTs of
+    XML to the URLs listed below. Make sure to set 'Content-Type' and 'Accept' headers to 'application/XML' to
+    identify the request and response formats.
+</p>
 
-    <h2><a name="r4">What API calls are available?</a></h2>
+<h2><a name="r4">What API calls are available?</a></h2>
 
-    <p>
-        You can make the following requests:
-    </p>
-    <ul>
-        <li>
-            https://www.easy-insight.com/app/xml/defineDataSource -- creates or updates a data source. If the data
-            source already exists, returns a unique key you can use to pass data into the data source.
-        </li>
-        <li>
-            https://www.easy-insight.com/app/xml/defineCompositeDataSource -- creates or updates a composite data source
-            containing joins between multiple other data sources you have already defined.
-        </li>
-        <li>
-            https://www.easy-insight.com/app/xml/addRows -- adds new rows of data to a data source.
-        </li>
-        <li>
-            https://www.easy-insight.com/app/xml/replaceRows -- replaces the current contents of a data source with a
-            new set of rows.
-        </li>
-        <li>
-            https://www.easy-insight.com/app/xml/replaceRows -- updates certain rows within the data source based on the
-            specified where clauses.
-        </li>
-    </ul>
-    <h2><a name="r5">How about a simple example?</a></h2>
+<p>
+    You can make the following requests:
+</p>
+<ul>
+    <li>
+        https://www.easy-insight.com/app/xml/defineDataSource -- creates or updates a data source. If the data
+        source already exists, returns a unique key you can use to pass data into the data source.
+    </li>
+    <li>
+        https://www.easy-insight.com/app/xml/defineCompositeDataSource -- creates or updates a composite data source
+        containing joins between multiple other data sources you have already defined.
+    </li>
+    <li>
+        https://www.easy-insight.com/app/xml/addRows -- adds new rows of data to a data source.
+    </li>
+    <li>
+        https://www.easy-insight.com/app/xml/replaceRows -- replaces the current contents of a data source with a
+        new set of rows.
+    </li>
+    <li>
+        https://www.easy-insight.com/app/xml/replaceRows -- updates certain rows within the data source based on the
+        specified where clauses.
+    </li>
+</ul>
+<h2><a name="r5">How about a simple example?</a></h2>
 
-    <p>
-        For this first example, we'll create a data source with three fields and publish a row of data into the data
-        source. First, XML for creating the data source, which will be a POST to
-        https://www.easy-insight.com/app/xml/defineDataSource.
-    </p>
+<p>
+    For this first example, we'll create a data source with three fields and publish a row of data into the data
+    source. First, XML for creating the data source, which will be a POST to
+    https://www.easy-insight.com/app/xml/defineDataSource.
+</p>
             <pre><code>
-    &lt;defineDataSource&gt;
-        &lt;dataSourceName&gt;Sample Order Database&lt;/dataSourceName&gt;
-        &lt;fields&gt;
-            &lt;field dataType=&quot;grouping&quot;&gt;
+                &lt;defineDataSource&gt;
+                &lt;dataSourceName&gt;Sample Order Database&lt;/dataSourceName&gt;
+                &lt;fields&gt;
+                &lt;field dataType=&quot;grouping&quot;&gt;
                 &lt;key&gt;Customer&lt;/key&gt;
-            &lt;/field&gt;
-            &lt;field dataType=&quot;measure&quot;&gt;
+                &lt;/field&gt;
+                &lt;field dataType=&quot;measure&quot;&gt;
                 &lt;key&gt;Amount&lt;/key&gt;
-            &lt;/field&gt;
-            &lt;field dataType=&quot;date&quot;&gt;
+                &lt;/field&gt;
+                &lt;field dataType=&quot;date&quot;&gt;
                 &lt;key&gt;OrderDate&lt;/key&gt;
-            &lt;/field&gt;
-        &lt;/fields&gt;
-    &lt;/defineDataSource&gt;
+                &lt;/field&gt;
+                &lt;/fields&gt;
+                &lt;/defineDataSource&gt;
             </code></pre>
-    <p>This call returns:</p>
+<p>This call returns:</p>
             <pre><code>
-    &lt;response>
-        &lt;code>200&lt;/code>
-        &lt;dataSourceKey>A Unique Key for the Data Source&lt;/dataSourceKey>
-    &lt;/response>
+                &lt;response>
+                &lt;code>200&lt;/code>
+                &lt;dataSourceKey>A Unique Key for the Data Source&lt;/dataSourceKey>
+                &lt;/response>
             </code></pre>
-    <p>You can use the value returned from dataSourceKey as a unique identifier for publishing data into the data
-        source. Next, we publish data source into the data source by making a POST to
-        https://www.easy-insight.com/app/xml/addRows.</p>
+<p>You can use the value returned from dataSourceKey as a unique identifier for publishing data into the data
+    source. Next, we publish data source into the data source by making a POST to
+    https://www.easy-insight.com/app/xml/addRows.</p>
             <pre><code>
-    &lt;rows dataSourceName=&quot;Sample Order Database&quot;&gt;
-        &lt;row&gt;
-            &lt;Customer&gt;Acme&lt;/Customer&gt;
-            &lt;Amount&gt;500&lt;/Amount&gt;
-            &lt;OrderDate&gt;2010-11-12T12:00:00&lt;/OrderDate&gt;
-        &lt;/row&gt;
-    &lt;/rows&gt;
+                &lt;rows dataSourceName=&quot;Sample Order Database&quot;&gt;
+                &lt;row&gt;
+                &lt;Customer&gt;Acme&lt;/Customer&gt;
+                &lt;Amount&gt;500&lt;/Amount&gt;
+                &lt;OrderDate&gt;2010-11-12T12:00:00&lt;/OrderDate&gt;
+                &lt;/row&gt;
+                &lt;/rows&gt;
             </code></pre>
-    <p>
-        The result of these calls will be a data source inside of Easy Insight with the fields of Customer, Amount, and
-        OrderDate, containing one row of data.
-    </p>
+<p>
+    The result of these calls will be a data source inside of Easy Insight with the fields of Customer, Amount, and
+    OrderDate, containing one row of data.
+</p>
 
-    <h2><a name="r6">Response codes reference</a></h2>
+<h2><a name="r6">Response codes reference</a></h2>
 
-    <p>
-        With every call, there is a code tag returned as part of the response XML. More information is typically
-        available in the rest of the XML, but as a general reference:
-    </p>
-    <ul>
-        <li>200 -- everything's good, call worked</li>
-        <li>400 -- something was wrong with the request</li>
-        <li>401 -- bad credentials</li>
-        <li>500 -- server error</li>
-    </ul>
-    <h2><a name="r7">defineDataSource reference</a></h2>
+<p>
+    With every call, there is a code tag returned as part of the response XML. More information is typically
+    available in the rest of the XML, but as a general reference:
+</p>
+<ul>
+    <li>200 -- everything's good, call worked</li>
+    <li>400 -- something was wrong with the request</li>
+    <li>401 -- bad credentials</li>
+    <li>500 -- server error</li>
+</ul>
+<h2><a name="r7">defineDataSource reference</a></h2>
 
-    <p>
-        XML POST to https://www.easy-insight.com/app/xml/defineDataSource -- creates or updates a data source. If the
-        data source already exists, returns a unique key you can use to pass data into the data source.
-    </p>
+<p>
+    XML POST to https://www.easy-insight.com/app/xml/defineDataSource -- creates or updates a data source. If the
+    data source already exists, returns a unique key you can use to pass data into the data source.
+</p>
         <pre><code>
-    &lt;defineDataSource&gt;
-        &lt;dataSourceName&gt;Your Data Source Name&lt;/dataSourceName&gt;
-        &lt;fields&gt;
+            &lt;defineDataSource&gt;
+            &lt;dataSourceName&gt;Your Data Source Name&lt;/dataSourceName&gt;
+            &lt;fields&gt;
             &lt;field dataType=&quot;grouping&quot;&gt;
-                &lt;key&gt;customer&lt;/key&gt;
-                &lt;name&gt;Customer&lt;/name&gt;
+            &lt;key&gt;customer&lt;/key&gt;
+            &lt;name&gt;Customer&lt;/name&gt;
             &lt;/field&gt;
             &lt;field dataType=&quot;measure&quot;&gt;
-                &lt;key&gt;orderAmount&lt;/key&gt;
-                &lt;name&gt;Order Amount&lt;/name&gt;
+            &lt;key&gt;orderAmount&lt;/key&gt;
+            &lt;name&gt;Order Amount&lt;/name&gt;
             &lt;/field&gt;
             &lt;field dataType=&quot;date&quot;&gt;
-                &lt;key&gt;orderdate&lt;/key&gt;
-                &lt;name&gt;Order Date&lt;/name&gt;
+            &lt;key&gt;orderdate&lt;/key&gt;
+            &lt;name&gt;Order Date&lt;/name&gt;
             &lt;/field&gt;
-        &lt;/fields&gt;
-    &lt;/defineDataSource&gt;
+            &lt;/fields&gt;
+            &lt;/defineDataSource&gt;
         </code></pre>
-    <p>Valid dataType attributes are grouping, measure, date, tags, latitude, longitude, and postal.</p>
+<p>Valid dataType attributes are grouping, measure, date, tags, latitude, longitude, and postal.</p>
 
-    <h2><a name="r8">defineCompositeDataSource reference</a></h2>
+<h2><a name="r8">defineCompositeDataSource reference</a></h2>
 
-    <p>
-        XML POST to https://www.easy-insight.com/app/xml/defineCompositeDataSource -- creates or updates a data source.
-        If the data source already exists, returns a unique key you can use to pass data into the data source.
-    </p>
+<p>
+    XML POST to https://www.easy-insight.com/app/xml/defineCompositeDataSource -- creates or updates a data source.
+    If the data source already exists, returns a unique key you can use to pass data into the data source.
+</p>
 
-    <h2><a name="r9">addRows reference</a></h2>
+<h2><a name="r9">addRows reference</a></h2>
 
-    <p>
-        XML POST to https://www.easy-insight.com/app/xml/addRows -- adds new rows of data to a data source.
-    </p>
+<p>
+    XML POST to https://www.easy-insight.com/app/xml/addRows -- adds new rows of data to a data source.
+</p>
         <pre><code>
-    &lt;rows dataSourceName=&quot;Your Data Source Name&quot;&gt;
-        &lt;row&gt;
-            &lt;customer&gt;Acme&lt;/customer&gt;
-            &lt;orderamount&gt;500&lt;/orderamount&gt;
-            &lt;orderdate&gt;2010-11-12T12:00:00&lt;/orderdate&gt;
-        &lt;/row&gt;
-    &lt;/rows&gt;
-        </code></pre>
-    <h2><a name="r10">replaceRows reference</a></h2>
-
-    <p>
-        XML POST to https://www.easy-insight.com/app/xml/replaceRows -- replaces the current contents of a data source
-        with a new set of rows.
-    </p>
-        <pre><code>
-    &lt;rows dataSourceName=&quot;Your Data Source Name&quot;&gt;
-        &lt;row&gt;
-            &lt;customer&gt;Acme&lt;/customer&gt;
-            &lt;orderamount&gt;500&lt;/orderamount&gt;
-            &lt;orderdate&gt;2010-11-12T12:00:00&lt;/orderdate&gt;
-        &lt;/row&gt;
-    &lt;/rows&gt;
-        </code></pre>
-    <h2><a name="r11">updateRows reference</a></h2>
-
-    <p>
-        XML POST to https://www.easy-insight.com/app/xml/updateRows -- updates certain rows within the data source based
-        on the specified where clauses.
-    </p>
-        <pre><code>
-    &lt;update&gt;
-        &lt;rows dataSourceName=&quot;Your Data Source Name&quot;&gt;
+            &lt;rows dataSourceName=&quot;Your Data Source Name&quot;&gt;
             &lt;row&gt;
-                &lt;customer&gt;Acme&lt;/customer&gt;
-                &lt;orderamount&gt;500&lt;/orderamount&gt;
-                &lt;orderdate&gt;2010-11-12T12:00:00&lt;/orderdate&gt;
+            &lt;customer&gt;Acme&lt;/customer&gt;
+            &lt;orderamount&gt;500&lt;/orderamount&gt;
+            &lt;orderdate&gt;2010-11-12T12:00:00&lt;/orderdate&gt;
             &lt;/row&gt;
-        &lt;/rows&gt;
-        &lt;wheres&gt;
+            &lt;/rows&gt;
+        </code></pre>
+<h2><a name="r10">replaceRows reference</a></h2>
+
+<p>
+    XML POST to https://www.easy-insight.com/app/xml/replaceRows -- replaces the current contents of a data source
+    with a new set of rows.
+</p>
+        <pre><code>
+            &lt;rows dataSourceName=&quot;Your Data Source Name&quot;&gt;
+            &lt;row&gt;
+            &lt;customer&gt;Acme&lt;/customer&gt;
+            &lt;orderamount&gt;500&lt;/orderamount&gt;
+            &lt;orderdate&gt;2010-11-12T12:00:00&lt;/orderdate&gt;
+            &lt;/row&gt;
+            &lt;/rows&gt;
+        </code></pre>
+<h2><a name="r11">updateRows reference</a></h2>
+
+<p>
+    XML POST to https://www.easy-insight.com/app/xml/updateRows -- updates certain rows within the data source based
+    on the specified where clauses.
+</p>
+        <pre><code>
+            &lt;update&gt;
+            &lt;rows dataSourceName=&quot;Your Data Source Name&quot;&gt;
+            &lt;row&gt;
+            &lt;customer&gt;Acme&lt;/customer&gt;
+            &lt;orderamount&gt;500&lt;/orderamount&gt;
+            &lt;orderdate&gt;2010-11-12T12:00:00&lt;/orderdate&gt;
+            &lt;/row&gt;
+            &lt;/rows&gt;
+            &lt;wheres&gt;
             &lt;where whereType=&quot;string&quot;&gt;
-                &lt;key&gt;customer&lt;/key&gt;
-                &lt;value&gt;Acme&lt;/value&gt;
+            &lt;key&gt;customer&lt;/key&gt;
+            &lt;value&gt;Acme&lt;/value&gt;
             &lt;/where&gt;
-        &lt;/wheres&gt;
-    &lt;/update&gt;
+            &lt;/wheres&gt;
+            &lt;/update&gt;
 
-    &lt;update&gt;
-        &lt;rows dataSourceName=&quot;Your Data Source Name&quot;&gt;
+            &lt;update&gt;
+            &lt;rows dataSourceName=&quot;Your Data Source Name&quot;&gt;
             &lt;row&gt;
-                &lt;customer&gt;Acme&lt;/customer&gt;
-                &lt;orderamount&gt;500&lt;/orderamount&gt;
-                &lt;orderdate&gt;2010-11-12T12:00:00&lt;/orderdate&gt;
+            &lt;customer&gt;Acme&lt;/customer&gt;
+            &lt;orderamount&gt;500&lt;/orderamount&gt;
+            &lt;orderdate&gt;2010-11-12T12:00:00&lt;/orderdate&gt;
             &lt;/row&gt;
-        &lt;/rows&gt;
-        &lt;wheres&gt;
+            &lt;/rows&gt;
+            &lt;wheres&gt;
             &lt;where whereType=&quot;day&quot;&gt;
-                &lt;key&gt;orderdate&lt;/key&gt;
-                &lt;year&gt;2010&lt;/year&gt;
-                &lt;day&gt;275&lt;/day&gt;
+            &lt;key&gt;orderdate&lt;/key&gt;
+            &lt;year&gt;2010&lt;/year&gt;
+            &lt;day&gt;275&lt;/day&gt;
             &lt;/where&gt;
-        &lt;/wheres&gt;
-    &lt;/update&gt;
+            &lt;/wheres&gt;
+            &lt;/update&gt;
         </code></pre>
 </div>
 <div id="contentHeaderEnd"></div>
 <div id="footer">
     <div id="linkLine">
-        <div style="float:left;padding-left:10px;">
-            <a href="/documentation/toc.html">Documentation</a>
+        <div style="padding-left:15px;">
+            <a href="/company.html">Company</a>
         </div>
-        <div style="float:left;padding-left:40px;">
+        <div>
             |
         </div>
-        <div style="float:left;padding-left:40px;">
+        <div>
             <a href="/pricing.html">Pricing</a>
         </div>
-        <div style="float:left;padding-left:40px;">
+        <div>
             |
         </div>
-        <div style="float:left;padding-left:40px;">
-            <a href="/api/index.html">Developers</a>
+        <div>
+            <a href="/api.html">Developers</a>
         </div>
-        <div style="float:left;padding-left:35px;">
+        <div>
             |
         </div>
-        <div style="float:left;padding-left:40px;">
+        <div>
             <a href="/privacy.html">Privacy Policy</a>
         </div>
-        <div style="float:left;padding-left:40px;">
+        <div>
             |
         </div>
-        <div style="float:left;padding-left:40px;">
+        <div>
             <a href="/terms.html">Terms of Service</a>
         </div>
-        <div style="float:left;padding-left:40px;">
+        <div>
             |
         </div>
-        <div style="float:left;padding-left:40px;">
+        <div>
             <a href="/partners.html">Partners</a>
         </div>
-        <div style="float:left;padding-left:40px;">
+        <div>
             |
         </div>
-        <div style="float:left;padding-left:40px;">
+        <div>
             <a href="/contactus.html">Contact Us</a>
         </div>
     </div>
     <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-        Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+        Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
     </div>
 </div>
 </div>

@@ -18,144 +18,193 @@
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
-<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
-<div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:108px"></div>
-    <div style="width:1000px;margin:0 auto;">
-        <div id="topBar">
-            <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+<div id="topMenuDiv"></div>
+<div id="blackIntroDiv"></div>
+<div style="width:1000px;margin:0 auto;">
+    <div id="topBar">
+        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
 
-            <div class="signupHeadline">
-                <a href="/app/">Customer Login</a>
-                <a href="/app/htmlreport/">Mobile Login</a>
-                <a href="/app/newaccount/">Sign Up</a>
-                <a href="/contactus.html">Contact Us</a>
-            </div>
+        <div class="signupHeadline">
+            <a href="/app/">Customer Login</a>
+            <a href="/app/newaccount/">Free Trial</a>
+            <a href="contactus.html">Contact Us</a>
         </div>
+    </div>
     <div class="headline">
         <a class="inactive" href="/product.html">Features</a>
         <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/webanalytics.html">Solutions</a>
-        <a class="inactive" href="/customers.html">Customers</a>
-        <a class="inactive" href="/partners.html">Partners</a>
-        <a class="inactive" href="/company.html">Company</a>
+        <a class="inactive" href="/pricing.html">Pricing</a>
+        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
+        <a class="inactive" href="/api.html">Developers</a>
     </div>
-            <div id="coreContent">
+    <div id="coreContent">
         <div class="coreContentBlock">
             <h2 class="coreContentHeader">Custom Field Documentation</h2>
+
             <p class="coreContentParagraph">
-Need help using custom fields in Easy Insight? Here's the documentation to guide you through the process.
+                Need help using custom fields in Easy Insight? Here's the documentation to guide you through the
+                process.
             </p>
         </div>
         <div style="padding-top:50px;padding-right:50px;margin:0px;float:right">
             <img src="/images/documents.png" alt="Documentation Image"/>
         </div>
     </div>
-            <div id="contentHeaderStart"></div>
-        <div id="midContent">
-                <h2><a href="toc.html">Table of Contents</a></h2>
-                <ul>
-                    <li><a href="customfields.html#r1">Why would I want to use custom fields in Easy Insight?</a></li>
-                    <li><a href="customfields.html#r2">What are the types of custom fields in Easy Insight?</a></li>
-                    <li><a href="customfields.html#r3">How do I use calculations?</a></li>
-                    <li><a href="customfields.html#r4">How do I use lookup tables?</a></li>
-                </ul>
-                <h2><a name="r1">Why would I want to use custom fields in Easy Insight?</a></h2>
-                <p>Many SaaS systems don't offer you any way to define custom fields. For example, a CRM system might not include fields like Deal Probability, Sales Channel, or Expected Close Date--all useful fields for your sales reporting. Easy Insight provides multiple mechanisms to add these custom fields to your data and create more useful, meaningful reports.</p>
-                <h2><a name="r2">What are the types of custom fields in Easy Insight?</a></h2>
-                <p>Easy Insight offers two primary approaches to defining custom fields:</p>
-                <ul>
-                    <li>Calculations -- Easy Insight parses the custom field out of data from the connected data source. For example, you might add [Probability:50] to your Deal Description on your CRM system. You would then define a calculation inside of Easy Insight to parse out values matching that pattern. The advantage of this approach is that users of the source system are able to define values for the custom fields inside of said source system.</li>
-                    <li>Lookup Table -- you define a lookup table entirely inside of Easy Insight. For example, you could define a lookup table stating that each Project Name matches to a particular Billing Code. You can then assign values for each Project Name and use that Billing Code field inside of reports. The advantage of this approach is that you don't have to touch the data of the source system--everything is contained to Easy Insight.</li>
-                </ul>
-                <h2><a name="r3">How do I use calculations?</a></h2>
-                <p>You can define calculations under the Data tab of the report editor in Easy Insight. You'll see three buttons on the left hand side of the Data tab:</p>
-                <ul>
-                    <li>New Calculation -- creates a measure which will be defined through calculation. Use this for measures like Probability or Estimated Hours.</li>
-                    <li>New Derived Grouping -- creates a grouping which will be defined through calculation. Use this for groupings like Sales Channel or Industry.</li>
-                    <li>New Derived Date -- creates a date which will be defined through calculation. Use this for dates like Expected Close Date.</li>
-                </ul>
-                <p>Whichever of the three you use, the approach will be similar. Within the calculation window, you'll define an expression which will parse out the particular value from your data. Let's walk through the process of defining three custom fields: Probability (a measure), Sales Channel (a grouping), and Expected Close Date (a date).</p>
-                <p>First, we'll want to tweak some of our sample data to include these custom fields. For example, in the Deal Description field of Highrise, you could add the following:</p>
+    <div id="contentHeaderStart"></div>
+    <div id="midContent">
+        <h2><a href="toc.html">Table of Contents</a></h2>
+        <ul>
+            <li><a href="customfields.html#r1">Why would I want to use custom fields in Easy Insight?</a></li>
+            <li><a href="customfields.html#r2">What are the types of custom fields in Easy Insight?</a></li>
+            <li><a href="customfields.html#r3">How do I use calculations?</a></li>
+            <li><a href="customfields.html#r4">How do I use lookup tables?</a></li>
+        </ul>
+        <h2><a name="r1">Why would I want to use custom fields in Easy Insight?</a></h2>
+
+        <p>Many SaaS systems don't offer you any way to define custom fields. For example, a CRM system might not
+            include fields like Deal Probability, Sales Channel, or Expected Close Date--all useful fields for your
+            sales reporting. Easy Insight provides multiple mechanisms to add these custom fields to your data and
+            create more useful, meaningful reports.</p>
+
+        <h2><a name="r2">What are the types of custom fields in Easy Insight?</a></h2>
+
+        <p>Easy Insight offers two primary approaches to defining custom fields:</p>
+        <ul>
+            <li>Calculations -- Easy Insight parses the custom field out of data from the connected data source. For
+                example, you might add [Probability:50] to your Deal Description on your CRM system. You would then
+                define a calculation inside of Easy Insight to parse out values matching that pattern. The advantage of
+                this approach is that users of the source system are able to define values for the custom fields inside
+                of said source system.
+            </li>
+            <li>Lookup Table -- you define a lookup table entirely inside of Easy Insight. For example, you could define
+                a lookup table stating that each Project Name matches to a particular Billing Code. You can then assign
+                values for each Project Name and use that Billing Code field inside of reports. The advantage of this
+                approach is that you don't have to touch the data of the source system--everything is contained to Easy
+                Insight.
+            </li>
+        </ul>
+        <h2><a name="r3">How do I use calculations?</a></h2>
+
+        <p>You can define calculations under the Data tab of the report editor in Easy Insight. You'll see three buttons
+            on the left hand side of the Data tab:</p>
+        <ul>
+            <li>New Calculation -- creates a measure which will be defined through calculation. Use this for measures
+                like Probability or Estimated Hours.
+            </li>
+            <li>New Derived Grouping -- creates a grouping which will be defined through calculation. Use this for
+                groupings like Sales Channel or Industry.
+            </li>
+            <li>New Derived Date -- creates a date which will be defined through calculation. Use this for dates like
+                Expected Close Date.
+            </li>
+        </ul>
+        <p>Whichever of the three you use, the approach will be similar. Within the calculation window, you'll define an
+            expression which will parse out the particular value from your data. Let's walk through the process of
+            defining three custom fields: Probability (a measure), Sales Channel (a grouping), and Expected Close Date
+            (a date).</p>
+
+        <p>First, we'll want to tweak some of our sample data to include these custom fields. For example, in the Deal
+            Description field of Highrise, you could add the following:</p>
                 <pre><code>
                     [Probability:50] [Channel:DirectMarketing] [ExpectedClose:2011-03-31]
                 </code></pre>
-                <p>With those values defined, we can step through building each of the necessary calculations. First, define a new calculation for the Probability field. Label it as Probability and use a calculation of:</p>
+        <p>With those values defined, we can step through building each of the necessary calculations. First, define a
+            new calculation for the Probability field. Label it as Probability and use a calculation of:</p>
                 <pre><code>
                     namedbracketvalue(Deal Description, "Probability")
                 </code></pre>
-                <p>This expression will use the namedbracketvalue function in Easy Insight to find the value for the custom field called Probability which is surrounded by brackets and labeled with a colon, as shown in the earlier example. If you're operating in a project management scenario instead of a CRM scenario, you could define a custom field called Expected Time by doing:</p>
+        <p>This expression will use the namedbracketvalue function in Easy Insight to find the value for the custom
+            field called Probability which is surrounded by brackets and labeled with a colon, as shown in the earlier
+            example. If you're operating in a project management scenario instead of a CRM scenario, you could define a
+            custom field called Expected Time by doing:</p>
                 <pre><code>
                     namedbracketvalue(Todo Item Name, "Expected Hours")
                 </code></pre>
-                <p>Creating the derived grouping for Sales Channel will work almost identically--just make sure you start with New Derived Grouping instead of New Calculation.</p>
+        <p>Creating the derived grouping for Sales Channel will work almost identically--just make sure you start with
+            New Derived Grouping instead of New Calculation.</p>
                 <pre><code>
                     namedbracketvalue(Deal Description, "Channel")
                 </code></pre>
-                <p>Finally, we can create a derived date--this'll add one wrinkle in that we need to specify how the date itself will be parsed. We'll use date formatting to specify that format. For example, if we pass in 2011-03-31 as the date in the custom field, we'll specify a format of yyyy-MM-dd for Year, Month, and Day of Month. You can see how that works in the following example:</p>
+        <p>Finally, we can create a derived date--this'll add one wrinkle in that we need to specify how the date itself
+            will be parsed. We'll use date formatting to specify that format. For example, if we pass in 2011-03-31 as
+            the date in the custom field, we'll specify a format of yyyy-MM-dd for Year, Month, and Day of Month. You
+            can see how that works in the following example:</p>
                 <pre><code>
                     namedbracketdate(Deal Description, "ExpectedClose", "yyyy-MM-dd")
                 </code></pre>
-                <h2><a name="r4">How do I use lookup tables?</a></h2>
-                <p>You can add custom fields to any data source in Easy Insight through the use of a lookup table. For example, you can add Billable Rate to your time tracking data from Basecamp to create a real time calculator on your billing amounts for the month or tie different link sources in Google Analytics to categories to better segment your visitor traffic data.</p>
-                <p>Navigate to the My Data page and click on the Lookup Table button. You'll be prompted to choose a data source, an existing field, the name of the new field, and the type of the new field. For example, to do the above Billable Rate example, you could choose Basecamp as the data source, Person Name as the source grouping, Billable Rate as the new field name, and Measure as the new field type.</p>
-                <p>Once you've set these initial parameters, you'll enter a new screen with a list down the left side of the screen of all distinct values of the source grouping. At this poiny, you can go through and fill in the matching lookup values for each grouping. Once you save the lookup table, this new field becomes available to reports just as any other field which is intrinsically part of the data source.</p>
+        <h2><a name="r4">How do I use lookup tables?</a></h2>
+
+        <p>You can add custom fields to any data source in Easy Insight through the use of a lookup table. For example,
+            you can add Billable Rate to your time tracking data from Basecamp to create a real time calculator on your
+            billing amounts for the month or tie different link sources in Google Analytics to categories to better
+            segment your visitor traffic data.</p>
+
+        <p>Navigate to the My Data page and click on the Lookup Table button. You'll be prompted to choose a data
+            source, an existing field, the name of the new field, and the type of the new field. For example, to do the
+            above Billable Rate example, you could choose Basecamp as the data source, Person Name as the source
+            grouping, Billable Rate as the new field name, and Measure as the new field type.</p>
+
+        <p>Once you've set these initial parameters, you'll enter a new screen with a list down the left side of the
+            screen of all distinct values of the source grouping. At this poiny, you can go through and fill in the
+            matching lookup values for each grouping. Once you save the lookup table, this new field becomes available
+            to reports just as any other field which is intrinsically part of the data source.</p>
+    </div>
+    <div id="contentHeaderEnd"></div>
+    <div id="footer">
+        <div id="linkLine">
+            <div style="padding-left:15px;">
+                <a href="/company.html">Company</a>
             </div>
-        <div id="contentHeaderEnd"></div>
-        <div id="footer">
-            <div id="linkLine">
-                <div style="float:left;padding-left:10px;">
-                    <a href="/documentation/toc.html">Documentation</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/pricing.html">Pricing</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/api/index.html">Developers</a>
-                </div>
-                <div style="float:left;padding-left:35px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/privacy.html">Privacy Policy</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/terms.html">Terms of Service</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/partners.html">Partners</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/contactus.html">Contact Us</a>
-                </div>
+            <div>
+                |
             </div>
-            <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-                Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+            <div>
+                <a href="/pricing.html">Pricing</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/api.html">Developers</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/privacy.html">Privacy Policy</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/terms.html">Terms of Service</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/partners.html">Partners</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/contactus.html">Contact Us</a>
             </div>
         </div>
+        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+        </div>
     </div>
-    <script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</div>
+<script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
 
 <script type="text/javascript">
-var pageTracker = _gat._getTracker("UA-8316271-1");
-pageTracker._trackPageview();
+    var pageTracker = _gat._getTracker("UA-8316271-1");
+    pageTracker._trackPageview();
 </script>
 </body>
 <!-- InstanceEnd --></html>

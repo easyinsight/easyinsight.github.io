@@ -1,0 +1,47 @@
+.filterDiv {
+    float:left;
+    font-size:12px;
+    margin-right: 10px;
+}
+
+.filterLabel {
+    margin-left:5px;
+    margin-top:10px;
+    margin-right:5px;
+}
+
+.filterSelect {
+    margin-left:5px;
+    margin-top:5px;
+    margin-right:5px;
+}
+
+.filterCX {
+    margin-right:5px;
+    margin-top:2px;
+}
+
+.orFilterBox {
+    border-style: solid;
+    border-width: 1px;
+    padding: 5px;
+}
+
+#chartpseudotooltip {
+    border: 1px solid #cccccc;
+    font-size: 0.75em;
+    white-space: nowrap;
+    background: rgba(208,208,208,0.5);
+    padding: 1px;
+    display: none;
+}
+
+a.dp-choose-date {
+    float: left;
+    width: 0;
+    height: 16px;
+    padding: 0;
+    margin: 0;
+    display: block;
+    overflow: hidden;
+}

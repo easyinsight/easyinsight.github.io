@@ -18,124 +18,142 @@
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
-<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
-<div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:108px"></div>
-    <div style="width:1000px;margin:0 auto;">
-        <div id="topBar">
-            <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+<div id="topMenuDiv"></div>
+<div id="blackIntroDiv"></div>
+<div style="width:1000px;margin:0 auto;">
+    <div id="topBar">
+        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
 
-            <div class="signupHeadline">
-                <a href="/app/">Customer Login</a>
-                <a href="/app/htmlreport/">Mobile Login</a>
-                <a href="/app/newaccount/">Sign Up</a>
-                <a href="/contactus.html">Contact Us</a>
-            </div>
+        <div class="signupHeadline">
+            <a href="/app/">Customer Login</a>
+            <a href="/app/newaccount/">Free Trial</a>
+            <a href="contactus.html">Contact Us</a>
         </div>
+    </div>
     <div class="headline">
         <a class="inactive" href="/product.html">Features</a>
         <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/webanalytics.html">Solutions</a>
-        <a class="inactive" href="/customers.html">Customers</a>
-        <a class="inactive" href="/partners.html">Partners</a>
-        <a class="inactive" href="/company.html">Company</a>
+        <a class="inactive" href="/pricing.html">Pricing</a>
+        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
+        <a class="inactive" href="/api.html">Developers</a>
     </div>
-            <div id="coreContent">
+    <div id="coreContent">
         <div class="coreContentBlock">
             <h2 class="coreContentHeader">Collaboration Documentation</h2>
+
             <p class="coreContentParagraph">
-Need help using collaboration in Easy Insight? Here's the documentation to guide you through the process.
+                Need help using collaboration in Easy Insight? Here's the documentation to guide you through the
+                process.
             </p>
         </div>
         <div style="padding-top:50px;padding-right:50px;margin:0px;float:right">
             <img src="/images/documents.png" alt="Documentation Image"/>
         </div>
     </div>
-            <div id="contentHeaderStart"></div>
-        <div id="midContent">
-                <h2><a href="toc.html">Table of Contents</a></h2>
-                <ul>
-                    <li><a href="collaboration.html#r1">How do I add users to my account?</a></li>
-                    <li><a href="collaboration.html#r2">What are the concepts of collaboration inside of Easy Insight?</a></li>
-                    <li><a href="collaboration.html#r3">How do I set access levels?</a></li>
-                    <li><a href="collaboration.html#r4">How do I add users to a group?</a></li>
-                    <li><a href="collaboration.html#r5">How do I add data sources, reports, and dashboards to groups?</a></li>
-                </ul>
-                <h2><a name="r1">How do I add users to my account?</a></h2>
-                <p>You can add other users from the User Administration page under Account.</p>
-                <h2><a name="r2">What are the concepts of collaboration inside of Easy Insight?</a></h2>
-                <p>There are three levels of access inside of Easy Insight for data sources, reports, and dashboards:</p>
-                <ul>
-                    <li>Owner -- the person who actually created the object</li>
-                    <li>Account Visible -- flag available when you save a data source, report, and dashboard</li>
-                    <li>Group Visible -- the object has been associated through a group</li>
-                </ul>
-                <p>
-                    For smaller teams, you can probably get away with doing but Owner and Account Visible settings. The Group Visible settings are more relevant to larger teams where you want to restrict certain sets of users to certain data sets.
-                </p>
-                <h2><a name="r3">How do I set access levels?</a></h2>
-                <p>When you save a data source, report, and dashboard, you have the option of setting a value for "Do you want to share this report with other users in the account?" If you check this option, the saved object will be visible to everyone in the account under the Home page</p>
-                <p>You can add users to a group by clicking in the group from the Group page, then clicking on Members and Add User.</p>
-                <h2><a name="r4">How do I add users to a group?</a></h2>
-                <p>You can add users to a group by clicking in the group from the Group page, then clicking on Members and Add User.</p>
-                <h2><a name="r5">How do I add data sources, reports, and dashboards to groups?</a></h2>
-                <p>Click to Data Sources and Reports under a given group and use the buttons on the right side of the page to add data sources, reports, and dashboards. These data sources and reports will become available to users in the group in both the group page and the individual user Home pages.</p>
+    <div id="contentHeaderStart"></div>
+    <div id="midContent">
+        <h2><a href="toc.html">Table of Contents</a></h2>
+        <ul>
+            <li><a href="collaboration.html#r1">How do I add users to my account?</a></li>
+            <li><a href="collaboration.html#r2">What are the concepts of collaboration inside of Easy Insight?</a></li>
+            <li><a href="collaboration.html#r3">How do I set access levels?</a></li>
+            <li><a href="collaboration.html#r4">How do I add users to a group?</a></li>
+            <li><a href="collaboration.html#r5">How do I add data sources, reports, and dashboards to groups?</a></li>
+        </ul>
+        <h2><a name="r1">How do I add users to my account?</a></h2>
+
+        <p>You can add other users from the User Administration page under Account.</p>
+
+        <h2><a name="r2">What are the concepts of collaboration inside of Easy Insight?</a></h2>
+
+        <p>There are three levels of access inside of Easy Insight for data sources, reports, and dashboards:</p>
+        <ul>
+            <li>Owner -- the person who actually created the object</li>
+            <li>Account Visible -- flag available when you save a data source, report, and dashboard</li>
+            <li>Group Visible -- the object has been associated through a group</li>
+        </ul>
+        <p>
+            For smaller teams, you can probably get away with doing but Owner and Account Visible settings. The Group
+            Visible settings are more relevant to larger teams where you want to restrict certain sets of users to
+            certain data sets.
+        </p>
+
+        <h2><a name="r3">How do I set access levels?</a></h2>
+
+        <p>When you save a data source, report, and dashboard, you have the option of setting a value for "Do you want
+            to share this report with other users in the account?" If you check this option, the saved object will be
+            visible to everyone in the account under the Home page</p>
+
+        <p>You can add users to a group by clicking in the group from the Group page, then clicking on Members and Add
+            User.</p>
+
+        <h2><a name="r4">How do I add users to a group?</a></h2>
+
+        <p>You can add users to a group by clicking in the group from the Group page, then clicking on Members and Add
+            User.</p>
+
+        <h2><a name="r5">How do I add data sources, reports, and dashboards to groups?</a></h2>
+
+        <p>Click to Data Sources and Reports under a given group and use the buttons on the right side of the page to
+            add data sources, reports, and dashboards. These data sources and reports will become available to users in
+            the group in both the group page and the individual user Home pages.</p>
+    </div>
+    <div id="contentHeaderEnd"></div>
+    <div id="footer">
+        <div id="linkLine">
+            <div style="padding-left:15px;">
+                <a href="/company.html">Company</a>
             </div>
-        <div id="contentHeaderEnd"></div>
-        <div id="footer">
-            <div id="linkLine">
-                <div style="float:left;padding-left:10px;">
-                    <a href="/documentation/toc.html">Documentation</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/pricing.html">Pricing</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/api/index.html">Developers</a>
-                </div>
-                <div style="float:left;padding-left:35px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/privacy.html">Privacy Policy</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/terms.html">Terms of Service</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/partners.html">Partners</a>
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    |
-                </div>
-                <div style="float:left;padding-left:40px;">
-                    <a href="/contactus.html">Contact Us</a>
-                </div>
+            <div>
+                |
             </div>
-            <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-                Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+            <div>
+                <a href="/pricing.html">Pricing</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/api.html">Developers</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/privacy.html">Privacy Policy</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/terms.html">Terms of Service</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/partners.html">Partners</a>
+            </div>
+            <div>
+                |
+            </div>
+            <div>
+                <a href="/contactus.html">Contact Us</a>
             </div>
         </div>
+        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+        </div>
     </div>
-    <script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</div>
+<script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
 
 <script type="text/javascript">
-var pageTracker = _gat._getTracker("UA-8316271-1");
-pageTracker._trackPageview();
+    var pageTracker = _gat._getTracker("UA-8316271-1");
+    pageTracker._trackPageview();
 </script>
 </body>
 <!-- InstanceEnd --></html>
