@@ -292,7 +292,11 @@
 <p>
     If you have a lot of data to add, it probably won't all fit into one XML request.  It's best to split it up into
     multiple requests, using the transactional API. To begin a transactional commit, do an XML POST to
-    https://www.easy-insight.com/app/xml/beginTransaction :
+    https://www.easy-insight.com/app/xml/beginTransaction passing an operation:
+    <ul>
+        <li><b>add</b> - data is appended to the data source named.</li>
+        <li><b>replace</b> - data replaces the current data in the data source.</li>
+    </ul>
 </p>
 
 <pre><code>
@@ -327,7 +331,7 @@
 
 </code></pre>
 
-<p> When you are finished, all of the data will be copied into the data source by commiting the data with an XML POST to https://www.easy-insight.com/app/xml/commit :</p>
+<p> When you are finished, all of the data will be copied into the data source by committing the data with an XML POST to https://www.easy-insight.com/app/xml/commit :</p>
 
 <pre><code>
     &lt;commit&gt;
