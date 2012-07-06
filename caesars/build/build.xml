@@ -1,0 +1,28 @@
+<project default="caesarswar" basedir="." name="caesarswar">
+
+    <property name="out.path" value="../out"/>
+    <property name="out.classes.path" value="../out/classes"/>
+    <target name="caesarswar">
+        <mkdir dir="${out.path}"/>
+        <mkdir dir="${out.classes.path}"/>
+        <javac destdir="${out.classes.path}"
+               optimize="off"
+               debug="on" failonerror="false"
+               srcdir="../src"
+               excludes="**/*.smap">
+            <classpath>
+                <fileset dir="../lib">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+            <include name="**"/>
+            <exclude name="tags/**"/>
+        </javac>
+        <war destfile="${out.path}/caesars.war">
+            <lib dir="../lib" />
+            <classes dir="${out.classes.path}" />
+            <fileset dir="../web" />
+        </war>
+
+    </target>
+</project>
