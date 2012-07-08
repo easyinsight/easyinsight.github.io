@@ -47,6 +47,11 @@
     </rule>
 
     <rule>
+        <from>/html/embeddedReport/([A-Za-z0-9]+)</from>
+        <to>/html/embeddedReport.jsp?reportID=$1</to>
+    </rule>
+
+    <rule>
         <from>/html/dashboard/([A-Za-z0-9]+)</from>
         <to>/html/dashboard.jsp?dashboardID=$1</to>
     </rule>

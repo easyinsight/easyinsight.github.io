@@ -9,6 +9,10 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.HashSet" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="com.easyinsight.preferences.ImageDescriptor" %>
+<%@ page import="com.easyinsight.preferences.ApplicationSkinSettings" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="org.hibernate.Session" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -23,10 +27,20 @@
         Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
         session.setAttribute("dashboard", dashboard);
         String dataSourceURLKey = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
-        ApplicationSkin applicationSkin = (ApplicationSkin) session.getAttribute("uiSettings");
-        String headerStyle = "width:100%;overflow: hidden;padding: 10px;";
+        ApplicationSkin applicationSkin;
+        String headerStyle;
+
+        Session hibernateSession = Database.instance().createSession();
+        try {
+            applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), hibernateSession, SecurityUtil.getAccountID());
+            headerStyle = "width:100%;overflow: hidden;padding: 10px;";
+        } finally {
+            hibernateSession.close();
+        }
+        ImageDescriptor headerImageDescriptor = null;
         String headerTextStyle = "width: 100%;text-align: center;font-size: 14px;padding-top: 10px;";
         if (applicationSkin != null && applicationSkin.isReportHeader()) {
+            headerImageDescriptor = applicationSkin.getReportHeaderImage();
             int reportBackgroundColor = applicationSkin.getReportBackgroundColor();
             headerStyle += "background-color: " + String.format("#%06X", (0xFFFFFF & reportBackgroundColor));
             headerTextStyle += "color: " + String.format("#%06X", (0xFFFFFF & applicationSkin.getReportTextColor()));
@@ -39,6 +53,8 @@
     <meta name="author" content="">
     <title>Easy Insight &mdash; <%= StringEscapeUtils.escapeHtml(dashboard.getName()) %></title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="/js/date.js"></script>
+    <script type="text/javascript" src="/js/jquery.datePicker.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
 
     <style type="text/css">
@@ -48,6 +64,7 @@
         }
     </style>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="/css/datePicker.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
     <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
     <%
@@ -154,8 +171,8 @@
     <div style="background-color: #FFFFFF;padding: 5px;float:left">
         <%
 
-            if (applicationSkin != null && applicationSkin.getReportHeaderImage() != null) {
-                out.println("<img src=\"/app/reportHeader\"/>");
+            if (headerImageDescriptor != null) {
+                out.println("<img src=\"/app/reportHeader?imageID="+headerImageDescriptor.getId()+"\"/>");
             }
         %>
     </div>

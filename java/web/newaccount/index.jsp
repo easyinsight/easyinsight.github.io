@@ -202,7 +202,7 @@
     <div id="footer">
         <div id="linkLine">
             <div style="padding-left:15px;">
-                <a href="/documentation/toc.html">Documentation</a>
+                <a href="/company.html">Company</a>
             </div>
             <div>
                 |

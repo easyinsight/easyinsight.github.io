@@ -3,7 +3,6 @@
 <%@ page import="com.easyinsight.preferences.ApplicationSkin" %>
 <%@ page import="com.easyinsight.analysis.*" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
-<%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
 <%@ page import="java.util.List" %>
 <%@ page import="com.easyinsight.preferences.ApplicationSkinSettings" %>
 <%@ page import="org.hibernate.Session" %>
@@ -31,7 +30,6 @@
         if (drillthroughFilters != null) {
             report.getFilterDefinitions().addAll(drillthroughFilters);
         }
-        String dataSourceURLKey = new FeedStorage().dataSourceURLKeyForDataSource(report.getDataFeedID());
 
         ApplicationSkin applicationSkin;
         String headerStyle;
@@ -64,10 +62,6 @@
     <link href="/css/bootstrap.css" rel="stylesheet">
 
     <style type="text/css">
-        body {
-            padding-top: 40px;
-            padding-bottom: 40px;
-        }
 
         #refreshDiv {
             display: none;
@@ -247,65 +241,6 @@
     </script>
 </head>
 <body style="background-color: #f5f5f5">
-
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <div class="btn-group pull-right">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <%--<li><a href="#">Profile</a></li>
-                    <li class="divider"></li>--%>
-                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                </ul>
-            </div>
-
-            <div class="nav-collapse pull-left">
-                <ul class="nav">
-                    <li><a href="/app/html">Data Sources</a></li>
-                    <li><a href="/app/html/reports/<%= dataSourceURLKey %>">Reports and Dashboards</a></li>
-                    <li><a href="/app/html/flashAppAction.jsp">Full Interface</a></li>
-                </ul>
-            </div>
-            <div class="nav-collapse btn-group pull-left">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    Export the Report
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu pull-right">
-                    <li><button class="btn" type="button" onclick="window.location.href='../exportExcel?reportID=<%= report.getAnalysisID() %>'" style="padding:5px;margin:5px;width:150px">Export to Excel</button></li>
-                    <li><button class="btn" type="button" onclick="$('#emailReportWindow').modal(true, true, true)" style="padding:5px;margin:5px;width:150px">Email the Report</button></li>
-                </ul>
-            </div>
-            <div class="nav-collapse btn-group pull-left">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    Refresh Data
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu pull-right">
-                    <li><button class="btn" type="button" onclick="refreshReport()" style="padding:5px;margin:5px;width:150px">Refresh the Report</button></li>
-                    <%
-                        FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
-                        if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
-                            %>
-                    <li><button class="btn" type="button" id="refreshDataSourceButton" onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh Data Source</button></li>
-                            <%
-                        }
-                    %>
-
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
 <div class="modal hide" id="refreshingReport">
     <div class="modal-body">
         Refreshing the report...

@@ -3,6 +3,8 @@ package com.easyinsight.analysis;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.NewHierarchyIntention;
+import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.pipeline.ListSummaryComponent;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -22,6 +24,15 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
     private int textColor;
     private int headerTextColor;
     private boolean autoExpandAll;
+    private boolean summaryTotal;
+
+    public boolean isSummaryTotal() {
+        return summaryTotal;
+    }
+
+    public void setSummaryTotal(boolean summaryTotal) {
+        this.summaryTotal = summaryTotal;
+    }
 
     public boolean isAutoExpandAll() {
         return autoExpandAll;
@@ -163,6 +174,15 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
     }
 
     @Override
+    public List<IComponent> createComponents() {
+        List<IComponent> components = super.createComponents();
+        if (summaryTotal) {
+            components.add(new ListSummaryComponent());
+        }
+        return components;
+    }
+
+    @Override
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         rowColor1 = (int) findNumberProperty(properties, "rowColor1", 0xffffff);
@@ -172,6 +192,7 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
         textColor = (int) findNumberProperty(properties, "textColor", 0x000000);
         headerTextColor = (int) findNumberProperty(properties, "headerTextColor", 0x000000);
         autoExpandAll = findBooleanProperty(properties, "autoExpandAll", false);
+        summaryTotal = findBooleanProperty(properties, "summaryTotal", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -183,6 +204,7 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("textColor", textColor));
         properties.add(new ReportNumericProperty("headerTextColor", headerTextColor));
         properties.add(new ReportBooleanProperty("autoExpandAll", autoExpandAll));
+        properties.add(new ReportBooleanProperty("summaryTotal", summaryTotal));
         return properties;
     }
 

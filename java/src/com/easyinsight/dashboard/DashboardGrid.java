@@ -2,6 +2,7 @@ package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.FilterHTMLMetadata;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.database.Database;
@@ -250,6 +251,14 @@ public class DashboardGrid extends DashboardElement {
         List<String> includes = super.cssIncludes();
         for (DashboardGridItem stackItem : getGridItems()) {
             includes.addAll(stackItem.getDashboardElement().cssIncludes());
+        }
+        return includes;
+    }
+
+    public Collection<? extends FilterDefinition> filtersToRender() {
+        List<FilterDefinition> includes = new ArrayList<FilterDefinition>();
+        for (DashboardGridItem stackItem : getGridItems()) {
+            includes.addAll(stackItem.getDashboardElement().filtersToRender());
         }
         return includes;
     }

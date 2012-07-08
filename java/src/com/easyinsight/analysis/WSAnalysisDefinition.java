@@ -794,4 +794,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 "                $('#"+targetDiv+"').html(data)\nafterRefresh();\n" +
                 "            });";
     }
+
+    public String rootHTML() {
+        return "";
+    }
 }

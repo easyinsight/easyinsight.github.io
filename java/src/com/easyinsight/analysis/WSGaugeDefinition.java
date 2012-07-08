@@ -1,6 +1,10 @@
 package com.easyinsight.analysis;
 
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.*;
 
 /**
@@ -176,4 +180,61 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
             throw new RuntimeException("Unrecognized intention type");
         }
     }*/
+
+    @Override
+    public String rootHTML() {
+        return "<canvas class=\"gauge\" width=\"200\" height=\"200\" id=\"gauge"+getUrlKey()+"\"></canvas>";
+    }
+
+    @Override
+    public String toHTML(String targetDiv) {
+        StringBuilder sb = new StringBuilder();
+        String gaugePropertiesString;
+        try {
+            JSONArray bands = new JSONArray();
+            JSONObject band1 = new JSONObject();
+            band1.put("color", "'"+String.format("#%06X", (0xFFFFFF & color1))+"'");
+            band1.put("start", 0);
+            band1.put("end", alertPoint1);
+            bands.put(band1);
+            JSONObject band2 = new JSONObject();
+            band2.put("color", "'" + String.format("#%06X", (0xFFFFFF & color2)) + "'");
+            band2.put("start", alertPoint1);
+            band2.put("end", alertPoint2);
+            bands.put(band2);
+            JSONObject band3 = new JSONObject();
+            band3.put("color", "'" + String.format("#%06X", (0xFFFFFF & color3)) + "'");
+            band3.put("start", alertPoint2);
+            band3.put("end", getMaxValue());
+            bands.put(band3);
+            gaugePropertiesString = bands.toString();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        gaugePropertiesString = gaugePropertiesString.replaceAll("\"", "");
+        sb.append("var aGauge = new AquaGauge('gauge"+getUrlKey()+"');\n");
+        sb.append("aGauge.props.minValue = 0;\n");
+        sb.append("aGauge.props.dialSubTitle = '';\n");
+        sb.append("aGauge.props.dialTitle = '';\n");
+        sb.append("aGauge.props.maxValue = 1000;\n");
+        sb.append("aGauge.props.rangeSegments = ").append(gaugePropertiesString).append(";\n");
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        String xyz = "$.getJSON('/app/gauge?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
+                "aGauge.refresh(data['value']);\n"+
+                "afterRefresh();\n"+
+                "});\n";
+        sb.append(xyz);
+        System.out.println(sb.toString());
+        return sb.toString();
+    }
+
+    @Override
+    public List<String> cssIncludes() {
+        return new ArrayList<String>();
+    }
+
+    @Override
+    public List<String> javaScriptIncludes() {
+        return Arrays.asList("/js/AquaGauge.js", "/js/helper.js");
+    }
 }

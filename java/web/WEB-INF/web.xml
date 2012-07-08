@@ -161,6 +161,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>EIAdmin</servlet-name>
+        <display-name>EIAdmin</display-name>
+        <servlet-class>com.easyinsight.datafeeds.custom.EIAdminServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>EmailReport</servlet-name>
         <display-name>EmailReport</display-name>
         <servlet-class>com.easyinsight.export.EmailServlet</servlet-class>
@@ -269,6 +276,13 @@
         <servlet-name>HtmlExport</servlet-name>
         <display-name>HtmlExport</display-name>
         <servlet-class>com.easyinsight.html.HtmlExportServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Gauge</servlet-name>
+        <display-name>Gauge</display-name>
+        <servlet-class>com.easyinsight.html.GaugeServlet</servlet-class>
         <load-on-startup>4</load-on-startup>
     </servlet>
 
@@ -488,6 +502,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>Gauge</servlet-name>
+        <url-pattern>/gauge</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>TwoAxisChart</servlet-name>
         <url-pattern>/twoAxisChart</url-pattern>
     </servlet-mapping>
@@ -510,6 +529,11 @@
     <servlet-mapping>
         <servlet-name>RefreshStatus</servlet-name>
         <url-pattern>/refreshStatus</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>EIAdmin</servlet-name>
+        <url-pattern>/eiAdminAccounts</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

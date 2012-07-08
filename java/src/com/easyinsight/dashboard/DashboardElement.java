@@ -311,7 +311,7 @@ public abstract class DashboardElement implements Cloneable {
     }
 
     public Collection<? extends FilterDefinition> filtersForReport(long reportID) {
-        return null;
+        return new ArrayList<FilterDefinition>();
     }
 
     public List<String> jsIncludes() {
@@ -320,5 +320,9 @@ public abstract class DashboardElement implements Cloneable {
 
     public List<String> cssIncludes() {
         return new ArrayList<String>();
+    }
+
+    public Collection<? extends FilterDefinition> filtersToRender() {
+        return new ArrayList<FilterDefinition>();
     }
 }

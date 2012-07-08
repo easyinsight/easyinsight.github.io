@@ -145,6 +145,8 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         List<String> includes = super.javaScriptIncludes();
         //includes.add("/js/jquery.jqplot.js");
         includes.add("/js/plugins/jqplot.pointLabels.min.js");
+        includes.add("/js/plugins/jqplot.highlighter.min.js");
+        includes.add("/js/plugins/jqplot.cursor.min.js");
         return includes;
     }
 

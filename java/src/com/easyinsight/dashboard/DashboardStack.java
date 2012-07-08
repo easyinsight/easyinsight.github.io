@@ -237,13 +237,24 @@ public class DashboardStack extends DashboardElement {
         }
     }
 
+    public List<FilterDefinition> filtersToRender() {
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        filters.addAll(getFilters());
+        if (consolidateHeaderElements) {
+            for (DashboardStackItem item : getGridItems()) {
+                filters.addAll(item.getDashboardElement().filtersToRender());
+            }
+        }
+        return filters;
+    }
+
     @Override
     public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
-        //sb.append("<div>");
         String stackID = "stack" + getElementID();
-        if (getFilters() != null) {
-            for (FilterDefinition filter : getFilters()) {
+        List<FilterDefinition> filters = filtersToRender();
+        if (filters != null) {
+            for (FilterDefinition filter : filters) {
                 if (filter.isShowOnReportView()) {
                     FilterHTMLMetadata metadata = new FilterHTMLMetadata(filterHTMLMetadata.getDashboard());
                     if (gridItems.size() > 1) {
@@ -263,79 +274,86 @@ public class DashboardStack extends DashboardElement {
             }
         }
         if (gridItems.size() > 1) {
-            sb.append("<div class=\"tabbable\">");
-            sb.append("<ul style=\"text-align:right\" class=\"nav nav-pills\" id=\"").append(stackID).append("\">");
-            for (int i = 0; i < gridItems.size(); i++) {
-                DashboardStackItem item = gridItems.get(i);
-                if (i == 0) {
-                    sb.append("<li style=\"float:none;display:inline-block;\" class=\"active\">");
-                } else {
-                    sb.append("<li style=\"float:none;display:inline-block;\">");
+            if ("Buttons".equals(selectionType)) {
+                sb.append("<div class=\"tabbable\">");
+                sb.append("<ul style=\"text-align:right\" class=\"nav nav-pills\" id=\"").append(stackID).append("\">");
+                for (int i = 0; i < gridItems.size(); i++) {
+                    DashboardStackItem item = gridItems.get(i);
+                    if (i == 0) {
+                        sb.append("<li style=\"float:none;display:inline-block;\" class=\"active\">");
+                    } else {
+                        sb.append("<li style=\"float:none;display:inline-block;\">");
+                    }
+                    String label;
+                    if (item.getDashboardElement() instanceof DashboardReport) {
+                        label = ((DashboardReport) item.getDashboardElement()).getReport().getName();
+                    } else {
+                        label = item.getDashboardElement().getLabel();
+                    }
+                    sb.append("<a data-toggle=\"tab\" href=\"#ds").append(item.getDashboardElement().getElementID()).append("\">").append(label).append("</a>");
+                    sb.append("</li>");
                 }
-                String label;
-                if (item.getDashboardElement() instanceof DashboardReport) {
-                    label = ((DashboardReport) item.getDashboardElement()).getReport().getName();
-                } else {
-                    label = item.getDashboardElement().getLabel();
+                sb.append("</ul>");
+                sb.append("<div class=\"tab-content\">");
+                for (int i = 0; i < gridItems.size(); i++) {
+                    DashboardStackItem item = gridItems.get(i);
+                    if (i == 0) {
+                        sb.append("<div class=\"tab-pane active\"");
+                    } else {
+                        sb.append("<div class=\"tab-pane\"");
+                    }
+                    sb.append(" id=\"").append("ds").append(item.getDashboardElement().getElementID()).append("\"></div>");
                 }
-                sb.append("<a data-toggle=\"tab\" href=\"#ds").append(item.getDashboardElement().getElementID()).append("\">").append(label).append("</a>");
-                sb.append("</li>");
-            }
-            sb.append("</ul>");
-            sb.append("<div class=\"tab-content\">");
-            for (int i = 0; i < gridItems.size(); i++) {
-                DashboardStackItem item = gridItems.get(i);
-                if (i == 0) {
-                    sb.append("<div class=\"tab-pane active\"");
-                } else {
-                    sb.append("<div class=\"tab-pane\"");
-                }
-                sb.append(" id=\"").append("ds").append(item.getDashboardElement().getElementID()).append("\"></div>");
-            }
-            sb.append("</div>");
-            /*sb.append("<div class=\"tab-content\">");
-            for (int i = 0; i < gridItems.size(); i++) {
-                DashboardStackItem item = gridItems.get(i);
-                if (i == 0) {
-                    sb.append("<div class=\"tab-pane active\" id=\""+i+"\">");
-                } else {
-                    sb.append("<div class=\"tab-pane\" id=\""+i+"\">");
-                }
-                sb.append(item.getDashboardElement().toHTML());
                 sb.append("</div>");
-            }*/
-            sb.append("</div>");
-            String globalVar = "var state" + stackID + " = 'ds" + gridItems.get(0).getDashboardElement().getElementID() + "';\n";
-            String update = "function update" + stackID + "() {\n";
-            for (int i = 0; i < gridItems.size(); i++) {
-                DashboardStackItem item = gridItems.get(i);
-                if (i == 0) {
-                    update += "if (state" + stackID + " == 'ds" + item.getDashboardElement().getElementID() + "') {\n";
-                } else {
-                    update += "else if (state" + stackID + " == 'ds" + item.getDashboardElement().getElementID() + "') {\n";
+                sb.append("</div>");
+                String globalVar = "var state" + stackID + " = 'ds" + gridItems.get(0).getDashboardElement().getElementID() + "';\n";
+                String update = "function update" + stackID + "() {\n";
+                for (int i = 0; i < gridItems.size(); i++) {
+                    DashboardStackItem item = gridItems.get(i);
+                    if (i == 0) {
+                        update += "if (state" + stackID + " == 'ds" + item.getDashboardElement().getElementID() + "') {\n";
+                    } else {
+                        update += "else if (state" + stackID + " == 'ds" + item.getDashboardElement().getElementID() + "') {\n";
+                    }
+                    update += item.getDashboardElement().refreshFunction()+"\n";
+                    update += "}\n";
                 }
-                update += item.getDashboardElement().refreshFunction()+"\n";
-                update += "}\n";
-            }
-            update += "}";
+                update += "}";
 
-            sb.append("\n<script type=\"text/javascript\">\n");
-            sb.append(globalVar);
-            sb.append(update);
-            sb.append("    $(function() {\n" +
-                    "        $('#ds"+gridItems.get(0).getDashboardElement().getElementID()+"').load('/app/dashboardPiece?dashboardElementID="+gridItems.get(0).getDashboardElement().getElementID()+"&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"', function() {\n" +
-                    "            $('#"+stackID+"').tab(); //initialize tabs\n" +
-                    "        });    \n" +
-                    "        $('#"+stackID+"').bind('show', function(e) {    \n" +
-                    "           var pattern=/#.+/gi //use regex to get anchor(==selector)\n" +
-                    "           var contentID = e.target.toString().match(pattern)[0]; //get anchor         \n" +
-                    "            $(contentID).load('/app/dashboardPiece?dashboardElementID=' + contentID.replace('#', '')+'&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"', function(){\n" +
-                    "                $('#"+stackID+"').tab(); //reinitialize tabs\n" +
-                    "state" + stackID + " = contentID.replace('#', '');\n" +
-                    "            });\n" +
-                    "        });\n" +
-                    "    });\n" +
-                    "</script>");
+                sb.append("\n<script type=\"text/javascript\">\n");
+                sb.append(globalVar);
+                sb.append(update);
+                sb.append("    $(function() {\n" +
+                        "        $('#ds"+gridItems.get(0).getDashboardElement().getElementID()+"').load('/app/dashboardPiece?dashboardElementID="+gridItems.get(0).getDashboardElement().getElementID()+"&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"', function() {\n" +
+                        "            $('#"+stackID+"').tab(); //initialize tabs\n" +
+                        "        });    \n" +
+                        "        $('#"+stackID+"').bind('show', function(e) {    \n" +
+                        "           var pattern=/#.+/gi //use regex to get anchor(==selector)\n" +
+                        "           var contentID = e.target.toString().match(pattern)[0]; //get anchor         \n" +
+                        "            $(contentID).load('/app/dashboardPiece?dashboardElementID=' + contentID.replace('#', '')+'&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"', function(){\n" +
+                        "                $('#"+stackID+"').tab(); //reinitialize tabs\n" +
+                        "state" + stackID + " = contentID.replace('#', '');\n" +
+                        "            });\n" +
+                        "        });\n" +
+                        "    });\n" +
+                        "</script>");
+            } else {
+                sb.append("<select>");
+                for (int i = 0; i < gridItems.size(); i++) {
+                    DashboardStackItem item = gridItems.get(i);
+                    String label;
+                    if (item.getDashboardElement() instanceof DashboardReport) {
+                        label = ((DashboardReport) item.getDashboardElement()).getReport().getName();
+                    } else {
+                        label = item.getDashboardElement().getLabel();
+                    }
+                    sb.append("<option>").append(label).append("</option>");
+                }
+                sb.append("</select>");
+                sb.append("<div style=\"float:left;clear:left;width:100%;height:100%\">");
+                sb.append(gridItems.get(0).getDashboardElement().toHTML(filterHTMLMetadata));
+                sb.append("</div>");
+            }
         } else {
             sb.append("<div style=\"float:left;clear:left;width:100%;height:100%\">");
             sb.append(gridItems.get(0).getDashboardElement().toHTML(filterHTMLMetadata));
@@ -369,7 +387,7 @@ public class DashboardStack extends DashboardElement {
                 return filters;
             }
         }
-        return null;
+        return new ArrayList<FilterDefinition>();
     }
 
     @Override
