@@ -87,30 +87,6 @@ public class KPIService {
         }
     }
 
-    public List<KPI> getKPIsForStart(long targetDataSourceID, InsightRequestMetadata insightRequestMetadata) {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(targetDataSourceID);
-            List<KPI> kpis = dataSource.createKPIs();
-
-            for (KPI kpi : kpis) {
-                kpi.setTemporary(true);
-                kpi.setCoreFeedID(targetDataSourceID);
-                kpiStorage.saveKPI(kpi, conn);
-            }
-            conn.commit();
-            return kpis;
-        } catch (Exception e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
-    }
-
     private AnalysisItem findAnalysisItem(AnalysisItem analysisItem, FeedDefinition targetDataSource) {
         for (AnalysisItem testItem : targetDataSource.getFields()) {
             if (testItem.getKey().equals(analysisItem.getKey()) && testItem.getType() == analysisItem.getType()) {
