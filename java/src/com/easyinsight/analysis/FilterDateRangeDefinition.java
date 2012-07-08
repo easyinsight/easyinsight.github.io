@@ -259,15 +259,24 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     @Override
     public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+        String startName = "filter" + getFilterID() + "start";
+        String endName = "filter" + getFilterID() + "end";
+        String onChange = "updateRangeFilter('filter" + getFilterID() + "'," + filterHTMLMetadata.createOnChange() + ")";
         sb.append("<script type=\"text/javascript\">\n" +
                 "\t$(function() {\n" +
-                "\t\t$( \"#datepicker1\" ).datepicker();\n" +
-                "\t\t$( \"#datepicker2\" ).datepicker();\n" +
+                "\t\t$( \"#"+startName+"\" ).datePicker({clickInput:true, startDate:'1900/01/01'}).bind('dateSelected', function(e, selectedDate, $td) {" + onChange + "});\n" +
+                "\t\t$( \"#"+endName+"\" ).datePicker({clickInput:true, startDate:'1900/01/01'}).bind('dateSelected', function(e, selectedDate, $td) {" + onChange + "});\n" +
                 "\t});\n" +
                 "\t</script>");
-        sb.append("<div><input type=\"text\" id=\"datepicker1\" value=\"").append(df.format(getStartDate())).append("\"/>").
-                append("<input type=\"text\" id=\"datepicker2\" value=\"").append(df.format(getEndDate())).append("\"/></div>");
+        sb.append("<div>");
+        if (!isToggleEnabled()) {
+            sb.append(checkboxHTML(filterHTMLMetadata.getFilterKey(), filterHTMLMetadata.createOnChange()));
+        }
+        sb.append(label(true));
+        sb.append("<input readonly=\"readonly\" type=\"text\" id=\""+startName+"\" value=\"").append(df.format(getStartDate())).append("\"/>").
+                append("<input readonly=\"readonly\" type=\"text\" id=\""+endName+"\" value=\"").append(df.format(getEndDate())).append("\"/>");
+        sb.append("</div>");
         return sb.toString();
     }
 }

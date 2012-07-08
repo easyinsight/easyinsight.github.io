@@ -145,8 +145,6 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
         includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
-        includes.add("/js/plugins/jqplot.highlighter.min.js");
-        includes.add("/js/plugins/jqplot.cursor.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
         return includes;
@@ -202,7 +200,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
             JSONObject legend = new JSONObject();
             legend.put("show", "true");
             legend.put("labels", "labels");
-            JSONArray seriesColors = new JSONArray(Arrays.asList("'#a6bc59'", "'#597197'", "'#xd6ab2a'", "'#d86068'", "'#5d9942'",
+            JSONArray seriesColors = new JSONArray(Arrays.asList("'#a6bc59'", "'#597197'", "'#d6ab2a'", "'#d86068'", "'#5d9942'",
                     "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'"));
             jsonParams.put("seriesColors", seriesColors);
             jsonParams.put("legend", legend);

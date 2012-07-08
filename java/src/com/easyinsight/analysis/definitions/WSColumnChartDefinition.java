@@ -144,10 +144,39 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        return "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
+        String xyz = "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
                 "                var s1 = data[\"values\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', [s1], " + argh + ");afterRefresh();\n})";
+                "                var ticks = data[\"ticks\"];\n" +
+                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");";
+        xyz += " $('#"+targetDiv+"').bind('jqplotDataHighlight', \n" +
+                "        function (ev, seriesIndex, pointIndex, data ) {\n" +
+                "            var mouseX = ev.pageX; //these are going to be how jquery knows where to put the div that will be our tooltip\n" +
+                "            var mouseY = ev.pageY;\n" +
+                "            $('#chartpseudotooltip').html(ticks[pointIndex] + ', ' + data[1]);\n" +
+                "            var cssObj = {\n" +
+                "                  'position' : 'absolute',\n" +
+                "                  'font-weight' : 'bold',\n" +
+                "                  'left' : mouseX + 'px', //usually needs more offset here\n" +
+                "                  'top' : mouseY + 'px'\n" +
+                "                };\n" +
+                "            $('#chartpseudotooltip').css(cssObj);\n" +
+                "            $('#chartpseudotooltip').show();\n" +
+                "            }\n" +
+                "    );    \n" +
+                "\n" +
+                "    $('#"+targetDiv+"').bind('jqplotDataUnhighlight', \n" +
+                "        function (ev) {\n" +
+                "            $('#chartpseudotooltip').html('');\n" +
+                "            $('#chartpseudotooltip').hide();\n" +
+                "        }\n" +
+                "    );";
+        xyz += "afterRefresh();\n" +
+                "})";
 
+        // katherine on gantt charts
+        // justin sherman, nrc, 402-475-2525
+
+        return xyz;
         /*return "$.getJSON('../columnChart?reportID="+getAnalysisID()+"&'+ strParams, function(data) {\n" +
 "                var s1 = data[\"values\"];\n" +
 "                var plot1 = $.jqplot('"+targetDiv+"', [s1], {\n" +

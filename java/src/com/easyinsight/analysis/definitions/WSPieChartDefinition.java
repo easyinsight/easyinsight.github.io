@@ -51,6 +51,8 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
         includes.add("/js/plugins/jqplot.pieRenderer.min.js");
+        includes.add("/js/plugins/jqplot.highlighter.min.js");
+        includes.add("/js/plugins/jqplot.cursor.min.js");
         includes.add("/js/plugins/jqplot.pointLabels.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         return includes;
@@ -74,6 +76,13 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
             JSONObject grid = new JSONObject();
             grid.put("background", "'#FFFFFF'");
             jsonParams.put("grid", grid);
+            JSONArray seriesColors = new JSONArray(Arrays.asList("'#a6bc59'", "'#597197'", "'#d6ab2a'", "'#d86068'", "'#5d9942'",
+                    "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'"));
+            jsonParams.put("seriesColors", seriesColors);
+            /*JSONObject highlighter = new JSONObject();
+            highlighter.put("show", true);
+            highlighter.put("sizeAdjust", 7.5);
+            jsonParams.put("highlighter", highlighter);*/
             params = new JSONObject(jsonParams);
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -81,10 +90,24 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        System.out.println(targetDiv);
-        return "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
+        System.out.println(argh);
+        String xyz = "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
                 "$('#"+targetDiv+"').empty();\n"+
                 "                var s1 = data[\"values\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', [s1], " + argh + ");afterRefresh();\n})";
+                "                var plot1 = $.jqplot('"+targetDiv+"', [s1], " + argh + ");";
+        xyz += "$('#"+targetDiv+"').bind('jqplotDataHighlight', function(ev, seriesIndex, pointIndex, data) {\n" +
+                "            var $this = $(this);                \n" +
+                "\n" +
+                "            $this.attr('title', data[0] + \": \" + data[1]);                               \n" +
+                "        }); \n" +
+                "\n" +
+                " $('#"+targetDiv+"').bind('jqplotDataUnhighlight', function(ev, seriesIndex, pointIndex, data) {\n" +
+                "            var $this = $(this);                \n" +
+                "\n" +
+                "            $this.attr('title',\"\"); \n" +
+                " });";
+        xyz += "afterRefresh();\n" +
+                "})";
+        return xyz;
     }
 }
