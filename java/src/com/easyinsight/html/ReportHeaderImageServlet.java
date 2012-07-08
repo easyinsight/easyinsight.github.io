@@ -4,6 +4,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.PreferencesService;
+import com.easyinsight.security.SecurityUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -20,19 +21,17 @@ public class ReportHeaderImageServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        ApplicationSkin applicationSkin = (ApplicationSkin) req.getSession().getAttribute("uiSettings");
-        if (applicationSkin.getReportHeaderImage() != null) {
-            EIConnection conn = Database.instance().getConnection();
-            try {
-                byte[] bytes = new PreferencesService().getImage(applicationSkin.getReportHeaderImage().getId(), conn);
-                resp.setContentLength(bytes.length);
-                resp.setContentType("image/png");
-                resp.setHeader("Content-disposition","inline; filename=" + applicationSkin.getReportHeaderImage().getName() );
-                resp.getOutputStream().write(bytes);
-                resp.getOutputStream().flush();
-            } finally {
-                Database.closeConnection(conn);
-            }
+        SecurityUtil.populateThreadLocalFromSession(req);
+        try {
+            Long imageID = Long.parseLong(req.getParameter("imageID"));
+            byte[] bytes = new PreferencesService().getImage(imageID);
+            resp.setContentLength(bytes.length);
+            resp.setContentType("image/png");
+            resp.setHeader("Content-disposition","inline; filename=reportHeader.png" );
+            resp.getOutputStream().write(bytes);
+            resp.getOutputStream().flush();
+        } finally {
+            SecurityUtil.clearThreadLocal();
         }
     }
 }

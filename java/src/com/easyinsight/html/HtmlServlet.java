@@ -119,7 +119,7 @@ public class HtmlServlet extends HttpServlet {
                         FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filter;
                         String startDate = req.getParameter("filter" + filter.getFilterID() + "start");
                         String endDate = req.getParameter("filter" + filter.getFilterID() + "end");
-                        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
                         if (startDate != null) {
                             filterDateRangeDefinition.setStartDate(dateFormat.parse(startDate));
                         }
