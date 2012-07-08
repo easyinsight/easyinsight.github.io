@@ -29,6 +29,9 @@
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:JSONDataSource = feedDefinition as JSONDataSource;
             ds.url = urlInput.text;
+            ds.httpMethod = int(methodGroup.selectedValue);
+            ds.userName = userNameInput.text;
+            ds.password = passwordInput.text;
             ds.feedName = nameInput.text;
         }
 
@@ -36,12 +39,23 @@
             return true;
         }
         ]]></mx:Script>
-    <mx:HBox>
-        <mx:Label text="Data Source Name:" width="250" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
-        <mx:TextInput id="nameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
-    </mx:HBox>
-    <mx:HBox>
-        <mx:Label text="JSON URL:" width="250" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
-        <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
-    </mx:HBox>
+    <mx:Form>
+        <mx:FormItem label="Data Source Name:" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="nameInput" fontWeight="normal" fontFamily="Lucida Grande" text="" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="JSON URL:" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Basic Auth User Name:" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Basic Auth Password:" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="passwordInput" displayAsPassword="true" fontWeight="normal" fontFamily="Lucida Grande" text="" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="HTTP Method:" fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
+            <mx:RadioButtonGroup id="methodGroup"/>
+            <mx:RadioButton groupName="methodGroup" label="GET" value="1" id="getOption" selected="true"/>
+            <mx:RadioButton groupName="methodGroup" label="POST" value="2" id="postOption"/>
+        </mx:FormItem>
+    </mx:Form>
 </mx:VBox>

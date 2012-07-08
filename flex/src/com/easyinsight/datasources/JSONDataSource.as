@@ -16,6 +16,9 @@ import mx.collections.ArrayCollection;
 public class JSONDataSource extends ServerDataSourceDefinition {
 
     public var url:String;
+    public var userName:String;
+    public var password:String;
+    public var httpMethod:int;
 
     public function JSONDataSource() {
     }
@@ -31,6 +34,10 @@ public class JSONDataSource extends ServerDataSourceDefinition {
 
     override public function configClass():Class {
         return JSONDataSourceCreation;
+    }
+
+    override public function allowFieldEdit():Boolean {
+        return true;
     }
 }
 }
