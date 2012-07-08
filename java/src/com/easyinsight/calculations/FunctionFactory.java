@@ -188,6 +188,8 @@ public class FunctionFactory {
             return new AdditionalGroupingField();
         } else if (s.equals("drillthroughfieldfilter")) {
             return new DrillthroughFieldFilter();
+        } else if (s.equals("parsedate")) {
+            return new ParseDate();
         } else {
             return null;
         }
