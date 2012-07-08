@@ -139,7 +139,8 @@ public class ExcelUploadFormat extends UploadFormat {
                     dateValue.setFormat(defaultDateFormat.toPattern());
                     obj = dateValue;
                 } else {
-                    obj = new NumericValue(cell.getNumericCellValue());
+                    Double doubleValue = cell.getNumericCellValue();
+                    obj = new NumericValue(doubleValue);
                 }
                 break;
             case HSSFCell.CELL_TYPE_STRING:
