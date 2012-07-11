@@ -26,10 +26,10 @@ public class AnalysisItemRetrievalStructure {
     }
 
     public List<FilterDefinition> getFilters() {
-        if (report != null) {
+        if (report != null && report.getFilterDefinitions() != null) {
             return report.getFilterDefinitions();
         }
-        if (baseReport != null) {
+        if (baseReport != null && baseReport.getFilterDefinitions() != null) {
             return baseReport.getFilterDefinitions();
         }
         return new ArrayList<FilterDefinition>();
