@@ -345,5 +345,13 @@ import flash.events.KeyboardEvent;
         public function get editEnabled():Boolean {
             return _editEnabled;
         }
+
+        public function get diagramHeight():Number {
+            return this.height;
+        }
+
+        public function get diagramWidth():Number{
+            return this.width;
+        }
     }
 }

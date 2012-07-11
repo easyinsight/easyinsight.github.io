@@ -82,6 +82,14 @@
             }
         }
 
+        override public function get diagramHeight():Number {
+            return canvas.height;
+        }
+
+        override public function get diagramWidth():Number {
+            return canvas.width;
+        }
+
         [Bindable]
         private var showStatus:Boolean = false;
 

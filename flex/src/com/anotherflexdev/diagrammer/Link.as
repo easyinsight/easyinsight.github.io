@@ -24,8 +24,8 @@ package com.anotherflexdev.diagrammer {
 		[Bindable] public var toNode:BaseNode;
 		[Bindable] public var linkName:String;
 		[Bindable] public var linkNum:Number = 0;
-		private var fromPoint:Point;
-		private var toPoint:Point;
+		protected var fromPoint:Point;
+		protected var toPoint:Point;
 		
 
 		protected var label:Label;

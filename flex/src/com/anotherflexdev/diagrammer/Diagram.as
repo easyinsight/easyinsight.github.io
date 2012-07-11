@@ -34,7 +34,7 @@ import mx.core.ClassFactory;
 	public class Diagram extends Canvas {
 		
 		private var templateLine:Link;
-		public var defaultLinkClass:IFactory = new ClassFactory(Link);
+		public var defaultLinkClass:IFactory = new ClassFactory(LinkDouble90Deg);
 		[Bindable] public var numNodes:Number = 0;
 		
 		public function Diagram() {
