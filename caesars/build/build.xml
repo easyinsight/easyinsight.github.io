@@ -18,6 +18,13 @@
             <include name="**"/>
             <exclude name="tags/**"/>
         </javac>
+        <copy todir="${out.classes.path}">
+                    <fileset dir="../src">
+                        <include name="**/*.properties"/>
+                        <include name="**/*.xml"/>
+                        <include name="**/*.jks"/>
+                    </fileset>
+                </copy>
         <war destfile="${out.path}/caesars.war">
             <lib dir="../lib" />
             <classes dir="${out.classes.path}" />

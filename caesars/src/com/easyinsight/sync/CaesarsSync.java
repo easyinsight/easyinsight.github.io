@@ -8,16 +8,21 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * User: jamesboe
@@ -25,6 +30,24 @@ import java.util.List;
  * Time: 11:58 AM
  */
 public class CaesarsSync extends HttpServlet {
+
+    private String username;
+    private String password;
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+
+        super.init(config);    //To change body of overridden methods use File | Settings | File Templates.
+        URL url = getClass().getClassLoader().getResource("password.properties");
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream(new File(url.getFile())));
+            username = properties.get("caesars.username").toString();
+            password = properties.get("caesars.password").toString();
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -43,7 +66,7 @@ public class CaesarsSync extends HttpServlet {
             try {
                 HttpClient client = new HttpClient();
                 client.getParams().setAuthenticationPreemptive(true);
-                Credentials defaultcreds = new UsernamePasswordCredentials("jboecaesar@easy-insight.com", "");
+                Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
                 client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
                 GetMethod getMethod = new GetMethod("https://www.easy-insight.com/app/xml/reports/34019");
                 client.executeMethod(getMethod);
@@ -78,7 +101,7 @@ public class CaesarsSync extends HttpServlet {
                         e.printStackTrace();
                     }
                 }
-                DataSourceFactory dataSourceFactory = APIUtil.defineDataSource("Rounds Worked", "jboecaesar@easy-insight.com", "");
+                DataSourceFactory dataSourceFactory = APIUtil.defineDataSource("Rounds Worked", username, password);
 
                 dataSourceFactory.addGrouping("Person");
                 dataSourceFactory.addDate("Date");

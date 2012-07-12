@@ -12,9 +12,21 @@
         <load-on-startup>0</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>rcfranklin-statuses</servlet-name>
+        <display-name>rcfranklin-statuses</display-name>
+        <servlet-class>com.easyinsight.sync.rescare.franklin.StatusSync</servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>caesarsappend</servlet-name>
         <url-pattern>/caesarsappend</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>rcfranklin-statuses</servlet-name>
+        <url-pattern>/rescare/franklin/statuses</url-pattern>
     </servlet-mapping>
 
 </web-app>
