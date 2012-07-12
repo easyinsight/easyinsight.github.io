@@ -22,6 +22,10 @@
             padding-top: 45px;
             padding-bottom: 40px;
         }
+
+        .center_stuff {
+            text-align:center;
+        }
     </style>
     <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.min.js"></script>
@@ -88,7 +92,7 @@
 
         <div class="span6 offset3">
 
-            <form class="well" method="post" action="/app/loginAction.jsp" style="width:100%" id="loginForm" onsubmit="preserveHash()">
+            <form class="well" method="post" action="/app/loginAction.jsp" id="loginForm" onsubmit="preserveHash()">
                 <div style="width:100%;text-align: center">
                     <%
                         if (request.getParameter("subdomain") != null) {

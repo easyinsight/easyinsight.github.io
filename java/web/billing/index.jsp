@@ -160,7 +160,7 @@
         <div class="row">
             <div class="span8 offset1">
                 <% if(request.getParameter("error") != null) { %>
-                <p><span class="error"><%
+                <p><label class="error"><%
                     String errorCode = request.getParameter("response_code");
                     if ("200".equals(errorCode)) out.println("The transaction was declined by the credit card processor. If this error continues, contact support@easy-insight.com.");
                     else if ("204".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
@@ -174,7 +174,7 @@
                     } else {
                         out.println("There was an error with your billing information. Please input the correct information below.");
                     }
-                %></span></p>
+                %></label></p>
                 <% } %>
                 <form method="post" action="https://secure.braintreepaymentgateway.com/api/transact.php" onsubmit="setCCexp()" class="well form-horizontal">
                     <fieldset>
@@ -193,7 +193,7 @@
 
                         <div class="control-group">
                             <label class="control-label" for="billingType">Billing Interval:</label>
-                            <div class="controls">
+                            <div id="billingType" class="controls">
                                 <label class="radio inline">
                                     <input class="radio" id="monthlyBillingType" type="radio" name="billingType" value="monthly" <%= account.getBillingMonthOfYear() != null ? "disabled=\"disabled\"" : "" %> <%= monthly ? "checked=\"checked\"" : "" %> onchange="changeBilling()">Monthly
                                 </label>
