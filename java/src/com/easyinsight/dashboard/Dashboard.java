@@ -369,7 +369,7 @@ public class Dashboard implements Cloneable, Serializable {
         eiDescs.addAll(getRootElement().allItems(dataSourceItems));
         for (FilterDefinition filterDefinition : filters) {
             eiDescs.add(new FilterDescriptor(filterDefinition));
-            List<AnalysisItem> items = filterDefinition.getAnalysisItems(dataSourceItems, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
+            List<AnalysisItem> items = filterDefinition.getAnalysisItems(dataSourceItems, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
             for (AnalysisItem item : items) {
                 eiDescs.add(new AnalysisItemDescriptor(item));
                 eiDescs.addAll(item.getKey().getDescriptors());
