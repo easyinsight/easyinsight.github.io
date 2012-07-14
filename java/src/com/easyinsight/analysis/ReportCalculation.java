@@ -152,8 +152,9 @@ public class ReportCalculation {
         }
     }
 
-    public List<IJoin> applyJoinCalculation() throws RecognitionException {
+    public List<IJoin> applyJoinCalculation(List<FilterDefinition> filters) throws RecognitionException {
         CompositeCalculationMetadata compositeCalculationMetadata = new CompositeCalculationMetadata();
+        compositeCalculationMetadata.setFilters(filters);
         ICalculationTreeVisitor visitor;
         CalculationsParser.expr_return ret;
         CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
