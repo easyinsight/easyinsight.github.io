@@ -21,12 +21,6 @@
         [Bindable]
         private var dataColl:ArrayCollection;
 
-        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
-            super.updateDisplayList(unscaledWidth, unscaledHeight);
-            box.width = unscaledWidth;
-            box.height = unscaledHeight;
-        }
-
         private function createColumn(field:String, header:String):AdvancedDataGridColumn {
             var metrics:TextLineMetrics = dataGrid.measureText(field);
             var intervalColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
@@ -54,7 +48,34 @@
             return value;
         }
 
+        private var queuedDataSet:ArrayCollection;
+        private var queuedDef:AnalysisDefinition;
+        private var queuedMap:Object;
+        private var queuedProps:Object;
+
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            if (queuedDataSet != null && unscaledWidth > 0) {
+                var dataSet:ArrayCollection = queuedDataSet;
+                var def:AnalysisDefinition = queuedDef;
+                var map:Object = queuedMap;
+                var props:Object = queuedProps;
+                queuedDataSet = null;
+                queuedDef = null;
+                queuedMap = null;
+                queuedProps = null;
+                renderReport(dataSet, def, map, props)
+            }
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+            if (this.width == 0) {
+                queuedDataSet = dataSet;
+                queuedDef = analysisDefinition;
+                queuedMap = clientProcessorMap;
+                queuedProps = additionalProperties;
+                return;
+            }
             var vert:CompareYearsDefinition = analysisDefinition as CompareYearsDefinition;
             var dColl:ArrayCollection = new ArrayCollection();
             var columns:ArrayCollection = new ArrayCollection();
@@ -157,6 +178,7 @@
             }
             dataGrid.columns = columns.toArray();
             dataGrid.rowCount = dColl.length + 1;
+            dataGrid.height = (dColl.length + 1) * 20 + 20;
             dataGrid.rowsToUnderline = underlines;
             dataGrid.dataProvider = dColl;
             invalidateDisplayList();

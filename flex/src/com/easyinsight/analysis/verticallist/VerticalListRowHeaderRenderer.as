@@ -43,6 +43,9 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
 
     public function set data(value:Object):void {
         this.value = value;
+        if (value == null) {
+            return;
+        }
         var _analysisMeasure:AnalysisMeasure = value["baseMeasure"] as AnalysisMeasure;
         if (_analysisMeasure == null) {
             text.text = "";

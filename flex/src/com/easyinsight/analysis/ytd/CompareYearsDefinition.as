@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.analysis.ytd {
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
@@ -41,6 +42,7 @@ public class CompareYearsDefinition extends AnalysisDefinition {
         var dimensions:ArrayCollection = findItems(fields, AnalysisItemTypes.DATE);
         if (dimensions.length > 0) {
             timeDimension = dimensions.getItemAt(0) as AnalysisItem;
+            AnalysisDateDimension(timeDimension).dateLevel = AnalysisItemTypes.YEAR_LEVEL;
         }
     }
 

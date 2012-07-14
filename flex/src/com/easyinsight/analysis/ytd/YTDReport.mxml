@@ -21,11 +21,17 @@
         private var dataColl:ArrayCollection;
 
         override protected function measure():void {
-            super.measure();
-            box.width = this.width;
-            box.height = this.height;
-        }
-        
+         super.measure();
+         box.width = this.width;
+         box.height = this.height;
+         }
+
+        /*override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+         super.updateDisplayList(unscaledWidth, unscaledHeight);
+         box.width = unscaledWidth;
+         box.height = unscaledHeight;
+         }*/
+
         private function createColumn(field:String):AdvancedDataGridColumn {
             var metrics:TextLineMetrics = dataGrid.measureText(field);
             var intervalColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
@@ -33,15 +39,15 @@
             intervalColumn.dataField = field;
             intervalColumn.width = metrics.width + metrics.x + metrics.x + 5;
             var factory:ClassFactory = new ClassFactory(VerticalListRenderer);
-            factory.properties = { qualifiedName: field };
+            factory.properties = { qualifiedName:field };
             intervalColumn.itemRenderer = factory;
             intervalColumn.sortable = false;
             var headerFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
-            headerFactory.properties = { headerText: field };
+            headerFactory.properties = { headerText:field };
             intervalColumn.headerRenderer = headerFactory;
             return intervalColumn;
         }
-        
+
         private function applyMeasure(index:int, value:String, columns:ArrayCollection):String {
             var column:AdvancedDataGridColumn = columns.getItemAt(index) as AdvancedDataGridColumn;
             var width:int = column.width;
@@ -53,8 +59,34 @@
             return value;
         }
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+        private var queuedDataSet:ArrayCollection;
+        private var queuedDef:AnalysisDefinition;
+        private var queuedMap:Object;
+        private var queuedProps:Object;
 
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            if (queuedDataSet != null && unscaledWidth > 0) {
+                var dataSet:ArrayCollection = queuedDataSet;
+                var def:AnalysisDefinition = queuedDef;
+                var map:Object = queuedMap;
+                var props:Object = queuedProps;
+                queuedDataSet = null;
+                queuedDef = null;
+                queuedMap = null;
+                queuedProps = null;
+                renderReport(dataSet, def, map, props)
+            }
+        }
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+            if (this.width == 0) {
+                queuedDataSet = dataSet;
+                queuedDef = analysisDefinition;
+                queuedMap = clientProcessorMap;
+                queuedProps = additionalProperties;
+                return;
+            }
             if (dataSet.length == 0) {
                 return;
             }
@@ -65,7 +97,7 @@
             labelColumn.sortable = false;
             labelColumn.itemRenderer = new ClassFactory(VerticalListRowHeaderRenderer);
             var labelHeaderFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
-            labelHeaderFactory.properties = { headerText: "" };
+            labelHeaderFactory.properties = { headerText:"" };
             labelColumn.headerRenderer = labelHeaderFactory;
             labelColumn.width = vert.headerWidth;
             labelColumn.dataField = "Label";
@@ -74,15 +106,15 @@
                 return;
             }
             var underlines:Array = [];
-            
+
             var timeIntervals:ArrayCollection = additionalProperties["timeIntervals"];
             for each (var interval:Value in timeIntervals) {
                 columns.addItem(createColumn(interval.toString()));
             }
-            
+
             columns.addItem(createColumn(vert.ytdLabel));
             columns.addItem(createColumn("Average"));
-            
+
             var hasBenchmark:Boolean = false;
             for each (var testMeasure:AnalysisMeasure in vert.measures) {
                 if (testMeasure.reportFieldExtension != null && testMeasure.reportFieldExtension is YTDReportFieldExtension) {
@@ -92,7 +124,7 @@
                     }
                 }
             }
-            
+
             if (hasBenchmark) {
                 columns.addItem(createColumn("BK"));
                 columns.addItem(createColumn("Variation"));
@@ -165,10 +197,11 @@
                     dataGrid.x = (this.width - endWidth) / 2;
                 }
                 dataGrid.columns = columns.toArray();
-                dataGrid.rowCount = dColl.length + 1;
-                dataGrid.height = (dColl.length + 1) * 22 + 10;
+                //dataGrid.rowCount = dColl.length + 1;
+                dataGrid.height = (dColl.length + 1) * 20 + 20;
                 dataGrid.rowsToUnderline = underlines;
                 dataGrid.dataProvider = dColl;
+                //invalidateDisplayList();
                 invalidateSize();
             }
         }
