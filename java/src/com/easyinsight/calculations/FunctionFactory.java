@@ -190,7 +190,15 @@ public class FunctionFactory {
             return new DrillthroughFieldFilter();
         } else if (s.equals("parsedate")) {
             return new ParseDate();
-        } else {
+        } else if (s.equals("fixedjoin")) {
+            return new FixedJoin();
+        } else if (s.equals("filtervalue")) {
+            return new FilterValue();
+        } /*else if (s.equals("createnamedpipeline")) {
+            return new CreateNamedPipeline();
+        } else if (s.equals("assignpipeline")) {
+            return new AssignPipeline();
+        }*/ else {
             return null;
         }
     }
