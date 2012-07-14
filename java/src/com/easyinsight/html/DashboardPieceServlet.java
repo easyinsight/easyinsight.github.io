@@ -33,17 +33,18 @@ public class DashboardPieceServlet extends HttpServlet {
                 elementStringID = elementStringID.substring(2);
             }
             long dashboardID = Long.parseLong(req.getParameter("dashboardID"));
-            Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
-            long dashbboardElementID = Long.parseLong(elementStringID);
-            PreparedStatement ps = conn.prepareStatement("SELECT ELEMENT_TYPE FROM DASHBOARD_ELEMENT WHERE DASHBOARD_ELEMENT_ID = ?");
+            long dashboardElementID = Long.parseLong(elementStringID);
+            Dashboard dashboard = new DashboardService().getDashboardView(dashboardID);
+            DashboardElement element = dashboard.findElement(dashboardElementID);
+            /*PreparedStatement ps = conn.prepareStatement("SELECT ELEMENT_TYPE FROM DASHBOARD_ELEMENT WHERE DASHBOARD_ELEMENT_ID = ?");
             ps.setLong(1, dashbboardElementID);
             ResultSet rs = ps.executeQuery();
             rs.next();
             int elementType = rs.getInt(1);
-            DashboardElement element = DashboardStorage.getElement(conn, dashbboardElementID, elementType);
+            DashboardElement element = DashboardStorage.getElement(conn, dashbboardElementID, elementType);*/
             response.setContentType("text/html");
             response.setCharacterEncoding("UTF-8");
-            response.getOutputStream().write(element.toHTML(new FilterHTMLMetadata(dashboard)).getBytes());
+            response.getOutputStream().write(element.toHTML(new FilterHTMLMetadata(dashboard, req)).getBytes());
             response.getOutputStream().flush();
         } catch (Exception e) {
             throw new RuntimeException(e);

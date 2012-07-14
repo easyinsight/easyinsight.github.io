@@ -25,6 +25,9 @@ public class GaugeServlet extends HtmlServlet {
         Value value = dataSet.getRow(0).getValue(gaugeDefinition.getMeasure());
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("value", value.toDouble());
+        if (gaugeDefinition.getBenchmarkMeasure() != null) {
+            jsonObject.put("benchmark", "Benchmark: " + dataSet.getRow(0).getValue(gaugeDefinition.getBenchmarkMeasure()).toDouble());
+        }
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getOutputStream().write(jsonObject.toString().getBytes());

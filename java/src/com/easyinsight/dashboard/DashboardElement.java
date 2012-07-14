@@ -11,6 +11,7 @@ import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.scorecard.Scorecard;
 import org.hibernate.Session;
 
+import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,7 +23,7 @@ import java.util.*;
  * Date: Nov 26, 2010
  * Time: 1:25:06 PM
  */
-public abstract class DashboardElement implements Cloneable {
+public abstract class DashboardElement implements Cloneable, Serializable {
 
     public static final int GRID = 1;
     public static final int REPORT = 2;
@@ -324,5 +325,16 @@ public abstract class DashboardElement implements Cloneable {
 
     public Collection<? extends FilterDefinition> filtersToRender() {
         return new ArrayList<FilterDefinition>();
+    }
+
+    public DashboardUIProperties findHeaderImage() {
+        return null;
+    }
+
+    public DashboardElement findElement(long dashboardElementID) {
+        if (getElementID() == dashboardElementID) {
+            return this;
+        }
+        return null;
     }
 }

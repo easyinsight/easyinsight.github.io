@@ -139,7 +139,7 @@ public class DashboardReport extends DashboardElement {
     public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {
         List<EIDescriptor> descs = new ArrayList<EIDescriptor>();
         descs.add(report);
-        descs.addAll(new AnalysisStorage().getAnalysisDefinition(report.getId()).allItems(dataSourceItems, new AnalysisItemRetrievalStructure()));
+        descs.addAll(new AnalysisStorage().getAnalysisDefinition(report.getId()).allItems(dataSourceItems, new AnalysisItemRetrievalStructure(null)));
         return descs;
     }
 
@@ -173,8 +173,6 @@ public class DashboardReport extends DashboardElement {
 
         // recurse back up to the top level...
 
-
-
         StringBuilder sb = new StringBuilder();
         WSAnalysisDefinition reportDefinition = new AnalysisService().openAnalysisDefinition(report.getId());
         String div = "reportTarget" + report.getId();
@@ -195,16 +193,22 @@ public class DashboardReport extends DashboardElement {
         sb.append("}");
         // $(document).ready(refreshReport('reportTarget517'))
         // refreshReport('div,
-        sb.append("$(document).ready(").append("renderReport").append(report.getId()).append("());");
+        System.out.println("\t\t" + report.getName() + " = renderReport" + report.getId());
+        sb.append("renderReport").append(report.getId()).append("();");
         sb.append("</script>\n");
-        sb.append("<div style-\"font-size:12px;margin-right:10px\">");
+        sb.append("<div style=\"font-size:12px;margin-right:10px\">");
+        if (isShowLabel()) {
+            sb.append("<div class=\"dashboardReportHeader\"><strong>").append(report.getName()).append("</strong></div>");
+        }
         for (FilterDefinition filterDefinition : reportDefinition.getFilterDefinitions()) {
             if (filterDefinition.isShowOnReportView()) {
+                System.out.println("\t\t" + filterDefinition.label(false) + " on report");
                 sb.append(filterDefinition.toHTML(new FilterHTMLMetadata(filterHTMLMetadata.getDashboard(), reportDefinition)));
             }
         }
         sb.append("</div>");
-        sb.append("<div id=\"").append(div).append("\"></div>");
+        sb.append("<div class=\"dashboardReportDiv\" id=\"").append(div).append("\">").append("</div>");
+        sb.append(reportDefinition.rootHTML());
         /*sb.append("<script type=\"text/javascript\">\n" +
                 "                    $(document).ready(refreshReport('#reportTarget"+report.getId()+"', "+report.getId()+"));\n" +
                 "                </script>\n" +

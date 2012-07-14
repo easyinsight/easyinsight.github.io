@@ -140,6 +140,7 @@ public class DashboardGrid extends DashboardElement {
                 item.setRowIndex(itemRS.getInt(3));
                 item.setColumnIndex(itemRS.getInt(4));
                 item.setDashboardElement(DashboardStorage.getElement(conn, gridElementID, elementType));
+                item.getDashboardElement().setParentElement(dashboardGrid);
                 items.add(item);
             }
             dashboardGrid.setGridItems(items);
@@ -202,6 +203,17 @@ public class DashboardGrid extends DashboardElement {
     }
 
     @Override
+    public Collection<? extends FilterDefinition> filtersForReport(long reportID) {
+        for (DashboardGridItem stackItem : getGridItems()) {
+            Collection<? extends FilterDefinition> filters = stackItem.getDashboardElement().filtersForReport(reportID);
+            if (filters != null && !filters.isEmpty()) {
+                return filters;
+            }
+        }
+        return new ArrayList<FilterDefinition>();
+    }
+
+    @Override
     public String refreshFunction() {
         return "updateGrid" + getElementID() + "()";
     }
@@ -219,7 +231,7 @@ public class DashboardGrid extends DashboardElement {
         for (int i = 0; i < rows; i++) {
             sb.append("<tr style=\"width:100%\">\r\n");
             for (int j = 0; j < columns; j++) {
-                sb.append("<td style=\"width:50%\">\r\n");
+                sb.append("<td style=\"width:"+(100 / columns)+"%\">\r\n");
                 DashboardGridItem item = findItem(i, j);
                 sb.append(item.getDashboardElement().toHTML(filterHTMLMetadata));
                 sb.append("</td>\r\n");
@@ -261,5 +273,19 @@ public class DashboardGrid extends DashboardElement {
             includes.addAll(stackItem.getDashboardElement().filtersToRender());
         }
         return includes;
+    }
+
+    public DashboardElement findElement(long dashboardElementID) {
+        DashboardElement element = super.findElement(dashboardElementID);
+        if (element != null) {
+            return element;
+        }
+        for (DashboardGridItem stackItem : getGridItems()) {
+            element = stackItem.getDashboardElement().findElement(dashboardElementID);
+            if (element != null) {
+                return element;
+            }
+        }
+        return null;
     }
 }

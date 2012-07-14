@@ -2,6 +2,7 @@ package com.easyinsight.dashboard;
 
 import com.easyinsight.database.EIConnection;
 
+import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -10,7 +11,7 @@ import java.sql.SQLException;
  * Date: Nov 26, 2010
  * Time: 2:01:39 PM
  */
-public class DashboardStackItem implements Cloneable {
+public class DashboardStackItem implements Cloneable, Serializable {
     private DashboardElement dashboardElement;
     private int position;
 
