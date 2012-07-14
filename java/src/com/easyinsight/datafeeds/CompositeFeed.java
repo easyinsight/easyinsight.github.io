@@ -108,7 +108,7 @@ public class CompositeFeed extends Feed {
                 if (joinOverride.getDataSourceID() == getFeedID()) {
                     if (joinOverride.getMarmotScript() != null && !"".equals(joinOverride.getMarmotScript())) {
                         try {
-                            List<IJoin> newJoins = new ReportCalculation(joinOverride.getMarmotScript()).applyJoinCalculation();
+                            List<IJoin> newJoins = new ReportCalculation(joinOverride.getMarmotScript()).applyJoinCalculation(new ArrayList<FilterDefinition>(filters));
                             for (IJoin newJoin : newJoins) {
                                 //CompositeFeedCompositeConnection connection = (CompositeFeedCompositeConnection) newJoin;
                                 newJoin.reconcile(compositeFeedNodes, getFields());
