@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.dashboard.Dashboard;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -12,6 +13,7 @@ import java.util.List;
 public class FilterHTMLMetadata {
 
     private Dashboard dashboard;
+    private HttpServletRequest request;
     private WSAnalysisDefinition report;
     private String onChange;
     private String filterKey = "reportbase";
@@ -45,8 +47,13 @@ public class FilterHTMLMetadata {
         this.report = report;
     }
 
-    public FilterHTMLMetadata(Dashboard dashboard) {
+    public FilterHTMLMetadata(Dashboard dashboard, HttpServletRequest request) {
         this.dashboard = dashboard;
+        this.request = request;
+    }
+
+    public HttpServletRequest getRequest() {
+        return request;
     }
 
     public String getOnChange() {
