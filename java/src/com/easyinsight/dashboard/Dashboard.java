@@ -9,6 +9,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.email.UserStub;
+import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
@@ -294,7 +295,7 @@ public class Dashboard implements Cloneable, Serializable {
 
         for (FilterDefinition persistableFilterDefinition : this.filters) {
             filterDefinitions.add(persistableFilterDefinition.clone());
-            List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
+            List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
             for (AnalysisItem item : filterItems) {
                 if (replacementMap.get(item.getAnalysisItemID()) == null) {
                     AnalysisItem clonedItem = item.clone();
