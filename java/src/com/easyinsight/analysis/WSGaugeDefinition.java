@@ -183,7 +183,11 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
 
     @Override
     public String rootHTML() {
-        return "<canvas class=\"gauge\" width=\"200\" height=\"200\" id=\"gauge"+getUrlKey()+"\"></canvas>";
+        String root = "<div style=\"text-align:center\"><canvas class=\"gauge\" width=\"200\" height=\"200\" id=\"gauge"+getUrlKey()+"\"></canvas></div>";
+        if (getBenchmarkMeasure() != null) {
+            root += "<div class=\"gaugeBenchmark\" id=\"benchmark" + getUrlKey() + "\"></div>";
+        }
+        return root;
     }
 
     @Override
@@ -221,10 +225,10 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
         String xyz = "$.getJSON('/app/gauge?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
                 "aGauge.refresh(data['value']);\n"+
+                "$('#benchmark" + getUrlKey() + "').html(data['benchmark']);\n"+
                 "afterRefresh();\n"+
                 "});\n";
         sb.append(xyz);
-        System.out.println(sb.toString());
         return sb.toString();
     }
 
