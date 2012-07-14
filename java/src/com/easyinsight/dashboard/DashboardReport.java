@@ -139,7 +139,7 @@ public class DashboardReport extends DashboardElement {
     public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {
         List<EIDescriptor> descs = new ArrayList<EIDescriptor>();
         descs.add(report);
-        descs.addAll(new AnalysisStorage().getAnalysisDefinition(report.getId()).allItems(dataSourceItems, new AnalysisItemRetrievalStructure(null)));
+        descs.addAll(new AnalysisStorage().getAnalysisDefinition(report.getId()).allItems(dataSourceItems, new AnalysisItemRetrievalStructure()));
         return descs;
     }
 
