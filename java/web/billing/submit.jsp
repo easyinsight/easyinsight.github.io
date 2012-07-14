@@ -119,6 +119,7 @@
                     account.setBillingMonthOfYear((cal.get(Calendar.MONTH) + 1) % 12);
                 }
             }
+            account.setBillingFailures(0);
             account.setAccountState(Account.ACTIVE);
             s.save(account);
 
