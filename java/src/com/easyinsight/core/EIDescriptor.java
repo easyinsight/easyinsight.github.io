@@ -2,6 +2,7 @@ package com.easyinsight.core;
 
 import com.easyinsight.security.Roles;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Date;
  * Date: Mar 28, 2009
  * Time: 8:30:25 AM
  */
-public abstract class EIDescriptor {
+public abstract class EIDescriptor implements Serializable {
 
     public static final int DATA_SOURCE = 1;
     public static final int REPORT = 2;
