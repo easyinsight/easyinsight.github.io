@@ -127,7 +127,21 @@ public class CompositeFeed extends Feed {
             }
         } else {
             connections = new ArrayList<IJoin>();
-            connections.addAll(this.connections);
+            for (CompositeFeedConnection connection : this.connections) {
+                if (connection.getMarmotScript() != null && !"".equals(connection.getMarmotScript())) {
+                    try {
+                        List<IJoin> newJoins = new ReportCalculation(connection.getMarmotScript()).applyJoinCalculation(new ArrayList<FilterDefinition>(filters));
+                        for (IJoin newJoin : newJoins) {
+                            newJoin.reconcile(compositeFeedNodes, getFields());
+                        }
+                        connections.addAll(newJoins);
+                    } catch (RecognitionException e) {
+                        throw new ReportException(new GenericReportFault(e.getMessage()));
+                    }
+                } else {
+                    connections.add(connection);
+                }
+            }
         }
 
         Map<Long, QueryStateNode> queryNodeMap = new HashMap<Long, QueryStateNode>();
