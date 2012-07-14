@@ -286,6 +286,8 @@ public class YTDUtil {
             for (FilterDefinition filter : wsytdDefinition.getFilterDefinitions()) {
                 if (filter instanceof FlatDateFilter) {
                     filters.add(filter);
+                } else if (filter instanceof FilterValueDefinition) {
+                    filters.add(filter);
                 }
             }
             benchmarkReport.setFilterDefinitions(filters);
