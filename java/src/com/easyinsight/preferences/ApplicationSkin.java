@@ -46,7 +46,6 @@ public class ApplicationSkin implements Serializable {
     private boolean myDataLastTime;
     private boolean myDataCombine;
     private boolean myDataNewScorecard;
-    private boolean myDataNewKPITree;
     private boolean myDataNewDashboard;
     private boolean myDataLookupTable;
     private boolean myDataAccountVisible;
@@ -91,7 +90,6 @@ public class ApplicationSkin implements Serializable {
             properties.add(new ReportBooleanProperty("myDataLastTime", myDataLastTime));
             properties.add(new ReportBooleanProperty("myDataCombine", myDataCombine));
             properties.add(new ReportBooleanProperty("myDataScorecard", myDataNewScorecard));
-            properties.add(new ReportBooleanProperty("myDataKPITree", myDataNewKPITree));
             properties.add(new ReportBooleanProperty("myDataDashboard", myDataNewDashboard));
             properties.add(new ReportBooleanProperty("myDataLookupTable", myDataLookupTable));
             properties.add(new ReportBooleanProperty("myDataAccountVisible", myDataAccountVisible));
@@ -134,7 +132,6 @@ public class ApplicationSkin implements Serializable {
         myDataLastTime = findBooleanProperty(properties, "myDataLastTime", false);
         myDataCombine = findBooleanProperty(properties, "myDataCombine", false);
         myDataNewScorecard = findBooleanProperty(properties, "myDataScorecard", true);
-        myDataNewKPITree = findBooleanProperty(properties, "myDataKPITree", false);
         myDataNewDashboard = findBooleanProperty(properties, "myDataDashboard", true);
         myDataLookupTable = findBooleanProperty(properties, "myDataLookupTable", false);
         myDataAccountVisible = findBooleanProperty(properties, "myDataAccountVisible", false);
@@ -370,14 +367,6 @@ public class ApplicationSkin implements Serializable {
 
     public void setMyDataAccountVisible(boolean myDataAccountVisible) {
         this.myDataAccountVisible = myDataAccountVisible;
-    }
-
-    public boolean isMyDataNewKPITree() {
-        return myDataNewKPITree;
-    }
-
-    public void setMyDataNewKPITree(boolean myDataNewKPITree) {
-        this.myDataNewKPITree = myDataNewKPITree;
     }
 
     public boolean isMyDataNewDashboard() {

@@ -35,9 +35,8 @@ public class ApplicationSkinTO {
     public var myDataOwner:Boolean = false;
     public var myDataCreationDate:Boolean = false;
     public var myDataLastTime:Boolean = false;
-    public var myDataCombine:Boolean = false;
-    public var myDataNewScorecard:Boolean = true;
-    public var myDataNewKPITree:Boolean = false;
+    public var myDataCombine:Boolean = true;
+    public var myDataNewScorecard:Boolean = false;
     public var myDataNewDashboard:Boolean = true;
     public var myDataLookupTable:Boolean = false;
     public var myDataAccountVisible:Boolean = false;

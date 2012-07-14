@@ -88,7 +88,6 @@ public class ApplicationSkin extends EventDispatcher {
         myDataLastTime = appSkin.myDataLastTime;
         myDataCombine = appSkin.myDataCombine;
         myDataNewScorecard = appSkin.myDataNewScorecard;
-        myDataNewKPITree = appSkin.myDataNewKPITree;
         myDataNewDashboard = appSkin.myDataNewDashboard;
         myDataLookupTable = appSkin.myDataLookupTable;
         myDataAccountVisible = appSkin.myDataAccountVisible;
