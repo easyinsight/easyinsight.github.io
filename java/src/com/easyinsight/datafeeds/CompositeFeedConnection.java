@@ -39,6 +39,7 @@ public class CompositeFeedConnection implements Serializable, IJoin {
     private String targetFeedName;
     private String label = "";
     private boolean optimized;
+    private String marmotScript;
 
     public CompositeFeedConnection() {
     }
@@ -71,6 +72,18 @@ public class CompositeFeedConnection implements Serializable, IJoin {
         this.targetOuterJoin = targetOuterJoin;
         this.sourceJoinOnOriginal = sourceJoinOnOriginal;
         this.targetJoinOnOriginal = targetJoinOnOriginal;
+    }
+
+    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, Key sourceJoin, Key targetJoin, String sourceName, String targetName,
+                                   boolean sourceOuterJoin, boolean targetOuterJoin, boolean sourceJoinOnOriginal, boolean targetJoinOnOriginal, String marmotScript) {
+        this(sourceFeedID, targetFeedID, sourceJoin, targetJoin, sourceName, targetName, sourceOuterJoin, targetOuterJoin, sourceJoinOnOriginal, targetJoinOnOriginal);
+        this.marmotScript = marmotScript;
+    }
+
+    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, AnalysisItem sourceItem, AnalysisItem targetItem, String sourceName, String targetName,
+                                   boolean sourceOuterJoin, boolean targetOuterJoin, boolean sourceJoinOnOriginal, boolean targetJoinOnOriginal, String marmotScript) {
+        this(sourceFeedID, targetFeedID, sourceItem, targetItem, sourceName, targetName, sourceOuterJoin, targetOuterJoin, sourceJoinOnOriginal, targetJoinOnOriginal);
+        this.marmotScript = marmotScript;
     }
 
     public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, AnalysisItem sourceItem, AnalysisItem targetItem, String sourceName, String targetName,
@@ -119,6 +132,14 @@ public class CompositeFeedConnection implements Serializable, IJoin {
 
     public boolean isPostJoin() {
         return false;
+    }
+
+    public String getMarmotScript() {
+        return marmotScript;
+    }
+
+    public void setMarmotScript(String marmotScript) {
+        this.marmotScript = marmotScript;
     }
 
     public void reconcile(List<CompositeFeedNode> compositeFeedNodes, List<AnalysisItem> fields) {
@@ -246,8 +267,9 @@ public class CompositeFeedConnection implements Serializable, IJoin {
     public void store(Connection conn, long feedID) throws SQLException {
         if (sourceItem != null && targetItem != null) {
             PreparedStatement connInsertStmt = conn.prepareStatement("INSERT INTO COMPOSITE_CONNECTION (" +
-                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, source_item_id, target_item_id, COMPOSITE_FEED_ID, left_join, right_join, left_join_on_original, right_join_on_original) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, source_item_id, target_item_id, COMPOSITE_FEED_ID, " +
+                    "left_join, right_join, left_join_on_original, right_join_on_original, marmot_script) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             connInsertStmt.setLong(1, sourceFeedID);
             connInsertStmt.setLong(2, targetFeedID);
             connInsertStmt.setLong(3, sourceItem.getAnalysisItemID());
@@ -257,12 +279,14 @@ public class CompositeFeedConnection implements Serializable, IJoin {
             connInsertStmt.setBoolean(7, targetOuterJoin);
             connInsertStmt.setBoolean(8, sourceJoinOnOriginal);
             connInsertStmt.setBoolean(9, targetJoinOnOriginal);
+            connInsertStmt.setString(10, marmotScript);
             connInsertStmt.execute();
             connInsertStmt.close();
         } else {
             PreparedStatement connInsertStmt = conn.prepareStatement("INSERT INTO COMPOSITE_CONNECTION (" +
-                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, SOURCE_JOIN, TARGET_JOIN, COMPOSITE_FEED_ID, left_join, right_join, left_join_on_original, right_join_on_original) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, SOURCE_JOIN, TARGET_JOIN, COMPOSITE_FEED_ID, " +
+                    "left_join, right_join, left_join_on_original, right_join_on_original, marmot_script) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             connInsertStmt.setLong(1, sourceFeedID);
             connInsertStmt.setLong(2, targetFeedID);
             connInsertStmt.setLong(3, sourceJoin.getKeyID());
@@ -272,6 +296,7 @@ public class CompositeFeedConnection implements Serializable, IJoin {
             connInsertStmt.setBoolean(7, targetOuterJoin);
             connInsertStmt.setBoolean(8, sourceJoinOnOriginal);
             connInsertStmt.setBoolean(9, targetJoinOnOriginal);
+            connInsertStmt.setString(10, marmotScript);
             connInsertStmt.execute();
             connInsertStmt.close();
         }
