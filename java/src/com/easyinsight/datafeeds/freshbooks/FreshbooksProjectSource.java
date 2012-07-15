@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.freshbooks;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -30,7 +31,8 @@ public class FreshbooksProjectSource extends FreshbooksBaseSource {
     public static final String DESCRIPTION = "Project Description";
     public static final String RATE = "Project Rate";
     public static final String BILL_METHOD = "Project Billing Method";
-    public static final String CLIENT_ID = "Client ID";    
+    public static final String CLIENT_ID = "Client ID";
+    public static final String BUDGET_HOURS = "Project Budget";
     public static final String COUNT = "Project Count";
 
     public FreshbooksProjectSource() {
@@ -40,7 +42,7 @@ public class FreshbooksProjectSource extends FreshbooksBaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(PROJECT_ID, CLIENT_ID, NAME, DESCRIPTION, RATE, BILL_METHOD, COUNT);
+        return Arrays.asList(PROJECT_ID, CLIENT_ID, NAME, DESCRIPTION, RATE, BILL_METHOD, BUDGET_HOURS, COUNT);
     }
 
     @Override
@@ -56,7 +58,8 @@ public class FreshbooksProjectSource extends FreshbooksBaseSource {
         items.add(new AnalysisDimension(keys.get(FreshbooksProjectSource.DESCRIPTION), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksProjectSource.BILL_METHOD), true));
         items.add(new AnalysisMeasure(keys.get(FreshbooksProjectSource.COUNT), AggregationTypes.SUM));
-        items.add(new AnalysisMeasure(keys.get(FreshbooksProjectSource.RATE), AggregationTypes.SUM));       
+        items.add(new AnalysisMeasure(keys.get(FreshbooksProjectSource.BUDGET_HOURS), AggregationTypes.SUM));
+        items.add(new AnalysisMeasure(keys.get(FreshbooksProjectSource.RATE), AggregationTypes.SUM));
         return items;
     }
 
@@ -91,6 +94,7 @@ public class FreshbooksProjectSource extends FreshbooksBaseSource {
                         String billMethod = queryField(invoice, "bill_method/text()");
                         String clientID = queryField(invoice, "client_id/text()");
                         String rateString = queryField(invoice, "rate/text()");
+                        String budgetString = queryField(invoice, "hour_budget/text()");
                         IRow row = dataSet.createRow();
                         addValue(row, FreshbooksProjectSource.PROJECT_ID, projectID, keys);
                         addValue(row, FreshbooksProjectSource.CLIENT_ID, clientID, keys);
@@ -99,6 +103,9 @@ public class FreshbooksProjectSource extends FreshbooksBaseSource {
                         addValue(row, FreshbooksProjectSource.BILL_METHOD, billMethod, keys);
                         if (rateString != null) {
                             addValue(row, FreshbooksProjectSource.RATE, Double.parseDouble(rateString), keys);
+                        }
+                        if (budgetString != null) {
+                            addValue(row, FreshbooksProjectSource.BUDGET_HOURS, Double.parseDouble(budgetString), keys);
                         }
                         addValue(row, FreshbooksProjectSource.COUNT, 1, keys);
                     }
@@ -120,5 +127,15 @@ public class FreshbooksProjectSource extends FreshbooksBaseSource {
         FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) parent;
         return new FreshbooksProjectFeed(freshbooksCompositeSource.getUrl(), freshbooksCompositeSource.getTokenKey(),
                 freshbooksCompositeSource.getTokenSecretKey(), freshbooksCompositeSource);
+    }
+
+    @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new FreshbooksProject1To2(this));
     }
 }

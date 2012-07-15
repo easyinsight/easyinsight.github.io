@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.freshbooks;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -36,6 +37,7 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
     public static final String COUNTRY = "Client Country";
     public static final String ORGANIZATION = "Client Organization";
     public static final String WORK_PHONE = "Client Work Phone";
+    public static final String NOTES = "Client Internal Notes";
     public static final String COUNT = "Client Count";
 
     public FreshbooksClientSource() {
@@ -46,7 +48,7 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(FIRST_NAME, LAST_NAME, NAME, USERNAME, PRIMARY_STREET1, PRIMARY_STREET2, CITY,
-                STATE, POSTAL, COUNTRY, ORGANIZATION, WORK_PHONE, COUNT, CLIENT_ID, EMAIL);
+                STATE, POSTAL, COUNTRY, ORGANIZATION, WORK_PHONE, COUNT, CLIENT_ID, EMAIL, NOTES);
     }
 
     @Override
@@ -57,6 +59,7 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.FIRST_NAME), true));
+        items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.NOTES), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.EMAIL), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.CLIENT_ID), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.LAST_NAME), true));
@@ -140,6 +143,16 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new FreshbooksClient1To2(this));
     }
 
     @Override

@@ -208,25 +208,6 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public List<KPI> createKPIs() {
-        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
-        rollingFilterDefinition.setField(findAnalysisItem(FreshbooksInvoiceSource.INVOICE_DATE));
-        rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.QUARTER);
-        List<KPI> kpis = new ArrayList<KPI>();
-        kpis.add(KPIUtil.createKPIWithFilters("Outstanding Invoice Amount", "symbol_dollar.png", (AnalysisMeasure) findAnalysisItem(FreshbooksInvoiceSource.AMOUNT_OUTSTANDING),
-            new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
-        kpis.add(KPIUtil.createKPIWithFilters("Invoiced Dollars in the Last 90 Days", "document.png", (AnalysisMeasure) findAnalysisItem(FreshbooksInvoiceSource.AMOUNT),
-            Arrays.asList((FilterDefinition) rollingFilterDefinition), KPI.GOOD, 90));
-        kpis.add(KPIUtil.createKPIForDateFilter("Hours Tracked in the Last 90 Days", "clock.png", (AnalysisMeasure) findAnalysisItem(FreshbooksTimeEntrySource.HOURS),
-            (AnalysisDimension) findAnalysisItem(FreshbooksTimeEntrySource.DATE), MaterializedRollingFilterDefinition.QUARTER, new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
-        kpis.add(KPIUtil.createKPIForDateFilter("Expenses in the Last 90 Days", "money.png", (AnalysisMeasure) findAnalysisItem(FreshbooksExpenseSource.AMOUNT),
-            (AnalysisDimension) findAnalysisItem(FreshbooksExpenseSource.DATE), MaterializedRollingFilterDefinition.QUARTER, new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
-        kpis.add(KPIUtil.createKPIForDateFilter("Payment Received in the Last 90 Days", "credit_card.png", (AnalysisMeasure) findAnalysisItem(FreshbooksPaymentSource.AMOUNT),
-            (AnalysisDimension) findAnalysisItem(FreshbooksPaymentSource.PAYMENT_DATE), MaterializedRollingFilterDefinition.QUARTER, new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
-        return kpis;
-    }
-
-    @Override
     public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
         FreshbooksCompositeSource dataSource = (FreshbooksCompositeSource) super.clone(conn);
         dataSource.setUrl("");

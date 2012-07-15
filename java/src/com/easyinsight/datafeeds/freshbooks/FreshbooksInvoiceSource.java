@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.freshbooks;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -27,6 +28,7 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
 
     public static final String INVOICE_ID = "Invoice ID";
     public static final String INVOICE_NUMBER = "Invoice Number";
+    public static final String INVOICE_CURRENCY = "Invoice Currency";
     public static final String CLIENT_ID = "Invoice Client ID";
     public static final String AMOUNT = "Invoice Amount";
     public static final String AMOUNT_OUTSTANDING = "Invoice Amount Outstanding";
@@ -45,7 +47,7 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(INVOICE_ID, CLIENT_ID, AMOUNT, AMOUNT_OUTSTANDING, STATUS, PO_NUMBER, INVOICE_DATE,
-                DISCOUNT, COUNT, INVOICE_NUMBER, AMOUNT_PAID);
+                DISCOUNT, COUNT, INVOICE_NUMBER, AMOUNT_PAID, INVOICE_CURRENCY);
     }
 
     @Override
@@ -57,6 +59,7 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(FreshbooksInvoiceSource.INVOICE_ID), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksInvoiceSource.INVOICE_NUMBER), true));
+        items.add(new AnalysisDimension(keys.get(FreshbooksInvoiceSource.INVOICE_CURRENCY), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksInvoiceSource.CLIENT_ID), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksInvoiceSource.STATUS), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksInvoiceSource.PO_NUMBER), true));
@@ -131,6 +134,16 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new FreshbooksInvoice1To2(this));
     }
 
     @Override
