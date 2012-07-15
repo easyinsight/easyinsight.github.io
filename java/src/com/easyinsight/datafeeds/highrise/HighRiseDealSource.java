@@ -31,6 +31,8 @@ import com.easyinsight.datafeeds.FeedType;
 public class HighRiseDealSource extends HighRiseBaseSource {
 
     public static final String DEAL_NAME = "Deal Name";
+    public static final String AUTHOR = "Deal Author";
+    public static final String CURRENCY = "Deal Currency";
     public static final String DESCRIPTION = "Deal Description";
     public static final String DEAL_ID = "Deal ID";
     public static final String COMPANY_ID = "Company ID";
@@ -54,7 +56,8 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     @NotNull
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(DEAL_NAME, COMPANY_ID, PRICE, DURATION, PRICE_TYPE, DEAL_OWNER,
-                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON, RESPONSIBLE_PARTY, DEAL_ID, CONTACT_ID, DESCRIPTION);
+                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON, RESPONSIBLE_PARTY, DEAL_ID, CONTACT_ID, DESCRIPTION,
+                AUTHOR, CURRENCY);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -66,6 +69,8 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_OWNER), true));
         analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLE_PARTY), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
+        analysisItems.add(new AnalysisDimension(keys.get(AUTHOR), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CURRENCY), true));
         AnalysisMeasure priceMeasure = new AnalysisMeasure(PRICE, AggregationTypes.SUM);
         FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
         formattingConfiguration.setFormattingType(FormattingConfiguration.CURRENCY);
@@ -194,6 +199,9 @@ public class HighRiseDealSource extends HighRiseBaseSource {
 
                     String personID = queryField(currDeal, "owner-id/text()");
                     row.addValue(DEAL_OWNER, highriseCache.getUserName(personID));
+                    String authorID = queryField(currDeal, "author-id/text()");
+                    row.addValue(AUTHOR, highriseCache.getUserName(authorID));
+                    row.addValue(CURRENCY, queryField(currDeal, "currency/text()"));
                     String responsibleParty = queryField(currDeal, "responsible-party-id/text()");
                     row.addValue(RESPONSIBLE_PARTY, highriseCache.getUserName(responsibleParty));
                     String categoryID = queryField(currDeal, "category-id/text()");
@@ -232,12 +240,12 @@ public class HighRiseDealSource extends HighRiseBaseSource {
 
     @Override
     public int getVersion() {
-        return 7;
+        return 8;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
         return Arrays.asList(new HighRise1To2(this), new HighRiseDeal2To3(this), new HighRiseDeal3To4(this),
-                new HighRiseDeal4To5(this), new HighRiseDeal5To6(this), new HighRiseDeal6To7(this));
+                new HighRiseDeal4To5(this), new HighRiseDeal5To6(this), new HighRiseDeal6To7(this), new HighRiseDeal7To8(this));
     }
 }
