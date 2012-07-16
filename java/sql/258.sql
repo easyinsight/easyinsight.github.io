@@ -1,0 +1,1 @@
+alter table composite_connection add marmot_script text default null;
