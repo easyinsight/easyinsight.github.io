@@ -115,9 +115,9 @@
         ]]></mx:Script>
     <mx:Canvas borderStyle="solid" borderThickness="1" borderColor="0x333333" width="100%" height="52" cornerRadius="5" backgroundColor="0xf8f8ff"
             horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundAlpha=".8" id="canvas">
-        <mx:Image id="iconImage" y="5"/>
-        <mx:Label text="{outcomeValue}" x="30" width="100%" textAlign="center" fontSize="14"/>
-        <mx:HBox verticalAlign="middle" x="30" y="17" width="100%" horizontalAlign="center" visible="{showStatus}">
+        <mx:Image id="iconImage" y="8" x="5"/>
+        <mx:Label text="{outcomeValue}" x="35" width="100%" textAlign="center" fontSize="14"/>
+        <mx:HBox verticalAlign="middle" x="35" y="17" width="100%" horizontalAlign="center" visible="{showStatus}">
             <mx:Label text="{percentChange}"/>
             <mx:Image source="{trendImage}"/>
         </mx:HBox>

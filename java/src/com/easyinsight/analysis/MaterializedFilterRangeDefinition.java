@@ -13,11 +13,15 @@ public class MaterializedFilterRangeDefinition extends MaterializedFilterDefinit
 
     private Double lowValue;
     private Double highValue;
+    private int upperOperator;
+    private int lowerOperator;
 
-    public MaterializedFilterRangeDefinition(AnalysisItem key, Double lowValue, Double highValue) {
+    public MaterializedFilterRangeDefinition(AnalysisItem key, Double lowValue, Double highValue, int lowerOperator, int upperOperator) {
         super(key);
         this.lowValue = lowValue;
         this.highValue = highValue;
+        this.lowerOperator = lowerOperator;
+        this.upperOperator = upperOperator;
     }
 
     public boolean allows(Value value) {
@@ -25,7 +29,26 @@ public class MaterializedFilterRangeDefinition extends MaterializedFilterDefinit
         if (value.type() == Value.NUMBER) {
             Double doubleValue = value.toDouble();
             if (doubleValue != null) {
-                allowed = (lowValue == null || doubleValue > lowValue) && (highValue == null || doubleValue < highValue);
+                boolean lowerRange, upperRange;
+                if(lowValue != null) {
+                    if(lowerOperator == FilterRangeDefinition.LESS_THAN) {
+                        lowerRange = doubleValue > lowValue;
+                    } else {
+                        lowerRange = doubleValue >= lowValue;
+                    }
+                } else {
+                    lowerRange = true;
+                }
+                if(highValue != null) {
+                    if(upperOperator == FilterRangeDefinition.LESS_THAN) {
+                        upperRange = doubleValue < highValue;
+                    } else {
+                        upperRange = doubleValue <= highValue;
+                    }
+                } else {
+                    upperRange = true;
+                }
+                allowed = upperRange && lowerRange;
             }
         }
         return allowed;

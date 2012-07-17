@@ -30,9 +30,12 @@ import mx.controls.Text;
     public function set fields(value:ArrayCollection):void {
         _fields = value;
     }
-        
+
         private var lowDropdown:ComboBox;
         private var highDropdown:ComboBox;
+
+        private var lowOperator:ComboBox;
+        private var highOperator:ComboBox;
 
 		override protected function createChildren():void {
 			super.createChildren();
@@ -47,10 +50,25 @@ import mx.controls.Text;
                 lowDropdown.dataProvider = new ArrayCollection([ "Days", "Hours"]);
                 addChild(lowDropdown);
             }
-			
+
+            var operators:ArrayCollection = new ArrayCollection([{label: "<", data: FilterRangeDefinition.LESS_THAN}, {label: "<=", data: FilterRangeDefinition.LESS_THAN_EQUAL_TO}]);
+            lowOperator = new ComboBox();
+            lowOperator.dataProvider = operators;
+            highOperator = new ComboBox();
+            highOperator.dataProvider = operators;
+            if(_filterDefinition.lowerOperator == FilterRangeDefinition.LESS_THAN_EQUAL_TO) {
+                lowOperator.selectedIndex = 1;
+            }
+            if(_filterDefinition.upperOperator == FilterRangeDefinition.LESS_THAN_EQUAL_TO) {
+                highOperator.selectedIndex = 1;
+            }
+
+            addChild(lowOperator);
 			var between:Text = new Text();
-			between.text = " < " + analysisItem.display + " < ";
+			between.text = analysisItem.display;
 			addChild(between);
+
+            addChild(highOperator);
 			
 			highInput = new TextInput();
 			addChild(highInput);
@@ -130,6 +148,10 @@ import mx.controls.Text;
 				_filterDefinition.endValueDefined = false;
 				_filterDefinition.endValue = 0;
 			}
+
+            _filterDefinition.upperOperator = highOperator.selectedItem.data;
+            _filterDefinition.lowerOperator = lowOperator.selectedItem.data;
+
 			return _filterDefinition;
 		}
 

@@ -15,8 +15,8 @@ import mx.controls.Alert;
             var fromCenter:Point = new Point(fromX + fromW/2.0, fromY + fromH / 2.0)
             var toCenter:Point = new Point(toX + toW / 2.0, toY + toH / 2.0)
 
-            var point_point = function(x1, y1, x2, y2) {
-                return function(x, y):Number {
+            var point_point:Function = function(x1:Number, y1:Number, x2:Number, y2:Number):Function {
+                return function(x:Number, y:Number):Number {
                     return ((y2 - y1) / (x2 - x1)) * (x - x1) - (y - y1)
                 }
             }

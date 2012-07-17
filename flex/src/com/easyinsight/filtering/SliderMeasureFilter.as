@@ -10,6 +10,7 @@ import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.HSlider;
@@ -24,6 +25,8 @@ import mx.states.State;
 
 public class SliderMeasureFilter extends HBox implements IFilter
 {
+
+    public static const OPERATOR_STRINGS:Object = {1: "<", 2: "<=" }
     private var hslider:HSlider;
     private var _filterDefinition:FilterRangeDefinition;
     private var analysisItem:AnalysisItem;
@@ -33,8 +36,35 @@ public class SliderMeasureFilter extends HBox implements IFilter
     private var _lowValueString:String;
     private var _highValueString:String;
 
+    private var _lowOperatorString:String;
+    private var _highOperatorString:String;
+
+    [Bindable(event="lowOperatorStringChanged")]
+    public function set lowOperatorString(value:String):void {
+        if(_lowOperatorString == value) return;
+        _lowOperatorString = value;
+        dispatchEvent(new Event("lowOperatorStringChanged"));
+    }
+
+    public function get lowOperatorString():String {
+        return _lowOperatorString;
+    }
+
+    [Bindable(event="highOperatorStringChanged")]
+    public function set highOperatorString(value:String):void {
+        if(_highOperatorString == value) return;
+        _highOperatorString = value;
+        dispatchEvent(new Event("highOperatorStringChanged"));
+    }
+
+    public function get highOperatorString():String {
+        return _highOperatorString;
+    }
+
     private var lowInput:Label;
     private var highInput:Label;
+    private var lowOperator:Label;
+    private var highOperator:Label;
 
     private var _analysisItems:ArrayCollection;
 
@@ -117,10 +147,15 @@ public class SliderMeasureFilter extends HBox implements IFilter
             }
             highValueString = highString;
         }
+
         if (measureFilter.startValueDefined || measureFilter.endValueDefined) {
             currentState = "Configured";
         } else {
             currentState = "";
+        }
+        if(measureFilter.lowerOperator > 0 && measureFilter.upperOperator > 0) {
+            lowOperatorString = OPERATOR_STRINGS[measureFilter.lowerOperator];
+            highOperatorString = OPERATOR_STRINGS[measureFilter.upperOperator];
         }
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
     }
@@ -159,8 +194,16 @@ public class SliderMeasureFilter extends HBox implements IFilter
                 box.addChild(lowInput);
 
                 var between:Text = new Text();
-                between.text = " < " + analysisItem.display + " < ";
+
+                highOperator = new Label();
+                BindingUtils.bindProperty(highOperator, "text", this, "highOperatorString");
+                lowOperator = new Label();
+                BindingUtils.bindProperty(lowOperator, "text", this, "lowOperatorString");
+
+                between.text = " " + analysisItem.display + " ";
+                box.addChild(lowOperator);
                 box.addChild(between);
+                box.addChild(highOperator);
 
                 highInput = new Label();
                 BindingUtils.bindProperty(highInput, "text", this, "highValueString");
@@ -233,6 +276,8 @@ public class SliderMeasureFilter extends HBox implements IFilter
             _filterDefinition.startValueDefined = false;
             _filterDefinition.endValueDefined = false;
             _filterDefinition.field = analysisItem;
+            _filterDefinition.lowerOperator = 1;
+            _filterDefinition.upperOperator = 1;
 
         } else {
             if (_filterDefinition.startValueDefined) {
@@ -263,9 +308,12 @@ public class SliderMeasureFilter extends HBox implements IFilter
                 }
                 highValueString = highString;
             }
+            lowOperatorString = OPERATOR_STRINGS[_filterDefinition.lowerOperator];
+            highOperatorString = OPERATOR_STRINGS[_filterDefinition.upperOperator];
             if (_filterEditable) {
                 currentState = "Configured";
             }
+
         }
 
         if (_loadingFromReport) {

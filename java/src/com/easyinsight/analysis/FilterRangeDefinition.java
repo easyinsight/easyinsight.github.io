@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.logging.LogClass;
 import nu.xom.Element;
 import org.hibernate.Session;
 
@@ -17,6 +18,10 @@ import java.sql.SQLException;
 @Table(name="range_filter")
 @PrimaryKeyJoinColumn(name="filter_id")
 public class FilterRangeDefinition extends FilterDefinition {
+
+    public static final int LESS_THAN = 1;
+    public static final int LESS_THAN_EQUAL_TO = 2;
+
     @Column(name="low_value")
     private double startValue;
     @Column(name="low_value_defined")
@@ -33,6 +38,10 @@ public class FilterRangeDefinition extends FilterDefinition {
     private boolean currentStartValueDefined;
     @Column(name="current_high_value_defined")
     private boolean currentEndValueDefined;
+    @Column(name="lower_operator")
+    private int lowerOperator;
+    @Column(name="upper_operator")
+    private int upperOperator;
 
     public FilterRangeDefinition() {
         setApplyBeforeAggregation(false);
@@ -118,7 +127,7 @@ public class FilterRangeDefinition extends FilterDefinition {
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        return new MaterializedFilterRangeDefinition(getField(), startValueDefined() ? startValue() : null, endValueDefined() ? endValue() : null);
+        return new MaterializedFilterRangeDefinition(getField(), startValueDefined() ? startValue() : null, endValueDefined() ? endValue() : null, getLowerOperator(), getUpperOperator());
     }
 
     private boolean startValueDefined() {
@@ -127,6 +136,22 @@ public class FilterRangeDefinition extends FilterDefinition {
 
     private boolean endValueDefined() {
         return currentEndValueDefined || endValueDefined;
+    }
+
+    public int getLowerOperator() {
+        return lowerOperator;
+    }
+
+    public void setLowerOperator(int lowerOperator) {
+        this.lowerOperator = lowerOperator;
+    }
+
+    public int getUpperOperator() {
+        return upperOperator;
+    }
+
+    public void setUpperOperator(int upperOperator) {
+        this.upperOperator = upperOperator;
     }
 
     private double startValue() {
@@ -146,17 +171,28 @@ public class FilterRangeDefinition extends FilterDefinition {
     }
 
     public String toQuerySQL(String tableName) {
+        String lowerOperator = (getLowerOperator() == LESS_THAN) ? ">" : ">=";
+        String upperOperator = (getUpperOperator() == LESS_THAN) ? "<" : "<=";
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = getField().toKeySQL();
         queryBuilder.append(columnName);
         if (startValueDefined() && endValueDefined()) {
-            queryBuilder.append(" > ? AND ");
+            queryBuilder.append(" ");
+            queryBuilder.append(lowerOperator);
+            queryBuilder.append(" ? AND ");
             queryBuilder.append(columnName);
-            queryBuilder.append(" < ?");
+            queryBuilder.append(" ");
+            queryBuilder.append(upperOperator);
+            queryBuilder.append(" ?");
         } else if (startValueDefined()) {
-            queryBuilder.append(" > ?");
+            queryBuilder.append(" ");
+            queryBuilder.append(lowerOperator);
+            queryBuilder.append(" ?");
         } else if (endValueDefined()) {
-            queryBuilder.append(" < ?");
+            queryBuilder.append(" ");
+            queryBuilder.append(upperOperator);
+            queryBuilder.append(" ?");
+
         }
         return queryBuilder.toString();
     }
