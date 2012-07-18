@@ -1,0 +1,51 @@
+.diagram {
+    overflow: auto;
+    position: relative;
+    height: 600px;
+
+}
+
+.diagram > canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.diagram .node {
+  position: absolute;
+  display: block;
+  width: 152px;
+}
+
+.diagram .node > div {
+  height: 42px;
+  width: 140px;
+  border-radius: 5px;
+  border-width: 1px;
+  border-style: solid;
+  padding: 5px;
+  background-color: #F7F7FF;
+}
+
+
+.diagram .node > div.drillthrough:hover {
+  background-color: #C2F0B7;
+}
+
+.diagram .node img {
+    height: 32px;
+    width: 32px;
+}
+
+.diagram .node .spacer {
+    height: 32px;
+    width: 32px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.diagram .node > div span {
+    width: 100%;
+    margin-left: 32px;
+    text-align: center;
+}

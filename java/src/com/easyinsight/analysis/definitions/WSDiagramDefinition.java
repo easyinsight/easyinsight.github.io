@@ -3,6 +3,7 @@ package com.easyinsight.analysis.definitions;
 import com.easyinsight.analysis.AnalysisTypes;
 import com.easyinsight.analysis.DiagramLink;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 /**
@@ -34,5 +35,12 @@ public class WSDiagramDefinition extends WSKPIDefinition {
     @Override
     public String getDataFeedType() {
         return AnalysisTypes.DIAGRAM;
+    }
+
+    @Override
+    public String toHTML(String targetDiv) {
+        String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
+        String format = "$.getJSON(''/app/diagramChart?reportID={0}&{1}&''+ strParams, function(data) '{' window.drawDiagram(data, $(\"#{2}\"), ''{3}'') '}');";
+        return MessageFormat.format(format, getAnalysisID(), timezoneOffset, targetDiv, getAnalysisID());
     }
 }
