@@ -1,17 +1,8 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
-    <mx:Metadata>
-		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
-		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
-	</mx:Metadata>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.JSONDataSource;
-
-        import mx.controls.Alert;
-        import mx.controls.Button;
-
-        import mx.validators.Validator;
 
         [Bindable]
         private var url:String;
@@ -24,19 +15,7 @@
         [Bindable]
         private var jsonPassword:String;
         [Bindable]
-        private var httpValue:String = "1";
-
-        public function get dataSourceDefinition():FeedDefinitionData {
-            var obj:JSONDataSource = new JSONDataSource();
-            obj.url = urlInput.text;
-            obj.feedName = nameInput.text;
-            obj.jsonPath = jsonPathInput.text;
-            return obj;
-        }
-
-        public function setupButton(button:Button):Function {
-            return null;
-        }
+        private var httpValue:String;
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:JSONDataSource = feedDefinition as JSONDataSource;
@@ -54,18 +33,10 @@
             ds.httpMethod = int(methodGroup.selectedValue);
             ds.userName = userNameInput.text;
             ds.password = passwordInput.text;
-            ds.feedName = nameInput.text;
             ds.jsonPath = jsonPathInput.text;
         }
 
         public function validate():Boolean {
-            nameInput.errorString = null;
-            urlInput.errorString = null;
-            var results:Array = Validator.validateAll([nameValidator,  urlValidator]);
-            if (results.length > 0) {
-                Alert.show("There were one or more errors that need to be corrected.");
-                return false;
-            }
             return true;
         }
 
@@ -73,12 +44,7 @@
         private var instructions:String = "The JSON data source needs to point at an array of objects. For example, the target might look like [{label1:X,date1:2011-09-05,value1:5},{label1:Y,date1:2012-04-03,value1:5}]. If the array is deeper inside the returned JSON, you can use JSONPath to specify how to find the array.";
         ]]></mx:Script>
     <mx:TextArea text="{instructions}" borderStyle="none" editable="false" width="650" height="50" fontSize="11"/>
-    <mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="1"/>
-    <mx:StringValidator id="urlValidator" source="{urlInput}" property="text" minLength="1"/>
     <mx:Form>
-        <mx:FormItem label="What do you want to name the data source?" fontFamily="Tahoma" fontWeight="bold">
-            <mx:TextInput id="nameInput" fontWeight="normal" fontFamily="Lucida Grande" text="" width="350"/>
-        </mx:FormItem>
         <mx:FormItem label="JSON URL:" fontFamily="Tahoma" fontWeight="bold">
             <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
         </mx:FormItem>

@@ -135,23 +135,6 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         return DataSourceInfo.COMPOSITE_PULL;
     }
 
-    @Override
-    public List<KPI> createKPIs() {
-        List<KPI> kpis = new ArrayList<KPI>();
-        kpis.add(KPIUtil.createKPIWithFilters("Number of Urgent Open Tickets", "sign_warning.png", (AnalysisMeasure) findAnalysisItemByDisplayName(ZendeskTicketSource.COUNT),
-                Arrays.asList((FilterDefinition) new FilterValueDefinition(findAnalysisItem(ZendeskTicketSource.PRIORITY), true, Arrays.asList((Object) "Urgent")),
-                        new FilterValueDefinition(findAnalysisItem(ZendeskTicketSource.STATUS), true, Arrays.asList((Object) "Open"))), KPI.GOOD, 1));
-        kpis.add(KPIUtil.createKPIWithFilters("Number of Open Tickets", "inbox.png", (AnalysisMeasure) findAnalysisItemByDisplayName(ZendeskTicketSource.COUNT),
-                Arrays.asList((FilterDefinition) new FilterValueDefinition(findAnalysisItem(ZendeskTicketSource.STATUS), true, Arrays.asList((Object) "Open"))), KPI.GOOD, 1));
-        kpis.add(KPIUtil.createKPIWithFilters("Number of Pending Tickets", "inbox.png", (AnalysisMeasure) findAnalysisItemByDisplayName(ZendeskTicketSource.COUNT),
-                Arrays.asList((FilterDefinition) new FilterValueDefinition(findAnalysisItem(ZendeskTicketSource.STATUS), true, Arrays.asList((Object) "Pending"))), KPI.GOOD, 1));
-        kpis.add(KPIUtil.createKPIForDateFilter("Tickets Created in the Last 30 Days", "document.png", (AnalysisMeasure) findAnalysisItemByDisplayName(ZendeskTicketSource.COUNT),
-                (AnalysisDimension) findAnalysisItem(ZendeskTicketSource.CREATED_AT), MaterializedRollingFilterDefinition.MONTH, new ArrayList<FilterDefinition>(), KPI.GOOD, 1));
-        kpis.add(KPIUtil.createKPIForDateFilter("Tickets Solved in the Last 30 Days", "check.png", (AnalysisMeasure) findAnalysisItemByDisplayName(ZendeskTicketSource.COUNT),
-                (AnalysisDimension) findAnalysisItem(ZendeskTicketSource.SOLVED_AT), MaterializedRollingFilterDefinition.MONTH, new ArrayList<FilterDefinition>(), KPI.GOOD, 1));
-        return kpis;
-    }
-
     private transient ZendeskUserCache zendeskUserCache;
 
     public ZendeskUserCache getOrCreateUserCache(HttpClient httpClient) throws InterruptedException {

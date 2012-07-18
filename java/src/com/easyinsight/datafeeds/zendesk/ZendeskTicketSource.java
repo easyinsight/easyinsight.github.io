@@ -68,25 +68,9 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        List<String> baseKeys = new ArrayList<String>(Arrays.asList(ASSIGNED_AT, ASSIGNEE, BASE_SCORE, CREATED_AT, TAGS, DESCRIPTION,
+        return new ArrayList<String>(Arrays.asList(ASSIGNED_AT, ASSIGNEE, BASE_SCORE, CREATED_AT, TAGS, DESCRIPTION,
                 DUE_DATE, GROUP_ID, INITIALLY_ASSIGNED_AT, ORGANIZATION_ID, PRIORITY, REQUESTER, RESOLUTION_TIME,
                 SOLVED_AT, STATUS, STATUS_UPDATED_AT, SUBMITTER, SUBJECT, TICKET_TYPE, UPDATED_AT, SCORE, VIA, COUNT, TICKET_ID));
-        try {
-            ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
-            /*Document fields = runRestRequest(zendeskCompositeSource, getHttpClient(zendeskCompositeSource.getZdUserName(),
-                    zendeskCompositeSource.getZdPassword()), "/ticket_fields.xml", new Builder());
-            Nodes recordNodes = fields.query("/records/record");
-            for (int i = 0; i < recordNodes.size(); i++) {
-                Node recordNode = recordNodes.get(i);
-                String title = queryField(recordNode, "title/text()");
-                if (!baseKeys.contains(title)) {
-                    baseKeys.add("zd" + queryField(recordNode, "id/text()"));
-                }
-            }*/
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return baseKeys;
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -134,7 +118,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                     items.add(new AnalysisDimension(customKey, title));
                 } else if ("MultiLineField".equals(type)) {
                     items.add(new AnalysisText(customKey, title));
-                } else if ("NumericField".equals(type) || "DecimalField".equals(type) || "FieldInteger".equals(type)) {
+                } else if ("NumericField".equals(type) || "FieldDecimal".equals(type) || "FieldInteger".equals(type) || "FieldNumeric".equals(type)) {
                     items.add(new AnalysisMeasure(customKey, title, AggregationTypes.SUM));
                 }
             }
@@ -154,7 +138,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
             ZendeskUserCache zendeskUserCache = zendeskCompositeSource.getOrCreateUserCache(httpClient);
             if (lastRefreshDate == null) {
-                return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache);
+                return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache, IDataStorage);
             } else {
                 getUpdatedTickets(keys, zendeskCompositeSource, lastRefreshDate, IDataStorage, zendeskUserCache);
                 return null;
@@ -168,7 +152,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         }
     }
 
-    private String getUserName(String userID, ZendeskUserCache zendeskUserCache, ZendeskCompositeSource zendeskCompositeSource) throws InterruptedException {
+    private String getUserName(String userID, ZendeskUserCache zendeskUserCache) throws InterruptedException {
         ZendeskUser zendeskUser = zendeskUserCache.getUsers().get(userID);
         if (zendeskUser == null) {
             return "";
@@ -185,71 +169,75 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, IDataStorage IDataStorage,
                                    ZendeskUserCache zendeskUserCache) throws Exception {
 
-        HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+        HttpClient httpClient = new HttpClient();
         Builder builder = new Builder();
 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
         DateFormat updateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(lastUpdateDate);
-        cal.add(Calendar.DAY_OF_YEAR, -1);
-        String updateDate = updateFormat.format(cal.getTime());
+
+        String updateDate = updateFormat.format(lastUpdateDate);
         Key noteKey = zendeskCompositeSource.getField(TICKET_ID).toBaseKey();
-        boolean moreData;
         int page = 1;
+        int count = 0;
+        int recordCount = 0;
         do {
             String path = "/search.xml?query=" + URLEncoder.encode("\"type:ticket updated>"+updateDate+"\"", "UTF-8");
-            if (page > 1) {
-                path += "&page=" + page;
-            }
+            path += "&page=" + page;
+            System.out.println(path);
             Document doc = runRestRequest(zendeskCompositeSource, httpClient, path, builder);
             Nodes ticketNodes = doc.query("/records/record");
-            moreData = ticketNodes.size() == 15;
+            if (page == 1) {
+                count = Integer.parseInt(doc.query("/records/@count").get(0).getValue());
+            }
             for (int i = 0; i < ticketNodes.size(); i++) {
                 DataSet dataSet = new DataSet();
                 IRow row = dataSet.createRow();
                 Node ticketNode = ticketNodes.get(i);
-                String id = parseTicket(keys, zendeskCompositeSource, httpClient, zendeskUserCache, row, ticketNode);
+                String id = parseTicket(keys, zendeskUserCache, row, ticketNode);
                 if (id != null) {
                     StringWhere userWhere = new StringWhere(noteKey, id);
                     IDataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
                 }
             }
             page++;
-        } while (moreData);
+            recordCount += 15;
+        } while (recordCount < count);
     }
 
-    private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, ZendeskUserCache userCache) throws InterruptedException, ParseException {
+    private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, ZendeskUserCache userCache, IDataStorage dataStorage) throws Exception {
         DataSet dataSet = new DataSet();
-        HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+        HttpClient httpClient = new HttpClient();
         Builder builder = new Builder();
 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
-        boolean moreData;
         int page = 1;
+        int count = 0;
+        int recordCount = 0;
         do {
             String path = "/search.xml?query=type:ticket";
             if (page > 1) {
                 path += "&page=" + page;
             }
-
             Document doc = runRestRequest(zendeskCompositeSource, httpClient, path, builder);
+            if (page == 1) {
+                count = Integer.parseInt(doc.query("/records/@count").get(0).getValue());
+            }
             Nodes ticketNodes = doc.query("/records/record");
-            moreData = ticketNodes.size() == 15;
             for (int i = 0; i < ticketNodes.size(); i++) {
                 IRow row = dataSet.createRow();
                 Node ticketNode = ticketNodes.get(i);
-                parseTicket(keys, zendeskCompositeSource, httpClient, userCache, row, ticketNode);
+                parseTicket(keys, userCache, row, ticketNode);
             }
             page++;
-        } while (moreData);
-        return dataSet;
+            dataStorage.insertData(dataSet);
+            dataSet = new DataSet();
+            recordCount += 15;
+        } while (recordCount < count);
+        return null;
     }
 
-    private String parseTicket(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, HttpClient httpClient, ZendeskUserCache userCache, IRow row, Node ticketNode) throws ParseException, InterruptedException {
+    private String parseTicket(Map<String, Key> keys, ZendeskUserCache userCache, IRow row, Node ticketNode) throws ParseException, InterruptedException {
         try {
             row.addValue(keys.get(ASSIGNED_AT), queryDate(ticketNode, "assigned-at/text()"));
-            row.addValue(keys.get(ASSIGNEE), queryUser(ticketNode, "assignee-id/text()", userCache, zendeskCompositeSource));
+            row.addValue(keys.get(ASSIGNEE), queryUser(ticketNode, "assignee-id/text()", userCache));
             row.addValue(keys.get(BASE_SCORE), queryField(ticketNode, "base-score/text()"));
             row.addValue(keys.get(SCORE), queryField(ticketNode, "score/text()"));
             row.addValue(keys.get(COUNT), 1);
@@ -264,8 +252,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             row.addValue(keys.get(ORGANIZATION_ID), queryField(ticketNode, "organization-id/text()"));
             String id = queryField(ticketNode, "nice-id/text()");
             row.addValue(keys.get(TICKET_ID), id);
-            row.addValue(keys.get(REQUESTER), queryUser(ticketNode, "requester-id/text()", userCache, zendeskCompositeSource));
-            row.addValue(keys.get(SUBMITTER), queryUser(ticketNode, "submitter-id/text()", userCache, zendeskCompositeSource));
+            row.addValue(keys.get(REQUESTER), queryUser(ticketNode, "requester-id/text()", userCache));
+            row.addValue(keys.get(SUBMITTER), queryUser(ticketNode, "submitter-id/text()", userCache));
             String tags = queryField(ticketNode, "current-tags/text()");
             if (tags != null) {
                 String[] tagElements = tags.split(" ");
@@ -301,6 +289,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                     row.addValue(keys.get(STATUS), "Closed");
                 }
             } catch (NumberFormatException e) {
+                // ignore
             }
 
             try {
@@ -318,6 +307,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                     row.addValue(keys.get(TICKET_TYPE), "Task");
                 }
             } catch (NumberFormatException e) {
+                // ignore
             }
 
             try {
@@ -335,6 +325,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                     row.addValue(keys.get(PRIORITY), "Urgent");
                 }
             } catch (NumberFormatException e) {
+                // ignore
             }
 
             try {
@@ -368,6 +359,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                     row.addValue(keys.get(VIA), "Twitter public message");
                 }
             } catch (NumberFormatException e) {
+                // ignore
             }
 
             return id;
@@ -384,11 +376,11 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         return TICKET_ID;
     }
 
-    protected Value queryUser(Node node, String target, ZendeskUserCache zendeskUserCache, ZendeskCompositeSource zendeskCompositeSource) throws InterruptedException {
+    protected Value queryUser(Node node, String target, ZendeskUserCache zendeskUserCache) throws InterruptedException {
         String value = queryField(node, target);
         if (value != null && !"".equals(value)) {
             try {
-                return new StringValue(getUserName(value, zendeskUserCache, zendeskCompositeSource));
+                return new StringValue(getUserName(value, zendeskUserCache));
             } catch (Exception e) {
                 return new EmptyValue();
             }

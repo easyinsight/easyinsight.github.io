@@ -2,8 +2,7 @@ package com.easyinsight.datafeeds.json;
 
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -12,6 +11,9 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
+import com.easyinsight.userupload.DataTypeGuesser;
+import com.jayway.jsonpath.JsonPath;
+import net.minidev.json.parser.JSONParser;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -21,13 +23,13 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
-import org.json.JSONObject;
+import org.json.JSONException;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -44,7 +46,16 @@ public class JSONDataSource extends ServerDataSourceDefinition {
     private String url;
     private String userName;
     private String password;
+    private String jsonPath;
     private int httpMethod = GET;
+
+    public String getJsonPath() {
+        return jsonPath;
+    }
+
+    public void setJsonPath(String jsonPath) {
+        this.jsonPath = jsonPath;
+    }
 
     public String getUserName() {
         return userName;
@@ -80,6 +91,28 @@ public class JSONDataSource extends ServerDataSourceDefinition {
 
     @Override
     public String validateCredentials() {
+        try {
+            HttpClient client = new HttpClient();
+            if (userName != null && !"".equals(userName)) {
+                client.getParams().setAuthenticationPreemptive(true);
+                Credentials defaultcreds = new UsernamePasswordCredentials(userName, password);
+                client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
+            }
+            HttpMethod restMethod;
+            if (httpMethod == GET) {
+                restMethod = new GetMethod(url);
+            } else if (httpMethod == POST) {
+                restMethod = new PostMethod(url);
+            } else {
+                throw new RuntimeException("Unknown http method " + httpMethod);
+            }
+            restMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
+            client.executeMethod(restMethod);
+            JSONArray array = new JSONArray(restMethod.getResponseBodyAsString());
+
+        } catch (IOException e) {
+        } catch (JSONException e) {
+        }
         return null;
     }
 
@@ -106,19 +139,20 @@ public class JSONDataSource extends ServerDataSourceDefinition {
         deleteStmt.setLong(1, getDataFeedID());
         deleteStmt.executeUpdate();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO JSON_SOURCE (URL, DATA_SOURCE_ID, AUTH_USERNAME, AUTH_PASSWORD," +
-                "HTTP_METHOD) VALUES (?, ?, ?, ?, ?)");
+                "HTTP_METHOD, JSON_PATH) VALUES (?, ?, ?, ?, ?, ?)");
         insertStmt.setString(1, getUrl());
         insertStmt.setLong(2, getDataFeedID());
         insertStmt.setString(3, getUserName());
         insertStmt.setString(4, getPassword() != null ? PasswordStorage.encryptString(getPassword()) : null);
         insertStmt.setInt(5, getHttpMethod());
+        insertStmt.setString(6, getJsonPath());
         insertStmt.execute();
     }
 
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, AUTH_USERNAME, AUTH_PASSWORD, HTTP_METHOD FROM JSON_SOURCE WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, AUTH_USERNAME, AUTH_PASSWORD, HTTP_METHOD, JSON_PATH FROM JSON_SOURCE WHERE DATA_SOURCE_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
@@ -129,13 +163,14 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                 this.password = PasswordStorage.decryptString(password);
             }
             setHttpMethod(rs.getInt(4));
+            setJsonPath(rs.getString(5));
         }
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> fieldList = new ArrayList<AnalysisItem>();
+        Map<String, Key> keyMap = new HashMap<String, Key>(keys);
+        List<AnalysisItem> fieldList;
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
             HttpClient client = new HttpClient();
             if (userName != null && !"".equals(userName)) {
                 client.getParams().setAuthenticationPreemptive(true);
@@ -152,33 +187,53 @@ public class JSONDataSource extends ServerDataSourceDefinition {
             }
             restMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
             client.executeMethod(restMethod);
-            JSONArray array = new JSONArray(restMethod.getResponseBodyAsString());
 
-            if (array.length() == 0) {
+            if (restMethod.getStatusCode() == 404) {
+                throw new ReportException(new DataSourceConnectivityReportFault("We received a 404, Page Not Found when trying to retrieve the specified URL.", this));
+            } else if (restMethod.getStatusCode() == 401) {
+                throw new ReportException(new DataSourceConnectivityReportFault("Authorization with the specified credentials failed when trying to retrieve the specified URL.", this));
+            }
 
-            } else {
-                JSONObject object = (JSONObject) array.get(0);
-                Iterator iter = object.keys();
-                while (iter.hasNext()) {
-                    String keyName = (String) iter.next();
-                    Key key = keys.get(keyName);
-                    if (key == null) {
-                        key = new NamedKey(keyName);
-                    }
-                    String value = object.getString(keyName);
-                    try {
-                        Double.parseDouble(value);
-                        fieldList.add(new AnalysisMeasure(key, AggregationTypes.SUM));
-                    } catch (NumberFormatException e) {
-                        try {
-                            sdf.parse(value);
-                            fieldList.add(new AnalysisDateDimension(key, true, AnalysisDateDimension.DAY_LEVEL));
-                        } catch (ParseException e1) {
-                            fieldList.add(new AnalysisDimension(key, true));
+            List<Map> coreArray = null;
+            if (jsonPath == null || "".equals(jsonPath.trim())) {
+                Object obj = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                if (obj instanceof List) {
+                    List list = (List) obj;
+                    coreArray = new ArrayList<Map>();
+                    for (Object o : list) {
+                        if (o instanceof Map) {
+                            coreArray.add((Map) o);
                         }
                     }
                 }
+            } else {
+                coreArray = JsonPath.read(restMethod.getResponseBodyAsStream(), jsonPath);
             }
+
+            if (coreArray == null) {
+                throw new ReportException(new DataSourceConnectivityReportFault("We couldn't find a JSON array at the specified URL. You might need to try a different URL or specify a different JSONPath to find the array within the returned JSON data.", this));
+            }
+
+            DataTypeGuesser guesser = new DataTypeGuesser();
+            for (Object obj : coreArray) {
+                Map map = (Map) obj;
+                for (Object keyObj : map.keySet()) {
+                    String keyName = (String) keyObj;
+                    Object value = map.get(keyName);
+                    Key key = keyMap.get(keyName);
+                    if (key == null) {
+                        key = new NamedKey(keyName);
+                        keyMap.put(keyName, key);
+                    }
+                    if (value != null) {
+                        guesser.addValue(key, new StringValue(value.toString()));
+                    }
+
+                }
+            }
+            fieldList = guesser.createFeedItems();
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -197,15 +252,11 @@ public class JSONDataSource extends ServerDataSourceDefinition {
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
-        Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
-        for (AnalysisItem analysisItem : getFields()) {
-            map.put(analysisItem.getKey().toKeyString(), analysisItem);
-        }
         DataSet dataSet = new DataSet();
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
             HttpClient client = new HttpClient();
-            if (userName != null && !"".equals(userName)) {
+            if (userName != null || "".equals(userName)) {
                 client.getParams().setAuthenticationPreemptive(true);
                 Credentials defaultcreds = new UsernamePasswordCredentials(userName, password);
                 client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
@@ -218,26 +269,49 @@ public class JSONDataSource extends ServerDataSourceDefinition {
             } else {
                 throw new RuntimeException("Unknown http method " + httpMethod);
             }
+
             restMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
             client.executeMethod(restMethod);
-            JSONArray array = new JSONArray(restMethod.getResponseBodyAsString());
-            for (int i = 0; i < array.length(); i++) {
+            List<Map> coreArray = null;
+            if (jsonPath == null || "".equals(jsonPath.trim())) {
+                Object obj = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                if (obj instanceof List) {
+                    List list = (List) obj;
+                    coreArray = new ArrayList<Map>();
+                    for (Object o : list) {
+                        if (o instanceof Map) {
+                            coreArray.add((Map) o);
+                        }
+                    }
+                }
+            } else {
+                coreArray = JsonPath.read(restMethod.getResponseBodyAsStream(), jsonPath);
+            }
+            if (coreArray == null) {
+                throw new ReportException(new DataSourceConnectivityReportFault("We couldn't find a JSON array at the specified URL. You might need to try a different URL or specify a different JSONPath to find the array within the returned JSON data.", this));
+            }
+            for (Map object : coreArray) {
                 IRow row = dataSet.createRow();
-                JSONObject object = (JSONObject) array.get(i);
-                Iterator iter = object.keys();
-                while (iter.hasNext()) {
-                    String keyName = (String) iter.next();
-                    String value = object.getString(keyName);
-                    AnalysisItem item = map.get(keyName);
-                    if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                        row.addValue(keys.get(keyName), sdf.parse(value));
+                for (AnalysisItem item : getFields()) {
+                    String keyName = item.getKey().toKeyString();
+                    Object value = object.get(keyName);
+                    if (value == null) {
+                        row.addValue(keys.get(keyName), new EmptyValue());
+                    } else if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                        row.addValue(keys.get(keyName), sdf.parse(value.toString()));
                     } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
-                        row.addValue(keys.get(keyName), Double.parseDouble(value));
+                        if (value instanceof Number) {
+                            row.addValue(keys.get(keyName), (Number) value);
+                        } else {
+                            row.addValue(keys.get(keyName), Double.parseDouble(value.toString()));
+                        }
                     } else {
-                        row.addValue(keys.get(keyName), value);
+                        row.addValue(keys.get(keyName), value.toString());
                     }
                 }
             }
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

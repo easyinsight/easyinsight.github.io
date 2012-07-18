@@ -14,6 +14,9 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
+import sun.misc.BASE64Encoder;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * User: jamesboe
@@ -40,6 +43,20 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
 
     public Document runRestRequest(ZendeskCompositeSource zendeskCompositeSource, HttpClient client, String path, Builder builder) throws InterruptedException {
         HttpMethod restMethod = new GetMethod(zendeskCompositeSource.getUrl() + path);
+        if (path.startsWith("/search"))
+        {
+            // add  Authorization header with base64 encoded "<username>:<password>"
+            StringBuilder toEncode = new StringBuilder();
+            toEncode.append(zendeskCompositeSource.getZdUserName()).append(":").append(zendeskCompositeSource.getZdPassword());
+            byte[] bytes;
+            try {
+                bytes = toEncode.toString().getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            BASE64Encoder base64Encoder = new BASE64Encoder();
+            restMethod.setRequestHeader("Authorization", "Basic " + base64Encoder.encode(bytes));
+        }
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
         boolean successful = false;
@@ -49,6 +66,11 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
             try {
                 client.executeMethod(restMethod);
                 doc = builder.build(restMethod.getResponseBodyAsStream());
+                if (restMethod.getStatusCode() == 401) {
+                    throw new ReportException(new DataSourceConnectivityReportFault("Invalid Zendesk credentials in connecting to " +
+                            zendeskCompositeSource.getUrl() + ".",
+                            zendeskCompositeSource));
+                }
                 successful = true;
             } catch (Exception e) {
                 String statusLine = restMethod.getStatusLine().toString();
