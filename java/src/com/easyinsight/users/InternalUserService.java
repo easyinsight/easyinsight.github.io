@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 
+import javax.servlet.http.HttpServletResponse;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,21 +25,29 @@ public class InternalUserService {
     @Nullable
     public UserServiceResponse validateCookie(String cookie, String userName, EIConnection conn, Session session) throws SQLException {
 
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.USER_ID FROM USER_SESSION, USER WHERE USER_SESSION.user_id = user.user_id and " +
-                    "user_session.session_number = ? AND user.username = ?");
-            queryStmt.setString(1, cookie);
-            queryStmt.setString(2, userName);
-            ResultSet rs = queryStmt.executeQuery();
-            long userID = 0;
-            if (rs.next()) {
-                userID = rs.getLong(1);
-            }
-            queryStmt.close();
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.USER_ID FROM USER_SESSION, USER WHERE USER_SESSION.user_id = user.user_id and " +
+                "user_session.session_number = ? AND user.username = ?");
+        queryStmt.setString(1, cookie);
+        queryStmt.setString(2, userName);
+        ResultSet rs = queryStmt.executeQuery();
+        long userID = 0;
+        if (rs.next()) {
+            userID = rs.getLong(1);
+        }
+        queryStmt.close();
         if (userID == 0) {
             return null;
         }
+
+        PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM USER_SESSION WHERE user_session.session_number = ? and user_session.user_id = ?");
+        deleteStmt.setString(1, cookie);
+        deleteStmt.setLong(2, userID);
+        deleteStmt.execute();
+        deleteStmt.close();
+
         User user = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
-        return UserServiceResponse.createResponse(user, session, conn);
+        UserServiceResponse response = UserServiceResponse.createResponse(user, session, conn);
+        return response;
     }
 
     public String createCookie(long userID) throws SQLException {
@@ -51,9 +60,9 @@ public class InternalUserService {
     }
 
     public String createCookie(long userID, EIConnection conn) throws SQLException {
-        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM USER_SESSION WHERE USER_ID = ?");
-        clearStmt.setLong(1, userID);
-        clearStmt.executeUpdate();
+//        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM USER_SESSION WHERE USER_ID = ?");
+//        clearStmt.setLong(1, userID);
+//        clearStmt.executeUpdate();
         String sessionCookie = RandomTextGenerator.generateText(30);
         PreparedStatement saveCookieStmt = conn.prepareStatement("INSERT INTO USER_SESSION (USER_ID, SESSION_NUMBER," +
                 "USER_SESSION_DATE) VALUES (?, ?, ?)");
@@ -63,7 +72,7 @@ public class InternalUserService {
         saveCookieStmt.execute();
         return sessionCookie;
     }
-    
+
     @Nullable
     public User retrieveUser(String userName) {
         Session session = Database.instance().createSession();
@@ -80,7 +89,6 @@ public class InternalUserService {
             }
             if (results.size() > 0) {
                 user = (User) results.get(0);
-
             }
             return user;
         } catch (Exception e) {

@@ -60,8 +60,14 @@
             UserServiceResponse userServiceResponse = new InternalUserService().validateCookie(cookieValue, userName, conn, hibernateSession);
             if (userServiceResponse != null) {
                 SecurityUtil.populateSession(session, userServiceResponse);
-                response.addCookie(new Cookie("eiUserName", userName));
-                response.addCookie(new Cookie("eiRememberMe", new InternalUserService().createCookie(userServiceResponse.getUserID(), conn)));
+                Cookie usernameCookie = new Cookie("eiUserName", userName);
+                usernameCookie.setSecure(true);
+                usernameCookie.setMaxAge(60 * 60 * 24 * 30);
+                response.addCookie(usernameCookie);
+                Cookie rememberMeCookie = new Cookie("eiRememberMe", new InternalUserService().createCookie(userServiceResponse.getUserID(), conn));
+                rememberMeCookie.setSecure(true);
+                rememberMeCookie.setMaxAge(60 * 60 * 24 * 30);
+                response.addCookie(rememberMeCookie);
                 String redirectUrl = RedirectUtil.getURL(request, "/app/");
                 if(session.getAttribute("loginRedirect") != null) {
                     redirectUrl = ((String) session.getAttribute("loginRedirect"));
@@ -118,7 +124,6 @@
                     Password
                 </label>
                 <input type="password" name="password" id="password" style="width:100%;font-size:14px;height:28px"/>
-
                 <%
                     if (request.getParameter("error") != null) {
                 %>

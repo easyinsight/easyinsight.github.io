@@ -9,6 +9,7 @@
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="com.easyinsight.preferences.ImageDescriptor" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -53,6 +54,7 @@
         }
 
 %>
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
@@ -76,12 +78,16 @@
         #problemHTML {
             display: none;
         }
+
     </style>
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
-    <link href="/css/app.css" rel="stylesheet">
-    <link href="/css/datePicker.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet" />
+    <link href="/css/app.css" rel="stylesheet" />
+    <link href="/css/datePicker.css" rel="stylesheet" />
+    <link href="/css/diagram.css" rel="stylesheet" />
     <script type="text/javascript" src="/js/bootstrap.js"></script>
     <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
+    <script type="text/javascript" src="/js/diagram.js"></script>
+
     <%
         List<String> jsIncludes = report.javaScriptIncludes();
         for (String jsInclude : jsIncludes) {
@@ -322,7 +328,7 @@
     </div>
     <div class="modal-body">
         <a href="../exportExcel?reportID=<%= report.getAnalysisID() %>" class="btn">Export to Excel</a>
-        <button class="btn" onclick="$('#exportModalWindow').modal('hide'); $('(#emailReportWindow').modal(true, true, true)">Email Report</button>
+        <button class="btn" onclick="$('#exportModalWindow').modal('hide'); $('#emailReportWindow').modal(true, true, true)">Email Report</button>
     </div>
 </div>
 <div class="modal hide fade" id="emailReportWindow">

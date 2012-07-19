@@ -89,6 +89,8 @@
         }
     %>
     <link href="/css/app.css" rel="stylesheet">
+    <link href="/css/diagram.css" rel="stylesheet" />
+    <script type="text/javascript" src="/js/diagram.js"></script>
     <script type="text/javascript">
 
         var filterBase = {};

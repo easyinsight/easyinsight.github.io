@@ -336,6 +336,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>DiagramChart</servlet-name>
+        <display-name>DiagramChart</display-name>
+        <servlet-class>com.easyinsight.html.DiagramChartServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>TwoAxisChart</servlet-name>
         <display-name>TwoAxisChart</display-name>
         <servlet-class>com.easyinsight.html.LineChartServlet</servlet-class>
@@ -499,6 +506,11 @@
     <servlet-mapping>
         <servlet-name>ColumnChart</servlet-name>
         <url-pattern>/columnChart</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>DiagramChart</servlet-name>
+        <url-pattern>/diagramChart</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

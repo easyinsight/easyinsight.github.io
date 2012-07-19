@@ -18,7 +18,7 @@
 }
 
 .diagram .node > div {
-  height: 42px;
+  height: 49px;
   width: 140px;
   border-radius: 5px;
   border-width: 1px;
@@ -37,6 +37,17 @@
     width: 32px;
 }
 
+.diagram .node .trend {
+    float:right;
+    text-align: right;
+    margin: 0px;
+    width: auto;
+}
+
+.diagram .node .trend img {
+    vertical-align: baseline;
+}
+
 .diagram .node .spacer {
     height: 32px;
     width: 32px;
@@ -48,4 +59,15 @@
     width: 100%;
     margin-left: 32px;
     text-align: center;
+}
+
+.diagram .node > div div {
+    width: 108px;
+    vertical-align:middle;
+    text-align: center;
+    display: inline-block;
+}
+
+.diagram .node > div div img {
+    margin-left: 5px;
 }
