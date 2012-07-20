@@ -60,9 +60,6 @@ public class InternalUserService {
     }
 
     public String createCookie(long userID, EIConnection conn) throws SQLException {
-//        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM USER_SESSION WHERE USER_ID = ?");
-//        clearStmt.setLong(1, userID);
-//        clearStmt.executeUpdate();
         String sessionCookie = RandomTextGenerator.generateText(30);
         PreparedStatement saveCookieStmt = conn.prepareStatement("INSERT INTO USER_SESSION (USER_ID, SESSION_NUMBER," +
                 "USER_SESSION_DATE) VALUES (?, ?, ?)");
