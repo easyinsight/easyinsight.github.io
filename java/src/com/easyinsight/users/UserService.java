@@ -395,8 +395,8 @@ public class UserService {
         a.setAccountState(Account.CLOSING);
         a.setBillingInformationGiven(false);
         BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
-        billingSystem.setUsername("testapi");
-        billingSystem.setPassword("password1");
+        billingSystem.setUsername(ConfigLoader.instance().getBillingUsername());
+        billingSystem.setPassword(ConfigLoader.instance().getBillingPassword());
         billingSystem.cancelPlan(a.getAccountID());
         session.save(a);
     }
