@@ -14,6 +14,8 @@ import net.smartam.leeloo.client.OAuthClient;
 import net.smartam.leeloo.client.URLConnectionClient;
 import net.smartam.leeloo.client.request.OAuthClientRequest;
 import net.smartam.leeloo.client.response.OAuthJSONAccessTokenResponse;
+import net.smartam.leeloo.common.exception.OAuthProblemException;
+import net.smartam.leeloo.common.exception.OAuthSystemException;
 import net.smartam.leeloo.common.message.types.GrantType;
 import nu.xom.*;
 import oauth.signpost.OAuthConsumer;
@@ -102,6 +104,22 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
             refreshToken = rs.getString(2);
             instanceName = rs.getString(3);
         }
+        loadStmt.close();
+    }
+
+    public void refreshTokenInfo() throws OAuthSystemException, OAuthProblemException {
+        try {
+            OAuthClientRequest.TokenRequestBuilder tokenRequestBuilder = OAuthClientRequest.tokenLocation("https://na1.salesforce.com/services/oauth2/token").
+                    setGrantType(GrantType.REFRESH_TOKEN).setClientId(SALESFORCE_CONSUMER_KEY).
+                    setClientSecret(SALESFORCE_SECRET_KEY).setRefreshToken(refreshToken).setRedirectURI("https://easy-insight.com/app/oauth");
+            tokenRequestBuilder.setParameter("type", "refresh");
+            OAuthClient client = new OAuthClient(new URLConnectionClient());
+            OAuthClientRequest request = tokenRequestBuilder.buildBodyMessage();
+            OAuthJSONAccessTokenResponse response = client.accessToken(request);
+            accessToken = response.getAccessToken();
+        } catch (Exception e) {
+            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize access to Salesforce.", this));
+        }
     }
 
     @Override
@@ -165,12 +183,6 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         return null;
     }
 
-    @Override
-    public List<KPI> createKPIs() {
-        List<KPI> kpis = new ArrayList<KPI>();
-        return kpis;
-    }
-
     public SalesforceBaseDataSource() {
         setFeedName("Salesforce");
     }
@@ -197,7 +209,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
             return builder.build(new ByteArrayInputStream(string.getBytes("UTF-8")));
         } catch (HttpResponseException e) {
             if ("Unauthorized".equals(e.getMessage())) {
-                throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Constant Contact data.", parentSource));
+                throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Salesforce data.", parentSource));
             } else {
                 throw e;
             }

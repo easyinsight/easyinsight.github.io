@@ -6,6 +6,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
 import java.io.ByteArrayInputStream;
+import java.sql.SQLException;
 import java.util.*;
 
 import nu.xom.Builder;
@@ -31,16 +32,53 @@ public class SalesforceFeed extends Feed {
         this.sobjectName = sobjectName;
     }
 
+    private static class AuthFailed extends Exception {
+
+    }
+
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
-        SalesforceBaseDataSource salesforceBaseDataSource = null;
+        SalesforceBaseDataSource salesforceBaseDataSource;
         try {
             salesforceBaseDataSource = (SalesforceBaseDataSource) new FeedStorage().getFeedDefinitionData(getDataSource().getParentSourceID(), conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            return getDataSet(salesforceBaseDataSource, analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
+        } catch (ReportException re) {
+            throw re;
+        } catch (AuthFailed authFailed) {
+            try {
+                salesforceBaseDataSource.refreshTokenInfo();
+                new FeedStorage().updateDataFeedConfiguration(salesforceBaseDataSource);
+                return getDataSet(salesforceBaseDataSource, analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
+            } catch (ReportException re) {
+                throw re;
+            } catch (AuthFailed authFailed1) {
+                throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Salesforce data.", salesforceBaseDataSource));
+            } catch (Exception e1) {
+                throw new RuntimeException(e1);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private DataSet getDataSet(SalesforceBaseDataSource salesforceBaseDataSource, Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata,
+                               List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException, AuthFailed {
+
+        try {
+
             StringBuilder queryBuilder = new StringBuilder();
             queryBuilder.append("SELECT+");
+            Set<String> keys = new HashSet<String>();
             for (AnalysisItem analysisItem : analysisItems) {
                 String keyString = analysisItem.getKey().toKeyString();
-                queryBuilder.append(keyString);
-                queryBuilder.append(",");
+                boolean alreadyThere = keys.add(keyString);
+                if (alreadyThere) {
+                    queryBuilder.append(keyString);
+                    queryBuilder.append(",");
+                }
             }
             queryBuilder.deleteCharAt(queryBuilder.length() - 1);
             queryBuilder.append("+from+");
@@ -74,8 +112,14 @@ public class SalesforceFeed extends Feed {
                 }
             }
             return dataSet;
+        } catch (ReportException re) {
+            throw re;
         } catch (HttpResponseException hre) {
-            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Salesforce data.", salesforceBaseDataSource));
+            if ("Unauthorized".equals(hre.getMessage())) {
+                throw new AuthFailed();
+            } else {
+                throw new ReportException(new ServerError(hre.getMessage()));
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

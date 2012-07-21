@@ -1,12 +1,12 @@
 package com.easyinsight.salesforce
 {
-import com.easyinsight.administration.feed.ServerDataSourceDefinition;
 import com.easyinsight.customupload.SalesforceDataSourceCreation;
+import com.easyinsight.datasources.CompositeServerDataSource;
 import com.easyinsight.datasources.DataSourceType;
 
 [Bindable]
 	[RemoteClass(alias="com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource")]
-	public class SalesforceFeedDefinition extends ServerDataSourceDefinition
+	public class SalesforceFeedDefinition extends CompositeServerDataSource
 	{
 
     public var accessToken:String;
