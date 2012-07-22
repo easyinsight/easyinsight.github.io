@@ -186,7 +186,12 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             Document doc = runRestRequest(zendeskCompositeSource, httpClient, path, builder);
             Nodes ticketNodes = doc.query("/records/record");
             if (page == 1) {
-                count = Integer.parseInt(doc.query("/records/@count").get(0).getValue());
+                Nodes countNodes = doc.query("/records/@count");
+                if (countNodes.size() == 1) {
+                    count = Integer.parseInt(countNodes.get(0).getValue());
+                } else {
+                    count = 0;
+                }
             }
             for (int i = 0; i < ticketNodes.size(); i++) {
                 DataSet dataSet = new DataSet();
