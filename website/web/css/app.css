@@ -45,3 +45,28 @@ a.dp-choose-date {
     display: block;
     overflow: hidden;
 }
+
+.gaugeBenchmark {
+    text-align: center;
+}
+
+.dashboardReportHeader {
+    text-align: center;
+    height: 30px;
+    font-size: 16px;
+}
+
+.dashboardReportDiv {
+    text-align: center;
+    font-size: 16px;
+}
+
+.argh {
+    color: #333333;
+}
+
+.nav-pills > .active > a,
+.nav-pills > .active > a:hover {
+    color: #ffffff;
+    background-color: #333333;
+}
