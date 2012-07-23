@@ -207,7 +207,7 @@ public class DashboardReport extends DashboardElement {
             }
         }
         sb.append("</div>");
-        sb.append("<div class=\"dashboardReportDiv\" id=\"").append(div).append("\">").append("</div>");
+        sb.append("<div class=\"dashboardReportDiv\" id=\"").append(div).append("\"><div class=\"reportArea\" id=\"").append(div).append("ReportArea\"></div><div class=\"noData\"> There is no data for this report. </div></div>");
         sb.append(reportDefinition.rootHTML());
         /*sb.append("<script type=\"text/javascript\">\n" +
                 "                    $(document).ready(refreshReport('#reportTarget"+report.getId()+"', "+report.getId()+"));\n" +

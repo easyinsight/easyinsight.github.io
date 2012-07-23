@@ -90,6 +90,7 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
         includes.add("/js/visualizations/chart.js");
+        includes.add("/js/visualizations/util.js");
         return includes;
     }
 

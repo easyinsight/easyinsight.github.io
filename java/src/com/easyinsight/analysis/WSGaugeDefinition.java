@@ -224,6 +224,7 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         sb.append("aGauge.props.rangeSegments = ").append(gaugePropertiesString).append(";\n");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
         String xyz = "$.getJSON('/app/gauge?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
+                "$('#" + targetDiv + " .noData').hide();" +
                 "aGauge.refresh(data['value']);\n"+
                 "$('#benchmark" + getUrlKey() + "').html(data['benchmark']);\n"+
                 "afterRefresh();\n"+

@@ -148,6 +148,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
         includes.add("/js/visualizations/chart.js");
+        includes.add("/js/visualizations/util.js");
         return includes;
     }
 
@@ -158,12 +159,6 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
 
-            JSONObject seriesDefaults = new JSONObject();
-            //seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
-            //JSONObject rendererOptions = new JSONObject();
-            //rendererOptions.put("fillToZero", "true");
-            //seriesDefaults.put("rendererOptions", rendererOptions);
-            //jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = new JSONObject();
             grid.put("background", "'#FFFFFF'");
             jsonParams.put("grid", grid);
@@ -185,11 +180,6 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
 
             xAxis.put("tickOptions", xAxisTicketOptions);
             axes.put("xaxis", xAxis);
-            //JSONObject yAxis = new JSONObject();
-            //JSONObject tickOptions = new JSONObject();
-            //tickOptions.put("formatString", "'%d'");
-            //yAxis.put("tickOptions", tickOptions);
-            //axes.put("yaxis", yAxis);
             jsonParams.put("axes", axes);
             JSONObject highlighter = new JSONObject();
             highlighter.put("show", true);
@@ -210,7 +200,6 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
 
         argh = "$.getJSON('/app/twoAxisChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true))";
-        System.out.println(argh);
         return argh;
     }
 }

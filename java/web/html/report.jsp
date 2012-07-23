@@ -80,11 +80,11 @@
         }
 
         #reportTarget {
-            height: 600px;
+            min-height: 600px;
         }
 
         #reportTargetReportArea {
-            height: 600px;
+            min-height: 600px;
         }
 
     </style>
@@ -423,8 +423,10 @@
             <div class="span12">
                 <div class="well" style="background-color: #ffffff">
                     <div id="reportTarget">
-                        <div id="reportTargetReportArea" class="reportArea"></div>
-                        <%= report.rootHTML() %>
+                        <div id="reportTargetReportArea" class="reportArea">
+                            <%= report.rootHTML() %>
+                        </div>
+
                         <div id="chartpseudotooltip"></div>
                         <div class="noData"> There is no data for this report. </div>
                     </div>
