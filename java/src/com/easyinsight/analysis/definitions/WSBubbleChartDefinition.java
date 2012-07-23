@@ -89,6 +89,7 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
         includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        includes.add("/js/visualizations/chart.js");
         return includes;
     }
 
@@ -118,9 +119,7 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        argh = "$.getJSON('/app/bubbleChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {afterRefresh();\n" +
-                "                var s1 = data[\"values\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', [ s1 ], " + argh + ");\n})";
+        argh = "$.getJSON('/app/bubbleChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, Chart.getCallback('"+ targetDiv + "', " + argh + "))";
         System.out.println(argh);
         return argh;
     }

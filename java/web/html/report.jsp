@@ -79,6 +79,14 @@
             display: none;
         }
 
+        #reportTarget {
+            height: 600px;
+        }
+
+        #reportTargetReportArea {
+            height: 600px;
+        }
+
     </style>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet" />
     <link href="/css/app.css" rel="stylesheet" />
@@ -414,9 +422,12 @@
         <div class="row">
             <div class="span12">
                 <div class="well" style="background-color: #ffffff">
-                    <div id="reportTarget"></div>
-                    <%= report.rootHTML() %>
-                    <div id="chartpseudotooltip"></div>
+                    <div id="reportTarget">
+                        <div id="reportTargetReportArea" class="reportArea"></div>
+                        <%= report.rootHTML() %>
+                        <div id="chartpseudotooltip"></div>
+                        <div class="noData"> There is no data for this report. </div>
+                    </div>
                 </div>
             </div>
         </div>

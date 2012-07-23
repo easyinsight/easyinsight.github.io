@@ -97,6 +97,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         List<String> includes = super.javaScriptIncludes();
         includes.add("/js/plugins/jqplot.barRenderer.min.js");
         includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
+        includes.add("/js/visualizations/chart.js");
         return includes;
     }
 
@@ -143,8 +144,10 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         argh = argh.replaceAll("\"", "");
 
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        return "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
-                "                var s1 = data[\"values\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', [s1], " + argh + ");afterRefresh();\n})";
+//        return "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
+//                "                var s1 = data[\"values\"];\n" +
+//                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";
+
+        return "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + "))";
     }
 }

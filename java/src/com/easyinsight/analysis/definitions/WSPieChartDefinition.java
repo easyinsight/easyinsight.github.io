@@ -55,6 +55,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         includes.add("/js/plugins/jqplot.cursor.min.js");
         includes.add("/js/plugins/jqplot.pointLabels.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
+        includes.add("/js/visualizations/chart.js");
         return includes;
     }
 
@@ -91,23 +92,25 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
         System.out.println(argh);
-        String xyz = "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
-                "$('#"+targetDiv+"').empty();\n"+
-                "                var s1 = data[\"values\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', [s1], " + argh + ");";
-        xyz += "$('#"+targetDiv+"').bind('jqplotDataHighlight', function(ev, seriesIndex, pointIndex, data) {\n" +
-                "            var $this = $(this);                \n" +
-                "\n" +
-                "            $this.attr('title', data[0] + \": \" + data[1]);                               \n" +
-                "        }); \n" +
-                "\n" +
-                " $('#"+targetDiv+"').bind('jqplotDataUnhighlight', function(ev, seriesIndex, pointIndex, data) {\n" +
-                "            var $this = $(this);                \n" +
-                "\n" +
-                "            $this.attr('title',\"\"); \n" +
-                " });";
-        xyz += "afterRefresh();\n" +
-                "})";
+//        String xyz = "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
+//                "$('#"+targetDiv+"').empty();\n"+
+//                "                var s1 = data[\"values\"];\n" +
+//                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");";
+//        xyz += "$('#"+targetDiv+"').bind('jqplotDataHighlight', function(ev, seriesIndex, pointIndex, data) {\n" +
+//                "            var $this = $(this);                \n" +
+//                "\n" +
+//                "            $this.attr('title', data[0] + \": \" + data[1]);                               \n" +
+//                "        }); \n" +
+//                "\n" +
+//                " $('#"+targetDiv+"').bind('jqplotDataUnhighlight', function(ev, seriesIndex, pointIndex, data) {\n" +
+//                "            var $this = $(this);                \n" +
+//                "\n" +
+//                "            $this.attr('title',\"\"); \n" +
+//                " });";
+//        xyz += "afterRefresh();\n" +
+//                "})";
+
+        String xyz = "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, Chart.getPieChartCallback('" + targetDiv + "', " + argh + "))";
         return xyz;
     }
 }

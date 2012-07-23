@@ -147,6 +147,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        includes.add("/js/visualizations/chart.js");
         return includes;
     }
 
@@ -197,13 +198,9 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
             JSONObject cursor = new JSONObject();
             cursor.put("show", false);
             jsonParams.put("cursor", cursor);
-            JSONObject legend = new JSONObject();
-            legend.put("show", "true");
-            legend.put("labels", "labels");
             JSONArray seriesColors = new JSONArray(Arrays.asList("'#a6bc59'", "'#597197'", "'#d6ab2a'", "'#d86068'", "'#5d9942'",
                     "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'"));
             jsonParams.put("seriesColors", seriesColors);
-            jsonParams.put("legend", legend);
             params = new JSONObject(jsonParams);
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -211,11 +208,8 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        argh = "$.getJSON('/app/twoAxisChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {afterRefresh();\n" +
-                "$('#"+targetDiv+"').empty();\n"+
-                "                var s1 = data[\"values\"];\n" +
-                "                var labels = data[\"labels\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");\n})";
+
+        argh = "$.getJSON('/app/twoAxisChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true))";
         System.out.println(argh);
         return argh;
     }

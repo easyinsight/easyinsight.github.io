@@ -56,38 +56,26 @@ public class ColumnChartServlet extends HtmlServlet {
 
         for (IRow row : dataSet.getRows()) {
 
-            if (report instanceof WSColumnChartDefinition) {
-                ticks.add(row.getValue(xAxisItem).toString());
-                for (int i = 0; i < measures.size(); i++) {
-                    AnalysisItem measureItem = measures.get(i);
-                    JSONArray array = blahArray.getJSONArray(i);
-                    JSONArray val = new JSONArray();
-                    array.put(val);
+            ticks.add(row.getValue(xAxisItem).toString());
+            for (int i = 0; i < measures.size(); i++) {
+                AnalysisItem measureItem = measures.get(i);
+                JSONArray array = blahArray.getJSONArray(i);
+                JSONArray val = new JSONArray();
+                array.put(val);
+                if (report instanceof WSBarChartDefinition) {
+                    val.put(row.getValue(measureItem).toDouble());
+                    val.put(row.getValue(xAxisItem).toString());
+                } else {
                     val.put(row.getValue(xAxisItem).toString());
                     val.put(row.getValue(measureItem).toDouble());
                 }
-            } else if (report instanceof WSBarChartDefinition) {
-                ticks.add(row.getValue(xAxisItem).toString());
-                for (int i = 0; i < measures.size(); i++) {
-                    AnalysisItem measureItem = measures.get(i);
-                    JSONArray array = blahArray.getJSONArray(i);
-                    array.put(row.getValue(measureItem).toDouble());
-                    array.put(row.getValue(xAxisItem).toString());
-                }
-            } else if (report instanceof WSPieChartDefinition) {
-                ticks.add(row.getValue(xAxisItem).toString());
-                for (int i = 0; i < measures.size(); i++) {
-                    AnalysisItem measureItem = measures.get(i);
-                    JSONArray array = blahArray.getJSONArray(i);
-                    array.put(row.getValue(xAxisItem).toString());
-                    array.put(row.getValue(measureItem).toDouble());
-                }
             }
+
         }
         object.put("ticks", ticks);
 
         object.put("values", blahArray);
-        System.out.println(blahArray);
+        System.out.println(object.toString());
         response.setContentType("application/json");
         response.getOutputStream().write(object.toString().getBytes());
         response.getOutputStream().flush();

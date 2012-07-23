@@ -45,8 +45,9 @@ public class BubbleChartServlet extends HtmlServlet {
 
 
         // object.put("ticks", ticks);
-
-        object.put("values", arrays);
+        JSONArray a = new JSONArray();
+        a.put(arrays);
+        object.put("values", a);
 
         response.setContentType("application/json");
         String argh = object.toString();
