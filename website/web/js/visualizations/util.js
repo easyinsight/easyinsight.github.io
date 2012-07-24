@@ -1,7 +1,8 @@
 Utils = {
     noData:function (data, f, cleanup, target) {
-        cleanup(target);
-        if ((data instanceof Array && data.length > 0) || (typeof data == "object" && Object.keys(data).length > 0)) {
+        if(cleanup)
+            cleanup(target);
+        if ((data instanceof Array && data.length > 0) || (typeof data == "object" && Object.keys(data).length > 0) || typeof data == "number") {
             $("#" + target + " .reportArea").show();
             $("#" + target + " .noData").hide();
             f();

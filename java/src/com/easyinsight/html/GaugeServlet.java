@@ -22,12 +22,15 @@ public class GaugeServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws Exception {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         WSGaugeDefinition gaugeDefinition = (WSGaugeDefinition) report;
-        Value value = dataSet.getRow(0).getValue(gaugeDefinition.getMeasure());
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("value", value.toDouble());
-        if (gaugeDefinition.getBenchmarkMeasure() != null) {
-            jsonObject.put("benchmark", "Benchmark: " + dataSet.getRow(0).getValue(gaugeDefinition.getBenchmarkMeasure()).toDouble());
+        if(dataSet.getRows().size() > 0) {
+            Value value = dataSet.getRow(0).getValue(gaugeDefinition.getMeasure());
+            jsonObject.put("value", value.toDouble());
+            if (gaugeDefinition.getBenchmarkMeasure() != null) {
+                jsonObject.put("benchmark", "Benchmark: " + dataSet.getRow(0).getValue(gaugeDefinition.getBenchmarkMeasure()).toDouble());
+            }
         }
+
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getOutputStream().write(jsonObject.toString().getBytes());
