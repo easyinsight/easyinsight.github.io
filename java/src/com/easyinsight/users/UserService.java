@@ -28,6 +28,8 @@ import java.util.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
@@ -262,14 +264,14 @@ public class UserService {
             Calendar c = Calendar.getInstance();
             c.setTime(new Date());
             c.setTimeInMillis(c.getTimeInMillis() - 172800000L);
-            stmt.setString(1,passwordResetString);
+            stmt.setString(1, passwordResetString);
             stmt.setDate(2, new java.sql.Date(c.getTimeInMillis()));
             ResultSet rs = stmt.executeQuery();
-            if(rs.next() && rs.getString(1).equals(passwordResetString))
+            if (rs.next() && rs.getString(1).equals(passwordResetString))
                 success = true;
             stmt.close();
             conn.commit();
-        } catch(Exception e){
+        } catch (Exception e) {
             conn.rollback();
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -290,14 +292,14 @@ public class UserService {
 
             c.setTime(new Date());
             c.setTimeInMillis(c.getTimeInMillis() - 86400000L);
-            stmt.setString(1,passwordResetValidation);
+            stmt.setString(1, passwordResetValidation);
             stmt.setDate(2, new java.sql.Date(c.getTimeInMillis()));
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 String verifiedResetString = rs.getString(2);
                 if (passwordResetValidation.equals(verifiedResetString)) {
                     List l = s.createQuery("from User where userName = ? and userID = ?").setString(0, username).setLong(1, rs.getLong(1)).list();
-                    if(l.size() == 1) {
+                    if (l.size() == 1) {
                         User u = (User) l.get(0);
                         u.setPassword(PasswordService.getInstance().encrypt(password, u.getHashSalt(), u.getHashType()));
                         s.update(u);
@@ -326,7 +328,7 @@ public class UserService {
             s.flush();
             conn.commit();
             s.close();
-        } catch(Exception e) {
+        } catch (Exception e) {
             conn.rollback();
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -336,19 +338,18 @@ public class UserService {
         }
 
         return success;
-    }    
+    }
 
     public void cancelPaidAccount() {
         long accountID = SecurityUtil.getAccountID();
         Session session = Database.instance().createSession();
         try {
             cancelPaidAccount(accountID, session);
-        } catch(Exception e) {
+        } catch (Exception e) {
             session.getTransaction().rollback();
             LogClass.error(e);
             throw new RuntimeException(e);
-        }
-        finally {
+        } finally {
             session.close();
         }
     }
@@ -359,7 +360,7 @@ public class UserService {
         try {
             User user = (User) session.createQuery("from User where userName = ?").setString(0, username).list().get(0);
             cancelPaidAccount(user.getAccount().getAccountID(), session);
-        } catch(Exception e) {
+        } catch (Exception e) {
             session.getTransaction().rollback();
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -382,7 +383,7 @@ public class UserService {
             Account a = (Account) session.createQuery("from Account where snappCloudId = ?").setString(0, snappCloudId).list().get(0);
             cancelAccount(session, a);
             session.getTransaction().commit();
-        } catch(Exception e) {
+        } catch (Exception e) {
             session.getTransaction().rollback();
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -410,13 +411,11 @@ public class UserService {
             a.setAccountState(Account.CLOSED);
             session.save(a);
             session.getTransaction().commit();
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             session.getTransaction().rollback();
             LogClass.error(e);
             throw new RuntimeException(e);
-        }
-        finally {
+        } finally {
             session.close();
         }
     }
@@ -428,7 +427,7 @@ public class UserService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }    
+    }
 
     public boolean remindPassword(String emailAddress) {
         boolean success;
@@ -454,7 +453,7 @@ public class UserService {
                 insertStatement.setDate(2, new java.sql.Date(new Date().getTime()));
                 insertStatement.setString(3, passwordPrefix);
 
-                if(updateStatement.executeUpdate() == 0)
+                if (updateStatement.executeUpdate() == 0)
                     insertStatement.execute();
 
                 new AccountMemberInvitation().resetPassword(emailAddress, passwordPrefix);
@@ -639,6 +638,7 @@ public class UserService {
         AuthRequest authReq = manager.authenticate(discovered, "");
     }
 */
+
     public void updateUserLabels(String userName, String fullName, String email, String firstName, boolean optIn) {
         User user = retrieveUser().user;
         if (SecurityUtil.getAccountID() != user.getAccount().getAccountID()) {
@@ -667,10 +667,13 @@ public class UserService {
     }
 
     public String updatePassword(String password) {
+
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
-            User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);            
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+            if (user.isInitialSetupDone())
+                throw new RuntimeException("You've already set your password!");
             String encryptedPassword = PasswordService.getInstance().encrypt(password, user.getHashSalt(), user.getHashType());
             user.setPassword(encryptedPassword);
             user.setInitialSetupDone(true);
@@ -687,6 +690,9 @@ public class UserService {
     }
 
     public String updatePassword(String existingPassword, String password) {
+        String error = checkPassword(password);
+        if(error != null)
+            throw new RuntimeException(error);
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
@@ -708,6 +714,32 @@ public class UserService {
         } finally {
             session.close();
         }
+    }
+
+    public static String checkPassword(String password) {
+        String errorString = null;
+        Pattern digits = Pattern.compile("[0-9]");
+        Pattern upperCase = Pattern.compile("[A-Z]");
+        Pattern lowerCase = Pattern.compile("[a-z]");
+        Pattern special = Pattern.compile("[^0-9A-Za-z]");
+        List<Pattern> l = Arrays.asList(digits, upperCase, lowerCase, special);
+        int count = 0;
+        for (Pattern p : l) {
+            Matcher m = p.matcher(password);
+            if (m.find()) {
+                count = count + 1;
+            }
+        }
+        if (count < 2) {
+            errorString = "You must use at least two of the following types of characters: Uppercase, lowercase, digits, and special characters.";
+        } else if (password == null || "".equals(password.trim())) {
+            errorString = "Please enter the new password.";
+        } else if (password.length() < 8) {
+            errorString = "Your password must be at least eight characters.";
+        } else if (password.length() > 20) {
+            errorString = "Your password must be less than twenty characters.";
+        }
+        return errorString;
     }
 
     public long createAccount(UserTransferObject userTransferObject, AccountTransferObject accountTransferObject, String password) {
@@ -796,7 +828,7 @@ public class UserService {
         User user = userTransferObject.toUser();
         user.setAccount(account);
         user.setHashSalt(salt);
-        if(salt == null) {
+        if (salt == null) {
             password = PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256");
         }
         user.setPassword(password);
@@ -810,7 +842,7 @@ public class UserService {
         account.setAccountState(Account.INACTIVE);
         AccountLimits.configureAccount(account);
     }
-   
+
     public void deleteAccount() {
         long accountID = SecurityUtil.getAccountID();
         Session session = Database.instance().createSession();
@@ -946,7 +978,7 @@ public class UserService {
         }
         return userServiceResponse;
     }
-    
+
     public UserServiceResponse htmlEstablish(String token, String userIDString) {
         EIConnection conn = Database.instance().getConnection();
         Session hibernateSession = Database.instance().createSession(conn);
@@ -1054,13 +1086,12 @@ public class UserService {
         try {
             session.getTransaction().begin();
             List results = session.createQuery("from User where userName = ?").setString(0, userName).list();
-            if(results.size() > 0) {
+            if (results.size() > 0) {
                 User user = (User) results.get(0);
                 int state = user.getAccount().getAccountState();
                 delinquent = (state == Account.DELINQUENT || state == Account.CLOSED || state == Account.BILLING_FAILED);
             }
-        }
-        finally {
+        } finally {
             session.close();
         }
         return delinquent;
@@ -1354,7 +1385,7 @@ public class UserService {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM ACCOUNT LEFT JOIN USER_IMAGE ON ACCOUNT.login_image = USER_IMAGE.user_image_id where account.subdomain = ?");
             queryStmt.setString(1, subdomain);
             ResultSet rs = queryStmt.executeQuery();
-            if(rs.next())
+            if (rs.next())
                 bytes = rs.getBytes(1);
             conn.commit();
             return bytes;

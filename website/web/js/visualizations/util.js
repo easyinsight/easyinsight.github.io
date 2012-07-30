@@ -2,7 +2,7 @@ Utils = {
     noData:function (data, f, cleanup, target) {
         if(cleanup)
             cleanup(target);
-        if ((data instanceof Array && data.length > 0) || (typeof data == "object" && Object.keys(data).length > 0) || typeof data == "number") {
+        if ((data instanceof Array && data.length > 0) || (typeof data == "object" && Object.keys(data).length > 0) || typeof data == "number" || (typeof data == "string" && data != "")) {
             $("#" + target + " .reportArea").show();
             $("#" + target + " .noData").hide();
             f();

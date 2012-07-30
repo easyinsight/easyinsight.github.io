@@ -1201,7 +1201,9 @@ public class ExportService {
                 for (i = 0; i < kpiReport.getGroupings().size(); i++) {
                     AnalysisItem grouping = kpiReport.getGroupings().get(i);
                     Value value = trendOutcome.getDimensions().get(grouping.qualifiedName());
+                    sb.append("<td style=\"" +tdStyle + "left\">");
                     sb.append(value);
+                    sb.append("</td>");
                 }
             }
             sb.append("<td style=\""+tdStyle+"left\">").append(trendOutcome.getMeasure().toDisplay()).append("</td>");

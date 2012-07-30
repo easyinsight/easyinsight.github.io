@@ -216,20 +216,8 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
             throw new RuntimeException(e);
         }
         gaugePropertiesString = gaugePropertiesString.replaceAll("\"", "");
-//        sb.append("var aGauge = new AquaGauge('gauge"+getUrlKey()+"');\n");
-//        sb.append("aGauge.props.minValue = 0;\n");
-//        sb.append("aGauge.props.dialSubTitle = '';\n");
-//        sb.append("aGauge.props.dialTitle = '';\n");
-//        sb.append("aGauge.props.maxValue = 1000;\n");
-//        sb.append("aGauge.props.rangeSegments = ").append(gaugePropertiesString).append(";\n");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-//        String xyz = "$.getJSON('/app/gauge?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
-//                "$('#" + targetDiv + " .noData').hide();" +
-//                "aGauge.refresh(data['value']);\n"+
-//                "$('#benchmark" + getUrlKey() + "').html(data['benchmark']);\n"+
-//                "afterRefresh();\n"+
-//                "});\n";
-//        sb.append(xyz);
+
         String sss = "$.getJSON('/app/gauge?reportID="+getAnalysisID()+timezoneOffset+"&' + strParams, Gauge.getCallback('" +targetDiv +"', '" + getUrlKey() + "', " + gaugePropertiesString + "))";
         return sss;
     }

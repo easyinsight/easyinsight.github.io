@@ -781,7 +781,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
     }
 
     public List<String> javaScriptIncludes() {
-        return new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
+        list.add("/js/visualizations/util.js");
+        return list;
     }
 
     public List<String> cssIncludes() {
@@ -790,9 +792,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public String toHTML(String targetDiv) {
         String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
-        return "$.get('/app/htmlExport?reportID="+getAnalysisID()+"&"+timezoneOffset+"&'+ strParams, function(data) {\n" +
-                "                $('#"+targetDiv+" .reportArea').html(data);$('#" + targetDiv + " .noData').hide();afterRefresh();\n" +
-                "            });";
+        return "$.get('/app/htmlExport?reportID="+getAnalysisID()+"&"+timezoneOffset+"&'+ strParams, function(data) { Utils.noData(data, function() { $('#"+targetDiv+" .reportArea').html(data); }, null, '" + targetDiv + "');});";
     }
 
     public String rootHTML() {

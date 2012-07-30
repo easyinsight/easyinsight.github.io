@@ -98,6 +98,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         includes.add("/js/plugins/jqplot.barRenderer.min.js");
         includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         return includes;
     }
 

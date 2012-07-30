@@ -5,6 +5,6 @@
     if (new UserService().remindPassword(email)) {
         response.sendRedirect("forgot.jsp?result=emailed");
     } else {
-        response.sendRedirect("forgot.jsp?result=noEmail");
+        response.sendRedirect("forgot.jsp?result=emailed");
     }
 %>

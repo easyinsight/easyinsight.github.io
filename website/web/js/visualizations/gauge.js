@@ -13,7 +13,7 @@ Gauge = {
                 var aGauge = Gauge.gauges[gaugeKey];
                 aGauge.refresh(data["value"]);
                 $('#benchmark' + gaugeKey).html(data['benchmark']);
-            }, null, target)
+            }, null, target);
         }
     }
 }

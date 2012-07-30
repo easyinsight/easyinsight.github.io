@@ -19,9 +19,12 @@ public class HtmlExportServlet extends HtmlServlet {
                            EIConnection conn, WSAnalysisDefinition report) throws Exception {
         String html;
         try {
-            html = DeliveryScheduledTask.createHTMLTable(conn, report, insightRequestMetadata, true, false);
+            html = DeliveryScheduledTask.createHTMLTable(conn, report, insightRequestMetadata, false, false);
         } catch (ReportException re) {
             html = re.getReportFault().toHTML();
+        }
+        if(html == null) {
+            html = "";
         }
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
