@@ -91,10 +91,8 @@
     <link href="/css/bootstrap-responsive.css" rel="stylesheet" />
     <link href="/css/app.css" rel="stylesheet" />
     <link href="/css/datePicker.css" rel="stylesheet" />
-    <link href="/css/diagram.css" rel="stylesheet" />
     <script type="text/javascript" src="/js/bootstrap.js"></script>
     <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
-    <script type="text/javascript" src="/js/diagram.js"></script>
 
     <%
         List<String> jsIncludes = report.javaScriptIncludes();

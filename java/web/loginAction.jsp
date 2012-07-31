@@ -15,6 +15,7 @@
     if (!userServiceResponse.isSuccessful()) {
         response.sendRedirect("login.jsp?error=true");
     } else {
+        String oldRedirectUrl = (String) session.getAttribute("loginRedirect");
         session.invalidate();
         session = request.getSession(true);
         SecurityUtil.populateSession(session, userServiceResponse);
@@ -43,9 +44,8 @@
                 response.sendRedirect(RedirectUtil.getURL(request, "/app/user/initialUserSetup.jsp"));
             } else {*/
                 String redirectUrl = RedirectUtil.getURL(request, "/app/");
-                if(session.getAttribute("loginRedirect") != null) {
-                   redirectUrl = ((String) session.getAttribute("loginRedirect"));
-                   session.removeAttribute("loginRedirect");
+                if(oldRedirectUrl != null) {
+                   redirectUrl = oldRedirectUrl;
                 }
                 if(urlHash != null)
                    redirectUrl = redirectUrl + urlHash;

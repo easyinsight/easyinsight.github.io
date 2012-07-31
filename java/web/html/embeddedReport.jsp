@@ -343,9 +343,13 @@
         <div class="row">
             <div class="span12">
                 <div class="well" style="background-color: #ffffff">
-                    <div id="reportTarget"></div>
-                    <%= report.rootHTML() %>
-                    <div id="chartpseudotooltip"></div>
+                    <div id="reportTarget">
+                        <div id="reportTargetReportArea" class="reportArea">
+                            <%= report.rootHTML() %>
+                        </div>
+                        <div id="chartpseudotooltip"></div>
+                        <div class="noData"> There is no data for this report. </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -4,6 +4,7 @@ import com.easyinsight.analysis.AnalysisTypes;
 import com.easyinsight.analysis.DiagramLink;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -35,6 +36,16 @@ public class WSDiagramDefinition extends WSKPIDefinition {
     @Override
     public String getDataFeedType() {
         return AnalysisTypes.DIAGRAM;
+    }
+
+    @Override
+    public List<String> javaScriptIncludes() {
+        return Arrays.asList("/js/diagram.js");    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public List<String> cssIncludes() {
+        return Arrays.asList("/css/diagram.css");
     }
 
     @Override
