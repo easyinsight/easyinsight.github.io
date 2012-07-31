@@ -667,7 +667,9 @@ public class UserService {
     }
 
     public String updatePassword(String password) {
-
+        String error = UserService.checkPassword(password);
+        if(error != null)
+            return error;
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
@@ -679,7 +681,7 @@ public class UserService {
             user.setInitialSetupDone(true);
             session.update(user);
             session.getTransaction().commit();
-            return encryptedPassword;
+            return null;
         } catch (Exception e) {
             LogClass.error(e);
             session.getTransaction().rollback();
@@ -691,22 +693,23 @@ public class UserService {
 
     public String updatePassword(String existingPassword, String password) {
         String error = checkPassword(password);
-        if(error != null)
-            throw new RuntimeException(error);
+        if(error != null) {
+            return error;
+        }
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
             User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
             String encryptedExistingPassword = PasswordService.getInstance().encrypt(existingPassword, user.getHashSalt(), user.getHashType());
             if (!encryptedExistingPassword.equals(user.getPassword())) {
-                return null;
+                return "Your old password was not correct.";
             }
             String encryptedPassword = PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256");
             user.setPassword(encryptedPassword);
             user.setHashType("SHA-256");
             session.update(user);
             session.getTransaction().commit();
-            return encryptedPassword;
+            return null;
         } catch (Exception e) {
             LogClass.error(e);
             session.getTransaction().rollback();

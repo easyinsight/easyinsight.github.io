@@ -113,7 +113,7 @@
 
                 <div style="height:450px; width: 575px; float:left">
 
-                    <div style="color:red; font-size:16px;height:25px;padding-top:10px">
+                    <div style="color:red; font-size:16px;height:25px;padding-top:10px;padding-bottom:10px;">
                         <% if (errorString != null) { %>
                         <%= errorString %>
                         <% } %>
@@ -242,7 +242,7 @@
             </div>
         </div>
         <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+            Copyright ï¿½2008-2012 Easy Insight, LLC. All rights reserved.
         </div>
     </div>
 </div>

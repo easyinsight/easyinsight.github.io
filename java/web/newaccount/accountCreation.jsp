@@ -1,14 +1,19 @@
 <%@ page import="java.net.URLEncoder" %>
-<%@ page import="com.easyinsight.users.Account" %><%
+<%@ page import="com.easyinsight.users.Account" %>
+<%@ page import="com.easyinsight.users.UserService" %><%
     String firstName = request.getParameter("firstName");
     String lastName = request.getParameter("lastName");
     String email = request.getParameter("email");
     String company = request.getParameter("company");
     String password = request.getParameter("password");
     String wasSubmit = request.getParameter("wasSubmit");
-    String errorString = null;
+    String errorString = UserService.checkPassword(password);
+
+
     if (wasSubmit != null) {
-        if (firstName == null || "".equals(firstName)) {
+        if(errorString != null) {
+            // fall through
+        } else if (firstName == null || "".equals(firstName)) {
             errorString = "Please specify a first name.";
         } else if (lastName == null || "".equals(lastName)) {
             errorString = "Please specify a last name.";

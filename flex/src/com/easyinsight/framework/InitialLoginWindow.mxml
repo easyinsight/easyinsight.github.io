@@ -42,8 +42,13 @@
         }
 
         private function updated():void {
-            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
-            dispatchEvent(new KPITutorialEvent(KPITutorialEvent.NEXT));
+            var result:String = userService.updatePassword.lastResult as String;
+            if(result == null) {
+                stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+                dispatchEvent(new KPITutorialEvent(KPITutorialEvent.NEXT));
+            } else {
+                Alert.show(result);
+            }
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="login" id="userService">
