@@ -147,6 +147,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        includes.add("/js/plugins/jqplot.enhancedLegendRenderer.min.js");
         includes.add("/js/visualizations/chart.js");
         includes.add("/js/visualizations/util.js");
         return includes;
@@ -181,6 +182,11 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
             xAxis.put("tickOptions", xAxisTicketOptions);
             axes.put("xaxis", xAxis);
             jsonParams.put("axes", axes);
+            JSONObject legend = new JSONObject();
+            legend.put("show", "true");
+            legend.put("placement", "'outsideGrid'");
+            legend.put("location", "'e'");
+            jsonParams.put("legend", legend);
             JSONObject highlighter = new JSONObject();
             highlighter.put("show", true);
             highlighter.put("sizeAdjust", 7.5);
