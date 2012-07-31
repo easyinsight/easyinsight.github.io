@@ -29,7 +29,6 @@
     </style>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
-    <script type="text/javascript" src="/app/owasp.js?OWASP_CSRFTOKEN=<%= session.getAttribute("OWASP_CSRFTOKEN") %>"></script>
 </head>
 <body>
 <%
