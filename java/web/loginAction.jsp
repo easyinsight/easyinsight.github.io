@@ -15,6 +15,8 @@
     if (!userServiceResponse.isSuccessful()) {
         response.sendRedirect("login.jsp?error=true");
     } else {
+        session.invalidate();
+        session = request.getSession(true);
         SecurityUtil.populateSession(session, userServiceResponse);
         if (userServiceResponse.getAccountState() == Account.CLOSED) {
             response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/index.jsp"));
