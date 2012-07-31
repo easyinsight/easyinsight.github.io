@@ -15,6 +15,7 @@
     <meta name="author" content="">
     <title>Easy Insight Sign In</title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="/app/owasp.js"></script>
     <link href="/css/bootstrap.min.css" rel="stylesheet">
 
     <style type="text/css">

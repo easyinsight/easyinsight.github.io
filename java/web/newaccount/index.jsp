@@ -56,6 +56,7 @@
     <script type="text/javascript" src="/js/swfobject.js"></script>
     <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
     <script type="text/javascript" src="/js/startup.js"></script>
+    <script type="text/javascript" src="/app/owasp.js"></script>
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
 </head>

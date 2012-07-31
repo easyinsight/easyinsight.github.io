@@ -24,7 +24,6 @@
     <!--  BEGIN Browser History required section -->
     <script src="history/history.js" language="javascript"></script>
     <!--  END Browser History required section -->
-
     <style>
         body {
             margin: 0px;
