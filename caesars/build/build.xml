@@ -1,8 +1,8 @@
-<project default="caesarswar" basedir="." name="caesarswar">
+<project default="appswar" basedir="." name="caesarswar">
 
     <property name="out.path" value="../out"/>
     <property name="out.classes.path" value="../out/classes"/>
-    <target name="caesarswar">
+    <target name="appswar">
         <mkdir dir="${out.path}"/>
         <mkdir dir="${out.classes.path}"/>
         <javac destdir="${out.classes.path}"
@@ -25,7 +25,7 @@
                         <include name="**/*.jks"/>
                     </fileset>
                 </copy>
-        <war destfile="${out.path}/caesars.war">
+        <war destfile="${out.path}/apps.war">
             <lib dir="../lib" />
             <classes dir="${out.classes.path}" />
             <fileset dir="../web" />

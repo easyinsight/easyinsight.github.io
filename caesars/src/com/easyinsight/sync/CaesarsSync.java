@@ -37,15 +37,15 @@ public class CaesarsSync extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
 
-        super.init(config);    //To change body of overridden methods use File | Settings | File Templates.
-        URL url = getClass().getClassLoader().getResource("password.properties");
+        super.init(config);
+        URL url = getClass().getClassLoader().getResource("passwords.properties");
         Properties properties = new Properties();
         try {
             properties.load(new FileInputStream(new File(url.getFile())));
             username = properties.get("caesars.username").toString();
             password = properties.get("caesars.password").toString();
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
     }
 
@@ -64,6 +64,7 @@ public class CaesarsSync extends HttpServlet {
         @Override
         public void run() {
             try {
+                System.out.println("Starting Caesar's append fields sync.");
                 HttpClient client = new HttpClient();
                 client.getParams().setAuthenticationPreemptive(true);
                 Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
@@ -132,6 +133,7 @@ public class CaesarsSync extends HttpServlet {
 
 
                 dataSourceTarget.flush();
+                System.out.println("Finished Caesar's append fields sync.");
             } catch (Exception e) {
                 e.printStackTrace();
             }
