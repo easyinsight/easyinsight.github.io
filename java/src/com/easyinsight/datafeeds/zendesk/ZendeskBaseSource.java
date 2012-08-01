@@ -70,6 +70,10 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
                     throw new ReportException(new DataSourceConnectivityReportFault("Invalid Zendesk credentials in connecting to " +
                             zendeskCompositeSource.getUrl() + ".",
                             zendeskCompositeSource));
+                } else if (restMethod.getStatusCode() == 404) {
+                    throw new ReportException(new DataSourceConnectivityReportFault("No Zendesk system was found at " +
+                            zendeskCompositeSource.getUrl() + ". If your Zendesk account is using domain mapping, please use the actual Zendesk URL instead of the mapped domain.",
+                            zendeskCompositeSource));
                 }
                 successful = true;
             } catch (Exception e) {

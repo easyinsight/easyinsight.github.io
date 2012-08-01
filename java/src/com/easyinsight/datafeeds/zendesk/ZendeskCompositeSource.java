@@ -153,8 +153,9 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         if(basecampUrl.endsWith("/")) {
             basecampUrl = basecampUrl.substring(0, basecampUrl.length() - 1);
         }
-        if(!(basecampUrl.endsWith(".zendesk.com")))
+        if (!basecampUrl.contains(".")) {
             basecampUrl = basecampUrl + ".zendesk.com";
+        }
         return basecampUrl;
     }
 
