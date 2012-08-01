@@ -283,21 +283,4 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
         batchbookCompositeSource.setBbApiKey(null);
         return batchbookCompositeSource;
     }
-
-    @Override
-    public List<KPI> createKPIs() {
-        List<KPI> kpis = new ArrayList<KPI>();
-        kpis.add(KPIUtil.createKPIWithFilters("Pipeline Value", "credit_card.png", (AnalysisMeasure) findAnalysisItem(BatchbookDealSource.AMOUNT),
-                Arrays.asList((FilterDefinition) new FilterValueDefinition(findAnalysisItem(BatchbookDealSource.STATUS), true, Arrays.asList((Object) "pending"))), KPI.GOOD, 90));
-        kpis.add(KPIUtil.createKPIForDateFilter("Deals Created in the Last 90 Days", "document.png", (AnalysisMeasure) findAnalysisItem(BatchbookDealSource.DEAL_COUNT),
-                (AnalysisDimension) findAnalysisItem(BatchbookDealSource.DEAL_CREATED_AT), MaterializedRollingFilterDefinition.QUARTER, new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
-        kpis.add(KPIUtil.createKPIForDateFilter("Contacts Created in the Last 90 Days", "user.png", (AnalysisMeasure) findAnalysisItem(BatchbookPeopleSource.PERSON_COUNT),
-                (AnalysisDimension) findAnalysisItem(BatchbookPeopleSource.PERSON_CREATED_AT), MaterializedRollingFilterDefinition.QUARTER, new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
-        kpis.add(KPIUtil.createKPIWithFilters("Open Todo Items", "inbox.png", (AnalysisMeasure) findAnalysisItem(BatchbookTodoSource.TODO_COUNT),
-                Arrays.asList((FilterDefinition) new FilterValueDefinition(findAnalysisItem(BatchbookTodoSource.COMPLETE), true, Arrays.asList((Object) "false"))), KPI.GOOD, 90));
-        kpis.add(KPIUtil.createKPIForDateFilter("Deals Won in the Last 90 Days", "symbol_dollar.png", (AnalysisMeasure) findAnalysisItem(BatchbookDealSource.AMOUNT),
-                (AnalysisDimension) findAnalysisItem(BatchbookDealSource.DEAL_UPDATED_AT), MaterializedRollingFilterDefinition.QUARTER,
-                Arrays.asList((FilterDefinition) new FilterValueDefinition(findAnalysisItem(BatchbookDealSource.STATUS), true, Arrays.asList((Object) "won"))), KPI.GOOD, 90));
-        return kpis;
-    }
 }
