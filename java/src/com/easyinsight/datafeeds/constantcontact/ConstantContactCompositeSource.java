@@ -164,30 +164,6 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public List<KPI> createKPIs() {
-        List<KPI> kpis = new ArrayList<KPI>();
-        kpis.add(KPIUtil.createKPIForDateFilter("Emails Sent in the Last 30 Days", "mail.png", (AnalysisMeasure) findAnalysisItem(CCCampaignResultsSource.SENT_COUNT),
-                (AnalysisDimension) findAnalysisItem(CCCampaignResultsSource.EVENT_DATE), MaterializedRollingFilterDefinition.MONTH, new ArrayList<FilterDefinition>(),
-                KPI.GOOD, 30));
-        kpis.add(KPIUtil.createKPIForDateFilter("Emails Opened in the Last 30 Days", "mail.png", (AnalysisMeasure) findAnalysisItem(CCCampaignResultsSource.OPEN_COUNT),
-                (AnalysisDimension) findAnalysisItem(CCCampaignResultsSource.EVENT_DATE), MaterializedRollingFilterDefinition.MONTH, new ArrayList<FilterDefinition>(),
-                KPI.GOOD, 30));
-        kpis.add(KPIUtil.createKPIForDateFilter("Emails Clicked in the Last 30 Days", "mail.png", (AnalysisMeasure) findAnalysisItem(CCCampaignResultsSource.CLICK_COUNT),
-                (AnalysisDimension) findAnalysisItem(CCCampaignResultsSource.EVENT_DATE), MaterializedRollingFilterDefinition.MONTH, new ArrayList<FilterDefinition>(),
-                KPI.GOOD, 30));
-        kpis.add(KPIUtil.createKPIForDateFilter("Contacts Added in the Last 30 Days", "user.png", (AnalysisMeasure) findAnalysisItem(CCContactSource.CONTACT_COUNT),
-                (AnalysisDimension) findAnalysisItem(CCContactSource.CONTACT_CREATED_ON), MaterializedRollingFilterDefinition.MONTH, new ArrayList<FilterDefinition>(),
-                KPI.GOOD, 30));
-        kpis.add(KPIUtil.createKPIForDateFilter("Campaign Open Rate", "check.png", (AnalysisMeasure) findAnalysisItem(CCCampaignResultsSource.OPEN_RATE),
-                (AnalysisDimension) findAnalysisItem(CCCampaignResultsSource.EVENT_DATE), MaterializedRollingFilterDefinition.MONTH, new ArrayList<FilterDefinition>(),
-                KPI.GOOD, 30));
-        kpis.add(KPIUtil.createKPIForDateFilter("Campaign Click Rate", "check.png", (AnalysisMeasure) findAnalysisItem(CCCampaignResultsSource.CLICK_RATE),
-                (AnalysisDimension) findAnalysisItem(CCCampaignResultsSource.EVENT_DATE), MaterializedRollingFilterDefinition.MONTH, new ArrayList<FilterDefinition>(),
-                KPI.GOOD, 30));
-        return kpis;
-    }
-
-    @Override
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
     }
