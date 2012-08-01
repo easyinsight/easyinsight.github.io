@@ -25,11 +25,13 @@ public class ReportHeaderImageServlet extends HttpServlet {
         try {
             Long imageID = Long.parseLong(req.getParameter("imageID"));
             byte[] bytes = new PreferencesService().getImage(imageID);
-            resp.setContentLength(bytes.length);
-            resp.setContentType("image/png");
-            resp.setHeader("Content-disposition","inline; filename=reportHeader.png" );
-            resp.getOutputStream().write(bytes);
-            resp.getOutputStream().flush();
+            if (bytes != null) {
+                resp.setContentLength(bytes.length);
+                resp.setContentType("image/png");
+                resp.setHeader("Content-disposition","inline; filename=reportHeader.png" );
+                resp.getOutputStream().write(bytes);
+                resp.getOutputStream().flush();
+            }
         } finally {
             SecurityUtil.clearThreadLocal();
         }
