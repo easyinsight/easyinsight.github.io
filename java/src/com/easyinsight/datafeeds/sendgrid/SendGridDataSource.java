@@ -145,24 +145,6 @@ public class SendGridDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<KPI> createKPIs() {
-        List<KPI> kpis = new ArrayList<KPI>();
-        kpis.add(KPIUtil.createKPIForDateFilter("Clicks in the Last Week", "user.png", (AnalysisMeasure) findAnalysisItem(SendGridDataSource.CLICKS),
-                (AnalysisDimension) findAnalysisItem(SendGridDataSource.DATE), MaterializedRollingFilterDefinition.LAST_FULL_WEEK,
-                null, KPI.GOOD, 7));
-        kpis.add(KPIUtil.createKPIForDateFilter("Delivered in the Last Week", "user.png", (AnalysisMeasure) findAnalysisItem(SendGridDataSource.DELIVERED),
-                (AnalysisDimension) findAnalysisItem(SendGridDataSource.DATE), MaterializedRollingFilterDefinition.LAST_FULL_WEEK,
-                null, KPI.GOOD, 7));
-        kpis.add(KPIUtil.createKPIForDateFilter("Bounces in the Last Week", "user.png", (AnalysisMeasure) findAnalysisItem(SendGridDataSource.BOUNCES),
-                (AnalysisDimension) findAnalysisItem(SendGridDataSource.DATE), MaterializedRollingFilterDefinition.LAST_FULL_WEEK,
-                null, KPI.GOOD, 7));
-        kpis.add(KPIUtil.createKPIForDateFilter("Opens in the Last Week", "user.png", (AnalysisMeasure) findAnalysisItem(SendGridDataSource.OPENS),
-                (AnalysisDimension) findAnalysisItem(SendGridDataSource.DATE), MaterializedRollingFilterDefinition.LAST_FULL_WEEK,
-                null, KPI.GOOD, 7));
-        return kpis;
-    }
-
-    @Override
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM sendgrid WHERE data_source_id = ?");
