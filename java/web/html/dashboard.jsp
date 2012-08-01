@@ -37,7 +37,7 @@
         Session hibernateSession = Database.instance().createSession();
         try {
             applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), hibernateSession, SecurityUtil.getAccountID());
-            headerStyle = "width:100%;overflow: hidden;padding: 10px;";
+            headerStyle = "width:100%;overflow: hidden;";
         } finally {
             hibernateSession.close();
         }
@@ -182,13 +182,15 @@
 </div>
 <% if (fullBackgroundImage == null) { %>
 <div style="<%= headerStyle %>">
-    <div style="background-color: #FFFFFF;padding: 5px;float:left">
-        <%
+    <div style="padding:10px;float:left">
+        <div style="background-color: #FFFFFF;padding: 5px">
+            <%
 
-            if (headerImageDescriptor != null) {
-                out.println("<img src=\"/app/reportHeader?imageID="+headerImageDescriptor.getId()+"\"/>");
-            }
-        %>
+                if (headerImageDescriptor != null) {
+                    out.println("<img src=\"/app/reportHeader?imageID="+headerImageDescriptor.getId()+"\"/>");
+                }
+            %>
+        </div>
     </div>
     <div style="<%= headerTextStyle %>">
         <%= StringEscapeUtils.escapeHtml(dashboard.getName()) %>

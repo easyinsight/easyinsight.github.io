@@ -40,12 +40,12 @@
         Session hibernateSession = Database.instance().createSession();
         try {
             applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), hibernateSession, SecurityUtil.getAccountID());
-            headerStyle = "width:100%;overflow: hidden;padding: 10px;";
+            headerStyle = "width:100%;overflow: hidden;";
         } finally {
             hibernateSession.close();
         }
         ImageDescriptor headerImageDescriptor = null;
-        String headerTextStyle = "width: 100%;text-align: center;font-size: 14px;padding-top: 10px;";
+        String headerTextStyle = "width: 100%;text-align: center;font-size: 14px;padding-top:10px;";
         if (applicationSkin != null && applicationSkin.isReportHeader()) {
             headerImageDescriptor = applicationSkin.getReportHeaderImage();
             int reportBackgroundColor = applicationSkin.getReportBackgroundColor();
@@ -68,7 +68,6 @@
     <style type="text/css">
         body {
             padding-top: 40px;
-            padding-bottom: 40px;
         }
 
         #refreshDiv {
@@ -79,18 +78,15 @@
             display: none;
         }
 
-        #reportTarget {
-            min-height: 600px;
-        }
-
-        #reportTargetReportArea {
-            min-height: 600px;
-        }
-
     </style>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet" />
     <link href="/css/app.css" rel="stylesheet" />
     <link href="/css/datePicker.css" rel="stylesheet" />
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="/js/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
     <script type="text/javascript" src="/js/bootstrap.js"></script>
     <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
 
@@ -250,7 +246,13 @@
                     strParams += filterValue + "=" + value + "&";
                 }
             }
+            /*if ($('#reportTarget').height() == null) {
+                $('#reportTarget').ready(function() {
+
+                });
+            } else {*/
             <%= report.toHTML("reportTarget") %>
+            //}
         }
 
         function afterRefresh() {
@@ -376,14 +378,16 @@
     </div>
 </div>
 <% if (applicationSkin != null && applicationSkin.isReportHeader()) { %>
-<div style="<%= headerStyle %>">
-    <div style="background-color: #FFFFFF;padding: 5px;float:left">
+<div id="reportHeader" style="<%= headerStyle %>">
+    <div style="padding:10px;float:left">
+    <div style="background-color: #FFFFFF;padding: 5px">
     <%
 
         if (headerImageDescriptor != null) {
             out.println("<img src=\"/app/reportHeader?imageID="+headerImageDescriptor.getId()+"\"/>");
         }
     %>
+    </div>
     </div>
     <div style="<%= headerTextStyle %>">
         <%= StringEscapeUtils.escapeHtml(report.getName()) %>
@@ -426,7 +430,7 @@
                         </div>
 
                         <div id="chartpseudotooltip"></div>
-                        <div class="noData"> There is no data for this report. </div>
+                        <div class="noData">We didn't find any data for the fields and filters that you specified in the report.</div>
                     </div>
                 </div>
             </div>
