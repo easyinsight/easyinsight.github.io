@@ -114,9 +114,11 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
                         String zip = queryField(invoice, "p_code/text()");
                         String country = queryField(invoice, "p_country/text()");
                         String organization = queryField(invoice, "organization/text()");
+                        String notes = queryField(invoice, "notes/text()");
 
                         IRow row = dataSet.createRow();
                         addValue(row, FreshbooksClientSource.FIRST_NAME, firstName, keys);
+                        addValue(row, FreshbooksClientSource.NOTES, notes, keys);
                         addValue(row, FreshbooksClientSource.CLIENT_ID, clientID, keys);
                         addValue(row, FreshbooksClientSource.LAST_NAME, lastName, keys);
                         addValue(row, FreshbooksClientSource.NAME, name, keys);
