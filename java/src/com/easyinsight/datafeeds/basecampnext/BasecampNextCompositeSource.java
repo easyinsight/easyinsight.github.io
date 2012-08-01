@@ -208,6 +208,22 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.BASECAMP_NEXT_PROJECTS, FeedType.BASECAMP_NEXT_CALENDAR, BasecampNextProjectSource.PROJECT_ID, BasecampNextCalendarSource.CALENDAR_EVENT_PROJECT_ID));
     }
 
+    private transient ProjectCache projectCache;
+
+    public ProjectCache getOrCreateProjectCache() throws JSONException {
+        if (projectCache == null) {
+            projectCache = new ProjectCache();
+            projectCache.populate(this);
+        }
+        return projectCache;
+    }
+
+    @Override
+    protected void refreshDone() {
+        super.refreshDone();
+        projectCache = null;
+    }
+
     public Collection<BasecampNextAccount> getBasecampAccounts() {
         try {
             return new InitRetrieval().getAccounts(this);

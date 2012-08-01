@@ -118,10 +118,11 @@ public class BasecampNextCalendarSource extends BasecampNextBaseSource {
                 JSONArray pastEventArray = runJSONRequest("calendars/"+calendarID+"/calendar_events/past.json", (BasecampNextCompositeSource) parentDefinition);
                 parseCalendarEvents(keys, dataSet, calendarID, calendarName, calendarURL, calendarUpdatedAt, pastEventArray, null);
             }
-            JSONArray projectArray = runJSONRequest("projects.json", (BasecampNextCompositeSource) parentDefinition);
-            for (int i = 0; i < projectArray.length(); i++) {
-                JSONObject projectObject = projectArray.getJSONObject(i);
-                String projectID = String.valueOf(projectObject.getInt("id"));
+            BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
+            List<Project> projects = basecampNextCompositeSource.getOrCreateProjectCache().getProjects();
+
+            for (Project project : projects) {
+                String projectID = project.getId();
 
                 try {
                     Object eventObj = runJSONRequest("projects/" + projectID + "/calendar_events.json", (BasecampNextCompositeSource) parentDefinition);

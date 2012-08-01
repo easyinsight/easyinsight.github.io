@@ -140,13 +140,12 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            
 
-            JSONArray jsonArray = runJSONRequest("projects.json", (BasecampNextCompositeSource) parentDefinition);
-            for (int i = 0; i < jsonArray.length(); i++) {
+            BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
+            List<Project> projects = basecampNextCompositeSource.getOrCreateProjectCache().getProjects();
+            for (Project project : projects) {
                 DataSet dataSet = new DataSet();
-                JSONObject projectObject = jsonArray.getJSONObject(i);
-                String projectID = String.valueOf(projectObject.getInt("id"));
+                String projectID = project.getId();
                 JSONArray todoListArray = runJSONRequest("projects/"+projectID+"/todolists.json", (BasecampNextCompositeSource) parentDefinition, lastRefreshDate);
                 if (todoListArray == null) {
                     System.out.println("No need to retrieve todos for " + projectID);

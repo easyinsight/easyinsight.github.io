@@ -63,17 +63,16 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
             DataSet dataSet = new DataSet();
-            JSONArray jsonArray = runJSONRequest("projects.json", (BasecampNextCompositeSource) parentDefinition);
-            for (int i = 0; i < jsonArray.length(); i++) {
+            BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
+            List<Project> projects = basecampNextCompositeSource.getOrCreateProjectCache().getProjects();
+            for (Project project : projects) {
                 IRow row = dataSet.createRow();
-                JSONObject projectObject = jsonArray.getJSONObject(i);
-                row.addValue(keys.get(PROJECT_ID), String.valueOf(projectObject.getInt("id")));
-                row.addValue(keys.get(PROJECT_NAME), projectObject.getString("name"));
-                row.addValue(keys.get(DESCRIPTION), projectObject.getString("description"));
-                row.addValue(keys.get(URL), projectObject.getString("url"));
-                row.addValue(keys.get(UPDATED_AT), format.parseDateTime(projectObject.getString("updated_at")).toDate());
+                row.addValue(keys.get(PROJECT_ID), project.getId());
+                row.addValue(keys.get(PROJECT_NAME), project.getName());
+                row.addValue(keys.get(DESCRIPTION), project.getDescription());
+                row.addValue(keys.get(URL), project.getUrl());
+                row.addValue(keys.get(UPDATED_AT), project.getUpdatedAt());
             }
             return dataSet;
         } catch (ReportException re) {
