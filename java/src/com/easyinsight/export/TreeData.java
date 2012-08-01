@@ -3,8 +3,7 @@ package com.easyinsight.export;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Value;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -41,7 +40,7 @@ public class TreeData {
         return sb.toString();
     }
 
-    private Map<Value, Argh> map = new HashMap<Value, Argh>();
+    private Map<Value, Argh> map = new LinkedHashMap<Value, Argh>();
 
     public void addRow(IRow row) {
         AnalysisItem analysisItem = hierarchy.getHierarchyLevels().get(0).getAnalysisItem();
@@ -62,7 +61,7 @@ public class TreeData {
     }
 
     private class HigherLevel extends Argh {
-        private Map<Value, Argh> map = new HashMap<Value, Argh>();
+        private Map<Value, Argh> map = new LinkedHashMap<Value, Argh>();
         private AnalysisItem level;
         private AnalysisHierarchyItem hierarchy;
         private int index;
@@ -100,6 +99,13 @@ public class TreeData {
         }
 
         public String toHTML() {
+            /*List<Value> values = new ArrayList<Value>(map.keySet());
+            Collections.sort(values, new Comparator<Value>() {
+
+                public int compare(Value value, Value value1) {
+                    return value.toString().compareTo(value1.toString());
+                }
+            });*/
             StringBuilder sb = new StringBuilder();
             sb.append("<tr style=\"").append(trStyle).append("\">");
             String tableStyle = "color:" + textColor + ";background-color:#" + backgroundColor + ";" + tdStyle;
