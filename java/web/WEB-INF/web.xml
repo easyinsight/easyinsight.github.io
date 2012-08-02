@@ -60,7 +60,7 @@
 
     <filter-mapping>
         <filter-name>CSRFGuard</filter-name>
-        <!--<url-pattern>/loginAction.jsp</url-pattern>-->
+        <url-pattern>/loginAction.jsp</url-pattern>
         <url-pattern>/forgotPasswordAction.jsp</url-pattern>
         <url-pattern>/newaccount/accountCreation.jsp</url-pattern>
     </filter-mapping>
@@ -112,7 +112,11 @@
     </listener>
 
     <listener>
-        <listener-class>org.owasp.csrfguard.CsrfGuardListener</listener-class>
+        <listener-class>org.owasp.csrfguard.CsrfGuardServletContextListener</listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>org.owasp.csrfguard.CsrfGuardHttpSessionListener</listener-class>
     </listener>
 
     <servlet>
