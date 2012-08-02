@@ -140,7 +140,7 @@
         </init-param>
         <init-param>
              <param-name>referer-pattern</param-name>
-             <param-value>(.*localhost.*|.*staging\.easy-insight\.com.*|.*www\.easy-insight\.com.*)</param-value>
+             <param-value>((.*localhost.*)|(.*staging\.easy-insight\.com.*)|(.*www\.easy-insight\.com.*))</param-value>
         </init-param>
     </servlet>
 

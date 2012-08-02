@@ -198,6 +198,10 @@
 				result = current.endsWith('.' + target);
 			}
 		}
+
+        if(!result) {
+            result = current.endsWith("easy-insight.com");
+        }
 		
 		return result;
 	}
