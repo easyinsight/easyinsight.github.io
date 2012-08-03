@@ -4,6 +4,7 @@ import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.List;
@@ -105,5 +106,9 @@ public abstract class ConnectionInfo {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void adjustStatement(PreparedStatement statement) {
+
     }
 }

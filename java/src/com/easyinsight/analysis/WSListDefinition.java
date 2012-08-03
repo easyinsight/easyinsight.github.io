@@ -7,6 +7,8 @@ import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.ReportPropertiesIntention;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ListSummaryComponent;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -187,7 +189,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
             int count = dataSet.getRows().size();
             limitsResults = new LimitsResults(count >= listLimitsMetadata.getNumber(), count, listLimitsMetadata.getNumber());
             if (listLimitsMetadata.getAnalysisItem() != null) {
-                dataSet.sort(listLimitsMetadata.getAnalysisItem(), listLimitsMetadata.isTop());    
+                dataSet.sort(listLimitsMetadata.getAnalysisItem(), listLimitsMetadata.isTop());
             }
             dataSet.subset(listLimitsMetadata.getNumber());
         } else {
@@ -214,6 +216,42 @@ public class WSListDefinition extends WSAnalysisDefinition {
     }
 
     @Override
+    public List<String> javaScriptIncludes() {
+        List<String> list = new ArrayList<String>();
+        list.add("/js/visualizations/util.js");
+        list.add("/js/visualizations/list.js");
+        list.add("/js/jquery.dataTables.min.js");
+        list.add("/js/color.js");
+        return list;
+    }
+
+    @Override
+    public List<String> cssIncludes() {
+        return Arrays.asList("/css/jquery.dataTables.css");
+    }
+
+    @Override
+    public String toHTML(String targetDiv) {
+        try {
+            JSONObject analysisItemMap = new JSONObject();
+            for (AnalysisItem i : columns) {
+                if (i.getSortSequence() > 0) {
+                    JSONArray array = new JSONArray();
+                    array.put(String.valueOf(i.getItemPosition()));
+                    array.put(i.getSort() == 2 ? "desc" : "asc");
+                    analysisItemMap.put(String.valueOf(i.getSortSequence()), array);
+                }
+            }
+
+            String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
+
+            return "$.get('/app/htmlExport?reportID=" + getAnalysisID() + "&" + timezoneOffset + "&'+ strParams, List.getCallback('" + targetDiv + "', " + jsonProperties() + ", " + analysisItemMap.toString() +"));";
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         rowColor1 = (int) findNumberProperty(properties, "rowColor1", 0xF7F7F7);
@@ -226,6 +264,22 @@ public class WSListDefinition extends WSAnalysisDefinition {
         summaryRowBackgroundColor = (int) findNumberProperty(properties, "summaryRowBackgroundColor", 0x6699ff);
         rolloverIcon = findBooleanProperty(properties, "rolloverIcon", false);
         multiLineHeaders = findBooleanProperty(properties, "multiLineHeaders", false);
+    }
+
+    public String jsonProperties() {
+
+        JSONObject p = new JSONObject();
+        try {
+            List<ReportProperty> properties = createProperties();
+            populateProperties(properties);
+            for (ReportProperty property : properties) {
+                if (property instanceof ReportNumericProperty)
+                    p.put(property.getPropertyName(), ((ReportNumericProperty) property).getValue());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return p.toString();
     }
 
     public List<ReportProperty> createProperties() {
@@ -242,7 +296,6 @@ public class WSListDefinition extends WSAnalysisDefinition {
         properties.add(new ReportBooleanProperty("multiLineHeaders", multiLineHeaders));
         return properties;
     }
-
 
 
     public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {

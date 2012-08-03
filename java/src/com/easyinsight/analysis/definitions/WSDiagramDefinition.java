@@ -40,7 +40,7 @@ public class WSDiagramDefinition extends WSKPIDefinition {
 
     @Override
     public List<String> javaScriptIncludes() {
-        return Arrays.asList("/js/diagram.js");    //To change body of overridden methods use File | Settings | File Templates.
+        return Arrays.asList("/js/diagram.js","/js/color.js");    //To change body of overridden methods use File | Settings | File Templates.
     }
 
     @Override

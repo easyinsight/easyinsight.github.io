@@ -424,12 +424,14 @@
         <div class="row">
             <div class="span12">
                 <div class="well" style="background-color: #ffffff">
+                    <div id="chartpseudotooltip" style="z-index:100;"></div>
                     <div id="reportTarget">
                         <div id="reportTargetReportArea" class="reportArea">
+
                             <%= report.rootHTML() %>
                         </div>
 
-                        <div id="chartpseudotooltip"></div>
+
                         <div class="noData">We didn't find any data for the fields and filters that you specified in the report.</div>
                     </div>
                 </div>

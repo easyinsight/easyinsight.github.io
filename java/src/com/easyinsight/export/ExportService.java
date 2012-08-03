@@ -2204,6 +2204,7 @@ public class ExportService {
         }
 
         sb.append("<table style=\"").append(tableStyle).append("\">");
+        sb.append("<thead>");
         sb.append("<tr style=\"").append(headerTRStyle).append("\">");
         Map<AnalysisItem, Link> linkMap = new HashMap<AnalysisItem, Link>();
         for (AnalysisItem analysisItem : items) {
@@ -2239,6 +2240,8 @@ public class ExportService {
             }
         }
         sb.append("</tr>");
+        sb.append("</thead>");
+        sb.append("<tbody>");
         for (com.easyinsight.analysis.ListRow listRow : listDataResults.getRows()) {
             sb.append("<tr style=\"").append(trStyle).append("\">");
             for (AnalysisItem analysisItem : items) {
@@ -2322,9 +2325,11 @@ public class ExportService {
             }
             sb.append("</tr>");
         }
+        sb.append("</tbody>");
         if (report.getReportType() == WSAnalysisDefinition.LIST) {
             WSListDefinition list = (WSListDefinition) report;
             if (list.isSummaryTotal()) {
+                sb.append("<tfoot>");
                 sb.append("<tr style=\"").append(summaryTRStyle).append("\">");
                 for (AnalysisItem analysisItem : items) {
                     for (int j = 0; j < listDataResults.getHeaders().length; j++) {
@@ -2366,8 +2371,10 @@ public class ExportService {
                     }
                 }
                 sb.append("</tr>");
+                sb.append("</tfoot>");
             }
         }
+
         sb.append("</table>");
         return sb.toString();
     }
