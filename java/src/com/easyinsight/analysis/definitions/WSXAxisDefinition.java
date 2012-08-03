@@ -1,9 +1,8 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.ReportProperty;
-import com.easyinsight.analysis.ReportStringProperty;
-import com.easyinsight.analysis.WSChartDefinition;
-import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.*;
 

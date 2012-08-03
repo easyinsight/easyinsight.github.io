@@ -4,11 +4,11 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.MinMaxComponent;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -154,5 +154,52 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         List<String> includes = new ArrayList<String>();
         includes.add("/css/jquery.jqplot.min.css");
         return includes;
+    }
+
+    protected JSONObject getLegend() throws JSONException {
+        JSONObject legendObj = new JSONObject();
+        legendObj.put("show", "true");
+        legendObj.put("placement", "'outsideGrid'");
+        legendObj.put("location", "'e'");
+        return legendObj;
+    }
+
+    protected JSONObject getGrid() throws JSONException {
+        JSONObject grid = new JSONObject();
+        grid.put("background", "'#FFFFFF'");
+        return grid;
+    }
+
+    protected JSONArray getSeriesColors() {
+        return new JSONArray(Arrays.asList("'#a6bc59'", "'#597197'", "'#d6ab2a'", "'#d86068'", "'#5d9942'",
+                "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'"));
+    }
+
+    protected JSONObject getMeasureAxis(AnalysisItem analysisItem) throws JSONException {
+        JSONObject yAxis = new JSONObject();
+        yAxis.put("pad", 1.05);
+        yAxis.put("label", "'"+analysisItem.toDisplay()+"'");
+        yAxis.put("labelRenderer", "$.jqplot.CanvasAxisLabelRenderer");
+        yAxis.put("min", 0);
+        JSONObject tickOptions = new JSONObject();
+        if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.CURRENCY) {
+            tickOptions.put("formatter", "$.jqplot.currencyTickNumberFormatter");
+        } else {
+            tickOptions.put("formatter", "$.jqplot.tickNumberFormatter");
+        }
+        yAxis.put("tickOptions", tickOptions);
+        return yAxis;
+    }
+
+    protected JSONObject getGroupingAxis(AnalysisItem analysisItem) throws JSONException {
+        JSONObject xAxis = new JSONObject();
+        xAxis.put("renderer", "$.jqplot.CategoryAxisRenderer");
+
+        xAxis.put("tickRenderer", "$.jqplot.CanvasAxisTickRenderer");
+        xAxis.put("label", "'"+analysisItem.toDisplay()+"'");
+        JSONObject xAxisTicketOptions = new JSONObject();
+        xAxisTicketOptions.put("angle", -15);
+        xAxis.put("tickOptions", xAxisTicketOptions);
+        return xAxis;
     }
 }

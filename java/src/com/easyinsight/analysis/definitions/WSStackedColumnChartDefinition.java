@@ -105,34 +105,6 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         return includes;
     }
 
-    protected JSONObject getMeasureAxis(AnalysisItem analysisItem) throws JSONException {
-        JSONObject yAxis = new JSONObject();
-        yAxis.put("pad", 1.05);
-        yAxis.put("label", "'"+analysisItem.toDisplay()+"'");
-        yAxis.put("labelRenderer", "$.jqplot.CanvasAxisLabelRenderer");
-        yAxis.put("min", 0);
-        JSONObject tickOptions = new JSONObject();
-        if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.CURRENCY) {
-            tickOptions.put("formatter", "$.jqplot.currencyTickNumberFormatter");
-        } else {
-            tickOptions.put("formatter", "$.jqplot.tickNumberFormatter");
-        }
-        yAxis.put("tickOptions", tickOptions);
-        return yAxis;
-    }
-
-    protected JSONObject getGroupingAxis(AnalysisItem analysisItem) throws JSONException {
-        JSONObject xAxis = new JSONObject();
-        xAxis.put("renderer", "$.jqplot.CategoryAxisRenderer");
-
-        xAxis.put("tickRenderer", "$.jqplot.CanvasAxisTickRenderer");
-        xAxis.put("label", "'"+analysisItem.toDisplay()+"'");
-        JSONObject xAxisTicketOptions = new JSONObject();
-        xAxisTicketOptions.put("angle", -15);
-        xAxis.put("tickOptions", xAxisTicketOptions);
-        return xAxis;
-    }
-
     @Override
     public String toHTML(String targetDiv) {
 
