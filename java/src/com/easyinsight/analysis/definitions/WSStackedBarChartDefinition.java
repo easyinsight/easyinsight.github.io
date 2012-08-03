@@ -121,11 +121,10 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
             seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
             JSONObject rendererOptions = new JSONObject();
             rendererOptions.put("barDirection", "'horizontal'");
-            //rendererOptions.put("fillToZero", "true");
+            rendererOptions.put("fillToZero", "true");
             seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
-            JSONObject grid = new JSONObject();
-            grid.put("background", "'#FFFFFF'");
+            JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
             JSONObject axes = new JSONObject();
             JSONObject xAxis = new JSONObject();

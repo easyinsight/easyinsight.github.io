@@ -75,11 +75,9 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
             JSONObject legend = new JSONObject();
             legend.put("show", "true");
             jsonParams.put("legend", legend);
-            JSONObject grid = new JSONObject();
-            grid.put("background", "'#FFFFFF'");
+            JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
-            JSONArray seriesColors = new JSONArray(Arrays.asList("'#a6bc59'", "'#597197'", "'#d6ab2a'", "'#d86068'", "'#5d9942'",
-                    "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'"));
+            JSONArray seriesColors = getSeriesColors();
             jsonParams.put("seriesColors", seriesColors);
             params = new JSONObject(jsonParams);
         } catch (JSONException e) {

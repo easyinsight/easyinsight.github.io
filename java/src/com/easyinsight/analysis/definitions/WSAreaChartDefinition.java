@@ -76,8 +76,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
             //rendererOptions.put("fillToZero", "true");
             //seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
-            JSONObject grid = new JSONObject();
-            grid.put("background", "'#FFFFFF'");
+            JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
             JSONObject axes = new JSONObject();
             JSONObject xAxis = new JSONObject();

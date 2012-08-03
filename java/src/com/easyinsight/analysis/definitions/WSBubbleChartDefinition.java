@@ -110,8 +110,7 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
             seriesDefaults.put("rendererOptions", rendererOptions);
             seriesDefaults.put("shadow", true);
             jsonParams.put("seriesDefaults", seriesDefaults);
-            JSONObject grid = new JSONObject();
-            grid.put("background", "'#FFFFFF'");
+            JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
             params = new JSONObject(jsonParams);
         } catch (JSONException e) {

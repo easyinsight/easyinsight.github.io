@@ -160,8 +160,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
 
-            JSONObject grid = new JSONObject();
-            grid.put("background", "'#FFFFFF'");
+            JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
             JSONObject axes = new JSONObject();
             JSONObject xAxis = new JSONObject();
@@ -182,10 +181,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
             xAxis.put("tickOptions", xAxisTicketOptions);
             axes.put("xaxis", xAxis);
             jsonParams.put("axes", axes);
-            JSONObject legend = new JSONObject();
-            legend.put("show", "true");
-            legend.put("placement", "'outsideGrid'");
-            legend.put("location", "'e'");
+            JSONObject legend = getLegend();
             jsonParams.put("legend", legend);
             JSONObject highlighter = new JSONObject();
             highlighter.put("show", true);
@@ -194,8 +190,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
             JSONObject cursor = new JSONObject();
             cursor.put("show", false);
             jsonParams.put("cursor", cursor);
-            JSONArray seriesColors = new JSONArray(Arrays.asList("'#a6bc59'", "'#597197'", "'#d6ab2a'", "'#d86068'", "'#5d9942'",
-                    "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'"));
+            JSONArray seriesColors = getSeriesColors();
             jsonParams.put("seriesColors", seriesColors);
             params = new JSONObject(jsonParams);
         } catch (JSONException e) {
