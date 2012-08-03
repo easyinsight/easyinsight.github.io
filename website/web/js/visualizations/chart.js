@@ -4,14 +4,21 @@ Chart = {
             Utils.noData(data["values"].flatten(), function () {
                 if (showLabels) {
                     var labels = data["labels"];
-                    params.legend = {show:true, labels:labels};
+                    params.legend = $.extend({}, params.legend, {show:true, labels:labels});
                 }
+
+                var height = $(document).height() - 40 - $('#filterRow').height() - $('#reportHeader').height() - 60;
                 var s1 = data["values"];
-                var plot1 = $.jqplot(target + 'ReportArea', s1, params);
-                Chart.charts[target] = plot1
+                var selector = "#" + target;
+                var selector2 = "#" + target + 'ReportArea';
+                $(selector).height(height);
+                $(selector2).height(height);
                 if (extras) {
                     extras(data);
                 }
+                var plot1 = $.jqplot(target + 'ReportArea', s1, params);
+                Chart.charts[target] = plot1;
+
             }, Chart.cleanup, target);
         };
     },
@@ -25,6 +32,21 @@ Chart = {
         }
     },
 
+    getStackedBarChart:function (target, params) {
+        return Chart.getCallback(target, params, true, function (data) {
+            var series = data["series"];
+            params.series = series;
+            params.axes.yaxis.ticks = data["ticks"];
+        })
+    },
+
+    getStackedColumnChart:function (target, params) {
+        return Chart.getCallback(target, params, true, function (data) {
+            var series = data["series"];
+            params.series = series;
+            params.axes.xaxis.ticks = data["ticks"];
+        })
+    },
 
     getColumnChartCallback:function (target, params) {
         return Chart.getCallback(target, params, false, function (data) {
@@ -73,4 +95,24 @@ Chart = {
         $this.attr('title', "");
     }
 
-}
+};
+
+(function($) {
+    $.jqplot.tickNumberFormatter = function (format, val) {
+        return numberWithCommas($.jqplot.sprintf(format, val));
+    };
+
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
+    }
+})(jQuery);
+
+(function($) {
+    $.jqplot.currencyTickNumberFormatter = function (format, val) {
+        return "$" + numberWithCommas($.jqplot.sprintf(format, val));
+    };
+
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
+    }
+})(jQuery);

@@ -2137,10 +2137,6 @@ public class ExportService {
 
     public static String treeReportToHTMLTable(WSAnalysisDefinition report, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
 
-        for (IRow row : dataSet.getRows()) {
-
-        }
-
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
 
         StringBuilder sb = new StringBuilder();
@@ -2206,6 +2202,7 @@ public class ExportService {
         if (includeTitle && report.getName() != null) {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(report.getName()).append("</h0>").append("</div>");
         }
+
         sb.append("<table style=\"").append(tableStyle).append("\">");
         sb.append("<tr style=\"").append(headerTRStyle).append("\">");
         Map<AnalysisItem, Link> linkMap = new HashMap<AnalysisItem, Link>();
@@ -2291,7 +2288,7 @@ public class ExportService {
                             } else if (defaultLink instanceof DrillThrough) {
                                 StringBuilder paramBuilder = new StringBuilder();
                                 DrillThrough drillThrough = (DrillThrough) defaultLink;
-                                paramBuilder.append("drillThrough('reportID=").append(report.getAnalysisID()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
+                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
                                 for (AnalysisItem dataItem : items) {
                                     for (int k = 0; k < listDataResults.getHeaders().length; k++) {
                                         AnalysisItem dataHeaderItem = listDataResults.getHeaders()[k];

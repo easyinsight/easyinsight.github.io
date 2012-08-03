@@ -146,6 +146,6 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
 
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
 
-        return "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + "))";
+        return "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + "))";
     }
 }

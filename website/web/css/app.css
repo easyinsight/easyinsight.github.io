@@ -70,3 +70,8 @@ a.dp-choose-date {
     color: #ffffff;
     background-color: #333333;
 }
+
+#reportTargetReportArea table.jqplot-table-legend {
+    width:auto;
+    max-width: none;
+}

@@ -98,6 +98,8 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        includes.add("/js/visualizations/chart.js");
+        includes.add("/js/visualizations/util.js");
         return includes;
     }
 
@@ -112,7 +114,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
             legendObj.put("placement", "'outside'");
             legendObj.put("location", "'e'");
             jsonParams.put("legend", legendObj);
-            jsonParams.put("series", "data['series']");
+            //jsonParams.put("series", "data['series']");
             jsonParams.put("stackSeries", "true");
             //jsonParams.put("seriesColors", new JSONArray(Arrays.asList("'" + color + "'")));
             JSONObject seriesDefaults = new JSONObject();
@@ -132,7 +134,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
             JSONObject xAxisTicketOptions = new JSONObject();
             xAxisTicketOptions.put("angle", -15);
             xAxis.put("tickOptions", xAxisTicketOptions);
-            xAxis.put("ticks", "data['ticks']");
+            //xAxis.put("ticks", "data['ticks']");
             axes.put("yaxis", xAxis);
             JSONObject yAxis = new JSONObject();
             yAxis.put("pad", 1.05);
@@ -148,8 +150,10 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        return "$.getJSON('/app/stackedChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
+        String xyz = "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getStackedBarChart('"+ targetDiv + "', " + argh + "))";
+        /*return "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {\n" +
                 "                var s1 = data[\"values\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";
+                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";*/
+        return xyz;
     }
 }

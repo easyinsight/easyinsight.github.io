@@ -99,7 +99,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
         argh = argh.replaceAll("\"", "");
 
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        argh = "$.getJSON('/app/twoAxisChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {afterRefresh();\n" +
+        argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {afterRefresh();\n" +
                 "                var s1 = data[\"values\"];\n" +
                 "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");\n})";
         System.out.println(argh);

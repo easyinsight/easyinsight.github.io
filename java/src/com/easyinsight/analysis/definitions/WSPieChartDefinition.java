@@ -89,7 +89,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
 
-        String xyz = "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, Chart.getPieChartCallback('" + targetDiv + "', " + argh + "))";
+        String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getPieChartCallback('" + targetDiv + "', " + argh + "))";
         return xyz;
     }
 }

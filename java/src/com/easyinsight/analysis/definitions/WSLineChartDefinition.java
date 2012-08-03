@@ -205,7 +205,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
 
-        argh = "$.getJSON('/app/twoAxisChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true))";
+        argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true))";
         return argh;
     }
 }

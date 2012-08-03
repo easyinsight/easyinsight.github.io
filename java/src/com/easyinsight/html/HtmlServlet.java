@@ -28,10 +28,16 @@ public class HtmlServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        long reportID = Long.parseLong(req.getParameter("reportID"));
+        String reportIDString = req.getParameter("reportID");
         SecurityUtil.populateThreadLocalFromSession(req);
         try {
-            SecurityUtil.authorizeInsight(reportID);
+            InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
+            long reportID;
+            if (insightResponse.getStatus() == InsightResponse.SUCCESS) {
+                reportID = insightResponse.getInsightDescriptor().getId();
+            } else {
+                throw new com.easyinsight.security.SecurityException();
+            }
             EIConnection conn = Database.instance().getConnection();
             try {
                 WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(reportID);

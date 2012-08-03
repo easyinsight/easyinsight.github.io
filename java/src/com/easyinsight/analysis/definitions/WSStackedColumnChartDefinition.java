@@ -98,7 +98,10 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         includes.add("/js/plugins/jqplot.barRenderer.min.js");
         includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
+        includes.add("/js/visualizations/chart.js");
+        includes.add("/js/visualizations/util.js");
         return includes;
     }
 
@@ -110,17 +113,14 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
             JSONObject legendObj = new JSONObject();
             legendObj.put("show", "true");
-            legendObj.put("placement", "'outside'");
+            legendObj.put("placement", "'outsideGrid'");
             legendObj.put("location", "'e'");
             jsonParams.put("legend", legendObj);
-            jsonParams.put("series", "data['series']");
             jsonParams.put("stackSeries", "true");
-            //jsonParams.put("seriesColors", new JSONArray(Arrays.asList("'" + color + "'")));
             JSONObject seriesDefaults = new JSONObject();
             seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
             JSONObject rendererOptions = new JSONObject();
             rendererOptions.put("barDirection", "'vertical'");
-            //rendererOptions.put("fillToZero", "true");
             seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = new JSONObject();
@@ -130,18 +130,23 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
             JSONObject xAxis = new JSONObject();
             xAxis.put("renderer", "$.jqplot.CategoryAxisRenderer");
             xAxis.put("tickRenderer", "$.jqplot.CanvasAxisTickRenderer");
+            xAxis.put("label", "'"+getXaxis().toDisplay()+"'");
             JSONObject xAxisTicketOptions = new JSONObject();
             xAxisTicketOptions.put("angle", -15);
             xAxis.put("tickOptions", xAxisTicketOptions);
-            xAxis.put("ticks", "data['ticks']");
             axes.put("xaxis", xAxis);
             JSONObject yAxis = new JSONObject();
             yAxis.put("pad", 1.05);
+            yAxis.put("label", "'"+getMeasures().get(0).toDisplay() +"'");
+            yAxis.put("labelRenderer", "$.jqplot.CanvasAxisLabelRenderer");
             JSONObject tickOptions = new JSONObject();
-            tickOptions.put("formatString", "'%d'");
+            tickOptions.put("formatter", "$.jqplot.currencyTickNumberFormatter");
             yAxis.put("tickOptions", tickOptions);
             axes.put("yaxis", yAxis);
             jsonParams.put("axes", axes);
+            JSONArray seriesColors = new JSONArray(Arrays.asList("'#a6bc59'", "'#597197'", "'#d6ab2a'", "'#d86068'", "'#5d9942'",
+                    "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'"));
+            jsonParams.put("seriesColors", seriesColors);
             params = new JSONObject(jsonParams);
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -149,8 +154,10 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        return "$.getJSON('/app/stackedChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, function(data) {\n" +
+        String xyz = "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getStackedColumnChart('"+ targetDiv + "', " + argh + "))";
+        /*return "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {\n" +
                 "                var s1 = data[\"values\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";
+                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";*/
+        return xyz;
     }
 }

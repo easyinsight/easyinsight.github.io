@@ -103,6 +103,11 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
     }
 
     @Override
+    public String rootHTML() {
+        return "<div id=\"chartpseudotooltip\"></div>";
+    }
+
+    @Override
     public String toHTML(String targetDiv) {
         String color;
         if (useChartColor) {
@@ -146,7 +151,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String xyz = "$.getJSON('/app/columnChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, Chart.getColumnChartCallback('"+ targetDiv + "', " + argh + "))";
+        String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getColumnChartCallback('"+ targetDiv + "', " + argh + "))";
 
         return xyz;
     }
