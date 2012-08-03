@@ -40,17 +40,18 @@
                 tokenCookie.setMaxAge(60 * 60 * 24 * 30);
                 response.addCookie(tokenCookie);
             }
-            /*if (userServiceResponse.isFirstLogin()) {
+            if (userServiceResponse.isFirstLogin()) {
                 response.sendRedirect(RedirectUtil.getURL(request, "/app/user/initialUserSetup.jsp"));
-            } else {*/
+            } else {
                 String redirectUrl = RedirectUtil.getURL(request, "/app/");
+                System.out.println("Redirect url = " + oldRedirectUrl);
                 if(oldRedirectUrl != null) {
                    redirectUrl = oldRedirectUrl;
                 }
                 if(urlHash != null)
                    redirectUrl = redirectUrl + urlHash;
                 response.sendRedirect(redirectUrl);
-            //}
+            }
         }
     }
 %>

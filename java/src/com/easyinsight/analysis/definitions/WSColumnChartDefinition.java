@@ -96,6 +96,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         includes.add("/js/plugins/jqplot.barRenderer.min.js");
         includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
+        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
         includes.add("/js/visualizations/chart.js");
         includes.add("/js/visualizations/util.js");
@@ -119,7 +120,13 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         JSONObject params;
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
-            jsonParams.put("seriesColors", new JSONArray(Arrays.asList("'" + color + "'")));
+            if (getMeasures().size() == 1) {
+                jsonParams.put("seriesColors", new JSONArray(Arrays.asList("'" + color + "'")));
+            } else {
+                JSONArray seriesColors = getSeriesColors();
+                jsonParams.put("seriesColors", seriesColors);
+                jsonParams.put("legend", getLegend());
+            }
             JSONObject seriesDefaults = new JSONObject();
             seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
             JSONObject rendererOptions = new JSONObject();
@@ -129,19 +136,9 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
             JSONObject axes = new JSONObject();
-            JSONObject xAxis = new JSONObject();
-            xAxis.put("renderer", "$.jqplot.CategoryAxisRenderer");
-            xAxis.put("tickRenderer", "$.jqplot.CanvasAxisTickRenderer");
-            JSONObject xAxisTicketOptions = new JSONObject();
-            xAxisTicketOptions.put("angle", -15);
-            xAxis.put("tickOptions", xAxisTicketOptions);
+            JSONObject xAxis = getGroupingAxis(getXaxis());
             axes.put("xaxis", xAxis);
-            JSONObject yAxis = new JSONObject();
-            yAxis.put("pad", 1.05);
-            JSONObject tickOptions = new JSONObject();
-            tickOptions.put("formatString", "'%d'");
-            yAxis.put("tickOptions", tickOptions);
-            axes.put("yaxis", yAxis);
+            axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
             jsonParams.put("axes", axes);
             params = new JSONObject(jsonParams);
         } catch (JSONException e) {

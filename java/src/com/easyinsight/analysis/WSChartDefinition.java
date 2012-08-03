@@ -196,6 +196,7 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         xAxis.put("renderer", "$.jqplot.CategoryAxisRenderer");
 
         xAxis.put("tickRenderer", "$.jqplot.CanvasAxisTickRenderer");
+        xAxis.put("labelRenderer", "$.jqplot.CanvasAxisLabelRenderer");
         xAxis.put("label", "'"+analysisItem.toDisplay()+"'");
         JSONObject xAxisTicketOptions = new JSONObject();
         xAxisTicketOptions.put("angle", -15);

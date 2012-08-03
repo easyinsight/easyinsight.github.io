@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -123,6 +124,8 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
             axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
             axes.put("xaxis", getGroupingAxis(getYaxis()));
             jsonParams.put("axes", axes);
+            JSONArray seriesColors = getSeriesColors();
+            jsonParams.put("seriesColors", seriesColors);
             params = new JSONObject(jsonParams);
         } catch (JSONException e) {
             throw new RuntimeException(e);

@@ -86,7 +86,7 @@
     <!--[if lt IE 9]>
     <script src="/js/html5.js"></script>
     <![endif]-->
-    <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
+    <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->
     <script type="text/javascript" src="/js/bootstrap.js"></script>
     <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
 
