@@ -243,6 +243,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.HIGHRISE_CASE_NOTES);
         feedTypes.add(FeedType.HIGHRISE_DEAL_NOTES);
         feedTypes.add(FeedType.HIGHRISE_CASE_JOIN);
+        feedTypes.add(FeedType.HIGHRISE_ACTIVITIES);
         return feedTypes;
     }
 
