@@ -39,7 +39,7 @@ public class HighRiseActivitySource extends HighRiseBaseSource {
     public static final String COUNT = "Activity Count";
 
     public HighRiseActivitySource() {
-        setFeedName("Activitys");
+        setFeedName("Activities");
     }
 
     @NotNull
