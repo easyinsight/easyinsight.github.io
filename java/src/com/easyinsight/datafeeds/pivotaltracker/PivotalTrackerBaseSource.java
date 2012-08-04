@@ -85,15 +85,6 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         this.ptPassword = ptPassword;
     }
 
-    @Override
-    public List<KPI> createKPIs() {
-        List<KPI> kpis = new ArrayList<KPI>();
-        FilterValueDefinition filterValueDefinition = new FilterValueDefinition(findAnalysisItem(PivotalTrackerBaseSource.ITERATION_STATE), true, Arrays.asList((Object)"Current"));
-        kpis.add(KPIUtil.createKPIWithFilters("Stories Remaining in Current Iterations", "user.png", (AnalysisMeasure) findAnalysisItem(PivotalTrackerBaseSource.STORY_COUNT),
-                Arrays.asList((FilterDefinition) filterValueDefinition), KPI.BAD, 7));
-        return kpis;
-    }
-
     protected String getToken(String userName, String password) throws IOException, ParsingException {
         HttpClient client = new HttpClient();
         client.getParams().setAuthenticationPreemptive(true);
