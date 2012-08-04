@@ -126,6 +126,38 @@ public class DataStorage implements IDataStorage {
         return writeConnection(feedDefinition, conn, accountID, false);
     }
 
+    public static TempStorage existingTempConnection(FeedDefinition feedDefinition, EIConnection conn, String tableName) {
+        Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
+        List<AnalysisItem> cachedCalculations = new ArrayList<AnalysisItem>();
+        for (AnalysisItem analysisItem : feedDefinition.getFields()) {
+            if (!analysisItem.persistable()) {
+                continue;
+            }
+            if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
+                if (analysisCalculation.isCachedCalculation()) {
+                    cachedCalculations.add(analysisCalculation);
+                }
+            }
+            Key key = analysisItem.getKey();
+            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
+            } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+            } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
+            } else {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
+            }
+        }
+        List<IDataTransform> transforms = new ArrayList<IDataTransform>();
+        if (cachedCalculations.size() > 0) {
+            transforms.add(new CachedCalculationTransform(feedDefinition));
+        }
+        Database database = DatabaseManager.instance().getDatabase(getMetadata(feedDefinition.getDataFeedID(), conn).getDatabase());
+        return new TempStorage(keyMetadatas, database, tableName);
+    }
+
     public static TempStorage tempConnection(FeedDefinition feedDefinition, EIConnection conn) {
         Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
         List<AnalysisItem> cachedCalculations = new ArrayList<AnalysisItem>();
@@ -346,6 +378,8 @@ public class DataStorage implements IDataStorage {
                     dataSourceType == FeedType.BASECAMP.getType() || dataSourceType == FeedType.CONSTANT_CONTACT_CONTACT_TO_CONTACT_LIST.getType() ||
                     dataSourceType == FeedType.CONSTANT_CONTACT_CAMPAIGN_RESULTS.getType() || dataSourceType == FeedType.QUICKBASE_CHILD.getType()) {
                 return dataLength;
+            } else if (dataSourceType == FeedType.HIGHRISE_ACTIVITIES.getType()) {
+                return 0;
             }
             return dataLength + indexLength;
         } else {
