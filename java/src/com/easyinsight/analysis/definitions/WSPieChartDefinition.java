@@ -72,9 +72,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
             rendererOptions.put("showDataLabels", "true");
             seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
-            JSONObject legend = new JSONObject();
-            legend.put("show", "true");
-            jsonParams.put("legend", legend);
+            jsonParams.put("legend", getLegend());
             JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
             JSONArray seriesColors = getSeriesColors();

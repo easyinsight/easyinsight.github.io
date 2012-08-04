@@ -147,6 +147,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
         includes.add("/js/plugins/jqplot.enhancedLegendRenderer.min.js");
         includes.add("/js/visualizations/chart.js");
         includes.add("/js/visualizations/util.js");
@@ -163,29 +164,34 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
             JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
             JSONObject axes = new JSONObject();
-            JSONObject xAxis = new JSONObject();
+            JSONObject xAxis = getGroupingAxis(getXaxis());
             xAxis.put("renderer", "$.jqplot.DateAxisRenderer");
 
-            JSONObject xAxisTicketOptions = new JSONObject();
+            JSONObject xAxisTickOptions = xAxis.getJSONObject("tickOptions");
             AnalysisDateDimension date = (AnalysisDateDimension) this.getXaxis();
             if (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
-                xAxisTicketOptions.put("formatString", "'%b %#d'");
+                xAxisTickOptions.put("formatString", "'%b %#d'");
             } else if (date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
-                xAxisTicketOptions.put("formatString", "'%b'");
+                xAxisTickOptions.put("formatString", "'%b'");
             } else if (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
-                xAxisTicketOptions.put("formatString", "'%b'");
+                xAxisTickOptions.put("formatString", "'%b'");
             } else {
-                xAxisTicketOptions.put("formatString", "'%b %#d'");
+                xAxisTickOptions.put("formatString", "'%b %#d'");
             }
 
-            xAxis.put("tickOptions", xAxisTicketOptions);
+            xAxis.put("tickOptions", xAxisTickOptions);
             axes.put("xaxis", xAxis);
+            if (getMeasure() != null) {
+                axes.put("yaxis", getMeasureAxis(getMeasure()));
+            }
+
             jsonParams.put("axes", axes);
             JSONObject legend = getLegend();
             jsonParams.put("legend", legend);
             JSONObject highlighter = new JSONObject();
             highlighter.put("show", true);
             highlighter.put("sizeAdjust", 7.5);
+            highlighter.put("useAxesFormatters", "true");
             jsonParams.put("highlighter", highlighter);
             JSONObject cursor = new JSONObject();
             cursor.put("show", false);
