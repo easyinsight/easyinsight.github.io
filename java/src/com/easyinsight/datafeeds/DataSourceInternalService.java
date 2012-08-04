@@ -9,6 +9,7 @@ import com.easyinsight.storage.DataStorage;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,16 +24,20 @@ public class DataSourceInternalService {
     public void updateComposites(FeedDefinition feedDefinition, Connection conn) throws Exception {
         PreparedStatement stmt = conn.prepareStatement("SELECT COMPOSITE_FEED.data_feed_id FROM COMPOSITE_NODE, COMPOSITE_FEED WHERE COMPOSITE_NODE.DATA_FEED_ID = ? AND " +
                 "COMPOSITE_NODE.composite_feed_id = COMPOSITE_FEED.composite_feed_id");
+        List<Long> ids = new ArrayList<Long>();
         stmt.setLong(1, feedDefinition.getDataFeedID());
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
             long parentDataSourceID = rs.getLong(1);
+            ids.add(parentDataSourceID);
+        }
+        stmt.close();
+        for (Long parentDataSourceID : ids) {
             CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feedStorage.getFeedDefinitionData(parentDataSourceID, conn);
             compositeFeedDefinition.populateFields(conn);
             feedStorage.updateDataFeedConfiguration(compositeFeedDefinition, conn);
             updateComposites(compositeFeedDefinition, conn);
         }
-        stmt.close();
     }
 
     public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn) throws Exception {

@@ -173,20 +173,10 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
             this.compositeFeedNodes = nodes;
             this.connections = edges;
+            nameStmt.close();
             queryConnStmt.close();
-
-            Session session = Database.instance().createSession(conn);
-            PreparedStatement queryFieldStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM_ID, CHILD_SOURCE_ID FROM DATA_SOURCE_TO_UNIQUE_FIELD WHERE DATA_SOURCE_ID = ?");
-            queryFieldStmt.setLong(1, getDataFeedID());
-            ResultSet fieldRS = queryFieldStmt.executeQuery();
-            while (fieldRS.next()) {
-                long uniqueID = fieldRS.getLong(1);
-                long childSourceID = fieldRS.getLong(2);
-                AnalysisItem uniqueItem = (AnalysisItem) session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, uniqueID).list().get(0);
-                uniqueItem.afterLoad();
-                uniqueFields.put(childSourceID, uniqueItem);
-            }
-            session.close();
+        } else {
+            getCustomFeedIDStmt.close();
         }
     }
 
