@@ -229,7 +229,6 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
 
         accessToken = response.getAccessToken();
         refreshToken = response.getRefreshToken();
-        System.out.println("updated access token to " + accessToken + " and refresh token to " + refreshToken);
     }
 
     @Override
@@ -283,21 +282,6 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
             setRefreshToken(rs.getString(5));
         }
         statement.close();
-    }
-
-    @Override
-    public List<KPI> createKPIs() {
-        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
-        rollingFilterDefinition.setField(findAnalysisItem(HarvestInvoiceSource.ISSUED_AT));
-        rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.QUARTER);
-        List<KPI> kpis = new ArrayList<KPI>();
-        kpis.add(KPIUtil.createKPIWithFilters("Invoiced Dollars in the Last 90 Days", "document.png", (AnalysisMeasure) findAnalysisItem(HarvestInvoiceSource.AMOUNT),
-            Arrays.asList((FilterDefinition) rollingFilterDefinition), KPI.GOOD, 90));
-        kpis.add(KPIUtil.createKPIForDateFilter("Hours Tracked in the Last 90 Days", "clock.png", (AnalysisMeasure) findAnalysisItem(HarvestTimeSource.HOURS),
-            (AnalysisDimension) findAnalysisItem(HarvestTimeSource.CREATED_AT), MaterializedRollingFilterDefinition.QUARTER, new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
-        kpis.add(KPIUtil.createKPIForDateFilter("Expenses in the Last 90 Days", "money.png", (AnalysisMeasure) findAnalysisItem(HarvestExpenseSource.TOTAL_COST),
-            (AnalysisDimension) findAnalysisItem(HarvestExpenseSource.SPENT_AT), MaterializedRollingFilterDefinition.QUARTER, new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
-        return kpis;
     }
 
     protected static HttpClient getHttpClient(String username, String password) {

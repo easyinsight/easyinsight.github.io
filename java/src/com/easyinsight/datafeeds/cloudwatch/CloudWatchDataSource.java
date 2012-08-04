@@ -164,13 +164,4 @@ public class CloudWatchDataSource extends CompositeServerDataSource {
         return null;
     }
 
-    @Override
-    public List<KPI> createKPIs() {
-        List<KPI> kpis = new ArrayList<KPI>();
-        kpis.add(KPIUtil.createKPIForDateFilter("Average CPU Utilization in the Last 24 Hours", "cpu.png", (AnalysisMeasure) findAnalysisItem(AmazonEC2Source.CPU_UTILIZATION),
-                (AnalysisDimension) findAnalysisItem(CloudWatchDataSource.DATE), MaterializedRollingFilterDefinition.LAST_DAY,
-                null, 0, 1));
-        return kpis;
-    }
-
 }

@@ -259,14 +259,4 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
         else
             return null;
     }
-
-    @Override
-    public List<KPI> createKPIs() {
-        List<KPI> kpis = Arrays.asList(KPIUtil.createKPIWithFilters("Total Number of Connections, Including You", "user.png", (AnalysisMeasure) findAnalysisItem(LinkedInDataSource.COUNT),
-                new ArrayList<FilterDefinition>(), KPI.GOOD, 1),
-                KPIUtil.createKPIWithFilters("Network Size", "user.png", (AnalysisMeasure) findAnalysisItem(LinkedInDataSource.NUMBER_CONNECTIONS),
-                new ArrayList<FilterDefinition>(), KPI.GOOD, 1));
-        FilterValueDefinition filter = new FilterValueDefinition(findAnalysisItem(LinkedInDataSource.NAME), true, Arrays.asList((Object) myName));
-        return kpis;
-    }
 }
