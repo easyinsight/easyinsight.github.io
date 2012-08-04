@@ -340,35 +340,6 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         return Arrays.asList(new BaseCamp1To2(this), new BaseCamp2To3(this), new BaseCamp3To4(this), new BaseCamp4To5(this));
     }
 
-    @Override
-    public String getFilterExampleMessage() {
-        return "On the left, you'll see the list of fields available to you. Drag a field from that list into the area to the right to create a filter. For example, drag Project Name into the area to the right to restrict the KPI to a particular project.";
-    }
-
-    @Override
-    public List<KPI> createKPIs() {
-        List<KPI> kpis = new ArrayList<KPI>();
-        FilterValueDefinition openFilter = new FilterValueDefinition();
-        openFilter.setField(findAnalysisItem(BaseCampTodoSource.COMPLETED));
-        openFilter.setFilteredValues(Arrays.asList((Object) "false"));
-        openFilter.setInclusive(true);
-        kpis.add(KPIUtil.createKPIWithFilters("Total Open Todo Items", "inbox.png", (AnalysisMeasure) findAnalysisItemByDisplayName("Todo - Count"),
-                Arrays.asList((FilterDefinition) openFilter), KPI.BAD, 0));
-        FilterValueDefinition closedFilter = new FilterValueDefinition();
-        closedFilter.setField(findAnalysisItem(BaseCampTodoSource.COMPLETED));
-        closedFilter.setInclusive(true);
-        closedFilter.setFilteredValues(Arrays.asList((Object) "true"));
-        kpis.add(KPIUtil.createKPIForDateFilter("Todo Items Closed in the Last Seven Days", "inbox.png", (AnalysisMeasure) findAnalysisItemByDisplayName("Todo - Count"),
-                (AnalysisDimension) findAnalysisItem(BaseCampTodoSource.COMPLETEDDATE), MaterializedRollingFilterDefinition.WEEK,
-                Arrays.asList((FilterDefinition) closedFilter), KPI.GOOD, 7));
-        kpis.add(KPIUtil.createKPIForDateFilter("Hours Worked Month to Date", "clock.png", (AnalysisMeasure) findAnalysisItem(BaseCampTimeSource.HOURS),
-                (AnalysisDimension) findAnalysisItem(BaseCampTimeSource.DATE), MaterializedRollingFilterDefinition.MONTH_TO_NOW,
-                null, KPI.GOOD, 7));
-        return kpis;
-    }
-
-
-
     public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report, DataSourceInfo dataSourceInfo) {
         List<IntentionSuggestion> suggestions = super.suggestIntentions(report, dataSourceInfo);
         suggestions.add(new IntentionSuggestion("Help Me Set Up a Milestone Report",

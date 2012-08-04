@@ -2,12 +2,15 @@ package com.easyinsight.datafeeds.basecamp;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.IDataStorage;
+import com.easyinsight.storage.IWhere;
+import com.easyinsight.storage.StringWhere;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import nu.xom.Builder;
@@ -20,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -29,11 +33,14 @@ import java.util.*;
  */
 public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
 
+    public static final String XMLDATETIMEFORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+
     public static final String COMMENT_AUTHOR = "Todo Comment Author";
     public static final String TODO_ID = "Todo Parent ID";
     public static final String COMMENT_BODY = "Todo Comment Body";
     public static final String COMMENT_ID = "Todo Comment ID";
     public static final String COMMENT_CREATED_ON = "Todo Comment Created On";
+    public static final String PROJECT_ID = "Todo Comment Project ID";
 
     public static final String COUNT = "Todo Comment Count";
 
@@ -50,8 +57,20 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
         return FeedType.BASECAMP_TODO_COMMENTS;
     }
 
+    @Override
+    protected boolean clearsData(FeedDefinition parentSource) {
+        return false;
+    }
+
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
+
+        Key projectID = keys.get(PROJECT_ID);
+        if (projectID == null) {
+            projectID = new NamedKey(BaseCampTodoCommentsSource.PROJECT_ID);
+        }
+
+        analysisItems.add(new AnalysisDimension(projectID, true));
         analysisItems.add(new AnalysisDimension(keys.get(COMMENT_AUTHOR), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMMENT_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(TODO_ID), true));
@@ -69,6 +88,7 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
 
             String url = source.getUrl();
             DateFormat df = new XmlSchemaDateFormat();
+            DateFormat deadlineTimeFormat = new SimpleDateFormat(XMLDATETIMEFORMAT);
 
 
             Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false, conn);
@@ -82,6 +102,8 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
                 for (int i = 0; i < projectNodes.size(); i++) {
                     Node curProject = projectNodes.get(i);
                     String projectName = queryField(curProject, "name/text()");
+
+                    String projectChangedOnString = queryField(curProject, "last-changed-on/text()");
                     String projectID = queryField(curProject, "id/text()");
                     loadingProgress(i, projectNodes.size(), "Synchronizing with comments of " + projectName + "...", callDataID);
                     String projectStatus = queryField(curProject, "status/text()");
@@ -89,6 +111,22 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
                         continue;
                     }
                     if (!source.isIncludeInactive() && "inactive".equals(projectStatus)) {
+                        continue;
+                    }
+                    Date projectChangedAt;
+                    if (projectChangedOnString == null) {
+                        projectChangedAt = new Date();
+                    } else {
+                        projectChangedAt = deadlineTimeFormat.parse(projectChangedOnString);
+                    }
+                    if (lastRefreshDate == null) {
+                        lastRefreshDate = new Date(1);
+                    }
+                    long delta = lastRefreshDate.getTime() - projectChangedAt.getTime();
+
+                    long daysSinceChange = delta / (60 * 60 * 1000 * 24);
+
+                    if (source.isIncrementalRefresh() && daysSinceChange > 2) {
                         continue;
                     }
                     Document todoLists = runRestRequest("/projects/" + projectID + "/todo_lists.xml", client, builder, url, null, false, parentDefinition, false);
@@ -122,6 +160,7 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
                                             IRow row = ds.createRow();
                                             row.addValue(keys.get(COMMENT_ID), commentID);
                                             row.addValue(keys.get(TODO_ID), todoID);
+                                            row.addValue(keys.get(PROJECT_ID), projectID);
                                             row.addValue(keys.get(COMMENT_AUTHOR), authorName);
                                             row.addValue(keys.get(COMMENT_BODY), body);
                                             row.addValue(keys.get(COMMENT_CREATED_ON), createdDate);
@@ -132,7 +171,12 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
                             }
                         }
                     }
-                    IDataStorage.insertData(ds);
+                    if (!source.isIncrementalRefresh() || lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
+                        IDataStorage.insertData(ds);
+                    } else {
+                        StringWhere stringWhere = new StringWhere(keys.get(PROJECT_ID), projectID);
+                        IDataStorage.updateData(ds, Arrays.asList((IWhere) stringWhere));
+                    }
                     ds = new DataSet();
                 }
             } catch (ReportException re) {

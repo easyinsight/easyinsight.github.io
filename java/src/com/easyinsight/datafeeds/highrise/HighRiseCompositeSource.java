@@ -11,7 +11,6 @@ import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 
 import com.easyinsight.intention.*;
-import com.easyinsight.kpi.KPI;
 import com.easyinsight.security.SecurityUtil;
 
 import com.easyinsight.users.Account;
@@ -161,9 +160,18 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private transient HighriseCompanyCache highriseCompanyCache;
     private transient HighriseCustomFieldsCache customFieldsCache;
     private transient Map<String, String> contactToCompanyCache;
+    private transient HighriseTaskCache taskCache;
 
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
+    }
+
+    public HighriseTaskCache getOrCreateCache(EIConnection conn) throws HighRiseLoginException, ParsingException, ParseException {
+        if (taskCache == null) {
+            taskCache = new HighriseTaskCache();
+            taskCache.populate(this, conn);
+        }
+        return taskCache;
     }
 
     public Map<String, String> getContactToCompanyCache() {
@@ -314,6 +322,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             connections.add(new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_DEAL, HighRiseCompanySource.COMPANY_ID,
                 HighRiseDealSource.COMPANY_ID));
         }
+        // 908-400-3658 Jeanie
         connections.addAll(Arrays.asList(
                 new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_CONTACTS, HighRiseCompanySource.COMPANY_ID,
                     HighRiseContactSource.COMPANY_ID),
@@ -344,7 +353,15 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_COMPANY, HighRiseCaseJoinSource.COMPANY_ID,
                         HighRiseCompanySource.COMPANY_ID),
                 new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CONTACTS, HighRiseCaseJoinSource.CONTACT_ID,
-                        HighRiseContactSource.CONTACT_ID)));
+                        HighRiseContactSource.CONTACT_ID),
+                new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_ACTIVITIES, HighRiseContactSource.CONTACT_ID,
+                        HighRiseActivitySource.CONTACT_ID),
+                new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_ACTIVITIES, HighRiseCompanySource.COMPANY_ID,
+                        HighRiseActivitySource.COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_ACTIVITIES, HighRiseDealSource.DEAL_ID,
+                        HighRiseActivitySource.DEAL_ID),
+                new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_ACTIVITIES, HighRiseCaseSource.CASE_ID,
+                        HighRiseActivitySource.CASE_ID)));
         return connections;
     }
 
@@ -450,40 +467,6 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         }
         this.additionalTokens = tokens;
     }
-    
-    public List<KPI> createKPIs() {
-        KPI dealValueKPI = new KPI();
-        dealValueKPI.setName("Pending Dollar Value of the Sales Pipeline");
-        dealValueKPI.setIconImage("credit_card.png");
-        dealValueKPI.setAnalysisMeasure((AnalysisMeasure) findAnalysisItem(HighRiseDealSource.TOTAL_DEAL_VALUE));
-        FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-        filterValueDefinition.setInclusive(true);
-        filterValueDefinition.setField(findAnalysisItem(HighRiseDealSource.STATUS));
-        filterValueDefinition.setFilteredValues(Arrays.asList((Object) "pending"));
-        dealValueKPI.setFilters(Arrays.asList((FilterDefinition) filterValueDefinition));
-        KPI pendingDealCountKPI = new KPI();
-        pendingDealCountKPI.setName("Number of Pending Deals in the Pipeline");
-        pendingDealCountKPI.setIconImage("funnel.png");
-        pendingDealCountKPI.setAnalysisMeasure((AnalysisMeasure) findAnalysisItem(HighRiseDealSource.COUNT));
-        FilterValueDefinition pendingCountFilter = new FilterValueDefinition();
-        pendingCountFilter.setField(findAnalysisItem(HighRiseDealSource.STATUS));
-        pendingCountFilter.setInclusive(true);
-        pendingCountFilter.setFilteredValues(Arrays.asList((Object) "pending"));
-        pendingDealCountKPI.setFilters(Arrays.asList((FilterDefinition) pendingCountFilter));
-        KPI dealsClosedMonthKPI = new KPI();
-        dealsClosedMonthKPI.setName("Dollar Value of Deals Created in the Last 30 Days");
-        dealsClosedMonthKPI.setIconImage("symbol_dollar.png");
-        dealsClosedMonthKPI.setAnalysisMeasure((AnalysisMeasure) findAnalysisItem(HighRiseDealSource.TOTAL_DEAL_VALUE));
-        dealsClosedMonthKPI.setDayWindow(30);
-        FilterValueDefinition wonFilterDefinition = new FilterValueDefinition();
-        wonFilterDefinition.setField(findAnalysisItem(HighRiseDealSource.STATUS));
-        wonFilterDefinition.setFilteredValues(Arrays.asList((Object) "won"));
-        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
-        rollingFilterDefinition.setField(findAnalysisItem(HighRiseDealSource.CREATED_AT));
-        rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.LAST_FULL_MONTH);
-        dealsClosedMonthKPI.setFilters(Arrays.asList((FilterDefinition) rollingFilterDefinition));
-        return Arrays.asList(dealValueKPI, pendingDealCountKPI, dealsClosedMonthKPI);
-    }
 
     public boolean isLongRefresh() {
         return true;
@@ -491,12 +474,13 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getVersion() {
-        return 5;
+        return 6;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList(new HighRiseComposite1To2(this), new HighRiseComposite2To3(this), new HighRiseComposite3To4(this), new HighRiseComposite4To5(this));
+        return Arrays.asList(new HighRiseComposite1To2(this), new HighRiseComposite2To3(this), new HighRiseComposite3To4(this), new HighRiseComposite4To5(this),
+                new HighRiseComposite5To6(this));
     }
 
     public void decorateLinks(List<AnalysisItem> analysisItems) {
@@ -548,9 +532,11 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     }
 
     protected void refreshDone() {
+        super.refreshDone();
         highriseCache = null;
         highriseCompanyCache = null;
         highriseRecordingsCache = null;
+        customFieldsCache = null;
         contactToCompanyCache = null;
     }
 
@@ -620,9 +606,6 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             suggestions.add(new IntentionSuggestion("Help Me Set Up a Task Report",
                     "This action will filter out any records not related to Tasks and add a couple of new custom fields to help you do additional reporting against Tasks.",
                     IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_TASK_SETUP, IntentionSuggestion.OTHER));
-            suggestions.add(new IntentionSuggestion("Help Me Set Up an Activity Report",
-                    "This action will add four new custom fields representing the various Activity concepts from Highrise. Notes from your Contacts, Companies, Cases, and Deals, your Emails, and your Tasks will be combined into Activity Body, Activity Type, Activity Author, and Activity Date.",
-                    IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_ACTIVITY_SETUP, IntentionSuggestion.OTHER));
         }
         Set<AnalysisItem> analysisItems = report.getAllAnalysisItems();
         for (AnalysisItem analysisItem : analysisItems) {
@@ -657,7 +640,11 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 if (!includeDealNotes) {
                     suggestions.add(new IntentionSuggestion("Enable Deal Notes", "You're currently not synchronizing deal notes to this data source.", IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_NOTE_CONFIG, IntentionSuggestion.WARNING));
                 }
-            }
+            } /*else if (analysisItem.toDisplay().equals(HighRiseTaskSource.BODY)) {
+                if (getAdditionalTokens() == null || getAdditionalTokens().size() == 0) {
+                    suggestions.add(new IntentionSuggestion("Configure Tasks", "You haven't added any additional API keys for your Highrise tasks.", IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.SUGGESTION_TASK_ADD, IntentionSuggestion.WARNING));
+                }
+            }*/
         }
         return suggestions;
     }
@@ -711,7 +698,16 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                     new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_COMPANY, HighRiseCaseJoinSource.COMPANY_ID,
                             HighRiseCompanySource.COMPANY_ID),
                     new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CONTACTS, HighRiseCaseJoinSource.CONTACT_ID,
-                            HighRiseContactSource.CONTACT_ID)), fields)));
+                            HighRiseContactSource.CONTACT_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_ACTIVITIES, HighRiseContactSource.CONTACT_ID,
+                            HighRiseActivitySource.CONTACT_ID),
+                    new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_ACTIVITIES, HighRiseCompanySource.COMPANY_ID,
+                            HighRiseActivitySource.COMPANY_ID),
+                    new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_ACTIVITIES, HighRiseCaseSource.CASE_ID,
+                            HighRiseActivitySource.CASE_ID),
+                    new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_ACTIVITIES, HighRiseDealSource.DEAL_ID,
+                            HighRiseActivitySource.DEAL_ID)
+                    ), fields)));
             intentions.add(new AddFilterIntention(excludeFilter(HighRiseDealSource.DEAL_NAME, report, fields)));
             ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
             reportPropertiesIntention.setFullJoins(true);
@@ -751,64 +747,6 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 intentions.add(new AddReportFieldIntention(findFieldFromList(HighRiseCaseSource.CASE_NAME, fields)));
             }
             intentions.add(new AddFilterIntention(excludeFilter));
-        } else if (type == IntentionSuggestion.SUGGESTION_ACTIVITY_SETUP) {
-            intentions.add(new CustomizeJoinsIntention(fromChildConnections(Arrays.asList(
-                    new ChildConnection(FeedType.HIGHRISE_COMPANY_NOTES, FeedType.HIGHRISE_COMPANY, HighRiseCompanyNotesSource.NOTE_COMPANY_ID,
-                            HighRiseCompanySource.COMPANY_ID, false, false, false, true),
-                    new ChildConnection(FeedType.HIGHRISE_CONTACT_NOTES, FeedType.HIGHRISE_CONTACTS, HighRiseContactNotesSource.NOTE_CONTACT_ID,
-                            HighRiseContactSource.CONTACT_ID, false, false, false, true),
-                    new ChildConnection(FeedType.HIGHRISE_CASE_NOTES, FeedType.HIGHRISE_CASES, HighRiseCaseNotesSource.NOTE_CASE_ID,
-                            HighRiseCaseSource.CASE_ID, false, false, false, true),
-                    new ChildConnection(FeedType.HIGHRISE_DEAL_NOTES, FeedType.HIGHRISE_DEAL, HighRiseDealNotesSource.NOTE_DEAL_ID,
-                            HighRiseDealSource.DEAL_ID, false, false, false, true),
-                    new ChildConnection(FeedType.HIGHRISE_CONTACT_NOTES, FeedType.HIGHRISE_TASKS, HighRiseContactNotesSource.NOTE_AUTHOR,
-                            HighRiseTaskSource.TASK_ID),
-                    new ChildConnection(FeedType.HIGHRISE_COMPANY_NOTES, FeedType.HIGHRISE_DEAL, HighRiseCompanyNotesSource.NOTE_AUTHOR,
-                            HighRiseDealSource.DEAL_ID),
-                    new ChildConnection(FeedType.HIGHRISE_CONTACT_NOTES, FeedType.HIGHRISE_DEAL, HighRiseContactNotesSource.NOTE_AUTHOR,
-                            HighRiseDealSource.DEAL_ID),
-                    new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_DEAL, HighRiseCaseSource.CASE_NAME,
-                            HighRiseDealSource.DEAL_ID),
-                    new ChildConnection(FeedType.HIGHRISE_EMAILS, FeedType.HIGHRISE_CASE_NOTES, HighRiseEmailSource.EMAIL_ID,
-                            HighRiseCaseNotesSource.NOTE_AUTHOR),
-                    new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_COMPANY, HighRiseDealSource.COMPANY_ID,
-                            HighRiseCompanySource.COMPANY_ID, false, false, false, true),
-                    new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_CONTACTS, HighRiseDealSource.CONTACT_ID,
-                            HighRiseContactSource.CONTACT_ID, false, false, false, true),
-                    new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_COMPANY, HighRiseContactSource.COMPANY_ID,
-                            HighRiseCompanySource.COMPANY_ID, false, false, false, true)
-                    ), fields)));
-            DerivedAnalysisDimension activityBody = new DerivedAnalysisDimension();
-            activityBody.setKey(new NamedKey("Activity Body"));
-            activityBody.setConcrete(false);
-            activityBody.setHtml(true);
-            activityBody.setWordWrap(true);
-            activityBody.setDerivationCode("notnull([Company Note Body], \"<p><b>\" + [Company Name] + \"</b></p><p>\" + [Company Note Created At] + \"</p><p>Note by \" + [Company Note Author]+\"</p><p>\"+[Company Note Body]+\"</p>\", [Contact Note Body], \"<p><b>\" + [Contact Name] + \"</b></p><p>\" + [Contact Note Created At] + \"</p><p>Note by \" + [Contact Note Author]+\"</p><p>\"+[Contact Note Body]+\"</p>\", [Case Note Body], \"<p><b>\" + [Case Name] + \"</b></p><p>\" + [Case Note Created At] + \"</p><p>Note by \" + [Case Note Author]+\"</p><p>\"+[Case Note Body]+\"</p>\",  [Deal Note Body], \"<p><b>\" + [Deal Name] + \"</b></p><p>\" + [Deal Note Created At] + \"</p><p>Note by \" + [Deal Note Author]+\"</p><p>\"+[Deal Note Body]+\"</p>\", [Task Body], [Task Body], [Email ID], [Email Body])");
-            intentions.add(new CustomFieldIntention(activityBody));
-            DerivedAnalysisDimension activityType = new DerivedAnalysisDimension();
-            activityType.setKey(new NamedKey("Activity Type"));
-            activityType.setConcrete(false);
-            activityType.setDerivationCode("notnull([Case Note Body], \"Case Note\", [Company Note Body], \"Company Note\", [Contact Note Body], \"Contact Note\", [Deal Note Body], \"Deal Note\", [Task Body], \"Task\", [Email ID], \"Email\")");
-            intentions.add(new CustomFieldIntention(activityType));
-            DerivedAnalysisDimension activityAuthor = new DerivedAnalysisDimension();
-            activityAuthor.setKey(new NamedKey("Activity Author"));
-            activityAuthor.setConcrete(false);
-            activityAuthor.setDerivationCode("notnull([Case Note Body], [Case Note Author], [Company Note Body], [Company Note Author], [Contact Note Body], [Contact Note Author], [Deal Note Body], [Deal Note Author], [Task Body], [Task Author], [Email ID], [Email Author])");
-            intentions.add(new CustomFieldIntention(activityAuthor));
-            DerivedAnalysisDateDimension derivedAnalysisDateDimension = new DerivedAnalysisDateDimension();
-            derivedAnalysisDateDimension.setConcrete(false);
-            derivedAnalysisDateDimension.setKey(new NamedKey("Activity Date"));
-            derivedAnalysisDateDimension.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
-            derivedAnalysisDateDimension.setGroup(true);
-            derivedAnalysisDateDimension.setDerivationCode("notnull([Case Note Body], [Case Note Updated At], [Company Note Body], [Company Note Updated At], [Contact Note Body], [Contact Note Updated At], [Deal Note Body], [Deal Note Updated At], [Task Body], [Task Created At], [Email ID], [Email Sent At])");
-            intentions.add(new CustomFieldIntention(derivedAnalysisDateDimension));
-            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
-            reportPropertiesIntention.setFullJoins(true);
-            Set<AnalysisItem> items = report.getAllAnalysisItems();
-            if (items.isEmpty()) {
-                intentions.add(new AddReportFieldIntention(activityBody));
-            }
-            intentions.add(reportPropertiesIntention);
         } else if (type == IntentionSuggestion.SUGGESTION_TASK_SETUP) {
             intentions.add(new CustomizeJoinsIntention(fromChildConnections(Arrays.asList(
                 new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_COMPANY, HighRiseDealSource.COMPANY_ID,
