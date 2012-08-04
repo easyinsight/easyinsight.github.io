@@ -245,7 +245,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
 
             String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
 
-            return "$.get('/app/htmlExport?reportID=" + getAnalysisID() + "&" + timezoneOffset + "&'+ strParams, List.getCallback('" + targetDiv + "', " + jsonProperties() + ", " + analysisItemMap.toString() +"));";
+            return "$.get('/app/htmlExport?reportID=" + getUrlKey() + "&" + timezoneOffset + "&'+ strParams, List.getCallback('" + targetDiv + "', " + jsonProperties() + ", " + analysisItemMap.toString() +"));";
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
