@@ -1,7 +1,6 @@
 package com.easyinsight.datafeeds;
 
-import com.easyinsight.analysis.ReportCache;
-import com.easyinsight.analysis.ReportException;
+import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.scorecard.DataSourceRefreshEvent;
 import com.easyinsight.storage.IDataStorage;
@@ -10,7 +9,6 @@ import com.easyinsight.users.User;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.database.Database;
@@ -25,6 +23,7 @@ import java.sql.SQLException;
 import com.easyinsight.util.ServiceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.hibernate.Session;
+import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -116,7 +115,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     /**
      * The names of the fields used in this data source
      * @return the key names
-     * @param parentDefinition
+     * @param parentDefinition blah
      */
     @NotNull
     protected abstract List<String> getKeys(FeedDefinition parentDefinition);
@@ -168,6 +167,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         Map<String, Key> keys = newDataSourceFields(parentDefinition);
         List<AnalysisItem> fields = createAnalysisItems(keys, conn, parentDefinition);
         List<AnalysisItem> newFields = new ArrayList<AnalysisItem>();
+        boolean renamed = false;
         for (AnalysisItem field : fields) {
             if (field == null) {
                 continue;
@@ -178,7 +178,10 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             AnalysisItem existingField = findAnalysisItemByKey(field.getKey().toKeyString());
             if (existingField == null) {
                 newFields.add(field);
-            }
+            } /*else if (!existingField.toDisplay().equals(field.toDisplay())) {
+                renamed = true;
+                existingField.setDisplayName(field.getDisplayName());
+            }*/
         }
         if (newFields.size() > 0) {
             changed = true;
@@ -192,7 +195,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         return new MigrationResult(changed, keys);
     }
 
-    public String tempLoad(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, EIConnection conn, boolean fullRefresh) throws Exception {
+    public String tempLoad(Map<String, Key> keys, Date now, @Nullable FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, EIConnection conn, boolean fullRefresh) throws Exception {
         TempStorage tempStorage = DataStorage.tempConnection(this, conn);
         if (parentDefinition == null) {
             fullRefresh = fullRefresh && fullNightlyRefresh();
@@ -228,7 +231,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         dataStorage.truncate();
     }
 
-    public void applyTempLoad(EIConnection conn, long accountID, FeedDefinition parentDefinition, Date lastRefreshTime, String tempTable, boolean fullRefresh) throws Exception {
+    public void applyTempLoad(EIConnection conn, long accountID, @Nullable FeedDefinition parentDefinition, Date lastRefreshTime, String tempTable, boolean fullRefresh) throws Exception {
         DataStorage dataStorage = null;
         try {
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
@@ -263,55 +266,36 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
 
     public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) throws Exception {
         boolean changed = false;
-        DataStorage dataStorage = null;
-        try {
-            Map<String, Key> keys = newDataSourceFields(parentDefinition);
-            List<AnalysisItem> fields = createAnalysisItems(keys, conn, parentDefinition);
-            List<AnalysisItem> newFields = new ArrayList<AnalysisItem>();
-            for (AnalysisItem field : fields) {
-                if (field == null) {
-                    continue;
+        MigrationResult migrationResult = migrations(conn, this);
+        changed = migrationResult.isChanged() || changed;
+        Map<String, Key> keyMap = migrationResult.getKeyMap();
+
+        conn.commit();
+        conn.setAutoCommit(true);
+        String tempTable = tempLoad(keyMap, now, this, callDataID, lastRefreshTime, conn, fullRefresh);
+
+        conn.setAutoCommit(false);
+        applyTempLoad(conn, accountID, null, lastRefreshTime, tempTable, fullRefresh);
+
+        refreshDone();
+        return changed;
+    }
+
+    protected void refreshDone() {
+        if (getRefreshMarmotScript() != null) {
+            StringTokenizer toker = new StringTokenizer(getRefreshMarmotScript(), "\r\n");
+            while (toker.hasMoreTokens()) {
+                String line = toker.nextToken();
+                try {
+                    new ReportCalculation(line).apply(this);
+                } catch (ReportException re) {
+                    throw re;
+                } catch (Exception e) {
+                    LogClass.error(e);
+                    throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of data source code " + line + ".", null));
                 }
-                if (field.getKey() == null) {
-                    continue;
-                }
-                AnalysisItem existingField = findAnalysisItemByKey(field.getKey().toKeyString());
-                if (existingField == null) {
-                    newFields.add(field);
-                }
-            }
-            if (newFields.size() > 0) {
-                changed = true;
-                System.out.println("Discovered new fields = " + newFields);
-                for (AnalysisItem newField : newFields) {
-                    getFields().add(newField);
-                    keys.put(newField.getKey().toKeyString(), newField.getKey());
-                }
-                new DataSourceInternalService().updateFeedDefinition(this, conn, true, false);
-            }
-            dataStorage = DataStorage.writeConnection(this, conn, accountID);
-            if (!dataStorage.isTableDefined()) {
-                dataStorage.createTable();
-            }
-            System.out.println("Refreshing " + getDataFeedID() + " for account " + accountID + " at " + new Date());
-            if (clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh) {
-                clearData(dataStorage);
-            }
-            DataSet dataSet = getDataSet(keys, now, parentDefinition, dataStorage, conn, callDataID, lastRefreshTime);
-            addData(dataStorage, dataSet);
-            dataStorage.commit();
-            System.out.println("Completed refresh of " + getDataFeedID() + " for account " + accountID + " at " + new Date());
-        } catch (Exception e) {
-            if (dataStorage != null) {
-                dataStorage.rollback();
-            }
-            throw e;
-        } finally {
-            if (dataStorage != null) {
-                dataStorage.closeConnection();
             }
         }
-        return changed;
     }
 
     protected boolean clearsData(FeedDefinition parentSource) {
