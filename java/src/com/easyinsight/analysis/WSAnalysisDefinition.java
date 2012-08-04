@@ -792,7 +792,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public String toHTML(String targetDiv) {
         String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
-        return "$.get('/app/htmlExport?reportID="+getAnalysisID()+"&"+timezoneOffset+"&'+ strParams, function(data) { Utils.noData(data, function() { $('#"+targetDiv+" .reportArea').html(data); }, null, '" + targetDiv + "');});";
+        return "$.get('/app/htmlExport?reportID="+getUrlKey()+"&"+timezoneOffset+"&'+ strParams, function(data) { Utils.noData(data, function() { $('#"+targetDiv+" .reportArea').html(data); }, null, '" + targetDiv + "');});";
     }
 
     public String rootHTML() {
