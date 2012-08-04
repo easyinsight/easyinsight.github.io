@@ -429,6 +429,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             PreparedStatement clearTokenStmt = conn.prepareStatement("DELETE FROM HIGHRISE_ADDITIONAL_TOKEN WHERE DATA_SOURCE_ID = ?");
             clearTokenStmt.setLong(1, getDataFeedID());
             clearTokenStmt.executeUpdate();
+            clearTokenStmt.close();
             PreparedStatement saveTokenStmt = conn.prepareStatement("INSERT INTO HIGHRISE_ADDITIONAL_TOKEN (TOKEN, DATA_SOURCE_ID, TOKEN_VALID) VALUES (?, ?, ?)");
             for (HighriseAdditionalToken token : additionalTokens) {
                 saveTokenStmt.setString(1, token.getToken());
@@ -466,6 +467,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             highriseToken.setToken(token);
             tokens.add(highriseToken);
         }
+        additionalTokenStmt.close();
         this.additionalTokens = tokens;
     }
 
