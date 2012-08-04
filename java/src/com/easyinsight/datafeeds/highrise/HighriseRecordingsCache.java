@@ -25,6 +25,11 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
     private List<Recording> dealNotes = new ArrayList<Recording>();
     private List<Recording> companyNotes = new ArrayList<Recording>();
     private List<HighriseEmail> emails = new ArrayList<HighriseEmail>();
+    private List<Activity> activities = new ArrayList<Activity>();
+
+    public List<Activity> getActivities() {
+        return activities;
+    }
 
     public List<HighriseEmail> getEmails() {
         return emails;
@@ -85,16 +90,31 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
                     String id = queryField(recordingNode, "id/text()");
                     String subjectID = queryField(recordingNode, "subject-id/text()");
                     String subjectType = queryField(recordingNode, "subject-type/text()");
+
+                    String companyID = null;
+                    String contactID = null;
+                    String dealID = null;
+                    String caseID = null;
+                    String activityType = null;
+
                     Recording recording = new Recording(body, createdAt, updatedAt, subjectID, id, author);
                     if ("Party".equals(subjectType)) {
                         if (companyIDs.contains(subjectID)) {
+                            activityType = "Company Note";
+                            companyID = subjectID;
                             companyNotes.add(recording);
                         } else {
+                            activityType = "Contact Note";
+                            contactID = subjectID;
                             contactNotes.add(recording);
                         }
                     } else if ("Deal".equals(subjectType)) {
+                        activityType = "Deal Note";
+                        dealID = subjectID;
                         dealNotes.add(recording);
                     } else if ("Kase".equals(subjectType)) {
+                        activityType = "Case Note";
+                        caseID = subjectID;
                         caseNotes.add(recording);
                     }
                     String collectionType = queryField(recordingNode, "collection-type/text()");
@@ -102,16 +122,21 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
                     if (collectionType != null) {
                         recording = new Recording(body, createdAt, updatedAt, collectionID, id, author);
                         if (companyIDs.contains(subjectID)) {
+                            companyID = subjectID;
                             recording.setCompanyID(subjectID);
                         } else {
+                            contactID = subjectID;
                             recording.setContactID(subjectID);
                         }
                         if ("Kase".equals(collectionType) && !"Kase".equals(subjectType)) {
+                            caseID = collectionID;
                             caseNotes.add(recording);
                         } else if ("Deal".equals(collectionType) && !"Deal".equals(subjectType)) {
+                            contactID = collectionID;
                             dealNotes.add(recording);
                         }
                     }
+                    activities.add(new Activity(body, createdAt, updatedAt, contactID, companyID, dealID, caseID, activityType, id, author));
                 } else if ("Email".equals(type)) {
                     String authorID = queryField(recordingNode, "author-id/text()");
                     String author = highriseCache.getUserName(authorID);
@@ -122,26 +147,39 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
                     String subjectType = queryField(recordingNode, "subject-type/text()");
                     String body = queryField(recordingNode, "body/text()");
                     HighriseEmail highriseEmail = new HighriseEmail(author, createdAt, id, body);
+
+                    String companyID = null;
+                    String contactID = null;
+                    String dealID = null;
+                    String caseID = null;
+
                     if ("Party".equals(subjectType)) {
                         if (companyIDs.contains(subjectID)) {
+                            companyID = subjectID;
                             highriseEmail.setCompanyID(subjectID);
                         } else {
+                            contactID = subjectID;
                             highriseEmail.setContactID(subjectID);
                         }
                     } else if ("Deal".equals(subjectType)) {
+                        dealID = subjectID;
                         highriseEmail.setDealID(subjectID);
                     } else if ("Kase".equals(subjectType)) {
+                        caseID = subjectID;
                         highriseEmail.setCaseID(subjectID);
                     }
                     String collectionType = queryField(recordingNode, "collection-type/text()");
                     String collectionID = queryField(recordingNode, "collection-id/text()");
                     if (collectionType != null) {
                         if ("Kase".equals(collectionType) && !"Kase".equals(subjectType)) {
+                            caseID = collectionID;
                             highriseEmail.setCaseID(collectionID);
                         } else if ("Deal".equals(collectionType) && !"Deal".equals(subjectType)) {
+                            dealID = collectionID;
                             highriseEmail.setDealID(collectionID);
                         }
                     }
+                    activities.add(new Activity(body, createdAt, null, contactID, companyID, dealID, caseID, "Email", id, author));
                     emails.add(highriseEmail);
                 }
             }

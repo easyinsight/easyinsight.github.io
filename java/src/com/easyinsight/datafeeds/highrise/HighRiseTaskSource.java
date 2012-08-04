@@ -1,7 +1,6 @@
 package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
@@ -77,168 +76,14 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_TASKS;
     }
 
-    private static class TaskInfo {
-        private String taskID;
-        private String category;
-        private String body;
-        private String owner;
-        private String author;
-        private String caseID;
-        private String companyID;
-        private String dealID;
-        private Date createdAt;
-        private Date dueAt;
-        private Date doneAt;
-        private String contactID;
 
-        private TaskInfo(String taskID, String category, String body, String owner, String author, String caseID, String companyID, String dealID, Date createdAt, Date dueAt, Date doneAt,
-                         String contactID) {
-            this.taskID = taskID;
-            this.category = category;
-            this.body = body;
-            this.owner = owner;
-            this.author = author;
-            this.caseID = caseID;
-            this.companyID = companyID;
-            this.dealID = dealID;
-            this.createdAt = createdAt;
-            this.dueAt = dueAt;
-            this.doneAt = doneAt;
-            this.contactID = contactID;
-        }
-
-        public void addToDataSet(DataSet dataSet) {
-            IRow row = dataSet.createRow();
-            row.addValue(TASK_ID, taskID);
-            row.addValue(CATEGORY, category);
-            row.addValue(COUNT, 1);
-            row.addValue(BODY, body);
-            row.addValue(OWNER, owner);
-            row.addValue(AUTHOR, author);
-            row.addValue(CASE_ID, caseID);
-            row.addValue(DEAL_ID, dealID);
-            row.addValue(COMPANY_ID, companyID);
-            row.addValue(CREATED_AT, new DateValue(createdAt));
-            row.addValue(DUE_AT, new DateValue(dueAt));
-            row.addValue(DONE_AT, new DateValue(doneAt));
-            row.addValue(CONTACT_ID, contactID);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            TaskInfo taskInfo = (TaskInfo) o;
-
-            return !(taskID != null ? !taskID.equals(taskInfo.taskID) : taskInfo.taskID != null);
-
-        }
-
-        @Override
-        public int hashCode() {
-            return taskID != null ? taskID.hashCode() : 0;
-        }
-    }
-
-    private List<TaskInfo> getTasks(String apiToken, String path, String url, FeedDefinition parentDefinition, Map<String, String> peopleCache,
-                                    Map<String, String> categoryCache, DateFormat deadlineFormat) throws HighRiseLoginException, ParsingException, ParseException {
-        List<TaskInfo> taskInfos = new ArrayList<TaskInfo>();
-        HttpClient client = getHttpClient(apiToken, "");
-        Builder builder = new Builder();
-        Document companies = runRestRequest("/tasks/"+path+".xml", client, builder, url, true, false, parentDefinition);
-        HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
-        HighriseCompanyCache companyCache = highRiseCompositeSource.getOrCreateCompanyCache(client, null);
-        Nodes companyNodes = companies.query("/tasks/task");
-        for (int i = 0; i < companyNodes.size(); i++) {
-            Node taskNode = companyNodes.get(i);
-
-
-            String id = queryField(taskNode, "id/text()");
-
-            String categoryID = queryField(taskNode, "category-id/text()");
-            String category = retrieveCategoryInfo(client, builder, categoryCache, categoryID, url, parentDefinition);
-            String authorID = queryField(taskNode, "author-id/text()");
-            String author = retrieveUserInfo(client, builder, peopleCache, authorID, url, parentDefinition);
-            String ownerID = queryField(taskNode, "owner-id/text()");
-            String owner = retrieveUserInfo(client, builder, peopleCache, ownerID, url, parentDefinition);
-            String createdAtString = queryField(taskNode, "created-at/text()");
-            Date createdAt = deadlineFormat.parse(createdAtString);
-            String doneAtString = queryField(taskNode, "done-at/text()");
-            Date doneAt = null;
-            if (doneAtString != null) {
-                doneAt = deadlineFormat.parse(doneAtString);
-
-            }
-            String dueAtString = queryField(taskNode, "due-at/text()");
-            Date dueAt = null;
-            if (dueAtString != null) {
-                dueAt = deadlineFormat.parse(dueAtString);
-                if (dueAt == null) {
-                    Calendar cal = Calendar.getInstance();
-                    String frame = queryField(taskNode, "frame/text()");
-                    if ("next_week".equals(frame)) {
-                        cal.add(Calendar.WEEK_OF_YEAR, 1);
-                        cal.set(Calendar.DAY_OF_WEEK, 0);
-                        cal.set(Calendar.HOUR_OF_DAY, 0);
-                        cal.set(Calendar.MINUTE, 0);
-                        dueAt = cal.getTime();
-                    }
-                }
-            }
-
-            String body = queryField(taskNode, "body/text()");
-
-            String subjectType = queryField(taskNode, "subject-type/text()");
-            String subjectID = queryField(taskNode, "subject-id/text()");
-            String caseID = null;
-            String companyID = null;
-            String contactID = null;
-            String dealID = null;
-            if ("Kase".equals(subjectType)) {
-                caseID = subjectID;
-            } else if ("Party".equals(subjectType)) {
-                if (companyCache.getCompanyIDs().contains(subjectID)) {
-                    companyID = subjectID;
-                } else {
-                    contactID = subjectID;
-                }
-            } else if ("Deal".equals(subjectType)) {
-                dealID = subjectID;
-            }
-
-            taskInfos.add(new TaskInfo(id, category, body, owner, author, caseID, companyID, dealID, createdAt, dueAt, doneAt, contactID));
-        }
-        return taskInfos;
-    }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
-        String url = highRiseCompositeSource.getUrl();
-
-        DateFormat deadlineFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
 
         DataSet ds = new DataSet();
-        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
-        Map<String, String> peopleCache = new HashMap<String, String>();
-        Map<String, String> categoryCache = new HashMap<String, String>();
         try {
-            Set<TaskInfo> tasks = new HashSet<TaskInfo>();
-            loadingProgress(0, 1, "Synchronizing with tasks...", callDataID);
-            tasks.addAll(getTasks(token.getTokenValue(), "upcoming", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-            tasks.addAll(getTasks(token.getTokenValue(), "assigned", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-            tasks.addAll(getTasks(token.getTokenValue(), "completed", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-
-                for (HighriseAdditionalToken additionalToken : highRiseCompositeSource.getAdditionalTokens()) {
-                    try {
-                        tasks.addAll(getTasks(additionalToken.getToken(), "upcoming", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-                        tasks.addAll(getTasks(additionalToken.getToken(), "assigned", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-                        tasks.addAll(getTasks(additionalToken.getToken(), "completed", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-                    } catch (Exception e) {
-                        System.out.println("Failed to load tasks for token " + additionalToken.getToken());
-                    }
-                }
-
+            Collection<TaskInfo> tasks = highRiseCompositeSource.getOrCreateCache(conn).getTaskInfos();
             for (TaskInfo task : tasks) {
                 task.addToDataSet(ds);
             }
@@ -248,30 +93,6 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
             throw new RuntimeException(e);
         }
         return ds;
-    }
-
-    private String retrieveCategoryInfo(HttpClient client, Builder builder, Map<String, String> categoryCache, String categoryID, String url, FeedDefinition parentDefinition) throws HighRiseLoginException, ParsingException {
-        try {
-            String contactName = null;
-            if(categoryID != null) {
-                contactName = categoryCache.get(categoryID);
-                if(contactName == null) {
-                    Document contactInfo = runRestRequest("/task_categories/" + categoryID + ".xml", client, builder, url, false, false, parentDefinition);
-                    Nodes dealNodes = contactInfo.query("/task-category");
-                    if (dealNodes.size() > 0) {
-                        Node deal = dealNodes.get(0);
-                        contactName = queryField(deal, "name/text()");
-                    }
-
-                    categoryCache.put(categoryID, contactName);
-                }
-
-            }
-            return contactName;
-        } catch (HighRiseLoginException e) {
-            categoryCache.put(categoryID, "");
-            return "";
-        }
     }
 
     @Override

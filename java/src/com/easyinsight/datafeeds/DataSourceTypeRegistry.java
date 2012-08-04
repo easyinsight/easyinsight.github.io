@@ -4,6 +4,7 @@ import com.easyinsight.datafeeds.admin.AdminStatsDataSource;
 import com.easyinsight.datafeeds.basecamp.*;
 import com.easyinsight.datafeeds.basecampnext.*;
 import com.easyinsight.datafeeds.batchbook.*;
+import com.easyinsight.datafeeds.batchbook2.*;
 import com.easyinsight.datafeeds.campaignmonitor.CMClientSource;
 import com.easyinsight.datafeeds.campaignmonitor.CampaignMonitorDataSource;
 import com.easyinsight.datafeeds.cleardb.ClearDBCompositeSource;
@@ -213,6 +214,14 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.BASECAMP_NEXT_PEOPLE, BasecampNextPeopleSource.class);
         registerType(FeedType.BATCHBOOK_SUPER_TAG, BatchbookSuperTagSource.class);
         registerType(FeedType.JSON, JSONDataSource.class);
+        registerType(FeedType.HIGHRISE_ACTIVITIES, HighRiseActivitySource.class);
+        registerType(FeedType.BATCHBOOK2_COMPOSITE, Batchbook2CompositeSource.class);
+        registerType(FeedType.BATCHBOOK2_PEOPLE, Batchbook2PeopleSource.class);
+        registerType(FeedType.BATCHBOOK2_ADDRESSES, Batchbook2AddressSource.class);
+        registerType(FeedType.BATCHBOOK2_EMAILS, Batchbook2EmailSource.class);
+        registerType(FeedType.BATCHBOOK2_PHONES, Batchbook2PhoneSource.class);
+        registerType(FeedType.BATCHBOOK2_WEBSITES, Batchbook2WebsiteSource.class);
+        registerType(FeedType.BATCHBOOK2_COMPANIES, Batchbook2CompanySource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

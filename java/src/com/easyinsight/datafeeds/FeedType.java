@@ -156,6 +156,15 @@ public class FeedType implements Serializable {
     public static final FeedType BASECAMP_NEXT_PEOPLE = new FeedType(139);
     public static final FeedType BATCHBOOK_SUPER_TAG = new FeedType(140);
     public static final FeedType JSON = new FeedType(141);
+    public static final FeedType HIGHRISE_ACTIVITIES = new FeedType(142);
+
+    public static final FeedType BATCHBOOK2_PEOPLE = new FeedType(143);
+    public static final FeedType BATCHBOOK2_COMPANIES = new FeedType(144);
+    public static final FeedType BATCHBOOK2_COMPOSITE= new FeedType(145);
+    public static final FeedType BATCHBOOK2_PHONES = new FeedType(146);
+    public static final FeedType BATCHBOOK2_WEBSITES = new FeedType(147);
+    public static final FeedType BATCHBOOK2_ADDRESSES = new FeedType(148);
+    public static final FeedType BATCHBOOK2_EMAILS = new FeedType(149);
 
     private int type;
 
