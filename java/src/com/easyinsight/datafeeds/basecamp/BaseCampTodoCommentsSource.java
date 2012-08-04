@@ -50,7 +50,7 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
 
     @NotNull
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(COUNT, COMMENT_AUTHOR, TODO_ID, COMMENT_BODY, COMMENT_ID, COMMENT_CREATED_ON);
+        return Arrays.asList(COUNT, COMMENT_AUTHOR, TODO_ID, COMMENT_BODY, COMMENT_ID, COMMENT_CREATED_ON, PROJECT_ID);
     }
 
     public FeedType getFeedType() {
