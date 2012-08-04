@@ -444,16 +444,4 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
             tokenSecret = rs.getString(2);
         }
     }
-
-    @Override
-    public List<KPI> createKPIs() {
-        List<KPI> kpis = new ArrayList<KPI>();
-        kpis.add(KPIUtil.createKPIForDateFilter("Visits in the Last Week", "user.png", (AnalysisMeasure) findAnalysisItem(GoogleAnalyticsDataSource.VISITS),
-                (AnalysisDimension) findAnalysisItem(GoogleAnalyticsDataSource.DATE), MaterializedRollingFilterDefinition.LAST_FULL_WEEK,
-                null, KPI.GOOD, 7));
-        kpis.add(KPIUtil.createKPIForDateFilter("New Visits in the Last Week", "user3.png", (AnalysisMeasure) findAnalysisItem(GoogleAnalyticsDataSource.NEW_VISITS),
-                (AnalysisDimension) findAnalysisItem(GoogleAnalyticsDataSource.DATE), MaterializedRollingFilterDefinition.LAST_FULL_WEEK,
-                null, KPI.GOOD, 7));
-        return kpis;
-    }
 }
