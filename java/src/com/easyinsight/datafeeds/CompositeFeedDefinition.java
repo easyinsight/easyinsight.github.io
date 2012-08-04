@@ -106,21 +106,6 @@ public class CompositeFeedDefinition extends FeedDefinition {
             connection.store(conn, compositeFeedID);
         }
         nodeStmt.close();
-        PreparedStatement nukeStmt = conn.prepareStatement("DELETE FROM DATA_SOURCE_TO_UNIQUE_FIELD WHERE DATA_SOURCE_ID = ?");
-        nukeStmt.setLong(1, getDataFeedID());
-        nukeStmt.executeUpdate();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_TO_UNIQUE_FIELD (DATA_SOURCE_ID, ANALYSIS_ITEM_ID, CHILD_SOURCE_ID) VALUES (?, ?, ?)");
-        Session session = Database.instance().createSession(conn);
-        for (Map.Entry<Long, AnalysisItem> entry : uniqueFields.entrySet()) {
-            entry.getValue().beforeSave();
-            session.saveOrUpdate(entry.getValue());
-            session.flush();
-            insertStmt.setLong(1, getDataFeedID());
-            insertStmt.setLong(2, entry.getValue().getAnalysisItemID());
-            insertStmt.setLong(2, entry.getKey());
-            insertStmt.execute();
-        }
-        session.close();
     }
 
     public void customLoad(Connection conn) throws SQLException {
