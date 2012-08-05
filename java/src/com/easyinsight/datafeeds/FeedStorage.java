@@ -25,6 +25,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
+import org.hibernate.exception.ConstraintViolationException;
 
 /**
  * User: jboe
@@ -305,11 +306,15 @@ public class FeedStorage {
         childFoldersStmt.setLong(1, folderID);
         ResultSet childRS = childFoldersStmt.executeQuery();
         List<FeedFolder> childFolders = new ArrayList<FeedFolder>();
+        List<Long> childIDs = new ArrayList<Long>();
         while (childRS.next()) {
             long childID = childRS.getLong(1);
-            childFolders.add(getFolder(childID, fields, conn));
+            childIDs.add(childID);
         }
         childFoldersStmt.close();
+        for (Long childID : childIDs) {
+            childFolders.add(getFolder(childID, fields, conn));
+        }
         feedFolder.setChildFolders(childFolders);
         return feedFolder;
     }
@@ -411,11 +416,16 @@ public class FeedStorage {
                     }
                 }*/
                 for (AnalysisItem analysisItem : analysisItems) {
-                    analysisItem.reportSave(session);
-                    if (analysisItem.getAnalysisItemID() == 0) {
-                        session.save(analysisItem);
-                    } else {
-                        session.update(analysisItem);
+                    try {
+                        analysisItem.reportSave(session);
+                        if (analysisItem.getAnalysisItemID() == 0) {
+                            session.save(analysisItem);
+                        } else {
+                            session.update(analysisItem);
+                        }
+                    } catch (ConstraintViolationException e) {
+                        LogClass.error("On saving " + analysisItem.getAnalysisItemID());
+                        throw e;
                     }
                 }
                 session.flush();
@@ -477,6 +487,7 @@ public class FeedStorage {
             for (AnalysisItem item : analysisItems) {
                 item.afterLoad();
             }
+
         } finally {
             session.close();
         }
@@ -640,9 +651,7 @@ public class FeedStorage {
             feedDefinition.setSize(feedSize);
             feedDefinition.setDateCreated(createDate);
             feedDefinition.setDateUpdated(updateDate);
-            if (!feedType.equals(FeedType.ANALYSIS_BASED)) {
-                retrieveFields(feedDefinition, conn);
-            }
+            retrieveFields(feedDefinition, conn);
             feedDefinition.setAttribution(attribution);
             feedDefinition.setDescription(description);
             feedDefinition.setOwnerName(ownerName);
