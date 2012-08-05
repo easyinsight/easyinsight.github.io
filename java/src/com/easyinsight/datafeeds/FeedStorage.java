@@ -424,7 +424,7 @@ public class FeedStorage {
                             session.update(analysisItem);
                         }
                     } catch (ConstraintViolationException e) {
-                        LogClass.error("On saving " + analysisItem.getAnalysisItemID());
+                        LogClass.error("On saving " + analysisItem.toDisplay() + " - " + analysisItem.getAnalysisItemID());
                         throw e;
                     }
                 }
