@@ -62,6 +62,11 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
         return false;
     }
 
+    @Override
+    protected String getUpdateKeyName() {
+        return PROJECT_ID;
+    }
+
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
 
