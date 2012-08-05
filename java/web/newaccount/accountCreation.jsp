@@ -1,6 +1,7 @@
 <%@ page import="java.net.URLEncoder" %>
 <%@ page import="com.easyinsight.users.Account" %>
-<%@ page import="com.easyinsight.users.UserService" %><%
+<%@ page import="com.easyinsight.users.UserService" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %><%
     String firstName = request.getParameter("firstName");
     String lastName = request.getParameter("lastName");
     String email = request.getParameter("email");
@@ -58,7 +59,7 @@
         }
     }
     if (errorString == null) {
-        response.sendRedirect("accountCreated.jsp");
+        response.sendRedirect(RedirectUtil.getURL(request, "/app/newaccount/accountCreated.jsp"));
         return;
     } else {
         request.getSession().setAttribute("errorString", errorString);
@@ -66,7 +67,7 @@
         request.getSession().setAttribute("lastName", lastName);
         request.getSession().setAttribute("email", email);
         request.getSession().setAttribute("company", company);
-        response.sendRedirect("index.jsp");
+        response.sendRedirect(RedirectUtil.getURL(request, "/app/newaccount/index.jsp"));
         return;
     }
 %>
