@@ -90,6 +90,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 dataSources.add(definition);
                 CompositeFeedNode node = new CompositeFeedNode();
                 node.setDataFeedID(definition.getDataFeedID());
+                node.setDataSourceType(feedType.getType());
                 feedMap.put(definition.getFeedType(), definition);
                 nodes.add(node);
             }
@@ -134,7 +135,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             IServerDataSourceDefinition targetDef = feedMap.get(childConnection.getTargetFeedType());
             
             CompositeFeedConnection connection = childConnection.createConnection(sourceDef, targetDef);
-            connections.add(connection);
+            if (connection != null) {
+                connections.add(connection);
+            }
         }
         connections.addAll(getAdditionalConnections());
         return connections;

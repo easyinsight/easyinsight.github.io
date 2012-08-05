@@ -81,7 +81,13 @@ public class ChildConnection {
     public CompositeFeedConnection createConnection(IServerDataSourceDefinition sourceDef, IServerDataSourceDefinition targetDef) {
         if (fixedKey == null) {
             Key sourceKey = sourceDef.getField(getSourceKey());
+            if (sourceKey == null) {
+                return null;
+            }
             Key targetKey = targetDef.getField(getTargetKey());
+            if (targetKey == null) {
+                return null;
+            }
             return new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
                         sourceKey, targetKey, sourceDef.getFeedName(), targetDef.getFeedName(), leftJoin, rightJoin, leftOriginal, rightOriginal);
         } else {
