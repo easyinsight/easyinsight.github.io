@@ -80,8 +80,14 @@ public class ChildConnection {
 
     public CompositeFeedConnection createConnection(IServerDataSourceDefinition sourceDef, IServerDataSourceDefinition targetDef) {
         if (fixedKey == null) {
+            if (sourceDef == null) {
+                return null;
+            }
             Key sourceKey = sourceDef.getField(getSourceKey());
             if (sourceKey == null) {
+                return null;
+            }
+            if (targetDef == null) {
                 return null;
             }
             Key targetKey = targetDef.getField(getTargetKey());
