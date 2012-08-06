@@ -846,7 +846,7 @@ public class ExportService {
             }
             valueString = sdf.format(dateValue.getDate());
         } else {
-            valueString = value.toString();
+            valueString = value.toHTMLString();
             if (pdf && headerItem.hasType(AnalysisItemTypes.TEXT)) {
                 AnalysisText text = (AnalysisText) headerItem;
                 if (text.isHtml()) {
