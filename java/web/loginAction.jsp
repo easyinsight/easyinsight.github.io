@@ -43,6 +43,7 @@
             /*if (userServiceResponse.isFirstLogin()) {
                 response.sendRedirect(RedirectUtil.getURL(request, "/app/user/initialUserSetup.jsp"));
             } else {*/
+            session.removeAttribute("loginRedirect");
                 String redirectUrl = RedirectUtil.getURL(request, "/app/");
                 //System.out.println("Redirect url = " + oldRedirectUrl);
                 if(oldRedirectUrl != null) {

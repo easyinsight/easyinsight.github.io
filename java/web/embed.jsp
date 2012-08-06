@@ -25,6 +25,7 @@
         InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossible(reportID);
         if (insightResponse.getStatus() == InsightResponse.NEED_LOGIN) {
             if (session.getAttribute("accountID") == null) {
+                System.out.println(request.getRequestURI() + "?" + request.getQueryString());
                 session.setAttribute("loginRedirect", request.getRequestURI() + "?" + request.getQueryString());
                 response.sendRedirect(RedirectUtil.getURL(request, "/app/login.jsp"));
                 return;
