@@ -1,5 +1,6 @@
 package com.easyinsight.core;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
@@ -18,6 +19,11 @@ public class StringValue extends Value implements Serializable {
     }
 
     @Override
+    public String toHTMLString() {
+        return StringEscapeUtils.escapeHtml(value);
+    }
+
+    @Override
     public String toString() {
         return value;
     }
@@ -30,6 +36,12 @@ public class StringValue extends Value implements Serializable {
         super(originalValue);
         setSortValue(originalValue);
         this.value = value;
+    }
+
+    public StringValue(String value, Value originalValue, Value sortValue) {
+        this.value = value;
+        setOriginalValue(originalValue);
+        setSortValue(sortValue);
     }
 
     public void setValue(String value) {

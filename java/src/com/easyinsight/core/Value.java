@@ -75,6 +75,10 @@ public abstract class Value implements Serializable, Comparable<Value> {
         this.links = links;
     }
 
+    public String toHTMLString() {
+        return toString();
+    }
+
     public abstract int type();
 
     public abstract Double toDouble();
