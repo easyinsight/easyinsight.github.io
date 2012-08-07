@@ -68,7 +68,7 @@ public class EIAdminServlet extends HttpServlet {
                     SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
                             userResponse.getAccountType(), userResponse.isAccountAdmin(), userResponse.getFirstDayOfWeek(), userResponse.getPersonaName());
                     List<AccountAdminTO> accounts = new EIAccountManagementService().getAccounts();
-                    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd hh:mm");
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                     for (AccountAdminTO account : accounts) {
                         JSONObject obj = new JSONObject();
                         obj.put("AccountName", account.getName());
