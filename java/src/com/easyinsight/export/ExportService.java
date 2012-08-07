@@ -449,7 +449,7 @@ public class ExportService {
                             j == crosstab.getRowSections().size() + crosstabDefinition.getColumns().size() + 1) {
                         sb.append("<td style=\""+summaryCell+"\"></td>");
                     } else {
-                        sb.append("<td></td>");
+                        sb.append("<td style=\"" + headerCell + "\"></td>");
                     }
                 } else {
                     if (crosstabValue.getHeader() == null) {
