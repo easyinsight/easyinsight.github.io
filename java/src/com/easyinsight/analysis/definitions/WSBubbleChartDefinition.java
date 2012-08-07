@@ -119,7 +119,7 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        argh = "$.getJSON('/app/bubbleChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, Chart.getCallback('"+ targetDiv + "', " + argh + "))";
+        argh = "$.getJSON('/app/bubbleChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('"+ targetDiv + "', " + argh + "))";
         System.out.println(argh);
         return argh;
     }
