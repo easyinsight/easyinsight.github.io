@@ -814,15 +814,15 @@ public class ExportService {
             } else if (dateDim.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL ||
                     dateDim.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
                 if (dateFormat == 0) {
-                    sdf = new SimpleDateFormat("MM/dd/yyyy hh:mm");
+                    sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm");
                 } else if (dateFormat == 1) {
-                    sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+                    sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                 } else if (dateFormat == 2) {
-                    sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm");
+                    sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
                 } else if (dateFormat == 3) {
-                    sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm");
+                    sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                 } else if (dateFormat == 4) {
-                    sdf = new SimpleDateFormat("dd.MM.yyyy hh:mm");
+                    sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
                 }
             } else {
                 if (dateFormat == 0) {
