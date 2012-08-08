@@ -149,11 +149,13 @@ public class RescareTest extends TestCase implements ITestConstants {
         EIConnection conn = Database.instance().getConnection();
         try {
             createReport(conn);
-            Results results = report.runReport(conn);
+
             String participant3 = "135790";
             participants.addRow(participant3, "2012-07-01");
             appointments.addRow("7", participant3, "Orientation", "2012-07-02", "0");
             referrals.addRow("7", participant3, "WEP", "2012-07-08");
+
+            Results results = report.runReport(conn);
             results.verifyRow(participant3, "7", "2012-07-02", "7", "2012-07-05");
         } finally {
             Database.closeConnection(conn);
@@ -164,10 +166,12 @@ public class RescareTest extends TestCase implements ITestConstants {
         EIConnection conn = Database.instance().getConnection();
         try {
             createReport(conn);
-            Results results = report.runReport(conn);
+
             String participant4 = "124589";
             participants.addRow(participant4, "2012-05-30");
             appointments.addRow("8", participant4, "Orientation", "2012-05-30", "0");
+
+            Results results = report.runReport(conn);
             results.verifyRow(participant4, "8", "2012-05-30", "", "2012-06-01");
         } finally {
             Database.closeConnection(conn);
@@ -178,11 +182,13 @@ public class RescareTest extends TestCase implements ITestConstants {
         EIConnection conn = Database.instance().getConnection();
         try {
             createReport(conn);
-            Results results = report.runReport(conn);
+
             String participant5 = "888888";
             participants.addRow(participant5, beforeToday);
             appointments.addRow("9", participant5, "Orientation", beforeToday, "0");
-            results.verifyRow(participant5, "9", beforeToday, "", "");
+
+            Results results = report.runReport(conn);
+            results.verifyRow(participant5, "9", beforeToday, "", new Date(0));
         } finally {
             Database.closeConnection(conn);
         }
