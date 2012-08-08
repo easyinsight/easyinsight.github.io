@@ -528,9 +528,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 return null;
             }
             table = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
-        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.FORM) {
+        } /*else if (analysisDefinition.getReportType() == WSAnalysisDefinition.FORM) {
             table = analysisDefinition.toExportHTML(conn, insightRequestMetadata);
-        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
+        } */else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
             table = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, sendIfNoData, includeTitle);
