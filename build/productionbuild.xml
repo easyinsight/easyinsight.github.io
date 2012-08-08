@@ -394,7 +394,7 @@
 
                 <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
                     <url rsl-url="https://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                    <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
+                    <url rsl-url="https://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
                 </runtime-shared-library-path>
 
                 <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
