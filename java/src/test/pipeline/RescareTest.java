@@ -7,10 +7,7 @@ import com.easyinsight.datafeeds.FeedRegistry;
 import junit.framework.TestCase;
 import test.util.TestUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -36,6 +33,7 @@ public class RescareTest extends TestCase implements ITestConstants {
         TestUtil.getIndividualTestUser();
 
         today = new Date();
+
 
         afterToday = new Date(today.getTime() + 2 * 60 * 60 * 24 * 1000);
         beforeToday = new Date(today.getTime() - 2 * 60 * 60 * 24 * 1000);
@@ -121,7 +119,7 @@ public class RescareTest extends TestCase implements ITestConstants {
             referrals.addRow("5", "123456", "WEP", "2012-06-20");
 
             Results results = report.runReport(conn);
-            results.verifyRow("123456", "6", "2012-06-08", "3");
+            results.verifyRow("123456", "6", "2012-06-08", "3", "2012-06-08");
             results.verifyRowCount(1);
         } finally {
             Database.closeConnection(conn);
@@ -172,7 +170,7 @@ public class RescareTest extends TestCase implements ITestConstants {
             appointments.addRow("8", participant4, "Orientation", "2012-05-30", "0");
 
             Results results = report.runReport(conn);
-            results.verifyRow(participant4, "8", "2012-05-30", "", "2012-06-01");
+            results.verifyRow(participant4, "8", "2012-05-30", "(Empty)", "2012-06-02");
         } finally {
             Database.closeConnection(conn);
         }
@@ -188,7 +186,7 @@ public class RescareTest extends TestCase implements ITestConstants {
             appointments.addRow("9", participant5, "Orientation", beforeToday, "0");
 
             Results results = report.runReport(conn);
-            results.verifyRow(participant5, "9", beforeToday, "", new Date(0));
+            results.verifyRow(participant5, "9", beforeToday, "(Empty)", 0);
         } finally {
             Database.closeConnection(conn);
         }

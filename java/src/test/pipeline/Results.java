@@ -2,11 +2,13 @@ package test.pipeline;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
+import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
 import junit.framework.Assert;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -50,14 +52,24 @@ public class Results {
                     Date targetDate;
                     if (target instanceof Date) {
                         targetDate = (Date) target;
+                        Calendar c = Calendar.getInstance();
+                        c.setTime(targetDate);
+                        Calendar d = Calendar.getInstance();
+                        d.setTime(((DateValue) value).getDate());
+
+                        validRow = validRow && d.get(Calendar.YEAR) == c.get(Calendar.YEAR) && d.get(Calendar.DAY_OF_YEAR) == c.get(Calendar.DAY_OF_YEAR);
                     } else if (target instanceof String) {
                         AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
                         SimpleDateFormat sdf = new SimpleDateFormat(dateDim.getCustomDateFormat());
                         targetDate = sdf.parse((String) target);
+                        validRow = validRow && ((DateValue) value).getDate().equals(targetDate);
+                    } else if (target instanceof Number) {
+                        validRow = validRow && ((NumericValue) value).getValue() == ((Number) target).doubleValue();
                     } else {
                         throw new RuntimeException();
                     }
-                    validRow = validRow && ((DateValue) value).getDate().equals(targetDate);
+
+
                 } else {
                     String string = (String) target;
                     validRow = validRow && value.toString().equals(string);
