@@ -1,18 +1,19 @@
 package test.pipeline;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.WSListDefinition;
+import com.easyinsight.analysis.*;
+import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
 import junit.framework.Assert;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
-* User: jamesboe
-* Date: 7/19/12
-* Time: 1:30 PM
-*/
+ * User: jamesboe
+ * Date: 7/19/12
+ * Time: 1:30 PM
+ */
 public class Results {
     private DataSet dataSet;
     private WSListDefinition report;
@@ -34,7 +35,7 @@ public class Results {
         Assert.assertEquals("Counts did not match. Data set contents were: " + dataSet.getRows(), count, dataSet.getRows().size());
     }
 
-    public void verifyRow(Object... values) {
+    public void verifyRow(Object... values) throws Exception {
         boolean found = false;
         for (IRow row : dataSet.getRows()) {
             boolean validRow = true;
@@ -45,6 +46,18 @@ public class Results {
                 if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     Number number = (Number) target;
                     validRow = validRow && number.intValue() == value.toDouble().intValue();
+                } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    Date targetDate;
+                    if (target instanceof Date) {
+                        targetDate = (Date) target;
+                    } else if (target instanceof String) {
+                        AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
+                        SimpleDateFormat sdf = new SimpleDateFormat(dateDim.getCustomDateFormat());
+                        targetDate = sdf.parse((String) target);
+                    } else {
+                        throw new RuntimeException();
+                    }
+                    validRow = validRow && ((DateValue) value).getDate().equals(targetDate);
                 } else {
                     String string = (String) target;
                     validRow = validRow && value.toString().equals(string);
