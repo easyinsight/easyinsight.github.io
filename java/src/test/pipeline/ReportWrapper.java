@@ -82,9 +82,33 @@ public class ReportWrapper {
     }
 
     public FieldWrapper addCalculation(String calculationName, String calculationString) {
+        return addCalculation(calculationName, calculationString, true);
+    }
+
+    public FieldWrapper addCalculation(String calculationName, String calculationString, boolean applyBeforeAggregation) {
         AnalysisCalculation calculation = new AnalysisCalculation();
         calculation.setKey(new NamedKey(calculationName));
         calculation.setCalculationString(calculationString);
+        calculation.setApplyBeforeAggregation(applyBeforeAggregation);
+        listDefinition.getAddedItems().add(calculation);
+        return new FieldWrapper(calculation);
+    }
+
+    public FieldWrapper addDerivedDate(String calculationName, String calculationString, boolean applyBeforeAggregation, int dateLevel) {
+        DerivedAnalysisDateDimension calculation = new DerivedAnalysisDateDimension();
+        calculation.setKey(new NamedKey(calculationName));
+        calculation.setDerivationCode(calculationString);
+        calculation.setApplyBeforeAggregation(applyBeforeAggregation);
+        calculation.setDateLevel(dateLevel);
+        listDefinition.getAddedItems().add(calculation);
+        return new FieldWrapper(calculation);
+    }
+
+    public FieldWrapper addDerivedGrouping(String calculationName, String calculationString, boolean applyBeforeAggregation) {
+        DerivedAnalysisDimension calculation = new DerivedAnalysisDimension();
+        calculation.setKey(new NamedKey(calculationName));
+        calculation.setDerivationCode(calculationString);
+        calculation.setApplyBeforeAggregation(applyBeforeAggregation);
         listDefinition.getAddedItems().add(calculation);
         return new FieldWrapper(calculation);
     }
