@@ -362,7 +362,15 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_ACTIVITIES, HighRiseDealSource.DEAL_ID,
                         HighRiseActivitySource.DEAL_ID),
                 new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_ACTIVITIES, HighRiseCaseSource.CASE_ID,
-                        HighRiseActivitySource.CASE_ID)));
+                        HighRiseActivitySource.CASE_ID),
+                new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_ACTIVITIES, HighRiseContactSource.CONTACT_ID,
+                        HighRiseActivitySource.CONTACT_ID),
+                new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_ACTIVITIES, HighRiseCompanySource.COMPANY_ID,
+                        HighRiseActivitySource.COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_ACTIVITIES, HighRiseCaseSource.CASE_ID,
+                        HighRiseActivitySource.CASE_ID),
+                new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_ACTIVITIES, HighRiseDealSource.DEAL_ID,
+                        HighRiseActivitySource.DEAL_ID)));
         return connections;
     }
 
@@ -701,16 +709,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                     new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_COMPANY, HighRiseCaseJoinSource.COMPANY_ID,
                             HighRiseCompanySource.COMPANY_ID),
                     new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CONTACTS, HighRiseCaseJoinSource.CONTACT_ID,
-                            HighRiseContactSource.CONTACT_ID),
-                    new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_ACTIVITIES, HighRiseContactSource.CONTACT_ID,
-                            HighRiseActivitySource.CONTACT_ID),
-                    new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_ACTIVITIES, HighRiseCompanySource.COMPANY_ID,
-                            HighRiseActivitySource.COMPANY_ID),
-                    new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_ACTIVITIES, HighRiseCaseSource.CASE_ID,
-                            HighRiseActivitySource.CASE_ID),
-                    new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_ACTIVITIES, HighRiseDealSource.DEAL_ID,
-                            HighRiseActivitySource.DEAL_ID)
-                    ), fields)));
+                            HighRiseContactSource.CONTACT_ID)), fields)));
             intentions.add(new AddFilterIntention(excludeFilter(HighRiseDealSource.DEAL_NAME, report, fields)));
             ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
             reportPropertiesIntention.setFullJoins(true);
@@ -790,6 +789,9 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             taskCompleted.setKey(new NamedKey("Task Completed"));
             taskCompleted.setDisplayName("Task Completed");
             taskCompleted.setConcrete(false);
+            // .png, jquery video
+            //
+
             taskCompleted.setDerivationCode("greaterthan([Task Done At], 0, \"Completed\", \"Not Completed\")");
             intentions.add(new CustomFieldIntention(taskCompleted));
             AnalysisCalculation daysToDue = new AnalysisCalculation();
