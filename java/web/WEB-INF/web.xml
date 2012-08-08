@@ -391,6 +391,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>PlotChart</servlet-name>
+        <display-name>PlotChart</display-name>
+        <servlet-class>com.easyinsight.html.PlotChartServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>DiagramChart</servlet-name>
         <display-name>DiagramChart</display-name>
         <servlet-class>com.easyinsight.html.DiagramChartServlet</servlet-class>
@@ -586,6 +593,11 @@
     <servlet-mapping>
         <servlet-name>BubbleChart</servlet-name>
         <url-pattern>/bubbleChart</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>PlotChart</servlet-name>
+        <url-pattern>/plotChart</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

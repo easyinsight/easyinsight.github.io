@@ -68,16 +68,24 @@
     <script type="text/javascript" src="/js/jquery.datePicker.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
 
+
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet" />
+    <link href="/css/app.css" rel="stylesheet" />
+    <link href="/css/datePicker.css" rel="stylesheet" />
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="/js/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
+
     <style type="text/css">
         body {
             padding-top: 40px;
             padding-bottom: 40px;
         }
     </style>
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
-    <link href="/css/datePicker.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.js"></script>
-    <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
     <%
         Set<String> jsIncludes = new HashSet<String>(dashboard.getRootElement().jsIncludes());
         for (String jsInclude : jsIncludes) {
@@ -88,9 +96,6 @@
             out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\""+cssInclude+"\" />");
         }
     %>
-    <link href="/css/app.css" rel="stylesheet">
-    <link href="/css/diagram.css" rel="stylesheet" />
-    <script type="text/javascript" src="/js/diagram.js"></script>
     <script type="text/javascript">
 
         var filterBase = {};
@@ -126,9 +131,12 @@
                 // running
                 again(callDataID);
             } else if (status == 2) {
-                alert('done');
+                $("#refreshDiv").hide();
+                refreshReport();
             } else {
-                alert('failed');
+                $("#refreshDiv").hide();
+                $("#problemHTML").show();
+                $("#problemHTML").html(data["problemHTML"]);
             }
         }
 
@@ -202,6 +210,17 @@
 </div>
 <% } %>
 <div class="container">
+    <div class="row-fluid">
+        <div class="span12" style="text-align:center" id="refreshDiv">
+            Refreshing the data source...
+            <div class="progress progress-striped active">
+                <div class="bar"
+                     style="width: 100%;"></div>
+            </div>
+        </div>
+        <div class="span12" style="text-align:center" id="problemHTML">
+        </div>
+    </div>
     <div class="row">
         <div class="span12">
             <%= dashboard.getRootElement().toHTML(new FilterHTMLMetadata(dashboard, request)) %>

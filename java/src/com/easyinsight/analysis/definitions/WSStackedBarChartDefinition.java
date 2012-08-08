@@ -121,8 +121,8 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
             JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
             JSONObject axes = new JSONObject();
-            axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
-            axes.put("xaxis", getGroupingAxis(getYaxis()));
+            axes.put("xaxis", getMeasureAxis(getMeasures().get(0)));
+            axes.put("yaxis", getGroupingAxis(getYaxis()));
             jsonParams.put("axes", axes);
             JSONArray seriesColors = getSeriesColors();
             jsonParams.put("seriesColors", seriesColors);

@@ -11,6 +11,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import com.itextpdf.text.DocumentException;
 import org.hibernate.Session;
+import org.jetbrains.annotations.Nullable;
 
 import javax.mail.MessagingException;
 import javax.persistence.Column;
@@ -505,6 +506,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
     }
 
+    @Nullable
     public static String createHTMLTable(EIConnection conn, WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean sendIfNoData, boolean includeTitle) throws SQLException {
         String table;
         if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
@@ -513,10 +515,6 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 return null;
             }
             table = ExportService.verticalListToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
-        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST_COMBINED) {
-            List<DataSet> dataSets = DataService.getEmbeddedVerticalDataSets((WSCombinedVerticalListDefinition) analysisDefinition,
-                    insightRequestMetadata, conn);
-            table = ExportService.combinedVerticalListToHTMLTable(analysisDefinition, dataSets, conn, insightRequestMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.YTD) {
             table = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREE) {
@@ -530,6 +528,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 return null;
             }
             table = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
+        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.FORM) {
+            table = analysisDefinition.toExportHTML(conn, insightRequestMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {

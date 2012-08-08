@@ -1,9 +1,7 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.ChartDefinitionState;
-import com.easyinsight.analysis.ReportBooleanProperty;
-import com.easyinsight.analysis.ReportProperty;
-import com.easyinsight.analysis.ReportStringProperty;
+import com.easyinsight.analysis.*;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,10 +50,13 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
-        includes.add("/js/plugins/jqplot.barRenderer.min.js");
         includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
+        includes.add("/js/plugins/jqplot.enhancedLegendRenderer.min.js");
+        includes.add("/js/visualizations/chart.js");
+        includes.add("/js/visualizations/util.js");
         return includes;
     }
 
@@ -65,31 +66,48 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
         JSONObject params;
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
-
+            JSONObject legend = getLegend();
+            jsonParams.put("legend", legend);
             jsonParams.put("stackSeries", "true");
             jsonParams.put("showMarker", "false");
             JSONObject seriesDefaults = new JSONObject();
             seriesDefaults.put("fill", "true");
 
-            //seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
-            //JSONObject rendererOptions = new JSONObject();
-            //rendererOptions.put("fillToZero", "true");
-            //seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
             JSONObject axes = new JSONObject();
-            JSONObject xAxis = new JSONObject();
+            JSONObject xAxis = getGroupingAxis(getXaxis());
             xAxis.put("renderer", "$.jqplot.DateAxisRenderer");
-            //JSONObject xAxisTicketOptions = new JSONObject();
-            //xAxis.put("tickOptions", xAxisTicketOptions);
+
+            JSONObject xAxisTickOptions = xAxis.getJSONObject("tickOptions");
+            AnalysisDateDimension date = (AnalysisDateDimension) this.getXaxis();
+            if (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
+                xAxisTickOptions.put("formatString", "'%b %#d'");
+            } else if (date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+                xAxisTickOptions.put("formatString", "'%b'");
+            } else if (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
+                xAxisTickOptions.put("formatString", "'%b'");
+            } else {
+                xAxisTickOptions.put("formatString", "'%b %#d'");
+            }
+
+            xAxis.put("tickOptions", xAxisTickOptions);
             axes.put("xaxis", xAxis);
-            //JSONObject yAxis = new JSONObject();
-            //JSONObject tickOptions = new JSONObject();
-            //tickOptions.put("formatString", "'%d'");
-            //yAxis.put("tickOptions", tickOptions);
-            //axes.put("yaxis", yAxis);
+            if (getMeasure() != null) {
+                axes.put("yaxis", getMeasureAxis(getMeasure()));
+            }
             jsonParams.put("axes", axes);
+            JSONObject highlighter = new JSONObject();
+            highlighter.put("show", true);
+            highlighter.put("sizeAdjust", 7.5);
+            highlighter.put("useAxesFormatters", "true");
+            jsonParams.put("highlighter", highlighter);
+            JSONObject cursor = new JSONObject();
+            cursor.put("show", false);
+            jsonParams.put("cursor", cursor);
+            JSONArray seriesColors = getSeriesColors();
+            jsonParams.put("seriesColors", seriesColors);
             params = new JSONObject(jsonParams);
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -98,9 +116,10 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
         argh = argh.replaceAll("\"", "");
 
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {afterRefresh();\n" +
+        /*argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {afterRefresh();\n" +
                 "                var s1 = data[\"values\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");\n})";
+                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");\n})";*/
+        argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true))";
         System.out.println(argh);
         return argh;
     }

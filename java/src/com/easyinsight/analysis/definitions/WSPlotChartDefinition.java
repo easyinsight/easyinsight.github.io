@@ -3,11 +3,10 @@ package com.easyinsight.analysis.definitions;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.WSChartDefinition;
 import com.easyinsight.analysis.ChartDefinitionState;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.util.Map;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -95,5 +94,35 @@ public class WSPlotChartDefinition extends WSChartDefinition {
 
     public int getChartFamily() {
         return ChartDefinitionState.PLOT_FAMILY;
+    }
+
+    @Override
+    public String toHTML(String targetDiv) {
+
+        JSONObject params;
+        try {
+            Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
+
+            JSONObject seriesDefaults = new JSONObject();
+            seriesDefaults.put("renderer", "$.jqplot.BubbleRenderer");
+
+            JSONObject rendererOptions = new JSONObject();
+            //rendererOptions.put("fillToZero", "true");
+            rendererOptions.put("bubbleGradients", "false");
+            seriesDefaults.put("rendererOptions", rendererOptions);
+            seriesDefaults.put("shadow", true);
+            jsonParams.put("seriesDefaults", seriesDefaults);
+            JSONObject grid = getGrid();
+            jsonParams.put("grid", grid);
+            params = new JSONObject(jsonParams);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        String argh = params.toString();
+        argh = argh.replaceAll("\"", "");
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        argh = "$.getJSON('/app/bubbleChart?reportID="+getAnalysisID()+timezoneOffset+"&'+ strParams, Chart.getCallback('"+ targetDiv + "', " + argh + "))";
+        System.out.println(argh);
+        return argh;
     }
 }

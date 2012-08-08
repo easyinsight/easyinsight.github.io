@@ -3,6 +3,7 @@ package com.easyinsight.html;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSTwoAxisDefinition;
 import com.easyinsight.core.DateValue;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import org.json.JSONArray;
@@ -12,10 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -45,7 +43,11 @@ public class LineChartServlet extends HtmlServlet {
                     JSONArray values = new JSONArray();
                     measureArray.put(values);
                     values.put(dateFormat.format(dateValue.getDate()));
-                    values.put(row.getValue(measure).toDouble());
+                    if (row.getValue(measure).toDouble() == 0) {
+                        values.put(1);
+                    } else {
+                        values.put(row.getValue(measure).toDouble());
+                    }
                 }
             }
         } else {
@@ -53,30 +55,57 @@ public class LineChartServlet extends HtmlServlet {
             AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
             AnalysisItem yAxis = twoAxisDefinition.getYaxis();
 
-            Map<String, JSONArray> series = new HashMap<String, JSONArray>();
+            Map<String, Map<Date, Double>> series = new HashMap<String, Map<Date, Double>>();
 
-
+            Set<Date> xAxisValues = new HashSet<Date>();
 
             for (IRow row : dataSet.getRows()) {
                 String yAxisValue = row.getValue(yAxis).toString();
-                JSONArray array = series.get(yAxisValue);
+                Map<Date, Double> array = series.get(yAxisValue);
                 if (array == null) {
-                    array = new JSONArray();
+                    array = new HashMap<Date, Double>();
                     series.put(yAxisValue, array);
                 }
                 JSONArray values = new JSONArray();
                 DateValue dateValue = (DateValue) row.getValue(date);
-                values.put(dateFormat.format(dateValue.getDate()));
+                String formattedDate = dateFormat.format(dateValue.getDate());
+                xAxisValues.add(dateValue.getDate());
+                values.put(formattedDate);
                 values.put(row.getValue(measure).toDouble());
-                array.put(values);
+                array.put(dateValue.getDate(), row.getValue(measure).toDouble());
+                //array.put(values);
             }
 
 
-            for (Map.Entry<String, JSONArray> entry : series.entrySet()) {
+            for (Map.Entry<String, Map<Date, Double>> entry : series.entrySet()) {
+                Set<Date> uniques = new HashSet<Date>();
+                for (Map.Entry<Date, Double> entry1 : entry.getValue().entrySet()) {
+                    uniques.add(entry1.getKey());
+                }
+                for (Date xAxisValue : xAxisValues) {
+                    if (!uniques.contains(xAxisValue)) {
+                        JSONArray ph = new JSONArray();
+                        ph.put(xAxisValue);
+                        ph.put(0.0);
+                        entry.getValue().put(xAxisValue, 0.0);
+                    }
+                }
                 labelArray.put(entry.getKey());
-                blahArray.put(entry.getValue());
+                List<Date> dates = new ArrayList<Date>(entry.getValue().keySet());
+                Collections.sort(dates);
+                JSONArray array = new JSONArray();
+                for (Date x : dates) {
+                    JSONArray point = new JSONArray();
+                    String formattedDate = dateFormat.format(x);
+                    point.put(formattedDate);
+                    point.put(entry.getValue().get(x));
+                    array.put(point);
+                }
+                blahArray.put(array);
             }
         }
+
+
 
         // object.put("ticks", ticks);
 

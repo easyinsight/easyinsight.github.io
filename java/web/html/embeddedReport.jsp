@@ -61,6 +61,18 @@
     <script type="text/javascript" src="/js/jquery.datePicker.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
 
+
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet" />
+    <link href="/css/app.css" rel="stylesheet" />
+    <link href="/css/datePicker.css" rel="stylesheet" />
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="/js/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
+
     <style type="text/css">
 
         #refreshDiv {
@@ -71,11 +83,6 @@
             display: none;
         }
     </style>
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
-    <link href="/css/app.css" rel="stylesheet">
-    <link href="/css/datePicker.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.js"></script>
-    <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
     <%
         List<String> jsIncludes = report.javaScriptIncludes();
         for (String jsInclude : jsIncludes) {

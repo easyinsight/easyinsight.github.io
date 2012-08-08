@@ -9,7 +9,6 @@
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="com.easyinsight.preferences.ImageDescriptor" %>
-<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -58,12 +57,25 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
+    <meta charset="utf-8">
     <meta name="author" content="">
     <title>Easy Insight &mdash; <%= StringEscapeUtils.escapeHtml(report.getName()) %></title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="/js/date.js"></script>
     <script type="text/javascript" src="/js/jquery.datePicker.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
+
+
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet" />
+    <link href="/css/app.css" rel="stylesheet" />
+    <link href="/css/datePicker.css" rel="stylesheet" />
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="/js/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
 
     <style type="text/css">
         body {
@@ -79,16 +91,6 @@
         }
 
     </style>
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet" />
-    <link href="/css/app.css" rel="stylesheet" />
-    <link href="/css/datePicker.css" rel="stylesheet" />
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-    <script src="/js/html5.js"></script>
-    <![endif]-->
-    <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->
-    <script type="text/javascript" src="/js/bootstrap.js"></script>
-    <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
 
     <%
         List<String> jsIncludes = report.javaScriptIncludes();
@@ -100,6 +102,20 @@
             out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\""+cssInclude+"\" />");
         }
     %>
+    <style type="text/css">
+        body {
+            padding-top: 40px;
+        }
+
+        #refreshDiv {
+            display: none;
+        }
+
+        #problemHTML {
+            display: none;
+        }
+
+    </style>
     <script type="text/javascript">
 
         var filterBase = {};
@@ -295,7 +311,7 @@
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu pull-right">
-                    <li><button class="btn" type="button" onclick="window.location.href='../exportExcel?reportID=<%= report.getAnalysisID() %>'" style="padding:5px;margin:5px;width:150px">Export to Excel</button></li>
+                    <li><button class="btn" type="button" onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'" style="padding:5px;margin:5px;width:150px">Export to Excel</button></li>
                     <li><button class="btn" type="button" onclick="$('#emailReportWindow').modal(true, true, true)" style="padding:5px;margin:5px;width:150px">Email the Report</button></li>
                 </ul>
             </div>
