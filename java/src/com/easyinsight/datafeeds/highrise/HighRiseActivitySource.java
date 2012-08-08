@@ -77,10 +77,8 @@ public class HighRiseActivitySource extends HighRiseBaseSource {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
 
         DataSet ds = new DataSet();
-        if (!highRiseCompositeSource.isIncludeCaseNotes()) {
-            return ds;
-        }
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
+        Key noteKey = parentDefinition.getField(ACTIVITY_ID).toBaseKey();
         HttpClient client = getHttpClient(token.getTokenValue(), "");
 
         try {
@@ -90,25 +88,43 @@ public class HighRiseActivitySource extends HighRiseBaseSource {
             } else {
                 date = lastRefreshDate;
             }
-            HighriseRecordingsCache highriseActivitysCache = highRiseCompositeSource.getOrCreateRecordingsCache(client, date);
+            if (highRiseCompositeSource.isIncludeContactNotes() || highRiseCompositeSource.isIncludeCaseNotes() ||
+                    highRiseCompositeSource.isIncludeCompanyNotes() || highRiseCompositeSource.isIncludeDealNotes() ||
+                    highRiseCompositeSource.isIncludeEmails()) {
+                HighriseRecordingsCache highriseActivitysCache = highRiseCompositeSource.getOrCreateRecordingsCache(client, date);
 
-            List<Activity> activities = highriseActivitysCache.getActivities();
+                List<Activity> activities = highriseActivitysCache.getActivities();
 
-            Key noteKey = parentDefinition.getField(ACTIVITY_ID).toBaseKey();
 
-            if (lastRefreshDate == null) {
-                for (Activity Activity : activities) {
-                    IRow row = ds.createRow();
-                    activityToRow(Activity, row);
-                }
-            } else {
-                for (Activity Activity : activities) {
+
+                if (lastRefreshDate == null) {
+                    for (Activity activity : activities) {
+                        if (("Case Note".equals(activity.getActivityType()) && highRiseCompositeSource.isIncludeCaseNotes()) ||
+                                ("Company Note".equals(activity.getActivityType()) && highRiseCompositeSource.isIncludeCompanyNotes()) ||
+                                ("Contact Note".equals(activity.getActivityType()) && highRiseCompositeSource.isIncludeContactNotes()) ||
+                                ("Deal Note".equals(activity.getActivityType()) && highRiseCompositeSource.isIncludeDealNotes()) ||
+                                ("Email".equals(activity.getActivityType()) && highRiseCompositeSource.isIncludeEmails())) {
+                            IRow row = ds.createRow();
+                            activityToRow(activity, row);
+                        }
+                    }
+                    IDataStorage.insertData(ds);
                     ds = new DataSet();
-                    IRow row = ds.createRow();
-                    activityToRow(Activity, row);
-                    StringWhere userWhere = new StringWhere(noteKey, "Note"+Activity.getId());
-                    IDataStorage.updateData(ds, Arrays.asList((IWhere) userWhere));
-                    ds = null;
+                } else {
+                    for (Activity activity : activities) {
+                        ds = new DataSet();
+                        IRow row = ds.createRow();
+                        if (("Case Note".equals(activity.getActivityType()) && highRiseCompositeSource.isIncludeCaseNotes()) ||
+                                ("Company Note".equals(activity.getActivityType()) && highRiseCompositeSource.isIncludeCompanyNotes()) ||
+                                ("Contact Note".equals(activity.getActivityType()) && highRiseCompositeSource.isIncludeContactNotes()) ||
+                                ("Deal Note".equals(activity.getActivityType()) && highRiseCompositeSource.isIncludeDealNotes()) ||
+                                ("Email".equals(activity.getActivityType()) && highRiseCompositeSource.isIncludeEmails())) {
+                            activityToRow(activity, row);
+                            StringWhere userWhere = new StringWhere(noteKey, "Note"+activity.getId());
+                            IDataStorage.updateData(ds, Arrays.asList((IWhere) userWhere));
+                            ds = null;
+                        }
+                    }
                 }
             }
 
@@ -118,6 +134,8 @@ public class HighRiseActivitySource extends HighRiseBaseSource {
                     IRow row = ds.createRow();
                     taskToRow(task, row);
                 }
+                IDataStorage.insertData(ds);
+                ds = new DataSet();
             } else {
                 for (TaskInfo task : tasks) {
                     ds = new DataSet();
@@ -145,7 +163,7 @@ public class HighRiseActivitySource extends HighRiseBaseSource {
     private void taskToRow(TaskInfo taskInfo, IRow row) {
         row.addValue(BODY, taskInfo.getBody());
         row.addValue(ACTIVITY_ID, "Task"+taskInfo.getTaskID());
-        row.addValue(ACTIVITY_TYPE, "Task");
+        row.addValue(ACTIVITY_TYPE, taskInfo.getCategory());
         row.addValue(NOTE_AUTHOR, taskInfo.getAuthor());
         row.addValue(CONTACT_ID, taskInfo.getContactID());
         row.addValue(COMPANY_ID, taskInfo.getCompanyID());
