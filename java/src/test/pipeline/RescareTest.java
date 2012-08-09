@@ -189,7 +189,7 @@ public class RescareTest extends TestCase implements ITestConstants {
             appointments.addRow("9", participant5, "Orientation", beforeToday, "0");
 
             Results results = report.runReport(conn);
-            results.verifyRow(participant5, "9", beforeToday, "(Empty)", 0, "(Empty) ");
+            results.verifyRow(participant5, "9", beforeToday, "(Empty)", 0, "(Empty)");
         } finally {
             Database.closeConnection(conn);
         }
