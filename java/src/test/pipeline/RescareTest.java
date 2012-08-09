@@ -69,6 +69,9 @@ public class RescareTest extends TestCase implements ITestConstants {
         report.addDerivedDate("Counted Date", "greaterThan(Referral Date, 0, greaterThan(Time Between Referral and Orientation, 72, Appointment Date + (72 * 60 * 60 * 1000), Referral Date), greaterThan(Hours Since Orientation, 72, Appointment Date + (72 * 60 * 60 * 1000), 0))", false, AnalysisDateDimension.DAY_LEVEL);
         report.addField("Counted Date");
 
+        report.addDerivedGrouping("Referral Status", "greaterThan(Referral Date, 0, greaterThan(Time Between Referral and Orientation, 72, \"Not Referred\", \"Referred\"), greaterThan(Hours Since Orientation, 72, \"Not Referred\", \"\"))", false);
+        report.addField("Referral Status");
+
         RollingFilterDefinition rfd = new RollingFilterDefinition();
         rfd.setField(report.getField("Appointment Date").getAnalysisItem());
         rfd.setInterval(MaterializedRollingFilterDefinition.CUSTOM);
@@ -119,7 +122,7 @@ public class RescareTest extends TestCase implements ITestConstants {
             referrals.addRow("5", "123456", "WEP", "2012-06-20");
 
             Results results = report.runReport(conn);
-            results.verifyRow("123456", "6", "2012-06-08", "3", "2012-06-08");
+            results.verifyRow("123456", "6", "2012-06-08", "3", "2012-06-08", "Referred");
             results.verifyRowCount(1);
         } finally {
             Database.closeConnection(conn);
@@ -137,7 +140,7 @@ public class RescareTest extends TestCase implements ITestConstants {
 
             Results results = report.runReport(conn);
 
-            results.verifyRow(participant2, "6", "2012-06-08", "6", "2012-06-10");
+            results.verifyRow(participant2, "6", "2012-06-08", "6", "2012-06-10", "Referred");
         } finally {
             Database.closeConnection(conn);
         }
@@ -154,7 +157,7 @@ public class RescareTest extends TestCase implements ITestConstants {
             referrals.addRow("7", participant3, "WEP", "2012-07-08");
 
             Results results = report.runReport(conn);
-            results.verifyRow(participant3, "7", "2012-07-02", "7", "2012-07-05");
+            results.verifyRow(participant3, "7", "2012-07-02", "7", "2012-07-05", "Not Referred");
         } finally {
             Database.closeConnection(conn);
         }
@@ -170,7 +173,7 @@ public class RescareTest extends TestCase implements ITestConstants {
             appointments.addRow("8", participant4, "Orientation", "2012-05-30", "0");
 
             Results results = report.runReport(conn);
-            results.verifyRow(participant4, "8", "2012-05-30", "(Empty)", "2012-06-02");
+            results.verifyRow(participant4, "8", "2012-05-30", "(Empty)", "2012-06-02", "Not Referred");
         } finally {
             Database.closeConnection(conn);
         }
@@ -186,7 +189,7 @@ public class RescareTest extends TestCase implements ITestConstants {
             appointments.addRow("9", participant5, "Orientation", beforeToday, "0");
 
             Results results = report.runReport(conn);
-            results.verifyRow(participant5, "9", beforeToday, "(Empty)", 0);
+            results.verifyRow(participant5, "9", beforeToday, "(Empty)", 0, "(Empty)");
         } finally {
             Database.closeConnection(conn);
         }
