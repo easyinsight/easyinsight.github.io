@@ -45,7 +45,7 @@ class DataSourceWrapper implements  ITestConstants {
                 fields.add(new AnalysisMeasure(new NamedKey(paramName), AggregationTypes.SUM));
             } else if (type == DATE) {
                 AnalysisDateDimension date = new AnalysisDateDimension(new NamedKey(paramName), true, AnalysisDateDimension.DAY_LEVEL);
-                date.setDateOnlyField(true);
+                //date.setDateOnlyField(true);
                 fields.add(new AnalysisDateDimension(new NamedKey(paramName), true, AnalysisDateDimension.DAY_LEVEL));
             }
         }
