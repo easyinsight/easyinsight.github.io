@@ -44,6 +44,8 @@ class DataSourceWrapper implements  ITestConstants {
             } else if (type == MEASURE) {
                 fields.add(new AnalysisMeasure(new NamedKey(paramName), AggregationTypes.SUM));
             } else if (type == DATE) {
+                AnalysisDateDimension date = new AnalysisDateDimension(new NamedKey(paramName), true, AnalysisDateDimension.DAY_LEVEL);
+                date.setDateOnlyField(true);
                 fields.add(new AnalysisDateDimension(new NamedKey(paramName), true, AnalysisDateDimension.DAY_LEVEL));
             }
         }
@@ -53,6 +55,8 @@ class DataSourceWrapper implements  ITestConstants {
         feedDefinition.setUploadPolicy(uploadPolicy);
         feedDefinition.setFields(fields);
         FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), uploadPolicy);
+        result.getTableDefinitionMetadata().commit();
+        result.getTableDefinitionMetadata().closeConnection();
         feedDefinition.setDataFeedID(result.getFeedID());
         return new DataSourceWrapper(feedDefinition, conn);
     }
