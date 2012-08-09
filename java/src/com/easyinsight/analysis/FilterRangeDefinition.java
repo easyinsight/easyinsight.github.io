@@ -47,6 +47,15 @@ public class FilterRangeDefinition extends FilterDefinition {
         setApplyBeforeAggregation(false);
     }
 
+    public FilterRangeDefinition(AnalysisItem field, double range1, double range2) {
+        this();
+        setField(field);
+        setStartValue(range1);
+        setStartValueDefined(true);
+        setEndValue(range2);
+        setEndValueDefined(true);
+    }
+
     @Override
     public void beforeSave(Session session) {
         super.beforeSave(session);
