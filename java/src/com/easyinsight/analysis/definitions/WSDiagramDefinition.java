@@ -52,6 +52,6 @@ public class WSDiagramDefinition extends WSKPIDefinition {
     public String toHTML(String targetDiv) {
         String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
         String format = "$.getJSON(''/app/diagramChart?reportID={0}&{1}&''+ strParams, function(data) '{' window.drawDiagram(data, $(\"#{2}\"), ''{3}'') '}');";
-        return MessageFormat.format(format, getAnalysisID(), timezoneOffset, targetDiv, getAnalysisID());
+        return MessageFormat.format(format, getUrlKey(), timezoneOffset, targetDiv, getAnalysisID());
     }
 }
