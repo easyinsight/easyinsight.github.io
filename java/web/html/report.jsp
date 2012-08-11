@@ -311,7 +311,7 @@
 
 
 
-    <div class="container">
+    <div class="container-fluid">
         <div class="modal hide fade" id="exportModalWindow">
             <div class="modal-header">
                 <button data-dismiss="modal">×</button>
