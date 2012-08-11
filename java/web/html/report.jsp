@@ -296,7 +296,7 @@
 
 
 <div class="container-fluid">
-    <div class="row">
+    <div class="row-fluid">
         <div class="span12">
             <% if (applicationSkin != null && applicationSkin.isReportHeader()) { %>
             <div id="reportHeader" style="<%= headerStyle %>">
@@ -427,7 +427,7 @@
         </div>
 
 
-        <div class="row-fluid">
+        <div class="row">
             <div class="span12" style="text-align:center" id="refreshDiv">
                 Refreshing the data source...
                 <div class="progress progress-striped active">
