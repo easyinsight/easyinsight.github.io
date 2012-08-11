@@ -78,9 +78,6 @@
     <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
 
     <style type="text/css">
-        body {
-            padding-top: 40px;
-        }
 
         #refreshDiv {
             display: none;
@@ -310,7 +307,76 @@
 </div>
 
 
+<div class="container-fluid">
+    <div class="row-fluid">
+        <% if (applicationSkin != null && applicationSkin.isReportHeader()) { %>
+        <div id="reportHeader" style="<%= headerStyle %>">
+            <div style="padding:10px;float:left">
+                <div style="background-color: #FFFFFF;padding: 5px">
+                    <%
 
+                        if (headerImageDescriptor != null) {
+                            out.println("<img src=\"/app/reportHeader?imageID="+headerImageDescriptor.getId()+"\"/>");
+                        }
+                    %>
+                </div>
+            </div>
+            <div style="<%= headerTextStyle %>">
+                <%= StringEscapeUtils.escapeHtml(report.getName()) %>
+            </div>
+        </div>
+        <% } else { %>
+        <div style="<%= headerTextStyle %>">
+            <%= StringEscapeUtils.escapeHtml(report.getName()) %>
+        </div>
+        <% } %>
+    </div>
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="btn-toolbar">
+                <div class="btn-group">
+                    <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                        Export the Report
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><button class="btn" type="button" onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'" style="padding:5px;margin:5px;width:150px">Export to Excel</button></li>
+                        <li><button class="btn" type="button" onclick="$('#emailReportWindow').modal(true, true, true)" style="padding:5px;margin:5px;width:150px">Email the Report</button></li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                        Refresh Data
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><button class="btn" type="button" onclick="refreshReport()" style="padding:5px;margin:5px;width:150px">Refresh the Report</button></li>
+                        <%
+                            FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
+                            if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
+                        %>
+                        <li><button class="btn" type="button" id="refreshDataSourceButton" onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh Data Source</button></li>
+                        <%
+                            }
+                        %>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row-fluid" id="filterRow">
+        <div class="span12">
+            <%
+                for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
+                    if (filterDefinition.isShowOnReportView()) {
+                        out.println("<div class=\"filterDiv\">" + filterDefinition.toHTML(new FilterHTMLMetadata(report)) + "</div>");
+                    }
+                }
+            %>
+        </div>
+    </div>
+</div>
     <div class="container">
         <div class="modal hide fade" id="exportModalWindow">
             <div class="modal-header">
@@ -369,63 +435,8 @@
                 <button class="btn" data-dismiss="modal" onclick="email()">Send</button>
             </div>
         </div>
-        <div class="row-fluid">
-            <% if (applicationSkin != null && applicationSkin.isReportHeader()) { %>
-            <div id="reportHeader" style="<%= headerStyle %>">
-                <div style="padding:10px;float:left">
-                    <div style="background-color: #FFFFFF;padding: 5px">
-                        <%
 
-                            if (headerImageDescriptor != null) {
-                                out.println("<img src=\"/app/reportHeader?imageID="+headerImageDescriptor.getId()+"\"/>");
-                            }
-                        %>
-                    </div>
-                </div>
-                <div style="<%= headerTextStyle %>">
-                    <%= StringEscapeUtils.escapeHtml(report.getName()) %>
-                </div>
-            </div>
-            <% } else { %>
-            <div style="<%= headerTextStyle %>">
-                <%= StringEscapeUtils.escapeHtml(report.getName()) %>
-            </div>
-            <% } %>
-        </div>
-        <div class="row-fluid">
-            <div class="span12">
-                <div class="btn-toolbar">
-                    <div class="btn-group">
-                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                            Export the Report
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><button class="btn" type="button" onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'" style="padding:5px;margin:5px;width:150px">Export to Excel</button></li>
-                            <li><button class="btn" type="button" onclick="$('#emailReportWindow').modal(true, true, true)" style="padding:5px;margin:5px;width:150px">Email the Report</button></li>
-                        </ul>
-                    </div>
-                    <div class="btn-group">
-                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                            Refresh Data
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><button class="btn" type="button" onclick="refreshReport()" style="padding:5px;margin:5px;width:150px">Refresh the Report</button></li>
-                            <%
-                                FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
-                                if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
-                            %>
-                            <li><button class="btn" type="button" id="refreshDataSourceButton" onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh Data Source</button></li>
-                            <%
-                                }
-                            %>
 
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="row-fluid">
             <div class="span12" style="text-align:center" id="refreshDiv">
                 Refreshing the data source...
@@ -437,17 +448,7 @@
             <div class="span12" style="text-align:center" id="problemHTML">
             </div>
         </div>
-        <div class="row-fluid" id="filterRow">
-            <div class="span12">
-            <%
-                for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
-                    if (filterDefinition.isShowOnReportView()) {
-                        out.println("<div class=\"filterDiv\">" + filterDefinition.toHTML(new FilterHTMLMetadata(report)) + "</div>");
-                    }
-                }
-            %>
-            </div>
-        </div>
+
         <div class="row">
             <div class="span12">
                 <div class="well" style="background-color: #ffffff">
