@@ -352,6 +352,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         for (ChildConnection childConnection : childConnections) {
             FeedDefinition sourceDef = feedMap.get(childConnection.getSourceFeedType());
             FeedDefinition targetDef = feedMap.get(childConnection.getTargetFeedType());
+            if (sourceDef == null || targetDef == null) {
+                continue;
+            }
             CompositeFeedConnection connection = childConnection.createConnection((IServerDataSourceDefinition) sourceDef, (IServerDataSourceDefinition) targetDef);
             JoinOverride joinOverride = new JoinOverride();
             joinOverride.setSourceName(sourceDef.getFeedName());
