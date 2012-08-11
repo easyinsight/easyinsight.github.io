@@ -73,19 +73,7 @@
             for each (var pair:LookupPair in _lookupTable.lookupPairs) {
                 lookupMap[String(pair.sourceValue.getValue())] = pair;
                 masterLookupTable[String(pair.sourceValue.getValue())] = pair;
-                //valueStrings.addItem(String(pair.sourceValue.getValue()));
             }
-            /*valueStrings.sort = new Sort();
-             valueStrings.refresh();
-             for each (var valueString:String in valueStrings) {
-             var lookupPair:LookupPair = masterLookupTable[valueString];
-             lookupMap[valueString] = lookupPair;
-             var row:LookupTableRow = new LookupTableRow();
-             row.pair = lookupPair;
-             row.mode = rowType;
-             lookupTableBox.addChild(row);
-             editors.addItem(row);
-             }*/
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.lookupTableID = _lookupTable.urlKey;
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
