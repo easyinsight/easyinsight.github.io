@@ -103,9 +103,9 @@
         }
     %>
     <style type="text/css">
-        body {
+        /*body {
             padding-top: 40px;
-        }
+        }*/
 
         #refreshDiv {
             display: none;
@@ -311,7 +311,7 @@
 
 
 
-    <div class="container-fluid">
+    <div class="container">
         <div class="modal hide fade" id="exportModalWindow">
             <div class="modal-header">
                 <button data-dismiss="modal">×</button>
