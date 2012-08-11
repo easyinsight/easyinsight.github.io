@@ -36,9 +36,11 @@ public class ImageLoader extends EventDispatcher {
 
     private function onBytes(event:ResultEvent):void {
         var byteArray:ByteArray = prefService.getImage.lastResult as ByteArray;
-        var loader:Loader = new Loader();
-        loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
-        loader.loadBytes(byteArray);
+        if (byteArray != null) {
+            var loader:Loader = new Loader();
+            loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
+            loader.loadBytes(byteArray);
+        }
     }
 
     private function onComplete(event:Event):void {
