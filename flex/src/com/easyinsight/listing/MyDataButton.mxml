@@ -9,7 +9,6 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.skin.ApplicationSkin;
-        import com.easyinsight.skin.ApplicationSkinWindow;
         import com.easyinsight.skin.HomeConfigWindow;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -88,7 +87,7 @@
             userService.switchHtmlFlex.send(true);
         }
 
-        private function switched():void {
+        private static function switched():void {
             navigateToURL(new URLRequest("/app/html"), "_self");
         }
         ]]></mx:Script>
