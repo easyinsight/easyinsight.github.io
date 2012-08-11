@@ -83,10 +83,27 @@
                 ops.push(removeChild);
             }
         }
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/house.png")]
+        private var homeIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/user.png")]
+        private var accountIcon:Class;
         ]]>
     </mx:Script>
     <mx:Image source="{logo}" id="logoImage" maxWidth="180" maxHeight="50"/>
     <mx:Spacer width="10"/>
+    <listing:ListingOption perspectiveClass="{PerspectiveInfo.HOME_PAGE}" displayName="Home" listingChange="onListingChange(event)" width="85">
+        <mx:Image source="{homeIcon}" id="homeImage"/>
+        <mx:Label text="Home" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
+    <listing:ListingOption perspectiveClass="{PerspectiveInfo.ACCOUNT}" displayName="Accounts" listingChange="onListingChange(event)"
+                           id="accountsOption" width="85">
+        <mx:Image source="{accountIcon}" id="accountImage"/>
+        <mx:Label text="Account" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
     <mx:Spacer width="100%"/>
     <listing:SearchButton/>
     <mx:Spacer width="10"/>

@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:datasources="com.easyinsight.datasources.*" width="100%"
          height="100%"
-         creationComplete="addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete); addEventListener(ChangeFolderEvent.CHANGE_FOLDER, onChangeFolder);
-         addEventListener(AnalyzeEvent.ANALYZE, onAnalyze2)"
+         creationComplete="addEventListener(AnalyzeEvent.ANALYZE, onAnalyze2)"
         doubleClickEnabled="true" implements="com.easyinsight.listing.IDataSourceSpecificList">
     <mx:Metadata>
         [Event(name="backToDataSources", type="flash.events.Event")]
@@ -13,11 +12,8 @@
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.etl.LookupTableDescriptor;
         import com.easyinsight.etl.LookupTableSource;
-        import com.easyinsight.etl.NewLookupTableWindow;
         import com.easyinsight.framework.DataFolder;
-        import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.PerspectiveInfo;
-        import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.report.ReportAnalyzeSource;
@@ -25,21 +21,13 @@
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
-        import com.easyinsight.util.PopUpUtil;
-        import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
-
         import mx.collections.HierarchicalData;
         import mx.collections.ICollectionView;
         import mx.collections.Sort;
-
-        import mx.controls.Alert;
-        import mx.controls.CheckBox;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
-        import mx.events.CloseEvent;
         import mx.events.ListEvent;
-        import mx.managers.PopUpManager;
         import mx.utils.ObjectUtil;
 
         private var _dataSourceDescriptor:DataSourceDescriptor;
@@ -76,27 +64,6 @@
 
         [Bindable]
         private var realDataSource:Boolean;
-
-        private function onChangeFolder(event:ChangeFolderEvent):void {
-            var matchedFolder:DataFolder = null;
-            for each (var folder:DataFolder in displayTreeData) {
-                var found:Boolean = false;
-                for each (var child:EIDescriptor in folder.children) {
-                    if (child == event.movingItem) {
-                        matchedFolder = folder;
-                        found = true;
-                        break;
-                    }
-                }
-                if (found) {
-                    break;
-                }
-            }
-            matchedFolder.children.removeItemAt(matchedFolder.children.getItemIndex(event.movingItem));
-            event.targetFolder.children.addItem(event.movingItem);
-            uploadGrid.expandItem(event.targetFolder, true);
-            uploadService.move.send(event.movingItem, event.targetFolder.id);
-        }
 
         private function moved():void {
 
@@ -200,18 +167,6 @@
 
         private var openState:Object = new Object();
 
-        private function keyHit(event:KeyboardEvent):void {
-            if (event.keyCode == Keyboard.DELETE) {
-                if (uploadGrid.selectedItems != null) {
-                    if (uploadGrid.selectedItems.length > 1) {
-                        Alert.show("You can only delete single items at the moment.");
-                    } else {
-                        deleteItem(uploadGrid.selectedItem);
-                    }
-                }
-            }
-        }
-
         private function preserveOpenState():void {
             if (existingData != null) {
                 openState = new Object();
@@ -222,14 +177,6 @@
                 }
                 scrollPosition = uploadGrid.verticalScrollPosition;
             }
-        }
-
-        private function createReport():void {
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID)));
-        }
-
-        private function createDashboard():void {
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { startDataSourceID:dataSourceID})));
         }
 
         public function updateUI(event:Event = null):void {
@@ -256,56 +203,10 @@
                 var nameColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                 nameColumn.dataField = "name";
                 nameColumn.headerText = "Name";
+                //uploadGrid.groupItemRenderer = new ClassFactory(MyDataIndividualParentRenderer);
                 nameColumn.sortCompareFunction = nameSort;
-                var creationDateColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-                creationDateColumn.dataField = "creationDate";
-                creationDateColumn.width = 140;
-                creationDateColumn.headerText = "Creation Date";
-                creationDateColumn.sortCompareFunction = customCreationSort;
-                creationDateColumn.itemRenderer = new ClassFactory(MyDataCreationDateDataLabel);
-                var accountVisibleColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-                accountVisibleColumn.dataField = "accountVisibleDisplay";
-                accountVisibleColumn.width = 130;
-                accountVisibleColumn.headerText = "Account Visible";
-                //accountVisibleColumn.itemRenderer = new ClassFactory(SizeRenderer);
-                var ownerNameColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-                ownerNameColumn.dataField = "author";
-                ownerNameColumn.width = 140;
-                ownerNameColumn.headerText = "Owner Name";
-                var controlsColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-                //controlsColumn.dataField = "";
-                controlsColumn.headerText = "";
-                controlsColumn.width = 240;
-                controlsColumn.sortable = false;
-                var factory:ClassFactory = new ClassFactory(MyDataIconControls);
-                controlsColumn.itemRenderer = factory;
-                var showSize:Boolean = true;
-                var showLastData:Boolean = true;
-                showSize = true;
-                showLastData = true;
-                var i:int = 3;
-                factory.properties = {
-                    showAnalyze:true,
-                    showAdmin:true,
-                    showDelete:true
-                };
-                controlsColumn.width = i * 45 + 10;
-                var remWidth:int = controlsColumn.width;
+
                 columns.push(nameColumn);
-                if (ApplicationSkin.instance().myDataOwner) {
-                    columns.push(ownerNameColumn);
-                    remWidth += ownerNameColumn.width;
-                }
-                if (ApplicationSkin.instance().myDataCreationDate) {
-                    columns.push(creationDateColumn);
-                    remWidth += creationDateColumn.width;
-                }
-                if (ApplicationSkin.instance().myDataAccountVisible) {
-                    columns.push(accountVisibleColumn);
-                    remWidth += accountVisibleColumn.width;
-                }
-                nameColumn.width = unscaledWidth - remWidth - 40;
-                columns.push(controlsColumn);
                 uploadGrid.columns = columns;
                 columnsInvalid = false;
             }
@@ -329,33 +230,6 @@
             }
             if (dataSourceChanged) {
                 dataSourceChanged = false;
-            }
-        }
-
-        private function deleteSelf():void {
-            Alert.show("Are you sure you want to delete this data source? You will not be able to undo this operation.", "Alert",
-                    Alert.OK | Alert.CANCEL, this, alertDataSourceListener, null, Alert.CANCEL);
-        }
-
-        private function alertDataSourceListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                dispatchEvent(new DeleteDataSourceEvent(_dataSourceDescriptor));
-            }
-        }
-
-        private function deleteItem(selectedItem:Object):void {
-            if (selectedItem is InsightDescriptor) {
-                Alert.show("Are you sure you want to delete this report? You will not be able to undo this operation.", "Alert",
-                        Alert.OK | Alert.CANCEL, this, alertInsightListener, null, Alert.CANCEL);
-            } else if (selectedItem is LookupTableDescriptor) {
-                Alert.show("Are you sure you want to delete this lookup table? You will not be able to undo this operation.", "Alert",
-                        Alert.OK | Alert.CANCEL, this, alertLookupListener, null, Alert.CANCEL);
-            } else if (selectedItem is DashboardDescriptor) {
-                Alert.show("Are you sure you want to delete this dashboard? You will not be able to undo this operation.", "Alert",
-                        Alert.OK | Alert.CANCEL, this, alertDashboardListener, null, Alert.CANCEL);
-            } else if (selectedItem is ScorecardDescriptor) {
-                Alert.show("Are you sure you want to delete this scorecard? You will not be able to undo this operation.", "Alert",
-                        Alert.OK | Alert.CANCEL, this, alertScorecardListener, null, Alert.CANCEL);
             }
         }
 
@@ -407,22 +281,6 @@
         private var showLoading:Boolean;
         private var loadingIndex:int;
 
-        private function alertInsightListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                var definition:InsightDescriptor = uploadGrid.selectedItem as InsightDescriptor;
-                ProgressAlert.alert(this, "Deleting report...", null, analysisService.deleteAnalysisDefinition);
-                analysisService.deleteAnalysisDefinition.send(definition.id);
-            }
-        }
-
-        private function alertLookupListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                var feedDescriptor:LookupTableDescriptor = uploadGrid.selectedItem as LookupTableDescriptor;
-                ProgressAlert.alert(this, "Deleting lookup table...", null, etlService.deleteLookupTable);
-                etlService.deleteLookupTable.send(feedDescriptor.id);
-            }
-        }
-
         private function customSort(obj1:Object, obj2:Object):int {
             var date1:Date = null;
             var date2:Date = null;
@@ -463,45 +321,8 @@
             return ObjectUtil.dateCompare(date1, date2);
         }
 
-        private function onDelete(event:DeleteDataSourceEvent):void {
-            event.stopPropagation();
-            deleteItem(event.descriptor);
-        }
-
-        private function alertDashboardListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                var dashboardDescriptor:DashboardDescriptor = uploadGrid.selectedItem as DashboardDescriptor;
-                ProgressAlert.alert(this, "Deleting lookup table...", null, dashboardService.deleteDashboard);
-                dashboardService.deleteDashboard.send(dashboardDescriptor.id);
-            }
-        }
-
-        private function alertScorecardListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                var scorecardDescriptor:ScorecardDescriptor = uploadGrid.selectedItem as ScorecardDescriptor;
-                ProgressAlert.alert(this, "Deleting lookup table...", null, scorecardService.deleteScorecard);
-                scorecardService.deleteScorecard.send(scorecardDescriptor.id);
-            }
-        }
-
-        private function createScorecard():void {
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_EDITOR, { startDataSourceID:dataSourceID})));
-        }
-
         private function iconFunction(item:Object, depth:int):Class {
             return simpleIconFunction(item);
-        }
-
-        private function deleted():void {
-            dispatchEvent(new Event("refresh"));
-        }
-
-        private function createLookupTable():void {
-            var window:NewLookupTableWindow = new NewLookupTableWindow();
-            window.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
-            window.selectedDataSource = _dataSourceDescriptor;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         }
 
         private function onAnalyze(event:AnalyzeEvent):void {
@@ -526,11 +347,7 @@
         private function gridDoubleClick(event:ListEvent):void {
             var analyzeSource:PerspectiveInfo = null;
             var selectedObject:Object = event.currentTarget.selectedItem;
-            if (selectedObject is DataSourceDescriptor) {
-                var descriptor:DataSourceDescriptor = selectedObject as DataSourceDescriptor;
-                analyzeSource = new DescriptorAnalyzeSource(descriptor.id);
-                dispatchEvent(new AnalyzeEvent(analyzeSource));
-            } else if (selectedObject is LookupTableDescriptor) {
+            if (selectedObject is LookupTableDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(selectedObject).id)));
             } else if (selectedObject is DashboardDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(selectedObject).id})));
@@ -563,21 +380,6 @@
         [Bindable]
         private var showScorecard:Boolean = false;
         ]]></mx:Script>
-    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
-        <mx:method name="deleteAnalysisDefinition" result="deleted()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject id="etlService" destination="feeds">
-        <mx:method name="deleteLookupTable" result="deleted()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject id="dashboardService" destination="dashboardService">
-        <mx:method name="deleteDashboard" result="deleted()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject id="scorecardService" destination="scorecardService">
-        <mx:method name="deleteScorecard" result="deleted()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject id="uploadService" destination="userUpload">
-        <mx:method name="move" result="moved()"/>
-    </mx:RemoteObject>
     <mx:HBox paddingLeft="20" paddingRight="20"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
          horizontalGap="20"
@@ -587,35 +389,24 @@
             <mx:LinkButton label="Back to Data Sources" textDecoration="underline" click="dispatchEvent(new Event('backToDataSources'))" fontSize="12"
                     visible="{showBack}"/>
             <mx:Spacer height="100%"/>
-            <mx:LinkButton label="Find Prebuilt Reports" textDecoration="underline" fontSize="12" click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Exchange'))"/>
         </mx:VBox>
         <mx:Image/>
         <mx:Spacer width="100%"/>
         <mx:VBox horizontalAlign="center" height="100%" id="nameVBox">
             <mx:Label text="{dataSourceName}" fontSize="20" maxWidth="300"/>
-            <datasources:MyDataDataSourceDisplay dataSource="{dataSourceDescriptor}" visible="{realDataSource}"/>
         </mx:VBox>
         <mx:Spacer width="100%"/>
-        <mx:VBox paddingTop="5" paddingBottom="5" paddingLeft="0" paddingRight="0" verticalGap="0"
-                 borderStyle="solid" cornerRadius="8" borderThickness="1" backgroundColor="#CCCCCC" visible="{admin}">
-            <mx:LinkButton label="Configure the Data Source..." textDecoration="underline" fontSize="12" click="dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));" width="200"/>
-            <mx:LinkButton label="New Lookup Table..." textDecoration="underline" width="200" fontSize="12" click="createLookupTable()"/>
-            <mx:LinkButton label="Delete the Data Source" textDecoration="underline" width="200" click="deleteSelf()" fontSize="12"/>
-        </mx:VBox>
+        <datasources:MyDataDataSourceDisplay dataSource="{dataSourceDescriptor}" visible="{realDataSource}"/>
     </mx:HBox>
     <mx:VBox paddingLeft="10" paddingRight="10"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
          horizontalGap="20"
          backgroundColor="#FFFFFF" paddingTop="5" paddingBottom="5" width="100%" height="100%">
-        <mx:HBox>
-            <mx:Button label="New Report..." styleName="grayButton" icon="{crosstabIcon}" click="createReport()" visible="{realDataSource}" width="140"/>
-            <mx:Button label="New Dashboard..." styleName="grayButton" icon="{dashboardIcon}" click="createDashboard()" visible="{realDataSource}" width="140"/>
-            <mx:Button label="New Scorecard..." styleName="grayButton" icon="{scorecardIcon}" click="createScorecard()" visible="{showScorecard}" width="140"/>
-        </mx:HBox>
-        <mx:AdvancedDataGrid id="uploadGrid" allowMultipleSelection="true"
-                                             fontSize="12"
-                                             itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader"
-                                             iconFunction="simpleIconFunction" width="100%" height="100%">
+        <mx:AdvancedDataGrid id="uploadGrid" horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
+                             verticalGridLines="true" selectable="false"
+                             fontSize="12"
+                                             groupItemRenderer="com.easyinsight.listing.MyDataIndividualParentRenderer" headerStyleName="BlueHeader"
+                                             iconFunction="simpleIconFunction" width="100%" height="100%" rowHeight="24">
         </mx:AdvancedDataGrid>
     </mx:VBox>
 </mx:VBox>

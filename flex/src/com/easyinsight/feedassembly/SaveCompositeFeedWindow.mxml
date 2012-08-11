@@ -46,8 +46,8 @@
             <mx:TextInput id="dataSourceName"/>
         </mx:FormItem>
         <mx:FormItem label="" direction="horizontal">
-            <mx:Button label="Save" click="save()"/>
-            <mx:Button label="Cancel" click="cancel()"/>
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="cancel()"/>
         </mx:FormItem>
     </mx:Form>
 	<mx:StringValidator source="{dataSourceName}" property="text" minLength="3" id="nameValidator"/>

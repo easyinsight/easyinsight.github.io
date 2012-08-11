@@ -24,6 +24,9 @@
         [Embed(source="../../../../assets/preferences.png")]
         private var configIcon:Class;
 
+        [Bindable]
+        [Embed(source="../../../../assets/earth.png")]
+        private var globeIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/data_table.png")]
@@ -95,7 +98,7 @@
     <mx:RemoteObject id="userService" destination="login">
         <mx:method name="switchHtmlFlex" result="switched()"/>
     </mx:RemoteObject>
-    <!--<mx:Button label="Switch to HTML View" click="htmlView()" labelPlacement="right" fontSize="12" styleName="grayButton" width="180"/>-->
+    <mx:Button label="Switch to HTML View" click="htmlView()" labelPlacement="right" fontSize="12" styleName="grayButton" width="180" icon="{globeIcon}"/>
     <mx:Button toolTip="Create composite data source..." click="createCompositeFeed()"
                id="compositeFeedButton" icon="{joinIcon}"
                label="Join Data Sources..." labelPlacement="right" fontSize="12" styleName="grayButton"

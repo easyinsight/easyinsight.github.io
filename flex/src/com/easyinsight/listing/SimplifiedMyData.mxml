@@ -15,17 +15,14 @@
 		<![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.framework.PerspectiveInfo;
-        import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.binding.utils.BindingUtils;
-
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
-        import mx.core.Container;
         import mx.managers.BrowserManager;
         import mx.rpc.events.FaultEvent;
         import mx.utils.URLUtil;
@@ -99,7 +96,7 @@
 
         private function updateUI():void {
             if (dsList != null) {
-                IDataSourceSpecificList(dsList).updateUI();
+                dsList.updateUI();
             }
         }
 
@@ -116,7 +113,7 @@
                 descriptor.id = event.feedID;
                 descriptor.name = event.name;
                 if (event.startInAdmin) {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.id})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:descriptor.id})));
                 } else {
                     dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(event.feedID)));
                 }
@@ -144,7 +141,7 @@
             var dataSourceArray:Array = [];
             for each (var desc:EIDescriptor in myDataTree.objects) {
                 if (desc.getType() == EIDescriptor.DATA_SOURCE) {
-                    if (dsList != null && IDataSourceSpecificList(dsList).dataSourceDescriptor.id == desc.id) {
+                    if (dsList != null && dsList.dataSourceDescriptor.id == desc.id) {
                         dsList.data = desc;
                     }
                     if (dataSourceDescriptor != null && dataSourceDescriptor.id == desc.id) {
@@ -188,12 +185,11 @@
 
         private var dataGrid:DataSourceGrid;
 
-        private var dsList:Container;
+        private var dsList:DataSourceSpecificList;
 
         private function toDataSourceView():void {
             currentState = "";
-            if (dataSourceDescriptor != null && dsList != null && IDataSourceSpecificList(dsList).dataSourceDescriptor != null &&
-                    dataSourceDescriptor.id == IDataSourceSpecificList(dsList).dataSourceDescriptor.id) {
+            if (dataSourceDescriptor != null && dsList != null && dsList.dataSourceDescriptor != null && dataSourceDescriptor.id == dsList.dataSourceDescriptor.id) {
                 dsList.data = dataSourceDescriptor;
                 return;
             }
@@ -203,13 +199,8 @@
                 dsList.removeEventListener("refresh", onRefresh);
                 dsList.removeEventListener("backToDataSources", backToSources);
             }
-            if (User.getInstance().analyst) {
-                dsList = new DataSourceSpecificList();
-            } else {
-                dsList = new SimplifiedDataSourceSpecificList();
-            }
-
-            IDataSourceSpecificList(dsList).showBack = dataSources.length > 1;
+            dsList = new DataSourceSpecificList();
+            dsList.showBack = dataSources.length > 1;
             dsList.data = dataSourceDescriptor;
             dsList.addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
             dsList.addEventListener("refresh", onRefresh);

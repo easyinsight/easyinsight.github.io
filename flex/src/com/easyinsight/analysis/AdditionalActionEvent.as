@@ -15,6 +15,7 @@ public class AdditionalActionEvent extends Event {
     public static const NEW_DASHBOARD:String = "newDashboardAction";
     public static const SEARCH:String = "searchAction";
     public static const CONFIGURE_DATA_SOURCE:String = "configureDataSourceAction";
+    public static const VIEW_IN_HTML:String = "viewInHTMLAction";
 
     public function AdditionalActionEvent(type:String) {
         super(type);

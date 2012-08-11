@@ -30,6 +30,10 @@
     </mx:HBox>
     <mx:HBox>
         <report:BigButton imageClass="@Embed(source='../../../../assets/find.png')"
+                          headerText="View in HTML"
+                          description="Navigate to this report in the HTML view"
+                          click="dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.VIEW_IN_HTML)); this.close()" textHeight="45"/>
+        <report:BigButton imageClass="@Embed(source='../../../../assets/find.png')"
                           headerText="Navigate to Another Report"
                           description="Navigate to another already existing report or dashboard"
                           click="dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.SEARCH)); this.close()" textHeight="45"/>

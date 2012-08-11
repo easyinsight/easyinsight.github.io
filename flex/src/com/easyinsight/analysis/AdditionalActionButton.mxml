@@ -6,6 +6,7 @@
 		[Event(name="searchAction", type="com.easyinsight.analysis.AdditionalActionEvent")]
 		[Event(name="configureDataSourceAction", type="com.easyinsight.analysis.AdditionalActionEvent")]
 		[Event(name="reportViewAction", type="com.easyinsight.analysis.AdditionalActionEvent")]
+		[Event(name="viewInHTMLAction", type="com.easyinsight.analysis.AdditionalActionEvent")]
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
@@ -43,6 +44,9 @@
             window.addEventListener(AdditionalActionEvent.NEW_DASHBOARD, function (event:AdditionalActionEvent):void {
                 dispatchEvent(event);
             }, false, 0, true);
+            window.addEventListener(AdditionalActionEvent.VIEW_IN_HTML, function (event:AdditionalActionEvent):void {
+                dispatchEvent(event);
+            }, false, 0, true);
             window.addEventListener(AdditionalActionEvent.CONFIGURE_DATA_SOURCE, function (event:AdditionalActionEvent):void {
                 dispatchEvent(event);
             }, false, 0, true);
@@ -63,12 +67,15 @@
                 } else if (event.eiDescriptor.getType() == EIDescriptor.REPORT) {
                     User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new ReportPerspectiveInfo(event.eiDescriptor as InsightDescriptor)));
                 } else if (event.eiDescriptor.getType() == EIDescriptor.DASHBOARD) {
-                    //User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id})));
-                    var dashboardWindow:DashboardContextWindow = new DashboardContextWindow();
-                    dashboardWindow.dashboardDescriptor = event.eiDescriptor as DashboardDescriptor;
-                    dashboardWindow.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
-                    PopUpManager.addPopUp(dashboardWindow, this, false);
-                    PopUpUtil.centerPopUp(dashboardWindow);
+                    if (User.getInstance().analyst) {
+                        var dashboardWindow:DashboardContextWindow = new DashboardContextWindow();
+                        dashboardWindow.dashboardDescriptor = event.eiDescriptor as DashboardDescriptor;
+                        dashboardWindow.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
+                        PopUpManager.addPopUp(dashboardWindow, this, false);
+                        PopUpUtil.centerPopUp(dashboardWindow);
+                    } else {
+                        User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id})));
+                    }
                 } else if (event.eiDescriptor.getType() == EIDescriptor.SCORECARD) {
                     User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID:event.eiDescriptor.id})));
                 }
