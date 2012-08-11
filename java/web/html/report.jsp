@@ -305,35 +305,18 @@
                     <li><a href="/app/html/flashAppAction.jsp">Full Interface</a></li>
                 </ul>
             </div>
-            <div class="nav-collapse btn-group pull-left">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    Export the Report
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu pull-right">
-                    <li><button class="btn" type="button" onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'" style="padding:5px;margin:5px;width:150px">Export to Excel</button></li>
-                    <li><button class="btn" type="button" onclick="$('#emailReportWindow').modal(true, true, true)" style="padding:5px;margin:5px;width:150px">Email the Report</button></li>
-                </ul>
-            </div>
-            <div class="nav-collapse btn-group pull-left">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    Refresh Data
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu pull-right">
-                    <li><button class="btn" type="button" onclick="refreshReport()" style="padding:5px;margin:5px;width:150px">Refresh the Report</button></li>
-                    <%
-                        FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
-                        if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
-                            %>
-                    <li><button class="btn" type="button" id="refreshDataSourceButton" onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh Data Source</button></li>
-                            <%
-                        }
-                    %>
-
-                </ul>
-            </div>
         </div>
+    </div>
+</div>
+
+<div class="modal hide fade" id="exportModalWindow">
+    <div class="modal-header">
+        <button data-dismiss="modal">×</button>
+        <h3>Export Options</h3>
+    </div>
+    <div class="modal-body">
+        <a href="../exportExcel?reportID=<%= report.getAnalysisID() %>" class="btn">Export to Excel</a>
+        <button class="btn" onclick="$('#exportModalWindow').modal('hide'); $('#emailReportWindow').modal(true, true, true)">Email Report</button>
     </div>
 </div>
 <div class="modal hide" id="refreshingReport">
@@ -343,16 +326,6 @@
             <div class="bar"
                  style="width: 100%;"></div>
         </div>
-    </div>
-</div>
-<div class="modal hide fade" id="exportModalWindow">
-    <div class="modal-header">
-        <button data-dismiss="modal">×</button>
-        <h3>Export Options</h3>
-    </div>
-    <div class="modal-body">
-        <a href="../exportExcel?reportID=<%= report.getAnalysisID() %>" class="btn">Export to Excel</a>
-        <button class="btn" onclick="$('#exportModalWindow').modal('hide'); $('#emailReportWindow').modal(true, true, true)">Email Report</button>
     </div>
 </div>
 <div class="modal hide fade" id="emailReportWindow">
@@ -415,6 +388,36 @@
 </div>
 <% } %>
     <div class="container">
+        <div class="row-fluid">
+            <div class="nav-collapse btn-group pull-left">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    Export the Report
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu pull-right">
+                    <li><button class="btn" type="button" onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'" style="padding:5px;margin:5px;width:150px">Export to Excel</button></li>
+                    <li><button class="btn" type="button" onclick="$('#emailReportWindow').modal(true, true, true)" style="padding:5px;margin:5px;width:150px">Email the Report</button></li>
+                </ul>
+            </div>
+            <div class="btn-group">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    Refresh Data
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu pull-right">
+                    <li><button class="btn" type="button" onclick="refreshReport()" style="padding:5px;margin:5px;width:150px">Refresh the Report</button></li>
+                    <%
+                        FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
+                        if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
+                    %>
+                    <li><button class="btn" type="button" id="refreshDataSourceButton" onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh Data Source</button></li>
+                    <%
+                        }
+                    %>
+
+                </ul>
+            </div>
+        </div>
         <div class="row-fluid">
             <div class="span12" style="text-align:center" id="refreshDiv">
                 Refreshing the data source...
