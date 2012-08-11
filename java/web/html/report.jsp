@@ -281,7 +281,7 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <a class="btn btn-navbar" data-target=".nav-collapse">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -298,7 +298,7 @@
                 </ul>
             </div>
 
-            <div class="nav-collapse pull-left">
+            <div class="pull-left">
                 <ul class="nav">
                     <li><a href="/app/html">Data Sources</a></li>
                     <li><a href="/app/html/reports/<%= dataSourceURLKey %>">Reports and Dashboards</a></li>
