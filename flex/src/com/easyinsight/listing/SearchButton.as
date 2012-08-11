@@ -57,12 +57,15 @@ public class SearchButton extends Button {
             } else if (event.eiDescriptor.getType() == EIDescriptor.REPORT) {
                 User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new ReportPerspectiveInfo(event.eiDescriptor as InsightDescriptor)));
             } else if (event.eiDescriptor.getType() == EIDescriptor.DASHBOARD) {
-                //User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id})));
-                var dashboardWindow:DashboardContextWindow = new DashboardContextWindow();
-                dashboardWindow.dashboardDescriptor = event.eiDescriptor as DashboardDescriptor;
-                dashboardWindow.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
-                PopUpManager.addPopUp(dashboardWindow, this, false);
-                PopUpUtil.centerPopUp(dashboardWindow);
+                if (User.getInstance().analyst) {
+                    var dashboardWindow:DashboardContextWindow = new DashboardContextWindow();
+                    dashboardWindow.dashboardDescriptor = event.eiDescriptor as DashboardDescriptor;
+                    dashboardWindow.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
+                    PopUpManager.addPopUp(dashboardWindow, this, false);
+                    PopUpUtil.centerPopUp(dashboardWindow);
+                } else {
+                    User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id})));
+                }
             } else if (event.eiDescriptor.getType() == EIDescriptor.SCORECARD) {
                 User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID: event.eiDescriptor.id})));
             }
