@@ -1048,12 +1048,12 @@ public class ExportService {
     private static String vListToTable(VListInfo vListInfo, ExportMetadata exportMetadata) {
         StringBuilder sb = new StringBuilder();
         sb.append("<table>");
-        sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
-        sb.append("<td></td>");
+        sb.append("<tr>");
+        sb.append("<th></th>");
         for (SortInfo sortInfo : vListInfo.columns) {
-            sb.append("<td>");
+            sb.append("<th>");
             sb.append(sortInfo.label);
-            sb.append("</td>");
+            sb.append("</th>");
         }
         sb.append("</tr>");
         for (Map<String, Object> map : vListInfo.dColl) {
@@ -1082,6 +1082,7 @@ public class ExportService {
             sb.append("</tr>");
         }
         sb.append("</table>");
+        System.out.println(sb.toString());
         return sb.toString();
     }
 
