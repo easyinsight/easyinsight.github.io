@@ -1,13 +1,29 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <util:states>
-        <mx:State name="advanced">
+        <mx:State name="advancedReport">
             <mx:RemoveChild target="{advancedOptionsButton}"/>
             <mx:AddChild relativeTo="{optionsBox}">
                 <mx:HBox creationComplete="PopUpUtil.centerPopUp(this)">
                     <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
                     <mx:RadioButton label="Create a Field Choice Filter" groupName="typeGroup" value="fieldChoiceFilter"/>
+                </mx:HBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="advancedField">
+            <mx:RemoveChild target="{advancedOptionsButton}"/>
+            <mx:AddChild relativeTo="{optionsBox}">
+                <mx:HBox creationComplete="PopUpUtil.centerPopUp(this)">
+                    <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
                     <mx:RadioButton label="Create a Named Reference Filter" groupName="typeGroup" value="namedRef"/>
+                </mx:HBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="advancedDashboard">
+            <mx:RemoveChild target="{advancedOptionsButton}"/>
+            <mx:AddChild relativeTo="{optionsBox}">
+                <mx:HBox creationComplete="PopUpUtil.centerPopUp(this)">
+                    <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
                     <mx:RadioButton label="Create a Trend Filter" groupName="typeGroup" value="trendFilter"/>
                 </mx:HBox>
             </mx:AddChild>
@@ -24,6 +40,12 @@
 
         [Bindable]
         public var advancedAvailable:Boolean = true;
+
+        public static const REPORT_LEVEL:int = 0;
+        public static const DASHBOARD_LEVEL:int = 1;
+        public static const FIELD_LEVEL:int = 2;
+
+        public var filterSource:int = REPORT_LEVEL;
 
         private function newFieldFilter():void {
             dispatchEvent(new NewFilterEvent(NewFilterEvent.FIELD_FILTER, AnalysisItemWrapper(fieldBox.selectedItem).analysisItem));
@@ -68,7 +90,14 @@
         }
 
         private function toAdvanced():void {
-            currentState = "advanced";
+            if (filterSource == REPORT_LEVEL) {
+                currentState = "advancedReport";
+            } else if (filterSource == FIELD_LEVEL) {
+                currentState = "advancedField";
+            } else if (filterSource == DASHBOARD_LEVEL) {
+                currentState = "advancedDashboard";
+            }
+
         }
         ]]></mx:Script>
     <mx:VBox>
@@ -77,7 +106,7 @@
             <mx:RadioButton label="Create a Filter on a Field" groupName="typeGroup" value="fieldFilter"/>
             <mx:LinkButton label="Show Advanced Options" click="toAdvanced()" textDecoration="underline" id="advancedOptionsButton" visible="{advancedAvailable}"/>
         </mx:HBox>
-        <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
+        <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}" id="viewStack">
             <mx:VBox>
                 <mx:Label text="Choose a field for the filter:"/>
                 <mx:ComboBox dataProvider="{availableFields}" id="fieldBox" labelField="displayName" rowCount="15"/>
@@ -90,7 +119,7 @@
                 <util:SaveButton label="Create a new Or Filter" click="newOrFilter()"/>
                 <util:CancelButton label="Cancel" click="this.close()"/>
             </mx:HBox>
-            <mx:VBox>
+            <mx:VBox id="fieldChoiceFilterBox">
                 <mx:Label text="Choose a field for the filter:"/>
                 <mx:ComboBox dataProvider="{availableFields}" id="aFieldBox" labelField="displayName" rowCount="15"/>
                 <mx:HBox>
@@ -98,11 +127,11 @@
                     <util:CancelButton label="Cancel" click="this.close()"/>
                 </mx:HBox>
             </mx:VBox>
-            <mx:HBox>
+            <mx:HBox id="namedReferenceFilterBox">
                 <util:SaveButton label="Create a new Named Reference Filter" click="newRefFilter()"/>
                 <util:CancelButton label="Cancel" click="this.close()"/>
             </mx:HBox>
-            <mx:HBox>
+            <mx:HBox id="trendFilterBox">
                 <util:SaveButton label="Create a new Trend Filter" click="newTrendFilter()"/>
                 <util:CancelButton label="Cancel" click="this.close()"/>
             </mx:HBox>

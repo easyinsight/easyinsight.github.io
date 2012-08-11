@@ -6,6 +6,7 @@
 		<![CDATA[
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.filtering.NewFilterWindow;
         import com.easyinsight.framework.PerspectiveInfo;
 
         import com.easyinsight.util.PopUpUtil;
@@ -307,7 +308,7 @@
                 <filters:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                             paddingRight="10"
                                             width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"
-                                            feedID="{dataSourceID}"
+                                            feedID="{dataSourceID}" filterSource="{NewFilterWindow.FIELD_LEVEL}"
                                             analysisItems="{analysisItems}" borderStyle="solid" borderThickness="1"/>
             </mx:VBox>
         </mx:TabNavigator>

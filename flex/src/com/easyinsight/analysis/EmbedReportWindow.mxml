@@ -93,17 +93,40 @@
             updateURL();
         }
 
+        private var _showAsFlash:String = "flash";
+
+
+        [Bindable(event="showAsFlashChanged")]
+        public function get showAsFlash():String {
+            return _showAsFlash;
+        }
+
+        public function set showAsFlash(value:String):void {
+            if (_showAsFlash == value) return;
+            _showAsFlash = value;
+            dispatchEvent(new Event("showAsFlashChanged"));
+            updateURL();
+        }
 
         private function updateURL():void {
-            var str:String = "https://www.easy-insight.com/app/embed.jsp?width=" + _reportWidth + "&height=" + _reportHeight + "&analysisID=" +
-                    _urlKey + "&reportType=" + _reportType + "&reportName=" + escape(_reportName) + "&dataSourceID=" + _dataSourceID;
+            var str:String;
+            var sym:String;
+            if (_showAsFlash == "flash") {
+                str = "https://www.easy-insight.com/app/embed.jsp?width=" + _reportWidth + "&height=" + _reportHeight + "&analysisID=" +
+                        _urlKey + "&reportType=" + _reportType + "&reportName=" + escape(_reportName) + "&dataSourceID=" + _dataSourceID;
+                sym = "&";
+            } else {
+                str = "https://www.easy-insight.com/app/html/embeddedReport/" + _urlKey;
+                sym = "?";
+            }
             if (_showToolbar) {
-                str += "&showToolbar=1";
+                str += sym + "showToolbar=1";
+                sym = "&";
             }
             if (_showFilters) {
-                str += "&showFilters=1";
+                str += sym + "showFilters=1";
             }
-            url = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\""+ str + "\"></iframe>";
+            url = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\"" + str + "\"></iframe>";
         }
 
         private function copyToClipboard():void {
@@ -112,6 +135,12 @@
         ]]>
 	</mx:Script>
 	<mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:Label text="Do you want to embed the report as Flash or pure HTML?"/>
+        <mx:RadioButtonGroup id="embedTypeGroup" selectedValue="{showAsFlash}" change="showAsFlash = String(embedTypeGroup.selectedValue)"/>
+        <mx:HBox>
+            <mx:RadioButton label="Flash" value="flash" groupName="embedTypeGroup"/>
+            <mx:RadioButton label="Pure HTML (beta)" value="html" groupName="embedTypeGroup"/>
+        </mx:HBox>
         <mx:Form paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
             <mx:FormItem label="Report Width:">
                 <mx:NumericStepper id="widthStepper" value="{reportWidth}" minimum="50" maximum="2400" change="reportWidth = widthStepper.value"/>

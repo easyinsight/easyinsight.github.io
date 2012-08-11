@@ -32,7 +32,6 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemCopyEvent;
-        import com.easyinsight.analysis.AnalysisItemEditEvent;
         import com.easyinsight.analysis.AnalysisItemEditWindow;
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypeRenderer;
@@ -64,7 +63,6 @@
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.FilterDefinition;
-        import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataService;
         import com.easyinsight.framework.DataServiceLoadingEvent;
@@ -195,6 +193,7 @@
         }
 
         private function onAnalysisStateChange(event:AnalysisStateChangeEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
             var controller:IReportController = event.controller;
             loadController(controller);
             analysisService.generatePossibleIntentions.send(analysisDefinition);
@@ -443,7 +442,7 @@
             wrappers.refresh();
         }
 
-        private function customSort(obj1:Object, obj2:Object, fields:Array = null):int {
+        private static function customSort(obj1:Object, obj2:Object, fields:Array = null):int {
             var wrapper1:AnalysisItemWrapper = obj1 as AnalysisItemWrapper;
             var wrapper2:AnalysisItemWrapper = obj2 as AnalysisItemWrapper;
             if (wrapper1.isAnalysisItem() && !wrapper2.isAnalysisItem()) {
@@ -597,15 +596,6 @@
             }
         }
 
-        private function createFilter():void {
-            var filterRawData:FilterRawData = dataView.createFilterRawData();
-            if (filterRawData.keys == null || filterRawData.keys.length == 0) {
-                Alert.show("Select items from the grid, click this button, and the report will filter down to that set of items.");
-            }
-            dispatchEvent(new AnalysisChangedEvent());
-            transformContainer.processRawFilterData(filterRawData, true);
-        }
-
         private function getFilterDefinitions():Array {
             return transformContainer.getFilterDefinitions().toArray();
         }
@@ -686,6 +676,7 @@
             window.prompt = prompt;
             window.addEventListener(PromptEvent.PROMPT_SAVE, function (event:PromptEvent):void {
                 save(true, function (event:SavedAnalysisEvent):void {
+                    AnalysisUtil.updateReport(analysisDefinition, event.report);
                     doneHandler.call();
                 });
             }, false, 0, true);
@@ -741,7 +732,7 @@
             }
         }
 
-        private function iconFunction(item:Object):Class {
+        private static function iconFunction(item:Object):Class {
             var wrapper:AnalysisItemWrapper = item as AnalysisItemWrapper;
             return AnalysisItemTypeRenderer.getImageClass(wrapper);
         }
@@ -836,10 +827,6 @@
         [Bindable]
         private var rendererFactory:IFactory;
 
-        private function onItemEdit(event:AnalysisItemEditEvent):void {
-
-        }
-
         public function gotFocus():void {
         }
 
@@ -852,8 +839,6 @@
                 suggestionSummary.y = position;
                 transformContainer.percentWidth = NaN;
                 transformContainer.width = unscaledWidth - suggestionSummary.width - 10;
-                /*reportLabel.percentWidth = NaN;
-                reportLabel.width = unscaledWidth - suggestionSummary.width - 10;*/
                 reportButtonsBox.percentWidth = NaN;
                 reportButtonsBox.width = rightBox.width - suggestionSummary.width - 15;
             } else {
@@ -870,43 +855,6 @@
                 shape2.graphics.endFill();
                 uiComp2.addChild(shape2);
             }
-            /*if (shape == null && uiComp.width > 0 && uiComp.height > 0) {
-                shape = new Shape();
-                var matrix:Matrix = new Matrix();
-                var boxWidth:Number = uiComp.width;
-                var boxHeight:Number = uiComp.height;
-                var boxRotation:Number = Math.PI/2;
-                var tx:Number = 0;
-                var ty:Number = 0;
-                matrix.createGradientBox(boxWidth, boxHeight, boxRotation, tx, ty);
-                shape.graphics.beginGradientFill(GradientType.LINEAR, [0, reportName != null ? 0x666666 : 0xFFFFFF], [1, 1], [0, 255], matrix);
-                shape.graphics.drawRect(0, 0, uiComp.width, uiComp.height);
-                shape.graphics.endFill();
-                uiComp.addChild(shape);
-            }
-            if (!reportNameShown && reportName != null) {
-                reportNameShown = true;
-                var matrix:Matrix = new Matrix();
-                var boxWidth:Number = uiComp.width;
-                var boxHeight:Number = uiComp.height;
-                var boxRotation:Number = Math.PI/2;
-                var tx:Number = 0;
-                var ty:Number = 0;
-                matrix.createGradientBox(boxWidth, boxHeight, boxRotation, tx, ty);
-                shape.graphics.beginGradientFill(GradientType.LINEAR, [0, reportName != null ? 0x666666 : 0xFFFFFF], [1, 1], [0, 255], matrix);
-                shape.graphics.drawRect(0, 0, uiComp.width, uiComp.height);
-                shape.graphics.endFill();
-            }
-
-            if (shape3 == null && uiComp3 != null && uiComp3.width > 0 && uiComp3.height > 0) {
-                shape3 = new Shape();
-                var matrix2:Matrix = new Matrix();
-                matrix2.createGradientBox(uiComp3.width, uiComp3.height, Math.PI/2, 0, 0);
-                shape3.graphics.beginGradientFill(GradientType.LINEAR, [0x666666, 0xFFFFFF], [1, 1], [0, 255], matrix2);
-                shape3.graphics.drawRect(0, 0, uiComp3.width, uiComp3.height);
-                shape3.graphics.endFill();
-                uiComp3.addChild(shape3);
-            }*/
         }
 
         private var reportNameShown:Boolean = false;
@@ -964,6 +912,10 @@
             window.y = customFieldButton.y + customFieldButton.height + 10;
         }
 
+        private function onViewInHTML():void {
+            navigateToURL(new URLRequest("/app/html/report/" + analysisDefinition.urlKey), "_blank");
+        }
+
         private function goAdmin():void {
             if (analysisChanged) {
                 createPromptWindow("You have unsaved changes to this report.", function():void {
@@ -1002,7 +954,7 @@
         <mx:Button  icon="@Embed(source='../../../assets/table_edit.png')"
                    click="additionalProps()" id="propsButton"
                    toolTip="Edit Report Configuration" label="Additional Configuration" labelPlacement="right" styleName="grayButton"/>
-        <analysis:AdditionalActionButton newReportAction="newReport()" newDashboardAction="newDashboard()" reportViewAction="goReport()"
+        <analysis:AdditionalActionButton newReportAction="newReport()" newDashboardAction="newDashboard()" reportViewAction="goReport()" viewInHTMLAction="onViewInHTML()"
                                          configureDataSourceAction="goAdmin()" toolTip="Actions" icon="@Embed(source='../../../assets/businessman_edit.png')"
                 />
     </mx:HBox>

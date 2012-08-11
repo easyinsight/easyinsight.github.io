@@ -1,5 +1,6 @@
 package com.easyinsight.filtering
 {
+import com.easyinsight.analysis.AnalysisChangedEvent;
 import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.NamedKey;
@@ -32,6 +33,7 @@ import mx.managers.DragManager;
 import mx.managers.PopUpManager;
 
 [Event(name="updatedTransforms", type="com.easyinsight.filtering.TransformsUpdatedEvent")]
+[Event(name="analysisChanged", type="com.easyinsight.analysis.AnalysisChangedEvent")]
 
 public class TransformContainer extends HBox
 {
@@ -43,7 +45,6 @@ public class TransformContainer extends HBox
     private var _report:AnalysisDefinition;
     private var _dashboardID:int;
     private var noFilters:Boolean = true;
-    // private var dropHereBox:VBox;
     private var _filterEditable:Boolean = true;
     [Bindable]
     private var _analysisItems:ArrayCollection;
@@ -305,8 +306,15 @@ public class TransformContainer extends HBox
         showingFeedback = false;
     }
 
+    private var _filterSource:int;
+
+    public function set filterSource(value:int):void {
+        _filterSource = value;
+    }
+
     public function addNewFilter(advancedAvailable:Boolean = true):void {
         var window:NewFilterWindow = new NewFilterWindow();
+        window.filterSource = _filterSource;
         window.availableFields = this._analysisItems;
         window.advancedAvailable = advancedAvailable;
         window.addEventListener(NewFilterEvent.NEW_FILTER, onFilterCreation, false, 0, true);
@@ -471,6 +479,9 @@ public class TransformContainer extends HBox
         if (_loadingFromReport) {
             addFilter(filter);
         }
+        if (filter.filterDefinition.filterID == 0) {
+            dispatchEvent(new AnalysisChangedEvent());
+        }
     }
 
     private var _role:int;
@@ -592,7 +603,7 @@ public class TransformContainer extends HBox
                         filterMeasureRangeDefinition.currentStartValueDefined = true;
                         filterMeasureRangeDefinition.currentStartValue = min;
                     } else {
-                        
+
                     }
                 }
                 filterMap[key.qualifiedName()] = filter;
