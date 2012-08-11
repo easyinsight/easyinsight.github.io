@@ -27,7 +27,7 @@ import mx.collections.ArrayCollection;
 		public var dynamicServiceDefinitionID:int;
 		public var dataPersisted:Boolean;
 		public var publiclyVisible:Boolean;
-		public var accountVisible:Boolean;
+		public var accountVisible:Boolean = true;
 		public var marketplaceVisible:Boolean;
         public var apiKey:String;
         public var uncheckedAPIEnabled:Boolean;
