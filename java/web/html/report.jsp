@@ -66,18 +66,21 @@
     <link href="/css/bootstrap.css" rel="stylesheet">
 
 
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet" />
-    <link href="/css/app.css" rel="stylesheet" />
+
     <link href="/css/datePicker.css" rel="stylesheet" />
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
     <script src="/js/html5.js"></script>
     <![endif]-->
     <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->
-    <script type="text/javascript" src="/js/bootstrap.js"></script>
+
     <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
 
     <style type="text/css">
+
+        body {
+            padding-top: 40px;
+        }
 
         #refreshDiv {
             display: none;
@@ -88,6 +91,10 @@
         }
 
     </style>
+
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet" />
+    <link href="/css/app.css" rel="stylesheet" />
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
 
     <%
         List<String> jsIncludes = report.javaScriptIncludes();
@@ -99,20 +106,6 @@
             out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\""+cssInclude+"\" />");
         }
     %>
-    <style type="text/css">
-        /*body {
-            padding-top: 40px;
-        }*/
-
-        #refreshDiv {
-            display: none;
-        }
-
-        #problemHTML {
-            display: none;
-        }
-
-    </style>
     <script type="text/javascript">
 
         var filterBase = {};
@@ -278,11 +271,6 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container-fluid">
-            <a class="btn btn-navbar" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
             <div class="btn-group pull-right">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
                     <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
@@ -295,7 +283,7 @@
                 </ul>
             </div>
 
-            <div class="pull-left">
+            <div class="nav-collapse">
                 <ul class="nav">
                     <li><a href="/app/html">Data Sources</a></li>
                     <li><a href="/app/html/reports/<%= dataSourceURLKey %>">Reports and Dashboards</a></li>
@@ -308,28 +296,30 @@
 
 
 <div class="container-fluid">
-    <div class="row-fluid">
-        <% if (applicationSkin != null && applicationSkin.isReportHeader()) { %>
-        <div id="reportHeader" style="<%= headerStyle %>">
-            <div style="padding:10px;float:left">
-                <div style="background-color: #FFFFFF;padding: 5px">
-                    <%
+    <div class="row">
+        <div class="span12">
+            <% if (applicationSkin != null && applicationSkin.isReportHeader()) { %>
+            <div id="reportHeader" style="<%= headerStyle %>">
+                <div style="padding:10px;float:left">
+                    <div style="background-color: #FFFFFF;padding: 5px">
+                        <%
 
-                        if (headerImageDescriptor != null) {
-                            out.println("<img src=\"/app/reportHeader?imageID="+headerImageDescriptor.getId()+"\"/>");
-                        }
-                    %>
+                            if (headerImageDescriptor != null) {
+                                out.println("<img src=\"/app/reportHeader?imageID="+headerImageDescriptor.getId()+"\"/>");
+                            }
+                        %>
+                    </div>
+                </div>
+                <div style="<%= headerTextStyle %>">
+                    <%= StringEscapeUtils.escapeHtml(report.getName()) %>
                 </div>
             </div>
+            <% } else { %>
             <div style="<%= headerTextStyle %>">
                 <%= StringEscapeUtils.escapeHtml(report.getName()) %>
             </div>
+            <% } %>
         </div>
-        <% } else { %>
-        <div style="<%= headerTextStyle %>">
-            <%= StringEscapeUtils.escapeHtml(report.getName()) %>
-        </div>
-        <% } %>
     </div>
     <div class="row-fluid">
         <div class="span12">
