@@ -988,14 +988,18 @@ public class FeedStorage {
         }
     }
 
-    public String dataSourceURLKeyForDataSource(long dataSourceID) throws SQLException {
+    public DataSourceDescriptor dataSourceURLKeyForDataSource(long dataSourceID) throws SQLException {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT API_KEY FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+            PreparedStatement stmt = conn.prepareStatement("SELECT API_KEY, FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
             stmt.setLong(1, dataSourceID);
             ResultSet rs = stmt.executeQuery();
             rs.next();
-            return rs.getString(1);
+            String urlKey = rs.getString(1);
+            String name = rs.getString(2);
+            DataSourceDescriptor dsd = new DataSourceDescriptor(name, dataSourceID, 0, true);
+            dsd.setUrlKey(urlKey);
+            return dsd;
         } finally {
             Database.closeConnection(conn);
         }
