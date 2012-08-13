@@ -156,9 +156,8 @@ public class DashboardStack extends DashboardElement {
                 item.setDashboardElement(DashboardStorage.getElement(conn, gridElementID, elementType));
                 if (item.getDashboardElement() != null) {
                     item.getDashboardElement().setParentElement(dashboardGrid);
-                    continue;
+                    items.add(item);
                 }
-                items.add(item);
             }
             gridItemStmt.close();
             Collections.sort(items, new Comparator<DashboardStackItem>() {
