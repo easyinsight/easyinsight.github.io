@@ -14,6 +14,7 @@
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="com.easyinsight.dashboard.DashboardUIProperties" %>
+<%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -29,7 +30,7 @@
         DashboardUIProperties dashboardUIProperties = dashboard.findHeaderImage();
 
         session.setAttribute("dashboard", dashboard);
-        String dataSourceURLKey = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
+        DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
         ApplicationSkin applicationSkin;
 
         String headerTextStyle = "width: 100%;text-align: center;font-size: 14px;padding-top: 10px;";
@@ -68,16 +69,12 @@
     <script type="text/javascript" src="/js/jquery.datePicker.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
 
-
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet" />
-    <link href="/css/app.css" rel="stylesheet" />
     <link href="/css/datePicker.css" rel="stylesheet" />
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
     <script src="/js/html5.js"></script>
     <![endif]-->
     <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->
-    <script type="text/javascript" src="/js/bootstrap.js"></script>
     <script type="text/javascript" src="/js/jquery.jqplot.js"></script>
 
     <style type="text/css">
@@ -85,7 +82,18 @@
             padding-top: 40px;
             padding-bottom: 40px;
         }
+
+        #refreshDiv {
+            display: none;
+        }
+
+        #problemHTML {
+            display: none;
+        }
     </style>
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet" />
+    <link href="/css/app.css" rel="stylesheet" />
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
     <%
         Set<String> jsIncludes = new HashSet<String>(dashboard.getRootElement().jsIncludes());
         for (String jsInclude : jsIncludes) {
@@ -162,53 +170,52 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
             <div class="btn-group pull-right">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
                     <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                    <%--<li><a href="#">Profile</a></li>
-                    <li class="divider"></li>--%>
+                    <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
+                    <%--<li><a href="#">Profile</a></li>--%>
+                    <li class="divider"></li>
                     <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
                 </ul>
             </div>
+
             <div class="nav-collapse">
                 <ul class="nav">
                     <li><a href="/app/html">Data Sources</a></li>
-                    <li><a href="/app/html/reports/<%= dataSourceURLKey %>">Reports and Dashboards</a></li>
-                    <li><a href="/app/html/flashAppAction.jsp">Full Interface</a></li>
+                    <li><a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%=StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a></li>
+                    <li class="active"><a href="#"><%= StringEscapeUtils.escapeHtml(dashboard.getName()) %></a></li>
                 </ul>
-            </div><!--/.nav-collapse -->
+            </div>
         </div>
     </div>
 </div>
-<% if (fullBackgroundImage == null) { %>
-<div style="<%= headerStyle %>">
-    <div style="padding:10px;float:left">
-        <div style="background-color: #FFFFFF;padding: 5px">
-            <%
+<div class="container-fluid">
+    <% if (fullBackgroundImage == null) { %>
+    <div style="<%= headerStyle %>">
+        <div style="padding:10px;float:left">
+            <div style="background-color: #FFFFFF;padding: 5px">
+                <%
 
-                if (headerImageDescriptor != null) {
-                    out.println("<img src=\"/app/reportHeader?imageID="+headerImageDescriptor.getId()+"\"/>");
-                }
-            %>
+                    if (headerImageDescriptor != null) {
+                        out.println("<img src=\"/app/reportHeader?imageID="+headerImageDescriptor.getId()+"\"/>");
+                    }
+                %>
+            </div>
+        </div>
+        <div style="<%= headerTextStyle %>">
+            <%= StringEscapeUtils.escapeHtml(dashboard.getName()) %>
         </div>
     </div>
-    <div style="<%= headerTextStyle %>">
-        <%= StringEscapeUtils.escapeHtml(dashboard.getName()) %>
+    <% } else { %>
+    <div style="<%= headerStyle %>">
+        <% out.println("<img src=\"/app/reportHeader?imageID="+fullBackgroundImage.getId()+"\"/>"); %>
     </div>
+    <% } %>
 </div>
-<% } else { %>
-<div style="<%= headerStyle %>">
-    <% out.println("<img src=\"/app/reportHeader?imageID="+fullBackgroundImage.getId()+"\"/>"); %>
-</div>
-<% } %>
 <div class="container">
     <div class="row-fluid">
         <div class="span12" style="text-align:center" id="refreshDiv">

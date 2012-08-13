@@ -9,6 +9,7 @@
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="com.easyinsight.preferences.ImageDescriptor" %>
+<%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -31,7 +32,7 @@
         if (drillthroughFilters != null) {
             report.getFilterDefinitions().addAll(drillthroughFilters);
         }
-        String dataSourceURLKey = new FeedStorage().dataSourceURLKeyForDataSource(report.getDataFeedID());
+        DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(report.getDataFeedID());
 
         ApplicationSkin applicationSkin;
         String headerStyle;
@@ -44,7 +45,7 @@
             hibernateSession.close();
         }
         ImageDescriptor headerImageDescriptor = null;
-        String headerTextStyle = "width: 100%;text-align: center;font-size: 14px;padding-top:10px;";
+        String headerTextStyle = "width: 100%;text-align: center;font-size: 18px;padding-top:10px;";
         if (applicationSkin != null && applicationSkin.isReportHeader()) {
             headerImageDescriptor = applicationSkin.getReportHeaderImage();
             int reportBackgroundColor = applicationSkin.getReportBackgroundColor();
@@ -277,8 +278,9 @@
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                    <%--<li><a href="#">Profile</a></li>
-                    <li class="divider"></li>--%>
+                    <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
+                    <%--<li><a href="#">Profile</a></li>--%>
+                    <li class="divider"></li>
                     <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
                 </ul>
             </div>
@@ -286,8 +288,8 @@
             <div class="nav-collapse">
                 <ul class="nav">
                     <li><a href="/app/html">Data Sources</a></li>
-                    <li><a href="/app/html/reports/<%= dataSourceURLKey %>">Reports and Dashboards</a></li>
-                    <li><a href="/app/html/flashAppAction.jsp">Full Interface</a></li>
+                    <li><a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%=StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a></li>
+                    <li class="active"><a href="#"><%= StringEscapeUtils.escapeHtml(report.getName()) %></a></li>
                 </ul>
             </div>
         </div>
@@ -295,11 +297,11 @@
 </div>
 
 
-<div class="container-fluid">
+<div class="container-fluid" id="reportHeader">
     <div class="row-fluid">
         <div class="span12">
             <% if (applicationSkin != null && applicationSkin.isReportHeader()) { %>
-            <div id="reportHeader" style="<%= headerStyle %>">
+            <div style="<%= headerStyle %>">
                 <div style="padding:10px;float:left">
                     <div style="background-color: #FFFFFF;padding: 5px">
                         <%
@@ -322,7 +324,7 @@
         </div>
     </div>
     <div class="row-fluid">
-        <div class="span12">
+        <div class="span3">
             <div class="btn-toolbar">
                 <div class="btn-group">
                     <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
@@ -354,9 +356,8 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row-fluid" id="filterRow">
-        <div class="span12">
+        <div class="span9">
+
             <%
                 for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
                     if (filterDefinition.isShowOnReportView()) {
@@ -364,6 +365,7 @@
                     }
                 }
             %>
+
         </div>
     </div>
 </div>
