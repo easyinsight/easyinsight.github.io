@@ -154,7 +154,10 @@ public class DashboardStack extends DashboardElement {
                 DashboardStackItem item = new DashboardStackItem();
                 item.setPosition(itemRS.getInt(3));
                 item.setDashboardElement(DashboardStorage.getElement(conn, gridElementID, elementType));
-                item.getDashboardElement().setParentElement(dashboardGrid);
+                if (item.getDashboardElement() == null) {
+                    item.getDashboardElement().setParentElement(dashboardGrid);
+                    continue;
+                }
                 items.add(item);
             }
             gridItemStmt.close();
