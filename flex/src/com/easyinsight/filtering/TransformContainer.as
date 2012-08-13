@@ -479,7 +479,7 @@ public class TransformContainer extends HBox
         if (_loadingFromReport) {
             addFilter(filter);
         }
-        if (filter.filterDefinition.filterID == 0) {
+        if (filter.filterDefinition != null && filter.filterDefinition.filterID == 0) {
             dispatchEvent(new AnalysisChangedEvent());
         }
     }
