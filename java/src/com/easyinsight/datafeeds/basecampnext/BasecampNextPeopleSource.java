@@ -7,6 +7,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
+import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -58,9 +59,10 @@ public class BasecampNextPeopleSource extends BasecampNextBaseSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
+            HttpClient httpClient = new HttpClient();
             DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
             DataSet dataSet = new DataSet();
-            JSONArray jsonArray = runJSONRequest("people.json", (BasecampNextCompositeSource) parentDefinition);
+            JSONArray jsonArray = runJSONRequest("people.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
             for (int i = 0; i < jsonArray.length(); i++) {
                 IRow row = dataSet.createRow();
                 JSONObject projectObject = jsonArray.getJSONObject(i);

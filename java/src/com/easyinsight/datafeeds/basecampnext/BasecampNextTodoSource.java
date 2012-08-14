@@ -11,6 +11,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
+import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -140,13 +141,13 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-
+            HttpClient httpClient = new HttpClient();
             BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
             List<Project> projects = basecampNextCompositeSource.getOrCreateProjectCache().getProjects();
             for (Project project : projects) {
                 DataSet dataSet = new DataSet();
                 String projectID = project.getId();
-                JSONArray todoListArray = runJSONRequest("projects/"+projectID+"/todolists.json", (BasecampNextCompositeSource) parentDefinition, lastRefreshDate);
+                JSONArray todoListArray = runJSONRequest("projects/"+projectID+"/todolists.json", (BasecampNextCompositeSource) parentDefinition, lastRefreshDate, httpClient);
                 if (todoListArray == null) {
                     System.out.println("No need to retrieve todos for " + projectID);
                     continue;
@@ -166,7 +167,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     } catch (Exception e) {
                         LogClass.error("Parse failure on " + todoList.getString("updated_at"));
                     }
-                    JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition);
+                    JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition, httpClient);
                     JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
 
                     JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
@@ -175,7 +176,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     JSONArray completedArray = todoMasterObject.getJSONArray("completed");
                     parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray);
                 }
-                JSONArray completedTodoListArray = runJSONRequest("projects/"+projectID+"/todolists/completed.json", (BasecampNextCompositeSource) parentDefinition);
+                JSONArray completedTodoListArray = runJSONRequest("projects/"+projectID+"/todolists/completed.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
                 for (int j = 0; j < completedTodoListArray.length(); j++) {
 
                     JSONObject todoList = completedTodoListArray.getJSONObject(j);
@@ -190,7 +191,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     } catch (Exception e) {
                         LogClass.error("Parse failure on " + todoList.getString("updated_at"));
                     }
-                    JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition);
+                    JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition, httpClient);
                     JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
 
                     JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");

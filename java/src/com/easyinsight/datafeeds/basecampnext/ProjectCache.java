@@ -1,7 +1,7 @@
 package com.easyinsight.datafeeds.basecampnext;
 
-import com.easyinsight.analysis.IRow;
 import com.easyinsight.datafeeds.FeedDefinition;
+import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -25,9 +25,10 @@ public class ProjectCache extends BasecampNextBaseSource {
     }
 
     public void populate(FeedDefinition parentDefinition) throws JSONException {
+        HttpClient httpClient = new HttpClient();
         DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
         projects = new ArrayList<Project>();
-        JSONArray jsonArray = runJSONRequest("projects.json", (BasecampNextCompositeSource) parentDefinition);
+        JSONArray jsonArray = runJSONRequest("projects.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject projectObject = jsonArray.getJSONObject(i);
             projects.add(new Project(String.valueOf(projectObject.getInt("id")),
@@ -36,7 +37,7 @@ public class ProjectCache extends BasecampNextBaseSource {
                     projectObject.getString("url"),
                     format.parseDateTime(projectObject.getString("updated_at")).toDate()));
         }
-        jsonArray = runJSONRequest("projects/archived.json", (BasecampNextCompositeSource) parentDefinition);
+        jsonArray = runJSONRequest("projects/archived.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject projectObject = jsonArray.getJSONObject(i);
             projects.add(new Project(String.valueOf(projectObject.getInt("id")),

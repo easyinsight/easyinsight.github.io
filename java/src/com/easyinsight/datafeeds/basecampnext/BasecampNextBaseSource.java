@@ -25,15 +25,14 @@ import java.util.Date;
  */
 public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition {
 
-    protected JSONArray runJSONRequest(String path, BasecampNextCompositeSource parentDefinition) {
-        return runJSONRequest(path, parentDefinition, null);
+    protected JSONArray runJSONRequest(String path, BasecampNextCompositeSource parentDefinition, HttpClient httpClient) {
+        return runJSONRequest(path, parentDefinition, null, httpClient);
     }
 
-    protected JSONArray runJSONRequest(String path, BasecampNextCompositeSource parentDefinition, @Nullable Date lastRefreshDate) {
+    protected JSONArray runJSONRequest(String path, BasecampNextCompositeSource parentDefinition, @Nullable Date lastRefreshDate, HttpClient httpClient) {
         if (parentDefinition.getEndpoint() == null) {
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight access to your Basecamp account.", parentDefinition));
         }
-        HttpClient client = new HttpClient();
         DateFormat df = new SimpleDateFormat("EEE',' dd MMM yyyy HH:mm:ss Z");
         HttpMethod restMethod = new GetMethod("https://basecamp.com/"+parentDefinition.getEndpoint()+"/api/v1/" + path);
 
@@ -49,7 +48,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
         int retryCount = 0;
         do {
             try {
-                client.executeMethod(restMethod);
+                httpClient.executeMethod(restMethod);
                 if (lastRefreshDate != null && lastRefreshDate.getTime() >= 100) {
                     
                     Header header = restMethod.getResponseHeader("Last-Modified");
@@ -69,6 +68,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     throw new ReportException(new DataSourceConnectivityReportFault("We were unable to retrieve the list of projects for this Basecamp account. Check that you created this connection under the right 37Signals user, and if so, that your Basecamp account is still active. If this problem persists, contact support@easy-insight.com.", parentDefinition));
                 }
                 jsonObject = new JSONArray(restMethod.getResponseBodyAsString());
+                restMethod.releaseConnection();
                 successful = true;
             } catch (IOException e) {
                 retryCount++;
@@ -102,8 +102,8 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
         System.out.println(df.parse("Thu, 29 Mar 2012 20:18:58 GMT"));
     }
 
-    protected JSONObject runJSONRequestForObject(String path, BasecampNextCompositeSource parentDefinition) {
-        HttpClient client = new HttpClient();
+    protected JSONObject runJSONRequestForObject(String path, BasecampNextCompositeSource parentDefinition, HttpClient httpClient) {
+
         HttpMethod restMethod = new GetMethod("https://basecamp.com/"+parentDefinition.getEndpoint()+"/api/v1/" + path);
 
         restMethod.setRequestHeader("Authorization", "Bearer " + parentDefinition.getAccessToken());
@@ -114,7 +114,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
         int retryCount = 0;
         do {
             try {
-                client.executeMethod(restMethod);
+                httpClient.executeMethod(restMethod);
                 jsonObject = new JSONObject(restMethod.getResponseBodyAsString());
                 successful = true;
             } catch (IOException e) {
