@@ -143,9 +143,9 @@ public class RescareWprTest extends TestCase implements ITestConstants {
             hours.addRow("1", "1", 0, 0, 0, 0, "Approved", "true", "false", 6 * HOURS, 15 * HOURS);
             hours.addRow("2", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 6 * HOURS, 15 * HOURS);
             hours.addRow("3", "1", 6 * HOURS, 16 * HOURS, 12 * HOURS, 13 * HOURS, "Approved", "true", "false", 6 * HOURS, 15 * HOURS);
-            hours.addRow("4", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 6 * HOURS, 15 * HOURS);
-            hours.addRow("5", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 6 * HOURS, 15 * HOURS);
-            hours.addRow("6", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 6 * HOURS, 15 * HOURS);
+//            hours.addRow("4", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 6 * HOURS, 15 * HOURS);
+//            hours.addRow("5", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 6 * HOURS, 15 * HOURS);
+//            hours.addRow("6", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 6 * HOURS, 15 * HOURS);
             Results results = report.runReport(conn);
             results.verifyRow("1", "true", 2);
 
