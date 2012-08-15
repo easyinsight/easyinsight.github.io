@@ -10,6 +10,7 @@ import org.joda.time.Hours;
 import test.util.TestUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -60,6 +61,7 @@ public class RescareWprTest extends TestCase implements ITestConstants {
         values.add(new EmptyValue());
         FilterDefinition f = new FilterValueDefinition(report.getField("Calculated Excused Hours").getAnalysisItem(), false, values);
         w.addFilter(f);
+        w.addFilter(new FilterValueDefinition(report.getField("Good Cause Approved").getAnalysisItem(), true, Arrays.asList((Object) "true")));
     }
 
     public void testCoreActivities() throws Exception {
