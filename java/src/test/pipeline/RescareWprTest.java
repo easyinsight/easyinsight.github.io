@@ -1,10 +1,12 @@
 package test.pipeline;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedRegistry;
 import junit.framework.TestCase;
+import org.joda.time.Hours;
 import test.util.TestUtil;
 
 import java.util.ArrayList;
@@ -20,11 +22,12 @@ public class RescareWprTest extends TestCase implements ITestConstants {
     private DataSourceWrapper rescare;
     private DataSourceWrapper participants;
     private DataSourceWrapper activities;
+    private DataSourceWrapper hours;
 
     private ReportWrapper report;
-    private Date today;
-    private Date afterToday;
-    private Date beforeToday;
+
+    private static final double HOURS = 60 * 60 * 1000;
+
 
     protected void setUp() throws Exception {
         if (Database.instance() == null) {
@@ -36,17 +39,27 @@ public class RescareWprTest extends TestCase implements ITestConstants {
 
     public void createReport(EIConnection conn) throws Exception {
         participants = DataSourceWrapper.createDataSource("Participants", conn, "Participant ID", GROUPING, "Original Roster Date", DATE);
-        activities = DataSourceWrapper.createDataSource("Activities", conn, "Activities - Record ID#", GROUPING, "Related Participant", GROUPING, "Activity Type", GROUPING);
+        activities = DataSourceWrapper.createDataSource("Activities", conn, "Activities - Record ID#", GROUPING, "Activities - Related Participant", GROUPING, "Activity Type", GROUPING);
+        hours = DataSourceWrapper.createDataSource("Hours", conn, "Hours - Record ID#", GROUPING, "Hours - Related Activity", GROUPING, "Time In", MEASURE, "Time Out", MEASURE, "Lunch Time Out", MEASURE, "Lunch Time In", MEASURE, "Status", GROUPING, "Lunch Hour", GROUPING, "Good Cause Approved", GROUPING, "Scheduled Time In", MEASURE, "Scheduled Time Out", MEASURE);
 
-        rescare = DataSourceWrapper.createJoinedSource("Franklin", conn, participants, activities);
-        rescare.join(participants, activities, "Participant ID", "Related Participant");
+        rescare = DataSourceWrapper.createJoinedSource("Franklin", conn, participants, activities, hours);
+        rescare.join(participants, activities, "Participant ID", "Activities - Related Participant");
+        rescare.join(activities, hours, "Activities - Record ID#", "Hours - Related Activity");
 
         report = rescare.createReport();
-        report.addDerivedGrouping("Core Activity", "case([Activity Type], \"Training - Related to Employment\", \"false\", \"Training - Secondary School\", \"false\", \"Training - GED\", \"false\", \"Job Skills Workshop\", \"false\", \"ResCare Academy - Non-Core\", \"false\", \"true\")", false);
+        report.addDerivedGrouping("Core Activity", "case([Activity Type], \"Training - Related to Employment\", \"false\", \"Training - Secondary School\", \"false\", \"Training - GED\", \"false\", \"Job Skills Workshop\", \"false\", \"ResCare Academy - Non-Core\", \"false\", \"true\")", true);
+        report.addCalculation("Calculated Lunch Hours", "equalTo(Lunch Hour, \"true\", (Lunch Time In - Lunch Time Out)/(60 * 60 * 1000), 0)");
+        report.addCalculation("Calculated Hours", "((Time Out - Time In)/(60*60*1000)) - Calculated Lunch Hours");
+        report.addCalculation("Calculated Scheduled Hours", "((Scheduled Time Out - Scheduled Time In) / (60 * 60 * 1000)) - equalTo(Lunch Hour, \"true\", 1, 0)");
+        report.addCalculation("Calculated Absent Hours", "max(0, Calculated Scheduled Hours - Calculated Hours)");
         report.addField("Activities - Record ID#");
         report.addField("Core Activity");
-
-
+        FieldWrapper w = report.addCalculation("Calculated Excused Hours", "Calculated Absent Hours", false);
+        List<Object> values = new ArrayList<Object>();
+        values.add("Submitted");
+        values.add(new EmptyValue());
+        FilterDefinition f = new FilterValueDefinition(report.getField("Calculated Excused Hours").getAnalysisItem(), false, values);
+        w.addFilter(f);
     }
 
     public void testCoreActivities() throws Exception {
@@ -70,7 +83,73 @@ public class RescareWprTest extends TestCase implements ITestConstants {
             results.verifyRow("5", "false");
             results.verifyRow("6", "true");
             results.verifyRow("7", "true");
-            results.verifyRowCount(1);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void testCalculatedHours() throws Exception {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            createReport(conn);
+            report.addField("Hours - Record ID#");
+            report.addField("Calculated Hours");
+
+            participants.addRow("123456", "2012-06-06");
+            activities.addRow("1", "123456", "Community Work Experience");
+            hours.addRow("1", "1", 6 * HOURS, 15 * HOURS, 12 * HOURS, 13 * HOURS, "Submitted", "true", "false", 6 * HOURS, 15 * HOURS);
+            hours.addRow("2", "1", 6 * HOURS, 15 * HOURS, 0, 0, "Submitted", "false", "false", 6 * HOURS, 15 * HOURS);
+
+
+            Results results = report.runReport(conn);
+
+            results.verifyRow("1", "true", "1", 8);
+            results.verifyRow("1", "true", "2", 9);
+
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void testAbsentHours() throws Exception {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            createReport(conn);
+            report.addField("Hours - Record ID#");
+            report.addField("Calculated Absent Hours");
+            participants.addRow("123456", "2012-06-06");
+            activities.addRow("1", "123456", "Community Work Experience");
+            hours.addRow("1", "1", 0, 0, 0, 0, "Submitted", "true", "false", 6 * HOURS, 15 * HOURS);
+            hours.addRow("2", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Submitted", "true", "false", 6 * HOURS, 15 * HOURS);
+            hours.addRow("3", "1", 6 * HOURS, 16 * HOURS, 12 * HOURS, 13 * HOURS, "Submitted", "true", "false", 6 * HOURS, 15 * HOURS);
+
+            Results results = report.runReport(conn);
+            results.verifyRow("1", "true", "1", 8);
+            results.verifyRow("1", "true", "2", 2);
+            results.verifyRow("1", "true", "3", 0);
+
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void testExcusedHours() throws Exception {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            createReport(conn);
+            report.addField("Calculated Excused Hours");
+            participants.addRow("123456", "2012-06-06");
+            activities.addRow("1", "123456", "Community Work Experience");
+            hours.addRow("1", "1", 0, 0, 0, 0, "Approved", "true", "false", 6 * HOURS, 15 * HOURS);
+            hours.addRow("2", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 6 * HOURS, 15 * HOURS);
+            hours.addRow("3", "1", 6 * HOURS, 16 * HOURS, 12 * HOURS, 13 * HOURS, "Approved", "true", "false", 6 * HOURS, 15 * HOURS);
+            hours.addRow("4", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 6 * HOURS, 15 * HOURS);
+            hours.addRow("5", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 6 * HOURS, 15 * HOURS);
+            hours.addRow("6", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 6 * HOURS, 15 * HOURS);
+            Results results = report.runReport(conn);
+            results.verifyRow("1", "true", 2);
+
+
         } finally {
             Database.closeConnection(conn);
         }
