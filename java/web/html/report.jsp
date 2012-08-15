@@ -292,6 +292,38 @@
                     <li class="active"><a href="#"><%= StringEscapeUtils.escapeHtml(report.getName()) %></a></li>
                 </ul>
             </div>
+            <div class="btn-toolbar" style="margin-top:0px;margin-bottom: 0px">
+                <div class="btn-group">
+                    <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                        Export the Report
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><button class="btn btn-inverse" type="button" onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'" style="padding:5px;margin:5px;width:150px">Export to Excel</button></li>
+                        <li><button class="btn btn-inverse" type="button" onclick="$('#emailReportWindow').modal(true, true, true)" style="padding:5px;margin:5px;width:150px">Email the Report</button></li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                        Refresh Data
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><button class="btn btn-inverse" type="button" onclick="refreshReport()" style="padding:5px;margin:5px;width:150px">Refresh the Report</button></li>
+                        <%
+                            FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
+                            if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
+                        %>
+                        <li><button class="btn btn-inverse" type="button" id="refreshDataSourceButton" onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh Data Source</button></li>
+                        <%
+                            }
+                        %>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-inverse">Toggle Filters</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -324,39 +356,7 @@
         </div>
     </div>
     <div class="row-fluid">
-        <div class="span3">
-            <div class="btn-toolbar">
-                <div class="btn-group">
-                    <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
-                        Export the Report
-                        <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><button class="btn" type="button" onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'" style="padding:5px;margin:5px;width:150px">Export to Excel</button></li>
-                        <li><button class="btn" type="button" onclick="$('#emailReportWindow').modal(true, true, true)" style="padding:5px;margin:5px;width:150px">Email the Report</button></li>
-                    </ul>
-                </div>
-                <div class="btn-group">
-                    <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
-                        Refresh Data
-                        <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><button class="btn" type="button" onclick="refreshReport()" style="padding:5px;margin:5px;width:150px">Refresh the Report</button></li>
-                        <%
-                            FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
-                            if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
-                        %>
-                        <li><button class="btn" type="button" id="refreshDataSourceButton" onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh Data Source</button></li>
-                        <%
-                            }
-                        %>
-
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="span9">
+        <div class="span12">
 
             <%
                 for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
