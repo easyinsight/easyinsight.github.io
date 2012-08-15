@@ -292,7 +292,7 @@
                     <li class="active"><a href="#"><%= StringEscapeUtils.escapeHtml(report.getName()) %></a></li>
                 </ul>
             </div>
-            <div class="btn-toolbar" style="margin-top:0px;margin-bottom: 0px">
+            <div class="nav-collapse btn-toolbar" style="margin-top:0px;margin-bottom: 0px">
                 <div class="btn-group">
                     <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
                         Export the Report
