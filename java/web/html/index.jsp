@@ -16,6 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+    <title>Easy Insight Data Sources</title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
@@ -53,13 +54,15 @@
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
+                    <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
+                    <%--<li><a href="#">Profile</a></li>--%>
+                    <li class="divider"></li>
                     <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
                 </ul>
             </div>
             <div class="nav-collapse">
                 <ul class="nav">
                     <li class="active"><a href="#">Data Sources</a></li>
-                    <li><a href="flashAppAction.jsp">Full Interface</a></li>
                 </ul>
             </div><!--/.nav-collapse -->
         </div>
@@ -73,7 +76,7 @@
                 <ul class="nav nav-list">
                     <li class="nav-header">Recent Actions</li>
                     <%
-                        Collection<ActionLog> actions = new AdminService().getRecentActions();
+                        Collection<ActionLog> actions = new AdminService().getRecentHTMLActions();
                         for (ActionLog actionLog : actions) {
                             if (actionLog instanceof ActionReportLog && actionLog.getActionType() == ActionReportLog.VIEW) {
                                 ActionReportLog actionReportLog = (ActionReportLog) actionLog;

@@ -21,6 +21,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+    <title>Easy Insight Reports and Dashboards</title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
 
@@ -44,19 +45,15 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
             <div class="btn-group pull-right">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
                     <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                    <%--<li><a href="#">Profile</a></li>
-                    <li class="divider"></li>--%>
+                    <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
+                    <%--<li><a href="#">Profile</a></li>--%>
+                    <li class="divider"></li>
                     <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
                 </ul>
             </div>
@@ -64,7 +61,6 @@
                 <ul class="nav">
                     <li><a href="/app/html">Data Sources</a></li>
                     <li class="active"><a href="#">Reports and Dashboards</a></li>
-                    <li><a href="/app/html/flashAppAction.jsp">Full Interface</a></li>
                 </ul>
             </div><!--/.nav-collapse -->
         </div>
@@ -78,7 +74,7 @@
                 <ul class="nav nav-list">
                     <li class="nav-header">Recent Actions</li>
                     <%
-                        Collection<ActionLog> actions = new AdminService().getRecentActions();
+                        Collection<ActionLog> actions = new AdminService().getRecentHTMLActions();
                         for (ActionLog actionLog : actions) {
                             if (actionLog instanceof ActionReportLog && actionLog.getActionType() == ActionReportLog.VIEW) {
                                 ActionReportLog actionReportLog = (ActionReportLog) actionLog;
@@ -103,7 +99,7 @@
                 String dataSourceKey = request.getParameter("dataSourceID");
                 long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
 
-                List<EIDescriptor> descriptors = new UserUploadService().getFeedAnalysisTreeForDataSource(new DataSourceDescriptor(null, dataSourceID, 0, false));
+                List<EIDescriptor> descriptors = new UserUploadService().getFeedAnalysisTreeForDataSource(new DataSourceDescriptor(null, dataSourceID, 0, false, 0));
                 Collections.sort(descriptors, new Comparator<EIDescriptor>() {
 
                     public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
