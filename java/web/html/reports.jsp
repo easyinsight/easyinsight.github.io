@@ -99,7 +99,7 @@
                 String dataSourceKey = request.getParameter("dataSourceID");
                 long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
 
-                List<EIDescriptor> descriptors = new UserUploadService().getFeedAnalysisTreeForDataSource(new DataSourceDescriptor(null, dataSourceID, 0, false, 0));
+                List<EIDescriptor> descriptors = new UserUploadService().getFeedAnalysisTreeForDataSource(new DataSourceDescriptor(null, dataSourceID, 0, false));
                 Collections.sort(descriptors, new Comparator<EIDescriptor>() {
 
                     public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
