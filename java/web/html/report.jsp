@@ -294,32 +294,34 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container-fluid">
-            <div class="btn-group pull-right">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <% if (phone) { %>
-                        <li><a href="/app/html">Data Sources</a></li>
-                        <li><a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%=StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a></li>
-                        <li><a href="#" onclick="toggleFilters()">Toggle Filters</a></li>
-                        <li><a href="#" onclick="refreshReport()">Refresh Report</a></li>
-                    <%
-                        FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
-                        if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
-                    %>
-                        <li><a href="#" onclick="refreshDataSource()">Refresh the Data Source</a></li>
-                    <%
-                        }
-                    %>
-                    <% } else { %>
-                        <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
-                    <% } %>
-                    <%--<li><a href="#">Profile</a></li>--%>
-                    <li class="divider"></li>
-                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                </ul>
+            <div class="nav-collapse">
+                <div class="btn-group pull-right">
+                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <% if (phone) { %>
+                            <li><a href="/app/html">Data Sources</a></li>
+                            <li><a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%=StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a></li>
+                            <li><a href="#" onclick="toggleFilters()">Toggle Filters</a></li>
+                            <li><a href="#" onclick="refreshReport()">Refresh Report</a></li>
+                        <%
+                            FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
+                            if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
+                        %>
+                            <li><a href="#" onclick="refreshDataSource()">Refresh the Data Source</a></li>
+                        <%
+                            }
+                        %>
+                        <% } else { %>
+                            <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
+                        <% } %>
+                        <%--<li><a href="#">Profile</a></li>--%>
+                        <li class="divider"></li>
+                        <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
+                    </ul>
+                </div>
             </div>
 
             <% if (!phone) { %>
