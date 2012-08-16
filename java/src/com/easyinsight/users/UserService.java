@@ -23,11 +23,9 @@ import com.easyinsight.billing.BrainTreeBillingSystem;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.ResultSet;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1392,6 +1390,58 @@ public class UserService {
                 bytes = rs.getBytes(1);
             conn.commit();
             return bytes;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void logAuthentication(String username, Long userId, boolean success, String ipAddress, String userAgent) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+
+            conn.setAutoCommit(false);
+
+            if(userId == null || userId == 0) {
+                PreparedStatement usernameStatement = conn.prepareStatement("SELECT USER_ID FROM USER WHERE username = ?");
+                usernameStatement.setString(1, username);
+                ResultSet rs = usernameStatement.executeQuery();
+                if(rs.next()) {
+                    userId = rs.getLong(1);
+                }
+                usernameStatement.close();
+                rs.close();
+                if(userId == null || userId == 0) {
+                    PreparedStatement emailStatement = conn.prepareStatement("SELECT USER_ID FROM USER WHERE email = ?");
+                    emailStatement.setString(1, username);
+                    ResultSet ers = emailStatement.executeQuery();
+                    if(ers.next()) {
+                        userId = ers.getLong(1);
+                    }
+                    emailStatement.close();
+                    ers.close();
+                }
+            }
+
+
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO authentication_log(username, user_id, success, login_time, ip_address, login_type, user_agent) VALUES(?,?,?,?,?,?,?)");
+
+            insertStmt.setString(1, username);
+            insertStmt.setLong(2, userId);
+            insertStmt.setBoolean(3, success);
+            insertStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+            insertStmt.setString(5, ipAddress);
+            insertStmt.setInt(6, 1);
+            insertStmt.setString(7, userAgent);
+
+
+            insertStmt.execute();
+            conn.commit();
+            insertStmt.close();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();

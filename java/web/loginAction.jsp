@@ -12,6 +12,13 @@
 
 
     UserServiceResponse userServiceResponse = new UserService().authenticate(userName, password, false);
+    String ipAddress  = request.getHeader("X-FORWARDED-FOR");
+    if(ipAddress == null) {
+        ipAddress = request.getRemoteAddr();
+    }
+
+    new UserService().logAuthentication(userName, userServiceResponse.getUserID(), userServiceResponse.isSuccessful(), ipAddress, request.getHeader("User-Agent"));
+
     if (!userServiceResponse.isSuccessful()) {
         response.sendRedirect("login.jsp?error=true");
     } else {
