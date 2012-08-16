@@ -5,20 +5,17 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.api.ServiceRuntimeException;
-import com.easyinsight.api.v2.SerializedLoad;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.TempStorage;
 import nu.xom.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DateFormat;
@@ -46,13 +43,14 @@ public class LoadRowsServlet extends APIServlet {
             throw new ServiceRuntimeException("You need to specify a transaction ID via the transactionID attribute on the root element of the request.");
         }
         String transactionID = dataSourceAttribute.getValue();
-        PreparedStatement txnQueryStmt = conn.prepareStatement("SELECT data_transaction_id, data_source_name FROM data_transaction where external_txn_id = ? AND user_id = ?");
+        PreparedStatement txnQueryStmt = conn.prepareStatement("SELECT data_transaction_id, data_source_name, temp_table_name FROM data_transaction where external_txn_id = ? AND user_id = ?");
         txnQueryStmt.setString(1, transactionID);
         txnQueryStmt.setLong(2, SecurityUtil.getUserID());
         ResultSet rs = txnQueryStmt.executeQuery();
         rs.next();
         long transactionDBID = rs.getLong(1);
         String dataSourceKey = rs.getString(2);
+        String tableName = rs.getString(3);
         Map<Long, Boolean> dataSources = findDataSourceIDsByName(dataSourceKey, conn);
         if (dataSources.size() == 0) {
             throw new ServiceRuntimeException("We couldn't find a data source by the name or key of " + transactionID + ". Create the data source by posting to defineDataSource before you use this call.");
@@ -103,17 +101,8 @@ public class LoadRowsServlet extends APIServlet {
                 }
             }
         }
-        SerializedLoad load = SerializedLoad.fromDataSet(dataSet);
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO data_transaction_command (data_transaction_id, command_blob) VALUES (?, ?)");
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(load);
-        byte[] bytes = baos.toByteArray();
-        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        BufferedInputStream bis = new BufferedInputStream(bais, 1024);
-        insertStmt.setLong(1, transactionDBID);
-        insertStmt.setBinaryStream(2, bis, bytes.length);
-        insertStmt.execute();
+        TempStorage tempStorage = DataStorage.existingTempConnection(dataSource, conn, tableName);
+        tempStorage.insertData(dataSet);
         return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
     }
 }
