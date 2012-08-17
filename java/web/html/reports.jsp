@@ -45,24 +45,31 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container-fluid">
-            <div class="btn-group pull-right">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
-                    <%--<li><a href="#">Profile</a></li>--%>
-                    <li class="divider"></li>
-                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                </ul>
-            </div>
+            <a data-target=".nav-collapse" data-toggle="collapse" class="btn btn-navbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
             <div class="nav-collapse">
-                <ul class="nav">
-                    <li><a href="/app/html">Data Sources</a></li>
-                    <li class="active"><a href="#">Reports and Dashboards</a></li>
-                </ul>
-            </div><!--/.nav-collapse -->
+                <div class="btn-group pull-right">
+                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
+                        <%--<li><a href="#">Profile</a></li>--%>
+                        <li class="divider"></li>
+                        <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
+                    </ul>
+                </div>
+                <div class="nav-collapse">
+                    <ul class="nav">
+                        <li><a href="/app/html">Data Sources</a></li>
+                        <li class="active"><a href="#">Reports and Dashboards</a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>
