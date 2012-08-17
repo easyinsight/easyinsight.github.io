@@ -47,7 +47,7 @@ public class CommitServlet extends APIServlet {
             }
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSources.keySet().iterator().next(), conn);
             boolean replaceData = rs.getBoolean(3);
-            String tempTableName = rs.getString(4);
+            String tempTableName = rs.getString(5);
             dataStorage = DataStorage.writeConnection(dataSource, conn, SecurityUtil.getAccountID());
             if (replaceData) {
                 dataStorage.truncate();
