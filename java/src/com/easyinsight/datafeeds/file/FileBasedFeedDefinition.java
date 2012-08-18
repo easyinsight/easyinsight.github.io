@@ -144,7 +144,6 @@ public class FileBasedFeedDefinition extends ServerDataSourceDefinition {
                 bufOS.write(buffer, 0, nBytes);
             }
             bufOS.flush();
-            System.out.println(baos.toString());
             PersistableDataSetForm form = uploadFormat.createDataSet(baos.toByteArray(), getFields());
             return form.toDataSet(rowCount);
         } catch (ReportException re) {
