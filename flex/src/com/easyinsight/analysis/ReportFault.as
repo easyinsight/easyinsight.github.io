@@ -23,6 +23,10 @@ public class ReportFault {
         PopUpUtil.centerPopUp(window);
     }
 
+    public function canResolve():Boolean {
+        return false;
+    }
+
     public function getMessage():String {
         return null;
     }
