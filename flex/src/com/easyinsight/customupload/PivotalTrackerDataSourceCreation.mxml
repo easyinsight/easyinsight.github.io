@@ -9,12 +9,18 @@
         import com.easyinsight.datasources.PivotalTrackerBaseSource;
         import com.easyinsight.framework.Credentials;
 
+        import mx.controls.Button;
+
         [Bindable]
         private var url:String;
         [Bindable]
         private var usernameInputText:String;
         [Bindable]
         private var password:String;
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
 
         public function get dataSourceDefinition():FeedDefinitionData {
             return new PivotalTrackerBaseSource();

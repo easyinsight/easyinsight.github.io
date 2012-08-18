@@ -18,6 +18,12 @@
             def = definition as GoogleAnalyticsDataSource;
         }
 
+        public function setupButton(button:Button):Function {
+            button.label = "Authorize Easy Insight Access";
+            button.addEventListener(MouseEvent.CLICK, install);
+            return install;
+        }
+
         public function get dataSourceDefinition():FeedDefinitionData {
             return new GoogleAnalyticsDataSource();
         }
@@ -25,7 +31,7 @@
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
         }
 
-        private function install():void {
+        private function install(event:MouseEvent = null):void {
             ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
             tokenService.getOAuthURL.send(13, true, null, def, def.visible ? 2 : 1);
         }

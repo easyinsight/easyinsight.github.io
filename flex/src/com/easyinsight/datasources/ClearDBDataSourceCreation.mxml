@@ -8,6 +8,8 @@
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.google.ClearDBCompositeSource;
 
+        import mx.controls.Button;
+
         [Bindable]
         private var appToken:String;
 
@@ -16,6 +18,10 @@
 
         public function get dataSourceDefinition():FeedDefinitionData {
             return new ClearDBCompositeSource();
+        }
+
+        public function setupButton(button:Button):Function {
+            return null;
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {

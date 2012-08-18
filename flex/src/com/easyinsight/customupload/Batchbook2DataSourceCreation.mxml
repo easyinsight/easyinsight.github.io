@@ -6,10 +6,9 @@
 	</mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
-        import com.easyinsight.datasources.BatchbookDataSource;
+        import com.easyinsight.datasources.Batchbook2DataSource;
 
         import mx.controls.Button;
-
         import mx.validators.Validator;
 
         [Bindable]
@@ -20,22 +19,18 @@
         }
 
         public function get dataSourceDefinition():FeedDefinitionData {
-            return new BatchbookDataSource();
+            return new Batchbook2DataSource();
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
-            var ds:BatchbookDataSource = feedDefinition as BatchbookDataSource;
+            var ds:Batchbook2DataSource = feedDefinition as Batchbook2DataSource;
             urlInputText = ds.url;
         }
 
-        public function get savesCredentials():Boolean {
-            return false;
-        }
-
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var ds:BatchbookDataSource = feedDefinition as BatchbookDataSource;
+            var ds:Batchbook2DataSource = feedDefinition as Batchbook2DataSource;
             ds.url = urlInput.text;
-            ds.bbApiKey = apiInput.text;
+            ds.token = apiInput.text;
         }
 
         public function validate():Boolean {
@@ -54,7 +49,8 @@
                 return false;
             }
             return true;
-        }]]></mx:Script>
+        }
+        ]]></mx:Script>
     <mx:HBox>
         <mx:Label text="Batchbook URL:" width="250" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
         <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{urlInputText}" width="350"/>

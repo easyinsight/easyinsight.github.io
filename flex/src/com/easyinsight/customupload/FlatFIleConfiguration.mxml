@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail" label="Flat File Configuration">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+
+        [Bindable]
+        private var url:String;
+        [Bindable]
+        private var jsonPath:String;
+        [Bindable]
+        private var jsonUserName:String;
+        [Bindable]
+        private var jsonPassword:String;
+        [Bindable]
+        private var httpValue:String;
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:FileBasedFeedDefinition = feedDefinition as FileBasedFeedDefinition;
+            url = ds.url;
+            jsonUserName = ds.userName;
+            jsonPassword = ds.password;
+            httpValue = String(ds.httpMethod);
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:FileBasedFeedDefinition = feedDefinition as FileBasedFeedDefinition;
+            ds.url = urlInput.text;
+            ds.httpMethod = int(methodGroup.selectedValue);
+            ds.userName = userNameInput.text;
+            ds.password = passwordInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:TextArea text="You can set up your flat file data source to pull from a remote location instead of having to upload the spreadsheet or CSV every time yourself." borderStyle="none" editable="false" width="650" height="50" fontSize="11"/>
+    <mx:Form>
+        <mx:FormItem label="File Download URL:" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Basic Auth User Name (optional):" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonUserName}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Basic Auth Password (optional):" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="passwordInput" displayAsPassword="true" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonPassword}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="HTTP Method:" fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
+            <mx:RadioButtonGroup id="methodGroup" selectedValue="{httpValue}"/>
+            <mx:RadioButton groupName="methodGroup" label="GET" value="1" id="getOption"/>
+            <mx:RadioButton groupName="methodGroup" label="POST" value="2" id="postOption"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:VBox>

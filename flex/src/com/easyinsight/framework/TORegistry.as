@@ -72,13 +72,13 @@ import com.easyinsight.customupload.CsvFileUploadFormat;
 import com.easyinsight.customupload.ExcelUploadFormat;
 import com.easyinsight.customupload.FileBasedFeedDefinition;
 import com.easyinsight.customupload.FlatFileUploadFormat;
-import com.easyinsight.customupload.RedirectDataSource;
 import com.easyinsight.customupload.UploadResponse;
 import com.easyinsight.customupload.XSSFExcelUploadFormat;
 import com.easyinsight.customupload.wizard.FieldUploadInfo;
 import com.easyinsight.customupload.wizard.FlatFileUploadContext;
 import com.easyinsight.datasources.BaseCampDataSource;
 import com.easyinsight.datasources.BasecampNextCompositeSource;
+import com.easyinsight.datasources.Batchbook2DataSource;
 import com.easyinsight.datasources.BatchbookDataSource;
 import com.easyinsight.datasources.CloudWatchDataSource;
 import com.easyinsight.datasources.ConstantContactDataSource;
@@ -91,7 +91,6 @@ import com.easyinsight.datasources.LinkedInDataSource;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.SampleDataSource;
 import com.easyinsight.datasources.SendGridDataSource;
-import com.easyinsight.datasources.WholeFoodsDataSource;
 import com.easyinsight.datasources.ZendeskDataSource;
 import com.easyinsight.feedassembly.CompositeFeedConnection;
 import com.easyinsight.feedassembly.CompositeFeedNode;
@@ -214,7 +213,6 @@ public class TORegistry {
         var linked:LinkedInDataSource;
         var freshbooks:FreshbooksDataSource;
         var batchbook:BatchbookDataSource;
-        var redirect:RedirectDataSource;
         var constantContact:ConstantContactDataSource;
         var campaignMonitor:CampaignMonitorDataSourceCreation;
         var qbSource:QuickbaseCompositeSource;
@@ -228,7 +226,6 @@ public class TORegistry {
         var zenSource:ZendeskDataSource;
         var sample:SampleDataSource;
         var node:CompositeFeedNode;
-        var wf:WholeFoodsDataSource;
         var fault:DataSourceConnectivityReportFault;
         var slf:StorageLimitFault;
         var serverError:ServerError;
@@ -287,6 +284,7 @@ public class TORegistry {
         var joinOverride:JoinOverride;
         var qds:QuickbaseDatabaseSource;
         var json:JSONDataSource;
+        var bb2:Batchbook2DataSource;
     }
 }
 }

@@ -10,11 +10,15 @@
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
+        import mx.controls.Button;
+        import mx.validators.Validator;
 
         [Bindable]
         private var url:String;
 
         private var def:HarvestDataSource;
+
+        private var installButton:Button;
 
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:HarvestDataSource = new HarvestDataSource();
@@ -28,15 +32,28 @@
             this.def = ds;
         }
 
+        public function setupButton(button:Button):Function {
+            installButton = button;
+            button.label = "Authorize Easy Insight Access";
+            button.addEventListener(MouseEvent.CLICK, install);
+            return install;
+        }
+
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:HarvestDataSource = feedDefinition as HarvestDataSource;
             ds.url = urlInput.text;
         }
 
-        private function install():void {
-            updateDataSource(def);
-            ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
-            tokenService.getOAuthURL.send(93, true, null, def, def.visible ? 2 : 1);
+        private function install(event:MouseEvent = null):void {
+            var results:Array = Validator.validateAll([userNameValidator]);
+            if (results.length > 0) {
+                urlInput.setFocus();
+                urlInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            } else {
+                updateDataSource(def);
+                ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
+                tokenService.getOAuthURL.send(93, true, null, def, def.visible ? 2 : 1);
+            }
         }
 
         private function gotURL():void {
@@ -58,6 +75,7 @@
     <mx:RemoteObject destination="tokenService" id="tokenService">
         <mx:method name="getOAuthURL" result="gotURL()"/>
     </mx:RemoteObject>
+    <mx:StringValidator id="userNameValidator" source="{urlInput}" property="text" minLength="1"/>
     <mx:Form>
         <mx:FormItem label="Harvest Path: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
@@ -66,5 +84,4 @@
 	</mx:Form>
     <mx:TextArea text="Clicking Authorize will open a new browser tab or window to your Harvest account. Upon granting access, you will be returned to Easy Insight to finish setting up the connection." borderStyle="none"
             backgroundAlpha="0" editable="false" selectable="false" width="450" height="50"/>
-        <mx:Button label="Authorize Easy Insight Access" click="install()" id="installButton"/>
 </mx:VBox>

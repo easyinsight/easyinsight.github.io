@@ -22,7 +22,6 @@ import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.SolutionKPIData;
 import com.easyinsight.util.CancelButton;
 import com.easyinsight.util.EISlimWindow;
-import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
 
 import flash.events.Event;
@@ -36,7 +35,6 @@ import mx.containers.VBox;
 import mx.controls.Alert;
 import mx.controls.Label;
 import mx.controls.ProgressBar;
-import mx.core.IFlexDisplayObject;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -142,7 +140,7 @@ public class DelayedSync extends EISlimWindow {
     private function connectionInstalled():void {
         var kpiData:SolutionKPIData = new SolutionKPIData();
         kpiData.dataSourceID = _dataSourceDefinition.dataFeedID;
-        if (DataSourceBehavior.pullDataSource(_dataSourceDefinition.getFeedType())) {
+        if (DataSourceBehavior.pullDataSource(_dataSourceDefinition.dataSourceBehavior)) {
             var activity:DataSourceRefreshActivity = new DataSourceRefreshActivity();
             activity.dataSourceID = _dataSourceDefinition.dataFeedID;
             activity.dataSourceName = _dataSourceDefinition.feedName;

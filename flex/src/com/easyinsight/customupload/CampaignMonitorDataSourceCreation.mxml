@@ -8,8 +8,14 @@
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.CampaignMonitorDataSource;
 
+        import mx.controls.Button;
+
         [Bindable]
         private var urlInputText:String;
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
 
         public function get dataSourceDefinition():FeedDefinitionData {
             return new CampaignMonitorDataSource();

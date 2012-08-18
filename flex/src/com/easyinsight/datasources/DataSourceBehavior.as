@@ -11,11 +11,13 @@ public class DataSourceBehavior {
     }
 
     public static function pullDataSource(dataSourceType:int):Boolean {
-        switch (dataSourceType) {
+        return dataSourceType == DataSourceInfo.COMPOSITE_PULL || dataSourceType == DataSourceInfo.STORED_PULL;
+        /*switch (dataSourceType) {
             case DataSourceType.STATIC:
             case DataSourceType.EMPTY:
             case DataSourceType.BASECAMP:
             case DataSourceType.HIGHRISE:
+            case DataSourceType.JSON:
             case DataSourceType.PIVOTAL_TRACKER:
             case DataSourceType.WHOLE_FOODS:
             case DataSourceType.LINKEDIN:
@@ -27,9 +29,10 @@ public class DataSourceBehavior {
             case DataSourceType.QUICKBASE:
             case DataSourceType.FRESHBOOKS:
             case DataSourceType.BASECAMP_NEXT:
+            case DataSourceType.BATCHBOOK2:
                 return true;
         }
-        return false;
+        return false;*/
     }
 
     public static function sizeLabel(dataSourceType:int, size:int):String {

@@ -45,6 +45,9 @@
                     window.addEventListener(Event.CANCEL, onCancel, false, 0, true);
                     PopUpManager.addPopUp(window, this, true);
                     PopUpUtil.centerPopUp(window);
+                    if (!response.reportFault.canResolve()) {
+                        PopUpManager.removePopUp(this);
+                    }
                 } else {
                     Alert.show(response.failureMessage);
                     PopUpManager.removePopUp(this);
@@ -92,6 +95,9 @@
                     window.addEventListener(Event.CANCEL, onCancel, false, 0, true);
                     PopUpManager.addPopUp(window, this, true);
                     PopUpUtil.centerPopUp(window);
+                    if (!ReportFault(callData.result).canResolve()) {
+                        PopUpManager.removePopUp(this);
+                    }
                 } else {
                     Alert.show("Something went wrong in trying to retrieve data. Please double check your configuration information.");
                     PopUpManager.removePopUp(this);

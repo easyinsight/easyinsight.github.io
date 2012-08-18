@@ -9,7 +9,6 @@
         import com.easyinsight.scorecard.DataSourceAsyncEvent;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.PopUpUtil;
-        import com.easyinsight.util.UserAudit;
 
         import mx.controls.Alert;
         import mx.core.UIComponent;
@@ -23,7 +22,7 @@
 
         private function onKey(event:KeyboardEvent):void {
             if (event.keyCode == Keyboard.ENTER) {
-                validate();
+                validate(null);
             }
         }
 
@@ -48,8 +47,15 @@
             dataSourceCreation.dataSourceDefinition = dataSourceDefinition;
             var uicomp:UIComponent = dataSourceCreation as UIComponent;
             uicomp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
+            var blah:Function = dataSourceCreation.setupButton(createButton);
+            if (blah == null) {
+                createButton.label = "Create";
+                createButton.addEventListener(MouseEvent.CLICK, validate);
+            }
             coreContent.addChild(dataSourceCreation as DisplayObject);
         }
+
+        private var createFunction:Function;
 
         private function onCreation(event:FlexEvent):void {
             PopUpUtil.centerPopUp(this);
@@ -71,12 +77,16 @@
             _dataSourceDefinition = value;
         }
 
-        private function validate():void {
-            if (dataSourceCreation.validate()) {
-                ready = false;
-                progressBar.visible = true;
-                dataSourceCreation.updateDataSource(dataSourceDefinition);
-                uploadService.validateCredentials.send(dataSourceDefinition);
+        private function validate(event:MouseEvent):void {
+            if (createFunction == null) {
+                if (dataSourceCreation.validate()) {
+                    ready = false;
+                    progressBar.visible = true;
+                    dataSourceCreation.updateDataSource(dataSourceDefinition);
+                    uploadService.validateCredentials.send(dataSourceDefinition);
+                }
+            } else {
+                createFunction.apply(dataSourceCreation);
             }
         }
 
@@ -173,6 +183,8 @@
         [Bindable]
         private var showCreate:Boolean = true;
 
+
+
         [Bindable]
         private var asyncLabel:String = "Retrieving data, this may take a few minutes...";
         ]]></mx:Script>
@@ -190,7 +202,7 @@
         <mx:Box id="coreContent"/>
         <mx:ProgressBar id="progressBar" indeterminate="true" visible="false" label="{asyncLabel}"/>
         <mx:HBox width="100%" horizontalAlign="center">
-            <util:SaveButton label="Create" click="validate()" enabled="{ready}" styleName="grayButton" fontSize="14" visible="{showCreate}"/>
+            <util:SaveButton enabled="{ready}" styleName="grayButton" fontSize="14" visible="{showCreate}" id="createButton"/>
             <util:CancelButton label="Cancel" click="closeWindow()"
                     fontSize="14"/>
         </mx:HBox>

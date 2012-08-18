@@ -26,7 +26,13 @@
             source.pin = pinInput.text;
         }
 
-        private function install():void {
+        public function setupButton(button:Button):Function {
+            button.label = "Authorize Easy Insight Access";
+            button.addEventListener(MouseEvent.CLICK, install);
+            return install;
+        }
+
+        private function install(event:MouseEvent = null):void {
             ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
             tokenService.getOAuthURL.send(1, false, null, null, 0);
         }

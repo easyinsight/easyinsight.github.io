@@ -1,7 +1,6 @@
 package com.easyinsight.datasources {
 import com.easyinsight.administration.feed.ServerDataSourceDefinition;
 import com.easyinsight.customupload.LinkedInDataSourceCreation;
-import com.easyinsight.customupload.MeetupDataSourceCreation;
 
 
 [Bindable]

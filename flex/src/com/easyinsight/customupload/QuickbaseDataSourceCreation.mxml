@@ -8,6 +8,8 @@
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.google.QuickbaseCompositeSource;
 
+        import mx.controls.Button;
+
         [Bindable]
         private var url:String;
         [Bindable]
@@ -18,6 +20,10 @@
         private var milestoneCommentsIncluded:Boolean;
         [Bindable]
         private var todoCommentsIncluded:Boolean;
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
 
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:QuickbaseCompositeSource = new QuickbaseCompositeSource();

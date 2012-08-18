@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+
+        import mx.controls.Button;
+
+        [Bindable]
+        private var url:String;
+        [Bindable]
+        private var dataSourceName:String;
+        [Bindable]
+        private var jsonPath:String;
+        [Bindable]
+        private var jsonUserName:String;
+        [Bindable]
+        private var jsonPassword:String;
+        [Bindable]
+        private var httpValue:String = "1";
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var obj:FileBasedFeedDefinition = new FileBasedFeedDefinition();
+            obj.url = urlInput.text;
+            return obj;
+        }
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:FileBasedFeedDefinition = feedDefinition as FileBasedFeedDefinition;
+            url = ds.url;
+            dataSourceName = ds.feedName;
+            jsonUserName = ds.userName;
+            jsonPassword = ds.password;
+            httpValue = String(ds.httpMethod);
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:FileBasedFeedDefinition = feedDefinition as FileBasedFeedDefinition;
+            ds.url = urlInput.text;
+            ds.httpMethod = int(methodGroup.selectedValue);
+            ds.userName = userNameInput.text;
+            ds.password = passwordInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="File Download URL:" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Basic Auth User Name (optional):" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonUserName}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Basic Auth Password (optional):" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="passwordInput" displayAsPassword="true" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonPassword}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="HTTP Method:" fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
+            <mx:RadioButtonGroup id="methodGroup" selectedValue="{httpValue}"/>
+            <mx:RadioButton groupName="methodGroup" label="GET" value="1" id="getOption"/>
+            <mx:RadioButton groupName="methodGroup" label="POST" value="2" id="postOption"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:VBox>

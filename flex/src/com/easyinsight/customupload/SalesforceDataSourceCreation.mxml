@@ -19,6 +19,10 @@
             return source;
         }
 
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:SalesforceFeedDefinition = feedDefinition as SalesforceFeedDefinition;
             this.def = ds;

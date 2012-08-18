@@ -11,10 +11,15 @@
 
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Button;
 
 
         [Bindable]
         private var url:String;
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
 
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:HighRiseDataSource = new HighRiseDataSource();

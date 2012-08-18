@@ -16,6 +16,8 @@ import mx.controls.Button;
 import mx.controls.Label;
 import mx.formatters.DateFormatter;
 import mx.managers.PopUpManager;
+import mx.rpc.events.ResultEvent;
+import mx.rpc.remoting.RemoteObject;
 
 [Event(name="dataSourceRefreshed", type="com.easyinsight.datasources.DataSourceRefreshEvent")]
 public class MyDataDataSourceDisplay extends VBox {
@@ -23,6 +25,8 @@ public class MyDataDataSourceDisplay extends VBox {
     private var _dataSource:DataSourceDescriptor;
 
     private var _labelText:String;
+
+    private var remoteObject:RemoteObject;
 
     public function MyDataDataSourceDisplay() {
         super();
@@ -127,7 +131,7 @@ public class MyDataDataSourceDisplay extends VBox {
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         if (dataSourceChanged) {
-            if (DataSourceBehavior.pullDataSource(dataSource.dataSourceType)) {
+            if (DataSourceBehavior.pullDataSource(dataSource.dataSourceBehavior)) {
                 if (dataSource.lastDataTime != null) {
                     updateString(dataSource.lastDataTime);
                 }
@@ -159,10 +163,23 @@ public class MyDataDataSourceDisplay extends VBox {
     }
 
     private function fileData(feedDescriptor:DataSourceDescriptor):void {
-        var feedUpdateWindow:FileFeedUpdateWindow = FileFeedUpdateWindow(PopUpManager.createPopUp(this.parent.parent.parent, FileFeedUpdateWindow, true));
-        feedUpdateWindow.feedID = feedDescriptor.id;
-        feedUpdateWindow.addEventListener(AnalyzeEvent.ANALYZE, onEvent, false, 0, true);
-        PopUpUtil.centerPopUp(feedUpdateWindow);
+        remoteObject = new RemoteObject();
+        remoteObject.destination = "userUpload";
+        remoteObject.flatFileUpload.addEventListener(ResultEvent.RESULT, onResult, false, 0, true);
+        remoteObject.flatFileUpload.send(feedDescriptor.id);
+
+    }
+
+    private function onResult(event:ResultEvent):void {
+        var result:Boolean = event.result as Boolean;
+        if (result) {
+            var feedUpdateWindow:FileFeedUpdateWindow = FileFeedUpdateWindow(PopUpManager.createPopUp(this.parent.parent.parent, FileFeedUpdateWindow, true));
+            feedUpdateWindow.feedID = dataSource.id;
+            feedUpdateWindow.addEventListener(AnalyzeEvent.ANALYZE, onEvent, false, 0, true);
+            PopUpUtil.centerPopUp(feedUpdateWindow);
+        } else {
+            refreshData(dataSource);
+        }
     }
 
     private function onEvent(event:Event):void {

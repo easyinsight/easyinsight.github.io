@@ -7,10 +7,16 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
 
+        import mx.controls.Button;
+
         [Bindable]
         private var url:String;
         [Bindable]
         private var usernameInputText:String;
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
 
         public function get dataSourceDefinition():FeedDefinitionData {
             return new SendGridDataSource();
@@ -33,7 +39,8 @@
 
         public function validate():Boolean {
             return true;
-        }]]></mx:Script>
+        }
+        ]]></mx:Script>
     <mx:Form>
 		<mx:FormItem label="SendGrid Email: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>

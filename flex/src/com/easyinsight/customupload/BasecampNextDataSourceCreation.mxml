@@ -11,11 +11,21 @@
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
+        import mx.controls.Button;
 
         [Bindable]
         private var url:String;
 
         private var def:BasecampNextCompositeSource;
+
+        private var installButton:Button;
+
+        public function setupButton(button:Button):Function {
+            installButton = button;
+            button.label = "Authorize Easy Insight Access";
+            button.addEventListener(MouseEvent.CLICK, install);
+            return install;
+        }
 
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:BasecampNextCompositeSource = new BasecampNextCompositeSource();
@@ -31,7 +41,7 @@
             var ds:BasecampNextCompositeSource = feedDefinition as BasecampNextCompositeSource;
         }
 
-        private function install():void {
+        private function install(event:MouseEvent = null):void {
             updateDataSource(def);
             ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
             tokenService.getOAuthURL.send(DataSourceType.BASECAMP_NEXT, true, null, def, def.visible ? 2 : 1);
@@ -59,5 +69,4 @@
     </mx:RemoteObject>
     <mx:TextArea text="Clicking Authorize will open a new browser tab or window to your Basecamp account. Upon granting access, you will be returned to Easy Insight to finish setting up the connection." borderStyle="none"
             backgroundAlpha="0" editable="false" selectable="false" width="450" height="50"/>
-        <mx:Button label="Authorize Easy Insight Access" click="install()" id="installButton"/>
 </mx:VBox>
