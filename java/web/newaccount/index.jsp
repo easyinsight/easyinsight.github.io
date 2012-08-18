@@ -56,7 +56,6 @@
     <script type="text/javascript" src="/js/swfobject.js"></script>
     <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
     <script type="text/javascript" src="/js/startup.js"></script>
-    <script type="text/javascript" src="/app/owasp.js"></script>
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
 </head>
@@ -82,6 +81,7 @@
     <div id="contentHeaderStart"></div>
     <div id="midContent">
         <form method="post" id="profileForm" action="accountCreation.jsp">
+            <input type="hidden" name='OWASP_CSRFTOKEN' value="<%= session.getAttribute("OWASP_CSRFTOKEN")%>" />
             <input type="hidden" id="tier" name="tier" value="<%=StringEscapeUtils.escapeHtml(request.getParameter("tier"))%>"/>
             <input type="hidden" id="wasSubmit" name="wasSubmit" value="1"/>
             <div>
