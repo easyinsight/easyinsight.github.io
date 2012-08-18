@@ -4,10 +4,17 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedRegistry;
+import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.basecamp.BaseCampTimeSource;
+import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
+import com.easyinsight.datafeeds.composite.ChildConnection;
+import com.easyinsight.datafeeds.composite.MultiChildConnection;
 import junit.framework.TestCase;
 import test.util.TestUtil;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -243,14 +250,5 @@ public class PipelineTest extends TestCase implements ITestConstants {
 
 
 
-    public void testBasecampHack() throws Exception {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            DataSourceWrapper todos = DataSourceWrapper.createDataSource("Todo", conn, "Project Name", GROUPING, "Milestone", GROUPING, "Todo List", GROUPING, "Todo ID", GROUPING);
-            DataSourceWrapper timeTracking = DataSourceWrapper.createDataSource("Time Tracking", conn, "Project Name", GROUPING, "Todo ID", GROUPING, "Hours", MEASURE);
-            DataSourceWrapper basecamp = DataSourceWrapper.createJoinedSource("Basecamp", conn, todos);
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
+
 }

@@ -20,7 +20,7 @@ import java.util.*;
 * Date: 7/19/12
 * Time: 1:30 PM
 */
-class DataSourceWrapper implements  ITestConstants {
+public class DataSourceWrapper implements  ITestConstants {
 
     private FeedDefinition dataSource;
     private EIConnection conn;
@@ -32,6 +32,15 @@ class DataSourceWrapper implements  ITestConstants {
 
     public static DataSourceWrapper createDataSource(EIConnection conn, Object... params) throws Exception {
         return createDataSource("Data Source Test", conn, params);
+    }
+
+    public FieldWrapper getField(String name) {
+        for (AnalysisItem analysisItem : dataSource.getFields()) {
+            if (name.equals(analysisItem.toDisplay())) {
+                return new FieldWrapper(analysisItem);
+            }
+        }
+        throw new RuntimeException("Could not find field " + name);
     }
 
     public static DataSourceWrapper createDataSource(String name, EIConnection conn, Object... params) throws Exception {
@@ -74,7 +83,8 @@ class DataSourceWrapper implements  ITestConstants {
     public static DataSourceWrapper createJoinedSource(String name, EIConnection conn, DataSourceWrapper... children) throws Exception {
         List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
         for (DataSourceWrapper child : children) {
-            nodes.add(new CompositeFeedNode(child.getDataSource().getDataFeedID(), 0, 0, child.getDataSource().getFeedName(), child.getDataSource().getFeedType().getType()));
+            nodes.add(new CompositeFeedNode(child.getDataSource().getDataFeedID(), 0, 0, child.getDataSource().getFeedName(), child.getDataSource().getFeedType().getType(),
+                    child.getDataSource().getDataSourceBehavior()));
         }
         CompositeFeedDefinition def = new FeedService().createCompositeFeed(nodes, new ArrayList<CompositeFeedConnection>(), name, conn);
         return new DataSourceWrapper(def, conn);
