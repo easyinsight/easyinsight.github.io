@@ -139,7 +139,7 @@ public class DashboardReport extends DashboardElement {
     public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {
         List<EIDescriptor> descs = new ArrayList<EIDescriptor>();
         descs.add(report);
-        descs.addAll(new AnalysisStorage().getAnalysisDefinition(report.getId()).allItems(dataSourceItems, new AnalysisItemRetrievalStructure()));
+        descs.addAll(new AnalysisStorage().getAnalysisDefinition(report.getId()).allItems(dataSourceItems, new AnalysisItemRetrievalStructure(null)));
         return descs;
     }
 
@@ -189,7 +189,12 @@ public class DashboardReport extends DashboardElement {
                 "                }\n" +
                 "strParams += 'dashboardID="+filterHTMLMetadata.getDashboard().getId() + "&';\n"+
                 "            }");
-        sb.append(reportDefinition.toHTML(div));
+        HTMLReportMetadata htmlReportMetadata = new HTMLReportMetadata();
+        if (getPreferredHeight() > 0) {
+            htmlReportMetadata.setCustomHeight(getPreferredHeight());
+        }
+        htmlReportMetadata.setFullScreenHeight(false);
+        sb.append(reportDefinition.toHTML(div, htmlReportMetadata));
         sb.append("}");
         // $(document).ready(refreshReport('reportTarget517'))
         // refreshReport('div,
