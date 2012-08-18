@@ -18,7 +18,16 @@ public class DataSourceDescriptor extends EIDescriptor {
     private Date lastDataTime;
     private long groupSourceID;
     private byte[] logoImage;
+    private int dataSourceBehavior;
     private List<EIDescriptor> children = new ArrayList<EIDescriptor>();
+
+    public int getDataSourceBehavior() {
+        return dataSourceBehavior;
+    }
+
+    public void setDataSourceBehavior(int dataSourceBehavior) {
+        this.dataSourceBehavior = dataSourceBehavior;
+    }
 
     public byte[] getLogoImage() {
         return logoImage;
@@ -92,8 +101,9 @@ public class DataSourceDescriptor extends EIDescriptor {
     public DataSourceDescriptor() {
     }
 
-    public DataSourceDescriptor(String name, long id, int dataSourceType, boolean accountVisible) {
+    public DataSourceDescriptor(String name, long id, int dataSourceType, boolean accountVisible, int dataSourceBehavior) {
         super(name, id, accountVisible);
         this.dataSourceType = dataSourceType;
+        this.dataSourceBehavior = dataSourceBehavior;
     }
 }
