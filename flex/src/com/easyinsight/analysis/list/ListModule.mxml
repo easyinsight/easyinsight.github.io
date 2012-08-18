@@ -46,7 +46,6 @@
         import com.easyinsight.analysis.Value;
         import com.easyinsight.etl.LookupPair;
         import com.easyinsight.etl.LookupTable;
-        import com.easyinsight.filtering.FilterRawData;
 
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
@@ -276,7 +275,8 @@
 
                 var explicitWidth:Boolean = true;
                 for each (var item:AnalysisItem in def.columns) {
-                    if (item.width == 0) {
+                    var testColumn:AdvancedDataGridColumn = columnMap[item.qualifiedName()];
+                    if (testColumn == null) {
                         explicitWidth = false;
                     }
                 }
@@ -320,9 +320,11 @@
                             pairMaps.addItem(pairMap);
                         }
                     }
-                    columnMap[myHeader.qualifiedName()] = myHeader;
+
                     var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-                    if (explicitWidth) columnHeaderObject.width = myHeader.width;
+                    var existingGridColumn:AdvancedDataGridColumn = columnMap[myHeader.qualifiedName()] as AdvancedDataGridColumn;
+                    columnMap[myHeader.qualifiedName()] = columnHeaderObject;
+                    //if (explicitWidth) columnHeaderObject.width = myHeader.width;
                     columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending, columnHeaderObject);
                     if (listDef.multiLineHeaders) {
                         columnHeaderObject.headerWordWrap = true;
@@ -338,7 +340,11 @@
                         if (ext.fixedWidth > 0) {
                             columnHeaderObject.width = ext.fixedWidth;
                             columnHeaderObject.resizable = false;
+                        } else if (explicitWidth && existingGridColumn != null) {
+                            columnHeaderObject.width = existingGridColumn.width;
                         }
+                    } else if (explicitWidth && existingGridColumn != null) {
+                        columnHeaderObject.width = existingGridColumn.width;
                     }
                     if (myLookupTable == null) {
                         factory.properties = { analysisItem:myHeader, report:def, rolloverIcon:listDef.rolloverIcon ? handIcon : null };
@@ -527,22 +533,6 @@
             dispatchEvent(new ColumnReorderEvent(keys));
         }
 
-        public function createFilterRawData():FilterRawData {
-            var filterRawData:FilterRawData = new FilterRawData();
-            var selectedObjects:Array = dataGrid.selectedCells;
-            for (var i:int = 0; i < selectedObjects.length; i++) {
-                var selectedObject:Object = selectedObjects[i];
-                var data:Object = dataGrid.dataProvider[selectedObject.rowIndex];
-                var dataField:String = dataGrid.columns[selectedObject.columnIndex].dataField;
-
-                var dataString:Object = String(data[dataField]);
-
-                var analysisItem:AnalysisItem = columnMap[dataField];
-                filterRawData.addPair(analysisItem, dataString);
-            }
-            return filterRawData;
-        }
-
         public function updateExportMetadata():void {
             if (listDef != null) {
                 for (var i:int = 0; i < listDef.columns.length; i++) {
@@ -563,6 +553,14 @@
                         } else {
                             item.sort = 0;
                         }
+                        /*var ext:TextReportFieldExtension;
+                        if (item.reportFieldExtension == null) {
+                            ext = new TextReportFieldExtension();
+                            item.reportFieldExtension = ext;
+                        } else {
+                            ext = item.reportFieldExtension as TextReportFieldExtension;
+                        }
+                        ext.fixedWidth = column.width;*/
                     }
                 }
             }
