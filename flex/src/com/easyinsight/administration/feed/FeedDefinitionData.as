@@ -41,6 +41,7 @@ import mx.collections.ArrayCollection;
         public var concreteFieldsEditable:Boolean;
         public var dataSourceInfo:DataSourceInfo;
         public var refreshMarmotScript:String;
+        public var dataSourceBehavior:int;
 		
 		public function FeedDefinitionData()
 		{
