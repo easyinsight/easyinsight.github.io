@@ -222,6 +222,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.BATCHBOOK2_PHONES, Batchbook2PhoneSource.class);
         registerType(FeedType.BATCHBOOK2_WEBSITES, Batchbook2WebsiteSource.class);
         registerType(FeedType.BATCHBOOK2_COMPANIES, Batchbook2CompanySource.class);
+        registerType(FeedType.BATCHBOOK2_CUSTOM, Batchbook2CustomFieldSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
