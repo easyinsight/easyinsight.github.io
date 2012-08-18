@@ -66,6 +66,10 @@ public class FeedService {
         return dataSources;
     }
 
+    public void fieldToDataSourceLevel(AnalysisItem analysisItem, long dataSourceID) {
+
+    }
+
     public void convertToCalculation(AnalysisMeasure analysisItem, long dataSourceID, String calculation, boolean rowLevel, boolean cache) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -139,7 +143,7 @@ public class FeedService {
             FeedDefinition sourceObj = feedStorage.getFeedDefinitionData(source.getId(), conn);
             FeedDefinition targetObj = feedStorage.getFeedDefinitionData(target.getId(), conn);
 
-            CompositeFeedNode sourceNode = new CompositeFeedNode(source.getId(), 0, 0, source.getName(), source.getDataSourceType());
+            CompositeFeedNode sourceNode = new CompositeFeedNode(source.getId(), 0, 0, source.getName(), source.getDataSourceType(), source.getDataSourceBehavior());
 
             if (target.getDataSourceType() == FeedType.COMPOSITE.getType()) {
                 CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) targetObj;
@@ -187,9 +191,9 @@ public class FeedService {
                 }
                 new DataSourceInternalService().updateFeedDefinition(compositeFeedDefinition, conn);
                 return new DataSourceDescriptor(compositeFeedDefinition.getFeedName(), compositeFeedDefinition.getDataFeedID(),
-                        compositeFeedDefinition.getFeedType().getType(), compositeFeedDefinition.isAccountVisible());
+                        compositeFeedDefinition.getFeedType().getType(), compositeFeedDefinition.isAccountVisible(), compositeFeedDefinition.getDataSourceBehavior());
             } else {
-                CompositeFeedNode targetNode = new CompositeFeedNode(target.getId(), 0, 0, target.getName(), target.getDataSourceType());
+                CompositeFeedNode targetNode = new CompositeFeedNode(target.getId(), 0, 0, target.getName(), target.getDataSourceType(), target.getDataSourceBehavior());
                 String dataSourceName;
 
                 Key sourceKey;
@@ -221,7 +225,7 @@ public class FeedService {
                         targetObj.getFeedName(), false, false, false, false);
                 CompositeFeedDefinition dataSource = createCompositeFeed(Arrays.asList(sourceNode, targetNode), Arrays.asList(compositeFeedConnection), dataSourceName, conn);
                 conn.commit();
-                return new DataSourceDescriptor(dataSource.getFeedName(), dataSource.getDataFeedID(), dataSource.getFeedType().getType(), false);
+                return new DataSourceDescriptor(dataSource.getFeedName(), dataSource.getDataFeedID(), dataSource.getFeedType().getType(), false, dataSource.getDataSourceBehavior());
             }
         } catch (Exception e) {
             LogClass.error(e);
