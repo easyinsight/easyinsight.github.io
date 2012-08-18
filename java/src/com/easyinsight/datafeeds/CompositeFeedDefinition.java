@@ -5,7 +5,6 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataSourceInfo;
-import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
@@ -116,14 +115,14 @@ public class CompositeFeedDefinition extends FeedDefinition {
         if (rs.next()) {
             long compositeFeedID = rs.getLong(1);
             getCustomFeedIDStmt.close();
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, X, Y, DATA_FEED.FEED_TYPE, DATA_FEED.FEED_NAME FROM " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, X, Y, DATA_FEED.FEED_TYPE, DATA_FEED.FEED_NAME, REFRESH_BEHAVIOR FROM " +
                     "COMPOSITE_NODE, DATA_FEED WHERE COMPOSITE_FEED_ID = ? AND COMPOSITE_NODE.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID");
             queryStmt.setLong(1, compositeFeedID);
             ResultSet nodeRS = queryStmt.executeQuery();
             List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
             while (nodeRS.next()) {
                 long feedID = nodeRS.getLong(1);
-                nodes.add(new CompositeFeedNode(feedID, nodeRS.getInt(2), nodeRS.getInt(3), nodeRS.getString(5), nodeRS.getInt(4)));
+                nodes.add(new CompositeFeedNode(feedID, nodeRS.getInt(2), nodeRS.getInt(3), nodeRS.getString(5), nodeRS.getInt(4), nodeRS.getInt(6)));
             }
             queryStmt.close();
             PreparedStatement queryConnStmt = conn.prepareStatement("SELECT SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID," +
@@ -277,9 +276,15 @@ public class CompositeFeedDefinition extends FeedDefinition {
             for (AnalysisItem gatherItem : analysisItemVisitor.fields) {
                 fieldSet.add(gatherItem.toDisplay());
             }
+            Set<Long> childIDs = new HashSet<Long>();
+            for (CompositeFeedNode node : getCompositeFeedNodes()) {
+                childIDs.add(node.getDataFeedID());
+            }
             while (iter.hasNext()) {
                 AnalysisItem analysisItem = iter.next();
                 if (fieldSet.contains(analysisItem.toDisplay())) {
+                    iter.remove();
+                } else if (analysisItem.getKey() instanceof DerivedKey) {
                     iter.remove();
                 }
             }
@@ -303,6 +308,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             for (Map.Entry<Long, List<FeedNode>> entry : analysisItemVisitor.nodeMap.entrySet()) {
                 long dataSourceID = entry.getKey();
                 FeedFolder dataSourceFolder = folderMap.get(dataSourceID);
+                dataSourceFolder.getChildFolders().clear();
                 for (FeedNode feedNode : entry.getValue()) {
                     FeedFolder folder = createFeedFolder(feedNode);
                     dataSourceFolder.getChildFolders().add(folder);
@@ -452,7 +458,8 @@ public class CompositeFeedDefinition extends FeedDefinition {
             DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
             new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);
             replacementMap.put(child.getDataFeedID(), result);
-            newChildren.add(new CompositeFeedNode(clonedDefinition.getDataFeedID(), child.getX(), child.getY(), child.getDataSourceName(), child.getDataSourceType()));
+            newChildren.add(new CompositeFeedNode(clonedDefinition.getDataFeedID(), child.getX(), child.getY(), child.getDataSourceName(), child.getDataSourceType(),
+                    child.getRefreshBehavior()));
         }
 
         // 
