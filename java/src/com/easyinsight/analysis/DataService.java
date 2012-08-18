@@ -534,7 +534,7 @@ public class DataService {
         for (AnalysisItem item : items) {
             if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension dateDim = (AnalysisDateDimension) item;
-                boolean dateTime = !dateDim.isDateOnlyField() && dataSource.getDataSource().checkDateTime(item.toOriginalDisplayName(), item.getKey());
+                boolean dateTime = dataSource.getDataSource().checkDateTime(item.toOriginalDisplayName(), item.getKey());
                 dateDim.setTimeshift(dateTime);
             }
         }
