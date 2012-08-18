@@ -6,6 +6,7 @@
                       xmlns:skin="com.easyinsight.skin.*">
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.listing.IPerspective;
         import com.easyinsight.listing.ListingChangeEvent;
 
@@ -84,8 +85,24 @@
         }
 
         private function onSelection(event:SolutionSelectionEvent):void {
-            var detail:IPerspective = SolutionDetailFactory.createDetailPage(event.solution, false);
-            dispatchEvent(new ListingChangeEvent(detail));
+            if (event.solution.dataSourceType == DataSourceType.HIGHRISE ||
+                    event.solution.dataSourceType == DataSourceType.BASECAMP ||
+                    event.solution.dataSourceType == DataSourceType.BASECAMP_NEXT ||
+                    event.solution.dataSourceType == DataSourceType.CONSTANT_CONTACT ||
+                    event.solution.dataSourceType == DataSourceType.FRESHBOOKS ||
+                    event.solution.dataSourceType == DataSourceType.HARVEST_COMPOSITE ||
+                    event.solution.dataSourceType == DataSourceType.JSON ||
+                    event.solution.dataSourceType == DataSourceType.PIVOTAL_TRACKER ||
+                    event.solution.dataSourceType == DataSourceType.SENDGRID ||
+                    event.solution.dataSourceType == DataSourceType.BATCHBOOK2 ||
+                    event.solution.dataSourceType == DataSourceType.ZENDESK) {
+                var renderer:NewSolutionDetailRenderer = new NewSolutionDetailRenderer();
+                renderer.solution = event.solution;
+                renderer.installSolution();
+            } else {
+                var detail:IPerspective = SolutionDetailFactory.createDetailPage(event.solution, false);
+                dispatchEvent(new ListingChangeEvent(detail));
+            }
         }
 
         public function gotFocus():void {
