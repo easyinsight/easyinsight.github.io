@@ -232,7 +232,8 @@ public class GoogleDataProvider {
                 UploadPolicy childPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
                 clearDBDataSource.setUploadPolicy(childPolicy);
                 new FeedCreation().createFeed(clearDBDataSource, conn, new DataSet(), childPolicy);
-                CompositeFeedNode node = new CompositeFeedNode(clearDBDataSource.getDataFeedID(), 0, 0, clearDBDataSource.getFeedName(), clearDBDataSource.getFeedType().getType());
+                CompositeFeedNode node = new CompositeFeedNode(clearDBDataSource.getDataFeedID(), 0, 0, clearDBDataSource.getFeedName(), clearDBDataSource.getFeedType().getType(),
+                        clearDBDataSource.getDataSourceBehavior());
                 nodes.add(node);
             }
             clearDBCompositeSource.setCompositeFeedNodes(nodes);
@@ -242,7 +243,7 @@ public class GoogleDataProvider {
             ClearDBResponse response = new ClearDBResponse();
             response.setSuccessful(true);
             response.setEiDescriptor(new DataSourceDescriptor(clearDBCompositeSource.getFeedName(), clearDBCompositeSource.getDataFeedID(),
-                    clearDBCompositeSource.getFeedType().getType(), false));
+                    clearDBCompositeSource.getFeedType().getType(), false, clearDBCompositeSource.getDataSourceBehavior()));
             conn.commit();
             return response;
         } catch (ClearDBQueryException e) {
@@ -359,7 +360,7 @@ public class GoogleDataProvider {
                         result.getTableDefinitionMetadata().commit();
                         result.getTableDefinitionMetadata().closeConnection();
                         CompositeFeedNode node = new CompositeFeedNode(quickbaseDatabaseSource.getDataFeedID(), 0, 0, quickbaseDatabaseSource.getFeedName(),
-                                quickbaseDatabaseSource.getFeedType().getType());
+                                quickbaseDatabaseSource.getFeedType().getType(), quickbaseDatabaseSource.getDataSourceBehavior());
                         nodes.add(node);
                     }
                 }
@@ -411,7 +412,7 @@ public class GoogleDataProvider {
             conn.commit();
 
             return new DataSourceDescriptor(quickbaseCompositeSource.getFeedName(), quickbaseCompositeSource.getDataFeedID(),
-                    quickbaseCompositeSource.getFeedType().getType(), false);
+                    quickbaseCompositeSource.getFeedType().getType(), false, quickbaseCompositeSource.getDataSourceBehavior());
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -431,7 +432,12 @@ public class GoogleDataProvider {
 
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
 
-        String tableName = getSchema(sessionTicket, applicationToken, databaseID, items, connections, host);
+        String tableName;
+        try {
+            tableName = getSchema(sessionTicket, applicationToken, databaseID, items, connections, host);
+        } catch (QuickbaseSetupException e) {
+            return null;
+        }
         if (tableName == null) {
             return null;
         }
@@ -442,10 +448,18 @@ public class GoogleDataProvider {
         return quickbaseDatabaseSource;
     }
 
-    private String getSchema(String sessionTicket, String applicationToken, String databaseID, List<AnalysisItem> items, List<Connection> connections, String host) throws IOException, ParsingException {
+    public static String getSchema(String sessionTicket, String applicationToken, String databaseID, List<AnalysisItem> items, List<Connection> connections, String host) throws IOException, ParsingException, QuickbaseSetupException {
         String schemaRequest = MessageFormat.format(GET_SCHEMA_XML, sessionTicket, applicationToken);
         Document schemaDoc = executeRequest(host, databaseID, "API_GetSchema", schemaRequest);
         Nodes tableNameNodes = schemaDoc.query("/qdbapi/table/name/text()");
+        Nodes errors = schemaDoc.query("/qdbapi/errcode/text()");
+        if (errors.size() > 0) {
+            Node error = errors.get(0);
+            if (!"0".equals(error.getValue())) {
+                String errorDetail = schemaDoc.query("/qdbapi/errdetail/text()").get(0).getValue();
+                throw new QuickbaseSetupException(errorDetail);
+            }
+        }
         if (tableNameNodes.size() == 0) {
             return null;
         }
@@ -511,31 +525,7 @@ public class GoogleDataProvider {
         return tableName;
     }
 
-    private static class Connection {
-        String sourceDatabaseID;
-        String sourceDatabaseFieldID;
-        String targetDatabaseID;
-        String targetDatabaseFieldID;
-
-        private Connection(String sourceDatabaseID, String sourceDatabaseFieldID, String targetDatabaseID, String targetDatabaseFieldID) {
-            this.sourceDatabaseID = sourceDatabaseID;
-            this.sourceDatabaseFieldID = sourceDatabaseFieldID;
-            this.targetDatabaseID = targetDatabaseID;
-            this.targetDatabaseFieldID = targetDatabaseFieldID;
-        }
-
-        @Override
-        public String toString() {
-            return "Connection{" +
-                    "sourceDatabaseID='" + sourceDatabaseID + '\'' +
-                    ", sourceDatabaseFieldID='" + sourceDatabaseFieldID + '\'' +
-                    ", targetDatabaseID='" + targetDatabaseID + '\'' +
-                    ", targetDatabaseFieldID='" + targetDatabaseFieldID + '\'' +
-                    '}';
-        }
-    }
-
-    private Document executeRequest(String host, String path, String action, String requestBody) throws IOException, ParsingException {
+    private static Document executeRequest(String host, String path, String action, String requestBody) throws IOException, ParsingException {
         if (path == null) {
             path = "main";
         }
@@ -556,6 +546,4 @@ public class GoogleDataProvider {
         String string = client.execute(httpRequest, responseHandler);
         return new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
     }
-
-
 }
