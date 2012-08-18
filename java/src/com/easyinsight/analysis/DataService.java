@@ -1073,7 +1073,7 @@ public class DataService {
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
                     try {
-                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters);
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {
@@ -1087,7 +1087,7 @@ public class DataService {
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
                     try {
-                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters);
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {
@@ -1096,11 +1096,9 @@ public class DataService {
                     }
                 }
             }
-            //insightRequestMetadata.setFieldToUniqueMap(analysisDefinition.getFieldToUniqueMap());
-            //insightRequestMetadata.setUniqueIteMap(analysisDefinition.getUniqueIteMap());
-            AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
+            AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure();
             structure.setReport(analysisDefinition);
-            Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields, structure, insightRequestMetadata);
+            Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields, structure);
             if (analysisDefinition.isDataSourceFields()) {
                 Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
                 for (AnalysisItem field : feed.getFields()) {
@@ -1125,13 +1123,16 @@ public class DataService {
                     }
                 }
             }
-
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
-
             for (AnalysisItem analysisItem : analysisItems) {
-                //if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
+                if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
+                    if (analysisCalculation.isCachedCalculation()) {
+                        validQueryItems.add(analysisItem);
+                    }
+                } else if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
                     validQueryItems.add(analysisItem);
-                //}
+                }
             }
             boolean aggregateQuery = true;
             Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
