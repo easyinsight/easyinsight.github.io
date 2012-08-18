@@ -29,7 +29,7 @@ public class ACSPipeline extends Pipeline {
         }*/
 
         components.add(new NormalizationComponent());
-        components.add(new AggregationComponent());
+        components.add(new AggregationComponent(AggregationComponent.OTHER));
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if ("Calc Wtd Procedures".equals(analysisItem.toDisplay())) {
                 components.add(new CalculationComponent((AnalysisCalculation) analysisItem));

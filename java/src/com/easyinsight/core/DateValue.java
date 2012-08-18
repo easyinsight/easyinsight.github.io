@@ -87,6 +87,11 @@ public class DateValue extends Value implements Serializable {
         this.date = date;
     }
 
+    public DateValue(Date date, Value sortValue) {
+        this.date = date;
+        setSortValue(sortValue);
+    }
+
     public Date getDate() {
         return date;
     }
