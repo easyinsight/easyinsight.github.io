@@ -9,7 +9,6 @@ import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.email.UserStub;
-import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
@@ -295,7 +294,7 @@ public class Dashboard implements Cloneable, Serializable {
 
         for (FilterDefinition persistableFilterDefinition : this.filters) {
             filterDefinitions.add(persistableFilterDefinition.clone());
-            List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
+            List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
             for (AnalysisItem item : filterItems) {
                 if (replacementMap.get(item.getAnalysisItemID()) == null) {
                     AnalysisItem clonedItem = item.clone();
@@ -369,7 +368,7 @@ public class Dashboard implements Cloneable, Serializable {
         eiDescs.addAll(getRootElement().allItems(dataSourceItems));
         for (FilterDefinition filterDefinition : filters) {
             eiDescs.add(new FilterDescriptor(filterDefinition));
-            List<AnalysisItem> items = filterDefinition.getAnalysisItems(dataSourceItems, new ArrayList<AnalysisItem>(), true, true, 0, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
+            List<AnalysisItem> items = filterDefinition.getAnalysisItems(dataSourceItems, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
             for (AnalysisItem item : items) {
                 eiDescs.add(new AnalysisItemDescriptor(item));
                 eiDescs.addAll(item.getKey().getDescriptors());
