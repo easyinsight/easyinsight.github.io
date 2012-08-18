@@ -1,12 +1,16 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * User: James Boe
@@ -19,16 +23,26 @@ public class CompositeFeedNode implements Serializable {
     private int y;
     private String dataSourceName;
     private int dataSourceType;
+    private int refreshBehavior;
 
     public CompositeFeedNode() {
     }
 
-    public CompositeFeedNode(long dataFeedID, int x, int y, String dataSourceName, int dataSourceType) {
+    public CompositeFeedNode(long dataFeedID, int x, int y, String dataSourceName, int dataSourceType, int refreshBehavior) {
         this.dataFeedID = dataFeedID;
+        this.refreshBehavior = refreshBehavior;
         this.x = x;
         this.y = y;
         this.dataSourceName = dataSourceName;
         this.dataSourceType = dataSourceType;
+    }
+
+    public int getRefreshBehavior() {
+        return refreshBehavior;
+    }
+
+    public void setRefreshBehavior(int refreshBehavior) {
+        this.refreshBehavior = refreshBehavior;
     }
 
     public String getDataSourceName() {
@@ -83,4 +97,8 @@ public class CompositeFeedNode implements Serializable {
         insertNodeStmt.close();
 
     }
+
+    /*public QueryStateNode createQueryStateNode(EIConnection conn, List<AnalysisItem> analysisItems, InsightRequestMetadata insightRequestMetadata) {
+        return new QueryStateNode(getDataFeedID(), FeedRegistry.instance().getFeed(getDataFeedID(), conn), conn, analysisItems, insightRequestMetadata);
+    }*/
 }
