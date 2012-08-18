@@ -239,7 +239,7 @@
                     strParams += filterValue + "=" + value + "&";
                 }
             }
-            <%= report.toHTML("reportTarget") %>
+            <%= report.toHTML("reportTarget",new HTMLReportMetadata()) %>
         }
 
         function afterRefresh() {

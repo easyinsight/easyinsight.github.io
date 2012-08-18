@@ -116,7 +116,7 @@
 
 
 
-                List<EIDescriptor> descriptors = new UserUploadService().getFeedAnalysisTreeForDataSource(new DataSourceDescriptor(null, dataSourceID, 0, false));
+                List<EIDescriptor> descriptors = new UserUploadService().getFeedAnalysisTreeForDataSource(new DataSourceDescriptor(null, dataSourceID, 0, false, 0));
                 Collections.sort(descriptors, new Comparator<EIDescriptor>() {
 
                     public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {

@@ -280,7 +280,7 @@
 
                 });
             } else {*/
-            <%= report.toHTML("reportTarget") %>
+            <%= report.toHTML("reportTarget", new HTMLReportMetadata()) %>
             //}
         }
 
