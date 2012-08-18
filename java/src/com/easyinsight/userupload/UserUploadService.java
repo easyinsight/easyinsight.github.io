@@ -248,12 +248,12 @@ public class UserUploadService {
                 }
             }
 
-            PreparedStatement stmt = conn.prepareStatement("SELECT DATA_FEED.FEED_NAME, DATA_FEED.FEED_TYPE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME FROM DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID WHERE " +
+            PreparedStatement stmt = conn.prepareStatement("SELECT DATA_FEED.FEED_NAME, DATA_FEED.FEED_TYPE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, refresh_behavior FROM DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID WHERE " +
                     "DATA_FEED_ID = ?");
             PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT FIRST_NAME, NAME FROM USER, UPLOAD_POLICY_USERS WHERE UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
                 "UPLOAD_POLICY_USERS.FEED_ID = ?");
 
-            DataSourceDescriptor placeholder = new DataSourceDescriptor("Not Tied to a Data Source", 0, 0, false);
+            DataSourceDescriptor placeholder = new DataSourceDescriptor("Not Tied to a Data Source", 0, 0, false, 0);
             descriptorMap.put(0L, placeholder);
             iter = objects.iterator();
             while (iter.hasNext()) {
@@ -284,7 +284,7 @@ public class UserUploadService {
                             if (lastTime != null) {
                                 lastDataTime = new Date(lastTime.getTime());
                             }
-                            DataSourceDescriptor stub = new DataSourceDescriptor(dsRS.getString(1), dataSourceID, dsRS.getInt(2), false);
+                            DataSourceDescriptor stub = new DataSourceDescriptor(dsRS.getString(1), dataSourceID, dsRS.getInt(2), false, dsRS.getInt(4));
                             stub.setAuthor(name);
                             stub.setLastDataTime(lastDataTime);
                             dataSources.add(stub);
@@ -701,13 +701,13 @@ public class UserUploadService {
         SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
         try {
             CredentialsResponse credentialsResponse;
-            final IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
-            if (SecurityUtil.getAccountTier() < dataSource.getRequiredAccountTier()) {
+            //final IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition)
+            /*if (SecurityUtil.getAccountTier() < dataSource.getRequiredAccountTier()) {
                 return new CredentialsResponse(false, "Your account level is no longer valid for this data source connection.", feedID);
-            }
-            final FeedDefinition feedDefinition = (FeedDefinition) dataSource;
+            }*/
+            final FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID);;
             if ((feedDefinition.getDataSourceType() != DataSourceInfo.LIVE)) {
-                if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
+                if (DataSourceMutex.mutex().lock(feedDefinition.getDataFeedID())) {
                     final String callID = ServiceUtil.instance().longRunningCall(feedDefinition.getDataFeedID());
                     credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
                     credentialsResponse.setCallDataID(callID);
@@ -726,18 +726,33 @@ public class UserUploadService {
                             try {
                                 conn.setAutoCommit(false);
                                 Date now = new Date();
-                                boolean changed = dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, ((FeedDefinition) dataSource).getLastRefreshStart(), false);
-                                feedDefinition.setVisible(true);
-                                feedDefinition.setLastRefreshStart(now);
-                                if (changed) {
-                                    new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn, true, true);
+                                List<FeedDefinition> sourcesToRefresh = new ArrayList<FeedDefinition>();
+                                if (feedDefinition.getFeedType().getType() == FeedType.COMPOSITE.getType()) {
+                                    CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feedDefinition;
+                                    for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
+                                        sourcesToRefresh.add(feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn));
+                                    }
                                 } else {
-                                    feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
+                                    sourcesToRefresh.add(feedDefinition);
                                 }
-                                PreparedStatement stmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_REFRESH_LOG (REFRESH_TIME, DATA_SOURCE_ID) VALUES (?, ?)");
-                                stmt.setTimestamp(1, new Timestamp(now.getTime()));
-                                stmt.setLong(2, dataSource.getDataFeedID());
-                                stmt.execute();
+                                for (FeedDefinition sourceToRefresh : sourcesToRefresh) {
+                                    if (sourceToRefresh instanceof IServerDataSourceDefinition) {
+                                        IServerDataSourceDefinition refreshable = (IServerDataSourceDefinition) sourceToRefresh;
+                                        boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false);
+                                        sourceToRefresh.setVisible(true);
+                                        sourceToRefresh.setLastRefreshStart(now);
+                                        if (changed) {
+                                            new DataSourceInternalService().updateFeedDefinition(sourceToRefresh, conn, true, true);
+                                        } else {
+                                            feedStorage.updateDataFeedConfiguration(sourceToRefresh, conn);
+                                        }
+                                        PreparedStatement stmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_REFRESH_LOG (REFRESH_TIME, DATA_SOURCE_ID) VALUES (?, ?)");
+                                        stmt.setTimestamp(1, new Timestamp(now.getTime()));
+                                        stmt.setLong(2, sourceToRefresh.getDataFeedID());
+                                        stmt.execute();
+                                    }
+                                }
+
                                 ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, now);
                                 conn.commit();
                             } catch (ReportException re) {
@@ -754,7 +769,7 @@ public class UserUploadService {
                             } finally {
                                 conn.setAutoCommit(true);
                                 Database.closeConnection(conn);
-                                DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
+                                DataSourceMutex.mutex().unlock(feedDefinition.getDataFeedID());
                                 SecurityUtil.clearThreadLocal();
                             }
                         }
@@ -1021,6 +1036,8 @@ public class UserUploadService {
                 }).start();
             }
             return credentialsResponse;
+        } catch (ReportException re) {
+            return new CredentialsResponse(false, re.getReportFault().toString(), dataSource.getDataFeedID());
         } catch (Exception e) {
             LogClass.error(e);
             if (!conn.getAutoCommit()) {
@@ -1029,6 +1046,26 @@ public class UserUploadService {
             throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public boolean flatFileUpload(long dataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ENDPOINT FROM FILE_BASED_DATA_SOURCE WHERE DATA_SOURCE_ID = ?");
+            queryStmt.setLong(1, dataSourceID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                String endpoint = rs.getString(1);
+                if (endpoint == null || "".equals(endpoint.trim())) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
             Database.closeConnection(conn);
         }
     }
