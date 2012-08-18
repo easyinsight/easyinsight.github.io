@@ -55,7 +55,7 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
 
             Nodes dataSources = document.query("/defineCompositeDataSource/dataSources/dataSource");
             Map<String, CompositeFeedNode> compositeNodes = new HashMap<String, CompositeFeedNode>();
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, FEED_NAME, FEED_TYPE FROM DATA_FEED WHERE " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, FEED_NAME, FEED_TYPE, REFRESH_BEHAVIOR FROM DATA_FEED WHERE " +
                     "DATA_FEED.API_KEY = ? OR DATA_FEED.FEED_NAME = ?");
             List<CompositeFeedConnection> compositeConnections = new ArrayList<CompositeFeedConnection>();
             for (int i = 0; i < dataSources.size(); i++) {
@@ -66,7 +66,7 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 ResultSet dataSetRS = queryStmt.executeQuery();
                 if (dataSetRS.next()) {
                     long dataSourceID = dataSetRS.getLong(1);
-                    compositeNodes.put(dataSource, new CompositeFeedNode(dataSourceID, 0, 0, dataSetRS.getString(2), dataSetRS.getInt(3)));
+                    compositeNodes.put(dataSource, new CompositeFeedNode(dataSourceID, 0, 0, dataSetRS.getString(2), dataSetRS.getInt(3), dataSetRS.getInt(4)));
                 } else {
                     throw new ServiceRuntimeException("We couldn't find a data source with the key of " + dataSource + ".");
                 }
