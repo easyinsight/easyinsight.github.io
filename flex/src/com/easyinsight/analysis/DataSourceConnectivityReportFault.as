@@ -29,6 +29,10 @@ public class DataSourceConnectivityReportFault extends ReportFault {
         return admin;
     }
 
+    override public function canResolve():Boolean {
+        return true;
+    }
+
     private function onResolved(event:ProblemDataEvent):void {
         dispatchEvent(event);
     }
