@@ -2,7 +2,6 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
-import com.easyinsight.kpi.KPI;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.SuggestedUser;
 import com.easyinsight.userupload.UploadPolicy;
@@ -50,6 +49,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private String attribution;
     private String description;
     private long dynamicServiceDefinitionID;
+    private int dataSourceBehavior;
     private String apiKey;
     private boolean uncheckedAPIEnabled;
     private boolean uncheckedAPIUsingBasicAuth;
@@ -75,6 +75,17 @@ public class FeedDefinition implements Cloneable, Serializable {
             field.appendChild(analysisItem.toXML(null));
         }
         return dataSource.toXML();
+    }
+
+    public int getDataSourceBehavior() {
+        if (dataSourceBehavior == 0) {
+            dataSourceBehavior = getDataSourceType();
+        }
+        return dataSourceBehavior;
+    }
+
+    public void setDataSourceBehavior(int dataSourceBehavior) {
+        this.dataSourceBehavior = dataSourceBehavior;
     }
 
     public String getRefreshMarmotScript() {
@@ -464,10 +475,6 @@ public class FeedDefinition implements Cloneable, Serializable {
         }
         feedDefinition.setFolders(clonedFolders);
         return new DataSourceCloneResult(feedDefinition, keyReplacementMap);
-    }
-
-    public List<KPI> createKPIs() {
-        return new ArrayList<KPI>();
     }
 
     public AnalysisItem findAnalysisItemByKey(String key) {
