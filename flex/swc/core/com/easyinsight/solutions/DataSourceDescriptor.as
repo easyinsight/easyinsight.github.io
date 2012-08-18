@@ -17,6 +17,7 @@ import mx.collections.ArrayCollection;
 public class DataSourceDescriptor extends EIDescriptor{
 
     public var description:String;
+    public var dataSourceBehavior:int;
     public var dataSourceType:int;
     public var size:int;
     public var lastDataTime:Date;
