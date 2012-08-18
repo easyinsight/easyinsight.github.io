@@ -35,11 +35,9 @@
 		<![CDATA[
         import com.easyinsight.account.Account;
         import com.easyinsight.administration.ArchiveWindow;
-        import com.easyinsight.administration.DataSourceDeleteWindow;
         import com.easyinsight.administration.ReportAdminXMLWindow;
         import com.easyinsight.administration.ReportTestWindow;
         import com.easyinsight.administration.UpdateZipsWindow;
-        import com.easyinsight.customupload.UploadExternalSource;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.LoginObject;
         import com.easyinsight.framework.LoginResponse;
@@ -105,12 +103,6 @@
             } else {
                 failureMessageLabel.text = authResult.failureMessage;
             }
-        }
-
-        private function externalSources():void {
-            var window:UploadExternalSource = new UploadExternalSource();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         }
 
         private function login():void {
