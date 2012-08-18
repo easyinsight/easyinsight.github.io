@@ -12,7 +12,6 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.IJoin;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.PipelineData;
 import com.easyinsight.security.SecurityUtil;
@@ -41,7 +40,7 @@ public class ReportCalculation {
 
     public static List<AnalysisItem> getAnalysisItems(String calculationString, List<AnalysisItem> allItems, Map<String, List<AnalysisItem>> keyMap,
                                                       Map<String, List<AnalysisItem>> displayMap, Collection<AnalysisItem> insightItems,
-                                                      boolean getEverything, boolean includeFilters, int criteria) {
+                                                      boolean getEverything, boolean includeFilters, AnalysisItemRetrievalStructure structure) {
         CalculationTreeNode tree;
         Set<KeySpecification> specs;
 
@@ -87,7 +86,7 @@ public class ReportCalculation {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure()));
+                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, new HashSet<AnalysisItem>(), structure));
             }
         }
 
@@ -132,7 +131,7 @@ public class ReportCalculation {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure()));
+                analysisItemList.addAll(analysisItem.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null)));
             }
         }
         if (analysisItemList.size() > 0) {
@@ -356,11 +355,15 @@ public class ReportCalculation {
     }
 
     public void apply(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
-                      Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters) {
+                      Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) {
         try {
             //DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
             CalculationMetadata calculationMetadata = new CalculationMetadata();
+            calculationMetadata.setFeed(feed);
             calculationMetadata.setReport(report);
+            calculationMetadata.setInsightRequestMetadata(insightRequestMetadata);
+            calculationMetadata.setConnection(conn);
+            calculationMetadata.setDataSource(feed.getDataSource());
             Collection<FilterDefinition> allFilters = new ArrayList<FilterDefinition>();
             if (report.getFilterDefinitions() != null) {
                 allFilters.addAll(report.getFilterDefinitions());

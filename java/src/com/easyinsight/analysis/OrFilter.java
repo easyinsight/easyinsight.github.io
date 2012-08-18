@@ -131,10 +131,10 @@ public class OrFilter extends FilterDefinition {
         return element;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         for (FilterDefinition filterDefinition : filters) {
-            items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure));
+            items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
         }
         return items;
     }

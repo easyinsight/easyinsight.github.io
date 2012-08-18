@@ -19,12 +19,6 @@ public class StandardReportPipeline extends Pipeline {
 
         List<IComponent> components = new ArrayList<IComponent>();
 
-        // lookup tables, calculations, filters can potentially be pushed down to a lower level of operation here, pre-composite join
-
-        // okay, but what about after composite join, how do we get accurate results...
-
-        //
-
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
@@ -35,20 +29,20 @@ public class StandardReportPipeline extends Pipeline {
                     } else if (lookupTable.getSourceField().hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                         Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
                         analysisItems.add(lookupTable.getSourceField());
-                        components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, true, getStructure()));
+                        components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, Pipeline.BEFORE, getStructure()));
                     }
                     components.add(new LookupTableComponent(lookupTable));
                 }
             }
         }
 
-        Set<AnalysisItem> items = new HashSet<AnalysisItem>(reportItems);
+        /*Set<AnalysisItem> items = new HashSet<AnalysisItem>(reportItems);
         for (AnalysisItem item : allNeededAnalysisItems) {
             if (item.hasType(AnalysisItemTypes.CALCULATION) || item.hasType(AnalysisItemTypes.DERIVED_DIMENSION) ||
                     item.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-                items.addAll(item.getAnalysisItems(allItems, reportItems, false, false, CleanupComponent.AGGREGATE_CALCULATIONS, items, getStructure()));
+                items.addAll(item.getAnalysisItems(allItems, reportItems, false, false, items, getStructure()));
             }
-        }
+        }*/
 
 
         for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, reportItems)) {
@@ -56,7 +50,7 @@ public class StandardReportPipeline extends Pipeline {
             if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
         }
 
-        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true, getStructure()));
+        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.BEFORE, getStructure()));
 
         if (report instanceof WSHeatMap) {
             WSHeatMap heatMap = (WSHeatMap) report;
@@ -118,15 +112,15 @@ public class StandardReportPipeline extends Pipeline {
             }
         }
 
-        components.add(new CleanupComponent(CleanupComponent.AGGREGATE_CALCULATIONS, measureFilter));
+        components.add(new CleanupComponent(Pipeline.AFTER, measureFilter));
         components.add(new NormalizationComponent());
-        components.add(new AggregationComponent());
+        components.add(new AggregationComponent(AggregationComponent.OTHER));
 
-        List<IComponent> postAggCalculations = new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, false, getStructure());
+        List<IComponent> postAggCalculations = new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.AFTER, getStructure());
         components.addAll(postAggCalculations);
 
         // need another cleanup component here...
-        components.add(new CleanupComponent(0, false));
+        components.add(new CleanupComponent(Pipeline.LAST, false));
         
         /*for (AnalysisItem analysisItem : reportItems) {
             if (analysisItem.getSortItem() != null) {
@@ -134,7 +128,7 @@ public class StandardReportPipeline extends Pipeline {
             }
         }*/
 
-        components.add(new AggregationComponent(AggregationTypes.RANK));
+        components.add(new AggregationComponent(AggregationComponent.FINAL, AggregationTypes.RANK));
 
         components.add(new LinkDecorationComponent());
         if (report.getFilterDefinitions() != null) {

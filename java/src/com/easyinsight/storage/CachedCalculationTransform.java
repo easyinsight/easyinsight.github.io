@@ -84,7 +84,6 @@ public class CachedCalculationTransform implements IDataTransform {
         IRow result = resultSet.getRow(0);
         for (AnalysisItem calculation : calculations) {
             Value targetValue = result.getValue(calculation);
-
             row.addValue(calculation.getKey(), targetValue);
         }
     }

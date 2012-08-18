@@ -194,11 +194,11 @@ public class FunctionFactory {
             return new FixedJoin();
         } else if (s.equals("filtervalue")) {
             return new FilterValue();
-        } /*else if (s.equals("createnamedpipeline")) {
+        } else if (s.equals("createnamedpipeline")) {
             return new CreateNamedPipeline();
         } else if (s.equals("assignpipeline")) {
             return new AssignPipeline();
-        }*/ else {
+        } else {
             return null;
         }
     }

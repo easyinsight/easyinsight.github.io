@@ -30,6 +30,9 @@ public class IntentionSuggestion {
 
     public static final int ADD_SUMMARY_ROW = 6;
     public static final int NEW_HIERARCHY = 13;
+    public static final int CONFIGURE_GAUGE = 15;
+    public static final int SUGGESTION_TASK_ADD = 16;
+    public static final int WARNING_JOIN_FAILURE = 17;
 
     private String headline;
     private String description;

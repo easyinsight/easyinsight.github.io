@@ -71,7 +71,7 @@ public class DateRangePluginComponent implements IComponent {
     private boolean findItem(AnalysisItem field, List<AnalysisItem> allRequestedAnalysisItems, List<AnalysisItem> allFields) {
         int found = 0;
         for (AnalysisItem item : allRequestedAnalysisItems) {
-            List<AnalysisItem> items = item.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), false, false, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
+            List<AnalysisItem> items = item.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), false, false, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
             found += items.contains(field) ? 1 : 0;
         }
         return found > 0;

@@ -6,6 +6,8 @@ import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.Feed;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.Collection;
@@ -21,9 +23,27 @@ public class CalculationMetadata {
     private DataSet dataSet;
     private FilterDefinition filterDefinition;
     private Dashboard dashboard;
+    private Feed feed;
     private EIConnection connection;
     private Collection<FilterDefinition> filters;
     private InsightRequestMetadata insightRequestMetadata;
+    private FeedDefinition dataSource;
+
+    public Feed getFeed() {
+        return feed;
+    }
+
+    public void setFeed(Feed feed) {
+        this.feed = feed;
+    }
+
+    public FeedDefinition getDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(FeedDefinition dataSource) {
+        this.dataSource = dataSource;
+    }
 
     public InsightRequestMetadata getInsightRequestMetadata() {
         return insightRequestMetadata;

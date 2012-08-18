@@ -380,7 +380,13 @@ public class FilterValueDefinition extends FilterDefinition {
             if (isExcludeEmpty()) {
                 stringList.remove("");
             }
-            String existingChoice = getFilteredValues().get(0).toString();
+            String existingChoice = null;
+            if (!getFilteredValues().isEmpty()) {
+                Object obj = getFilteredValues().get(0);
+                if (obj != null) {
+                    existingChoice = obj.toString();
+                }
+            }
             for (String value : stringList) {
                 if (value.equals(existingChoice)) {
                     sb.append("<option selected=\"selected\">").append(value).append("</option>");

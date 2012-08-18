@@ -155,7 +155,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     }
 
     @Override
-    public String toHTML(String targetDiv) {
+    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
         JSONObject params;
         try {
@@ -205,8 +205,8 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-
-        argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true))";
+        int customHeight = htmlReportMetadata.getCustomHeight();
+        argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true,"+customHeight+"))";
         return argh;
     }
 }

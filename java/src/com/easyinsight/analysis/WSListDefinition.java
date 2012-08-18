@@ -231,7 +231,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
     }
 
     @Override
-    public String toHTML(String targetDiv) {
+    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         try {
             JSONObject analysisItemMap = new JSONObject();
             for (AnalysisItem i : columns) {

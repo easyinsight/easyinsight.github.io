@@ -37,6 +37,9 @@ public class YTDUtil {
         Calendar cal = Calendar.getInstance();
         for (IRow row : nowSet.getRows()) {
             Value year = row.getValue(timeDimension);
+            if (year.getOriginalValue() != null) {
+                year = year.getOriginalValue();
+            }
             if (year.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) year;
                 cal.setTime(dateValue.getDate());
@@ -61,8 +64,7 @@ public class YTDUtil {
                 }
             }
         }
-        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true, new AnalysisItemRetrievalStructure());
-        components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false, new AnalysisItemRetrievalStructure()));
+        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, new AnalysisItemRetrievalStructure(null));
         Iterator<IComponent> iter = components.iterator();
         while (iter.hasNext()) {
             IComponent component = iter.next();
@@ -229,8 +231,7 @@ public class YTDUtil {
             }
 
         }
-        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, true, new AnalysisItemRetrievalStructure());
-        components.addAll(new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, false, new AnalysisItemRetrievalStructure()));
+        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, new AnalysisItemRetrievalStructure(null));
         Iterator<IComponent> iter = components.iterator();
         while (iter.hasNext()) {
             IComponent component = iter.next();
@@ -261,13 +262,6 @@ public class YTDUtil {
                 ytdValue.setAverage(tempRow1.getValue(measure.createAggregateKey()));
             }
         }
-        /*for (AnalysisMeasure measure : measures) {
-            if (measure.hasType(AnalysisItemTypes.CALCULATION) && measure.getAggregation() == AggregationTypes.AVERAGE) {
-                
-                
-            }
-
-        }*/
         List<AnalysisItem> benchmarkMeasures = new ArrayList<AnalysisItem>();
         for (AnalysisMeasure measure : measures) {
             if (measure.getReportFieldExtension() != null && measure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
@@ -277,6 +271,9 @@ public class YTDUtil {
                 }
             }
         }
+
+        // conditionaljoin(Provider Discipline, "All", "PT", "OT")
+
         if (benchmarkMeasures.size() > 0) {
             WSListDefinition benchmarkReport = new WSListDefinition();
             benchmarkReport.setDataFeedID(wsytdDefinition.getDataFeedID());

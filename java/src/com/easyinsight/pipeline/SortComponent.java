@@ -24,15 +24,21 @@ public class SortComponent implements IComponent {
         Collections.sort(sortItems, new Comparator<AnalysisItem>() {
 
             public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
-                Integer sortSequence = analysisItem.getSortSequence();
+                int sortSequence = analysisItem.getSortSequence();
                 if (sortSequence == 0) {
                     sortSequence = Integer.MAX_VALUE;
                 }
-                Integer sortSequence2 = analysisItem1.getSortSequence();
+                int sortSequence2 = analysisItem1.getSortSequence();
                 if (sortSequence2 == 0) {
                     sortSequence2 = Integer.MAX_VALUE;
                 }
-                return sortSequence.compareTo(sortSequence2);
+                if (sortSequence < sortSequence2) {
+                    return -1;
+                }
+                if (sortSequence > sortSequence2) {
+                    return 1;
+                }
+                return 0;
             }
         });
         Collections.sort(dataSet.getRows(), new Comparator<IRow>() {
@@ -63,8 +69,14 @@ public class SortComponent implements IComponent {
     private int getComparison(AnalysisItem field, IRow row1, IRow row2) {
         int comparison = 0;
         int ascending = field.getSort() == 2 ? -1 : 1;
-        Value value1 = row1.getValue(field);
-        Value value2 = row2.getValue(field);
+        Value value1;
+
+            value1 = row1.getValue(field);
+
+        Value value2;
+
+            value2 = row2.getValue(field);
+
 
         if (value1.type() == Value.NUMBER && value2.type() == Value.NUMBER) {
             comparison = value1.toDouble().compareTo(value2.toDouble()) * ascending;

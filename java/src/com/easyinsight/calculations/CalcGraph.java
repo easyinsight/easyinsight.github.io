@@ -9,6 +9,7 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -19,23 +20,18 @@ import java.util.*;
 public class CalcGraph {
 
     public List<IComponent> doFunGraphStuff(Set<AnalysisItem> allNeededAnalysisItems, List<AnalysisItem> allItems, Set<AnalysisItem> reportItems,
-                                            boolean rowLevel, AnalysisItemRetrievalStructure structure) {
+                                            @Nullable String name, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> derivedItems = new ArrayList<AnalysisItem>();
         for (AnalysisItem item : allNeededAnalysisItems) {
             if (item.hasType(AnalysisItemTypes.CALCULATION)) {
                 AnalysisCalculation calc = (AnalysisCalculation) item;
-                /*if (calc.isCachedCalculation()) {
-                    continue;
-                }*/
-                if (calc.isApplyBeforeAggregation() == rowLevel) derivedItems.add(item);
+                if (name == null || calc.getPipelineName().equals(name)) derivedItems.add(item);
             } else if (item.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                 DerivedAnalysisDimension calc = (DerivedAnalysisDimension) item;
-                if (calc.isApplyBeforeAggregation() == rowLevel) derivedItems.add(item);
+                if (name == null || calc.getPipelineName().equals(name)) derivedItems.add(item);
             } else if (item.hasType(AnalysisItemTypes.DERIVED_DATE)) {
                 DerivedAnalysisDateDimension calc = (DerivedAnalysisDateDimension) item;
-                if (calc.isApplyBeforeAggregation() == rowLevel) derivedItems.add(item);
-            } else if (!rowLevel && item.hasType(AnalysisItemTypes.REAGGREGATE_MEASURE)) {
-                derivedItems.add(item);
+                if (name == null || calc.getPipelineName().equals(name)) derivedItems.add(item);
             }
         }
         List<IComponent> components = new ArrayList<IComponent>();
@@ -47,7 +43,8 @@ public class CalcGraph {
                 nodeMap.put(item.createAggregateKey(), item);
             }
             for (AnalysisItem analysisItem : nodeMap.values()) {
-                List<AnalysisItem> requiredItems = analysisItem.getAnalysisItems(allItems, reportItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), structure);
+                List<AnalysisItem> requiredItems = analysisItem.getAnalysisItems(allItems, reportItems, false, true, new HashSet<AnalysisItem>(),
+                        new AnalysisItemRetrievalStructure(name, structure));
                 for (AnalysisItem item : requiredItems) {
                     AnalysisItem requiredNode = nodeMap.get(item.createAggregateKey());
                     if (requiredNode != null && requiredNode != analysisItem) {
@@ -65,36 +62,7 @@ public class CalcGraph {
             while (iterator.hasNext()) {
                 items.add(iterator.next());
             }
-            List<AnalysisItem> reaggregateItems = new ArrayList<AnalysisItem>();
-            List<AnalysisItem> allOtherItems = new ArrayList<AnalysisItem>();
-            for (AnalysisItem item : items) {
-                if (item.hasType(AnalysisItemTypes.CALCULATION)) {
-                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) item;
-                    if (analysisCalculation.getCalculationString().contains("aggregatefield")) {
-                        reaggregateItems.add(analysisCalculation);
-                    } else {
-                        allOtherItems.add(analysisCalculation);
-                    }
-                } else {
-                    allOtherItems.add(item);
-                }
-            }
-            if (!reaggregateItems.isEmpty()) {
-                for (AnalysisItem calcNode : reaggregateItems) {
-                    if (calcNode.hasType(AnalysisItemTypes.CALCULATION)) {
-                       components.add(new CalculationComponent((AnalysisCalculation) calcNode));
-                    } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
-                        components.add(new DerivedGroupingComponent((DerivedAnalysisDimension) calcNode));
-                    } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-                        components.add(new DerivedDateComponent((DerivedAnalysisDateDimension) calcNode));
-                    } else if (calcNode.hasType(AnalysisItemTypes.REAGGREGATE_MEASURE)) {
-                        components.add(new ReaggregateComponent((ReaggregateAnalysisMeasure) calcNode));
-                    }
-                }
-                components.add(new AdjustPipelineComponent());
-                components.add(new AggregationComponent());
-            }
-            for (AnalysisItem calcNode : allOtherItems) {
+            for (AnalysisItem calcNode : items) {
                 if (calcNode.hasType(AnalysisItemTypes.CALCULATION)) {
                     components.add(new CalculationComponent((AnalysisCalculation) calcNode));
                 } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
@@ -107,7 +75,7 @@ public class CalcGraph {
             }
             FieldFilterComponent fieldFilterComponent = new FieldFilterComponent();
             components.add(fieldFilterComponent);
-            for (AnalysisItem calcNode : allOtherItems) {
+            for (AnalysisItem calcNode : items) {
                 if (calcNode.getFilters() != null && calcNode.getFilters().size() > 0) {
                     for (FilterDefinition filterDefinition : calcNode.getFilters()) {
                         if (filterDefinition.getField() != null) {

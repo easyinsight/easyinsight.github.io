@@ -34,9 +34,9 @@ public class NamedFilterReference extends FilterDefinition {
     }
 
     @Override
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         if (filter != null) {
-            return filter.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure);
+            return filter.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
         } else {
             return Collections.emptyList();
         }

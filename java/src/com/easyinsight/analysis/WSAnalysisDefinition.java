@@ -3,12 +3,13 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.definitions.WSKPIDefinition;
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
-import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.ResultsBridge;
 
 import java.sql.SQLException;
@@ -99,6 +100,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private int folder;
     private boolean dataSourceFields;
     private boolean lookupTableOptimization;
+    private boolean adHocExecution;
 
     private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
@@ -106,6 +108,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private double backgroundAlpha = 1;
 
     private boolean rowsEditable;
+
+    public boolean isAdHocExecution() {
+        return adHocExecution;
+    }
+
+    public void setAdHocExecution(boolean adHocExecution) {
+        this.adHocExecution = adHocExecution;
+    }
 
     public boolean isRowsEditable() {
         return rowsEditable;
@@ -417,41 +427,63 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return filters;
     }
 
-    public Set<AnalysisItem> getColumnItems(List<AnalysisItem> allItems, AnalysisItemRetrievalStructure structure) {
-        Set<AnalysisItem> columnSet = new HashSet<AnalysisItem>();
+    private void populate(Map<AnalysisItem, AnalysisItem> map, AnalysisItem analysisItem) {
+        AnalysisItem existing = map.get(analysisItem);
+        if (existing == null) {
+            map.put(analysisItem, analysisItem);
+        } else {
+            existing.getPipelineSections().addAll(analysisItem.getPipelineSections());
+        }
+    }
+
+    private void populate(Map<AnalysisItem, AnalysisItem> map, List<AnalysisItem> analysisItems) {
+        for (AnalysisItem analysisItem : analysisItems) {
+            populate(map, analysisItem);
+        }
+    }
+
+    public Set<AnalysisItem> getColumnItems(List<AnalysisItem> allItems, AnalysisItemRetrievalStructure structure, InsightRequestMetadata insightRequestMetadata) {
+        Map<AnalysisItem, AnalysisItem> map = new HashMap<AnalysisItem, AnalysisItem>();
+        //Set<AnalysisItem> columnSet = new HashSet<AnalysisItem>();
         Set<AnalysisItem> analysisItems = getAllAnalysisItems();
         analysisItems.remove(null);
         for (AnalysisItem analysisItem : analysisItems) {
+            analysisItem.getPipelineSections().add(Pipeline.LAST);
             if (analysisItem.isValid()) {
-                columnSet.add(analysisItem);
+                //columnSet.add(analysisItem);
+                populate(map, analysisItem);
             }
         }
         for (AnalysisItem analysisItem : analysisItems) {
+            insightRequestMetadata.pipelineAssign(analysisItem);
+        }
+        Set<AnalysisItem> argh = new HashSet<AnalysisItem>();
+        for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
-                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, columnSet, structure);
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), structure);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID()) {
-                    if (!columnSet.contains(item)) {
-                        columnSet.add(item);
+                    if (!map.keySet().contains(item)) {
+                        populate(map, item);
                     }
                     //}
                 }
                 List<AnalysisItem> linkItems = analysisItem.addLinkItems(allItems);
                 for (AnalysisItem item : linkItems) {
-                    if (!columnSet.contains(item)) {
-                        columnSet.add(item);
+                    if (!map.keySet().contains(item)) {
+                        populate(map, item);
                     }
                 }
             }
         }
         if (retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : retrieveFilterDefinitions()) {
-                columnSet.addAll(filterDefinition.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, columnSet, new AnalysisItemRetrievalStructure()));
+                populate(map, filterDefinition.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(Pipeline.BEFORE)));
             }
         }
         for (AnalysisItem analysisItem : getLimitFields()) {
-            if (!columnSet.contains(analysisItem)) {
-                columnSet.add(analysisItem);
+            if (!map.keySet().contains(analysisItem)) {
+                populate(map, analysisItem);
             }
         }
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
@@ -476,20 +508,20 @@ public abstract class WSAnalysisDefinition implements Serializable {
             StringTokenizer toker = new StringTokenizer(getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
-                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allItems, keyMap, displayMap, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
-                columnSet.addAll(items);
+                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allItems, keyMap, displayMap, analysisItems, false, true, structure);
+                populate(map, items);
             }
         }
         if (uniqueIteMap != null) {
             Set<Long> ids = new HashSet<Long>();
-            for (AnalysisItem analysisItem : columnSet) {
+            for (AnalysisItem analysisItem : map.keySet()) {
                 Key key = analysisItem.getKey();
                 long dsID = toID(key);
                 if (dsID != 0) {
                     ids.add(dsID);
                 }
             }
-            Set<AnalysisItem> uniqueFields = new HashSet<AnalysisItem>();
+            List<AnalysisItem> uniqueFields = new ArrayList<AnalysisItem>();
             for (Long id : ids) {
                 AnalysisDimension analysisDimension = (AnalysisDimension) uniqueIteMap.get(id);
                 if (analysisDimension != null) {
@@ -497,13 +529,13 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     uniqueFields.add(analysisDimension);
                 }
             }
-            columnSet.addAll(uniqueFields);
+            populate(map, uniqueFields);
         }
         if (!additionalGroupingItems.isEmpty()) {
-            columnSet.addAll(additionalGroupingItems);
+            populate(map, additionalGroupingItems);
         }
 
-        return columnSet;
+        return new HashSet<AnalysisItem>(map.values());
     }
 
     private long toID(Key key) {
@@ -612,7 +644,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private transient List<AnalysisItem> additionalGroupingItems = new ArrayList<AnalysisItem>();
 
     @Transient
-    private transient Map<String, AnalysisItem> fieldToUniqueMap = new HashMap<String, AnalysisItem>();
+    private transient Map<String, Long> fieldToUniqueMap = new HashMap<String, Long>();
 
     public List<AnalysisItem> getAdditionalGroupingItems() {
         return additionalGroupingItems;
@@ -622,11 +654,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
         this.additionalGroupingItems = additionalGroupingItems;
     }
 
-    public Map<String, AnalysisItem> getFieldToUniqueMap() {
+    public Map<String, Long> getFieldToUniqueMap() {
         return fieldToUniqueMap;
     }
 
-    public void setFieldToUniqueMap(Map<String, AnalysisItem> fieldToUniqueMap) {
+    public void setFieldToUniqueMap(Map<String, Long> fieldToUniqueMap) {
         this.fieldToUniqueMap = fieldToUniqueMap;
     }
 
@@ -663,6 +695,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         dataSourceFields =  findBooleanProperty(properties, "dataSourceFields", false);
         headerImage =  findImage(properties, "headerImage", null);
         lookupTableOptimization =  findBooleanProperty(properties, "lookupTableOptimization", false);
+        adHocExecution = findBooleanProperty(properties, "adHocExecution", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -675,6 +708,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("fullJoins", fullJoins));
         properties.add(new ReportBooleanProperty("dataSourceFields", dataSourceFields));
         properties.add(new ReportBooleanProperty("lookupTableOptimization", lookupTableOptimization));
+        properties.add(new ReportBooleanProperty("adHocExecution", adHocExecution));
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }
@@ -755,7 +789,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems, AnalysisItemRetrievalStructure structure) {
         List<EIDescriptor> allItems = new ArrayList<EIDescriptor>();
-        Set<AnalysisItem> items = getColumnItems(dataSourceItems, structure);
+        Set<AnalysisItem> items = getColumnItems(dataSourceItems, structure, new InsightRequestMetadata());
         for (AnalysisItem analysisItem : items) {
             allItems.add(new AnalysisItemDescriptor(analysisItem));
             if (analysisItem.getFilters() != null) {
@@ -790,12 +824,16 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return new ArrayList<String>();
     }
 
-    public String toHTML(String targetDiv) {
+    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
         return "$.get('/app/htmlExport?reportID="+getUrlKey()+"&"+timezoneOffset+"&'+ strParams, function(data) { Utils.noData(data, function() { $('#"+targetDiv+" .reportArea').html(data); }, null, '" + targetDiv + "');});";
     }
 
     public String rootHTML() {
         return "";
+    }
+
+    public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
+        throw new UnsupportedOperationException();
     }
 }

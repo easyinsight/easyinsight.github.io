@@ -534,7 +534,7 @@ public class DataService {
         for (AnalysisItem item : items) {
             if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension dateDim = (AnalysisDateDimension) item;
-                boolean dateTime = dataSource.getDataSource().checkDateTime(item.toOriginalDisplayName(), item.getKey());
+                boolean dateTime = !dateDim.isDateOnlyField() && dataSource.getDataSource().checkDateTime(item.toOriginalDisplayName(), item.getKey());
                 dateDim.setTimeshift(dateTime);
             }
         }
@@ -933,7 +933,7 @@ public class DataService {
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn);
             List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
-            //suggestions.addAll(insightRequestMetadata.getSuggestions());
+            suggestions.addAll(insightRequestMetadata.getSuggestions());
             /*if (analysisDefinition.isLogReport()) {
                 new SendGridEmail().sendEmail("jboe@easy-insight.com", "Data Source Audit", reportRetrieval.getPipeline().toLogString(), "jboe@easy-insight.com", true, "Audit Test");
             }*/
@@ -1073,7 +1073,7 @@ public class DataService {
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
                     try {
-                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters);
+                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {
@@ -1087,7 +1087,7 @@ public class DataService {
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
                     try {
-                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters);
+                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {
@@ -1096,9 +1096,11 @@ public class DataService {
                     }
                 }
             }
-            AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure();
+            insightRequestMetadata.setFieldToUniqueMap(analysisDefinition.getFieldToUniqueMap());
+            insightRequestMetadata.setUniqueIteMap(analysisDefinition.getUniqueIteMap());
+            AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
             structure.setReport(analysisDefinition);
-            Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields, structure);
+            Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields, structure, insightRequestMetadata);
             if (analysisDefinition.isDataSourceFields()) {
                 Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
                 for (AnalysisItem field : feed.getFields()) {
@@ -1123,16 +1125,13 @@ public class DataService {
                     }
                 }
             }
+
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
+
             for (AnalysisItem analysisItem : analysisItems) {
-                if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
-                    if (analysisCalculation.isCachedCalculation()) {
-                        validQueryItems.add(analysisItem);
-                    }
-                } else if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
+                //if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
                     validQueryItems.add(analysisItem);
-                }
+                //}
             }
             boolean aggregateQuery = true;
             Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();

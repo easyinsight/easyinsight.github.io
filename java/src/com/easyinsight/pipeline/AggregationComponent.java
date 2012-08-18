@@ -14,9 +14,14 @@ import java.util.*;
  */
 public class AggregationComponent implements IComponent {
 
-    private Set<Integer> skipAggregations;
+    public static final int FINAL = 1;
+    public static final int OTHER = 2;
 
-    public AggregationComponent(Integer... skipAggregations) {
+    private Set<Integer> skipAggregations;
+    private int tier;
+
+    public AggregationComponent(int tier, Integer... skipAggregations) {
+        this.tier = tier;
         this.skipAggregations = new HashSet<Integer>();
         if (skipAggregations != null && skipAggregations.length > 0) {
             this.skipAggregations.addAll(Arrays.asList(skipAggregations));
@@ -29,7 +34,7 @@ public class AggregationComponent implements IComponent {
             derivedItems.addAll(item.getDerivedItems());
         }
         List<AnalysisItem> list = new ArrayList<AnalysisItem>(pipelineData.getReportItems());
-        ListTransform listTransform = dataSet.listTransform(list, skipAggregations, pipelineData.getUniqueItems(), pipelineData.getReport() != null ? pipelineData.getReport().getFieldToUniqueMap() : null);
+        ListTransform listTransform = dataSet.listTransform(list, skipAggregations, pipelineData.getUniqueItems(), pipelineData.getReport() != null ? pipelineData.getReport().getFieldToUniqueMap() : null, tier);
         return listTransform.aggregate(derivedItems);
     }
 

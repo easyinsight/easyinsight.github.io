@@ -9,6 +9,7 @@ import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.intention.IntentionSuggestion;
 
 import java.util.*;
 
@@ -19,10 +20,14 @@ import java.util.*;
  */
 public abstract class Pipeline {
 
+    public static final String BEFORE = "before";
+    public static final String AFTER = "after";
+    public static final String LAST = "last";
+
     private List<IComponent> components = new ArrayList<IComponent>();
     private PipelineData pipelineData;
     private ResultsBridge resultsBridge = new ListResultsBridge();
-    private AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure();
+    private AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
         structure.setReport(report);
@@ -31,6 +36,36 @@ public abstract class Pipeline {
             allFields.addAll(report.getAddedItems());
         }
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource, null);
+        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems(), insightRequestMetadata);
+        if (report.hasCustomResultsBridge()) {
+            resultsBridge = report.getCustomResultsBridge();
+        }
+        return this;
+    }
+
+    private Feed preassigned;
+
+    public void setPreassigned(Feed preassigned) {
+        this.preassigned = preassigned;
+    }
+
+    private List<AnalysisItem> additionalItems;
+
+    public void setAdditionalItems(List<AnalysisItem> additionalItems) {
+        this.additionalItems = additionalItems;
+    }
+
+    public Pipeline setup(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
+        if (preassigned == null) {
+            throw new RuntimeException("You can only use this setup() call when you've preassigned an earlier data source.");
+        }
+        structure.setReport(report);
+        List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(preassigned.getFields());
+        allFields.addAll(additionalItems);
+        /*if (report.getAddedItems() != null) {
+            allFields.addAll(report.getAddedItems());
+        }*/
+        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, preassigned, null);
         components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems(), insightRequestMetadata);
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
@@ -100,7 +135,7 @@ public abstract class Pipeline {
                 if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
                     AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
                     if (analysisCalculation.getAggregation() == AggregationTypes.AVERAGE) {
-                        List<AnalysisItem> baseItems = analysisItem.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure());
+                        List<AnalysisItem> baseItems = analysisItem.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, new HashSet<AnalysisItem>(), structure);
                         allRequestedAnalysisItems.addAll(baseItems);
                         List<AnalysisItem> linkItems = analysisItem.addLinkItems(allFields);
                         allRequestedAnalysisItems.addAll(linkItems);
@@ -117,13 +152,13 @@ public abstract class Pipeline {
 
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                List<AnalysisItem> items = filterDefinition.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, allNeededAnalysisItems, structure);
+                List<AnalysisItem> items = filterDefinition.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, new HashSet<AnalysisItem>(), structure);
                 allNeededAnalysisItems.addAll(items);
             }
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
-                List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS, allNeededAnalysisItems, structure);
+                List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, new HashSet<AnalysisItem>(), structure);
                 allNeededAnalysisItems.addAll(baseItems);
                 List<AnalysisItem> linkItems = item.addLinkItems(allFields);
                 allNeededAnalysisItems.addAll(linkItems);
@@ -155,7 +190,7 @@ public abstract class Pipeline {
             StringTokenizer toker = new StringTokenizer(report.getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
-                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allFields, keyMap, displayMap, allRequestedAnalysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allFields, keyMap, displayMap, new HashSet<AnalysisItem>(), false, true, structure);
                 allNeededAnalysisItems.addAll(items);
             }
         }
@@ -176,7 +211,7 @@ public abstract class Pipeline {
             for (Long id : ids) {
                 AnalysisDimension analysisDimension = (AnalysisDimension) report.getUniqueIteMap().get(id);
                 if (analysisDimension != null) {
-                    analysisDimension.setGroup(false);
+                    //analysisDimension.setGroup(false);
                     uniqueFields.put(id, analysisDimension);
                 }
             }
@@ -269,7 +304,7 @@ public abstract class Pipeline {
 
     public DataResults toList(DataSet dataSet, EIConnection conn) {
         for (IComponent component : components) {
-            //System.out.println(component.getClass() + " - " + dataSet.getRows().size());
+            //System.out.println(component.getClass() + " - " + dataSet.getRows());
             /*if (pipelineData.getReport().isLogReport()) {
                 logger.append("<h1>" + component.getClass().getName() + "</h1>");
                 logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, conn, pipelineData.getInsightRequestMetadata()));

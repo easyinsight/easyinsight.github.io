@@ -6,7 +6,6 @@ import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.security.SecurityUtil;
 
 import java.text.DateFormat;
@@ -15,7 +14,6 @@ import java.util.*;
 
 import nu.xom.Attribute;
 import nu.xom.Element;
-import nu.xom.Node;
 import nu.xom.Nodes;
 import org.hibernate.Session;
 import org.hibernate.annotations.MapKey;
@@ -425,7 +423,7 @@ public class AnalysisDefinition implements Cloneable {
 
         Collection<AnalysisItem> reportItems = getReportStructure().values();
 
-        AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure();
+        AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
         structure.setBaseReport(this);
 
         if (getAddedItems() != null) {
@@ -433,7 +431,7 @@ public class AnalysisDefinition implements Cloneable {
             for (AnalysisItem analysisItem : getAddedItems()) {
                 AnalysisItem clonedItem = replacementMap.addField(analysisItem, changingDataSource);
                 addedItems.add(clonedItem);
-                List<AnalysisItem> items = analysisItem.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), structure);
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allFields, reportItems, true, true, new HashSet<AnalysisItem>(), structure);
                 for (AnalysisItem item : items) {
                     replacementMap.addField(item, changingDataSource);
                 }
@@ -447,7 +445,7 @@ public class AnalysisDefinition implements Cloneable {
         reportItems.remove(null);
         for (AnalysisItem baseItem : reportItems) {
             replacementMap.addField(baseItem, changingDataSource);
-            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), structure);
+            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true, new HashSet<AnalysisItem>(), structure);
             for (AnalysisItem item : items) {
                 replacementMap.addField(item, changingDataSource);
             }
@@ -456,7 +454,7 @@ public class AnalysisDefinition implements Cloneable {
         if (this.filterDefinitions != null) {
             for (FilterDefinition persistableFilterDefinition : this.filterDefinitions) {
                 filterDefinitions.add(persistableFilterDefinition.clone());
-                List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS, new HashSet<AnalysisItem>(), structure);
+                List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, reportItems, true, true, new HashSet<AnalysisItem>(), structure);
                 for (AnalysisItem item : filterItems) {
                     replacementMap.addField(item, changingDataSource);
                 }

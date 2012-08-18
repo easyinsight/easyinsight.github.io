@@ -106,7 +106,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
     }
 
     @Override
-    public String toHTML(String targetDiv) {
+    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         String color;
         if (useChartColor) {
             color = String.format("#%06X", (0xFFFFFF & chartColor));
@@ -147,7 +147,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         argh = argh.replaceAll("\"", "");
 
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-
-        return "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + "))";
+        int customHeight = htmlReportMetadata.getCustomHeight();
+        return "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ","+customHeight+"))";
     }
 }

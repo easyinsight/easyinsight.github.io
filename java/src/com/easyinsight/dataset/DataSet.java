@@ -3,6 +3,7 @@ package com.easyinsight.dataset;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.core.*;
+import com.easyinsight.pipeline.AggregationComponent;
 import com.easyinsight.storage.IWhere;
 
 import java.util.*;
@@ -98,7 +99,7 @@ public class DataSet implements Serializable {
         return 0;
     }
 
-    public ListTransform listTransform(List<AnalysisItem> columns, Set<Integer> skipAggregations, Map<Long, AnalysisItem> uniqueItems, Map<String, AnalysisItem> fieldToUniques) {
+    public ListTransform listTransform(List<AnalysisItem> columns, Set<Integer> skipAggregations, Map<Long, AnalysisItem> uniqueItems, Map<String, Long> fieldToUniques, int tier) {
         ListTransform listTransform = new ListTransform(skipAggregations);
         Collection<AnalysisDimension> ourDimensions = new ArrayList<AnalysisDimension>();
         Collection<AnalysisDimension> ungroupedDimensions = new ArrayList<AnalysisDimension>();
@@ -121,9 +122,10 @@ public class DataSet implements Serializable {
                         AnalysisItem dim = uniqueItems.get(id);
                         keyMapping.put(column, dim);
                     } else {
-                        if (fieldToUniques != null) {
-                            AnalysisItem dim = fieldToUniques.get(column.toDisplay());
-                            if (dim != null) {
+                        if (tier == AggregationComponent.FINAL && fieldToUniques != null) {
+                            Long idObj = fieldToUniques.get(column.toDisplay());
+                            if (idObj != null) {
+                                AnalysisItem dim = uniqueItems.get(idObj);
                                 keyMapping.put(column, dim);
                             }
                         }

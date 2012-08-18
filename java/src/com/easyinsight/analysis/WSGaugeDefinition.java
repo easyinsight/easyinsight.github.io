@@ -191,7 +191,7 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
     }
 
     @Override
-    public String toHTML(String targetDiv) {
+    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         StringBuilder sb = new StringBuilder();
         String gaugePropertiesString;
         try {

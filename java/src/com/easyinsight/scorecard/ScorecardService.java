@@ -1,6 +1,7 @@
 package com.easyinsight.scorecard;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -37,6 +38,17 @@ public class ScorecardService {
             LogClass.error(e);
         }
         return null;
+    }
+    
+    public InsightDescriptor generateTrendGridReport(long scorecardID) {
+        SecurityUtil.authorizeScorecard(scorecardID);
+        try {
+            Scorecard scorecard = new ScorecardStorage().getScorecard(scorecardID);
+            return scorecard.createTrendGridReport();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     public long canAccessScorecard(String urlKey) {

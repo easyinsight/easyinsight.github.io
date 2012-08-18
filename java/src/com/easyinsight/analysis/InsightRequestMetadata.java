@@ -1,9 +1,9 @@
 package com.easyinsight.analysis;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.List;
+import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.pipeline.Pipeline;
+
+import java.util.*;
 import java.io.Serializable;
 
 /**
@@ -25,6 +25,30 @@ public class InsightRequestMetadata implements Serializable {
     private boolean traverseAllJoins;
     private Collection<AnalysisItem> reportItems;
     private boolean lookupTableAggregate;
+    private transient Map<Long, AnalysisItem> uniqueIteMap = new HashMap<Long, AnalysisItem>();
+    private transient Map<String, Long> fieldToUniqueMap = new HashMap<String, Long>();
+
+    private transient List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+
+    public List<IntentionSuggestion> getSuggestions() {
+        return suggestions;
+    }
+
+    public Map<Long, AnalysisItem> getUniqueIteMap() {
+        return uniqueIteMap;
+    }
+
+    public void setUniqueIteMap(Map<Long, AnalysisItem> uniqueIteMap) {
+        this.uniqueIteMap = uniqueIteMap;
+    }
+
+    public Map<String, Long> getFieldToUniqueMap() {
+        return fieldToUniqueMap;
+    }
+
+    public void setFieldToUniqueMap(Map<String, Long> fieldToUniqueMap) {
+        this.fieldToUniqueMap = fieldToUniqueMap;
+    }
 
     public boolean isLookupTableAggregate() {
         return lookupTableAggregate;
@@ -128,5 +152,45 @@ public class InsightRequestMetadata implements Serializable {
 
     public void setNow(Date now) {
         this.now = now;
+    }
+
+    private Map<String, Pipeline> pipelineMap = new HashMap<String, Pipeline>();
+
+    private Map<String, List<AnalysisItem>> pipelineFieldMap = new HashMap<String, List<AnalysisItem>>();
+
+    public Pipeline findPipeline(String name) {
+        return pipelineMap.get(name);
+    }
+
+    public void putPipeline(String name, Pipeline pipeline) {
+        pipelineMap.put(name, pipeline);
+    }
+
+    private Map<String, String> pipelineAssignments = new HashMap<String, String>();
+
+    public void assignFieldToPipeline(String field, String pipelineName) {
+        pipelineAssignments.put(field, pipelineName);
+    }
+
+    public String getPipelineNameForField(String field) {
+        return pipelineAssignments.get(field);
+    }
+
+    public List<AnalysisItem> getFieldsForPipeline(String name) {
+        return pipelineFieldMap.get(name);
+    }
+
+    public void pipelineAssign(AnalysisItem analysisItem) {
+        String name = getPipelineNameForField(analysisItem.toDisplay());
+        if (name != null) {
+            analysisItem.setPipelineName(name);
+            List<AnalysisItem> fields = pipelineFieldMap.get(name);
+            if (fields == null) {
+                fields = new ArrayList<AnalysisItem>();
+                pipelineFieldMap.put(name, fields);
+            }
+            analysisItem.getPipelineSections().add(name);
+            fields.add(analysisItem);
+        }
     }
 }

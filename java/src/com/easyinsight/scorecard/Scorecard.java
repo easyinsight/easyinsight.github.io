@@ -1,10 +1,17 @@
 package com.easyinsight.scorecard;
 
-import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.*;
+import com.easyinsight.analysis.definitions.WSKPIDefinition;
+import com.easyinsight.analysis.definitions.WSTrendGridDefinition;
+import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.kpi.KPI;
+import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.Roles;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,6 +43,40 @@ public class Scorecard implements Cloneable {
         }
         scorecard.setKpis(clonedKPIs);
         return scorecard;
+    }
+
+    public InsightDescriptor createTrendGridReport() {
+        try {
+            WSTrendGridDefinition trendGridDefinition = new WSTrendGridDefinition();
+            trendGridDefinition.setReportType(WSAnalysisDefinition.TREND_GRID);
+            createTrendReport(trendGridDefinition);
+            WSAnalysisDefinition savedReport = new AnalysisService().saveAnalysisDefinition(trendGridDefinition);
+            return new InsightDescriptor(savedReport.getAnalysisID(), savedReport.getName(), savedReport.getDataFeedID(),
+                    savedReport.getReportType(), savedReport.getUrlKey(), Roles.OWNER, savedReport.isAccountVisible());
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private void createTrendReport(WSKPIDefinition kpiDefinition) throws CloneNotSupportedException {
+        kpiDefinition.setDayWindow(7);
+        List<AnalysisItem> measures = new ArrayList<AnalysisItem>();
+        for (KPI kpi : kpis) {
+            measures.add(kpi.createMeasure());
+        }
+        kpiDefinition.setMeasures(measures);
+        kpiDefinition.setFilterName("Date");
+        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
+        AnalysisDateDimension proxyItem = new AnalysisDateDimension(new NamedKey("Date"), true, AnalysisDateDimension.DAY_LEVEL);
+        rollingFilterDefinition.setField(proxyItem);
+        rollingFilterDefinition.setTrendFilter(true);
+        rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.WEEK);
+        rollingFilterDefinition.setIntrinsic(true);
+        kpiDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) rollingFilterDefinition));
+        kpiDefinition.setName(name);
+        kpiDefinition.setAccountVisible(accountVisible);
+        kpiDefinition.setDataFeedID(dataSourceID);
     }
 
     public int getFolder() {

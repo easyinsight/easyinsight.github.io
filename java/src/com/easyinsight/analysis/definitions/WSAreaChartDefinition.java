@@ -61,7 +61,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
     }
 
     @Override
-    public String toHTML(String targetDiv) {
+    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
         JSONObject params;
         try {
@@ -119,7 +119,8 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
         /*argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {afterRefresh();\n" +
                 "                var s1 = data[\"values\"];\n" +
                 "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");\n})";*/
-        argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true))";
+        int customHeight = htmlReportMetadata.getCustomHeight();
+        argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true, " + customHeight + "))";
         System.out.println(argh);
         return argh;
     }

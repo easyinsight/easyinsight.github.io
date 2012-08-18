@@ -6,14 +6,11 @@ import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.pipeline.CleanupComponent;
+import com.easyinsight.pipeline.Pipeline;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.*;
 
 /**
@@ -30,6 +27,24 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
 
     @Column(name="apply_before_aggregation")
     private boolean applyBeforeAggregation;
+
+    @Transient
+    transient private String pipelineName;
+
+    public String getPipelineName() {
+        if (pipelineName == null) {
+            if (applyBeforeAggregation) {
+                pipelineName = Pipeline.BEFORE;
+            } else {
+                pipelineName = Pipeline.AFTER;
+            }
+        }
+        return pipelineName;
+    }
+
+    public void setPipelineName(String pipelineName) {
+        this.pipelineName = pipelineName;
+    }
 
     public boolean isApplyBeforeAggregation() {
         return applyBeforeAggregation;
@@ -52,7 +67,7 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         return false;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
         CalculationsParser.startExpr_return ret;
@@ -110,13 +125,11 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
 
         Set<KeySpecification> specs = variableVisitor.getVariableList();
 
-        List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
+        List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
 
-        analysisItemList.add(this);
-
-        if (!includeFilters && isApplyBeforeAggregation()) return analysisItemList;
-
-        if (!isApplyBeforeAggregation() && !hasCriteria(criteria, CleanupComponent.AGGREGATE_CALCULATIONS)) return analysisItemList;
+        if (!structure.onOrAfter(getPipelineName())) {
+            return analysisItemList;
+        }
 
         for (KeySpecification spec : specs) {
             AnalysisItem analysisItem;
@@ -126,7 +139,7 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure));
+                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
             }
         }
 

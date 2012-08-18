@@ -1,5 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
+import com.easyinsight.analysis.HTMLReportMetadata;
 import com.easyinsight.analysis.WSChartDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.ChartDefinitionState;
@@ -95,7 +96,7 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
     }
 
     @Override
-    public String toHTML(String targetDiv) {
+    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
         JSONObject params;
         try {
@@ -119,7 +120,8 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        argh = "$.getJSON('/app/bubbleChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('"+ targetDiv + "', " + argh + "))";
+        int customHeight = htmlReportMetadata.getCustomHeight();
+        argh = "$.getJSON('/app/bubbleChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('"+ targetDiv + "', " + argh + ","+customHeight+"))";
         System.out.println(argh);
         return argh;
     }

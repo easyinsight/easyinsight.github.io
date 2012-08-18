@@ -33,6 +33,9 @@ public class AnalysisDateDimension extends AnalysisDimension {
     @Column(name="output_date_format")
     private String outputDateFormat;
 
+    @Column(name="date_time_field")
+    private boolean dateOnlyField = false;
+
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
         Element element = super.toXML(xmlMetadata);
@@ -64,6 +67,14 @@ public class AnalysisDateDimension extends AnalysisDimension {
     public AnalysisDateDimension(Key key, boolean group, int dateLevel) {
         super(key, group);
         this.dateLevel = dateLevel;
+    }
+
+    public boolean isDateOnlyField() {
+        return dateOnlyField;
+    }
+
+    public void setDateOnlyField(boolean dateTimeField) {
+        this.dateOnlyField = dateTimeField;
     }
 
     @Override
@@ -99,7 +110,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
     }
 
     public boolean isTimeshift() {
-        return timeshift;
+        return dateOnlyField && timeshift;
     }
 
     public void setTimeshift(boolean timeshift) {
@@ -255,9 +266,13 @@ public class AnalysisDateDimension extends AnalysisDimension {
 
                 finalDate = calendar.getTime();
                 if (outputDateFormat != null && outputDateFormat.length() > 0) {
-                    resultValue = new StringValue(new SimpleDateFormat(outputDateFormat).format(calendar.getTime()), new DateValue(finalDate));
+                    try {
+                        resultValue = new StringValue(new SimpleDateFormat(outputDateFormat).format(calendar.getTime()), new DateValue(finalDate), new NumericValue(finalDate.getTime()));
+                    } catch (IllegalArgumentException e) {
+                        throw new ReportException(new AnalysisItemFault(e.getMessage() + " output format of " + outputDateFormat + " on " + toDisplay() + ".", this));
+                    }
                 } else {
-                    resultValue = new DateValue(finalDate);
+                    resultValue = new DateValue(finalDate, new NumericValue(finalDate.getTime()));
                 }
             } else {
                 switch (dateLevel) {

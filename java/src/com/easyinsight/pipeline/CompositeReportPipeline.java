@@ -14,7 +14,7 @@ public class CompositeReportPipeline extends Pipeline {
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems, InsightRequestMetadata insightRequestMetadata) {
         List<IComponent> components = new ArrayList<IComponent>();
         components.add(new NormalizationComponent());
-        components.add(new AggregationComponent());
+        components.add(new AggregationComponent(AggregationComponent.OTHER));
 
         return components;
     }

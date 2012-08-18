@@ -4,7 +4,6 @@ import com.easyinsight.analysis.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
 
 import java.util.*;
 
@@ -109,7 +108,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
     }
 
     @Override
-    public String toHTML(String targetDiv) {
+    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         String color;
         if (useChartColor) {
             color = String.format("#%06X", (0xFFFFFF & chartColor));
@@ -147,8 +146,24 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getColumnChartCallback('"+ targetDiv + "', " + argh + "))";
+        /*AnalysisItem xAxis = getXaxis();
+        DrillThrough drillThrough = null;
+        if (xAxis.getLinks() != null) {
+            for (Link link : xAxis.getLinks()) {
+                if (link instanceof DrillThrough && link.isDefaultLink()) {
+                    drillThrough = (DrillThrough) link;
+                }
+            }
+        }
 
+        String drillString = "";
+        if (drillThrough != null) {
+            StringBuilder paramBuilder = new StringBuilder();
+            paramBuilder.append("reportID=").append(getUrlKey()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(xAxis.getAnalysisItemID());
+            drillString = paramBuilder.toString();
+        }*/
+        int customHeight = htmlReportMetadata.getCustomHeight();
+        String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getColumnChartCallback('"+ targetDiv + "', " + argh + ","+customHeight+"))";
         return xyz;
     }
 }

@@ -66,7 +66,8 @@ public class CacheDataTransform implements IDataTransform {
             items.add(analysisItem);
         }
 
-        List<AnalysisItem> items = ReportCalculation.getAnalysisItems(calculation.getCalculationString(), allItems, keyMap, displayMap, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+        List<AnalysisItem> items = ReportCalculation.getAnalysisItems(calculation.getCalculationString(), allItems, keyMap, displayMap, new ArrayList<AnalysisItem>(),
+                true, true, new AnalysisItemRetrievalStructure(null));
         DataSet dataSet = new DataSet();
         IRow newRow = dataSet.createRow();
         Set<AnalysisItem> needToRetrieve = new HashSet<AnalysisItem>();

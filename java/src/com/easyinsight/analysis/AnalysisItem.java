@@ -107,6 +107,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Transient
     private transient String folder;
 
+    @Transient
+    private transient Set<String> pipelineSections;
+
     public AnalysisItem() {
     }
 
@@ -125,6 +128,17 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem getSortItem() {
         return sortItem;
+    }
+
+    public Set<String> getPipelineSections() {
+        if (pipelineSections == null) {
+            pipelineSections = new HashSet<String>();
+        }
+        return pipelineSections;
+    }
+
+    public void setPipelineSections(Set<String> pipelineSections) {
+        this.pipelineSections = pipelineSections;
     }
 
     public boolean isLabelColumn() {
@@ -157,6 +171,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public ReportFieldExtension getReportFieldExtension() {
         return reportFieldExtension;
+    }
+
+    public void setPipelineName(String pipelineName) {
+
     }
 
     public void setReportFieldExtension(ReportFieldExtension reportFieldExtension) {
@@ -445,11 +463,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return null;
     }
     
-    protected List<AnalysisItem> measureFilters(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
+    protected List<AnalysisItem> measureFilters(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         if (includeFilters && getFilters().size() > 0) {
             for (FilterDefinition filterDefinition : getFilters()) {
-                items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure));
+                items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
             }
         }
         return items;
@@ -468,13 +486,15 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
 
-        if (getSortItem() != null && analysisItemSet.contains(this)) {
+        if (analysisItemSet.contains(this)) {
             return new ArrayList<AnalysisItem>(analysisItemSet);
         }
+        List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
+        analysisItemList.add(this);
         analysisItemSet.add(this);
-        analysisItemSet.addAll(measureFilters(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure));
+        analysisItemList.addAll(measureFilters(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
         
         if (getLookupTableID() != null && getLookupTableID() > 0 && includeFilters) {
             LookupTable lookupTable = new FeedService().getLookupTable(getLookupTableID());
@@ -511,17 +531,17 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                 }
                 AnalysisItem analysisItem = findMatch(lookupTable.getSourceField(), displayMap, keyMap);
                 if (analysisItem != null && !analysisItemSet.contains(analysisItem)) {
-                    analysisItemSet.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure));
+                    analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
                 }
             }
         }
         if (reportFieldExtension != null) {
-            analysisItemSet.addAll(reportFieldExtension.getAnalysisItems(getEverything));
+            analysisItemList.addAll(reportFieldExtension.getAnalysisItems(getEverything));
         }
         /*if (sortItem != null) {
             analysisItemSet.addAll(sortItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet));
         }*/
-        return new ArrayList<AnalysisItem>(analysisItemSet);
+        return analysisItemList;
     }
 
     public List<AnalysisItem> addLinkItems(List<AnalysisItem> allItems) {
@@ -704,10 +724,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (reportFieldExtension != null) {
             root.appendChild(reportFieldExtension.toXML(xmlMetadata));
         }
-
-        // Marie Fox, Music something, 720-287-1205
-        // Jason Elder, Active Network, 901-869-5013
-
 
         return root;
     }

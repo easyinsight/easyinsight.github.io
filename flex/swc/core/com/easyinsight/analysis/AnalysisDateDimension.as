@@ -1,6 +1,7 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.analysis.formatter.DimensionValueFormatter;
+import com.easyinsight.analysis.formatter.EIDateFormatter;
 import com.easyinsight.analysis.formatter.QuarterFormatter;
 import com.easyinsight.framework.User;
 
@@ -15,6 +16,7 @@ import mx.formatters.NumberFormatter;
 		public var dateLevel:int;
 		public var customDateFormat:String;
         public var outputDateFormat:String;
+        public var dateOnlyField:Boolean;
 		
 		public function AnalysisDateDimension(dateLevel:int = AnalysisItemTypes.DAY_LEVEL, 
 			customDateFormat:String = "yyyy-MM-dd") {				
@@ -40,7 +42,7 @@ import mx.formatters.NumberFormatter;
             }
             var formatter:Formatter;
             if (outputDateFormat != null && outputDateFormat != "") {
-                var outputFormatter:DateFormatter = new DateFormatter();
+                var outputFormatter:EIDateFormatter = new EIDateFormatter();
                 outputFormatter.formatString = outputDateFormat;
                 return outputFormatter;
             }

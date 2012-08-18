@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.ChartDefinitionState;
+import com.easyinsight.analysis.HTMLReportMetadata;
 import com.easyinsight.analysis.ReportProperty;
 import com.easyinsight.analysis.ReportStringProperty;
 import org.json.JSONArray;
@@ -61,7 +62,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
     }
 
     @Override
-    public String toHTML(String targetDiv) {
+    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
         JSONObject params;
         try {
@@ -84,8 +85,8 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-
-        String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getPieChartCallback('" + targetDiv + "', " + argh + "))";
+        int customHeight = htmlReportMetadata.getCustomHeight();
+        String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getPieChartCallback('" + targetDiv + "', " + argh + ","+customHeight+"))";
         return xyz;
     }
 }

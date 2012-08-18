@@ -72,6 +72,17 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name="trend_filter")
     private boolean trendFilter;
 
+    @Transient
+    transient private String pipelineName;
+
+    public String getPipelineName() {
+        return pipelineName;
+    }
+
+    public void setPipelineName(String pipelineName) {
+        this.pipelineName = pipelineName;
+    }
+
     public FilterDefinition() {
     }
 
@@ -183,8 +194,8 @@ public class FilterDefinition implements Serializable, Cloneable {
         this.applyBeforeAggregation = applyBeforeAggregation;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
-        return getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet, structure);
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
+        return getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
@@ -305,7 +316,7 @@ public class FilterDefinition implements Serializable, Cloneable {
         if (getField() != null) {
             if (getField().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension dateDim = (AnalysisDateDimension) getField();
-                boolean dateTime = dataSource.getDataSource().checkDateTime(getField().toOriginalDisplayName(), getField().getKey());
+                boolean dateTime = !dateDim.isDateOnlyField() && dataSource.getDataSource().checkDateTime(getField().toOriginalDisplayName(), getField().getKey());
                 dateDim.setTimeshift(dateTime);
             }
         }
