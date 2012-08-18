@@ -100,12 +100,13 @@ public class AnalysisService {
                 List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
                 for (CompositeFeedNode child : compositeFeedDefinition.getCompositeFeedNodes()) {
                     FeedDefinition childDataSource = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
-                    dataSources.add(new DataSourceDescriptor(childDataSource.getFeedName(), childDataSource.getDataFeedID(), childDataSource.getFeedType().getType(), false));
+                    dataSources.add(new DataSourceDescriptor(childDataSource.getFeedName(), childDataSource.getDataFeedID(), childDataSource.getFeedType().getType(), false,
+                            childDataSource.getDataSourceBehavior()));
                 }
                 dataSourceMap.put(String.valueOf(dataSourceID), dataSources);
                 map.put(String.valueOf(dataSourceID), joinOverrides);
                 configurableDataSources.add(new DataSourceDescriptor(dataSource.getFeedName(), dataSource.getDataFeedID(),
-                        dataSource.getFeedType().getType(), false));
+                        dataSource.getFeedType().getType(), false, dataSource.getDataSourceBehavior()));
                 reportJoins.setJoinOverrideMap(map);
                 reportJoins.setDataSourceMap(dataSourceMap);
                 reportJoins.setConfigurableDataSources(configurableDataSources);
@@ -124,7 +125,7 @@ public class AnalysisService {
         List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
 
         configurableDataSources.add(new DataSourceDescriptor(compositeFeedDefinition.getFeedName(), compositeFeedDefinition.getDataFeedID(), compositeFeedDefinition.getFeedType().getType(),
-                false));
+                false, compositeFeedDefinition.getDataSourceBehavior()));
         for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
             JoinOverride joinOverride = new JoinOverride();
             FeedDefinition source = new FeedStorage().getFeedDefinitionData(connection.getSourceFeedID());
@@ -142,7 +143,8 @@ public class AnalysisService {
         List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
         for (CompositeFeedNode child : compositeFeedDefinition.getCompositeFeedNodes()) {
             FeedDefinition childDataSource = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
-            dataSources.add(new DataSourceDescriptor(childDataSource.getFeedName(), childDataSource.getDataFeedID(), childDataSource.getFeedType().getType(), false));
+            dataSources.add(new DataSourceDescriptor(childDataSource.getFeedName(), childDataSource.getDataFeedID(), childDataSource.getFeedType().getType(), false,
+                    childDataSource.getDataSourceBehavior()));
             if (childDataSource instanceof CompositeFeedDefinition) {
                 populateMap(map, dataSourceMap, configurableDataSources, (CompositeFeedDefinition) childDataSource, null, conn);
             }
