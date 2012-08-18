@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" borderThickness="1" borderStyle="solid" borderColor="0x000000"
+           cornerRadius="15" dropShadowEnabled="true" addedToStage="setupListeners()" backgroundColor="0xFFFFFF">
+    <mx:states>
+        <mx:State name="Failure">
+            <mx:RemoveChild target="{progressBox}"/>
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:VBox horizontalAlign="center">
+                    <mx:Label fontWeight="bold"
+                                 text="Sorry, but we encountered the following error in trying to complete the operation:" fontSize="14" fontFamily="Tahoma"/>
+                    <mx:TextArea borderStyle="none" backgroundAlpha="0" text="{errorText}" width="400" height="200"/>
+                    <mx:Button label="Cancel" click="cancel()"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import mx.events.CloseEvent;
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+        import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncToken;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+
+        private function onKey(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ESCAPE) {
+                cancel();
+            }
+        }
+
+        private function setupListeners():void {
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
+        }
+
+        private var _progressText:String;
+        [Bindable]
+        private var errorText:String;
+
+        private var token:AsyncToken;
+
+        private var failed:Boolean;
+
+        private function cancel():void {
+            if (stage != null) {
+                stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+            }
+            PopUpManager.removePopUp(this);
+        }
+
+        private function complete():void {
+            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+            PopUpManager.removePopUp(this);
+            dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+        }
+
+        public static function alert(parent:DisplayObject, progressText:String, token:AsyncToken):AsyncResponderAlert {
+            var alert:AsyncResponderAlert = new AsyncResponderAlert();
+            alert.token = token;
+            alert.progressText = progressText;
+            alert.setup();
+            PopUpManager.addPopUp(alert, parent, true);
+            PopUpUtil.centerPopUp(alert);
+            return alert;
+        }
+
+        private function setup():void {
+            token.addResponder(new AsyncResponder(onResult, onFault));
+        }
+
+        private function onResult(event:ResultEvent, token:Object = null):void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onFault(event:FaultEvent, token:Object = null):void {
+        }
+
+        [Bindable]
+        public function get progressText():String {
+            return _progressText;
+        }
+
+        public function set progressText(val:String):void {
+            _progressText = val;
+            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+        }
+        ]]></mx:Script>
+    <mx:VBox id="coreBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle"
+             paddingBottom="20" paddingLeft="20" paddingRight="20" paddingTop="20">
+        <mx:VBox id="progressBox" horizontalAlign="center">
+            <mx:Label text="{progressText}" fontWeight="bold" fontSize="14" fontFamily="Tahoma"/>
+            <mx:ProgressBar indeterminate="true"/>
+            <mx:Button label="Cancel" click="cancel()"/>
+        </mx:VBox>
+    </mx:VBox>
+</mx:Canvas>
