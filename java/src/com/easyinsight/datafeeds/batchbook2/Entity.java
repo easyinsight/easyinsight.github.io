@@ -16,8 +16,10 @@ public class Entity {
     private List<Stuff> websites;
     private List<String> tags;
     private List<Address> addresses;
+    private List<CustomFieldValue> customFieldValues;
 
-    public Entity(String about, String id, List<Stuff> emails, List<Stuff> phones, List<Stuff> websites, List<Address> addresses, List<String> tags) {
+    public Entity(String about, String id, List<Stuff> emails, List<Stuff> phones, List<Stuff> websites, List<Address> addresses,
+                  List<String> tags, List<CustomFieldValue> customFieldValues) {
         this.about = about;
         this.id = id;
         this.emails = emails;
@@ -25,6 +27,11 @@ public class Entity {
         this.websites = websites;
         this.addresses = addresses;
         this.tags = tags;
+        this.customFieldValues = customFieldValues;
+    }
+
+    public List<CustomFieldValue> getCustomFieldValues() {
+        return customFieldValues;
     }
 
     public String getAbout() {

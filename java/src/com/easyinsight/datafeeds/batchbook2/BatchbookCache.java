@@ -26,6 +26,7 @@ public class BatchbookCache extends Batchbook2BaseSource {
     }
 
     public void populate(HttpClient client, Batchbook2CompositeSource parentDefinition) throws Exception {
+
         List people = (List) runRestRequest("/people.json", client, parentDefinition).get("people");
         List<Person> peopleList = new ArrayList<Person>();
         for (Object personObject : people) {
@@ -81,18 +82,41 @@ public class BatchbookCache extends Batchbook2BaseSource {
                 tagList.add((String) tag.get("name"));
             }
 
+            List<CustomFieldValue> customFieldValues = new ArrayList<CustomFieldValue>();
+            List customFieldSets = (List) person.get("cf_records");
+            for (Object customFieldObject : customFieldSets) {
+                Map customField = (Map) customFieldObject;
+                String customFieldSetID = customField.get("custom_field_set_id").toString();
+                CustomFieldValue customFieldValue = new CustomFieldValue(customFieldSetID);
+                customFieldValues.add(customFieldValue);
+                List customFieldSetValues = (List) customField.get("custom_field_values");
+                for (Object customFieldValueObject : customFieldSetValues) {
+                    Map customFieldValueMap = (Map) customFieldValueObject;
+                    String customFieldID = customFieldValueMap.get("custom_field_definition_id").toString();
+                    Object value = customFieldValueMap.get("text_value");
+                    if (value == null) {
+                        value = customFieldValueMap.get("decimal_value");
+                    }
+                    if (value == null) {
+                        System.out.println("No value found!");
+                    } else {
+                        customFieldValue.addValue(customFieldID, value.toString());
+                    }
+                }
+            }
+
             List<Stuff> companyStuff = new ArrayList<Stuff>();
             List companies = (List) person.get("company_affiliations");
 
             for (Object companyObject : companies) {
                 Map company = (Map) companyObject;
                 Stuff stuff = new Stuff();
-                stuff.setPart1((String) company.get("company-id"));
+                stuff.setPart1(company.get("company_id").toString());
                 stuff.setPart2((company.get("current")).toString());
-                stuff.setPart3((String) company.get("job-title"));
+                stuff.setPart3((String) company.get("job_title"));
                 companyStuff.add(stuff);
             }
-            peopleList.add(new Person(about, id, emailStuff, phoneStuff, websiteStuff, addressList, tagList, firstName, lastName, companyStuff));
+            peopleList.add(new Person(about, id, emailStuff, phoneStuff, websiteStuff, addressList, tagList, firstName, lastName, companyStuff, customFieldValues));
         }
         this.people = peopleList;
 
@@ -150,8 +174,30 @@ public class BatchbookCache extends Batchbook2BaseSource {
                 tagList.add((String) tag.get("name"));
             }
 
+            List<CustomFieldValue> customFieldValues = new ArrayList<CustomFieldValue>();
+            List customFieldSets = (List) person.get("cf_records");
+            for (Object customFieldObject : customFieldSets) {
+                Map customField = (Map) customFieldObject;
+                String customFieldSetID = customField.get("custom_field_set_id").toString();
+                CustomFieldValue customFieldValue = new CustomFieldValue(customFieldSetID);
+                customFieldValues.add(customFieldValue);
+                List customFieldSetValues = (List) customField.get("custom_field_values");
+                for (Object customFieldValueObject : customFieldSetValues) {
+                    Map customFieldValueMap = (Map) customFieldValueObject;
+                    String customFieldID = customFieldValueMap.get("custom_field_definition_id").toString();
+                    Object value = customFieldValueMap.get("text_value");
+                    if (value == null) {
+                        value = customFieldValueMap.get("decimal_value");
+                    }
+                    if (value == null) {
+                        System.out.println("No value found!");
+                    } else {
+                        customFieldValue.addValue(customFieldID, value.toString());
+                    }
+                }
+            }
 
-            companyList.add(new Company(about, id, emailStuff, phoneStuff, websiteStuff, addressList, tagList, name));
+            companyList.add(new Company(about, id, emailStuff, phoneStuff, websiteStuff, addressList, tagList, name, customFieldValues));
         }
         this.companies = companyList;
     }

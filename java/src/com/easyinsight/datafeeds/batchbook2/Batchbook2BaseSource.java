@@ -2,17 +2,12 @@ package com.easyinsight.datafeeds.batchbook2;
 
 import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
-import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import net.minidev.json.parser.JSONParser;
 import nu.xom.*;
-import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.json.JSONObject;
 
 import java.util.Map;
 
@@ -38,7 +33,7 @@ public abstract class Batchbook2BaseSource extends ServerDataSourceDefinition {
             return null;
     }
 
-    protected static Map runRestRequest(String path, HttpClient client, Batchbook2CompositeSource parentDefinition) throws ParsingException, ReportException {
+    protected static Map runRestRequest(String path, HttpClient client, Batchbook2CompositeSource parentDefinition) throws ReportException {
         String url = parentDefinition.getUrl() + "/api/v1";
         String blah = url + path + (path.contains("?") ? "&" : "?") + "auth_token=" + parentDefinition.getToken();
         HttpMethod restMethod = new GetMethod(blah);

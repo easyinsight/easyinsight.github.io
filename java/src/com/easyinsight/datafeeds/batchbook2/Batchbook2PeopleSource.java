@@ -27,6 +27,7 @@ public class Batchbook2PeopleSource extends Batchbook2BaseSource {
     public static final String LAST_NAME = "Person Last Name";
     public static final String NAME = "Person Name";
     public static final String TAGS = "Person Tags";
+    public static final String COMPANY_ID = "Person Company ID";
     public static final String COUNT = "Person Count";
 
     public Batchbook2PeopleSource() {
@@ -36,7 +37,7 @@ public class Batchbook2PeopleSource extends Batchbook2BaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(ID, ABOUT, FIRST_NAME, LAST_NAME, NAME, COUNT, TAGS);
+        return Arrays.asList(ID, ABOUT, FIRST_NAME, LAST_NAME, NAME, COUNT, TAGS, COMPANY_ID);
     }
 
     @Override
@@ -45,6 +46,7 @@ public class Batchbook2PeopleSource extends Batchbook2BaseSource {
         fields.add(new AnalysisDimension(keys.get(ID)));
         fields.add(new AnalysisDimension(keys.get(ABOUT)));
         fields.add(new AnalysisDimension(keys.get(FIRST_NAME)));
+        fields.add(new AnalysisDimension(keys.get(COMPANY_ID)));
         fields.add(new AnalysisDimension(keys.get(LAST_NAME)));
         fields.add(new AnalysisDimension(keys.get(NAME)));
         fields.add(new AnalysisList(keys.get(TAGS), true, ","));
@@ -67,6 +69,11 @@ public class Batchbook2PeopleSource extends Batchbook2BaseSource {
             for (Person person : people) {
                 IRow row = dataSet.createRow();
                 row.addValue(keys.get(ID), person.getId());
+                for (Stuff stuff : person.getCompanies()) {
+                    if ("true".equals(stuff.getPart2())) {
+                        row.addValue(keys.get(COMPANY_ID), stuff.getPart1());
+                    }
+                }
                 row.addValue(keys.get(FIRST_NAME), person.getFirstName());
                 row.addValue(keys.get(LAST_NAME), person.getLastName());
                 row.addValue(keys.get(ABOUT), person.getAbout());

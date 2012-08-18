@@ -77,24 +77,21 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     }
 
     protected List<IServerDataSourceDefinition> obtainChildDataSources(EIConnection conn) throws Exception {
-        List<IServerDataSourceDefinition> dataSources = new ArrayList<IServerDataSourceDefinition>();
+        List<IServerDataSourceDefinition> dataSources;
         Map<FeedType, IServerDataSourceDefinition> feedMap = new HashMap<FeedType, IServerDataSourceDefinition>();
-        List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
-        Set<FeedType> feedTypes = getFeedTypes();
-        FeedStorage feedStorage = new FeedStorage();
+        //List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
         boolean newSource = getCompositeFeedNodes().size() == 0;
         if (newSource) {
-            for (FeedType feedType : feedTypes) {
-                IServerDataSourceDefinition definition = createForFeedType(feedType);
-                newDefinition(definition, conn, "", getUploadPolicy());
-                dataSources.add(definition);
-                CompositeFeedNode node = new CompositeFeedNode();
+            dataSources = childDataSources(conn);
+            for (IServerDataSourceDefinition definition : dataSources) {
+                /*CompositeFeedNode node = new CompositeFeedNode();
                 node.setDataFeedID(definition.getDataFeedID());
-                node.setDataSourceType(feedType.getType());
+                node.setDataSourceType(definition.getFeedType().getType());*/
                 feedMap.put(definition.getFeedType(), definition);
-                nodes.add(node);
+                //nodes.add(node);
             }
-            setCompositeFeedNodes(nodes);
+
+            //setCompositeFeedNodes(nodes);
             List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
             for (ChildConnection childConnection : getChildConnections()) {
                 IServerDataSourceDefinition sourceDef = feedMap.get(childConnection.getSourceFeedType());
@@ -108,14 +105,40 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             setConnections(connections);
             populateFields(conn);
         } else {
-            for (CompositeFeedNode node : getCompositeFeedNodes()) {
-                FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
-                if (feedDefinition instanceof IServerDataSourceDefinition) {
-                    dataSources.add((IServerDataSourceDefinition) feedDefinition);
-                }
+            int nodeSize = getCompositeFeedNodes().size();
+            dataSources = childDataSources(conn);
+            int newNodeSize = getCompositeFeedNodes().size();
+            if (newNodeSize > nodeSize) {
+                populateFields(conn);
             }
         }
         sortSources(dataSources);
+        return dataSources;
+    }
+
+    protected List<IServerDataSourceDefinition> childDataSources(EIConnection conn) throws Exception {
+        FeedStorage feedStorage = new FeedStorage();
+        List<IServerDataSourceDefinition> dataSources = new ArrayList<IServerDataSourceDefinition>();
+        Set<FeedType> feedTypes = getFeedTypes();
+        Map<FeedType, FeedDefinition> feedTypeMap = new HashMap<FeedType, FeedDefinition>();
+        for (CompositeFeedNode node : getCompositeFeedNodes()) {
+            FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
+            feedTypeMap.put(feedDefinition.getFeedType(), feedDefinition);
+        }
+        for (FeedType feedType : feedTypes) {
+            FeedDefinition existing = feedTypeMap.get(feedType);
+            if (existing == null) {
+                IServerDataSourceDefinition definition = createForFeedType(feedType);
+                newDefinition(definition, conn, "", getUploadPolicy());
+                CompositeFeedNode node = new CompositeFeedNode();
+                node.setDataFeedID(definition.getDataFeedID());
+                node.setDataSourceType(feedType.getType());
+                getCompositeFeedNodes().add(node);
+                dataSources.add(definition);
+            } else if (existing instanceof IServerDataSourceDefinition) {
+                dataSources.add((IServerDataSourceDefinition) existing);
+            }
+        }
         return dataSources;
     }
 

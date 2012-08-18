@@ -51,52 +51,6 @@ public class BatchbookSuperTagRetrieval extends BatchbookBaseSource {
             }
             superTags.put(superTagName, fieldList);
         }
-        /*
-        <?xml version="1.0"?>
-<super_tags type="array">
-<super_tag>
-  <name>supertag1</name>
-  <fields>
-    <field type="Multiple choice" name="Argh">
-      <option>X</option>
-      <option>Y</option>
-      <option>Z</option>
-    </field>
-    <field type="Multiple choice" name="Argh2">
-      <option>A</option>
-      <option>B</option>
-    </field>
-  </fields>
-</super_tag>
-<super_tag>
-  <name>social media</name>
-  <fields>
-    <field type="RSS/Feed Reader">Flickr Username</field>
-    <field type="RSS/Feed Reader">Delicious Username</field>
-    <field type="RSS/Feed Reader">Personal Blog</field>
-    <field type="RSS/Feed Reader">Work Blog</field>
-    <field type="RSS/Feed Reader">Linkedin Url</field>
-    <field type="RSS/Feed Reader">Twitter Username</field>
-    <field type="RSS/Feed Reader">Facebook Username</field>
-    <field type="Multiple choice" name="Statuschoice">
-      <option>A</option>
-      <option>B</option>
-      <option>C</option>
-    </field>
-  </fields>
-</super_tag>
-<super_tag>
-  <name>tag 2</name>
-  <fields>
-    <field type="Multiple choice" name="Xyz">
-      <option>ABC</option>
-      <option>DEF</option>
-    </field>
-  </fields>
-</super_tag>
-</super_tags>
-
-         */
         return superTags;
     }
 }

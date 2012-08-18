@@ -12,8 +12,9 @@ public class Person extends Entity {
     private String lastName;
     private List<Stuff> companies;
 
-    public Person(String about, String id, List<Stuff> emails, List<Stuff> phones, List<Stuff> websites, List<Address> addresses, List<String> tags, String firstName, String lastName, List<Stuff> companies) {
-        super(about, id, emails, phones, websites, addresses, tags);
+    public Person(String about, String id, List<Stuff> emails, List<Stuff> phones, List<Stuff> websites, List<Address> addresses,
+                  List<String> tags, String firstName, String lastName, List<Stuff> companies, List<CustomFieldValue> customFieldValues) {
+        super(about, id, emails, phones, websites, addresses, tags, customFieldValues);
         this.firstName = firstName;
         this.lastName = lastName;
         this.companies = companies;

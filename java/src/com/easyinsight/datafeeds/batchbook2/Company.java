@@ -10,8 +10,9 @@ import java.util.List;
 public class Company extends Entity {
     private String name;
 
-    public Company(String about, String id, List<Stuff> emails, List<Stuff> phones, List<Stuff> websites, List<Address> addresses, List<String> tags, String name) {
-        super(about, id, emails, phones, websites, addresses, tags);
+    public Company(String about, String id, List<Stuff> emails, List<Stuff> phones, List<Stuff> websites, List<Address> addresses,
+                   List<String> tags, String name, List<CustomFieldValue> customFieldValues) {
+        super(about, id, emails, phones, websites, addresses, tags, customFieldValues);
         this.name = name;
     }
 

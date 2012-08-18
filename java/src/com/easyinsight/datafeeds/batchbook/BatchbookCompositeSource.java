@@ -258,11 +258,17 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    protected List<IServerDataSourceDefinition> obtainChildDataSources(EIConnection conn) throws Exception {
-        List<IServerDataSourceDefinition> defaultChildren = super.obtainChildDataSources(conn);
+    protected List<IServerDataSourceDefinition> childDataSources(EIConnection conn) throws Exception {
+        List<IServerDataSourceDefinition> defaultChildren = super.childDataSources(conn);
         Map<String, List<String>> superTags = new BatchbookSuperTagRetrieval().getSuperTags(this);
-        for (IServerDataSourceDefinition existing : defaultChildren) {
-            superTags.remove(existing.getFeedName());
+        for (CompositeFeedNode existing : getCompositeFeedNodes()) {
+            if (existing.getDataSourceType() == FeedType.BATCHBOOK_SUPER_TAG.getType()) {
+                FeedDefinition existingSource = new FeedStorage().getFeedDefinitionData(existing.getDataFeedID(), conn);
+                BatchbookSuperTagSource batchbook2CustomFieldSource = (BatchbookSuperTagSource) existingSource;
+                superTags.remove(batchbook2CustomFieldSource.getFeedName());
+                defaultChildren.add(batchbook2CustomFieldSource);
+                break;
+            }
         }
         for (String remainingTag : superTags.keySet()) {
             BatchbookSuperTagSource source = new BatchbookSuperTagSource();
@@ -270,6 +276,7 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
             newDefinition(source, conn, "", getUploadPolicy());
             CompositeFeedNode node = new CompositeFeedNode();
             node.setDataFeedID(source.getDataFeedID());
+            node.setDataSourceType(source.getFeedType().getType());
             getCompositeFeedNodes().add(node);
             defaultChildren.add(source);
         }
