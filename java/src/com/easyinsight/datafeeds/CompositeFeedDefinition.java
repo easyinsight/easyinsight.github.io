@@ -276,15 +276,9 @@ public class CompositeFeedDefinition extends FeedDefinition {
             for (AnalysisItem gatherItem : analysisItemVisitor.fields) {
                 fieldSet.add(gatherItem.toDisplay());
             }
-            Set<Long> childIDs = new HashSet<Long>();
-            for (CompositeFeedNode node : getCompositeFeedNodes()) {
-                childIDs.add(node.getDataFeedID());
-            }
             while (iter.hasNext()) {
                 AnalysisItem analysisItem = iter.next();
                 if (fieldSet.contains(analysisItem.toDisplay())) {
-                    iter.remove();
-                } else if (analysisItem.getKey() instanceof DerivedKey) {
                     iter.remove();
                 }
             }
@@ -308,7 +302,6 @@ public class CompositeFeedDefinition extends FeedDefinition {
             for (Map.Entry<Long, List<FeedNode>> entry : analysisItemVisitor.nodeMap.entrySet()) {
                 long dataSourceID = entry.getKey();
                 FeedFolder dataSourceFolder = folderMap.get(dataSourceID);
-                dataSourceFolder.getChildFolders().clear();
                 for (FeedNode feedNode : entry.getValue()) {
                     FeedFolder folder = createFeedFolder(feedNode);
                     dataSourceFolder.getChildFolders().add(folder);
