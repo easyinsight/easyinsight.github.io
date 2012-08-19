@@ -108,23 +108,32 @@ import mx.rpc.events.ResultEvent;
 
         private function processMetadata(metadata:AnalysisItemResultMetadata):void {
             var dateMetadata:AnalysisDateDimensionResultMetadata = metadata as AnalysisDateDimensionResultMetadata;
-			var lowDate:Date = dateMetadata.earliestDate;
-            if (lowDate == null) {
+            var lowDate:Date;
+            var highDate:Date;
+            if (dateMetadata == null) {
                 lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
-            }
-			var highDate:Date = dateMetadata.latestDate;
-            if (highDate == null) {
                 highDate = new Date();
+            } else {
+
+                lowDate = dateMetadata.earliestDate;
+                if (lowDate == null) {
+                    lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
+                }
+
+                highDate = dateMetadata.latestDate;
+                if (highDate == null) {
+                    highDate = new Date();
+                }
             }
 
-			if (_filterDefinition == null) {
-				_filterDefinition = new FlatDateFilterDefinition();
-				_filterDefinition.field = analysisItem;
+            if (_filterDefinition == null) {
+                _filterDefinition = new FlatDateFilterDefinition();
+                _filterDefinition.field = analysisItem;
                 if (analysisItem.hasType(AnalysisItemTypes.STEP)) {
                     _filterDefinition.applyBeforeAggregation = false;
                 }
-			} else {
-			}
+            } else {
+            }
 
             var latestYear:String = String(new Date().fullYear);
 
@@ -170,7 +179,7 @@ import mx.rpc.events.ResultEvent;
                 _loadingFromReport = false;
                 newFilter = false;
             } else {
-			    if (newFilter) {
+                if (newFilter) {
                     dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
                     newFilter = false;
                 } else {
