@@ -24,7 +24,7 @@ public class BracketValueFunction extends Function {
         if (startIndex == -1 || endIndex == -1) {
             return new EmptyValue();
         }
-        return new StringValue(string.substring(startIndex, endIndex));
+        return new StringValue(string.substring(startIndex + 1, endIndex));
     }
 
     public int getParameterCount() {
