@@ -18,6 +18,8 @@
 <%@ page import="com.easyinsight.analysis.FeedMetadata" %>
 <%@ page import="com.easyinsight.analysis.DataSourceInfo" %>
 <%@ page import="com.easyinsight.analysis.DataService" %>
+<%@ page import="com.easyinsight.analysis.ReportNotFoundException" %>
+<%@ page import="com.easyinsight.logging.LogClass" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -27,7 +29,7 @@
         String dashboardIDString = request.getParameter("dashboardID");
         long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
         if (dashboardID == 0) {
-            throw new com.easyinsight.security.SecurityException();
+            throw new ReportNotFoundException("Can't find the dashboard.");
         }
         Dashboard dashboard = new DashboardService().getDashboardView(dashboardID);
         DashboardUIProperties dashboardUIProperties = dashboard.findHeaderImage();
@@ -207,7 +209,6 @@
                 </div>
             </div>
 
-            <% if (!phone) { %>
             <div class="nav-collapse">
                 <ul class="nav">
                     <li><a href="/app/html">Data Sources</a></li>
@@ -215,7 +216,6 @@
                     <li class="active"><a href="#"><%= StringEscapeUtils.escapeHtml(dashboard.getName()) %></a></li>
                 </ul>
             </div>
-            <% } %>
         </div>
     </div>
 </div>
@@ -262,6 +262,9 @@
 </div>
 </body>
 <%
+    } catch(ReportNotFoundException e) {
+        LogClass.error(e);
+        response.sendError(404);
     } finally {
         SecurityUtil.clearThreadLocal();
     }
