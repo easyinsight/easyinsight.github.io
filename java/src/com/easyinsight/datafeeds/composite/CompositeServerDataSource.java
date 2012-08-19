@@ -125,9 +125,10 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
             feedTypeMap.put(feedDefinition.getFeedType(), feedDefinition);
         }
+        boolean newSource = getCompositeFeedNodes().size() == 0;
         for (FeedType feedType : feedTypes) {
             FeedDefinition existing = feedTypeMap.get(feedType);
-            if (existing == null) {
+            if (existing == null && newSource) {
                 IServerDataSourceDefinition definition = createForFeedType(feedType);
                 newDefinition(definition, conn, "", getUploadPolicy());
                 CompositeFeedNode node = new CompositeFeedNode();
