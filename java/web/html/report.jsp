@@ -10,6 +10,7 @@
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="com.easyinsight.preferences.ImageDescriptor" %>
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
+<%@ page import="com.easyinsight.logging.LogClass" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
