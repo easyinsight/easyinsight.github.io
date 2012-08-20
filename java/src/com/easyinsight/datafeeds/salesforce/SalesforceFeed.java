@@ -6,7 +6,9 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
 import java.io.ByteArrayInputStream;
+import java.net.URLEncoder;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import nu.xom.Builder;
@@ -44,14 +46,14 @@ public class SalesforceFeed extends Feed {
             throw new RuntimeException(e);
         }
         try {
-            return getDataSet(salesforceBaseDataSource, analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
+            return getDataSet(salesforceBaseDataSource, analysisItems, filters, insightRequestMetadata);
         } catch (ReportException re) {
             throw re;
         } catch (AuthFailed authFailed) {
             try {
                 salesforceBaseDataSource.refreshTokenInfo();
                 new FeedStorage().updateDataFeedConfiguration(salesforceBaseDataSource);
-                return getDataSet(salesforceBaseDataSource, analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
+                return getDataSet(salesforceBaseDataSource, analysisItems, filters, insightRequestMetadata);
             } catch (ReportException re) {
                 throw re;
             } catch (AuthFailed authFailed1) {
@@ -64,8 +66,7 @@ public class SalesforceFeed extends Feed {
         }
     }
 
-    private DataSet getDataSet(SalesforceBaseDataSource salesforceBaseDataSource, Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata,
-                               List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException, AuthFailed {
+    private DataSet getDataSet(SalesforceBaseDataSource salesforceBaseDataSource, Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata) throws ReportException, AuthFailed {
 
         try {
 
@@ -73,6 +74,9 @@ public class SalesforceFeed extends Feed {
             queryBuilder.append("SELECT+");
             Set<String> keys = new HashSet<String>();
             for (AnalysisItem analysisItem : analysisItems) {
+                if (analysisItem.isDerived()) {
+                    continue;
+                }
                 String keyString = analysisItem.getKey().toKeyString();
                 boolean alreadyThere = keys.add(keyString);
                 if (alreadyThere) {
@@ -83,6 +87,65 @@ public class SalesforceFeed extends Feed {
             queryBuilder.deleteCharAt(queryBuilder.length() - 1);
             queryBuilder.append("+from+");
             queryBuilder.append(sobjectName);
+            StringBuilder whereBuilder = new StringBuilder();
+            for (FilterDefinition filter : filters) {
+                if (filter instanceof FilterValueDefinition) {
+                    FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
+                    if (filterValueDefinition.getFilteredValues().size() == 1) {
+                        whereBuilder.append(filterValueDefinition.getField().getKey().toKeyString());
+                        whereBuilder.append("=");
+                        whereBuilder.append("'");
+                        whereBuilder.append(filterValueDefinition.getFilteredValues().get(0).toString());
+                        whereBuilder.append("'");
+                    } else if (filterValueDefinition.getFilteredValues().size() > 1) {
+                        List<Object> values = filterValueDefinition.getFilteredValues();
+                        whereBuilder.append("(");
+                        Iterator<Object> iter = values.iterator();
+                        while (iter.hasNext()) {
+                            Object value = iter.next();
+                            whereBuilder.append(filterValueDefinition.getField().getKey().toKeyString());
+                            whereBuilder.append("=");
+                            whereBuilder.append("'");
+                            whereBuilder.append(value.toString());
+                            whereBuilder.append("'");
+                            if (iter.hasNext()) {
+                                whereBuilder.append(" OR ");
+                            }
+                        }
+                        whereBuilder.append(")");
+                    }
+                } else if (filter instanceof FilterDateRangeDefinition) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filter;
+                    whereBuilder.append(filterDateRangeDefinition.getField().getKey().toKeyString());
+                    whereBuilder.append(">=");
+                    whereBuilder.append(sdf.format(filterDateRangeDefinition.getStartDate()));
+                    whereBuilder.append(" AND ");
+                    whereBuilder.append(filterDateRangeDefinition.getField().getKey().toKeyString());
+                    whereBuilder.append("<=");
+                    whereBuilder.append(sdf.format(filterDateRangeDefinition.getEndDate()));
+                } else if (filter instanceof RollingFilterDefinition) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;
+                    Date endDate = insightRequestMetadata.getNow();
+                    Date startDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, endDate));
+                    whereBuilder.append(filter.getField().getKey().toKeyString());
+                    whereBuilder.append(">=");
+                    whereBuilder.append(sdf.format(startDate));
+                    whereBuilder.append(" AND ");
+                    whereBuilder.append(filter.getField().getKey().toKeyString());
+                    whereBuilder.append("<=");
+                    whereBuilder.append(sdf.format(endDate));
+                }
+                whereBuilder.append(" AND ");
+            }
+            if (whereBuilder.length() > 0) {
+                whereBuilder.delete(whereBuilder.length() - 5, whereBuilder.length() - 1);
+            }
+            String where = URLEncoder.encode(whereBuilder.toString(), "UTF-8");
+            if (where.length() > 0) {
+                queryBuilder.append("+WHERE+").append(where);
+            }
             String url = salesforceBaseDataSource.getInstanceName() + "/services/data/v20.0/query/?q=" + queryBuilder.toString();
 
             HttpGet httpRequest = new HttpGet(url);
@@ -104,6 +167,9 @@ public class SalesforceFeed extends Feed {
                 IRow row = dataSet.createRow();
                 Node record = records.get(i);
                 for (AnalysisItem analysisItem : analysisItems) {
+                    if (analysisItem.isCalculated()) {
+                        continue;
+                    }
                     Nodes results = record.query(analysisItem.getKey().toKeyString() + "/text()");
                     if (results.size() > 0) {
                         String value = results.get(0).getValue();

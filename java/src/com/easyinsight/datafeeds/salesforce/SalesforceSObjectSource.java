@@ -128,7 +128,9 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
                     analysisMeasure.setFormattingConfiguration(formattingConfiguration);
                     items.add(analysisMeasure);
                 } else if ("DATE".equals(type)) {
-                    items.add(new AnalysisDateDimension(keys.get(fieldName), friendlyName, AnalysisDateDimension.DAY_LEVEL));
+                    AnalysisDateDimension dateDim = new AnalysisDateDimension(keys.get(fieldName), friendlyName, AnalysisDateDimension.DAY_LEVEL);
+                    dateDim.setDateOnlyField(true);
+                    items.add(dateDim);
                 } else if ("DATETIME".equals(type)) {
                     AnalysisDateDimension dateDimension = new AnalysisDateDimension(keys.get(fieldName), friendlyName, AnalysisDateDimension.DAY_LEVEL);
                     dateDimension.setCustomDateFormat("yyyy-MM-dd'T'HH:mm:SS.sss'Z'");
@@ -149,10 +151,12 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM SALESFORCE_SUB_DEFINITION WHERE DATA_SOURCE_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
+        clearStmt.close();
         PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO SALESFORCE_SUB_DEFINITION (DATA_SOURCE_ID, SOBJECT_NAME) VALUES (?, ?)");
         saveStmt.setLong(1, getDataFeedID());
         saveStmt.setString(2, sobjectName);
         saveStmt.execute();
+        saveStmt.close();
     }
 
     @Override
@@ -164,6 +168,7 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
         if (rs.next()) {
             sobjectName = rs.getString(1);
         }
+        loadStmt.close();
     }
 
     @Override
