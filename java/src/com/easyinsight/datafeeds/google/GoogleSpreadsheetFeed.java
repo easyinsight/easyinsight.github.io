@@ -63,6 +63,9 @@ public class GoogleSpreadsheetFeed extends Feed {
             for (ListEntry listEntry : feed.getEntries()) {
                 IRow row = dataSet.createRow();
                 for (AnalysisItem analysisItem : analysisItems) {
+                    if (analysisItem.isDerived()) {
+                        continue;
+                    }
                     Key key = analysisItem.getKey();
                     for (String tag : listEntry.getCustomElements().getTags()) {
                         if (key.toKeyString().equals(tag)) {

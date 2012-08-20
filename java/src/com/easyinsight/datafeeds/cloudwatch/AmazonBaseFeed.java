@@ -45,6 +45,9 @@ public abstract class AmazonBaseFeed extends Feed {
             Collection<AnalysisDimension> dimensions = new ArrayList<AnalysisDimension>();
             Collection<AnalysisMeasure> measures = new ArrayList<AnalysisMeasure>();
             for (AnalysisItem analysisItem : analysisItems) {
+                if (analysisItem.isDerived()) {
+                    continue;
+                }
                 if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     measures.add((AnalysisMeasure) analysisItem);
                 } else {

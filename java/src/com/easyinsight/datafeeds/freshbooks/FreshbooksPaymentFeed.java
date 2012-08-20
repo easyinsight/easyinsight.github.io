@@ -31,6 +31,9 @@ public class FreshbooksPaymentFeed extends FreshbooksFeed {
             }
             Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
+                if (analysisItem.isDerived()) {
+                    continue;
+                }
                 Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
                 if (keyColl == null) {
                     keyColl = new ArrayList<Key>();
