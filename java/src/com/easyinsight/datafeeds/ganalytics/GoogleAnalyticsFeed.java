@@ -274,9 +274,6 @@ public class GoogleAnalyticsFeed extends Feed {
                     }
                 }
                 urlBuilder.append("&start-date=").append(startDateString).append("&end-date=").append(endDateString);
-                /*String url = "https://www.google.com/analytics/feeds/data?ids=" + ids + "&dimensions=ga:browser,ga:city,ga:date,ga:visitorType,ga:latitude,ga:longitude" +
-                "&metrics=ga:pageviews,ga:bounces,ga:timeOnPage,ga:visitors,ga:visits,ga:timeOnSite" +
-                "&start-date=2009-06-09&end-date=2009-06-11";*/
                 String next = urlBuilder.toString();
                 
                 while (next != null) {

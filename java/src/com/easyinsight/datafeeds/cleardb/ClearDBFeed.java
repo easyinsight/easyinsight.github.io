@@ -128,7 +128,7 @@ public class ClearDBFeed extends Feed {
     private void createSelectClause(Collection<AnalysisItem> reportItems, StringBuilder selectBuilder, Collection<AnalysisItem> groupByItems, boolean aggregateQuery) {
         for (AnalysisItem analysisItem : reportItems) {
             if (analysisItem.isDerived()) {
-                throw new RuntimeException("Attempt made to query a derived analysis item");
+                continue;
             }
             String columnName = analysisItem.getKey().toKeyString();
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && aggregateQuery) {

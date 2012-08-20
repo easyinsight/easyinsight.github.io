@@ -1,9 +1,7 @@
 package com.easyinsight.datafeeds.sendgrid;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.DateValue;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.StringValue;
+import com.easyinsight.core.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
@@ -96,9 +94,14 @@ public class SendGridFeed extends Feed {
                 }
             }
 
-            Map<String, Key> keys = new HashMap<String, Key>();
+            Map<String, List<Key>> keys = new HashMap<String, List<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
+                List<Key> keyList = keys.get(analysisItem.getKey().toKeyString());
+                if (keyList == null) {
+                    keyList = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyList);
+                }
+                keyList.add(analysisItem.createAggregateKey());
             }
 
             for (FilterDefinition filterDefinition : filters) {
@@ -141,8 +144,8 @@ public class SendGridFeed extends Feed {
 
                     if (analysisItems.size() <= 2) {
                         IRow row = dataSet.createRow();
-                        row.addValue(keys.get(SendGridDataSource.CATEGORY), category);
-                        row.addValue(keys.get(SendGridDataSource.DATE), new Date());
+                        addValue(keys, SendGridDataSource.CATEGORY, new StringValue(category), row);
+                        addValue(keys, SendGridDataSource.DATE, new DateValue(new Date()), row);
                     }
                     pairs.add(new NameValuePair("category[]", category));
                 }
@@ -171,40 +174,64 @@ public class SendGridFeed extends Feed {
                     IRow row = dataSet.createRow();
                     Node dayNode = days.get(i);
                     String dateString = dayNode.query("date/text()").get(0).getValue();
+
+
                     Date date = outboundDateFormat.parse(dateString);
-                    row.addValue(keys.get(SendGridDataSource.DATE), new DateValue(date));
+                    addValue(keys, SendGridDataSource.DATE, new DateValue(date), row);
+
                     int requests = getValue(dayNode, "requests/text()");
-                    row.addValue(keys.get(SendGridDataSource.REQUESTS), requests);
+                    addValue(keys, SendGridDataSource.REQUESTS, new NumericValue(requests), row);
+
                     int delivered = getValue(dayNode, "delivered/text()");
-                    row.addValue(keys.get(SendGridDataSource.DELIVERED), delivered);
+                    addValue(keys, SendGridDataSource.DELIVERED, new NumericValue(delivered), row);
+
                     int bounces = getValue(dayNode, "bounces/text()");
-                    row.addValue(keys.get(SendGridDataSource.BOUNCES), bounces);
+                    addValue(keys, SendGridDataSource.BOUNCES, new NumericValue(bounces), row);
+
                     int repeatBounces = getValue(dayNode, "repeat_bounces/text()");
-                    row.addValue(keys.get(SendGridDataSource.REPEAT_BOUNCES), repeatBounces);
+                    addValue(keys, SendGridDataSource.REPEAT_BOUNCES, new NumericValue(repeatBounces), row);
+
                     int unsubscribes = getValue(dayNode, "unsubscribes/text()");
-                    row.addValue(keys.get(SendGridDataSource.UNSUBSCRIBES), unsubscribes);
+                    addValue(keys, SendGridDataSource.UNSUBSCRIBES, new NumericValue(unsubscribes), row);
+
                     int repeatUnsubscribes = getValue(dayNode, "repeat_unsubscribes/text()");
-                    row.addValue(keys.get(SendGridDataSource.REPEAT_UNSUBSCRIBES), repeatUnsubscribes);
+                    addValue(keys, SendGridDataSource.REPEAT_UNSUBSCRIBES, new NumericValue(repeatUnsubscribes), row);
+
                     int clicks = getValue(dayNode, "clicks/text()");
-                    row.addValue(keys.get(SendGridDataSource.CLICKS), clicks);
+                    addValue(keys, SendGridDataSource.CLICKS, new NumericValue(clicks), row);
+
                     int opens = getValue(dayNode, "opens/text()");
-                    row.addValue(keys.get(SendGridDataSource.OPENS), opens);
+                    addValue(keys, SendGridDataSource.OPENS, new NumericValue(opens), row);
+
                     int spamReports = getValue(dayNode, "spamreports/text()");
-                    row.addValue(keys.get(SendGridDataSource.SPAM_REPORTS), spamReports);
+                    addValue(keys, SendGridDataSource.SPAM_REPORTS, new NumericValue(spamReports), row);
+
                     int repeatSpamReports = getValue(dayNode, "repeat_spamreports/text()");
-                    row.addValue(keys.get(SendGridDataSource.REPEAT_SPAM_REPORTS), repeatSpamReports);
+                    addValue(keys, SendGridDataSource.REPEAT_SPAM_REPORTS, new NumericValue(repeatSpamReports), row);
+
                     int invalidEmails = getValue(dayNode, "invalid_email/text()");
-                    row.addValue(keys.get(SendGridDataSource.INVALID_EMAILS), invalidEmails);
+                    addValue(keys, SendGridDataSource.INVALID_EMAILS, new NumericValue(invalidEmails), row);
+
                     Nodes categoryNodes = dayNode.query("category/text()");
                     if (categoryNodes.size() > 0) {
                         String category = categoryNodes.get(0).getValue();
-                        row.addValue(keys.get(SendGridDataSource.CATEGORY), category);
+                        addValue(keys, SendGridDataSource.CATEGORY, new StringValue(category), row);
                     }
+
                 }
             }
             return dataSet;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void addValue(Map<String, List<Key>> keys, String keyName, Value value, IRow row) {
+        List<Key> keyList = keys.get(keyName);
+        if (keyList != null) {
+            for (Key key : keyList) {
+                row.addValue(key, value);
+            }
         }
     }
 
