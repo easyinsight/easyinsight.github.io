@@ -118,6 +118,7 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
             tree.accept(visitor);
         } catch (FunctionException fe) {
+            LogClass.error("On calculating " + derivationCode, fe);
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
         } catch (ReportException re) {
             throw re;
