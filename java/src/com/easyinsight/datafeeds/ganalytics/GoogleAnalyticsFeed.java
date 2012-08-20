@@ -166,6 +166,9 @@ public class GoogleAnalyticsFeed extends Feed {
             List<AnalysisItem> convertedItems = new ArrayList<AnalysisItem>();
             for (AnalysisItem analysisItem : analysisItems) {
                 for (AnalysisItem field : getFields()) {
+                    if (field.isDerived()) {
+                        continue;
+                    }
                     if (field.getKey().toBaseKey().equals(analysisItem.getKey().toBaseKey())) {
                         if (field.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                             convertedItems.add(field);
