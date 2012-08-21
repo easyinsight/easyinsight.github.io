@@ -11,7 +11,7 @@ public class DataSourceBehavior {
     }
 
     public static function pullDataSource(dataSourceType:int):Boolean {
-        return dataSourceType == DataSourceInfo.COMPOSITE_PULL || dataSourceType == DataSourceInfo.STORED_PULL;
+        return dataSourceType == DataSourceInfo.COMPOSITE_PULL || dataSourceType == DataSourceInfo.STORED_PULL || dataSourceType == DataSourceInfo.STORED_PUSH;
         /*switch (dataSourceType) {
             case DataSourceType.STATIC:
             case DataSourceType.EMPTY:
