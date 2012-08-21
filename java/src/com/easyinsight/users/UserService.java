@@ -1431,7 +1431,11 @@ public class UserService {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO authentication_log(username, user_id, success, login_time, ip_address, login_type, user_agent) VALUES(?,?,?,?,?,?,?)");
 
             insertStmt.setString(1, username);
-            insertStmt.setLong(2, userId);
+            if (userId == 0) {
+                insertStmt.setNull(2, Types.BIGINT);
+            } else {
+                insertStmt.setLong(2, userId);
+            }
             insertStmt.setBoolean(3, success);
             insertStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             insertStmt.setString(5, ipAddress);
