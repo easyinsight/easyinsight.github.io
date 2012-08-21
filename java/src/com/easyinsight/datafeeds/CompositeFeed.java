@@ -189,7 +189,7 @@ public class CompositeFeed extends Feed {
         itemSet.removeAll(alwaysSet);
 
         if (itemSet.size() > 0) {
-            Map<Key, Key> keyMap = new HashMap<Key, Key>();
+            /*Map<Key, Key> keyMap = new HashMap<Key, Key>();
             for (AnalysisItem analysisItem : getFields()) {
                 Key key = analysisItem.getKey();
                 if (key instanceof DerivedKey) {
@@ -203,7 +203,7 @@ public class CompositeFeed extends Feed {
                 if (replacement != null) {
                     analysisItem.setKey(replacement);
                 }
-            }
+            }*/
 
             Iterator<AnalysisItem> analysisItemIterator = itemSet.iterator();
             while (analysisItemIterator.hasNext()) {
