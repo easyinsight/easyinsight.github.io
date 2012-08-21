@@ -1061,6 +1061,8 @@ public class UserUploadService {
                 if (endpoint == null || "".equals(endpoint.trim())) {
                     return true;
                 }
+            } else {
+                return true;
             }
             return false;
         } catch (Exception e) {
