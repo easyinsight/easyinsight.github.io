@@ -427,7 +427,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public boolean isDerived() {
-        return false;
+        return lookupTableID != null && lookupTableID > 0;
     }
 
     public boolean isVirtual() {
