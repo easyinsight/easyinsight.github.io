@@ -736,7 +736,8 @@ public class UserUploadService {
                                     sourcesToRefresh.add(feedDefinition);
                                 }
                                 for (FeedDefinition sourceToRefresh : sourcesToRefresh) {
-                                    if (sourceToRefresh instanceof IServerDataSourceDefinition) {
+                                    if (sourceToRefresh instanceof IServerDataSourceDefinition && (sourceToRefresh.getDataSourceType() == DataSourceInfo.STORED_PULL ||
+                                            sourceToRefresh.getDataSourceType() == DataSourceInfo.COMPOSITE_PULL)) {
                                         IServerDataSourceDefinition refreshable = (IServerDataSourceDefinition) sourceToRefresh;
                                         boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false);
                                         sourceToRefresh.setVisible(true);
