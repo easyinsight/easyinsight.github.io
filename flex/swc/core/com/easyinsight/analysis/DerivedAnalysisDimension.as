@@ -11,7 +11,7 @@ package com.easyinsight.analysis
 		public var derivationCode:String;
         public var wordWrap:Boolean;
         public var html:Boolean;
-        public var applyBeforeAggregation:Boolean;
+        public var applyBeforeAggregation:Boolean = true;
 		
 		public function DerivedAnalysisDimension(group:Boolean = true)
 		{
