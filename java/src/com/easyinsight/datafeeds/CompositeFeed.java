@@ -597,6 +597,12 @@ public class CompositeFeed extends Feed {
             analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
             pipeline.setup(analysisDefinition, insightRequestMetadata);
             dataSet = pipeline.toDataSet(dataSet);
+        } else if (getFeedType().getType() == FeedType.BASECAMP_MASTER.getType() && !insightRequestMetadata.isOptimized() && !insightRequestMetadata.isTraverseAllJoins()) {
+            CompositeReportPipeline compositePipeline = new CompositeReportPipeline();
+            WSListDefinition analysisDefinition = new WSListDefinition();
+            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
+            compositePipeline.setup(analysisDefinition, this, insightRequestMetadata);
+            dataSet = compositePipeline.toDataSet(dataSet);
         }
         return dataSet;
     }
