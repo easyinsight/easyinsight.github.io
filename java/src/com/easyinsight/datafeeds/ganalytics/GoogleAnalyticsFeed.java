@@ -10,15 +10,13 @@ import com.easyinsight.users.TokenStorage;
 import com.easyinsight.users.Utility;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
+import com.google.api.services.analytics.Analytics;
 import com.google.gdata.client.analytics.AnalyticsService;
 import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
 import com.google.gdata.client.authn.oauth.OAuthException;
 import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 import com.google.gdata.client.authn.oauth.OAuthSigner;
-import com.google.gdata.data.analytics.DataFeed;
-import com.google.gdata.data.analytics.DataEntry;
-import com.google.gdata.data.analytics.AccountEntry;
-import com.google.gdata.data.analytics.AccountFeed;
+import com.google.gdata.data.analytics.*;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.InvalidEntryException;
 import com.google.gdata.util.ServiceException;
@@ -236,14 +234,26 @@ public class GoogleAnalyticsFeed extends Feed {
 
             String startDateString = outboundDateFormat.format(startDate);
             String endDateString = outboundDateFormat.format(endDate);
-            String baseUrl = "https://www.google.com/analytics/feeds/accounts/default";
-            AccountFeed accountFeed = as.getFeed(new URL(baseUrl), AccountFeed.class);
-            for (AccountEntry accountEntry : accountFeed.getEntries()) {
+            //String baseUrl = "https://www.googleapis.com/analytics/v2.4/data";
+            URL queryURL = new URL("https://www.googleapis.com/analytics/v2.4/management/accounts");
+            ManagementFeed accountsFeed = as.getFeed(queryURL, ManagementFeed.class);
+            //AccountFeed accountFeed = as.getFeed(new URL(baseUrl), AccountFeed.class);
+
+            for (ManagementEntry accountEntry : accountsFeed.getEntries()) {
                 String title = accountEntry.getTitle().getPlainText();
                 if (!titleFilters.isEmpty() && !titleFilters.contains(title)) {
                     continue;
                 }
-                String ids = accountEntry.getTableId().getValue();
+
+                //String ids = accountEntry.getTableId().getValue();
+                String accountID = accountEntry.getProperty("ga:accountId");
+                ManagementFeed webPropertyFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/"+accountID+"/webproperties"), ManagementFeed.class);
+                ManagementEntry webPropertyEntry = webPropertyFeed.getEntries().iterator().next();
+                String webPropertyID = webPropertyEntry.getProperty("ga:WebPropertyId");
+                ManagementFeed profilesFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/"+accountID+"/webproperties/"+webPropertyID+"/profiles"), ManagementFeed.class);
+                ManagementEntry profileEntry = profilesFeed.getEntries().iterator().next();
+                String ids = profileEntry.getProperty("dxp:tableId");
+                //String ids = "";
                 StringBuilder urlBuilder = new StringBuilder("https://www.google.com/analytics/feeds/data?ids=");
                 urlBuilder.append(ids);
 
