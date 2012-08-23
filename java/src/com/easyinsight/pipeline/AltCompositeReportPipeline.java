@@ -39,7 +39,7 @@ public class AltCompositeReportPipeline extends Pipeline {
         for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new RangeComponent((AnalysisRangeDimension) range));
         }
-        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.BEFORE, new AnalysisItemRetrievalStructure(Pipeline.BEFORE)));
+        components.addAll(new CalcGraph().doFunGraphStuff(new HashSet<AnalysisItem>(joinItems), allItems, reportItems, Pipeline.BEFORE, new AnalysisItemRetrievalStructure(Pipeline.BEFORE)));
         for (AnalysisItem item : joinItems) {
             for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, joinItems)) {
                 AnalysisList analysisList = (AnalysisList) tag;
