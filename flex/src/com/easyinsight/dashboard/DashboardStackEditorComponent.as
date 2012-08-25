@@ -68,12 +68,14 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         var comps:ArrayCollection = stackComponents();
         var items:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < dashboardStack.count; i++) {
-            var box:DashboardBox = comps.getItemAt(i) as DashboardBox;
-            box.save();
-            var dashboardGridItem:DashboardStackItem = new DashboardStackItem();
-            dashboardGridItem.position = i;
-            dashboardGridItem.dashboardElement = box.element;
-            items.addItem(dashboardGridItem);
+            if (i < comps.length) {
+                var box:DashboardBox = comps.getItemAt(i) as DashboardBox;
+                box.save();
+                var dashboardGridItem:DashboardStackItem = new DashboardStackItem();
+                dashboardGridItem.position = i;
+                dashboardGridItem.dashboardElement = box.element;
+                items.addItem(dashboardGridItem);
+            }
         }
         dashboardStack.gridItems = items;
     }
