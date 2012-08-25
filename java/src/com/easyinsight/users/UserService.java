@@ -1424,6 +1424,17 @@ public class UserService {
                     }
                     emailStatement.close();
                     ers.close();
+
+                    if(userId == null || userId == 0) {
+                        PreparedStatement apiKeyStatement = conn.prepareStatement("SELECT USER_ID FROM USER WHERE user_key = ?");
+                        apiKeyStatement.setString(1, username);
+                        ResultSet ars = apiKeyStatement.executeQuery();
+                        if(ars.next()) {
+                            userId = ars.getLong(1);
+                        }
+                        apiKeyStatement.close();
+                        ars.close();
+                    }
                 }
             }
 

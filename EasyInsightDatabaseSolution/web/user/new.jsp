@@ -19,7 +19,7 @@
   <body>
     <p>It appears you haven't created a user to secure your system yet.
        Enter a username and password below to ensure only authorized users can access your data.</p>
-    <form action="create.jsp">
+    <form action="create.jsp" method="post">
         Username: <input type="text" name="username" /><br />
         Password: <input type="password" name="password" /><br />
         <input type="submit" />

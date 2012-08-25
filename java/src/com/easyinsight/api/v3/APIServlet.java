@@ -64,6 +64,7 @@ public abstract class APIServlet extends HttpServlet {
         }
 
         if (userResponse == null || !userResponse.isSuccessful()) {
+
             resp.setContentType("text/xml");
             resp.setStatus(401);
             resp.getOutputStream().write("<response><code>401</code><message>Your credentials were rejected.</message></response>".getBytes());
@@ -115,8 +116,9 @@ public abstract class APIServlet extends HttpServlet {
         String userPass = new String(decoder.decodeBuffer(headerValue));
         int p = userPass.indexOf(":");
         UserServiceResponse userResponse = null;
+        String userID = "";
         if (p != -1) {
-            String userID = userPass.substring(0, p);
+            userID = userPass.substring(0, p);
             String password = userPass.substring(p+1);
             try {
                 userResponse = SecurityUtil.authenticateKeys(userID, password);
@@ -126,6 +128,11 @@ public abstract class APIServlet extends HttpServlet {
         }
 
         if (userResponse == null || !userResponse.isSuccessful()) {
+            String ipAddress  = req.getHeader("X-FORWARDED-FOR");
+            if(ipAddress == null) {
+                ipAddress = req.getRemoteAddr();
+            }
+            new UserService().logAuthentication(userID, userResponse == null ? null : userResponse.getUserID(), false, ipAddress, req.getHeader("User-Agent"));
             resp.setContentType("text/xml");
             resp.setStatus(401);
             resp.getOutputStream().write("<response><code>401</code><message>Your credentials were rejected.</message></response>".getBytes());

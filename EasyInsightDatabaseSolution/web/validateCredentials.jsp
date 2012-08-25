@@ -27,7 +27,7 @@
             Transaction trans = dataSession.getTransaction();
             try {
                 trans.begin();
-                dataSession.save(user);
+                dataSession.saveOrUpdate(user);
                 trans.commit();
             } catch(Exception e) {
                 trans.rollback();
