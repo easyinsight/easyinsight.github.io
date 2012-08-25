@@ -136,7 +136,7 @@ public class DashboardStack extends DashboardElement {
         if (rs.next()) {
             dashboardGrid = new DashboardStack();
             long gridID = rs.getLong(1);
-            dashboardGrid.setCount(rs.getInt(2));
+            //dashboardGrid.setCount(rs.getInt(2));
             dashboardGrid.setEffectType(rs.getInt(3));
             dashboardGrid.setEffectDuration(rs.getInt(4));
             dashboardGrid.setStackControl(rs.getInt(5));
@@ -159,6 +159,7 @@ public class DashboardStack extends DashboardElement {
                     items.add(item);
                 }
             }
+            dashboardGrid.setCount(items.size());
             gridItemStmt.close();
             Collections.sort(items, new Comparator<DashboardStackItem>() {
 
