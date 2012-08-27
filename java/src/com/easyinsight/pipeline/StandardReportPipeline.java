@@ -118,6 +118,8 @@ public class StandardReportPipeline extends Pipeline {
             }
         }
 
+        components.add(new PipelinePlaceholderComponent("End of Before Aggregation"));
+
         for (String name : intermediatePipelineNames) {
             //String name = "";
             components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, name, getStructure()));
@@ -141,8 +143,9 @@ public class StandardReportPipeline extends Pipeline {
                     }
                 }
             }
-            components.add(new CleanupComponent(name, measureFilter));
-            components.add(new AggregationComponent(AggregationComponent.OTHER));
+            components.add(new PipelinePlaceholderComponent("End of Pipeline " + name));
+            /*components.add(new CleanupComponent(name, measureFilter));
+            components.add(new AggregationComponent(AggregationComponent.OTHER));*/
         }
 
         components.add(new CleanupComponent(Pipeline.AFTER, measureFilter));

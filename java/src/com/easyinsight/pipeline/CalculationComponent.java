@@ -9,7 +9,7 @@ import com.easyinsight.dataset.DataSet;
  * Date: Nov 23, 2009
  * Time: 11:25:37 AM
  */
-public class CalculationComponent implements IComponent {
+public class CalculationComponent implements IComponent, DescribableComponent {
 
     private AnalysisCalculation analysisCalculation;
 
@@ -33,5 +33,9 @@ public class CalculationComponent implements IComponent {
 
     public void decorate(DataResults listDataResults) {
 
+    }
+
+    public String getDescription() {
+        return "CalculationComponent on " + analysisCalculation.toDisplay();
     }
 }

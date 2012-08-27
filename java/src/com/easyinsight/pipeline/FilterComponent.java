@@ -9,7 +9,7 @@ import com.easyinsight.core.Value;
  * Date: May 18, 2009
  * Time: 2:37:52 PM
  */
-public class FilterComponent implements IComponent {
+public class FilterComponent implements IComponent, DescribableComponent {
 
     private FilterDefinition filterDefinition;
     private IFilterProcessor filterProcessor;
@@ -25,5 +25,9 @@ public class FilterComponent implements IComponent {
     }
 
     public void decorate(DataResults listDataResults) {
+    }
+
+    public String getDescription() {
+        return "FilterComponent on " + filterDefinition.label(false);
     }
 }
