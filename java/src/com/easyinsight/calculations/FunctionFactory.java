@@ -198,6 +198,8 @@ public class FunctionFactory {
             return new CreateNamedPipeline();
         } else if (s.equals("assignpipeline")) {
             return new AssignPipeline();
+        } else if (s.equals("assignfilterpipeline")) {
+            return new AssignFilterPipeline();
         } else {
             return null;
         }

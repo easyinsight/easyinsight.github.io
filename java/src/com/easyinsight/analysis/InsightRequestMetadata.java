@@ -190,6 +190,16 @@ public class InsightRequestMetadata implements Serializable {
         return pipelineFieldMap.get(name);
     }
 
+    private Map<String, String> filterAssignments = new HashMap<String, String>();
+
+    public String getPipelineNameForFilter(String filter) {
+        return filterAssignments.get(filter);
+    }
+
+    public void assignFilterToPipeline(String field, String pipelineName) {
+        filterAssignments.put(field, pipelineName);
+    }
+
     public void pipelineAssign(AnalysisItem analysisItem) {
         String name = getPipelineNameForField(analysisItem.toDisplay());
         if (name != null) {
@@ -214,7 +224,7 @@ public class InsightRequestMetadata implements Serializable {
 
     public void pipelineAssign(FilterDefinition filter) {
         if (filter.getFilterName() != null && !"".equals(filter.getFilterName())) {
-            String name = getPipelineNameForField(filter.getFilterName());
+            String name = getPipelineNameForFilter(filter.getFilterName());
             if (name != null) {
                 filter.setPipelineName(name);
             }
