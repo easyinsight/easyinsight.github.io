@@ -32,9 +32,11 @@ public class CleanupComponent implements IComponent {
         WSAnalysisDefinition report = pipelineData.getReport();
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                if (filterDefinition.isEnabled() && !filterDefinition.isApplyBeforeAggregation()) {
-                    List<AnalysisItem> items = filterDefinition.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, allNeededAnalysisItems, structure);
-                    allNeededAnalysisItems.addAll(items);
+                if (filterDefinition.isEnabled()) {
+                    if (!structure.onOrAfter(filterDefinition.getPipelineName())) {
+                        List<AnalysisItem> items = filterDefinition.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, allNeededAnalysisItems, structure);
+                        allNeededAnalysisItems.addAll(items);
+                    }
                 }
             }
         }
