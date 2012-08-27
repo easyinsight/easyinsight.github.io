@@ -51,6 +51,7 @@ public class RescareTest extends TestCase implements ITestConstants {
         List<Object> values = new ArrayList<Object>();
         values.add("Orientation");
         FilterDefinition appointmentFilter = new FilterValueDefinition(report.getField("Appointment Type").getAnalysisItem(), true, values);
+        appointmentFilter.setFilterName("OrientationFilter");
         report.addFilter(appointmentFilter);
         report.addField("Participant ID");
         report.addField("Appointment - Record ID#");
@@ -78,12 +79,15 @@ public class RescareTest extends TestCase implements ITestConstants {
         rfd.setCustomBeforeOrAfter(RollingFilterDefinition.BEFORE);
         rfd.setCustomIntervalType(2);
         rfd.setCustomIntervalAmount(1);
+        rfd.setFilterName("beforeToday");
         report.addFilter(rfd);
+
         FilterRangeDefinition ordFilter = new FilterRangeDefinition();
         ordFilter.setLowerOperator(FilterRangeDefinition.LESS_THAN_EQUAL_TO);
         ordFilter.setStartValue(0);
         ordFilter.setStartValueDefined(true);
         ordFilter.setField(report.getField("Time Between Appointment and Original Roster Date").getAnalysisItem());
+        ordFilter.setFilterName("afterOriginalRosterDate");
         report.addFilter(ordFilter);
 
         FilterRangeDefinition refOrdFilter = new FilterRangeDefinition();
@@ -91,18 +95,72 @@ public class RescareTest extends TestCase implements ITestConstants {
         refOrdFilter.setStartValue(0);
         refOrdFilter.setStartValueDefined(true);
         refOrdFilter.setField(report.getField("Time Between Referral and Original Roster Date").getAnalysisItem());
+        refOrdFilter.setFilterName("refAfterOriginalRosterDate");
         report.addFilter(refOrdFilter);
 
         values = new ArrayList<Object>();
         values.add("0");
-        report.addFilter(new FilterValueDefinition(report.getField("No Show").getAnalysisItem(), true, values));
+        FilterDefinition f = new FilterValueDefinition(report.getField("No Show").getAnalysisItem(), true, values);
+        f.setFilterName("noShowFilter");
+        report.addFilter(f);
         values = new ArrayList<Object>();
         values.add("WEP");
         values.add("");
-        report.addFilter(new FilterValueDefinition(report.getField("Referral Type").getAnalysisItem(), true, values));
+        f = new FilterValueDefinition(report.getField("Referral Type").getAnalysisItem(), true, values);
+        f.setFilterName("WEPFilter");
+        report.addFilter(f);
+
+        FirstValueFilter ff = new FirstValueFilter();
+        ff.setField(report.getField("Appointment Date").getAnalysisItem());
+        ff.setApplyBeforeAggregation(false);
+        report.addFilter(ff);
+
+        ff = new FirstValueFilter();
+        ff.setField(report.getField("Referral Date").getAnalysisItem());
+        ff.setApplyBeforeAggregation(false);
+        report.addFilter(ff);
+
+
+        report.getListDefinition().setMarmotScript("createnamedpipeline(\"Middle1\", \"afterJoins\", \"1\")\n" +
+                "createnamedpipeline(\"Middle\", \"afterJoins\", \"2\")\n" +
+                "        assignfilterpipeline(\"afterOriginalRosterDate\", \"Middle\")\n" +
+                "        assignfilterpipeline(\"beforeToday\", \"Middle\")\n" +
+                "        assignfilterpipeline(\"OrientationFilter\", \"Middle\")\n" +
+                "       assignfilterpipeline(\"noShowFilter\", \"Middle\")\n" +
+                "       assignfilterpipeline(\"WEPFilter\",\"Middle\")\n" +
+                "       assignfilterpipeline(\"refAfterOriginalRosterDate\", \"Middle\")\n" +
+                "       assignpipeline(\"Time Between Appointment and Original Roster Date\", \"Middle1\")\n" +
+                "       assignpipeline(\"Time Between Referral and Original Roster Date\", \"Middle1\")\n");
+
     }
 
     public void testMultipleAppointments() throws Exception {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+
+
+            createReport(conn);
+
+            participants.addRow("123456", "2012-06-06");
+            appointments.addRow("1", "123456", "Orientation", "2012-01-20", "0");
+            appointments.addRow("2", "123456", "Assessment", "2012-02-01", "0");
+            appointments.addRow("3", "123456", "Orientation", "2012-06-07", "1");
+            appointments.addRow("6", "123456", "Orientation", "2012-06-08", "0");
+            appointments.addRow("7", "123456", "Orientation", "2012-06-09", "0");
+            appointments.addRow("4", "123456", "Assessment", "2012-06-08", "0");
+            appointments.addRow("5", "123456", "Orientation", afterToday, "0");
+            referrals.addRow("3", "123456", "WEP", "2012-06-08");
+
+            Results results = report.runReport(conn);
+            results.verifyRow("123456", "6", "2012-06-08", "3", "2012-06-08", "Referred");
+            results.verifyRowCount(1);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+    }
+
+    public void testMultipleReferrals() throws Exception {
         EIConnection conn = Database.instance().getConnection();
         try {
 
