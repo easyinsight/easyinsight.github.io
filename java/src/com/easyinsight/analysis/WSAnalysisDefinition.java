@@ -477,8 +477,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
             }
         }
         if (retrieveFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : retrieveFilterDefinitions()) {
-                populate(map, filterDefinition.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(Pipeline.BEFORE)));
+            for (FilterDefinition filter : retrieveFilterDefinitions()) {
+                insightRequestMetadata.pipelineAssign(filter);
+                populate(map, filter.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(Pipeline.BEFORE)));
             }
         }
         for (AnalysisItem analysisItem : getLimitFields()) {

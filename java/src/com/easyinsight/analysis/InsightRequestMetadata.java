@@ -202,5 +202,22 @@ public class InsightRequestMetadata implements Serializable {
             analysisItem.getPipelineSections().add(name);
             fields.add(analysisItem);
         }
+        if (analysisItem.getFilters() != null) {
+            for (FilterDefinition filter : analysisItem.getFilters()) {
+                if (filter.getFilterName() != null && !"".equals(filter.getFilterName())) {
+                    name = getPipelineNameForField(filter.getFilterName());
+                    filter.setPipelineName(name);
+                }
+            }
+        }
+    }
+
+    public void pipelineAssign(FilterDefinition filter) {
+        if (filter.getFilterName() != null && !"".equals(filter.getFilterName())) {
+            String name = getPipelineNameForField(filter.getFilterName());
+            if (name != null) {
+                filter.setPipelineName(name);
+            }
+        }
     }
 }
