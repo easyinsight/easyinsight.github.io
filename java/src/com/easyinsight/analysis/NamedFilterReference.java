@@ -63,8 +63,8 @@ public class NamedFilterReference extends FilterDefinition {
     }
 
     @Override
-    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor, AnalysisItem sourceItem, boolean columnLevel) {
-        return filter.createComponents(beforeAggregation, filterProcessor, sourceItem, columnLevel);
+    public List<IComponent> createComponents(String pipelineName, IFilterProcessor filterProcessor, AnalysisItem sourceItem, boolean columnLevel) {
+        return filter.createComponents(pipelineName, filterProcessor, sourceItem, columnLevel);
     }
 
     @Override

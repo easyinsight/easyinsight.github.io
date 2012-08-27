@@ -242,11 +242,11 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     }
 
     @Override
-    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor, AnalysisItem sourceItem, boolean columnLevel) {
+    public List<IComponent> createComponents(String pipelineName, IFilterProcessor filterProcessor, AnalysisItem sourceItem, boolean columnLevel) {
         if (getStartDateDimension() != null || getEndDateDimension() != null) {
             return Arrays.asList((IComponent) new DateRangePluginComponent(this));
         } else {
-            return super.createComponents(beforeAggregation, filterProcessor, sourceItem, columnLevel);
+            return super.createComponents(pipelineName, filterProcessor, sourceItem, columnLevel);
         }
     }
 

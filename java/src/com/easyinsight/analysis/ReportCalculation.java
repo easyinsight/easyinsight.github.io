@@ -13,6 +13,7 @@ import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.IJoin;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.PipelineData;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.IDataTransform;
@@ -138,7 +139,7 @@ public class ReportCalculation {
             List<IComponent> filterComponents = new ArrayList<IComponent>();
             for (FilterDefinition filterDefinition : dlsFilters) {
                 analysisItemList.add(filterDefinition.getField());
-                filterComponents.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null, false));
+                filterComponents.addAll(filterDefinition.createComponents(Pipeline.AFTER, new DefaultFilterProcessor(), null, false));
             }
             DataSet set = feed.getAggregateDataSet(analysisItemList, dlsFilters, new InsightRequestMetadata(), feed.getFields(), false, conn);
             PipelineData pipelineData = new PipelineData(null, null, new InsightRequestMetadata(), null, null, null, null);

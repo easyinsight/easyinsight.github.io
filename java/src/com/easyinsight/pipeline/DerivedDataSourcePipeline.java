@@ -14,12 +14,12 @@ public class DerivedDataSourcePipeline extends Pipeline {
         List<IComponent> components = new ArrayList<IComponent>();
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(false, new DefaultFilterProcessor(), null, false));
+                components.addAll(filterDefinition.createComponents(Pipeline.BEFORE, new DefaultFilterProcessor(), null, false));
             }
         }
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null, false));
+                components.addAll(filterDefinition.createComponents(Pipeline.AFTER, new DefaultFilterProcessor(), null, false));
             }
         }
         return components;

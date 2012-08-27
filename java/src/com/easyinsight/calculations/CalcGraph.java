@@ -81,7 +81,7 @@ public class CalcGraph {
                         if (filterDefinition.getField() != null) {
                             fieldFilterComponent.addFilterPair(calcNode, filterDefinition);
                         } else {
-                            components.addAll(filterDefinition.createComponents(false, new FieldFilterProcessor(calcNode), calcNode, true));
+                            components.addAll(filterDefinition.createComponents(Pipeline.AFTER, new FieldFilterProcessor(calcNode), calcNode, true));
                         }
                     }
                 }

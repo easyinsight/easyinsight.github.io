@@ -67,8 +67,8 @@ public class FirstValueFilter extends FilterDefinition {
         return start;
     }
 
-    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor, AnalysisItem sourceItem, boolean columnLevel) {
-        if (isEnabled() && beforeAggregation == isApplyBeforeAggregation()) {
+    public List<IComponent> createComponents(String pipelineName, IFilterProcessor filterProcessor, AnalysisItem sourceItem, boolean columnLevel) {
+        if (isEnabled() && pipelineName.equals(getPipelineName())) {
             return Arrays.asList((IComponent) new FirstValueComponent(this, sourceItem));
         } else {
             return new ArrayList<IComponent>();

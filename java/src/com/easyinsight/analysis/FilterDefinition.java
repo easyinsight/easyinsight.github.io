@@ -6,6 +6,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.pipeline.FilterComponent;
 import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.pipeline.Pipeline;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.hibernate.Session;
@@ -76,6 +77,13 @@ public class FilterDefinition implements Serializable, Cloneable {
     transient private String pipelineName;
 
     public String getPipelineName() {
+        if (pipelineName == null) {
+            if (applyBeforeAggregation) {
+                pipelineName = Pipeline.BEFORE;
+            } else {
+                pipelineName = Pipeline.AFTER;
+            }
+        }
         return pipelineName;
     }
 
@@ -261,9 +269,9 @@ public class FilterDefinition implements Serializable, Cloneable {
         }
     }
 
-    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor, AnalysisItem sourceItem, boolean columnLevel) {
+    public List<IComponent> createComponents(String pipelineName, IFilterProcessor filterProcessor, AnalysisItem sourceItem, boolean columnLevel) {
         List<IComponent> components = new ArrayList<IComponent>();
-        if (isEnabled() && beforeAggregation == isApplyBeforeAggregation()) {
+        if (isEnabled() && pipelineName.equals(this.pipelineName)) {
             if (!isTemplateFilter() || columnLevel) {
                 components.add(new FilterComponent(this, filterProcessor));
             }

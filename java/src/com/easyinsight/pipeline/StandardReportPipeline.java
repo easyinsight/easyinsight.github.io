@@ -79,7 +79,7 @@ public class StandardReportPipeline extends Pipeline {
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 if (!insightRequestMetadata.isLookupTableAggregate() || !filterDefinition.validForQuery()) {
-                    components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null, false));
+                    components.addAll(filterDefinition.createComponents(Pipeline.BEFORE, new DefaultFilterProcessor(), null, false));
                 }
             }
         }
@@ -98,7 +98,7 @@ public class StandardReportPipeline extends Pipeline {
                     if (filterDefinition.getField() != null) {
                         fieldFilterComponent.addFilterPair(analysisItem, filterDefinition);
                     } else {
-                        components.addAll(filterDefinition.createComponents(true, new FieldFilterProcessor(analysisItem), analysisItem, true));
+                        components.addAll(filterDefinition.createComponents(Pipeline.BEFORE, new FieldFilterProcessor(analysisItem), analysisItem, true));
                     }
                 }
             }
@@ -125,7 +125,7 @@ public class StandardReportPipeline extends Pipeline {
             components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, name, getStructure()));
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 if (name.equals(filterDefinition.getPipelineName())) {
-                    components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null, false));
+                    components.addAll(filterDefinition.createComponents(name, new DefaultFilterProcessor(), null, false));
                 }
             }
             fieldFilterComponent = new FieldFilterComponent();
@@ -137,7 +137,7 @@ public class StandardReportPipeline extends Pipeline {
                             if (filterDefinition.getField() != null) {
                                 fieldFilterComponent.addFilterPair(analysisItem, filterDefinition);
                             } else {
-                                components.addAll(filterDefinition.createComponents(true, new FieldFilterProcessor(analysisItem), analysisItem, true));
+                                components.addAll(filterDefinition.createComponents(name, new FieldFilterProcessor(analysisItem), analysisItem, true));
                             }
                         }
                     }
@@ -167,7 +167,7 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new LinkDecorationComponent());
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(false, new DefaultFilterProcessor(), null, false));
+                components.addAll(filterDefinition.createComponents(Pipeline.AFTER, new DefaultFilterProcessor(), null, false));
             }
         }
         components.add(new LimitsComponent());
