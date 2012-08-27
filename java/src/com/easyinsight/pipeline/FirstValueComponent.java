@@ -44,7 +44,7 @@ public class FirstValueComponent implements IComponent, DescribableComponent {
                 Value value = row.getValue(sortKey);
                 if (value.type() == Value.DATE) {
                     DateValue dateValue = (DateValue) value;
-                    if (firstDate == null || firstDate.getTime() < dateValue.getDate().getTime()) {
+                    if (firstDate == null || firstDate.getTime() > dateValue.getDate().getTime()) {
                         firstDate = dateValue.getDate();
                     }
                 }
@@ -78,7 +78,7 @@ public class FirstValueComponent implements IComponent, DescribableComponent {
                 Collections.sort(rows, new Comparator<IRow>() {
 
                     public int compare(IRow iRow, IRow iRow1) {
-                        return getComparison(sortDim, iRow, iRow1, true);
+                        return getComparison(sortDim, iRow, iRow1, false);
                     }
                 });
             }
