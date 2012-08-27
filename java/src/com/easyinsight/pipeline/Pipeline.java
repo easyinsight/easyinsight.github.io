@@ -9,6 +9,7 @@ import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.export.ExportService;
 import com.easyinsight.intention.IntentionSuggestion;
 
 import java.util.*;
@@ -296,6 +297,10 @@ public abstract class Pipeline {
 
     public DataSet toDataSet(DataSet dataSet) {
         for (IComponent component : components) {
+            if (pipelineData.getReport() != null && pipelineData.getReport().isLogReport()) {
+                logger.append("<h1>" + component.getClass().getName() + "</h1>");
+                logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, null, pipelineData.getInsightRequestMetadata()));
+            }
             dataSet = component.apply(dataSet, pipelineData);
         }
         return dataSet;
@@ -320,10 +325,10 @@ public abstract class Pipeline {
     public DataResults toList(DataSet dataSet, EIConnection conn) {
         for (IComponent component : components) {
             //System.out.println(component.getClass() + " - " + dataSet.getRows());
-            /*if (pipelineData.getReport().isLogReport()) {
+            if (pipelineData.getReport().isLogReport()) {
                 logger.append("<h1>" + component.getClass().getName() + "</h1>");
                 logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, conn, pipelineData.getInsightRequestMetadata()));
-            }*/
+            }
             long startTime = System.currentTimeMillis();
             dataSet = component.apply(dataSet, pipelineData);
             long endTime = System.currentTimeMillis();

@@ -28,8 +28,17 @@ public class ConfigLoader {
 
     private String googleUserName;
     private String googlePassword;
+    private String outputLogPath;
 
     private boolean taskRunner;
+
+    public String getOutputLogPath() {
+        return outputLogPath;
+    }
+
+    public void setOutputLogPath(String outputLogPath) {
+        this.outputLogPath = outputLogPath;
+    }
 
     public boolean isTaskRunner() {
         return taskRunner;
@@ -162,6 +171,7 @@ public class ConfigLoader {
             billingKeyID = (String) properties.get("billing.keyid");
             billingKey = (String) properties.get("billing.key");
             redirectLocation = (String) properties.get("billing.redirectLocation");
+            outputLogPath = (String) properties.get("report.log.path");
 
             googleUserName = (String) properties.get("google.username");
             googlePassword = (String) properties.get("google.password");

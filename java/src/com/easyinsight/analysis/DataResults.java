@@ -18,6 +18,15 @@ public abstract class DataResults {
     private List<String> auditMessages;
     private ReportFault reportFault;
     private List<IntentionSuggestion> suggestions;
+    private String reportLog;
+
+    public String getReportLog() {
+        return reportLog;
+    }
+
+    public void setReportLog(String reportLog) {
+        this.reportLog = reportLog;
+    }
 
     public List<IntentionSuggestion> getSuggestions() {
         return suggestions;

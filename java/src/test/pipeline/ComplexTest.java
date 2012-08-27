@@ -67,6 +67,8 @@ public class ComplexTest extends TestCase implements ITestConstants {
         }
     }
 
+
+
     public void testAttentionScenarioWithClient() throws Exception {
         EIConnection conn = Database.instance().getConnection();
         try {

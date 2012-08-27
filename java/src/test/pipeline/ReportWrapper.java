@@ -16,6 +16,7 @@ public class ReportWrapper {
 
     ReportWrapper(WSListDefinition listDefinition, FeedMetadata feedMetadata) {
         this.listDefinition = listDefinition;
+        listDefinition.setLogReport(true);
         this.feedMetadata = feedMetadata;
     }
 

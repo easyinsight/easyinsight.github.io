@@ -6,6 +6,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.logging.LogClass;
@@ -493,7 +494,11 @@ public class DataService {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-            return reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+            DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+            if (analysisDefinition.isLogReport()) {
+                dataSet.setReportLog(reportRetrieval.getPipeline().toLogString());
+            }
+            return dataSet;
         } finally {
             UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
@@ -934,9 +939,9 @@ public class DataService {
             DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn);
             List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
             suggestions.addAll(insightRequestMetadata.getSuggestions());
-            /*if (analysisDefinition.isLogReport()) {
-                new SendGridEmail().sendEmail("jboe@easy-insight.com", "Data Source Audit", reportRetrieval.getPipeline().toLogString(), "jboe@easy-insight.com", true, "Audit Test");
-            }*/
+            if (analysisDefinition.isLogReport()) {
+                results.setReportLog(reportRetrieval.getPipeline().toLogString());
+            }
             results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             suggestions.addAll(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
             results.setSuggestions(suggestions);

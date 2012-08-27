@@ -4,9 +4,10 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.datafeeds.composite.ChildConnection;
-import com.easyinsight.datafeeds.composite.FallthroughConnection;
+import com.easyinsight.datafeeds.composite.*;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.etl.LookupPair;
+import com.easyinsight.etl.LookupTable;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.userupload.UploadPolicy;
@@ -244,5 +245,27 @@ public class DataSourceWrapper implements  ITestConstants {
             }
         }
         throw new RuntimeException();
+    }
+
+    public static DataSourceWrapper createFederatedSource(String name, EIConnection conn, DataSourceWrapper... sources) throws Exception {
+        List<FederationSource> federatedDataSources = new ArrayList<FederationSource>();
+        for (DataSourceWrapper wrapper : sources) {
+            FederationSource federationSource = new FederationSource();
+            federationSource.setName(wrapper.getDataSource().getFeedName());
+            federationSource.setDataSourceID(wrapper.getDataSource().getDataFeedID());
+            federationSource.setFieldMappings(new ArrayList<FieldMapping>());
+            federatedDataSources.add(federationSource);
+        }
+        FederatedDataSource federatedDataSource = new FeedService().createFederatedDataSource(federatedDataSources, name, conn);
+        return new DataSourceWrapper(federatedDataSource, conn);
+    }
+
+    public void addLookupTable(String name, String fieldName, AnalysisItem targetField, LookupPair... pairs) {
+        LookupTable lookupTable = new LookupTable();
+        lookupTable.setName(name);
+        lookupTable.setSourceField(getField(fieldName).getAnalysisItem());
+        lookupTable.setTargetField(targetField);
+        lookupTable.setLookupPairs(Arrays.asList(pairs));
+        new FeedService().saveNewLookupTable(lookupTable);
     }
 }

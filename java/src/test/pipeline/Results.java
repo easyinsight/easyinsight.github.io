@@ -34,7 +34,11 @@ public class Results {
     }
 
     public void verifyRowCount(int count) {
-        Assert.assertEquals("Counts did not match. Data set contents were: " + dataSet.getRows(), count, dataSet.getRows().size());
+        String logName = null;
+        if (count != dataSet.getRows().size()) {
+            logName = new ReportLog().log(dataSet.getReportLog());
+        }
+        Assert.assertEquals("Counts did not match. Pipeline logged to " + logName + ". Data set contents were: " + dataSet.getRows(), count, dataSet.getRows().size());
     }
 
     public void verifyRow(Object... values) throws Exception {
@@ -80,6 +84,10 @@ public class Results {
                 break;
             }
         }
-        Assert.assertTrue("We could not find a row matching the specifications. Data set contents were: " + dataSet.getRows(), found);
+        String logName = null;
+        if (!found) {
+            logName = new ReportLog().log(dataSet.getReportLog());
+        }
+        Assert.assertTrue("We could not find a row matching the specifications. Pipeline logged to " + logName + ". Data set contents were: " + dataSet.getRows(), found);
     }
 }
