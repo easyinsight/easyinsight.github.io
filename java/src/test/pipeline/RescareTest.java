@@ -113,16 +113,21 @@ public class RescareTest extends TestCase implements ITestConstants {
         FirstValueFilter ff = new FirstValueFilter();
         ff.setField(report.getField("Appointment Date").getAnalysisItem());
         ff.setApplyBeforeAggregation(false);
+        ff.setFilterName("FirstAppointment");
         report.addFilter(ff);
 
         ff = new FirstValueFilter();
         ff.setField(report.getField("Referral Date").getAnalysisItem());
+        ff.setFilterName("FirstReferral");
         ff.setApplyBeforeAggregation(false);
         report.addFilter(ff);
 
 
         report.getListDefinition().setMarmotScript("createnamedpipeline(\"Middle1\", \"afterJoins\", \"1\")\n" +
                 "createnamedpipeline(\"Middle\", \"afterJoins\", \"2\")\n" +
+                "createnamedpipeline(\"MiddleLast\", \"afterJoins\", \"3\")\n" +
+                "assignfilterpipeline(\"FirstAppointment\", \"MiddleLast\")\n" +
+                "assignfilterpipeline(\"FirstReferral\", \"MiddleLast\")\n" +
                 "        assignfilterpipeline(\"afterOriginalRosterDate\", \"Middle\")\n" +
                 "        assignfilterpipeline(\"beforeToday\", \"Middle\")\n" +
                 "        assignfilterpipeline(\"OrientationFilter\", \"Middle\")\n" +
