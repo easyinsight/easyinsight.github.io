@@ -20,6 +20,8 @@ public class CreateNamedPipeline extends Function {
             pipeline.setPreassigned(calculationMetadata.getFeed());
             pipeline.setAdditionalItems(calculationMetadata.getReport().getAddedItems());
             calculationMetadata.getInsightRequestMetadata().putPipeline(param, pipeline);
+        } else if ("afterJoins".equals(where)) {
+            calculationMetadata.getInsightRequestMetadata().getIntermediatePipelines().add(name);
         }
         return null;
     }

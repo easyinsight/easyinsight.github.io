@@ -166,6 +166,16 @@ public class InsightRequestMetadata implements Serializable {
         pipelineMap.put(name, pipeline);
     }
 
+    private transient List<String> intermediatePipelines = new ArrayList<String>();
+
+    public List<String> getIntermediatePipelines() {
+        return intermediatePipelines;
+    }
+
+    public void setIntermediatePipelines(List<String> intermediatePipelines) {
+        this.intermediatePipelines = intermediatePipelines;
+    }
+
     private Map<String, String> pipelineAssignments = new HashMap<String, String>();
 
     public void assignFieldToPipeline(String field, String pipelineName) {

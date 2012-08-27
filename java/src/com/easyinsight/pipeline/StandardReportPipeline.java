@@ -15,6 +15,12 @@ import java.util.*;
  */
 public class StandardReportPipeline extends Pipeline {
 
+    private List<String> intermediatePipelineNames;
+
+    public StandardReportPipeline(List<String> intermediatePipelineNames) {
+        this.intermediatePipelineNames = intermediatePipelineNames;
+    }
+
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems, InsightRequestMetadata insightRequestMetadata) {
 
         List<IComponent> components = new ArrayList<IComponent>();
@@ -113,8 +119,36 @@ public class StandardReportPipeline extends Pipeline {
         }
 
         components.add(new CleanupComponent(Pipeline.AFTER, measureFilter));
+
+        for (String name : intermediatePipelineNames) {
+            //String name = "";
+            components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, name, getStructure()));
+            for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
+                if (name.equals(filterDefinition.getPipelineName())) {
+                    components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null, false));
+                }
+            }
+            fieldFilterComponent = new FieldFilterComponent();
+            components.add(fieldFilterComponent);
+            for (AnalysisItem analysisItem : allNeededAnalysisItems) {
+                if (analysisItem.getFilters() != null) {
+                    for (FilterDefinition filterDefinition : analysisItem.getFilters()) {
+                        if (name.equals(filterDefinition.getPipelineName())) {
+                            if (filterDefinition.getField() != null) {
+                                fieldFilterComponent.addFilterPair(analysisItem, filterDefinition);
+                            } else {
+                                components.addAll(filterDefinition.createComponents(true, new FieldFilterProcessor(analysisItem), analysisItem, true));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         components.add(new NormalizationComponent());
         components.add(new AggregationComponent(AggregationComponent.OTHER));
+
+
 
         List<IComponent> postAggCalculations = new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.AFTER, getStructure());
         components.addAll(postAggCalculations);

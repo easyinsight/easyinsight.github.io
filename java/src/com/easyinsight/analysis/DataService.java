@@ -1147,7 +1147,7 @@ public class DataService {
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
             timeshift(validQueryItems, filters, feed);
             dataSet = retrieveDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
-            pipeline = new StandardReportPipeline();
+            pipeline = new StandardReportPipeline(insightRequestMetadata.getIntermediatePipelines());
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata, allFields);
             dataSourceInfo = feed.createSourceInfo(conn);
             if (dataSet.getLastTime() == null) {

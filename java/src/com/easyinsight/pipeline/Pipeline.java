@@ -79,6 +79,11 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, Set<AnalysisItem> reportItems) {
         structure.setReport(report);
+        if (insightRequestMetadata.getIntermediatePipelines() != null) {
+            for (String pipe : insightRequestMetadata.getIntermediatePipelines()) {
+                structure.getSections().add(1, pipe);
+            }
+        }
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(dataSource.getFields());
         if (report.getAddedItems() != null) {
             allFields.addAll(report.getAddedItems());
@@ -93,6 +98,11 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allFields) {
         structure.setReport(report);
+        if (insightRequestMetadata.getIntermediatePipelines() != null) {
+            for (String pipe : insightRequestMetadata.getIntermediatePipelines()) {
+                structure.getSections().add(1, pipe);
+            }
+        }
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource, null);
         components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems(), insightRequestMetadata);
         if (report.hasCustomResultsBridge()) {
@@ -103,6 +113,11 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allItems) {
         structure.setReport(report);
+        if (insightRequestMetadata.getIntermediatePipelines() != null) {
+            for (String pipe : insightRequestMetadata.getIntermediatePipelines()) {
+                structure.getSections().add(1, pipe);
+            }
+        }
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allItems, null, null);
         components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems(), insightRequestMetadata);
         if (report.hasCustomResultsBridge()) {
