@@ -2383,7 +2383,12 @@ public class ExportService {
     public static String dataSetToHTMLTable(Collection<AnalysisItem> fields, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
 
         try {
-            ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+            ExportMetadata exportMetadata;
+            if (conn == null) {
+                exportMetadata = new ExportMetadata(1, "$", Calendar.getInstance());
+            } else {
+                exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+            }
 
             StringBuilder sb = new StringBuilder();
             List<AnalysisItem> items = new ArrayList<AnalysisItem>(fields);

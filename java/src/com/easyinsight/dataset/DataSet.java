@@ -20,6 +20,7 @@ public class DataSet implements Serializable {
     private Date lastTime;
     private List<String> audits = new ArrayList<String>();
     private DataSetKeys dataSetKeys = new DataSetKeys();
+    private String reportLog;
 
     public DataSet() {
         rows = new ArrayList<IRow>();
@@ -35,6 +36,14 @@ public class DataSet implements Serializable {
 
     public DataSetKeys getDataSetKeys() {
         return dataSetKeys;
+    }
+
+    public String getReportLog() {
+        return reportLog;
+    }
+
+    public void setReportLog(String reportLog) {
+        this.reportLog = reportLog;
     }
 
     public List<String> getAudits() {

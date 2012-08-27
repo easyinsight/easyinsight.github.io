@@ -565,6 +565,20 @@ public class FeedService {
         }
     }
 
+    public FederatedDataSource createFederatedDataSource(List<FederationSource> sources, String name, EIConnection conn) throws Exception {
+
+            FederatedDataSource federatedDataSource = new FederatedDataSource();
+            federatedDataSource.setFeedName(name);
+            federatedDataSource.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID()));
+            federatedDataSource.setSources(sources);
+            federatedDataSource.populateFields(conn);
+            federatedDataSource.setApiKey(RandomTextGenerator.generateText(12));
+            long feedID = feedStorage.addFeedDefinitionData(federatedDataSource, conn);
+            DataStorage.liveDataSource(feedID, conn);
+            return federatedDataSource;
+
+    }
+
     public CompositeFeedDefinition createCompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> edges,
                                                        String feedName, EIConnection conn) throws Exception {
         CompositeFeedDefinition feedDef = new CompositeFeedDefinition();
