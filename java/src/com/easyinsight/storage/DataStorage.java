@@ -4,6 +4,7 @@ import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
@@ -800,7 +801,7 @@ public class DataStorage implements IDataStorage {
         Collection<FilterDefinition> eligibleFilters = new ArrayList<FilterDefinition>();
         if (filters != null) {
             for (FilterDefinition filterDefinition : filters) {
-                if (filterDefinition.isApplyBeforeAggregation() && filterDefinition.validForQuery()) {
+                if (filterDefinition.getPipelineName().equals(Pipeline.BEFORE) && filterDefinition.validForQuery()) {
                     if (filterDefinition.getField() != null) {
                         if (!keyStrings.contains(filterDefinition.getField().getKey().toSQL())) {
                             continue;
