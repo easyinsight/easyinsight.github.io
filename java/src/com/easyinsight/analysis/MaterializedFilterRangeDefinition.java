@@ -26,7 +26,7 @@ public class MaterializedFilterRangeDefinition extends MaterializedFilterDefinit
 
     public boolean allows(Value value) {
         boolean allowed = false;
-        if (value.type() == Value.NUMBER) {
+        if (value.type() == Value.NUMBER || value.type() == Value.EMPTY) {
             Double doubleValue = value.toDouble();
             if (doubleValue != null) {
                 boolean lowerRange, upperRange;

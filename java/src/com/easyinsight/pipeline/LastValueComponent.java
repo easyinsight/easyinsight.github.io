@@ -11,22 +11,27 @@ import java.util.*;
  * Date: Aug 5, 2009
  * Time: 12:34:56 PM
  */
-public class LastValueComponent implements IComponent {
+public class LastValueComponent implements IComponent, DescribableComponent {
 
     private Map<Map<Key, Value>, List<IRow>> aggregationMap = new LinkedHashMap<Map<Key, Value>, List<IRow>>();
 
     private Map<Map<Key, Value>, Integer> countMap = new HashMap<Map<Key, Value>, Integer>();
+    private boolean absolute;
+    private int threshold = 1;
+
 
     private LastValueFilter lastValueFilter;
 
-    private boolean absolute;
 
-    private int threshold = 1;
 
     public LastValueComponent(LastValueFilter lastValueFilter) {
         this.lastValueFilter = lastValueFilter;
         this.absolute = lastValueFilter.isAbsolute();
         this.threshold = lastValueFilter.getThreshold();
+    }
+
+    public String getDescription() {
+        return "Last Value on " + lastValueFilter.label(false);
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {

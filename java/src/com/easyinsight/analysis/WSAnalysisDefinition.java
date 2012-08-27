@@ -454,9 +454,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 populate(map, analysisItem);
             }
         }
-        for (AnalysisItem analysisItem : analysisItems) {
-            insightRequestMetadata.pipelineAssign(analysisItem);
-        }
+
         Set<AnalysisItem> argh = new HashSet<AnalysisItem>();
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
@@ -534,6 +532,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         if (!additionalGroupingItems.isEmpty()) {
             populate(map, additionalGroupingItems);
+        }
+
+        for (AnalysisItem analysisItem : map.values()) {
+            insightRequestMetadata.pipelineAssign(analysisItem);
         }
 
         return new HashSet<AnalysisItem>(map.values());
