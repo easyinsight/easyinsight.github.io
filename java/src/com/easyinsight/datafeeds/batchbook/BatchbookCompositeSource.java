@@ -266,7 +266,7 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
                 FeedDefinition existingSource = new FeedStorage().getFeedDefinitionData(existing.getDataFeedID(), conn);
                 BatchbookSuperTagSource batchbook2CustomFieldSource = (BatchbookSuperTagSource) existingSource;
                 superTags.remove(batchbook2CustomFieldSource.getFeedName());
-                defaultChildren.add(batchbook2CustomFieldSource);
+                //defaultChildren.add(batchbook2CustomFieldSource);
                 break;
             }
         }

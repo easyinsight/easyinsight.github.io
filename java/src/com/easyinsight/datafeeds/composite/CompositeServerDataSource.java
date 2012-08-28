@@ -124,10 +124,8 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         boolean newSource = getCompositeFeedNodes().size() == 0;
         for (CompositeFeedNode node : getCompositeFeedNodes()) {
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
-            if (!newSource) {
-                if (feedDefinition instanceof IServerDataSourceDefinition) {
-                    dataSources.add((IServerDataSourceDefinition) feedDefinition);
-                }
+            if (feedDefinition instanceof IServerDataSourceDefinition) {
+                dataSources.add((IServerDataSourceDefinition) feedDefinition);
             }
             feedTypeMap.put(feedDefinition.getFeedType(), feedDefinition);
         }

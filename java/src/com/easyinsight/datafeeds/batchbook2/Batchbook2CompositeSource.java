@@ -123,7 +123,7 @@ public class Batchbook2CompositeSource extends CompositeServerDataSource {
                 FeedDefinition existingSource = new FeedStorage().getFeedDefinitionData(existing.getDataFeedID(), conn);
                 Batchbook2CustomFieldSource batchbook2CustomFieldSource = (Batchbook2CustomFieldSource) existingSource;
                 infos.remove(batchbook2CustomFieldSource.getCustomFieldID());
-                defaultChildren.add(batchbook2CustomFieldSource);
+                //defaultChildren.add(batchbook2CustomFieldSource);
                 break;
             }
         }
