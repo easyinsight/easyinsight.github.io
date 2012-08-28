@@ -121,11 +121,17 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         List<IServerDataSourceDefinition> dataSources = new ArrayList<IServerDataSourceDefinition>();
         Set<FeedType> feedTypes = getFeedTypes();
         Map<FeedType, FeedDefinition> feedTypeMap = new HashMap<FeedType, FeedDefinition>();
+        boolean newSource = getCompositeFeedNodes().size() == 0;
         for (CompositeFeedNode node : getCompositeFeedNodes()) {
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
+            if (!newSource) {
+                if (feedDefinition instanceof IServerDataSourceDefinition) {
+                    dataSources.add((IServerDataSourceDefinition) feedDefinition);
+                }
+            }
             feedTypeMap.put(feedDefinition.getFeedType(), feedDefinition);
         }
-        boolean newSource = getCompositeFeedNodes().size() == 0;
+
         for (FeedType feedType : feedTypes) {
             FeedDefinition existing = feedTypeMap.get(feedType);
             if (existing == null && newSource) {
@@ -136,8 +142,6 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 node.setDataSourceType(feedType.getType());
                 getCompositeFeedNodes().add(node);
                 dataSources.add(definition);
-            } else if (existing instanceof IServerDataSourceDefinition) {
-                dataSources.add((IServerDataSourceDefinition) existing);
             }
         }
         return dataSources;
