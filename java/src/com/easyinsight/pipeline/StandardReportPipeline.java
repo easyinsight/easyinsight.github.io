@@ -172,7 +172,7 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new LinkDecorationComponent());
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(Pipeline.AFTER, new DefaultFilterProcessor(), null, false));
+                components.addAll(filterDefinition.createComponents(Pipeline.LAST_FILTERS, new DefaultFilterProcessor(), null, false));
             }
         }
         components.add(new LimitsComponent());

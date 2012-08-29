@@ -31,7 +31,7 @@ public class PipelinePhaseTest extends TestCase implements ITestConstants {
             DataSourceWrapper todos = DataSourceWrapper.createDataSource("Todo", conn, "Todo - Project Name", GROUPING, "Milestone", GROUPING);
             DataSourceWrapper basecamp = DataSourceWrapper.createJoinedSource("Basecamp", conn, todos);
             DataSourceWrapper users = DataSourceWrapper.createDataSource("Users", conn, "User Full Name", GROUPING, "User Default Hourly Rate", MEASURE);
-            DataSourceWrapper projects = DataSourceWrapper.createDataSource("Projects", conn, "Project Name", GROUPING, "Budget", MEASURE);
+            DataSourceWrapper projects = DataSourceWrapper.createDataSource("Projects", conn, "Project Name", GROUPING, "Budget", MEASURE, "BigCat", GROUPING);
             DataSourceWrapper timeTracking = DataSourceWrapper.createDataSource("Time Tracking", conn, "Hours", MEASURE, "Time Tracking User", GROUPING, "Time Tracking Project", GROUPING);
             DataSourceWrapper harvest = DataSourceWrapper.createJoinedSource("Harvest", conn, users, projects, timeTracking);
             DataSourceWrapper warehouse = DataSourceWrapper.createJoinedSource("Warehouse", conn, basecamp, harvest);
@@ -43,7 +43,9 @@ public class PipelinePhaseTest extends TestCase implements ITestConstants {
             todos.addRow("Another Project", "");
             users.addRow("James Boe", 100);
             users.addRow("Jim Bob", 75);
-            projects.addRow("Shivano Consulting", 1000);
+            projects.addRow("Shivano Consulting", 900);
+            projects.addRow("Oregano Consulting", 100);
+            projects.addRow("XYZ Consulting", 500);
             projects.addRow("Another Project", 500);
             timeTracking.addRow(5, "James Boe", "Shivano Consulting");
             timeTracking.addRow(3, "Jim Bob", "Shivano Consulting");
@@ -51,7 +53,7 @@ public class PipelinePhaseTest extends TestCase implements ITestConstants {
             timeTracking.addRow(7, "Jim Bob", "Another Project");
 
             ReportWrapper report = warehouse.createReport();
-            FilterValueDefinition filter = new FilterValueDefinition(warehouse.getField("User Full Name").getAnalysisItem(), true, Arrays.asList((Object) "James Boe"));
+            FilterValueDefinition filter = new FilterValueDefinition(warehouse.getField("Project Name").getAnalysisItem(), true, Arrays.asList((Object) "Shivano Consulting", "Oregano Consulting"));
             filter.setFilterName("FilterX");
             report.addFilter(filter);
             report.getListDefinition().setMarmotScript("createnamedpipeline(\"MidProc1\", \"afterJoins\", \"1\")\n" +
@@ -65,7 +67,7 @@ public class PipelinePhaseTest extends TestCase implements ITestConstants {
             report.addField("Val2");
             report.addField("Val3");
             Results results = report.runReport(conn);
-            results.verifyRow(1500, 3000, 5000);
+            results.verifyRow(1000, 2000, 4000);
         } finally {
             Database.closeConnection(conn);
         }

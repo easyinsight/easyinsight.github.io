@@ -81,7 +81,7 @@ public class FilterDefinition implements Serializable, Cloneable {
             if (applyBeforeAggregation) {
                 pipelineName = Pipeline.BEFORE;
             } else {
-                pipelineName = Pipeline.AFTER;
+                pipelineName = Pipeline.LAST_FILTERS;
             }
         }
         return pipelineName;

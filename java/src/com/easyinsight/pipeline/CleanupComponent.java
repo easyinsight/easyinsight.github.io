@@ -26,6 +26,12 @@ public class CleanupComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(pipelineName);
+        int i = 1;
+        if (pipelineData.getInsightRequestMetadata() != null && pipelineData.getInsightRequestMetadata().getIntermediatePipelines() != null) {
+            for (String pipe : pipelineData.getInsightRequestMetadata().getIntermediatePipelines()) {
+                structure.getSections().add(i++, pipe);
+            }
+        }
         structure.setReport(pipelineData.getReport());
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
         Set<AnalysisItem> allRequestedAnalysisItems = pipelineData.getAllRequestedItems();

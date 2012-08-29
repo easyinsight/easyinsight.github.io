@@ -23,7 +23,8 @@ public abstract class Pipeline {
 
     public static final String BEFORE = "before";
     public static final String AFTER = "after";
-    public static final String LAST = "last";
+    public static final String LAST = "last_calculations";
+    public static final String LAST_FILTERS = "last_filters";
 
     private List<IComponent> components = new ArrayList<IComponent>();
     private PipelineData pipelineData;
@@ -80,9 +81,10 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, Set<AnalysisItem> reportItems) {
         structure.setReport(report);
+        int i = 1;
         if (insightRequestMetadata.getIntermediatePipelines() != null) {
             for (String pipe : insightRequestMetadata.getIntermediatePipelines()) {
-                structure.getSections().add(1, pipe);
+                structure.getSections().add(i++, pipe);
             }
         }
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(dataSource.getFields());
@@ -99,9 +101,10 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allFields) {
         structure.setReport(report);
+        int i = 1;
         if (insightRequestMetadata.getIntermediatePipelines() != null) {
             for (String pipe : insightRequestMetadata.getIntermediatePipelines()) {
-                structure.getSections().add(1, pipe);
+                structure.getSections().add(i++, pipe);
             }
         }
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource, null);
@@ -114,9 +117,10 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allItems) {
         structure.setReport(report);
+        int i = 1;
         if (insightRequestMetadata.getIntermediatePipelines() != null) {
             for (String pipe : insightRequestMetadata.getIntermediatePipelines()) {
-                structure.getSections().add(1, pipe);
+                structure.getSections().add(i++, pipe);
             }
         }
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allItems, null, null);

@@ -16,7 +16,7 @@ public class AnalysisItemRetrievalStructure {
     private boolean onStorage;
     private WSAnalysisDefinition report;
     private AnalysisDefinition baseReport;
-    private List<String> sections = new ArrayList<String>(Arrays.asList(Pipeline.BEFORE, Pipeline.AFTER, Pipeline.LAST));
+    private List<String> sections = new ArrayList<String>(Arrays.asList(Pipeline.BEFORE, Pipeline.AFTER, Pipeline.LAST, Pipeline.LAST_FILTERS));
     private String currentSection;
 
     public AnalysisItemRetrievalStructure(@Nullable String currentSection, AnalysisItemRetrievalStructure structure) {

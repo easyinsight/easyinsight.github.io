@@ -45,6 +45,7 @@ public class ComplexTest extends TestCase implements ITestConstants {
             timeTracking.addRow(10, "James Boe", "Another Project");
             timeTracking.addRow(7, "Jim Bob", "Another Project");
             ReportWrapper report = warehouse.createReport();
+            report.getListDefinition().setOptimized(true);
             report.getListDefinition().setMarmotScript("uniquefield(\"Project Name\")\n" +
                     "assignunique(\"Spent\", \"Projects\")\n" +
                     "assignunique(\"Budget Remaining\", \"Projects\")\n" +
