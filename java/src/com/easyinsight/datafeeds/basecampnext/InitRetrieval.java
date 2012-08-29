@@ -25,19 +25,23 @@ public class InitRetrieval extends BasecampNextBaseSource {
 
     public List<BasecampNextAccount> getAccounts(BasecampNextCompositeSource parent) throws JSONException {
         JSONObject jsonObject = rawJSONRequestForObject("https://launchpad.37signals.com/authorization.json", parent);
-        JSONArray accountsArray = jsonObject.getJSONArray("accounts");
+        Object accountsArrayObject = jsonObject.getJSONObject("accounts");
         List<BasecampNextAccount> accounts = new ArrayList<BasecampNextAccount>();
-        for (int i = 0; i < accountsArray.length(); i++) {
-            JSONObject accountObject = accountsArray.getJSONObject(i);
-            String product = accountObject.getString("product");
-            if ("bcx".equals(product)) {
-                String s = accountObject.getString("id");
-                BasecampNextAccount account = new BasecampNextAccount();
-                account.setName(accountObject.getString("name"));
-                account.setId(s);
-                accounts.add(account);
+        if (accountsArrayObject instanceof JSONArray) {
+            JSONArray accountsArray = (JSONArray) accountsArrayObject;
+            for (int i = 0; i < accountsArray.length(); i++) {
+                JSONObject accountObject = accountsArray.getJSONObject(i);
+                String product = accountObject.getString("product");
+                if ("bcx".equals(product)) {
+                    String s = accountObject.getString("id");
+                    BasecampNextAccount account = new BasecampNextAccount();
+                    account.setName(accountObject.getString("name"));
+                    account.setId(s);
+                    accounts.add(account);
+                }
             }
         }
+
         return accounts;
     }
 }
