@@ -33,7 +33,7 @@ public class CleanupComponent implements IComponent {
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 if (filterDefinition.isEnabled()) {
-                    if (!structure.onOrAfter(filterDefinition.getPipelineName())) {
+                    if (structure.onOrAfter(filterDefinition.getPipelineName())) {
                         List<AnalysisItem> items = filterDefinition.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, allNeededAnalysisItems, structure);
                         allNeededAnalysisItems.addAll(items);
                     }
