@@ -125,6 +125,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                         }
                     }
                 } else if (statusLine.contains("403")) {
+                    LogClass.error("403 had status line " + statusLine);
                     throw new Http403Exception();
                 } else {
                     if (badCredentialsOnError) {
