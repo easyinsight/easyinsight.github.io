@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.basecampnext;
 
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,6 +38,7 @@ public class InitRetrieval extends BasecampNextBaseSource {
                     BasecampNextAccount account = new BasecampNextAccount();
                     account.setName(accountObject.getString("name"));
                     account.setId(s);
+                    System.out.println(SecurityUtil.getUserName() + " found " + s + " - " + accountObject.getString("name"));
                     accounts.add(account);
                 }
             }
