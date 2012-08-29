@@ -68,7 +68,7 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
             this.width = dashboardText.preferredWidth;
         }
         textArea.editable = false;
-        textArea.text = dashboardText.text;
+        textArea.htmlText = dashboardText.text;
         canvas.addChild(textArea);
     }
 
