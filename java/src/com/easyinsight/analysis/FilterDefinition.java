@@ -271,7 +271,7 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     public List<IComponent> createComponents(String pipelineName, IFilterProcessor filterProcessor, AnalysisItem sourceItem, boolean columnLevel) {
         List<IComponent> components = new ArrayList<IComponent>();
-        if (isEnabled() && pipelineName.equals(this.pipelineName)) {
+        if (isEnabled() && pipelineName.equals(getPipelineName())) {
             if (!isTemplateFilter() || columnLevel) {
                 components.add(new FilterComponent(this, filterProcessor));
             }
