@@ -1,0 +1,1 @@
+alter table authentication_log drop foreign key authentication_log_ibfk1;
