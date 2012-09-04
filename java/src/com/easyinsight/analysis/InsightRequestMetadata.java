@@ -162,6 +162,10 @@ public class InsightRequestMetadata implements Serializable {
         return pipelineMap.get(name);
     }
 
+    public Map<String, Pipeline> getPipelineMap() {
+        return pipelineMap;
+    }
+
     public void putPipeline(String name, Pipeline pipeline) {
         pipelineMap.put(name, pipeline);
     }

@@ -454,12 +454,17 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 populate(map, analysisItem);
             }
         }
-
-        for (AnalysisItem analysisItem : analysisItems) {
-            insightRequestMetadata.pipelineAssign(analysisItem);
+        boolean joinPipeline = insightRequestMetadata.getIntermediatePipelines() == null || insightRequestMetadata.getIntermediatePipelines().isEmpty();
+        if (joinPipeline) {
+            for (AnalysisItem analysisItem : analysisItems) {
+                insightRequestMetadata.pipelineAssign(analysisItem);
+            }
         }
+        /*for (AnalysisItem analysisItem : analysisItems) {
+            insightRequestMetadata.pipelineAssign(analysisItem);
+        }*/
 
-        Set<AnalysisItem> argh = new HashSet<AnalysisItem>();
+
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
                 List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), structure);
@@ -538,9 +543,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
             populate(map, additionalGroupingItems);
         }
 
-        /*for (AnalysisItem analysisItem : map.values()) {
-            insightRequestMetadata.pipelineAssign(analysisItem);
-        }*/
+        if (!joinPipeline) {
+            for (AnalysisItem analysisItem : map.values()) {
+                insightRequestMetadata.pipelineAssign(analysisItem);
+            }
+        }
 
         return new HashSet<AnalysisItem>(map.values());
     }
