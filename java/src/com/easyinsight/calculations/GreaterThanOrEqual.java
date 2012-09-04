@@ -10,7 +10,7 @@ import java.util.Calendar;
  * Date: 8/29/11
  * Time: 7:00 PM
  */
-public class GreaterThan extends Function {
+public class GreaterThanOrEqual extends Function {
     public Value evaluate() {
         Value compare1 = minusQuotes(getParameter(0));
         Value compare2 = minusQuotes(getParameter(1));
@@ -27,20 +27,20 @@ public class GreaterThan extends Function {
             }
 
             if (compare2.type() == Value.DATE) {
-                DateValue dateValue = (DateValue) compare2;
+                DateValue dateValue = (DateValue) compare1;
                 cal2.setTime(dateValue.getDate());
             } else {
                 cal2.setTimeInMillis(compare2.toDouble().longValue());
             }
 
             if (cal1.get(Calendar.YEAR) > cal2.get(Calendar.YEAR) ||
-                    (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) > cal2.get(Calendar.DAY_OF_YEAR))) {
+                    (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) >= cal2.get(Calendar.DAY_OF_YEAR))) {
                 returnValue = minusQuotes(getParameter(2));
             } else {
                 returnValue = minusQuotes(getParameter(3));
             }
         } else {
-            if (compare1.toDouble() > compare2.toDouble()) {
+            if (compare1.toDouble() >= compare2.toDouble()) {
                 returnValue = minusQuotes(getParameter(2));
             } else {
                 returnValue = minusQuotes(getParameter(3));
@@ -48,10 +48,6 @@ public class GreaterThan extends Function {
         }
 
         return returnValue;
-        /*
-        if (cal1.get(Calendar.DAY_OF_YEAR) > cal2.get(Calendar.DAY_OF_YEAR) &&
-                    cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)) {
-         */
     }
 
     @Override

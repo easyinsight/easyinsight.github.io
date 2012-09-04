@@ -200,6 +200,8 @@ public class FunctionFactory {
             return new AssignPipeline();
         } else if (s.equals("assignfilterpipeline")) {
             return new AssignFilterPipeline();
+        } else if (s.equals("greaterthanorequal")) {
+            return new GreaterThanOrEqual();
         } else {
             return null;
         }
