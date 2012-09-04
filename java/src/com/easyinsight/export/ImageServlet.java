@@ -48,8 +48,14 @@ public class ImageServlet extends HttpServlet {
                     resp.setContentLength(bytes.length);
                     reportName = URLEncoder.encode(reportName, "UTF-8");
                     resp.setHeader("Content-disposition","inline; filename=" + reportName+".png" );
-                    resp.setHeader("Cache-Control","no-cache"); //HTTP 1.1
-                    resp.setHeader("Pragma","no-cache"); //HTTP 1.0
+                    String userAgent = req.getHeader("User-Agent");
+                    if (userAgent != null && userAgent.contains("MSIE 8.0")) {
+                        resp.setHeader("Cache-Control","private"); //HTTP 1.1
+                        resp.setHeader("Pragma","token"); //HTTP 1.0
+                    } else {
+                        resp.setHeader("Cache-Control","no-cache"); //HTTP 1.1
+                        resp.setHeader("Pragma","no-cache"); //HTTP 1.0
+                    }
                     resp.setDateHeader ("Expires", 0); //prevents caching at the proxy server
                     resp.getOutputStream().write(bytes);
                     resp.getOutputStream().flush();

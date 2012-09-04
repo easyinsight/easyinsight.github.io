@@ -48,7 +48,7 @@ public class ExcelServlet extends HttpServlet {
                     reportName = URLEncoder.encode(reportName, "UTF-8");
                     //resp.setHeader("Content-disposition","inline; filename=" + reportName+".xls" );
                     String userAgent = req.getHeader("User-Agent");
-                    if (userAgent.contains("MSIE 8.0")) {
+                    if (userAgent != null && userAgent.contains("MSIE 8.0")) {
                         resp.setHeader("Cache-Control","private"); //HTTP 1.1
                         resp.setHeader("Pragma","token"); //HTTP 1.0
                     } else {
