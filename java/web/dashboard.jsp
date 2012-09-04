@@ -17,7 +17,7 @@
         long id = new DashboardService().canAccessDashboard(dashboardID);
         if (id == 0) {
             if (session.getAttribute("accountID") == null) {
-                session.setAttribute("loginRedirect", request.getRequestURI() + "?" + request.getQueryString());
+                session.setAttribute("loginRedirect", RedirectUtil.getURL(request, request.getRequestURI() + "?" + request.getQueryString()));
                 response.sendRedirect(RedirectUtil.getURL(request, "/app/login.jsp"));
                 return;
             }
