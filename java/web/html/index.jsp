@@ -68,7 +68,7 @@
                 <% if (!phone) { %>
                 <div class="nav-collapse">
                     <ul class="nav">
-                        <li><a href="/app/html">Data Sources</a></li>
+                        <li class="active"><a href="/app/html">Data Sources</a></li>
                     </ul>
                 </div>
                 <% } %>
