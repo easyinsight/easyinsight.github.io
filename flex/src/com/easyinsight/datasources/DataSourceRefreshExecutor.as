@@ -25,7 +25,7 @@ public class DataSourceRefreshExecutor extends EventDispatcher {
 
     public function refresh(dataSource:DataSourceInfo):void {
         this.dataSource = dataSource;
-        if (dataSource.scheduled || dataSource.type != DataSourceInfo.COMPOSITE) {
+        if (dataSource.scheduled || dataSource.type == DataSourceInfo.COMPOSITE) {
             forceRefresh();
         } else {
             var setupWindow:DataSourceRefreshSetupWindow = new DataSourceRefreshSetupWindow();
