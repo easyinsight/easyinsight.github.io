@@ -77,9 +77,9 @@ public class BatchbookSuperTagSource extends BatchbookBaseSource {
                 fieldList.add(multipleChoiceDimension);
             }
         } catch (ReportException re) {
-            throw re;
+            //throw re;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            // ignore, might be an old super tag
         }
         return fieldList;
     }
