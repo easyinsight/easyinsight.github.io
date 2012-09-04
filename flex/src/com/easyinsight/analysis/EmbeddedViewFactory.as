@@ -408,8 +408,6 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
     private function reportLoadHandler(event:Event):void {
         _reportRenderer = reportModuleLoader.create() as IReportRenderer;
         _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender, false, 0, true);
-        _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown, false, 0, true);
-        _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup, false, 0, true);
         _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
         _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
         _reportRenderer.addEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, onItemChange, false, 0, true);
@@ -438,14 +436,6 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
 
     private function toReport(event:ReportNavigationEvent):void {
         //dispatchEvent(event);
-    }
-
-    private function onRollup(event:HierarchyRollupEvent):void {
-
-    }
-
-    private function drilldown(event:HierarchyDrilldownEvent):void {
-
     }
 
     public function updateExportMetadata():void {

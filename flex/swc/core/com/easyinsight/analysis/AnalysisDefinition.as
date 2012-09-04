@@ -1,11 +1,11 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.filtering.FilterDefinition;
-import com.easyinsight.filtering.FilterRawData;
+
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.skin.ImageDescriptor;
 
-import flash.events.Event;
+
 
 import mx.collections.ArrayCollection;
 	
@@ -166,7 +166,7 @@ import mx.collections.ArrayCollection;
             
         }
 
-        public function showDrilldown(analysisItem:AnalysisItem):Boolean {
+        /*public function showDrilldown(analysisItem:AnalysisItem):Boolean {
             if (analysisItem is AnalysisHierarchyItem) {
                 var hierarchy:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
                 var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
@@ -182,9 +182,9 @@ import mx.collections.ArrayCollection;
                 return index > 0;
             }
             return false;
-        }
+        }*/
 
-        public function drill(analysisItem:AnalysisItem, data:Object):Event {
+        /*public function drill(analysisItem:AnalysisItem, data:Object):Event {
             var hierarchyItem:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
             var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
             if (index < (hierarchyItem.hierarchyLevels.length - 1)) {
@@ -197,7 +197,7 @@ import mx.collections.ArrayCollection;
                         hierarchyItem, index + 1);
             }
             return null;
-        }
+        }*/
 
         public function getValue(analysisItem:AnalysisItem, data:Object):Object {
             return data[analysisItem.qualifiedName()];

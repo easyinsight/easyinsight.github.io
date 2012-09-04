@@ -310,8 +310,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _reportRenderer.removeEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded);
             _reportRenderer.removeEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
             _reportRenderer.removeEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
-            _reportRenderer.removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
-            _reportRenderer.removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             if (UIComponent(_reportRenderer).parent) {
                 reportCanvas.removeChild(_reportRenderer as DisplayObject);
             }
@@ -476,8 +474,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _reportRenderer.addEventListener(ReportRendererEvent.REMOVE_ITEM, onItemRemoved, false, 0, true);
             _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender, false, 0, true);
             _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer, false, 0, true);
-            _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown, false, 0, true);
-            _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup, false, 0, true);
             _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
             _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
             _reportRenderer.addEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, itemChange, false, 0, true);
@@ -514,14 +510,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
             event.dataSourceID = _dataSourceID;
         }
         ReportEventProcessor.fromEvent(event, this);
-    }
-
-    private function onRollup(event:HierarchyRollupEvent):void {
-        
-    }
-
-    private function drilldown(event:HierarchyDrilldownEvent):void {
-        
     }
 
     private function customChangeFromControlBar(event:CustomChangeEvent):void {

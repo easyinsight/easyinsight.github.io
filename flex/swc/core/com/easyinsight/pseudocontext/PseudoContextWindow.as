@@ -1,15 +1,12 @@
 package com.easyinsight.pseudocontext {
 import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItemChangeEvent;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.DrillThrough;
 import com.easyinsight.analysis.DrillThroughEvent;
 import com.easyinsight.analysis.DrillThroughExecutor;
-import com.easyinsight.analysis.HierarchyLevel;
-import com.easyinsight.analysis.HierarchyRollupEvent;
 import com.easyinsight.analysis.Link;
 import com.easyinsight.analysis.ReportWindowEvent;
 import com.easyinsight.analysis.URLLink;
@@ -53,15 +50,15 @@ public class PseudoContextWindow extends VBox {
         this.passthroughObject = passthroughObject;
         this.analysisDefinition = analysisDefinition;
         items = [];
-        if (analysisDefinition.showDrilldown(analysisItem)) {
+        /*if (analysisDefinition.showDrilldown(analysisItem)) {
             var drilldownContextItem:PseudoContextItem = new PseudoContextItem("Drilldown", drill);
             items.push(drilldownContextItem);
         }
         if (analysisDefinition.showRollup(analysisItem)) {
             var rollupItem:PseudoContextItem = new PseudoContextItem("Rollup", onRollup);
             items.push(rollupItem);
-        }
-        if (analysisItem is AnalysisHierarchyItem) {
+        }*/
+        /*if (analysisItem is AnalysisHierarchyItem) {
             var hierarchy:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
             //var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
             for each (var level:HierarchyLevel in hierarchy.hierarchyLevels) {
@@ -72,7 +69,7 @@ public class PseudoContextWindow extends VBox {
                     }
                 }
             }
-        }
+        }*/
         if (analysisItem is AnalysisDateDimension) {
             var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
             if (date.dateLevel == AnalysisItemTypes.YEAR_LEVEL) {
@@ -198,7 +195,7 @@ public class PseudoContextWindow extends VBox {
         }
     }
 
-    private function onRollup(event:MouseEvent):void {
+    /*private function onRollup(event:MouseEvent):void {
         var hierarchyItem:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
         var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
         if (index > 0) {
@@ -215,7 +212,7 @@ public class PseudoContextWindow extends VBox {
             passthroughFunction.call(passthroughObject, drillEvent);
         }
         destroy();
-    }
+    }*/
 
     private function urlClick(event:MouseEvent):void {
         var link:URLLink = event.currentTarget.data as URLLink;

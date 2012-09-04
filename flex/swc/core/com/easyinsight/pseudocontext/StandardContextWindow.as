@@ -2,7 +2,6 @@ package com.easyinsight.pseudocontext {
 import com.easyinsight.analysis.ActualRowExecutor;
 import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItemChangeEvent;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
@@ -10,12 +9,8 @@ import com.easyinsight.analysis.DrillThrough;
 import com.easyinsight.analysis.DrillThroughEvent;
 import com.easyinsight.analysis.DrillThroughExecutor;
 import com.easyinsight.analysis.ReportWindowEvent;
-import com.easyinsight.analysis.HierarchyDrilldownEvent;
-import com.easyinsight.analysis.HierarchyLevel;
-import com.easyinsight.analysis.HierarchyRollupEvent;
 import com.easyinsight.analysis.Link;
 import com.easyinsight.analysis.URLLink;
-import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.report.ReportNavigationEvent;
 import com.easyinsight.rowedit.ActualRowEvent;
 import com.easyinsight.solutions.InsightDescriptor;
@@ -62,14 +57,13 @@ public class StandardContextWindow {
         this.copyText = copyText;
         this.altKey = altKey;
         items = [];
-        if (analysisItem is AnalysisHierarchyItem) {
+        /*if (analysisItem is AnalysisHierarchyItem) {
             var hierarchy:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
             if (includeDrills) {
                 var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
                 if (index < (hierarchy.hierarchyLevels.length - 1)) {
                     var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown");
                     drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, drill);
-                    items.push(drilldownContextItem);
                 }
                 if (index > 0) {
                     var rollupItem:ContextMenuItem = new ContextMenuItem("Rollup");
@@ -85,7 +79,7 @@ public class StandardContextWindow {
                     }
                 }
             }
-        }
+        }*/
         if (analysisItem is AnalysisDateDimension) {
             var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
             if (date.dateLevel == AnalysisItemTypes.YEAR_LEVEL) {
@@ -186,7 +180,7 @@ public class StandardContextWindow {
 
     }
 
-    private function onRollup(event:ContextMenuEvent):void {
+    /*private function onRollup(event:ContextMenuEvent):void {
         var hierarchyItem:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
         var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
         if (index > 0) {
@@ -207,7 +201,7 @@ public class StandardContextWindow {
             passthroughFunction.call(passthroughObject, new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData,
                     hierarchyItem, index + 1));
         }
-    }
+    }*/
 
     private function onReport(event:Event):void {
         passthroughFunction.call(passthroughObject, event);

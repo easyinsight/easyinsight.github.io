@@ -13,8 +13,6 @@
         import com.easyinsight.analysis.AnalysisItemOverrideEvent;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.EmbeddedViewFactory;
-        import com.easyinsight.analysis.HierarchyDrilldownEvent;
-        import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.service.ReportRetrievalFault;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
@@ -27,7 +25,6 @@
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.EIGlobalTimer;
         import com.easyinsight.framework.GlobalDataSourceEvent;
-        import com.easyinsight.framework.HierarchyOverride;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -45,7 +42,6 @@
         import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.util.UserAudit;
 
-        import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.core.Container;
@@ -94,8 +90,6 @@
             // initializeTransformContainer();
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
-            addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
-            addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             addEventListener(AnalysisItemOverrideEvent.ANALYSIS_ITEM_OVERRIDE, fieldChange);
             addEventListener(ActualRowEvent.ACTUAL_ROW_DATA, actualRowEvent);
             viewFactory.loadRenderer();
@@ -108,27 +102,9 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        private function onRollup(event:HierarchyRollupEvent):void {
-
-            var overrideObj:HierarchyOverride = new HierarchyOverride();
-            overrideObj.analysisItemID = event.hierarchy.analysisItemID;
-            overrideObj.position = event.position;
-            viewFactory.addOverride(overrideObj);
-            transformContainer.clearFilter(event.analysisItem);
-        }
-
         private function fieldChange(event:AnalysisItemOverrideEvent):void {
             viewFactory.addOverride(event.analysisItemOverride);
             viewFactory.refresh();
-        }
-
-        private function childFilterCreation(event:HierarchyDrilldownEvent):void {
-            viewFactory.noCache = true;
-            var overrideObj:HierarchyOverride = new HierarchyOverride();
-            overrideObj.analysisItemID = event.hierarchyItem.analysisItemID;
-            overrideObj.position = event.position;
-            viewFactory.addOverride(overrideObj);
-            transformContainer.processRawFilterData(event.filterRawData, event.type == HierarchyDrilldownEvent.DRILLDOWN);
         }
 
         private function transformsUpdated(event:TransformsUpdatedEvent):void {
@@ -166,6 +142,10 @@
         [Bindable]
         [Embed(source="../../../../assets/funnel.png")]
         private var filterIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/earth.png")]
+        private var htmlIcon:Class;
         [Bindable]
         [Embed(source="../../../../assets/refresh.png")]
         private var refreshIcon:Class;
@@ -737,6 +717,10 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
+        private function viewInHTML():void {
+            navigateToURL(new URLRequest("/app/html/report/" + report.urlKey), "_blank");
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="setupAddRow" result="setupAddRow()"/>
@@ -755,6 +739,7 @@
         <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
                    labelPlacement="right" id="editReportButton"
                    toolTip="Open this report in the report editor..." label="Edit Report" styleName="grayButton"/>
+        <mx:Button labelPlacement="right" label="View in HTML" styleName="grayButton" click="viewInHTML()" icon="{htmlIcon}"/>
         <mx:Button labelPlacement="right" label="Add Row..." styleName="grayButton" click="addRow()" visible="{showAddRow}"/>
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>

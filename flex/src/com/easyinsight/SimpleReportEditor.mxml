@@ -47,8 +47,6 @@
         import com.easyinsight.analysis.FieldDoubleClickEvent;
         import com.easyinsight.analysis.FieldEditorEvent;
         import com.easyinsight.analysis.GenericDefinitionEditWindow;
-        import com.easyinsight.analysis.HierarchyDrilldownEvent;
-        import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.ImprovedSaveWindow;
         import com.easyinsight.analysis.PromptEvent;
@@ -499,8 +497,6 @@
                 addEventListener(AnalysisItemDeleteEvent.ANALYSIS_ITEM_DELETE, onAnalysisItemDelete);
                 addEventListener(CommandEvent.COMMAND, onCommand);
                 addEventListener(FieldDoubleClickEvent.FIELD_DOUBLE_CLICK, onItemDoubleClick);
-                addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
-                addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
                 dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
                 transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
                 try {
@@ -573,18 +569,6 @@
             dataService.reloadInitialContent(this, onMetadataReceipt);
         }
 
-        private function onRollup(event:HierarchyRollupEvent):void {
-            if (event.analysisItem == null) {
-
-            } else {
-                transformContainer.clearFilter(event.analysisItem);
-            }
-        }
-
-        private function childFilterCreation(event:HierarchyDrilldownEvent):void {
-            transformContainer.processRawFilterData(event.filterRawData, event.type == HierarchyDrilldownEvent.DRILLDOWN);
-        }
-
         private function createFilterBoxes(filters:Array):void {
             if (filters != null) {
                 transformContainer.loadingFromReport = true;
@@ -646,8 +630,6 @@
             cleanupBindings();
             removeEventListener(CommandEvent.COMMAND, onCommand);
             removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
-            removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
-            removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             if (dataService != null) {
                 dataService.removeEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
             }
