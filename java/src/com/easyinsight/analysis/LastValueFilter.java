@@ -29,7 +29,7 @@ public class LastValueFilter extends FilterDefinition {
     private boolean absolute;
 
     @Column(name="threshold")
-    private int threshold;
+    private int threshold = 1;
 
     public LastValueFilter(AnalysisItem key) {
         super(key);
