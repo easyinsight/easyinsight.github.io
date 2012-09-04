@@ -46,10 +46,6 @@ public class TreeDefinition extends AnalysisDefinition{
         return fields;
     }
 
-    override public function showDrilldown(analysisItem:AnalysisItem):Boolean {
-        return false;
-    }
-
     override public function populate(fields:ArrayCollection):void {
         var hierarchies:ArrayCollection = findItems(fields, AnalysisItemTypes.HIERARCHY);
         if (hierarchies.length > 0) {
