@@ -53,14 +53,77 @@ public class StatusSync extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         System.out.println("getting...");
         try {
-        SyncRunnable syncRunnable = new SyncRunnable();
-        syncRunnable.setDaemon(false);
-        syncRunnable.start();
-        } catch(Exception e) { e.printStackTrace(); }
+            SyncRunnable syncRunnable = new SyncRunnable();
+            syncRunnable.setDaemon(false);
+
+            syncRunnable.start();
+            SyncReferralStatus sr = new SyncReferralStatus();
+            sr.setDaemon(false);
+            sr.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         resp.setContentType("text/xml");
         resp.setStatus(200);
         resp.getOutputStream().write("<response>Started.</response>".getBytes());
         resp.getOutputStream().flush();
+    }
+
+    private class SyncReferralStatus extends Thread {
+        @Override
+        public void run() {
+            try {
+                HttpClient client = new HttpClient();
+                client.getParams().setAuthenticationPreemptive(true);
+                System.out.println(username + ":" + password);
+                Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
+                client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
+                GetMethod getMethod = new GetMethod("https://www.easy-insight.com/app/xml/reports/qklgRQujbPoEtSWVSwYA");
+                client.executeMethod(getMethod);
+                Document doc = new Builder().build(getMethod.getResponseBodyAsStream());
+
+                Nodes nodes = doc.query("/response/rows/row");
+                List<ReferralStatusRecord> fields = new ArrayList<ReferralStatusRecord>();
+                DateFormat df = new SimpleDateFormat("MMM-dd-yy hh:mm aa");
+                for (int i = 0; i < nodes.size(); i++) {
+                    Node rowNode = nodes.get(i);
+                    String participantID = rowNode.query("value[@field='Participant ID']").get(0).getValue();
+                    String status = rowNode.query("value[@field='Referral Status']").get(0).getValue();
+                    String countedDate = rowNode.query("value[@field='Counted Date']").get(0).getValue();
+                    fields.add(new ReferralStatusRecord(participantID, status, countedDate));
+
+                }
+
+                DataSourceFactory dataSourceFactory = APIUtil.defineDataSource("Participant Referral Statuses", username, password);
+
+                dataSourceFactory.addGrouping("ParticipantID");
+                dataSourceFactory.addGrouping("ReferralStatus");
+                dataSourceFactory.addDate("CountedDate");
+
+                DataSourceOperationFactory dataSourceOperationFactory = dataSourceFactory.defineDataSource();
+
+                DataSourceTarget dataSourceTarget = dataSourceOperationFactory.replaceRowsOperation();
+
+                dataSourceTarget.flush();
+
+                dataSourceTarget = dataSourceOperationFactory.addRowsOperation();
+
+                for (int i = 0; i < fields.size(); i++) {
+                    ReferralStatusRecord record = fields.get(i);
+                    DataRow dataRow = dataSourceTarget.newRow();
+                    dataRow.addValue("ParticipantID", record.getParticipantID());
+                    dataRow.addValue("ReferralStatus", record.getStatus());
+                    dataRow.addValue("CountedDate", record.getCountedDate());
+                    if ((i % 5000) == 0) {
+                        dataSourceTarget.flush();
+                    }
+                }
+
+                dataSourceTarget.flush();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private class SyncRunnable extends Thread {
@@ -113,6 +176,42 @@ public class StatusSync extends HttpServlet {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private static class ReferralStatusRecord {
+        private String participantID;
+        private String status;
+        private String countedDate;
+
+        public String getParticipantID() {
+            return participantID;
+        }
+
+        public void setParticipantID(String participantID) {
+            this.participantID = participantID;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getCountedDate() {
+            return countedDate;
+        }
+
+        public void setCountedDate(String countedDate) {
+            this.countedDate = countedDate;
+        }
+
+        private ReferralStatusRecord(String participantID, String status, String countedDate) {
+            this.participantID = participantID;
+            this.status = status;
+            this.countedDate = countedDate;
         }
     }
 
