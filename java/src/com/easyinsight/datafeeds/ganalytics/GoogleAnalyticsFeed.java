@@ -66,46 +66,43 @@ public class GoogleAnalyticsFeed extends Feed {
                 URL queryURL = new URL("https://www.googleapis.com/analytics/v2.4/management/accounts");
                 ManagementFeed accountsFeed = as.getFeed(queryURL, ManagementFeed.class);
                 for (ManagementEntry accountEntry : accountsFeed.getEntries()) {
-                    //String title = accountEntry.getTitle().getPlainText();
-                    /*if (!titleFilters.isEmpty() && !titleFilters.contains(title)) {
-                        continue;
-                    }*/
-
-                    //String ids = accountEntry.getTableId().getValue();
                     String accountID = accountEntry.getProperty("ga:accountId");
-                    ManagementFeed webPropertyFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/"+accountID+"/webproperties"), ManagementFeed.class);
-                    ManagementEntry webPropertyEntry = webPropertyFeed.getEntries().iterator().next();
-                    String webPropertyID = webPropertyEntry.getProperty("ga:WebPropertyId");
-                    ManagementFeed profilesFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/"+accountID+"/webproperties/"+webPropertyID+"/profiles"), ManagementFeed.class);
-                    ManagementEntry profileEntry = profilesFeed.getEntries().iterator().next();
-                    String ids = profileEntry.getProperty("dxp:tableId");
-                    //String ids = "";
-                    StringBuilder urlBuilder = new StringBuilder("https://www.google.com/analytics/feeds/data?ids=");
-                    urlBuilder.append(ids);
+                    ManagementFeed webPropertyFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/" + accountID + "/webproperties"), ManagementFeed.class);
+                    for (ManagementEntry webPropertyEntry : webPropertyFeed.getEntries()) {
 
-                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-                        urlBuilder.append("&dimensions=");
-                        urlBuilder.append(queryItem.getKey().toKeyString());
-                        urlBuilder.append("&metrics=");
-                        String measure = GoogleAnalyticsDataSource.getMeasure(queryItem.getKey().toKeyString());
-                        if (measure == null) {
-                            throw new RuntimeException("Could not locate measure for dimension " + queryItem.getKey().toKeyString());
+                        String webPropertyID = webPropertyEntry.getProperty("ga:WebPropertyId");
+                        ManagementFeed profilesFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/" + accountID + "/webproperties/" + webPropertyID + "/profiles"), ManagementFeed.class);
+                        for (ManagementEntry profileEntry : profilesFeed.getEntries()) {
+                            String ids = profileEntry.getProperty("dxp:tableId");
+                            //String ids = "";
+                            StringBuilder urlBuilder = new StringBuilder("https://www.google.com/analytics/feeds/data?ids=");
+                            urlBuilder.append(ids);
+
+                            if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                                urlBuilder.append("&dimensions=");
+                                urlBuilder.append(queryItem.getKey().toKeyString());
+                                urlBuilder.append("&metrics=");
+                                String measure = GoogleAnalyticsDataSource.getMeasure(queryItem.getKey().toKeyString());
+                                if (measure == null) {
+                                    throw new RuntimeException("Could not locate measure for dimension " + queryItem.getKey().toKeyString());
+                                }
+                                urlBuilder.append(measure);
+                            } else {
+                                urlBuilder.append("&metrics=");
+                                urlBuilder.append(queryItem.getKey().toKeyString());
+                            }
+                            Calendar cal = Calendar.getInstance();
+                            cal.add(Calendar.YEAR, -1);
+                            String endDateString = outboundDateFormat.format(new Date());
+                            String startDateString = outboundDateFormat.format(cal.getTime());
+                            urlBuilder.append("&start-date=").append(startDateString).append("&end-date=").append(endDateString);
+                            URL reportUrl = new URL(urlBuilder.toString());
+                            DataFeed feed = as.getFeed(reportUrl, DataFeed.class);
+
+                            for (DataEntry entry : feed.getEntries()) {
+                                metadata.addValue(queryItem, getValue(queryItem, entry), insightRequestMetadata);
+                            }
                         }
-                        urlBuilder.append(measure);
-                    } else {
-                        urlBuilder.append("&metrics=");
-                        urlBuilder.append(queryItem.getKey().toKeyString());
-                    }
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.YEAR, -1);
-                    String endDateString = outboundDateFormat.format(new Date());
-                    String startDateString = outboundDateFormat.format(cal.getTime());
-                    urlBuilder.append("&start-date=").append(startDateString).append("&end-date=").append(endDateString);
-                    URL reportUrl = new URL(urlBuilder.toString());
-                    DataFeed feed = as.getFeed(reportUrl, DataFeed.class);
-
-                    for (DataEntry entry : feed.getEntries()) {
-                        metadata.addValue(queryItem, getValue(queryItem, entry), insightRequestMetadata);
                     }
                 }
             }
@@ -259,70 +256,72 @@ public class GoogleAnalyticsFeed extends Feed {
 
                 //String ids = accountEntry.getTableId().getValue();
                 String accountID = accountEntry.getProperty("ga:accountId");
-                ManagementFeed webPropertyFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/"+accountID+"/webproperties"), ManagementFeed.class);
-                ManagementEntry webPropertyEntry = webPropertyFeed.getEntries().iterator().next();
-                String webPropertyID = webPropertyEntry.getProperty("ga:WebPropertyId");
-                ManagementFeed profilesFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/"+accountID+"/webproperties/"+webPropertyID+"/profiles"), ManagementFeed.class);
-                ManagementEntry profileEntry = profilesFeed.getEntries().iterator().next();
-                String ids = profileEntry.getProperty("dxp:tableId");
-                //String ids = "";
-                StringBuilder urlBuilder = new StringBuilder("https://www.google.com/analytics/feeds/data?ids=");
-                urlBuilder.append(ids);
+                ManagementFeed webPropertyFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/" + accountID + "/webproperties"), ManagementFeed.class);
+                for (ManagementEntry webPropertyEntry : webPropertyFeed.getEntries()) {
 
-                urlBuilder.append("&dimensions=");
-                if (dimensions.size() > 0) {
-                    Iterator<AnalysisDimension> dimIter = dimensions.iterator();
-                    while (dimIter.hasNext()) {
-                        AnalysisDimension analysisDimension = dimIter.next();
-                        if ("title".equals(analysisDimension.getKey().toKeyString())) {
-                            continue;
-                        }
-                        urlBuilder.append(analysisDimension.getKey().toKeyString());
-                        if (dimIter.hasNext()) {
-                            urlBuilder.append(",");
-                        }
-                    }
-                    if (urlBuilder.charAt(urlBuilder.length() - 1) == ',') {
-                        urlBuilder.deleteCharAt(urlBuilder.length() - 1);
-                    }
-                }
-                urlBuilder.append("&metrics=");
-                Iterator<AnalysisMeasure> measureIter = measures.iterator();
-                while (measureIter.hasNext()) {
-                    AnalysisMeasure analysisMeasure = measureIter.next();
-                    urlBuilder.append(analysisMeasure.getKey().toKeyString());
-                    if (measureIter.hasNext()) {
-                        urlBuilder.append(",");
-                    }
-                }
-                urlBuilder.append("&start-date=").append(startDateString).append("&end-date=").append(endDateString);
-                String next = urlBuilder.toString();
-                
-                while (next != null) {
-                    URL reportUrl = new URL(next);
-                    DataFeed feed = as.getFeed(reportUrl, DataFeed.class);
-                    
-                    for (DataEntry entry : feed.getEntries()) {
-                        IRow row = dataSet.createRow();
+                    String webPropertyID = webPropertyEntry.getProperty("ga:WebPropertyId");
+                    ManagementFeed profilesFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/" + accountID + "/webproperties/" + webPropertyID + "/profiles"), ManagementFeed.class);
+                    for (ManagementEntry profileEntry : profilesFeed.getEntries()) {
+                        String ids = profileEntry.getProperty("dxp:tableId");
+                        //String ids = "";
+                        StringBuilder urlBuilder = new StringBuilder("https://www.google.com/analytics/feeds/data?ids=");
+                        urlBuilder.append(ids);
 
-                        for (AnalysisItem analysisItem : analysisItems) {
-                            if ("title".equals(analysisItem.getKey().toKeyString())) {
-                                row.addValue(analysisItem.createAggregateKey(), title);
-                            } else {
-                                row.addValue(analysisItem.createAggregateKey(), getValue(analysisItem, entry));
+                        urlBuilder.append("&dimensions=");
+                        if (dimensions.size() > 0) {
+                            Iterator<AnalysisDimension> dimIter = dimensions.iterator();
+                            while (dimIter.hasNext()) {
+                                AnalysisDimension analysisDimension = dimIter.next();
+                                if ("title".equals(analysisDimension.getKey().toKeyString())) {
+                                    continue;
+                                }
+                                urlBuilder.append(analysisDimension.getKey().toKeyString());
+                                if (dimIter.hasNext()) {
+                                    urlBuilder.append(",");
+                                }
+                            }
+                            if (urlBuilder.charAt(urlBuilder.length() - 1) == ',') {
+                                urlBuilder.deleteCharAt(urlBuilder.length() - 1);
                             }
                         }
+                        urlBuilder.append("&metrics=");
+                        Iterator<AnalysisMeasure> measureIter = measures.iterator();
+                        while (measureIter.hasNext()) {
+                            AnalysisMeasure analysisMeasure = measureIter.next();
+                            urlBuilder.append(analysisMeasure.getKey().toKeyString());
+                            if (measureIter.hasNext()) {
+                                urlBuilder.append(",");
+                            }
+                        }
+                        urlBuilder.append("&start-date=").append(startDateString).append("&end-date=").append(endDateString);
+                        String next = urlBuilder.toString();
 
-                    }
-                    String nextLink = feed.getNextLink() == null ? null : feed.getNextLink().getHref();
-                    if (!next.equals(nextLink)) {
-                        next = nextLink;
-                    } else {
-                        next = null;
+                        while (next != null) {
+                            URL reportUrl = new URL(next);
+                            DataFeed feed = as.getFeed(reportUrl, DataFeed.class);
+
+                            for (DataEntry entry : feed.getEntries()) {
+                                IRow row = dataSet.createRow();
+
+                                for (AnalysisItem analysisItem : analysisItems) {
+                                    if ("title".equals(analysisItem.getKey().toKeyString())) {
+                                        row.addValue(analysisItem.createAggregateKey(), title);
+                                    } else {
+                                        row.addValue(analysisItem.createAggregateKey(), getValue(analysisItem, entry));
+                                    }
+                                }
+
+                            }
+                            String nextLink = feed.getNextLink() == null ? null : feed.getNextLink().getHref();
+                            if (!next.equals(nextLink)) {
+                                next = nextLink;
+                            } else {
+                                next = null;
+                            }
+                        }
                     }
                 }
             }
-            //String ids = "ga:16750246";
             return dataSet;
         } catch (AuthenticationException ae) {
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
