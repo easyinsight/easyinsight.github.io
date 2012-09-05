@@ -1,6 +1,6 @@
 package com.easyinsight.analysis {
 
-import com.easyinsight.util.ErrorReportView;
+import mx.collections.ArrayCollection;
 
 import mx.core.UIComponent;
 
@@ -9,14 +9,16 @@ import mx.core.UIComponent;
 public class StorageLimitFault extends ReportFault {
 
     public var message:String;
+    public var statsList:ArrayCollection;
 
     public function StorageLimitFault() {
         super();
     }
     
     override public function createFaultWindow():UIComponent {
-        var window:ErrorReportView = new ErrorReportView();
-        window.errorMessage = message;
+        var window:StorageLimitWindow = new StorageLimitWindow();
+        window.message = message;
+        window.statsList = statsList;
         return window;
     }
 
