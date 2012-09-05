@@ -55,6 +55,7 @@ public class UserServiceResponse {
     private byte[] reportImage;
     private boolean refreshReports;
     private boolean analyst;
+    private int pricingModel;
 
     public static UserServiceResponse createResponseWithUISettings(User user, ApplicationSkin applicationSkin, String personaName) {
         return createResponse(user, applicationSkin, personaName);
@@ -105,7 +106,7 @@ public class UserServiceResponse {
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
                                 account.getCurrencySymbol(), applicationSkin, account.getFirstDayOfWeek(),
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst());
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst(), account.getPricingModel());
         response.setReportImage(bytes);
         return response;
     }
@@ -123,7 +124,7 @@ public class UserServiceResponse {
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
                                String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
-                               boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst) {
+                               boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst, int pricingModel) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -161,6 +162,7 @@ public class UserServiceResponse {
         this.personaName = personaName;
         this.refreshReports = refreshReports;
         this.analyst = analyst;
+        this.pricingModel = pricingModel;
     }
 
     public boolean isAnalyst() {
@@ -193,6 +195,14 @@ public class UserServiceResponse {
 
     public void setPersonaName(String personaName) {
         this.personaName = personaName;
+    }
+
+    public int getPricingModel() {
+        return pricingModel;
+    }
+
+    public void setPricingModel(int pricingModel) {
+        this.pricingModel = pricingModel;
     }
 
     public ReportTypeOptions getReportTypeOptions() {

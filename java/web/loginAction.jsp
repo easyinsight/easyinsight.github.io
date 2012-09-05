@@ -34,6 +34,8 @@
             response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/index.jsp"));
         } else if (userServiceResponse.getAccountState() == Account.INACTIVE) {
             response.sendRedirect(RedirectUtil.getURL(request, "/app/activation/reactivate.jsp"));
+        } else if (userServiceResponse.getAccountState() == Account.REACTIVATION_POSSIBLE) {
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/reactivate"));
         } else {
             String urlHash = request.getParameter("urlhash");
             String rememberMe = request.getParameter("rememberMeCheckbox");
@@ -47,10 +49,10 @@
                 tokenCookie.setMaxAge(60 * 60 * 24 * 30);
                 response.addCookie(tokenCookie);
             }
-            /*if (userServiceResponse.isFirstLogin()) {
+            if (userServiceResponse.isFirstLogin()) {
                 response.sendRedirect(RedirectUtil.getURL(request, "/app/user/initialUserSetup.jsp"));
-            } else {*/
-            session.removeAttribute("loginRedirect");
+            } else {
+                session.removeAttribute("loginRedirect");
                 String redirectUrl = RedirectUtil.getURL(request, "/app/");
                 //System.out.println("Redirect url = " + oldRedirectUrl);
                 if(oldRedirectUrl != null) {
@@ -59,7 +61,7 @@
                 if(urlHash != null)
                    redirectUrl = redirectUrl + urlHash;
                 response.sendRedirect(redirectUrl);
-            //}
+            }
         }
     }
 %>

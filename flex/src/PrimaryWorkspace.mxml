@@ -91,6 +91,7 @@
             Security.allowInsecureDomain("maps.googleapis.com");
             PerspectiveFactoryHolder.factory = new PerspectiveFactory();
             Constants.setup();
+            TORegistry.registerTypes();
             UserAudit.initialize();
             ApplicationSkin.initialize();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
@@ -348,9 +349,6 @@
                 toLogin(LoginPage.REACTIVATE);
             } else if (authResult.accountState == Account.INACTIVE) {
                 toLogin(LoginPage.NEEDS_ACTIVATION);
-            } else if (authResult.firstLogin && !authResult.accountAdmin) {
-                quietLogin(authResult, false);
-                toLogin(LoginPage.INITIAL_USER_SETUP);
             } else {
                 quietLogin(authResult, false);
                 if (authResult.fixedDashboardID > 0) {
@@ -384,9 +382,6 @@
                     toLogin(LoginPage.REACTIVATE);
                 } else if (authResult.accountState == Account.INACTIVE) {
                     toLogin(LoginPage.NEEDS_ACTIVATION);
-                } else if (authResult.firstLogin && !authResult.accountAdmin) {
-                    quietLogin(authResult, false);
-                    toLogin(LoginPage.INITIAL_USER_SETUP);
                 } else {
                     quietLogin(authResult, false);
                     if (authResult.fixedDashboardID > 0) {

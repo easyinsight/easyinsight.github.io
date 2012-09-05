@@ -54,6 +54,7 @@ public class User extends EventDispatcher
     public var fixedDashboardID:int;
     public var subdomainEnabled:Boolean;
     public var refreshReports:Boolean;
+    public var pricingModel:int;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -144,6 +145,7 @@ public class User extends EventDispatcher
         _user.subdomainEnabled = response.subdomainEnabled;
         _user.refreshReports = response.refreshReports;
         _user.analyst = response.analyst;
+        _user.pricingModel = response.pricingModel;
         if (response.reportImage != null) {
             _user.loadBytes(response.reportImage);
         }

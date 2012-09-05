@@ -678,6 +678,7 @@ public class UserService {
             user.setPassword(encryptedPassword);
             user.setInitialSetupDone(true);
             session.update(user);
+            session.flush();
             session.getTransaction().commit();
             return null;
         } catch (Exception e) {
