@@ -87,9 +87,6 @@
                 dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
             } else if (event.authResponse.accountState == Account.INACTIVE) {
                 panelIndex = 2;
-            } else if (event.authResponse.firstLogin) {
-                dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
-                panelIndex = 6;
             } else if (event.authResponse.accountState == Account.BILLING_FAILED) {
                 panelIndex = 7;
             } else {
