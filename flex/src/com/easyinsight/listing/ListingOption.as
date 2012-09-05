@@ -29,6 +29,8 @@ import flash.events.MouseEvent;
             useHandCursor = true;
             buttonMode = true;
             BindingUtils.bindProperty(this, "headerBarBackgroundColor", ApplicationSkin.instance(), "headerBarBackgroundColor");
+            horizontalScrollPolicy = "off";
+            verticalScrollPolicy = "off";
 		}
 
     public function set headerBarBackgroundColor(color:uint):void {
