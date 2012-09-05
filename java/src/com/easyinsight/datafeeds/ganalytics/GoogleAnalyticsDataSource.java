@@ -78,7 +78,6 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static final String AD_KEYWORD = "ga:keyword";
     public static final String AD_MEDIUM = "ga:medium";
     public static final String AD_REFERRAL_PATH = "ga:referralPath";
-    public static final String AD_SOURCE = "ga:source";
 
     public static final String AD_CLICKS = "ga:adClicks";
     public static final String AD_COST = "ga:adCost";
@@ -139,7 +138,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static String[] generalMeasures = { VISITS };
 
     public static String[] adDimensions = { AD_CONTENT, AD_GROUP, AD_SLOT, AD_SLOT_POSITION, AD_CAMPAIGN, AD_KEYWORD,
-        AD_MEDIUM, AD_REFERRAL_PATH, AD_SOURCE };
+        AD_MEDIUM, AD_REFERRAL_PATH };
 
     public static String[] adMeasures = { AD_CLICKS };
 
@@ -263,7 +262,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
                 REGION, SCREEN_COLORS, SCREEN_RESOLUTION, SUB_CONTINENT, VISITOR_TYPE, PAGEVIEWS, TITLE,
                 BOUNCES, ENTRANCES, EXITS, NEW_VISITS, TIME_ON_PAGE, TIME_ON_SITE, VISITS,
                 AD_CONTENT, AD_GROUP, AD_SLOT, AD_SLOT_POSITION, AD_CAMPAIGN, AD_KEYWORD, AD_MEDIUM,
-                AD_REFERRAL_PATH, AD_SOURCE, AD_CLICKS, AD_COST, AD_CPC, AD_CPM, AD_CTR, AD_IMPRESSIONS,
+                AD_REFERRAL_PATH, AD_CLICKS, AD_COST, AD_CPC, AD_CPM, AD_CTR, AD_IMPRESSIONS,
                 CONTENT_EXIT_PAGE_PATH, CONTENT_LANDING_PAGE_PATH, CONTENT_PAGE_PATH, CONTENT_PAGE_TITLE,
                 CONTENT_UNIQUE_VIEWS, EC_AFFILIATION, EC_DAYS_TO, EC_CATEGORY, EC_NAME, EC_SKU, EC_TID,
                 EC_ITEM_REVENUE, EC_ITEM_QUANTITY, EC_TRANSACTION_REVENUE, EC_TRANSACTIONS,
@@ -330,7 +329,6 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         adItems.add(new AnalysisDimension(keys.get(AD_KEYWORD), "Ad Keyword"));
         adItems.add(new AnalysisDimension(keys.get(AD_MEDIUM), "Ad Medium"));
         adItems.add(new AnalysisDimension(keys.get(AD_REFERRAL_PATH), "Ad Referral Path"));
-        adItems.add(new AnalysisDimension(keys.get(AD_SOURCE), "Ad Source"));
         adItems.add(new AnalysisMeasure(keys.get(AD_CLICKS), "Ad Clicks", AggregationTypes.SUM));
         adItems.add(new AnalysisMeasure(keys.get(AD_COST), "Ad Cost", AggregationTypes.SUM));
         adItems.add(new AnalysisMeasure(keys.get(AD_CPC), "Cost to Advertiser Per Click", AggregationTypes.SUM));
