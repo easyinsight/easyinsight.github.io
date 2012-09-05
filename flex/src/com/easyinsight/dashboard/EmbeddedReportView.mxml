@@ -10,8 +10,6 @@
         import com.easyinsight.analysis.EmbeddedControllerLookup;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.EmbeddedViewFactory;
-        import com.easyinsight.analysis.HierarchyDrilldownEvent;
-        import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.IEmbeddedReportController;
         import com.easyinsight.analysis.InsightResponse;
         import com.easyinsight.commands.CommandEvent;
@@ -19,7 +17,6 @@
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataServiceLoadingEvent;
-        import com.easyinsight.framework.HierarchyOverride;
         import com.easyinsight.report.EmbeddedReportExportWindow;
         import com.easyinsight.report.ReportSetupEvent;
 
@@ -46,30 +43,11 @@
         private function initStuff():void {
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
-            addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
-            addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             if (_urlKey != null) {
                 analysisService.openAnalysisIfPossible.send(_urlKey);
             } else {
                 Alert.show("No analysisID parameter was specified in the report embed HTML code.");
             }
-        }
-
-        private function onRollup(event:HierarchyRollupEvent):void {
-            var overrideObj:HierarchyOverride = new HierarchyOverride();
-            overrideObj.analysisItemID = event.hierarchy.analysisItemID;
-            overrideObj.position = event.position;
-            dataViewFactory.addOverride(overrideObj);
-            transformContainer.clearFilter(event.analysisItem);
-        }
-
-        private function childFilterCreation(event:HierarchyDrilldownEvent):void {
-            dataViewFactory.noCache = true;
-            var overrideObj:HierarchyOverride = new HierarchyOverride();
-            overrideObj.analysisItemID = event.hierarchyItem.analysisItemID;
-            overrideObj.position = event.position;
-            dataViewFactory.addOverride(overrideObj);
-            transformContainer.processRawFilterData(event.filterRawData, event.type == HierarchyDrilldownEvent.DRILLDOWN);
         }
 
         [Bindable]
