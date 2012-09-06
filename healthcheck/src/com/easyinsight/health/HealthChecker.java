@@ -142,7 +142,7 @@ public class HealthChecker extends TimerTask {
         }
     }
 
-    private void alert() throws Exception {
+    public static void alert() throws Exception {
         TwilioRestClient client = new TwilioRestClient("ACef90386a431fd57dcc62d0b2bb8b00df", "f52b9bc3715f5896e91b0bd5af0ffd02", null);
         Map<String,String> params = new HashMap<String,String>();
         params.put("From", "7202208085");

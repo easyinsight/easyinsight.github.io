@@ -18,7 +18,9 @@ public class HealthCheckServlet extends HttpServlet {
     public void init(ServletConfig servletConfig) throws ServletException {
         timer = new Timer();
         HealthChecker.initialize();
+        SeleniumChecker.initialize();
         timer.schedule(HealthChecker.instance(), new Date(), 60000);
+        timer.schedule(SeleniumChecker.instance(), new Date(), 60000);
         System.out.println("Scheduled timer");
     }
 
