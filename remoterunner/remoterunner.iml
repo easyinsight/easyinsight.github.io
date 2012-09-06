@@ -30,11 +30,13 @@
     <orderEntry type="module-library">
       <library name="sel2">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/selenium-server.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/selenium-java-client-driver.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/selenium-java-2.25.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/selenium-server-standalone-2.25.0.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/lib/selenium-server-standalone-2.25.0.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
@@ -47,6 +49,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/metro" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="jetty" level="project" />
   </component>
 </module>
 
