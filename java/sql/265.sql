@@ -1,0 +1,1 @@
+alter table authentication_log modify column user_agent text;
