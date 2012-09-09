@@ -55,6 +55,9 @@
             parameterFilter = _filterDefinition.templateFilter;
             toggle = _filterDefinition.toggleEnabled;
             role = _filterDefinition.minimumRole;
+            if (_filterDefinition.field != null) {
+                filterField = filterDefinition.field.display + " - " + filterDefinition.field.key.createString();
+            }
         }
 
         private function onFilterEdit(event:FilterEditEvent):void {
@@ -95,6 +98,9 @@
         [Bindable]
         private var parameterFilter:Boolean;
 
+        [Bindable]
+        private var filterField = "";
+
         public function set fieldEditable(value:Boolean):void {
             _fieldEditable = value;
         }
@@ -128,6 +134,9 @@
 	<mx:VBox id="coreBox">
         <mx:HBox>
             <mx:Form>
+                <mx:FormItem label="Filter Field:">
+                    <mx:Label fontWeight="normal" fontFamily="Lucida Grande" text="{filterField}"/>
+                </mx:FormItem>
                 <mx:FormItem label="Row Level:">
                     <mx:CheckBox selected="{beforeAgg}" id="aggregationCheckbox"/>
                 </mx:FormItem>
