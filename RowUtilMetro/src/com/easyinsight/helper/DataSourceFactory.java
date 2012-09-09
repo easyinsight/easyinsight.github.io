@@ -18,6 +18,25 @@ public class DataSourceFactory {
     private String key;
     private String secretKey;
 
+    public String getRefreshUrl() {
+        return refreshUrl;
+    }
+
+    public void setRefreshUrl(String refreshUrl) {
+        this.refreshUrl = refreshUrl;
+    }
+
+    public String getRefreshKey() {
+        return refreshKey;
+    }
+
+    public void setRefreshKey(String refreshKey) {
+        this.refreshKey = refreshKey;
+    }
+
+    private String refreshKey;
+    private String refreshUrl;
+
     private String dataSourceKey;
 
     DataSourceFactory(String key, String secretKey, String dataSourceKey) {
@@ -122,6 +141,14 @@ public class DataSourceFactory {
             xmlBuilder.append("<dataSourceName><![CDATA[");
             xmlBuilder.append(dataSourceKey);
             xmlBuilder.append("]]></dataSourceName>");
+            if(refreshKey != null && refreshUrl != null) {
+                xmlBuilder.append("<refreshUrl><![CDATA[");
+                xmlBuilder.append(refreshUrl);
+                xmlBuilder.append("]]></refreshUrl>");
+                xmlBuilder.append("<refreshKey><![CDATA[");
+                xmlBuilder.append(refreshKey);
+                xmlBuilder.append("]]></refreshKey>");
+            }
             xmlBuilder.append("<fields>");
             for (FieldDefinition fieldDefinition : fieldDefinitions) {
                 xmlBuilder.append("<field dataType=\"");

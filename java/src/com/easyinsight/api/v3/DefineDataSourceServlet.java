@@ -29,7 +29,24 @@ public class DefineDataSourceServlet extends APIServlet {
             if (dataSourceNameNodes.size() == 0) {
                 return new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>You need to specify a data source name.</message>");
             }
+
             dataSourceName = dataSourceNameNodes.get(0).getValue();
+
+            Nodes refreshKeyNodes = document.query("/defineDataSource/refreshKey/text()");
+            String refreshKey = null;
+            if(refreshKeyNodes.size() > 0) {
+                refreshKey = refreshKeyNodes.get(0).getValue();
+            }
+
+            Nodes refreshUrlNodes = document.query("/defineDataSource/refreshUrl/text()");
+            String refreshUrl = null;
+            if(refreshUrlNodes.size() > 0) {
+                refreshUrl = refreshUrlNodes.get(0).getValue();
+            }
+
+            if((refreshKey == null) != (refreshUrl == null)) {
+                return new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>You must enter both refreshKey and refreshUrl if you enter either of them.</message>");
+            }
 
             Nodes fields = document.query("/defineDataSource/fields/field");
             List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
@@ -74,7 +91,7 @@ public class DefineDataSourceServlet extends APIServlet {
                 }
                 analysisItems.add(analysisItem);
             }
-            CallData callData = convertData(dataSourceName, analysisItems, conn, true);
+            CallData callData = convertData(dataSourceName, analysisItems, conn, true, refreshKey, refreshUrl);
             dataStorage = callData.dataStorage;
             dataStorage.commit();
             return new ResponseInfo(ResponseInfo.ALL_GOOD, "<dataSourceKey>" + callData.apiKey + "</dataSourceKey>");

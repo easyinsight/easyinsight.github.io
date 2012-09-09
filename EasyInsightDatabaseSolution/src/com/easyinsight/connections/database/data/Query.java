@@ -9,6 +9,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.Date;
 import java.sql.*;
@@ -26,6 +28,8 @@ import org.hibernate.Transaction;
  */
 @Entity
 public class Query {
+
+    private static SecureRandom random = new SecureRandom();
 
     public static Timer getScheduler() {
         return scheduler;
@@ -82,6 +86,16 @@ public class Query {
     private String dataSource;
     private String name;
 
+    public String getRefreshKey() {
+        return refreshKey;
+    }
+
+    public void setRefreshKey(String refreshKey) {
+        this.refreshKey = refreshKey;
+    }
+
+    private String refreshKey;
+
     @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     private ConnectionInfo connectionInfo;
 
@@ -130,6 +144,7 @@ public class Query {
 
     public ResultSet executeQuery(Connection conn) throws SQLException {
         PreparedStatement statement = conn.prepareStatement(getQuery());
+        statement.setFetchSize(Integer.MIN_VALUE);
         return statement.executeQuery();
     }
 
@@ -205,7 +220,13 @@ public class Query {
                 throw new RuntimeException("You need to enter your credentials first!");
             conn = this.getConnectionInfo().createConnection();
             rs = this.executeQuery(conn);
+            if(this.getRefreshKey() == null) {
+                this.setRefreshKey(new BigInteger(130, random).toString(32));
+            }
+            System.out.println(this.getRefreshKey());
             DataSourceFactory dataSourceFactory = APIUtil.defineDataSource(this.getDataSource(), user.getPublicKey(), user.getSecretKey());
+            dataSourceFactory.setRefreshUrl("http://localhost:8080/");
+            dataSourceFactory.setRefreshKey(this.getRefreshKey());
             for(int column = 1;column <= rs.getMetaData().getColumnCount();column++) {
                 switch (rs.getMetaData().getColumnType(column)) {
                     case Types.BIGINT:

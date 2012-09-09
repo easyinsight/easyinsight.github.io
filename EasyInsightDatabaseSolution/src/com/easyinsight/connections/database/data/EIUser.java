@@ -71,8 +71,10 @@ public class EIUser {
             List vals = session.createQuery("from EIUser").list();
             if(vals.size() == 0)
                 return null;
-            else
+            else {
+                System.out.println(vals.size());
                 return (EIUser) vals.get(0);
+            }
         }
         finally {
             session.close();

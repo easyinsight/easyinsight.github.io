@@ -190,7 +190,7 @@ public abstract class APIServlet extends HttpServlet {
         }
     }
 
-    protected CallData convertData(String dataSourceName, List<AnalysisItem> analysisItems, EIConnection conn, boolean updateIfNecessary) throws Exception {
+    protected CallData convertData(String dataSourceName, List<AnalysisItem> analysisItems, EIConnection conn, boolean updateIfNecessary, String refreshKey, String refreshUrl) throws Exception {
         if (dataSourceName == null) {
             throw new ServiceRuntimeException("You must specify a data source name or API key.");
         }
@@ -202,7 +202,15 @@ public abstract class APIServlet extends HttpServlet {
             if (dataSourceIDs.size() == 0) {
                 long userID = SecurityUtil.getUserID();
                 // create new data source
-                FeedDefinition feedDefinition = new FeedDefinition();
+                FeedDefinition feedDefinition;
+                if(refreshKey != null && refreshUrl != null) {
+                    DatabaseConnection dbConnection = new DatabaseConnection();
+                    dbConnection.setRefreshKey(refreshKey);
+                    dbConnection.setRefreshUrl(refreshUrl);
+                    feedDefinition = dbConnection;
+                } else {
+                    feedDefinition = new FeedDefinition();
+                }
                 if (dataSourceName.length() < 3) {
                     throw new ServiceRuntimeException("The data source name must be at least three characters.");
                 }
@@ -227,6 +235,10 @@ public abstract class APIServlet extends HttpServlet {
                 }
                 FeedStorage feedStorage = new FeedStorage();
                 FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(entry.getKey());
+                if(feedDefinition instanceof DatabaseConnection && refreshKey != null && refreshUrl != null) {
+                    ((DatabaseConnection) feedDefinition).setRefreshKey(refreshKey);
+                    ((DatabaseConnection) feedDefinition).setRefreshUrl(refreshUrl);
+                }
                 boolean newFieldsFound = false;
                 List<AnalysisItem> previousItems = feedDefinition.getFields();
                 for (AnalysisItem newItem : analysisItems) {

@@ -167,6 +167,8 @@ public class FeedType implements Serializable {
     public static final FeedType BATCHBOOK2_EMAILS = new FeedType(149);
     public static final FeedType BATCHBOOK2_CUSTOM = new FeedType(150);
 
+    public static final FeedType DATABASE_CONNECTION = new FeedType(153);
+
     private int type;
 
     public FeedType() {
