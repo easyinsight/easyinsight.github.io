@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.Dashboard;
 import nu.xom.Element;
@@ -97,6 +98,10 @@ public class Link implements Cloneable, Serializable {
     }
 
     public Element toXML(XMLMetadata xmlMetadata) {
+        return null;
+    }
+
+    public static Link fromXML(Element element, XMLImportMetadata xmlMetadata) {
         return null;
     }
 }

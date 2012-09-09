@@ -1,6 +1,8 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -51,7 +53,27 @@ public class ReportFieldExtension implements Cloneable, Serializable {
 
     }
 
-    public String toXML(XMLMetadata xmlMetadata) {
+    public Element toXML(XMLMetadata xmlMetadata) {
         return null;
+    }
+
+    public static ReportFieldExtension fromXML(Element extensionElement, XMLImportMetadata xmlImportMetadata) {
+        String extensionType = extensionElement.getAttribute("extensionType").getValue();
+        ReportFieldExtension reportFieldExtension;
+        if ("text".equals(extensionType)) {
+            reportFieldExtension = new TextReportFieldExtension();
+        } else if ("diagram".equals(extensionType)) {
+            reportFieldExtension = new DiagramReportFieldExtension();
+        } else if ("trend".equals(extensionType)) {
+            reportFieldExtension = new TrendReportFieldExtension();
+        } else {
+            throw new RuntimeException();
+        }
+        reportFieldExtension.subclassFromXML(extensionElement, xmlImportMetadata);
+        return reportFieldExtension;
+    }
+
+    protected void subclassFromXML(Element extensionElement, XMLImportMetadata xmlImportMetadata) {
+
     }
 }

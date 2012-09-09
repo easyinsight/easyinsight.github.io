@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -31,14 +32,25 @@ public class TextReportFieldExtension extends ReportFieldExtension {
     private boolean sortable = true;
 
     @Override
-    public String toXML(XMLMetadata xmlMetadata) {
-        Element element = new Element("textReportFieldExtension");
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("fieldExtension");
+        element.addAttribute(new Attribute("extensionType", "text"));
         element.addAttribute(new Attribute("align", align));
         element.addAttribute(new Attribute("size", String.valueOf(size)));
-        element.addAttribute(new Attribute("size", String.valueOf(fixedWidth)));
-        element.addAttribute(new Attribute("size", String.valueOf(wordWrap)));
-        element.addAttribute(new Attribute("size", String.valueOf(sortable)));
-        return element.toXML();
+        element.addAttribute(new Attribute("fixedWidth", String.valueOf(fixedWidth)));
+        element.addAttribute(new Attribute("wordWrap", String.valueOf(wordWrap)));
+        element.addAttribute(new Attribute("sortable", String.valueOf(sortable)));
+        return element;
+    }
+
+    @Override
+    protected void subclassFromXML(Element extensionElement, XMLImportMetadata xmlImportMetadata) {
+        super.subclassFromXML(extensionElement, xmlImportMetadata);
+        setAlign(extensionElement.getAttribute("align").getValue());
+        setSize(Integer.parseInt(extensionElement.getAttribute("size").getValue()));
+        setFixedWidth(Integer.parseInt(extensionElement.getAttribute("fixedWidth").getValue()));
+        setWordWrap(Boolean.parseBoolean(extensionElement.getAttribute("wordWrap").getValue()));
+        setSortable(Boolean.parseBoolean(extensionElement.getAttribute("sortable").getValue()));
     }
 
     public boolean isSortable() {

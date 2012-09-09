@@ -20,10 +20,10 @@ public class VerticalListReportExtension extends ReportFieldExtension {
     private boolean lineAbove;
 
     @Override
-    public String toXML(XMLMetadata xmlMetadata) {
+    public Element toXML(XMLMetadata xmlMetadata) {
         Element element = new Element("verticalListReportFieldExtension");
         element.addAttribute(new Attribute("lineAbove", String.valueOf(lineAbove)));
-        return element.toXML();
+        return element;
     }
 
     public boolean isLineAbove() {

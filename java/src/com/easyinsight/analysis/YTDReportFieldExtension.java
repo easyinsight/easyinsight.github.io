@@ -25,14 +25,14 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
     private boolean lineAbove;
 
     @Override
-    public String toXML(XMLMetadata xmlMetadata) {
+    public Element toXML(XMLMetadata xmlMetadata) {
         Element element = new Element("ytdReportFieldExtension");
         element.addAttribute(new Attribute("lineAbove", String.valueOf(lineAbove)));
         if (benchmark != null) {
             Element benchmark = new Element("benchmark");
             benchmark.appendChild(benchmark.toXML());
         }
-        return element.toXML();
+        return element;
     }
 
     public boolean isLineAbove() {
