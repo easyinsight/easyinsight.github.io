@@ -79,6 +79,11 @@ public class FileBasedFeedDefinition extends ServerDataSourceDefinition {
         return new ArrayList<AnalysisItem>();
     }
 
+    @Override
+    public String validateCredentials() {
+        return null;
+    }
+
     public String getPassword() {
         return password;
     }
