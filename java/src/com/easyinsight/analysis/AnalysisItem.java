@@ -14,6 +14,8 @@ import com.easyinsight.etl.LookupTable;
 import com.easyinsight.pipeline.IComponent;
 import nu.xom.Attribute;
 import nu.xom.Element;
+import nu.xom.Node;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 
 /**
@@ -124,6 +126,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public boolean isReady() {
+        return true;
+    }
+
+    public void setReady(boolean ready) {
+
     }
 
     public AnalysisItem getSortItem() {
@@ -589,7 +599,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AggregateKey createAggregateKey() {
         if (cachedKey == null) {
-            cachedKey = new AggregateKey(getKey(), getType(), getFilters());
+            if (keyColumn) {
+                cachedKey = new AggregatePrimaryKey(getKey(), getType(), getFilters());
+            } else {
+                cachedKey = new AggregateKey(getKey(), getType(), getFilters());
+            }
         }
         return cachedKey;
     }
@@ -802,6 +816,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             analysisItem.setDisplayName(displayName);
         }
         analysisItem.setConcrete(Boolean.parseBoolean(fieldNode.getAttribute("concrete").getValue()));
+        analysisItem.setFormattingConfiguration(FormattingConfiguration.fromXML(fieldNode));
 
         // so a derived key is going to be XXXXX:Blah or XXXXX:YYYYY:Blah
 
@@ -837,6 +852,33 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             }
         }
         analysisItem.setKey(baseItem.getKey());
+        Nodes filters = fieldNode.query("/filters/filter");
+        for (int i = 0; i < filters.size(); i++) {
+            Element filterNode = (Element) filters.get(i);
+            FilterDefinition filterDefinition = FilterDefinition.fromXML(filterNode, xmlImportMetadata);
+            analysisItem.getFilters().add(filterDefinition);
+        }
+        Nodes links = fieldNode.query("/links/link");
+        for (int i = 0; i < links.size(); i++) {
+            Element filterNode = (Element) links.get(i);
+            for (int j = 0; j < filterNode.getChildCount(); j++) {
+                Node linkNode = filterNode.getChild(j);
+                if (linkNode instanceof Element) {
+                    Link link = Link.fromXML((Element) linkNode, xmlImportMetadata);
+                    analysisItem.getLinks().add(link);
+                }
+            }
+        }
+        Nodes extensionNodes = fieldNode.query("/fieldExtension");
+        if (extensionNodes.size() > 0) {
+            Element extensionElement = (Element) extensionNodes.get(0);
+            analysisItem.setReportFieldExtension(ReportFieldExtension.fromXML(extensionElement, xmlImportMetadata));
+
+        }
         return analysisItem;
+    }
+
+    protected void subclassFromXML(Element fieldNode, XMLImportMetadata xmlImportMetadata) {
+
     }
 }
