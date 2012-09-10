@@ -22,6 +22,7 @@
             user = new EIUser();
         user.setPublicKey(request.getParameter("publicKey"));
         user.setSecretKey(request.getParameter("secretKey"));
+        user.setCurrentUrl(request.getParameter("currentUrl"));
         if(user.validateCredentials()) {
             Session dataSession = DataConnection.getSession();
             Transaction trans = dataSession.getTransaction();

@@ -28,6 +28,15 @@ public class EIUser {
 
     private String publicKey;
     private String secretKey;
+    private String currentUrl;
+
+    public String getCurrentUrl() {
+        return currentUrl;
+    }
+
+    public void setCurrentUrl(String currentUrl) {
+        this.currentUrl = currentUrl;
+    }
 
     public long getId() {
         return id;
@@ -62,7 +71,6 @@ public class EIUser {
             return false;
         }
     }
-
 
     private static EIUser instance;
     public static EIUser instance() throws SQLException {

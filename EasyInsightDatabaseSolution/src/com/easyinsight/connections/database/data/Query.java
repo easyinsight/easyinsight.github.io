@@ -159,6 +159,12 @@ public class Query {
         return session.createQuery("from Query").list();
     }
 
+    public static Query byRefreshToken(Session session, String refreshKey) throws SQLException {
+        List<Query> list = session.createQuery("from Query where refreshKey = ?").setString(0, refreshKey).list();
+        if(list.size() == 0) return null;
+        return list.get(0);
+    }
+
     public boolean isSchedule() {
         return schedule;
     }
@@ -225,7 +231,7 @@ public class Query {
             }
             System.out.println(this.getRefreshKey());
             DataSourceFactory dataSourceFactory = APIUtil.defineDataSource(this.getDataSource(), user.getPublicKey(), user.getSecretKey());
-            dataSourceFactory.setRefreshUrl("http://localhost:8080/");
+            dataSourceFactory.setRefreshUrl(user.getCurrentUrl());
             dataSourceFactory.setRefreshKey(this.getRefreshKey());
             for(int column = 1;column <= rs.getMetaData().getColumnCount();column++) {
                 switch (rs.getMetaData().getColumnType(column)) {

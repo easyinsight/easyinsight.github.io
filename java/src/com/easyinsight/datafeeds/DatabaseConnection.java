@@ -1,6 +1,8 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
@@ -58,6 +60,16 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
 
     public FeedType getFeedType() {
         return FeedType.DATABASE_CONNECTION;
+    }
+
+    @Override
+    public int getDataSourceType() {
+        return DataSourceInfo.STORED_PULL;
+    }
+
+    @Override
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
+        return new ArrayList<AnalysisItem>();
     }
 
     @Override

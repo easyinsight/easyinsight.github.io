@@ -520,7 +520,9 @@
 
                 <form id="credentialsForm" action="validateCredentials.jsp" method="post" onsubmit="return false;">
                     <p><label for="publicKey">Public Key/Username:</label> <input id="publicKey" name="publicKey" type="text" value="<%= user.getPublicKey() == null ? "" : user.getPublicKey() %>" /><br />
-                    <label for="secretKey">Secret Key/Password:</label> <input id="secretKey" name="secretKey" type="password" value="<%= user.getSecretKey() == null ? "" : user.getSecretKey() %>" /><br /></p>
+                    <label for="secretKey">Secret Key/Password:</label> <input id="secretKey" name="secretKey" type="password" value="<%= user.getSecretKey() == null ? "" : user.getSecretKey() %>" /><br />
+                    <label for="currentUrl">Current URL:</label> <input id="currentUrl" name="currentUrl" type="text" value="<%= user.getCurrentUrl() == null ? "" : user.getCurrentUrl() %>" /><br />
+                    </p>
                     <button onclick="validateCredentials('credentialsForm');">Save</button>
                 </form>
                 <div id="credentialsResults"></div>
