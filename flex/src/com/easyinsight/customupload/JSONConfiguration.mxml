@@ -16,6 +16,10 @@
         private var jsonPassword:String;
         [Bindable]
         private var httpValue:String;
+        [Bindable]
+        private var nextPage:String;
+        [Bindable]
+        private var resultCount:String;
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:JSONDataSource = feedDefinition as JSONDataSource;
@@ -25,6 +29,8 @@
             jsonUserName = ds.userName;
             jsonPassword = ds.password;
             httpValue = String(ds.httpMethod);
+            nextPage = ds.nextPageString;
+            resultCount = ds.resultsJSONPath;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
@@ -34,6 +40,8 @@
             ds.userName = userNameInput.text;
             ds.password = passwordInput.text;
             ds.jsonPath = jsonPathInput.text;
+            ds.nextPageString = nextPageInput.text;
+            ds.resultsJSONPath = resultCountInput.text;
         }
 
         public function validate():Boolean {
@@ -61,6 +69,15 @@
         </mx:FormItem>
         <mx:FormItem label="JSONPath (optional):" fontFamily="Tahoma" fontWeight="bold">
             <mx:TextInput id="jsonPathInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonPath}" width="350"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:TextArea text="If the target JSON API requires paging, you can specify how to page through the data with these next two settings. First, specify a JSONPath expression for retrieving the total number of results. For example, $.total to retrieve a property called total. Next, add the paging URL. Use \{n\} to represent the page number, for example http://etc/source.json?page=\{n\}." borderStyle="none" editable="false" width="650" height="65" fontSize="11"/>
+    <mx:Form>
+        <mx:FormItem label="Result Count JSONPath (optional):" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="resultCountInput" fontWeight="normal" fontFamily="Lucida Grande" text="{resultCount}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Next Page URL (optional):" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="nextPageInput" fontWeight="normal" fontFamily="Lucida Grande" text="{nextPage}" width="350"/>
         </mx:FormItem>
     </mx:Form>
 </mx:VBox>

@@ -21,6 +21,8 @@ public class JSONDataSource extends ServerDataSourceDefinition {
     public var password:String;
     public var jsonPath:String;
     public var httpMethod:int;
+    public var nextPageString:String;
+    public var resultsJSONPath:String;
 
     public function JSONDataSource() {
     }
