@@ -24,7 +24,7 @@
           dataSession.save(q);
           trans.commit(); %>
     <script type="text/javascript">jSuccess("Success!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
-    <script type="text/javascript">refreshQueries();$('#editQuery')[0].reset();$('#editQuery').hide();$('#newQueryButton').show();$("#queryList").show();</script>
+    <script type="text/javascript">refreshQueries();$('#createQuery')[0].reset();$('#createQuery').hide();$('#newQueryButton').show();$("#queryList").show();</script>
     <%
       } catch(Exception e) {
           trans.rollback();
