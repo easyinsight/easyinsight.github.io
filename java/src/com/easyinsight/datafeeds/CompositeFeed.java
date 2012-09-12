@@ -600,6 +600,19 @@ public class CompositeFeed extends Feed {
         } else if (getFeedType().getType() == FeedType.BASECAMP_MASTER.getType() && !insightRequestMetadata.isOptimized() && !insightRequestMetadata.isTraverseAllJoins()) {
             CompositeReportPipeline compositePipeline = new CompositeReportPipeline();
             WSListDefinition analysisDefinition = new WSListDefinition();
+            List<AnalysisItem> additionalFields = new ArrayList<AnalysisItem>();
+            Map<String, AnalysisItem> displayMap = new HashMap<String, AnalysisItem>();
+            Map<String, AnalysisItem> keyMap = new HashMap<String, AnalysisItem>();
+            for (AnalysisItem analysisItem : getFields()) {
+                displayMap.put(analysisItem.toDisplay(), analysisItem);
+                keyMap.put(analysisItem.getKey().toKeyString(), analysisItem);
+            }
+            for (AnalysisItem analysisItem : analysisItems) {
+                if (displayMap.get(analysisItem.toDisplay()) == null || keyMap.get(analysisItem.getKey().toKeyString()) == null) {
+                    additionalFields.add(analysisItem);
+                }
+            }
+            analysisDefinition.setAddedItems(additionalFields);
             analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
             compositePipeline.setup(analysisDefinition, this, insightRequestMetadata);
             dataSet = compositePipeline.toDataSet(dataSet);
