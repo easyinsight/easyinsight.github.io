@@ -26,6 +26,8 @@
     <script type="text/javascript" src="js/dbsolution.js"></script>
     <link rel="stylesheet" href="css/jquery-ui.css" media="screen" />
     <link rel="stylesheet" href="css/jNotify.jquery.css" media="screen" />
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <script src="js/bootstrap.min.js" language="javascript" type="text/javascript"></script>
     <style type="text/css">
         #loadingDiv {
             width: 100%;
@@ -68,48 +70,43 @@
         }
         #header {
             width:100%;
-            border-left-width: 1px;
-            border-left-style: solid;
-            border-left-color: #DDDDDD;
-            border-right-width: 1px;
-            border-right-style: solid;
-            border-right-color: #DDDDDD;
-        }
+            padding: 20px;
+         }
 
-        #logo {
-            padding: 7px 60px;
-            display: inline;
-        }
-        body {
-            text-align:center;
-            margin: 0px auto;
-        }
+        /*#logo {*/
+            /*padding: 7px 60px;*/
+            /*display: inline;*/
+        /*}*/
+        /*body {*/
+            /*text-align:center;*/
+            /*margin: 0px auto;*/
+        /*}*/
 
-        #mainTabs {
-            border: none;
-            padding:0px;
-        }
+        /*#mainTabs {*/
+            /*border: none;*/
+            /*padding:0px;*/
+        /*}*/
 
-        #mainTabs > div {
-            margin-top: 10px;
-            border-width: 1px;
-            border-style: solid;
-            border-color: #DDDDDD;
-        }
+        /*#mainTabs > div {*/
+            /*margin-top: 10px;*/
+            /*border-width: 1px;*/
+            /*border-style: solid;*/
+            /*border-color: #DDDDDD;*/
+        /*}*/
 
-        ul {
-            background-image: url(images/Banner3.jpg) !important;
-            background-position: bottom !important;
-        }
+        /*ul {*/
+            /*background-image: url(images/Banner3.jpg) !important;*/
+            /*background-position: bottom !important;*/
+        /*}*/
 
-        body > div {
-            font-family: Verdana, Helvetica, Arial, FreeSans, sans-serif;
-            text-align:left;
-            width:1000px;
-            display:block;
-            margin: 0px auto;
-            position:relative;
-        }
+        /*body > div {*/
+            /*font-family: Verdana, Helvetica, Arial, FreeSans, sans-serif;*/
+            /*text-align:left;*/
+            /*width:1000px;*/
+            /*display:block;*/
+            /*margin: 0px auto;*/
+            /*position:relative;*/
+        /*}*/
 
         .statusImage {
             cursor: pointer;
@@ -118,11 +115,11 @@
         span.success {
             color: #44FF44;
         }
-        
+
         span.failure {
             color: #FF4444;
         }
-        
+
         .controls {
             width:5.5em;
         }
@@ -130,7 +127,7 @@
         .scheduled {
             text-align:center;
         }
-        
+
         .append {
             text-align:center;
         }
@@ -193,7 +190,7 @@
         }
 
         #mainTabs.ui-widget-content, #mainTabs .ui-widget-content {
-            background-color: transparent;
+            /*background-color: transparent;*/
             background-image: none;
         }
 
@@ -232,51 +229,51 @@
             background-image:none;
         }
 
-        #mainTabs .ui-state-hover a, .ui-state-hover a:hover {
-            color: #EA003A;
-            font-weight: normal;
-        }
+        /*#mainTabs .ui-state-hover a, .ui-state-hover a:hover {*/
+            /*color: #EA003A;*/
+            /*font-weight: normal;*/
+        /*}*/
 
-        #mainTabs.ui-widget {
-            font-family: Verdana, Helvetica, Arial, FreeSans, sans-serif;
-        }
+        /*#mainTabs.ui-widget {*/
+            /*font-family: Verdana, Helvetica, Arial, FreeSans, sans-serif;*/
+        /*}*/
 
-        #mainTabs .ui-state-active, #mainTabs .ui-widget-content .ui-state-active {
-            border:none;
-        }
+        /*#mainTabs .ui-state-active, #mainTabs .ui-widget-content .ui-state-active {*/
+            /*border:none;*/
+        /*}*/
 
-        #signupHeadline {
-            height: 24px;
-            position: absolute;
-            right: 10px;
-            text-align: right;
-            top: 10px;
-            width: 200px;
-        }
+        /*#signupHeadline {*/
+            /*height: 24px;*/
+            /*position: absolute;*/
+            /*right: 10px;*/
+            /*text-align: right;*/
+            /*top: 10px;*/
+            /*width: 200px;*/
+        /*}*/
 
-        .signupButton {
-            background-image: url(images/buttons.png);
-            background-repeat: no-repeat;
-            display: inline-block;
-            height: 24px;
-            width: 70px;
-        }
+        /*.signupButton {*/
+            /*background-image: url(images/buttons.png);*/
+            /*background-repeat: no-repeat;*/
+            /*display: inline-block;*/
+            /*height: 24px;*/
+            /*width: 70px;*/
+        /*}*/
 
-        #mainTabs.ui-tabs .ui-tabs-nav {
-            width:100%;
-            border-left-width: 1px;
-            border-left-style: solid;
-            border-left-color: #DDDDDD;
-            border-right-width: 1px;
-            border-right-style: solid;
-            border-right-color: #DDDDDD;
-            border-radius: 0px;
-            padding: 0px;
-        }
+        /*#mainTabs.ui-tabs .ui-tabs-nav {*/
+            /*width:100%;*/
+            /*border-left-width: 1px;*/
+            /*border-left-style: solid;*/
+            /*border-left-color: #DDDDDD;*/
+            /*border-right-width: 1px;*/
+            /*border-right-style: solid;*/
+            /*border-right-color: #DDDDDD;*/
+            /*border-radius: 0px;*/
+            /*padding: 0px;*/
+        /*}*/
 
-        #mainTabs.ui-tabs .ui-tabs-nav li {
-            float: right;
-        }
+        /*#mainTabs.ui-tabs .ui-tabs-nav li {*/
+            /*float: right;*/
+        /*}*/
 
         #mainTabs .ui-state-hover, #mainTabs .ui-widget-content .ui-state-hover, #mainTabs .ui-state-focus, #mainTabs .ui-widget-content .ui-state-focus {
             background-image: none;
@@ -300,64 +297,64 @@
             color: #EA003A;
         }
 
-        #mainTabs.ui-tabs .ui-tabs-panel {
-            padding: 0px;
-        }
+        /*#mainTabs.ui-tabs .ui-tabs-panel {*/
+            /*padding: 0px;*/
+        /*}*/
 
-        #mainTabs.ui-tabs .ui-tabs-panel .content {
-            padding: 1em 1.4em;
-        }
+        /*#mainTabs.ui-tabs .ui-tabs-panel .content {*/
+            /*padding: 1em 1.4em;*/
+        /*}*/
 
-        #mainTabs.ui-tabs .ui-tabs-nav li a {
-            padding-bottom: 0.7em;
-        }
+        /*#mainTabs.ui-tabs .ui-tabs-nav li a {*/
+            /*padding-bottom: 0.7em;*/
+        /*}*/
 
-        #credentialsForm label, #editQuery label, #createQuery label, #editConnection label, #createConnection label,#updateCurrentUser label {
-            display: inline-block;
-            width: 250px;
-        }
+        /*#credentialsForm label, #editQuery label, #createQuery label, #editConnection label, #createConnection label,#updateCurrentUser label {*/
+            /*display: inline-block;*/
+            /*width: 250px;*/
+        /*}*/
 
-        #credentialsForm input, #editQuery input, #createQuery input, #editConnection input, #createConnection input, #updateCurrentUser input {
-            width: 250px;
-        }
+        /*#credentialsForm input, #editQuery input, #createQuery input, #editConnection input, #createConnection input, #updateCurrentUser input {*/
+            /*width: 250px;*/
+        /*}*/
 
         .errorDialog {
             display:none;
             width: 800px;
         }
 
-        .ui-dialog .ui-widget-header {
-            border-color: #B4B4B4;
-            background: #BEBEBE url(css/images/ui-bg_gloss-wave_35_888888_500x100.png);
-        }
+        /*.ui-dialog .ui-widget-header {*/
+            /*border-color: #B4B4B4;*/
+            /*background: #BEBEBE url(css/images/ui-bg_gloss-wave_35_888888_500x100.png);*/
+        /*}*/
 
-        .ui-dialog .ui-state-hover, .ui-dialog .ui-widget-content .ui-state-hover, .ui-dialog .ui-state-focus, .ui-dialog .ui-widget-content .ui-state-focus {
-            border: 1px solid #B4B4B4;
-            background: #E8E8E8 url(css/images/ui-bg_gloss-wave_35_888888_500x100.png) 50% 50% repeat-x;
-            font-weight: bold;
-            color: #AAAAAA;
-        }
+        /*.ui-dialog .ui-state-hover, .ui-dialog .ui-widget-content .ui-state-hover, .ui-dialog .ui-state-focus, .ui-dialog .ui-widget-content .ui-state-focus {*/
+            /*border: 1px solid #B4B4B4;*/
+            /*background: #E8E8E8 url(css/images/ui-bg_gloss-wave_35_888888_500x100.png) 50% 50% repeat-x;*/
+            /*font-weight: bold;*/
+            /*color: #AAAAAA;*/
+        /*}*/
 
-        .ui-dialog .ui-state-hover .ui-icon, .ui-dialog .ui-state-focus .ui-icon {
-            background-image: url(css/images/ui-icons_ffffff_256x240.png);
-        }
+        /*.ui-dialog .ui-state-hover .ui-icon, .ui-dialog .ui-state-focus .ui-icon {*/
+            /*background-image: url(css/images/ui-icons_ffffff_256x240.png);*/
+        /*}*/
 
-    :focus {
-        outline: 0;
-    }
+    /*:focus {*/
+        /*outline: 0;*/
+    /*}*/
         
     </style>
   </head>
   <body>
-  <div>
+  <div class="container">
       <div id="header">
           <a href="https://www.easy-insight.com/"><img id="logo" src="images/logo.jpg" alt="Easy Insight Logo" /></a>
       </div>
-      <div id="mainTabs">
+      <div class="well" id="mainTabs">
           <ul>
               <li><a href="#securityTab">SECURITY</a></li>
               <li><a href="#queriesTab">QUERIES</a></li>
-              <li><a href="#connectionsTab">DATA SOURCES</a></li>
+              <li><a href="#connectionsTab">DATA SOURCE</a></li>
               <li><a href="#userTab">USER INFO</a></li>
           </ul>
           <div id="securityTab">
@@ -422,7 +419,7 @@
           <div id="connectionsTab">
               <div class="title">
                 	<h2>
-                    Database Connections
+                    Database Connection
                     </h2>
 			  </div>
             <div class="content">
