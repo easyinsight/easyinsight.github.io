@@ -186,6 +186,9 @@
             sort.fields = [ new SortField("name")];
             reports.sort = sort;
             reports.refresh();
+            if (reports.length > 0 && _fixedReportID == 0 && reportID == 0) {
+                reportID = reports.getItemAt(0).id;
+            }
         }
 
         private function addRecipient():void {

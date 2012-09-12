@@ -138,7 +138,7 @@
         <mx:method name="deleteSchedule" result="deleted()"/>
         <mx:method name="getRefreshableDataSources" result="gotDataSources()"/>
     </mx:RemoteObject>
-    <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10" horizontalAlign="center" verticalGap="30">
+    <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10" horizontalAlign="center" verticalGap="30" paddingBottom="10">
         <mx:HBox width="100%">            
             <mx:Button label="Add Report Delivery..." click="newReportDelivery()" styleName="grayButton" fontSize="12"/>
             <mx:Button label="Add Scorecard Delivery..." click="newScorecard()" styleName="grayButton" fontSize="12"/>
