@@ -434,7 +434,7 @@ public class GoogleDataProvider {
 
         String tableName;
         try {
-            tableName = getSchema(sessionTicket, applicationToken, databaseID, items, connections, host);
+            tableName = getSchema(sessionTicket, applicationToken, databaseID, items, connections, host, new HashMap<String, Key>());
         } catch (QuickbaseSetupException e) {
             return null;
         }
@@ -448,7 +448,7 @@ public class GoogleDataProvider {
         return quickbaseDatabaseSource;
     }
 
-    public static String getSchema(String sessionTicket, String applicationToken, String databaseID, List<AnalysisItem> items, List<Connection> connections, String host) throws IOException, ParsingException, QuickbaseSetupException {
+    public static String getSchema(String sessionTicket, String applicationToken, String databaseID, List<AnalysisItem> items, List<Connection> connections, String host, Map<String, Key> keyMap) throws IOException, ParsingException, QuickbaseSetupException {
         String schemaRequest = MessageFormat.format(GET_SCHEMA_XML, sessionTicket, applicationToken);
         Document schemaDoc = executeRequest(host, databaseID, "API_GetSchema", schemaRequest);
         Nodes tableNameNodes = schemaDoc.query("/qdbapi/table/name/text()");
@@ -472,7 +472,11 @@ public class GoogleDataProvider {
             Element field = (Element) fields.get(j);
             String fieldID = field.getAttribute("id").getValue();
             String keyField = databaseID + "." + fieldID;
-            NamedKey namedKey = new NamedKey(keyField);
+            NamedKey namedKey;
+            namedKey = (NamedKey) keyMap.get(keyField);
+            if (namedKey == null) {
+                namedKey = new NamedKey(keyField);
+            }
             String fieldType = field.getAttribute("field_type").getValue();
             Attribute attributeMode = field.getAttribute("mode");
             if (attributeMode != null && "lookup".equals(attributeMode.getValue())) {
