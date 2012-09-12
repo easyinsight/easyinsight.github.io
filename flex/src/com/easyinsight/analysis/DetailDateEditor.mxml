@@ -5,6 +5,7 @@
         [Bindable]
         private var dateLevel:int;
 
+        [Bindable]
         private var dateFormat:String;
 
         override public function createAnalysisItem(aggregation:String):AnalysisItem {
@@ -25,7 +26,7 @@
             super.save(analysisItem);
             var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
             date.dateLevel = dateBox.selectedItem.data;
-            date.customDateFormat = dateFormat;
+            date.customDateFormat = customFormatInput.text;
             date.outputDateFormat = outputFormatInput.text;
         }
 
@@ -51,6 +52,9 @@
                 <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
             </mx:ArrayCollection>
         </util:SmartComboBox>
+    </mx:FormItem>
+    <mx:FormItem label="Custom Input Format (leave blank for default):">
+        <mx:TextInput id="customFormatInput" text="{dateFormat}"/>
     </mx:FormItem>
     <mx:FormItem label="Output Format (leave blank for default):">
         <mx:TextInput id="outputFormatInput" text="{outputFormat}"/>
