@@ -21,7 +21,7 @@
         trans.begin();
         Query query = (Query) dataSession.get(Query.class, Long.parseLong(request.getParameter("id")));
         query.update(request.getParameterMap());
-        query.setConnectionInfo((ConnectionInfo) dataSession.get(ConnectionInfo.class, Long.parseLong(request.getParameter("queryConnection"))));
+        query.setConnectionInfo(ConnectionInfo.instance());
         dataSession.save(query);
         trans.commit();
         %>

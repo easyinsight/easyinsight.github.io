@@ -116,32 +116,32 @@ public class RescareWprTest extends TestCase implements ITestConstants {
         }
     }
 
-//    public void testMeetsWpr() throws Exception {
-//        EIConnection conn = Database.instance().getConnection();
-//        try {
-//            createReport(conn);
-//            report.addField("Participant ID");
-//            report.addField("Meets WPR");
-//            participants.addRow("123456", "2012-06-06", 20, 10);
-//            activities.addRow("1", "123456", "Job Search");
-//            hours.addRow("1", "1", 8 * HOURS, 17 * HOURS, 12 * HOURS, 13 * HOURS, "Approved", "true", "false", 8 * HOURS, 17 * HOURS, "2012-06-07");
-//            hours.addRow("2", "1", 8 * HOURS, 17 * HOURS, 12 * HOURS, 13 * HOURS, "Approved", "true", "false", 8 * HOURS, 17 * HOURS, "2012-06-08");
-//
-//
-//            activities.addRow("2", "123456", "Training - Related to Employment");
-//            hours.addRow("3", "2", 8 * HOURS, 17 * HOURS, 12 * HOURS, 13 * HOURS, "Approved", "true", "false", 8 * HOURS, 17 * HOURS, "2012-06-09");
-//
-//            participants.addRow("123459", "2012-06-06", 20, 0);
-//            activities.addRow("3", "123459", "Job Search");
-//            hours.addRow("3", "3", 0, 0, 0, 0, "Approved", "true", "false", 8 * HOURS, 17 * HOURS, "2012-06-07");
-//            hours.addRow("4", "3", 8 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 8 * HOURS, 17 * HOURS, "2012-06-08");
-//            Results results = report.runReport(conn);
-//            results.verifyRow("123456", "true");
-//            results.verifyRow("123459", "false");
-//        } finally {
-//            Database.closeConnection(conn);
-//        }
-//    }
+    public void testMeetsWpr() throws Exception {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            createReport(conn);
+            report.addField("Participant ID");
+            report.addField("Meets WPR");
+            participants.addRow("123456", "2012-06-06", 20, 10);
+            activities.addRow("1", "123456", "Job Search");
+            hours.addRow("1", "1", 8 * HOURS, 17 * HOURS, 12 * HOURS, 13 * HOURS, "Approved", "true", "false", 8 * HOURS, 17 * HOURS, "2012-06-07");
+            hours.addRow("2", "1", 8 * HOURS, 17 * HOURS, 12 * HOURS, 13 * HOURS, "Approved", "true", "false", 8 * HOURS, 17 * HOURS, "2012-06-08");
+
+
+            activities.addRow("2", "123456", "Training - Related to Employment");
+            hours.addRow("3", "2", 8 * HOURS, 17 * HOURS, 12 * HOURS, 13 * HOURS, "Approved", "true", "false", 8 * HOURS, 17 * HOURS, "2012-06-09");
+
+            participants.addRow("123459", "2012-06-06", 20, 0);
+            activities.addRow("3", "123459", "Job Search");
+            hours.addRow("3", "3", 0, 0, 0, 0, "Approved", "true", "false", 8 * HOURS, 17 * HOURS, "2012-06-07");
+            hours.addRow("4", "3", 8 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 8 * HOURS, 17 * HOURS, "2012-06-08");
+            Results results = report.runReport(conn);
+            results.verifyRow("123456", "true");
+            results.verifyRow("123459", "false");
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
 
     public void testCoreActivities() throws Exception {
         EIConnection conn = Database.instance().getConnection();
@@ -297,6 +297,41 @@ public class RescareWprTest extends TestCase implements ITestConstants {
             results.verifyRow("123456", "Active");
             results.verifyRow("123457", "InActive");
             results.verifyRowCount(2);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void testAggregation() throws Exception {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            createReport(conn);
+
+            report.addField("Participant ID");
+            report.addField("Current Participant Status");
+            report.addField("Countable Core Hours");
+
+            participants.addRow("123456", "2012-06-06", 0, 0);
+
+            participantStatus.addRow("1", "123456", "2012-01-01", "Active");
+            participantStatus.addRow("2", "123456", "2012-02-01", "InActive");
+            participantStatus.addRow("3", "123456", "2012-06-06", "Active");
+            activities.addRow("1", "123456", "Community Work Experience");
+            hours.addRow("1", "1", 0, 0, 0, 0, "Approved", "true", "false", 6 * HOURS, 15 * HOURS, "2012-06-07");
+            hours.addRow("2", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Approved", "true", "true", 6 * HOURS, 15 * HOURS, "2012-06-08");
+            hours.addRow("3", "1", 6 * HOURS, 16 * HOURS, 12 * HOURS, 13 * HOURS, "Approved", "true", "false", 6 * HOURS, 15 * HOURS, "2012-06-09");
+            hours.addRow("4", "1", 6 * HOURS, 12 * HOURS, 0, 0, "Submitted", "true", "true", 6 * HOURS, 15 * HOURS, "2012-06-10");
+            hours.addRow("5", "1", 6 * HOURS, 12 * HOURS, 0, 0, "", "true", "true", 6 * HOURS, 15 * HOURS, "2012-06-11");
+            activities.addRow("2", "123456", "Training - GED");
+            hours.addRow("6", "2", 6 * HOURS, 15 * HOURS, 12 * HOURS, 13 * HOURS, "Approved", "true", "false", 6 * HOURS, 15 * HOURS, "2012-06-12");
+            hours.addRow("7", "2", 6 * HOURS, 15 * HOURS, 12 * HOURS, 13 * HOURS, "Approved", "true", "false", 6 * HOURS, 15 * HOURS, "2012-06-13");
+
+
+            Results results = report.runReport(conn);
+
+            results.verifyRow("123456", "Active", 17.0);
+
+
         } finally {
             Database.closeConnection(conn);
         }

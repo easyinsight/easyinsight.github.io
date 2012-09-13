@@ -24,7 +24,7 @@
             q = (Query) dataSession.get(Query.class, Long.parseLong(request.getParameter("id")));
         } else {
             q = new Query(request.getParameterMap());
-            q.setConnectionInfo((ConnectionInfo) dataSession.get(ConnectionInfo.class, Long.parseLong(request.getParameter("queryConnection"))));
+            q.setConnectionInfo(ConnectionInfo.instance());
         }
     } finally {
         dataSession.close();

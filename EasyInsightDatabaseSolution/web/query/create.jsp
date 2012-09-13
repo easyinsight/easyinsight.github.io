@@ -20,7 +20,7 @@
       Transaction trans = dataSession.getTransaction();
       try {
           trans.begin();
-          q.setConnectionInfo((ConnectionInfo) dataSession.get(ConnectionInfo.class, Long.parseLong(request.getParameter("queryConnection"))));
+          q.setConnectionInfo(ConnectionInfo.instance());
           dataSession.save(q);
           trans.commit(); %>
     <script type="text/javascript">jSuccess("Success!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>

@@ -77,7 +77,7 @@ function refreshDataSources() {
         type: 'get',
         success: loadResults("#databaseList")
     });
-    populateSelectStatement();
+//    populateSelectStatement();
 }
 
 function refreshQueries() {
@@ -167,6 +167,7 @@ function editQueryTab() {
     $("#newQueryButton").hide();
     $('#queryList').hide();
     $("#queryResults").html("");
+    $("#queryInfoText").hide();
 }
 
 function resetQueryTab() {
@@ -177,6 +178,7 @@ function resetQueryTab() {
     $('#newQueryButton').show();
     $('#queryList').show();
     $("#queryResults").html("");
+    $("#queryInfoText").show();
 }
 
 function showCreateQuery() {
@@ -187,6 +189,7 @@ function showCreateQuery() {
     $('#createQuery').show();
     $('#queryList').hide();
     $("#queryResults").html("");
+    $("#queryInfoText").hide();
 }
 
 
@@ -233,5 +236,16 @@ $(document).ready(function() {
     $("#editQuery").hide();
     $("#createQuery").hide();
     $("#mainTabs").tabs({selected: 3});
-    populateSelectStatement();
+
+    $.ajax({
+            url: "connection/list.jsp",
+            success: function(data) {
+                if(data.length == 0)
+                    showCreateConnection();
+                else {
+                    editConnection(data[0]["id"])
+                }
+            }
+    });
+//    populateSelectStatement();
 });

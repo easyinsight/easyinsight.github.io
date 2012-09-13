@@ -113,7 +113,7 @@ public class Query {
     public void update(Map<String, String[]> parameterMap) {
         setQuery(parameterMap.get("queryValue")[0]);
         setDataSource(parameterMap.get("queryDataSource")[0]);
-        setName(parameterMap.get("queryName")[0]);
+//        setName(parameterMap.get("queryName")[0]);
         if(parameterMap.get("schedule") != null && parameterMap.get("schedule")[0].equals("on")) {
             setSchedule(true);
         } else {

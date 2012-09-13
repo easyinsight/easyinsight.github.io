@@ -20,6 +20,22 @@ import com.easyinsight.connections.database.DataConnection;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class ConnectionInfo {
+
+    public static ConnectionInfo instance() throws SQLException {
+        Session session = DataConnection.getSession();
+        try {
+            List vals = session.createQuery("from ConnectionInfo").list();
+            if (vals.size() == 0)
+                return null;
+            else {
+                System.out.println(vals.size());
+                return (ConnectionInfo) vals.get(0);
+            }
+        } finally {
+            session.close();
+        }
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -62,18 +78,21 @@ public abstract class ConnectionInfo {
     }
 
     public abstract Connection createConnection() throws SQLException;
+
     public abstract String typeName();
+
     public abstract String sourceInfo();
+
     public abstract String toJSON();
 
 
     public static ConnectionInfo createConnectionInfo(Map<String, String[]> parameterMap) {
         ConnectionInfo connectionInfo = null;
-        if("mysql".equals(parameterMap.get("dbType")[0])) {
+        if ("mysql".equals(parameterMap.get("dbType")[0])) {
             connectionInfo = new MySqlConnectionInfo();
-        } else if("oracle".equals(parameterMap.get("dbType")[0])){
+        } else if ("oracle".equals(parameterMap.get("dbType")[0])) {
             connectionInfo = new OracleConnectionInfo();
-        } else if("mssql".equals(parameterMap.get("dbType")[0])) {
+        } else if ("mssql".equals(parameterMap.get("dbType")[0])) {
             connectionInfo = new MsSqlConnectionInfo();
         } else if ("jdbc".equals(parameterMap.get("dbType")[0])) {
             connectionInfo = new JdbcConnectionInfo();
@@ -94,8 +113,7 @@ public abstract class ConnectionInfo {
         Session session = DataConnection.getSession();
         try {
             return session.createQuery("from ConnectionInfo").list();
-        }
-        finally {
+        } finally {
             session.close();
         }
     }
