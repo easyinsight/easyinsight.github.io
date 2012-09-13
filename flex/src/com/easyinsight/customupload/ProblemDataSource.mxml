@@ -65,6 +65,11 @@
                 uicomp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
                 dataSourceCreation.dataSourceDefinition = dataSourceDefinition;
                 coreContent.addChild(dataSourceCreation as DisplayObject);
+                var blah:Function = dataSourceCreation.setupButton(updateButton);
+                if (blah == null) {
+                    updateButton.label = "Update";
+                    updateButton.addEventListener(MouseEvent.CLICK, validate);
+                }
             }
         }
 
@@ -166,8 +171,8 @@
         <mx:Box id="coreContent"/>
         <mx:ProgressBar id="progressBar" indeterminate="false" mode="manual" visible="false" label="{asyncLabel}"/>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Update" click="validate()" enabled="{ready}"/>
-            <mx:Button label="Cancel" click="stage.removeEventListener(KeyboardEvent.KEY_UP, onKey); dispatchEvent(new Event(Event.CANCEL)); PopUpManager.removePopUp(this)"/>
+            <util:SaveButton label="Update" click="validate()" enabled="{ready}" id="updateButton"/>
+            <util:CancelButton label="Cancel" click="stage.removeEventListener(KeyboardEvent.KEY_UP, onKey); dispatchEvent(new Event(Event.CANCEL)); PopUpManager.removePopUp(this)"/>
         </mx:HBox>
 	</mx:VBox>
 </util:EITitleWindow>
