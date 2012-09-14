@@ -109,7 +109,7 @@
             _dataSourceDefinition = value;
         }
 
-        private function validate():void {
+        private function validate(event:Event = null):void {
             ready = false;
             progressBar.visible = true;
             dataSourceCreation.updateDataSource(dataSourceDefinition);
