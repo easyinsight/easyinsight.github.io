@@ -67,6 +67,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int TREND_GRID = 37;
     public static final int YTD = 38;
     public static final int COMPARE_YEARS = 39;
+    public static final int SUMMARY = 40;
 
     private String name;
     private String authorName;
@@ -427,18 +428,18 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return filters;
     }
 
-    private void populate(Map<AnalysisItem, AnalysisItem> map, AnalysisItem analysisItem) {
+    private void populate(Map<AnalysisItem, AnalysisItem> map, AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
         AnalysisItem existing = map.get(analysisItem);
         if (existing == null) {
             map.put(analysisItem, analysisItem);
         } else {
-            existing.getPipelineSections().addAll(analysisItem.getPipelineSections());
+            insightRequestMetadata.getPipelines(existing).addAll(insightRequestMetadata.getPipelines(analysisItem));
         }
     }
 
-    private void populate(Map<AnalysisItem, AnalysisItem> map, List<AnalysisItem> analysisItems) {
+    private void populate(Map<AnalysisItem, AnalysisItem> map, List<AnalysisItem> analysisItems, InsightRequestMetadata insightRequestMetadata) {
         for (AnalysisItem analysisItem : analysisItems) {
-            populate(map, analysisItem);
+            populate(map, analysisItem, insightRequestMetadata);
         }
     }
 
@@ -448,10 +449,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
         Set<AnalysisItem> analysisItems = getAllAnalysisItems();
         analysisItems.remove(null);
         for (AnalysisItem analysisItem : analysisItems) {
-            analysisItem.getPipelineSections().add(Pipeline.LAST);
+            insightRequestMetadata.assign(analysisItem, Pipeline.LAST);
             if (analysisItem.isValid()) {
                 //columnSet.add(analysisItem);
-                populate(map, analysisItem);
+                populate(map, analysisItem, insightRequestMetadata);
             }
         }
         boolean joinPipeline = insightRequestMetadata.getIntermediatePipelines() == null || insightRequestMetadata.getIntermediatePipelines().isEmpty();
@@ -471,14 +472,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID()) {
                     if (!map.keySet().contains(item)) {
-                        populate(map, item);
+                        populate(map, item, insightRequestMetadata);
                     }
                     //}
                 }
                 List<AnalysisItem> linkItems = analysisItem.addLinkItems(allItems);
                 for (AnalysisItem item : linkItems) {
                     if (!map.keySet().contains(item)) {
-                        populate(map, item);
+                        populate(map, item, insightRequestMetadata);
                     }
                 }
             }
@@ -486,12 +487,12 @@ public abstract class WSAnalysisDefinition implements Serializable {
         if (retrieveFilterDefinitions() != null) {
             for (FilterDefinition filter : retrieveFilterDefinitions()) {
                 insightRequestMetadata.pipelineAssign(filter);
-                populate(map, filter.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(Pipeline.BEFORE)));
+                populate(map, filter.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(Pipeline.BEFORE)), insightRequestMetadata);
             }
         }
         for (AnalysisItem analysisItem : getLimitFields()) {
             if (!map.keySet().contains(analysisItem)) {
-                populate(map, analysisItem);
+                populate(map, analysisItem, insightRequestMetadata);
             }
         }
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
@@ -517,7 +518,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allItems, keyMap, displayMap, analysisItems, false, true, structure);
-                populate(map, items);
+                populate(map, items, insightRequestMetadata);
             }
         }
         if (uniqueIteMap != null) {
@@ -537,10 +538,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     uniqueFields.add(analysisDimension);
                 }
             }
-            populate(map, uniqueFields);
+            populate(map, uniqueFields, insightRequestMetadata);
         }
         if (!additionalGroupingItems.isEmpty()) {
-            populate(map, additionalGroupingItems);
+            populate(map, additionalGroupingItems, insightRequestMetadata);
         }
 
         if (!joinPipeline) {
