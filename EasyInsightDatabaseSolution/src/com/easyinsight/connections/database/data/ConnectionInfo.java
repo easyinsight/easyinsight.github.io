@@ -74,7 +74,7 @@ public abstract class ConnectionInfo {
     public void update(Map<String, String[]> parameterMap) {
         setUsername(parameterMap.get("dbUsername")[0]);
         setPassword(parameterMap.get("dbPassword")[0]);
-        setName(parameterMap.get("dbName")[0]);
+        setName(parameterMap.get("dbUsername")[0]);
     }
 
     public abstract Connection createConnection() throws SQLException;

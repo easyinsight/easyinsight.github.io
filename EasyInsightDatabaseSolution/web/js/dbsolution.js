@@ -112,7 +112,6 @@ function editConnection(id) {
             $("form#editConnection input[name=id]")[0].value = result.id;
             $("form#editConnection input[name=dbUsername]")[0].value = result.username;
             $("form#editConnection input[name=dbPassword]")[0].value = result.password;
-            $("form#editConnection input[name=dbName]")[0].value = result.name;
             $("#editConnectionInfo div").hide();
             $("#" + result.type + "EditConnection").show();
             $("form#editConnection input[name=dbType]")[0].value = result.type;
@@ -203,6 +202,16 @@ function resetConnectionTab() {
     $('#editConnection').hide();
     $('#newConnectionButton').show();
     $('#databaseList').show();
+    $.ajax({
+                url: "connection/list.jsp",
+                success: function(data) {
+                    if(data.length == 0)
+                        showCreateConnection();
+                    else {
+                        editConnection(data[0]["id"])
+                    }
+                }
+        });
 }
 
 function editConnectionTab() {

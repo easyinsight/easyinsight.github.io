@@ -462,7 +462,6 @@
                         <input type="hidden" name="id" value="" />
                         <input type="hidden" name="dbType" value="" />
                         <input type="hidden" name="edit" value="edit" />
-                        <label for="dbName">Connection Name:</label> <input id="dbName" name="dbName" type="text" /><br />
                         <div id="editConnectionInfo">
                             <div id="mssqlEditConnection">
                                 <label for="mssqlHostName">Host Name:</label> <input id="mssqlHostName" name="mssqlHostName" type="text" /><br />
@@ -488,7 +487,6 @@
                         <button class="btn btn-inverse" onclick="testDbConnection('editConnection')">Test Connection</button><button class="btn btn-inverse" onclick="updateDbConnection('editConnection')">Update</button><button class="btn btn-inverse" onclick="resetConnectionTab();">Cancel</button>
                     </form>
                     <form id="createConnection" action="connection/create.jsp" method="post" onsubmit="return false;">
-                        <label for="createDbName">Connection Name:</label> <input id="createDbName" name="dbName" type="text" /><br />
                         <label for="dbType">Database Type:</label> <select id="dbType" name="dbType" onchange="showConnectionDetails();">
                             <option></option>
                             <option value="mysql">MySQL</option>
