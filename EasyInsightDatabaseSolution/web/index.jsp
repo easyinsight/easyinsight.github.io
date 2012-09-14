@@ -121,7 +121,7 @@
         }
 
         .controls {
-            width:5.5em;
+            width:4em;
         }
 
         .scheduled {
@@ -158,6 +158,11 @@
             border-left-style:none;
             border-top-style:none;
             border-color: #666666;
+        }
+
+        #newQueryButton {
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
 
         #queryResults table tbody tr td:first-child {
@@ -257,9 +262,9 @@
             margin-bottom: 0px;
         }
 
-        input[type=radio] {
+        input[type=radio], input[type=checkbox] {
             margin-top: 0px;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
         }
 
         /*#mainTabs .ui-state-hover a, .ui-state-hover a:hover {*/
@@ -418,16 +423,17 @@
                         <jsp:include page="query/show.jsp" />
                     </div>
                     <form id="editQuery" action="query/update.jsp" onsubmit="return false;">
+                        <div class="well darker-well"><h4>Editing Query</h4></div>
                         <input type="hidden" name="edit" value="edit" />
                         <input type="hidden" name="id" value="" />
-                        <label for="queryDataSource" class="queryParam">Data Source Name: </label> <input id="queryDataSource" type="text" name="queryDataSource" /><br />
-                        <label for="schedule" class="queryParam">Schedule? </label><input id="schedule" type="checkbox" name="schedule" /><br />
-                        Replace or Append Existing Data?<br />
-                        <input id="uploadTypeReplace" name="uploadType" type="radio" value="replace" checked="checked" /> <label for="uploadTypeReplace">Replace</label><br />
-                        <div class="row"> <div class="span1"><input id="uploadTypeAppend" name="uploadType" type="radio" value="append" /></div><div class="span4"><label for="uploadTypeAppend">Append</label></div></div>
-                        <label for="queryValue">Query:</label><br />
-                        <textarea id="queryValue" name="queryValue" rows="6" cols="80"></textarea><br />
-                        <button onclick="testQuery('#editQuery')">Test</button><button onclick="updateQuery('#editQuery')">Update</button><button onclick="resetQueryTab();">Cancel</button>
+                        <div class="row"><div class="span2"><label for="queryDataSource" class="queryParam">Data Source Name: </label></div><div class="span3"><input id="queryDataSource" type="text" name="queryDataSource" /></div></div>
+                        <div class="row"><div class="span2"><label for="schedule" class="queryParam">Schedule? </label></div><div class="span3"><input id="schedule" type="checkbox" name="schedule" /></div></div>
+                        <div class="row"><div class="span6">Replace or Append Existing Data?</div></div>
+                        <div class="row"><div class="span1"><input id="uploadTypeReplace" name="uploadType" type="radio" value="replace" checked="checked" /></div> <div class="span4"><label for="uploadTypeReplace">Replace</label></div></div>
+                        <div class="row"><div class="span1"><input id="uploadTypeAppend" name="uploadType" type="radio" value="append" /></div><div class="span4"><label for="uploadTypeAppend">Append</label></div></div>
+                        <div class="row"><div class="span6"><label for="queryValue">Query:</label></div></div>
+                        <div class="row"><div class="span8"><textarea id="queryValue" class="span8" name="queryValue" rows="6"></textarea></div></div>
+                        <div class="row"><div class="span6"><button class="btn btn-inverse" onclick="testQuery('#editQuery')">Test</button><button class="btn btn-inverse" onclick="updateQuery('#editQuery')">Update</button><button class="btn btn-inverse" onclick="resetQueryTab();">Cancel</button></div></div>
                     </form>
                     <form id="createQuery" action="query/create.jsp" onsubmit="return false;">
                         <div class="well darker-well"><h4>Creating New Query</h4></div>
@@ -436,9 +442,9 @@
                         <div class="row"><div class="span6">Replace or Append Existing Data?</div></div>
                         <div class="row"><div class="span1"><input id="createUploadTypeReplace" name="uploadType" type="radio" value="replace" checked="checked" /></div><div class="span4"><label for="createUploadTypeReplace">Replace</label></div></div>
                         <div class="row"><div class="span1"><input id="createUploadTypeAppend" name="uploadType" type="radio" value="append" /></div><div class="span4"><label for="createUploadTypeAppend">Append</label><br /></div></div>
-                        <label for="createQueryValue">Query:</label> <br />
-                        <textarea id="createQueryValue" name="queryValue" rows="6" cols="80"></textarea><br />
-                        <button class="btn btn-inverse" onclick="testQuery('#createQuery')">Test</button><button class="btn btn-inverse" onclick="createQuery('#createQuery')">Create</button><button class="btn btn-inverse" onclick="resetQueryTab();">Cancel</button>
+                        <div class="row"><div class="span6"><label for="createQueryValue">Query:</label></div></div>
+                        <div class="row"><div class="span8"><textarea class="span8" id="createQueryValue" name="queryValue" rows="6"></textarea></div></div>
+                        <div class="row"><div class="span6"><button class="btn btn-inverse" onclick="testQuery('#createQuery')">Test</button><button class="btn btn-inverse" onclick="createQuery('#createQuery')">Create</button><button class="btn btn-inverse" onclick="resetQueryTab();">Cancel</button></div></div>
                     </form>
                     <div id="queryResults"></div>
                 </div>

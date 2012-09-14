@@ -36,7 +36,7 @@
         %>
         <h2>Test Results</h2>
         <div>
-            <table cellspacing="0">
+            <table cellspacing="0" class="table table-striped table-bordered table-hover">
                 <thead>
                     <%
                         for(int column = 1;column <= rs.getMetaData().getColumnCount();column++) {
@@ -63,7 +63,7 @@
             %>
             </table>
         </div>
-        <button onclick="$('#queryResults').html('');">Clear</button>
+        <button class="btn btn-inverse" onclick="$('#queryResults').html('');">Clear</button>
         <%
     }
     finally {

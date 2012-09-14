@@ -146,8 +146,7 @@ function editQuery(id) {
         type: 'get',
         success: function(result) {
             $("form#editQuery input[name=id]")[0].value = result.id;
-            $("form#editQuery input[name=queryName]")[0].value = result.name;
-            $("form#editQuery select[name=queryConnection]")[0].value = result.connectionId;
+
             $("form#editQuery textarea[name=queryValue]")[0].value = result.query;
             $("form#editQuery input[name=queryDataSource]")[0].value = result.dataSource;
             $("form#editQuery input[name=schedule]")[0].checked = result.schedule;
