@@ -86,7 +86,11 @@
             var dispObject:DisplayObject = dataSourceCreation as DisplayObject;
             dispObject.addEventListener(FlexEvent.CREATION_COMPLETE, onDataCreation, false, 0, true);
             coreContent.addChild(dispObject);
-
+            var blah:Function = dataSourceCreation.setupButton(updateButton);
+            if (blah == null) {
+                updateButton.label = "Update";
+                updateButton.addEventListener(MouseEvent.CLICK, validate);
+            }
         }
 
         private function onDataCreation(event:FlexEvent):void {
