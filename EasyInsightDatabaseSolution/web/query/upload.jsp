@@ -34,7 +34,7 @@
         <script type="text/javascript">refreshQueries();jSuccess("Success!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
     <%} catch(Exception e) {
 
-        %><script type="text/javascript">refreshQueries();jError("An error occured: <pre><%= e.getMessage() %></pre>", {HorizontalPosition : 'center', VerticalPosition : 'center'});</script><%
+        %><script type="text/javascript">refreshQueries();jError("An error occured: <pre><%= e.getMessage() %></pre>", {HorizontalPosition : 'center', VerticalPosition : 'center', autoHide: false, clickOverlay: true });</script><%
     } finally {
         if(dataSession != null)
             dataSession.close();

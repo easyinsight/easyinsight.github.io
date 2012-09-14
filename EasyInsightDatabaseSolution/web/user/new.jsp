@@ -15,14 +15,18 @@
 <html>
 <head>
     <title>Create User</title>
+    <style>
+         #mainwell {
+             margin-top: 45px;
+         }
+         input[type=text], input[type=password] {
+             height: 24px !important;
+         }
+     </style>
     <link rel="stylesheet" href="../css/bootstrap.min.css"/>
     <script src="../js/jquery.min.js" language="javascript" type="text/javascript"></script>
     <script src="../js/bootstrap.min.js" language="javascript" type="text/javascript"></script>
-    <style>
-        #mainwell {
-            margin-top: 45px;
-        }
-    </style>
+
 </head>
 <body>
 <div class="container">
@@ -32,9 +36,9 @@
         Enter a username and password below to ensure only authorized users can access your data.</span></p>
 
     <form action="create.jsp" method="post">
-        <div class="row"><span class="span2 offset3">Username:</span><span class="span4"><input type="text" class="span4" name="username"/></span></div>
-        <div class="row"><span class="span2 offset3">Password:</span><span class="span4"><input type="password" class="span4" name="password"/></span></div>
-        <div class="row"><div class="span4 offset4"><input class="btn btn-inverse" type="submit"/></div></div>
+        <div class="row"><span class="span2 offset3">Username:</span><div class="span4"><input type="text" name="username"/></div></div>
+        <div class="row"><span class="span2 offset3">Password:</span><div class="span4"><input type="password" name="password"/></div></div>
+        <div class="row"><div class="span4 offset4"><input class="btn btn-inverse" type="submit" value="Save" /></div></div>
     </form>
 </div>
 </div>

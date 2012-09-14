@@ -39,7 +39,7 @@ if(queries.size() == 0) { %>
             <td><img class="statusImage" src="images/<%= result == null ? "bullet_square_grey.png" : (result.isSuccess() ? "bullet_ball_green.png" : "bullet_square_glass_red.png") %>" /></td>
             <td><%= query.getDataSource() %></td><td class="query"><%= query.getQuery() %></td><td class="scheduled"><%= query.isSchedule() ? "yes" : "no" %></td><td class="append"><%= query.isAppend() ? "append" : "replace" %></td>
             <td><%= result != null ? format.format(result.getStartTime()) : "Never" %></td>
-            <td class="controls"><a href="query/upload.jsp" class="icon-refresh" onclick="uploadQuery('<%= query.getId() %>');return false"></a> <a href="query/edit.jsp" class="icon-edit" onclick="editQuery('<%= query.getId() %>');return false;"></a> <a href="query/delete.jsp" class="icon-remove" onclick="deleteQueryWithConfirm('<%= query.getId() %>');return false;"></a><% if(result != null && !result.isSuccess()) { %><div class="errorDialog"><%= result.getMessage() %><br /><pre><%= result.getStackTrace() %></pre></div><% } %></td>
+            <td class="controls"><a href="query/upload.jsp" class="icon-refresh" title="Upload" onclick="uploadQuery('<%= query.getId() %>');return false"></a> <a href="query/edit.jsp" class="icon-edit" title="Edit" onclick="editQuery('<%= query.getId() %>');return false;"></a> <a href="query/delete.jsp" class="icon-remove" title="Delete" onclick="deleteQueryWithConfirm('<%= query.getId() %>');return false;"></a><% if(result != null && !result.isSuccess()) { %><div class="errorDialog"><%= result.getMessage() %><br /><pre><%= result.getStackTrace() %></pre></div><% } %></td>
         </tr>
     <% } %>
         </tbody>

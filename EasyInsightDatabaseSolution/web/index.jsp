@@ -464,26 +464,26 @@
                         <input type="hidden" name="edit" value="edit" />
                         <div id="editConnectionInfo">
                             <div id="mssqlEditConnection">
-                                <label for="mssqlHostName">Host Name:</label> <input id="mssqlHostName" name="mssqlHostName" type="text" /><br />
-                                <label for="mssqlPort">Port:</label> <input id="mssqlPort" name="mssqlPort" type="text" /><br />
-                                <label for="mssqlInstanceName">Instance Name:</label> <input id="mssqlInstanceName" name="mssqlInstanceName" type="text"><br />
+                                <label for="mssqlHostName">Host Name:</label> <input id="mssqlHostName" class="span6" name="mssqlHostName" type="text" /><br />
+                                <label for="mssqlPort">Port:</label> <input id="mssqlPort" class="span6" name="mssqlPort" type="text" /><br />
+                                <label for="mssqlInstanceName">Instance Name:</label> <input id="mssqlInstanceName" class="span6" name="mssqlInstanceName" type="text"><br />
                             </div>
                             <div id="oracleEditConnection">
-                                <label for="oracleHostName">Host Name:</label> <input id="oracleHostName" name="oracleHostName" type="text" /><br />
-                                <label for="oraclePort">Port:</label> <input id="oraclePort" name="oraclePort" type="text" /><br />
-                                <label for="oracleSchema">Schema Name:</label> <input id="oracleSchema" name="oracleSchema" type="text"><br />
+                                <label for="oracleHostName">Host Name:</label> <input id="oracleHostName" class="span6" name="oracleHostName" type="text" /><br />
+                                <label for="oraclePort">Port:</label> <input id="oraclePort" name="oraclePort" class="span6" type="text" /><br />
+                                <label for="oracleSchema">Schema Name:</label> <input id="oracleSchema" class="span6" name="oracleSchema" type="text"><br />
                             </div>
                             <div id="mysqlEditConnection">
-                                <label for="mysqlHostName">Host Name:</label> <input id="mysqlHostName" name="mysqlHostName" type="text" /><br />
-                                <label for="mysqlPort">Port:</label> <input id="mysqlPort" name="mysqlPort" type="text" /><br />
-                                <label for="mysqlDbName">Database Name:</label> <input id="mysqlDbName" name="mysqlDbName" type="text"><br />
+                                <label for="mysqlHostName">Host Name:</label> <input id="mysqlHostName" class="span6" name="mysqlHostName" type="text" /><br />
+                                <label for="mysqlPort">Port:</label> <input id="mysqlPort" name="mysqlPort" class="span6" type="text" /><br />
+                                <label for="mysqlDbName">Database Name:</label> <input id="mysqlDbName" class="span6" name="mysqlDbName" type="text"><br />
                             </div>
                             <div id="jdbcEditConnection">
-                                <label for="connectionString">Connection String:</label> <input id="connectionString" name="connectionString" type="text" /><br />
+                                <label for="connectionString">Connection String:</label> <input id="connectionString" name="connectionString" class="span6" type="text" /><br />
                             </div>
                         </div>
-                        <label for="dbUsername">DB Username:</label> <input id="dbUsername" name="dbUsername" type="text" /><br />
-                        <label for="dbPassword">DB Password:</label> <input id="dbPassword" name="dbPassword" type="password" /><br />
+                        <label for="dbUsername">DB Username:</label> <input id="dbUsername" name="dbUsername" class="span6" type="text" /><br />
+                        <label for="dbPassword">DB Password:</label> <input id="dbPassword" name="dbPassword" class="span6" type="password" /><br />
                         <button class="btn btn-inverse" onclick="testDbConnection('editConnection')">Test Connection</button><button class="btn btn-inverse" onclick="updateDbConnection('editConnection')">Update</button><button class="btn btn-inverse" onclick="resetConnectionTab();">Cancel</button>
                     </form>
                     <form id="createConnection" action="connection/create.jsp" method="post" onsubmit="return false;">
@@ -496,26 +496,26 @@
                         </select><br />
                         <div id="connectionDetails">
                             <div id="mssqlConnection">
-                                <label for="createMssqlHostName">Host Name:</label> <input id="createMssqlHostName" name="mssqlHostName" type="text" /><br />
-                                <label for="createMssqlPort">Port:</label> <input id="createMssqlPort" name="mssqlPort" type="text" /><br />
-                                <label for="createMssqlInstanceName">Instance Name:</label> <input id="createMssqlInstanceName" name="mssqlInstanceName" type="text"><br />
+                                <label for="createMssqlHostName">Host Name:</label> <input id="createMssqlHostName" class="span6" name="mssqlHostName" type="text" /><br />
+                                <label for="createMssqlPort">Port:</label> <input id="createMssqlPort" class="span6" name="mssqlPort" type="text" /><br />
+                                <label for="createMssqlInstanceName">Instance Name:</label> <input id="createMssqlInstanceName" class="span6" name="mssqlInstanceName" type="text"><br />
                             </div>
                             <div id="oracleConnection">
-                                <label for="createOracleHostName">Host Name:</label> <input id="createOracleHostName" name="oracleHostName" type="text" /><br />
-                                <label for="createOraclePort">Port:</label> <input id="createOraclePort" name="oraclePort" type="text" /><br />
-                                <label for="createOracleSchema">Schema Name:</label> <input id="createOracleSchema" name="oracleSchema" type="text"><br />
+                                <label for="createOracleHostName">Host Name:</label> <input id="createOracleHostName" class="span6" name="oracleHostName" type="text" /><br />
+                                <label for="createOraclePort">Port:</label> <input id="createOraclePort" class="span6" name="oraclePort" type="text" /><br />
+                                <label for="createOracleSchema">Schema Name:</label> <input id="createOracleSchema" class="span6" name="oracleSchema" type="text"><br />
                             </div>
                             <div id="mysqlConnection">
-                                <label for="createMysqlHostName">Host Name:</label> <input id="createMysqlHostName" name="mysqlHostName" type="text" /><br />
-                                <label for="createMysqlPort">Port:</label> <input id="createMysqlPort" name="mysqlPort" type="text" /><br />
-                                <label for="createMysqlDbName">Database Name:</label> <input id="createMysqlDbName" name="mysqlDbName" type="text"><br />
+                                <label for="createMysqlHostName">Host Name:</label> <input id="createMysqlHostName" class="span6" name="mysqlHostName" type="text" /><br />
+                                <label for="createMysqlPort">Port:</label> <input id="createMysqlPort" class="span6" name="mysqlPort" type="text" /><br />
+                                <label for="createMysqlDbName">Database Name:</label> <input id="createMysqlDbName" class="span6" name="mysqlDbName" type="text"><br />
                             </div>
                             <div id="jdbcConnection">
-                                <label for="createConnectionString">Connection String:</label> <input id="createConnectionString" name="connectionString" type="text" /><br />
+                                <label for="createConnectionString">Connection String:</label> <input id="createConnectionString" class="span6" name="connectionString" type="text" /><br />
                             </div>
                         </div>
-                        <label for="createDbUsername">DB Username:</label> <input id="createDbUsername" name="dbUsername" type="text" /><br />
-                        <label for="createDbPassword">DB Password:</label> <input id="createDbPassword" name="dbPassword" type="password" /><br />
+                        <label for="createDbUsername">DB Username:</label> <input id="createDbUsername" class="span6" name="dbUsername" type="text" /><br />
+                        <label for="createDbPassword">DB Password:</label> <input id="createDbPassword" class="span6" name="dbPassword" type="password" /><br />
 
                         <button class="btn btn-inverse" onclick="testDbConnection('createConnection')">Test Connection</button><button class="btn btn-inverse" onclick="createDbConnection('createConnection')">Create</button><button class="btn btn-inverse" onclick="resetConnectionTab();">Cancel</button>
                     </form>
@@ -540,9 +540,9 @@
                       combination, as this is easier to invalidate for security purposes at a later date, but to get started quickly, you can still use your username/password.
                       </div>
                     <form id="credentialsForm" action="validateCredentials.jsp" method="post" onsubmit="return false;">
-                        <p><label for="publicKey">Public Key/Username:</label> <input id="publicKey" name="publicKey" type="text" value="<%= user.getPublicKey() == null ? "" : user.getPublicKey() %>" /><br />
-                        <label for="secretKey">Secret Key/Password:</label> <input id="secretKey" name="secretKey" type="password" value="<%= user.getSecretKey() == null ? "" : user.getSecretKey() %>" /><br />
-                        <label for="currentUrl">Current URL:</label> <input id="currentUrl" name="currentUrl" type="text" value="<%= user.getCurrentUrl() == null ? "" : user.getCurrentUrl() %>" /><br />
+                        <p><label for="publicKey">Public Key/Username:</label> <input id="publicKey" name="publicKey" class="span6" type="text" value="<%= user.getPublicKey() == null ? "" : user.getPublicKey() %>" /><br />
+                        <label for="secretKey">Secret Key/Password:</label> <input id="secretKey" name="secretKey" class="span6" type="password" value="<%= user.getSecretKey() == null ? "" : user.getSecretKey() %>" /><br />
+                        <label for="currentUrl">Current URL:</label> <input id="currentUrl" name="currentUrl" class="span6" type="text" value="<%= user.getCurrentUrl() == null ? "" : user.getCurrentUrl() %>" /><br />
                         </p>
                         <button class="btn btn-inverse" onclick="validateCredentials('credentialsForm');">Save</button>
                     </form>
