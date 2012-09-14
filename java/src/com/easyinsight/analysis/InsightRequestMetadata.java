@@ -27,8 +27,47 @@ public class InsightRequestMetadata implements Serializable {
     private boolean lookupTableAggregate;
     private transient Map<Long, AnalysisItem> uniqueIteMap = new HashMap<Long, AnalysisItem>();
     private transient Map<String, Long> fieldToUniqueMap = new HashMap<String, Long>();
+    private transient Map<AnalysisItem, Set<String>> pipelineAssignmentMap = new HashMap<AnalysisItem, Set<String>>();
+    private transient Map<AnalysisItem, String> derivedFieldAssignmentMap = new HashMap<AnalysisItem, String>();
 
     private transient List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+
+    public void assignDerived(AnalysisItem analysisItem, String pipeline) {
+        derivedFieldAssignmentMap.put(analysisItem, pipeline);
+    }
+
+    public String getDerived(AnalysisItem analysisItem) {
+        String pipeline = derivedFieldAssignmentMap.get(analysisItem);
+        if (pipeline == null) {
+            if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                pipeline = ((AnalysisCalculation) analysisItem).getPipelineName();
+            } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                pipeline = ((DerivedAnalysisDimension) analysisItem).getPipelineName();
+            } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+                pipeline = ((DerivedAnalysisDateDimension) analysisItem).getPipelineName();
+            }
+            derivedFieldAssignmentMap.put(analysisItem, pipeline);
+        }
+        return pipeline;
+    }
+
+    public void assign(AnalysisItem analysisItem, String pipeline) {
+        Set<String> pipelines = pipelineAssignmentMap.get(analysisItem);
+        if (pipelines == null) {
+            pipelines = new HashSet<String>();
+            pipelineAssignmentMap.put(analysisItem, pipelines);
+        }
+        pipelines.add(pipeline);
+    }
+
+    public Set<String> getPipelines(AnalysisItem analysisItem) {
+        Set<String> pipelines = pipelineAssignmentMap.get(analysisItem);
+        if (pipelines == null) {
+            pipelines = new HashSet<String>();
+            pipelineAssignmentMap.put(analysisItem, pipelines);
+        }
+        return pipelines;
+    }
 
     public List<IntentionSuggestion> getSuggestions() {
         return suggestions;
@@ -207,13 +246,13 @@ public class InsightRequestMetadata implements Serializable {
     public void pipelineAssign(AnalysisItem analysisItem) {
         String name = getPipelineNameForField(analysisItem.toDisplay());
         if (name != null) {
-            analysisItem.setPipelineName(name);
+            derivedFieldAssignmentMap.put(analysisItem, name);
             List<AnalysisItem> fields = pipelineFieldMap.get(name);
             if (fields == null) {
                 fields = new ArrayList<AnalysisItem>();
                 pipelineFieldMap.put(name, fields);
             }
-            analysisItem.getPipelineSections().add(name);
+            assign(analysisItem, name);
             fields.add(analysisItem);
         }
         if (analysisItem.getFilters() != null) {

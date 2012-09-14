@@ -17,6 +17,7 @@ import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.Nodes;
 import org.hibernate.Session;
+import org.hibernate.proxy.HibernateProxy;
 
 /**
  * User: James Boe
@@ -109,8 +110,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Transient
     private transient String folder;
 
-    @Transient
-    private transient Set<String> pipelineSections;
+    /*@Transient
+    private transient Set<String> pipelineSections;*/
 
     public AnalysisItem() {
     }
@@ -128,10 +129,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.key = key;
     }
 
-    public boolean isReady() {
-        return true;
-    }
-
     public void setReady(boolean ready) {
 
     }
@@ -140,7 +137,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return sortItem;
     }
 
-    public Set<String> getPipelineSections() {
+    /*public Set<String> getPipelineSections() {
         if (pipelineSections == null) {
             pipelineSections = new HashSet<String>();
         }
@@ -149,7 +146,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void setPipelineSections(Set<String> pipelineSections) {
         this.pipelineSections = pipelineSections;
-    }
+    }*/
 
     public boolean isLabelColumn() {
         return labelColumn;
@@ -181,10 +178,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public ReportFieldExtension getReportFieldExtension() {
         return reportFieldExtension;
-    }
-
-    public void setPipelineName(String pipelineName) {
-
     }
 
     public void setReportFieldExtension(ReportFieldExtension reportFieldExtension) {
@@ -629,9 +622,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             }
         }*/
         if (!loaded) {
-                for (FilterDefinition filterDefinition : getFilters()) {
-                    filterDefinition.afterLoad();
-                }
+            for (FilterDefinition filterDefinition : getFilters()) {
+                filterDefinition.afterLoad();
+            }
 
             setLinks(new ArrayList<Link>(getLinks()));
             loaded = true;

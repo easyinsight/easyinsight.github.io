@@ -18,9 +18,11 @@ public class AnalysisItemRetrievalStructure {
     private AnalysisDefinition baseReport;
     private List<String> sections = new ArrayList<String>(Arrays.asList(Pipeline.BEFORE, Pipeline.AFTER, Pipeline.LAST, Pipeline.LAST_FILTERS));
     private String currentSection;
+    private InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
 
     public AnalysisItemRetrievalStructure(@Nullable String currentSection, AnalysisItemRetrievalStructure structure) {
         setReport(structure.getReport());
+        setInsightRequestMetadata(structure.getInsightRequestMetadata());
         setOnStorage(structure.isOnStorage());
         setBaseReport(structure.baseReport);
         setSections(structure.sections);
@@ -29,6 +31,14 @@ public class AnalysisItemRetrievalStructure {
 
     public AnalysisItemRetrievalStructure(@Nullable String currentSection) {
         this.currentSection = currentSection;
+    }
+
+    public InsightRequestMetadata getInsightRequestMetadata() {
+        return insightRequestMetadata;
+    }
+
+    public void setInsightRequestMetadata(InsightRequestMetadata insightRequestMetadata) {
+        this.insightRequestMetadata = insightRequestMetadata;
     }
 
     public List<String> getSections() {
