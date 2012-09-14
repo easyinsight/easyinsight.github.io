@@ -1105,6 +1105,7 @@ public class DataService {
             insightRequestMetadata.setUniqueIteMap(analysisDefinition.getUniqueIteMap());
             AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
             structure.setReport(analysisDefinition);
+            structure.setInsightRequestMetadata(insightRequestMetadata);
             Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields, structure, insightRequestMetadata);
             if (analysisDefinition.isDataSourceFields()) {
                 Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
