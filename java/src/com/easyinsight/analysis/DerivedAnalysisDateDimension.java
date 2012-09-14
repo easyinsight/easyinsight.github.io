@@ -5,8 +5,12 @@ import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.Pipeline;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 
@@ -28,22 +32,14 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
     @Column(name="apply_before_aggregation")
     private boolean applyBeforeAggregation;
 
-    @Transient
-    transient private String pipelineName;
-
     public String getPipelineName() {
-        if (pipelineName == null) {
-            if (applyBeforeAggregation) {
-                pipelineName = Pipeline.BEFORE;
-            } else {
-                pipelineName = Pipeline.AFTER;
-            }
+        String pipelineName;
+        if (applyBeforeAggregation) {
+            pipelineName = Pipeline.BEFORE;
+        } else {
+            pipelineName = Pipeline.AFTER;
         }
         return pipelineName;
-    }
-
-    public void setPipelineName(String pipelineName) {
-        this.pipelineName = pipelineName;
     }
 
     public boolean isApplyBeforeAggregation() {
@@ -216,5 +212,22 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
     @Override
     public boolean isDerived() {
         return true;
+    }
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("applyBeforeAggregation", String.valueOf(applyBeforeAggregation)));
+        Element calculation = new Element("calculation");
+        calculation.appendChild(derivationCode);
+        element.appendChild(calculation);
+        return element;
+    }
+
+    @Override
+    protected void subclassFromXML(Element fieldNode, XMLImportMetadata xmlImportMetadata) {
+        super.subclassFromXML(fieldNode, xmlImportMetadata);
+        derivationCode = fieldNode.query("calculation").get(0).getValue();
+        applyBeforeAggregation = Boolean.parseBoolean(fieldNode.getAttribute("applyBeforeAggregation").getValue());
     }
 }

@@ -3,12 +3,14 @@ package com.easyinsight.analysis;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.logging.LogClass;
 
 import javax.persistence.*;
 
 import com.easyinsight.pipeline.Pipeline;
+import nu.xom.Attribute;
 import nu.xom.Element;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -38,22 +40,14 @@ public class AnalysisCalculation extends AnalysisMeasure {
     @Column(name="cached_calculation")
     private boolean cachedCalculation;
 
-    @Transient
-    transient private String pipelineName;
-
     public String getPipelineName() {
-        if (pipelineName == null) {
-            if (applyBeforeAggregation) {
-                pipelineName = Pipeline.BEFORE;
-            } else {
-                pipelineName = Pipeline.AFTER;
-            }
+        String name;
+        if (applyBeforeAggregation) {
+            name = Pipeline.BEFORE;
+        } else {
+            name = Pipeline.AFTER;
         }
-        return pipelineName;
-    }
-
-    public void setPipelineName(String pipelineName) {
-        this.pipelineName = pipelineName;
+        return name;
     }
 
     @Override
@@ -184,7 +178,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
 
         List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
 
-        if (!structure.onOrAfter(getPipelineName())) {
+        if (!structure.onOrAfter(structure.getInsightRequestMetadata().getDerived(this))) {
             return analysisItemList;
         }
 
@@ -201,8 +195,8 @@ public class AnalysisCalculation extends AnalysisMeasure {
             }
             if (analysisItem != null) {
                 for (AnalysisItem analysisItem1 : analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure)) {
-                    if (analysisItem1.getPipelineSections().isEmpty()) {
-                        analysisItem1.getPipelineSections().add(pipelineName);
+                    if (structure.getInsightRequestMetadata().getPipelines(analysisItem).isEmpty()) {
+                        structure.getInsightRequestMetadata().getPipelines(analysisItem).add(structure.getInsightRequestMetadata().getDerived(this));
                     }
                     analysisItemList.add(analysisItem1);
                 }
@@ -214,7 +208,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
 
     protected List<AnalysisItem> measureFilters(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> items;
-        if (structure.onOrAfter(getPipelineName())) {
+        if (structure.onOrAfter(structure.getInsightRequestMetadata().getDerived(this))) {
             items = new ArrayList<AnalysisItem>();
             for (FilterDefinition filterDefinition : getFilters()) {
                 items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
@@ -267,9 +261,19 @@ public class AnalysisCalculation extends AnalysisMeasure {
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
         Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("applyBeforeAggregation", String.valueOf(applyBeforeAggregation)));
+        element.addAttribute(new Attribute("recalculateSummary", String.valueOf(recalculateSummary)));
         Element calculation = new Element("calculation");
         calculation.appendChild(calculationString);
         element.appendChild(calculation);
         return element;
+    }
+
+    @Override
+    protected void subclassFromXML(Element fieldNode, XMLImportMetadata xmlImportMetadata) {
+        super.subclassFromXML(fieldNode, xmlImportMetadata);
+        calculationString = fieldNode.query("calculation").get(0).getValue();
+        applyBeforeAggregation = Boolean.parseBoolean(fieldNode.getAttribute("applyBeforeAggregation").getValue());
+        recalculateSummary = Boolean.parseBoolean(fieldNode.getAttribute("recalculateSummary").getValue());
     }
 }

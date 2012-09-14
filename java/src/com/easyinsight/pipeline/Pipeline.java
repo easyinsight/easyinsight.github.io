@@ -33,6 +33,7 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
         structure.setReport(report);
+        structure.setInsightRequestMetadata(insightRequestMetadata);
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(dataSource.getFields());
         if (report.getAddedItems() != null) {
             allFields.addAll(report.getAddedItems());
@@ -62,6 +63,7 @@ public abstract class Pipeline {
             throw new RuntimeException("You can only use this setup() call when you've preassigned an earlier data source.");
         }
         structure.setReport(report);
+        structure.setInsightRequestMetadata(insightRequestMetadata);
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(preassigned.getFields());
         allFields.addAll(additionalItems);
         /*if (report.getAddedItems() != null) {
@@ -81,6 +83,7 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, Set<AnalysisItem> reportItems) {
         structure.setReport(report);
+        structure.setInsightRequestMetadata(insightRequestMetadata);
         int i = 1;
         if (insightRequestMetadata.getIntermediatePipelines() != null) {
             for (String pipe : insightRequestMetadata.getIntermediatePipelines()) {
@@ -101,6 +104,7 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allFields) {
         structure.setReport(report);
+        structure.setInsightRequestMetadata(insightRequestMetadata);
         int i = 1;
         if (insightRequestMetadata.getIntermediatePipelines() != null) {
             for (String pipe : insightRequestMetadata.getIntermediatePipelines()) {
@@ -117,6 +121,7 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allItems) {
         structure.setReport(report);
+        structure.setInsightRequestMetadata(insightRequestMetadata);
         int i = 1;
         if (insightRequestMetadata.getIntermediatePipelines() != null) {
             for (String pipe : insightRequestMetadata.getIntermediatePipelines()) {

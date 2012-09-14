@@ -33,6 +33,7 @@ public class CleanupComponent implements IComponent {
             }
         }
         structure.setReport(pipelineData.getReport());
+        structure.setInsightRequestMetadata(pipelineData.getInsightRequestMetadata());
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
         Set<AnalysisItem> allRequestedAnalysisItems = pipelineData.getAllRequestedItems();
         WSAnalysisDefinition report = pipelineData.getReport();

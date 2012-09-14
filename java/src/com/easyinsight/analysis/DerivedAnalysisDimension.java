@@ -3,8 +3,12 @@ package com.easyinsight.analysis;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.generated.CalculationsParser;
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.Pipeline;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 
@@ -32,22 +36,14 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
     @Column(name="apply_before_aggregation")
     private boolean applyBeforeAggregation = true;
 
-    @Transient
-    transient private String pipelineName;
-
     public String getPipelineName() {
-        if (pipelineName == null) {
-            if (applyBeforeAggregation) {
-                pipelineName = Pipeline.BEFORE;
-            } else {
-                pipelineName = Pipeline.AFTER;
-            }
+        String pipelineName;
+        if (applyBeforeAggregation) {
+            pipelineName = Pipeline.BEFORE;
+        } else {
+            pipelineName = Pipeline.AFTER;
         }
         return pipelineName;
-    }
-
-    public void setPipelineName(String pipelineName) {
-        this.pipelineName = pipelineName;
     }
 
     public boolean isApplyBeforeAggregation() {
@@ -151,7 +147,7 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
         //if (!includeFilters) return analysisItemList;
 
         for (KeySpecification spec : specs) {
-            AnalysisItem analysisItem = null;
+            AnalysisItem analysisItem;
             try {
                 analysisItem = spec.findAnalysisItem(keyMap, displayMap);
             } catch (CloneNotSupportedException e) {
@@ -183,5 +179,26 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
 
     public boolean isCalculated() {
         return true;
+    }
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("applyBeforeAggregation", String.valueOf(applyBeforeAggregation)));
+        element.addAttribute(new Attribute("html", String.valueOf(html)));
+        element.addAttribute(new Attribute("wordWrap", String.valueOf(wordWrap)));
+        Element calculation = new Element("calculation");
+        calculation.appendChild(derivationCode);
+        element.appendChild(calculation);
+        return element;
+    }
+
+    @Override
+    protected void subclassFromXML(Element fieldNode, XMLImportMetadata xmlImportMetadata) {
+        super.subclassFromXML(fieldNode, xmlImportMetadata);
+        derivationCode = fieldNode.query("calculation").get(0).getValue();
+        applyBeforeAggregation = Boolean.parseBoolean(fieldNode.getAttribute("applyBeforeAggregation").getValue());
+        html = Boolean.parseBoolean(fieldNode.getAttribute("html").getValue());
+        wordWrap = Boolean.parseBoolean(fieldNode.getAttribute("wordWrap").getValue());
     }
 }

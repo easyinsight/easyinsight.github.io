@@ -23,15 +23,10 @@ public class CalcGraph {
                                             @Nullable String name, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> derivedItems = new ArrayList<AnalysisItem>();
         for (AnalysisItem item : allNeededAnalysisItems) {
-            if (item.hasType(AnalysisItemTypes.CALCULATION)) {
-                AnalysisCalculation calc = (AnalysisCalculation) item;
-                if (name == null || calc.getPipelineName().equals(name)) derivedItems.add(item);
-            } else if (item.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
-                DerivedAnalysisDimension calc = (DerivedAnalysisDimension) item;
-                if (name == null || calc.getPipelineName().equals(name)) derivedItems.add(item);
-            } else if (item.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-                DerivedAnalysisDateDimension calc = (DerivedAnalysisDateDimension) item;
-                if (name == null || calc.getPipelineName().equals(name)) derivedItems.add(item);
+            if (item.hasType(AnalysisItemTypes.CALCULATION) || item.hasType(AnalysisItemTypes.DERIVED_DATE) || item.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                if (name == null || structure.getInsightRequestMetadata().getDerived(item).equals(name)) {
+                    derivedItems.add(item);
+                }
             }
         }
         List<IComponent> components = new ArrayList<IComponent>();
