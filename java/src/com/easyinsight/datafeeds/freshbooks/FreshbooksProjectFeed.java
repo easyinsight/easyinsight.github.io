@@ -66,7 +66,7 @@ public class FreshbooksProjectFeed extends FreshbooksFeed {
                         String billMethod = queryField(invoice, "bill_method/text()");
                         String clientID = queryField(invoice, "client_id/text()");
                         String rateString = queryField(invoice, "rate/text()");
-                        String budgetString = queryField(invoice, "hour_budget/text()");
+                        String budgetString = queryField(invoice, "budget/hours/text()");
                         IRow row = dataSet.createRow();
                         addValue(row, FreshbooksProjectSource.PROJECT_ID, projectID, keys);
                         addValue(row, FreshbooksProjectSource.CLIENT_ID, clientID, keys);
@@ -76,7 +76,7 @@ public class FreshbooksProjectFeed extends FreshbooksFeed {
                         if (rateString != null) {
                             addValue(row, FreshbooksProjectSource.RATE, Double.parseDouble(rateString), keys);
                         }
-                        if (budgetString != null) {
+                        if (budgetString != null && !"".equals(budgetString.trim())) {
                             addValue(row, FreshbooksProjectSource.BUDGET_HOURS, Double.parseDouble(budgetString), keys);
                         }
                         addValue(row, FreshbooksProjectSource.COUNT, 1, keys);
