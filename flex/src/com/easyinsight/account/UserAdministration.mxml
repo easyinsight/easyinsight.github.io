@@ -49,7 +49,7 @@
             usersAvailableString = String(accountInfo.accountStats.availableUsers);
             usersUsed = accountInfo.accountStats.currentUsers;
             usersAvailable = accountInfo.accountStats.availableUsers;
-            basicUsersShown = User.getInstance().getAccountType() >= Account.PLUS;
+            basicUsersShown = User.getInstance().getAccountType() >= Account.PLUS && newPricingModel;
             preferencesService.getPersonas.send();
             userIndex = 1;
             userService.getUsers.send();
