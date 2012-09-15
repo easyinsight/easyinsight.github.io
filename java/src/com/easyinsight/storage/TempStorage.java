@@ -154,26 +154,51 @@ public class TempStorage implements IDataStorage {
         String parameters = paramBuilder.toString();
         String insertSQL = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + parameters + ")";
         EIConnection storageConn = storageDatabase.getConnection();
-
+        storageConn.setAutoCommit(false);
         try {
             PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
+            int counter = 0;
             for (IRow row : dataSet.getRows()) {
                 int i = 1;
                 for (KeyMetadata keyMetadata : keys.values()) {
                     i = setValue(insertStmt, row, i, keyMetadata, storageConn);
                 }
-                try {
-                    insertStmt.execute();
-                } catch (SQLException e) {
-                    if (e.getMessage() != null && e.getMessage().contains("Data truncated")) {
-                        LogClass.info(e.getMessage());
-                    } else {
-                        throw e;
-                    }
+                insertStmt.addBatch();
+                counter++;
+                if (counter == 1000) {
+                    counter = 0;
+                    insertStmt.executeBatch();
                 }
             }
+            if (counter > 0) {
+                insertStmt.executeBatch();
+            }
             insertStmt.close();
+            storageConn.commit();
+        } catch (Exception e) {
+            storageConn.rollback();
+            if (e.getMessage().contains("Data truncated")) {
+                PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
+                for (IRow row : dataSet.getRows()) {
+                    int i = 1;
+                    for (KeyMetadata keyMetadata : keys.values()) {
+                        i = setValue(insertStmt, row, i, keyMetadata, storageConn);
+                    }
+                    try {
+                        insertStmt.execute();
+                    } catch (SQLException e1) {
+                        if (e1.getMessage() != null && e.getMessage().contains("Data truncated")) {
+                            LogClass.info(e1.getMessage());
+                        } else {
+                            throw e1;
+                        }
+                    }
+                }
+                insertStmt.close();
+                storageConn.commit();
+            }
         } finally {
+            storageConn.setAutoCommit(true);
             Database.closeConnection(storageConn);
         }
     }
