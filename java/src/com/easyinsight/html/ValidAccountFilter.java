@@ -34,13 +34,15 @@ public class ValidAccountFilter implements Filter {
             rs.next();
             int accountState = rs.getInt(1);
             if (accountState == Account.CLOSED) {
-                alternateDestination = "/app/billing/index.jsp";
+                alternateDestination = "/app/billing/billingSetupAction.jsp";
             } else if (accountState == Account.DELINQUENT) {
-                alternateDestination = "/app/billing/index.jsp";
+                alternateDestination = "/app/billing/billingSetupAction.jsp";
             } else if (accountState == Account.BILLING_FAILED) {
-                alternateDestination = "/app/billing/index.jsp";
+                alternateDestination = "/app/billing/billingSetupAction.jsp";
             } else if (accountState == Account.INACTIVE) {
                 alternateDestination = "/app/html/reactivate.jsp";
+            } else if (accountState == Account.REACTIVATION_POSSIBLE) {
+                alternateDestination = "/app/reactivate/index.jsp";
             }
             ps.close();
         } catch (SQLException se) {
