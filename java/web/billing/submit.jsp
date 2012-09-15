@@ -124,7 +124,7 @@
                 } else {
                     account.setBillingMonthOfYear((cal.get(Calendar.MONTH) + 1) % 12);
                 }
-            } else if (yearly && account.getBillingMonthOfYear() != null) {
+            } else if (!yearly && account.getBillingMonthOfYear() != null) {
                 account.setBillingMonthOfYear(null);
             }
             account.setBillingFailures(0);

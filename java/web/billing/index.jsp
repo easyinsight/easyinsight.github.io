@@ -77,6 +77,12 @@
                 cost = Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(),
                         accountTypeChange.getStorage(), accountTypeChange.isYearly());
                 credit = Account.calculateCredit(account);
+                if (credit >= cost) {
+                    session.removeAttribute("accountTypeChange");
+                    // not supposed to get here...
+                    cost = account.createTotalCost();
+                    accountTypeChange = null;
+                }
             } else {
                 cost = account.createTotalCost();
             }
@@ -94,7 +100,7 @@
 
         boolean chargeNow = false;
 
-        if (accountTypeChange != null) {
+        if (accountTypeChange != null && (cost - credit) > 0) {
             type = "sale";
             double toCharge = cost - credit;
             amount = String.valueOf(toCharge);
@@ -139,7 +145,7 @@
         String billingHeader;
         String billingIntroParagraph;
         if (accountTypeChange == null) {
-            billingMessage = "You are signing up for the " + accountInfoString + " account tier, You will be charged " + charge + " USD " + (monthly ? "monthly" : "yearly") + " for your subscription.";
+            billingMessage = "You are signing up for the " + accountInfoString + " account tier, You will be charged " + NumberFormat.getCurrencyInstance().format(cost) + " USD " + (monthly ? "monthly" : "yearly") + " for your subscription.";
             billingHeader = account.billingHeader();
             billingIntroParagraph = account.billingIntroParagraph();
         } else {
