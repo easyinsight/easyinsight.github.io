@@ -71,6 +71,7 @@
                 storage = Account.PLUS_MAX;
             } else if (targetType == Account.PROFESSIONAL) {
                 storage = Account.PROFESSIONAL_MAX;
+                storageSelection = 1;
             }
         } else {
             if (targetType == Account.PROFESSIONAL) {
