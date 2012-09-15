@@ -27,6 +27,7 @@
             creditInfo.setAmount(String.valueOf(cost));
             creditInfo.setTransactionTime(new Date());
             creditInfo.setResponseCode("100");
+            creditInfo.setAgainstCredit(true);
             creditInfo.setDays(accountTypeChange.isYearly() ? 365 : 28);
             hibernateSession.save(creditInfo);
             hibernateSession.flush();

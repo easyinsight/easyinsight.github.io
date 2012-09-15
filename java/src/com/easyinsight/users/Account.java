@@ -609,7 +609,7 @@ public class Account {
         Map<String, String> params = billingSystem.billAccount(getAccountID(), charge);
         boolean successful;
         AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
-        info.setAmount(String.valueOf(this.getBillingMonthOfYear() != null ? yearlyCharge() : monthlyCharge()));
+        info.setAmount(String.valueOf(charge));
         info.setAccountId(this.getAccountID());
         info.setResponse(params.get("response"));
         info.setResponseCode(params.get("response_code"));
@@ -657,6 +657,7 @@ public class Account {
             info.setTransactionTime(new Date());
             info.setResponseCode("100");
             info.setDays(getBillingDayOfMonth() != null ? 365 : 28);
+            info.setAgainstCredit(true);
         } else {
             BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
             billingSystem.setUsername(ConfigLoader.instance().getBillingUsername());
@@ -729,23 +730,6 @@ public class Account {
         }
         LogClass.info("Completed billing Account ID:" + this.getAccountID());
         return info;
-    }
-
-    public double monthlyCharge() {
-        switch(getAccountType()) {
-            case Account.PLUS:
-                return PLUS_BILLING_AMOUNT;
-            case Account.BASIC:
-                return INDIVIDUAL_BILLING_AMOUNT;
-            case Account.PROFESSIONAL:
-                return GROUP_BILLING_AMOUNT;
-            default:
-                throw new RuntimeException("Only doing credit card billing for Individual and Group accounts at the moment.");
-        }
-    }
-
-    public double yearlyCharge() {
-        return monthlyCharge() * 11.0;
     }
 
     public Integer getBillingMonthOfYear() {

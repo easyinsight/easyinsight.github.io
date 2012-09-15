@@ -50,7 +50,7 @@
         info.setResponseCode(request.getParameter("response_code"));
         info.setResponseString(request.getParameter("responsetext"));
         info.setAccountId(account.getAccountID());
-        info.setDays(yearly ? 365 : 31);
+        info.setDays(yearly ? 365 : 28);
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date transTime = df.parse(request.getParameter("time"));
