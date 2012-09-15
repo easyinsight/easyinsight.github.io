@@ -57,11 +57,11 @@ public class AdminService {
                     } else if (amount == 825) {
                         info.setDays(365);
                     } else if (amount == 200) {
-                        info.setDays(31);
+                        info.setDays(28);
                     } else if (amount == 75) {
-                        info.setDays(31);
+                        info.setDays(28);
                     } else if (amount == 25) {
-                        info.setDays(31);
+                        info.setDays(28);
                     }
                 }
                 session.update(info);
