@@ -9,13 +9,15 @@
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="com.easyinsight.users.AccountTypeChange" %>
+<%@ page import="java.text.NumberFormat" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Easy Insight Sign In</title>
+    <title>Easy Insight Billing Configuration</title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
@@ -65,9 +67,19 @@
         }
 
         Session hibernateSession = Database.instance().createSession();
+        double cost = 0;
+        double credit = 0;
         Account account = null;
+        AccountTypeChange accountTypeChange = (AccountTypeChange) session.getAttribute("accountTypeChange");
         try {
             account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+            if (accountTypeChange != null) {
+                cost = Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(),
+                        accountTypeChange.getStorage(), accountTypeChange.isYearly());
+                credit = Account.calculateCredit(account);
+            } else {
+                cost = account.createTotalCost();
+            }
         } finally {
             hibernateSession.close();
         }
@@ -75,17 +87,22 @@
         String keyID = BillingUtil.getKeyID();
         String key = BillingUtil.getKey();
         boolean monthly = account.getBillingMonthOfYear() == null && (request.getParameter("billingType") == null || !request.getParameter("billingType").equals("yearly"));
-        String orderID = (monthly ? "monthly-" : "yearly-") + UUID.randomUUID().toString();
+        String orderID = UUID.randomUUID().toString();
 
         String amount = "1.00";
         String type = "auth";
-        if(account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED || account.getAccountState() == Account.CLOSED) {
-            if(monthly) {
-                amount = String.valueOf(account.monthlyCharge());
-            } else {
-                amount = String.valueOf(account.yearlyCharge());
-            }
+
+        boolean chargeNow = false;
+
+        if (accountTypeChange != null) {
             type = "sale";
+            double toCharge = cost - credit;
+            amount = String.valueOf(toCharge);
+            chargeNow = true;
+        }  else if(account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED || account.getAccountState() == Account.CLOSED) {
+            amount = String.valueOf(cost);
+            type = "sale";
+            chargeNow = true;
         }
 
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -95,8 +112,15 @@
         request.getSession().setAttribute("billingTime", time);
         String hashString = orderID + "|" + amount + "|" + String.valueOf(account.getAccountID()) + "|" + time + "|" + key;
         String hash = BillingUtil.MD5Hash(hashString);
-        String accountInfoString = null;
-        switch(account.getAccountType()) {
+        String accountInfoString;
+        String charge;
+        int accountType;
+        if (accountTypeChange == null) {
+            accountType = account.getAccountType();
+        } else {
+            accountType = accountTypeChange.getAccountType();
+        }
+        switch(accountType) {
             case Account.BASIC:
                 accountInfoString = "Basic";
                 break;
@@ -109,9 +133,26 @@
             default:
                 accountInfoString = "";
         }
-        Formatter f = new Formatter();
-        String charge = f.format("%.2f", monthly ? account.monthlyCharge() : (account.yearlyCharge())).toString();
+        charge = NumberFormat.getCurrencyInstance().format(cost - credit);
 
+        String billingMessage;
+        String billingHeader;
+        String billingIntroParagraph;
+        if (accountTypeChange == null) {
+            billingMessage = "You are signing up for the " + accountInfoString + " account tier, You will be charged " + charge + " USD " + (monthly ? "monthly" : "yearly") + " for your subscription.";
+            billingHeader = account.billingHeader();
+            billingIntroParagraph = account.billingIntroParagraph();
+        } else {
+            billingMessage = "You are signing up for the " + accountInfoString + " account tier. You will be charged " + charge + " USD now, and " +
+                    NumberFormat.getCurrencyInstance().format(Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(), accountTypeChange.getStorage(),
+                            accountTypeChange.isYearly())) + (!accountTypeChange.isYearly() ? " monthly" : " yearly") + " for your subscription.";
+            billingHeader = "";
+            billingIntroParagraph = "";
+        }
+
+        if (chargeNow) {
+             billingMessage += " Your credit card will be charged upon submitting this form.";
+        }
 %>
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
@@ -128,12 +169,6 @@
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                </ul>
-            </div>
-            <div class="nav-collapse">
-                <ul class="nav">
-                    <li class="active"><a href="#">Billing Configuration</a></li>
                     <%
                         if (account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.ACTIVE) {
                     %>
@@ -141,6 +176,13 @@
                     <%
                         }
                     %>
+                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
+                </ul>
+            </div>
+            <div class="nav-collapse">
+                <ul class="nav">
+                    <li><a href="accountType.jsp">Account Configuration</a></li>
+                    <li class="active"><a href="#">Billing Setup</a></li>
                 </ul>
             </div>
         </div>
@@ -154,8 +196,8 @@
             </div>
         </div>
         <div class="span6 offset3" style="padding-top: 10px;padding-bottom: 10px">
-            <h3 style="width:100%;text-align: center"><%= account.billingHeader() %></h3>
-            <p style="font-size:14px;font-family: 'PT Sans',arial,serif"><%= account.billingIntroParagraph() %></p>
+            <h3 style="width:100%;text-align: center"><%= billingHeader %></h3>
+            <p style="font-size:14px;font-family: 'PT Sans',arial,serif"><%= billingIntroParagraph %></p>
         </div>
         <div class="row">
             <div class="span8 offset1">
@@ -189,19 +231,6 @@
                         <input id="time" type="hidden" value="<%= time %>" name="time"/>
                         <input id="hash" type="hidden" value="<%= hash %>" name="hash"/>
                         <input id="type" type="hidden" value="<%= type %>" name="type" />
-                        <% f = new Formatter(); %>
-
-                        <div class="control-group">
-                            <label class="control-label" for="billingType">Billing Interval:</label>
-                            <div id="billingType" class="controls">
-                                <label class="radio inline">
-                                    <input class="radio" id="monthlyBillingType" type="radio" name="billingType" value="monthly" <%= account.getBillingMonthOfYear() != null ? "disabled=\"disabled\"" : "" %> <%= monthly ? "checked=\"checked\"" : "" %> onchange="changeBilling()">Monthly
-                                </label>
-                                <label class="radio inline">
-                                    <input class="radio" id="yearlyBillingType" type="radio" name="billingType" value="yearly" <%= !monthly ? "checked=\"checked\"" : "" %> <%= !monthly ? "checked=\"checked\"" : "" %> onchange="changeBilling()">Yearly
-                                </label>
-                            </div>
-                        </div>
 
                         <div class="control-group">
                             <label class="control-label" for="firstname">First Name:</label>
@@ -270,7 +299,7 @@
                                 </select>
                             </div>
                         </div>
-                        <p>You are signing up for the <%= accountInfoString %> account tier, and you will be charged $<%= charge %> USD <%= monthly ? "monthly" : "yearly" %> for your subscription.  <% if(account.getAccountState() == Account.DELINQUENT) { %> Since your account's free trial has expired, the first charge will be applied today. <% } %></p>
+                        <p><%= billingMessage %></p>
                         <button class="btn btn-inverse" type="submit" value="" name="commit">Submit</button>
                     </fieldset>
                 </form>

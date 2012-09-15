@@ -3,9 +3,13 @@
            height="100%" creationComplete="gotFocus()" styleName="basePageVBox">
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.framework.User;
         import com.easyinsight.preferences.Persona;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
+
+        import mx.controls.Alert;
+        import mx.events.CloseEvent;
 
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
@@ -28,6 +32,9 @@
         [Bindable]
         private var usersUsedString:String;
 
+        [Bindable]
+        private var pricingModel:int;
+
         private var usersAvailable:int;
         private var usersUsed:int;
 
@@ -35,12 +42,14 @@
             addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
             addEventListener(DeleteUserEvent.DELETE_USER, deleteUser);
             addEventListener("userChange", userChange);
+            newPricingModel = User.getInstance().pricingModel > 0;
             userButtonFactory = new EditUserButtonFactory(this);
             enableAdd = accountInfo.accountStats.currentUsers < accountInfo.accountStats.availableUsers;
             usersUsedString = String(accountInfo.accountStats.currentUsers);
             usersAvailableString = String(accountInfo.accountStats.availableUsers);
             usersUsed = accountInfo.accountStats.currentUsers;
             usersAvailable = accountInfo.accountStats.availableUsers;
+            basicUsersShown = User.getInstance().getAccountType() >= Account.PLUS;
             preferencesService.getPersonas.send();
             userIndex = 1;
             userService.getUsers.send();
@@ -51,8 +60,14 @@
         }
 
         private function deleteUser(event:DeleteUserEvent):void {
-            ProgressAlert.alert(this, "Deleting user...", null, userService.deleteUser);
-            userService.deleteUser.send(event.userID);
+            var obj:DisplayObject = this;
+            Alert.show("Are you sure you want to delete " + event.userName + "?", "Alert", Alert.OK | Alert.CANCEL, this,
+                    function(closeEvent:CloseEvent):void {
+                        if (closeEvent.detail == Alert.OK) {
+                            ProgressAlert.alert(obj, "Deleting user...", null, userService.deleteUser);
+                            userService.deleteUser.send(event.userID);
+                        }
+                    }, null, Alert.CANCEL);
         }
 
         private function refreshAccount(event:RefreshAccountEvent):void {
@@ -67,10 +82,17 @@
             usersUsed = users.length;
             usersUsedString = String(users.length);
             enableAdd = users.length < accountInfo.accountStats.availableUsers;
+            showMoreDesigners = newPricingModel && !enableAdd;
         }
 
         private function addUser():void {
             var newUserDialog:NewUserDialog = NewUserDialog(PopUpManager.createPopUp(this, NewUserDialog, true));
+            newUserDialog.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, addedUser, false, 0, true);
+            PopUpUtil.centerPopUp(newUserDialog);
+        }
+
+        private function addBasicUser():void {
+            var newUserDialog:NamedUserDialog = NamedUserDialog(PopUpManager.createPopUp(this, NamedUserDialog, true));
             newUserDialog.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, addedUser, false, 0, true);
             PopUpUtil.centerPopUp(newUserDialog);
         }
@@ -95,6 +117,16 @@
             this.personas = personas;
         }
 
+        private function addMoreUsers():void {
+            navigateToURL(new URLRequest("/app/billing/accountType.jsp"), "_self");
+        }
+
+        [Bindable]
+        private var newPricingModel:Boolean;
+
+        [Bindable]
+        private var basicUsersShown:Boolean;
+
         private function updatedUsers():void {
             changesIndex = 0;
         }
@@ -106,7 +138,8 @@
         [Bindable]
         private var changesIndex:int;
 
-
+        [Bindable]
+        private var showMoreDesigners:Boolean;
         ]]>
     </mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
@@ -118,9 +151,6 @@
         <mx:method name="getPersonas" result="gotPersonas()"/>
     </mx:RemoteObject>
     <account:PersonaComboBoxFactory id="personaFactory" personas="{personas}"/>
-    <mx:Box width="100%" styleName="bannerBackground">
-        <mx:Label text="User Administration" styleName="bannerText"/>
-    </mx:Box>
     <mx:ViewStack selectedIndex="{changesIndex}" resizeToContent="true">
         <mx:Box/>
         <mx:HBox width="100%" horizontalAlign="center">
@@ -131,14 +161,19 @@
             </mx:HBox>
         </mx:HBox>
     </mx:ViewStack>
-    <mx:HBox horizontalAlign="center" verticalAlign="middle">
-        <mx:Label text="Account Users:"/>
-        <mx:Label text="{usersUsedString}" fontFamily="Lucida Grande" fontWeight="normal"/>
-        <mx:Label text=" / "/>
-        <mx:Label text="{usersAvailableString}" fontFamily="Lucida Grande" fontWeight="normal"/>
-        <mx:Spacer width="30"/>
-        <mx:Button label="Add User..." click="addUser()" enabled="{enableAdd}" fontSize="14" styleName="grayButton"/>
-    </mx:HBox>
+    <mx:VBox horizontalAlign="center" verticalAlign="middle" width="700">
+        <mx:HBox>
+            <mx:Label text="Designers Used and Available:"/>
+            <mx:Label text="{usersUsedString}" fontFamily="Lucida Grande" fontWeight="normal"/>
+            <mx:Label text=" / "/>
+            <mx:Label text="{usersAvailableString}" fontFamily="Lucida Grande" fontWeight="normal"/>
+            <mx:Button styleName="grayButton" label="Add More Designers..." click="addMoreUsers()" visible="{showMoreDesigners}"/>
+        </mx:HBox>
+        <mx:HBox horizontalAlign="right" width="100%">
+            <mx:Button label="Add Designer..." click="addUser()" enabled="{enableAdd}" fontSize="14" styleName="grayButton"/>
+            <mx:Button label="Add Viewer..." click="addBasicUser()" fontSize="14" styleName="grayButton" visible="{basicUsersShown}"/>
+        </mx:HBox>
+    </mx:VBox>
 
     <mx:DataGrid dataProvider="{users}" rowHeight="28" height="100%">
         <mx:columns>

@@ -4,8 +4,12 @@ import com.easyinsight.billing.BrainTreeBillingSystem;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.logging.LogClass;
+import org.hibernate.Session;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 
 import javax.persistence.*;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -47,7 +51,11 @@ public class Account {
     public static final long PERSONAL_MAX = 5000000;
     public static final long BASIC_MAX = 35000000;
     public static final long PLUS_MAX = 90000000;
-    public static final long PROFESSIONAL_MAX = 250000000;
+    public static final long PROFESSIONAL_MAX   = 250000000L;
+    public static final long PROFESSIONAL_MAX_2 = 500000000L;
+    public static final long PROFESSIONAL_MAX_3 = 750000000L;
+    public static final long PROFESSIONAL_MAX_4 = 1000000000L;
+
     public static final long PREMIUM_MAX = 10000000000L;
     public static final long ENTERPRISE_MAX = 1000000000;
     public static final long ADMINISTRATOR_MAX = Long.MAX_VALUE;
@@ -169,6 +177,12 @@ public class Account {
     @Column(name="pricing_model")
     private int pricingModel;
 
+    @Column(name="days_over_size_boundary")
+    private int daysOverSizeBoundary;
+
+    @Column(name="max_days_over_size_boundary")
+    private int maxDaysOverSizeBoundary;
+
     @Column(name="address_line1")
     private String addressLine1;
     @Column(name="address_line2")
@@ -187,6 +201,14 @@ public class Account {
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public int getDaysOverSizeBoundary() {
+        return daysOverSizeBoundary;
+    }
+
+    public void setDaysOverSizeBoundary(int daysOverSizeBoundary) {
+        this.daysOverSizeBoundary = daysOverSizeBoundary;
+    }
 
     public int getBillingFailures() {
         return billingFailures;
@@ -330,6 +352,14 @@ public class Account {
 
     public void setPublicDataEnabled(boolean publicDataEnabled) {
         this.publicDataEnabled = publicDataEnabled;
+    }
+
+    public int getMaxDaysOverSizeBoundary() {
+        return maxDaysOverSizeBoundary;
+    }
+
+    public void setMaxDaysOverSizeBoundary(int maxDaysOverSizeBoundary) {
+        this.maxDaysOverSizeBoundary = maxDaysOverSizeBoundary;
     }
 
     public boolean isReportSharingEnabled() {
@@ -570,36 +600,14 @@ public class Account {
         this.billingDayOfMonth = billingDayOfMonth;
     }
 
-    public AccountCreditCardBillingInfo bill() {
-
+    public AccountCreditCardBillingInfo upgradeBill(AccountTypeChange accountTypeChange, double charge, Session session) {
         LogClass.info("Starting billing for account ID:" + this.getAccountID());
-        if(getAccountType() == Account.PERSONAL)
-            setAccountState(Account.ACTIVE);
         // the indirection here is to support invoice billingSystem later
         BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
         billingSystem.setUsername(ConfigLoader.instance().getBillingUsername());
         billingSystem.setPassword(ConfigLoader.instance().getBillingPassword());
-        Map<String, String> params = null;
-        if(this.getBillingMonthOfYear() != null) {
-            params = billingSystem.billAccount(this.getAccountID(), this.yearlyCharge());
-        } else {
-            params = billingSystem.billAccount(this.getAccountID(), this.monthlyCharge());
-        }
+        Map<String, String> params = billingSystem.billAccount(getAccountID(), charge);
         boolean successful;
-        if(!params.get("response").equals("1")) {
-            if (getBillingFailures() >= 7) {
-                setAccountState(Account.BILLING_FAILED);
-            } else {
-                billingFailures++;
-            }
-            LogClass.info("Billing failed!");
-            successful = false;
-        }
-        else {
-            billingFailures = 0;
-            LogClass.info("Success!");
-            successful = true;
-        }
         AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
         info.setAmount(String.valueOf(this.getBillingMonthOfYear() != null ? yearlyCharge() : monthlyCharge()));
         info.setAccountId(this.getAccountID());
@@ -608,7 +616,18 @@ public class Account {
         info.setResponseString(params.get("responsetext"));
         info.setTransactionID(params.get("transactionid"));
         info.setTransactionTime(new Date());
+        info.setDays(accountTypeChange.isYearly() ? 365 : 28);
+        if(!params.get("response").equals("1")) {
+            successful = false;
+        }
+        else {
+            billingFailures = 0;
+            LogClass.info("Success!");
+            successful = true;
+        }
+
         if (successful) {
+            accountTypeChange.apply(this, session);
             String invoiceBody = info.toInvoiceText(this);
             for (User user : getUsers()) {
                 if (user.isInvoiceRecipient()) {
@@ -619,27 +638,89 @@ public class Account {
                     }
                 }
             }
+        }
+        LogClass.info("Completed billing Account ID:" + this.getAccountID());
+        return info;
+    }
+
+    public AccountCreditCardBillingInfo bill() {
+
+        LogClass.info("Starting billing for account ID:" + this.getAccountID());
+
+        double credit = calculateCredit(this);
+        double cost = createTotalCost();
+
+        AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
+
+        if (credit >= cost) {
+            info.setAmount(String.valueOf(cost));
+            info.setTransactionTime(new Date());
+            info.setResponseCode("100");
+            info.setDays(getBillingDayOfMonth() != null ? 365 : 28);
         } else {
-            if (accountState == Account.BILLING_FAILED) {
-                String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information to resume service.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
+            BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
+            billingSystem.setUsername(ConfigLoader.instance().getBillingUsername());
+            billingSystem.setPassword(ConfigLoader.instance().getBillingPassword());
+            double amount = cost - credit;
+            Map<String, String> params = billingSystem.billAccount(getAccountID(), amount);
+
+            boolean successful;
+            if(!params.get("response").equals("1")) {
+                if (getBillingFailures() >= 7) {
+                    setAccountState(Account.BILLING_FAILED);
+                } else {
+                    billingFailures++;
+                }
+                LogClass.info("Billing failed on " + accountID + ".");
+                successful = false;
+            }
+            else {
+                billingFailures = 0;
+                LogClass.info("Successfully billed " + accountID + " for " + amount + ".");
+                successful = true;
+            }
+
+            info.setAmount(String.valueOf(amount));
+            info.setAccountId(this.getAccountID());
+            info.setResponse(params.get("response"));
+            info.setResponseCode(params.get("response_code"));
+            info.setResponseString(params.get("responsetext"));
+            info.setTransactionID(params.get("transactionid"));
+            info.setTransactionTime(new Date());
+            info.setDays(getBillingDayOfMonth() != null ? 365 : 28);
+            if (successful) {
+                String invoiceBody = info.toInvoiceText(this);
                 for (User user : getUsers()) {
                     if (user.isInvoiceRecipient()) {
                         try {
-                            new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
+                            new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, "support@easy-insight.com", false, "Easy Insight");
                         } catch (Exception e) {
                             LogClass.error(e);
                         }
                     }
                 }
             } else {
-                if (billingFailures == 1) {
-                    String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information within the next seven days.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
+                if (accountState == Account.BILLING_FAILED) {
+                    String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information to resume service.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
                     for (User user : getUsers()) {
                         if (user.isInvoiceRecipient()) {
                             try {
                                 new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
                             } catch (Exception e) {
                                 LogClass.error(e);
+                            }
+                        }
+                    }
+                } else {
+                    if (billingFailures == 1) {
+                        String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information within the next seven days.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
+                        for (User user : getUsers()) {
+                            if (user.isInvoiceRecipient()) {
+                                try {
+                                    new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
+                                } catch (Exception e) {
+                                    LogClass.error(e);
+                                }
                             }
                         }
                     }
@@ -731,5 +812,164 @@ public class Account {
         } else {
             return "You have successfully set up your billing account. Your account is now active and accessible again!";
         }
+    }
+
+    public String planName() {
+        if (getAccountType() == Account.BASIC) {
+            return "Basic Plan";
+        } else if (getAccountType() == Account.PLUS) {
+            return "Plus Plan";
+        } else if (getAccountType() == Account.PROFESSIONAL) {
+            return "Professional Plan";
+        } else if (getAccountType() == Account.ENTERPRISE) {
+            return "Enterprise Plan";
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    public String designers() {
+        if (maxUsers == 1) {
+            return maxUsers + " Designer";
+        } else {
+            return maxUsers + " Designers";
+        }
+    }
+
+    public String billingInterval() {
+        if (getBillingMonthOfYear() != null) {
+            return "Annually";
+        } else {
+            return "Monthly";
+        }
+    }
+
+    public static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
+
+    public String createCostString() {
+        NumberFormat nf = NumberFormat.getCurrencyInstance();
+        nf.setMaximumFractionDigits(2);
+        nf.setMinimumFractionDigits(2);
+        return nf.format(createCost());
+    }
+
+    public double createCost() {
+        int storageType = 0;
+        if (maxSize == Account.PROFESSIONAL_MAX_2) {
+            storageType = 1;
+        } else if (maxSize == Account.PROFESSIONAL_MAX_3) {
+            storageType = 2;
+        } else if (maxSize == Account.PROFESSIONAL_MAX_4) {
+            storageType = 3;
+        }
+        return createBaseCost(pricingModel, accountType, maxUsers, storageType, getBillingMonthOfYear() != null);
+    }
+
+    public String createTotalCostString() {
+        NumberFormat nf = NumberFormat.getCurrencyInstance();
+        nf.setMaximumFractionDigits(2);
+        nf.setMinimumFractionDigits(2);
+        return nf.format(createTotalCost());
+    }
+
+    public double createTotalCost() {
+        int storageType = 0;
+        if (maxSize == Account.PROFESSIONAL_MAX_2) {
+            storageType = 1;
+        } else if (maxSize == Account.PROFESSIONAL_MAX_3) {
+            storageType = 2;
+        } else if (maxSize == Account.PROFESSIONAL_MAX_4) {
+            storageType = 3;
+        }
+        return createTotalCost(pricingModel, accountType, maxUsers, storageType, getBillingMonthOfYear() != null);
+    }
+
+    public static double createBaseCost(int pricingModel, int tier, int maxUsers, int maxSize, boolean yearly) {
+        double cost;
+        if (pricingModel == 0) {
+            if (tier == Account.BASIC) {
+                cost = (25 * (yearly ? 12 : 1));
+            } else if (tier == Account.PLUS) {
+                cost = (75 * (yearly ? 12 : 1));
+            } else if (tier == Account.PROFESSIONAL) {
+                cost = (200 * (yearly ? 12 : 1));
+            } else {
+                throw new RuntimeException();
+            }
+        } else {
+            if (tier == Account.BASIC) {
+                cost = (25 * (yearly ? 12 : 1)) + (maxUsers - 1) * 10 * (yearly ? 12 : 1);
+            } else if (tier == Account.PLUS) {
+                cost = (75 * (yearly ? 12 : 1)) + (maxUsers - 1) * 25 * (yearly ? 12 : 1);
+            } else if (tier == Account.PROFESSIONAL) {
+                cost = (200 * (yearly ? 12 : 1)) + (maxUsers - 1) * 50 * (yearly ? 12 : 1);
+                if (maxSize == 2) {
+                    cost += 150 * (yearly ? 12 : 1);
+                } else if (maxSize == 3) {
+                    cost += 300 * (yearly ? 12 : 1);
+                } else if (maxSize == 4) {
+                    cost += 450 * (yearly ? 12 : 1);
+                }
+            } else {
+                throw new RuntimeException();
+            }
+        }
+        return cost;
+    }
+
+    public static double createTotalCost(int pricingModel, int tier, int maxUsers, int maxSize, boolean yearly) {
+        double cost = createBaseCost(pricingModel, tier, maxUsers, maxSize, yearly);
+        cost = cost - (createDiscount(pricingModel, tier, maxUsers, maxSize, yearly));
+        return cost;
+    }
+
+    public static double createDiscount(int pricingModel, int tier, int maxUsers, int maxSize, boolean yearly) {
+        double discount = 0;
+        if (yearly) {
+            if (pricingModel == 0) {
+                if (tier == Account.BASIC) {
+                    discount = 25;
+                } else if (tier == Account.PLUS) {
+                    discount = 75;
+                } else if (tier == Account.PROFESSIONAL) {
+                    discount = 200;
+                } else {
+                    throw new RuntimeException();
+                }
+            } else {
+                discount = createBaseCost(pricingModel, tier, maxUsers, maxSize, yearly) / 12;
+            }
+        }
+        return discount;
+    }
+
+    public static double calculateCredit(Account account) {
+        double totalCredit = 0;
+        for (AccountCreditCardBillingInfo info : account.getBillingInfo()) {
+            if ("100".equals(info.getResponseCode())) {
+                double amount = Double.parseDouble(info.getAmount());
+                DateTime lastTime = new DateTime(info.getTransactionTime());
+                DateTime now = new DateTime(System.currentTimeMillis());
+                int daysBetween = Days.daysBetween(lastTime, now).getDays();
+                int period = info.getDays();
+                int elapsed = period - daysBetween;
+                if (elapsed > 0) {
+                    double multiple = (double) elapsed / (double) period;
+                    double credit = amount * multiple;
+                    totalCredit += credit;
+                }
+            }
+
+        }
+        return totalCredit;
+    }
+
+    public String storageString() {
+        return humanReadableByteCount(maxSize, true);
     }
 }

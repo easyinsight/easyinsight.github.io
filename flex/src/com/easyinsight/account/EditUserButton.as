@@ -43,11 +43,19 @@ import mx.containers.HBox;
 		}
 
         private function onEdit(event:MouseEvent):void {
-            var userProfileEditor:NewUserDialog = new NewUserDialog();
-            userProfileEditor.user = user;
-            userProfileEditor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount, false, 0, true);
-            PopUpManager.addPopUp(userProfileEditor, parentWindow, true);
-            PopUpUtil.centerPopUp(userProfileEditor);
+            if (user.analyst) {
+                var userProfileEditor:NewUserDialog = new NewUserDialog();
+                userProfileEditor.user = user;
+                userProfileEditor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount, false, 0, true);
+                PopUpManager.addPopUp(userProfileEditor, parentWindow, true);
+                PopUpUtil.centerPopUp(userProfileEditor);
+            } else {
+                var basicEditor:NamedUserDialog = new NamedUserDialog();
+                basicEditor.user = user;
+                basicEditor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount, false, 0, true);
+                PopUpManager.addPopUp(basicEditor, parentWindow, true);
+                PopUpUtil.centerPopUp(basicEditor);
+            }
         }
 
         private function refreshAccount(event:RefreshAccountEvent):void {
@@ -59,7 +67,7 @@ import mx.containers.HBox;
                 Alert.show("You can't delete yourself.");
                 return;
             }
-            dispatchEvent(new DeleteUserEvent(user.userID));
+            dispatchEvent(new DeleteUserEvent(user.userID, user.userName));
         }
 
         override protected function createChildren():void {

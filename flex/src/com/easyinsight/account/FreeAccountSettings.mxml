@@ -69,13 +69,6 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        protected function upgrade():void {
-            var window:BasicUpgradeWindow = new BasicUpgradeWindow();
-            window.addEventListener(UpgradeEvent.UPGRADE_EVENT, onUpgrade, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
         private function onUpgrade(event:UpgradeEvent):void {
             dispatchEvent(new Event("refreshAccount"));
         }
@@ -107,7 +100,6 @@
                     <mx:Button label="Manage Persona..." click="managePersona()"/>
                 </mx:FormItem>
                 <mx:FormItem label="">
-                    <mx:Button label="Upgrade Account..." click="upgrade()"/>
                 </mx:FormItem>
                 <mx:FormItem>
                     <mx:Button label="Cancel Account..." click="cancelAccount()"/>

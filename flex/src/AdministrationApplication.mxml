@@ -13,6 +13,7 @@
                         <mx:Button label="Thread Dump" click="dumpThreads()"/>
                         <mx:Button label="Update Zip Geocodes" click="updateZipCodes()"/>
                         <mx:Button label="Nuke" click="nuke()"/>
+                        <mx:Button label="Apply Days" click="applyDays()"/>
                         <mx:Button label="Report Admin XML" click="reportAdminXML()"/>
                         <mx:Button label="Report Test" click="reportTest()"/>
                         <mx:Button label="Global Skin" click="globalSkin()"/>
@@ -85,6 +86,10 @@
 
         private function nuke():void {
             adminService.delinquentToExpired.send();
+        }
+
+        private function applyDays():void {
+            adminService.applyDays.send();
         }
 
         private function reportTest():void {
@@ -209,6 +214,7 @@
     </mx:RemoteObject>
     <mx:RemoteObject id="adminService" destination="admin">
         <mx:method name="threadDump"/>
+        <mx:method name="applyDays"/>
         <mx:method name="constantContactSync"/>
         <mx:method name="clearOrphanData"/>
         <mx:method name="delinquentToExpired"/>

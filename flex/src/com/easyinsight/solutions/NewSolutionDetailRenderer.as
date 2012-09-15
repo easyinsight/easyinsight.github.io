@@ -1,6 +1,5 @@
 package com.easyinsight.solutions {
 
-import com.easyinsight.account.BasicUpgradeWindow;
 import com.easyinsight.account.UpgradeEvent;
 import com.easyinsight.administration.feed.FeedDefinitionData;
 import com.easyinsight.analysis.PromptEvent;
@@ -20,6 +19,8 @@ import com.easyinsight.util.ProgressAlert;
 
 import flash.events.Event;
 import flash.events.EventDispatcher;
+import flash.net.URLRequest;
+import flash.net.navigateToURL;
 
 import mx.controls.Alert;
 import mx.core.Application;
@@ -47,10 +48,7 @@ public class NewSolutionDetailRenderer extends EventDispatcher {
     }
 
     protected function upgrade():void {
-        var window:BasicUpgradeWindow = new BasicUpgradeWindow();
-        window.addEventListener(UpgradeEvent.UPGRADE_EVENT, onUpgrade, false, 0, true);
-        PopUpManager.addPopUp(window, UIComponent(Application.application), true);
-        PopUpUtil.centerPopUp(window);
+        navigateToURL(new URLRequest("/app/billing/accountType.jsp"), "_self");
     }
 
     private function onUpgrade(event:UpgradeEvent):void {

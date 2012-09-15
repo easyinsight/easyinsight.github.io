@@ -1,6 +1,5 @@
 package com.easyinsight.solutions {
 
-import com.easyinsight.account.BasicUpgradeWindow;
 import com.easyinsight.account.UpgradeEvent;
 import com.easyinsight.administration.feed.FeedDefinitionData;
 import com.easyinsight.analysis.PromptEvent;
@@ -83,14 +82,7 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     }
 
     protected function upgrade():void {
-        if (User.getInstance().pricingModel == 0) {
-            var window:BasicUpgradeWindow = new BasicUpgradeWindow();
-            window.addEventListener(UpgradeEvent.UPGRADE_EVENT, onUpgrade, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        } else {
-            navigateToURL(new URLRequest("/app/billing/accountType.jsp"), "_self");
-        }
+        navigateToURL(new URLRequest("/app/billing/accountType.jsp"), "_self");
     }
 
     private function onUpgrade(event:UpgradeEvent):void {

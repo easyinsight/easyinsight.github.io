@@ -18,10 +18,10 @@
                 <account:AccountState accountInfo="{accountInfo}"/>
                 <account:AccountTrialDate accountInfo="{accountInfo}"/>
             </mx:Form>
-            <mx:Button label="Upgrade Account..." click="upgrade()" styleName="grayButton" fontSize="14" width="220" id="upgradeButton"/>
+            <mx:Button label="Upgrade or Downgrade Account..." click="upgrade()" styleName="grayButton" fontSize="14" width="220" id="upgradeButton"/>
             <mx:Button label="View Invoices..." click="invoices()" styleName="grayButton" fontSize="14" width="220" id="invoicesButton"/>
             <mx:Button label="Edit Invoice Properties..." click="editInvoiceProps()" styleName="grayButton" fontSize="14" width="220" id="invoicePropsButton"/>
-            <mx:Button label="Set Up Billing..." click="navigateToURL(new URLRequest('billing'), '_self');" styleName="grayButton" fontSize="14" width="220"/>
+            <mx:Button label="Set Up Billing..." click="navigateToURL(new URLRequest('billing/billingSetupAction.jsp'), '_self');" styleName="grayButton" fontSize="14" width="220"/>
             <mx:Button label="Cancel Account..." click="cancelPaidAccount()" styleName="grayButton" fontSize="14" width="220"/>
         </mx:VBox>
         <mx:VRule strokeColor="#333333"/>
@@ -67,10 +67,7 @@
         }
 
         protected function upgrade():void {
-            var window:BasicUpgradeWindow = new BasicUpgradeWindow();
-            window.addEventListener(UpgradeEvent.UPGRADE_EVENT, onUpgrade, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+            navigateToURL(new URLRequest("/app/billing/accountType.jsp"), "_self");
         }
 
         private function onUpgrade(event:UpgradeEvent):void {

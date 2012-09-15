@@ -3,19 +3,15 @@
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page import="com.easyinsight.logging.LogClass" %>
-<%@ page import="com.easyinsight.users.Account" %>
-<%@ page import="com.easyinsight.users.AccountActivityStorage" %>
-<%@ page import="com.easyinsight.users.AccountCreditCardBillingInfo" %>
-<%@ page import="com.easyinsight.users.User" %>
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="java.text.DateFormat" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.Calendar" %>
 <%@ page import="java.util.Date" %>
-<%@ page import="java.util.List" %>
 <%@ page import="java.util.TimeZone" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="com.easyinsight.users.*" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String hashStr = request.getParameter("orderid") + "|" + request.getParameter("amount") + "|" + request.getParameter("response") + "|" + request.getParameter("transactionid") + "|" + request.getParameter("avsresponse") + "|" + request.getParameter("cvvresponse") + "|" + request.getParameter("customer_vault_id") + "|" + request.getParameter("time") + "|" + BillingUtil.getKey();
@@ -29,11 +25,20 @@
         long accountID = (Long) request.getSession().getAttribute("accountID");
         long userID = (Long) request.getSession().getAttribute("userID");
         System.out.println("UserID: " + userID + " AccountID: " + accountID);
-        Account account = null;
-        User user = null;
 
-        user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
-        account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+        User user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+        Account account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+
+        AccountTypeChange accountTypeChange = (AccountTypeChange) session.getAttribute("accountTypeChange");
+
+        boolean yearly;
+        if (accountTypeChange == null) {
+            yearly = account.getBillingMonthOfYear() != null;
+        } else {
+            yearly = accountTypeChange.isYearly();
+        }
+
+        //boolean yearly = request.getParameter("orderid").startsWith("yearly");
 
         postBillingMessage = account.successMessage();
 
@@ -45,6 +50,7 @@
         info.setResponseCode(request.getParameter("response_code"));
         info.setResponseString(request.getParameter("responsetext"));
         info.setAccountId(account.getAccountID());
+        info.setDays(yearly ? 365 : 31);
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date transTime = df.parse(request.getParameter("time"));
@@ -63,7 +69,7 @@
             conn.setSavepoint();
             account.setBillingInformationGiven(true);
 
-            boolean yearly = request.getParameter("orderid").startsWith("yearly");
+
 
 
             // Can only let account admins use the billing
@@ -125,6 +131,7 @@
 
             s.flush();
             conn.commit();
+            session.removeAttribute("accountTypeChange");
         }
     }
     catch(Exception e) {
@@ -144,7 +151,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Easy Insight Sign In</title>
+    <title>Easy Insight Billing Configuration</title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
@@ -187,13 +194,14 @@
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
+                    <li><a href="../html/flashAppAction.jsp">Back to Full Interface</a></li>
                     <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
                 </ul>
             </div>
             <div class="nav-collapse">
                 <ul class="nav">
-                    <li class="active"><a href="index.jsp">Billing Configuration</a></li>
-                    <li><a href="../html/flashAppAction.jsp">Back to Full Interface</a></li>
+                    <li><a href="accountType.jsp">Account Configuration</a></li>
+                    <li class="active"><a href="#">Billing Setup</a></li>
                 </ul>
             </div>
         </div>

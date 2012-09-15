@@ -17,6 +17,8 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.groups.GroupStorage;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 
 import java.sql.*;
 import java.util.*;
@@ -489,6 +491,13 @@ public class UserAccountAdminService {
         return userCreationResponse;
     }
 
+    /*
+    on pricing change
+
+     */
+
+
+
     public void downgradeAccount(int toType) {
         if (toType == Account.ADMINISTRATOR) {
             throw new SecurityException();
@@ -563,7 +572,7 @@ public class UserAccountAdminService {
         }
     }
 
-    public UpgradeAccountResponse upgradeAccount(int toType) {
+    public UpgradeAccountResponse upgradeAccount(int toType, int numberDesigners, long maxStorage) {
 
         if (toType == Account.ADMINISTRATOR) {
             throw new SecurityException();
@@ -573,9 +582,9 @@ public class UserAccountAdminService {
         }
         SecurityUtil.authorizeAccountAdmin();
         long accountID = SecurityUtil.getAccountID();
-        if (toType < SecurityUtil.getAccountTier()) {
+        /*if (toType < SecurityUtil.getAccountTier()) {
             throw new RuntimeException();
-        }
+        }*/
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
@@ -584,7 +593,7 @@ public class UserAccountAdminService {
 
             User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
 
-            UpgradeAccountResponse response = updateAccount(toType, conn, session, account, user);
+            UpgradeAccountResponse response = updateAccount(toType, conn, session, account, user, numberDesigners, maxStorage);
             session.flush();
             conn.commit();
             return response;
@@ -598,61 +607,27 @@ public class UserAccountAdminService {
         }
     }
 
-    private UpgradeAccountResponse updateAccount(int toType, EIConnection conn, Session session, Account account, User user) throws SQLException {
+    private UpgradeAccountResponse updateAccount(int toType, EIConnection conn, Session session, Account account, User user, int numberDesigners, long maxStorage) throws SQLException {
         UpgradeAccountResponse response = new UpgradeAccountResponse();
-        boolean goAheadWithUpgrade = false;
 
-        if (account.getAccountType() == Account.PERSONAL && !account.isUpgraded()) {
-
-            // If the user has a free account and hasn't upgraded
-
-            goAheadWithUpgrade = true;
-
-            account.setAccountState(Account.TRIAL);
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DAY_OF_YEAR, 30);
-            new AccountActivityStorage().saveAccountTimeChange(account.getAccountID(), Account.ACTIVE, cal.getTime(), conn);
-
-            Group group = new Group();
-            group.setName(account.getName());
-            group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
-            account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
-
-
-        } else if (account.getAccountType() == Account.PERSONAL && account.isUpgraded()) {
-
-            // if the user has a free account that they've previously upgraded/downgraded
-
+        if (account.getUsers().size() > numberDesigners) {
+            response.setSuccessful(false);
+            response.setResultMessage("You currently have " + account.getUsers().size() + " users on the account. You'll need to reduce the account to " + numberDesigners + " before making this account change.");
         } else {
-
-            Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
-
-            if (trialEnd != null && trialEnd.after(new Date())) {
-
-                // if the user is currently in a trial period
-
-                goAheadWithUpgrade = true;
-
-            } else if (account.getBillingDayOfMonth() != null) {
-
-                // if the user has billing set up
-
-                goAheadWithUpgrade = true;
-            }
-        }
-
-        if (goAheadWithUpgrade) {
             account.setAccountType(toType);
             AccountLimits.configureAccount(account);
+            account.setMaxUsers(numberDesigners);
+            if (account.getAccountType() >= Account.PROFESSIONAL) {
+                account.setMaxSize(maxStorage);
+            }
             response.setNewAccountType(toType);
             account.setUpgraded(true);
             session.update(account);
             SecurityUtil.changeAccountType(toType);
-        } else {
-            throw new RuntimeException("Unhandled account upgrade case, please contact support.");
+            response.setSuccessful(true);
+            response.setUser(user.toUserTransferObject());
         }
-        response.setSuccessful(true);
-        response.setUser(user.toUserTransferObject());
+
         return response;
     }
 

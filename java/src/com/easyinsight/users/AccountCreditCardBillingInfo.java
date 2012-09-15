@@ -58,6 +58,28 @@ public class AccountCreditCardBillingInfo {
     @Column(name="response_code")
     private String responseCode;
 
+    @Column(name="days")
+    private int days;
+
+    @Column(name="against_credit")
+    private boolean againstCredit;
+
+    public boolean isAgainstCredit() {
+        return againstCredit;
+    }
+
+    public void setAgainstCredit(boolean againstCredit) {
+        this.againstCredit = againstCredit;
+    }
+
+    public int getDays() {
+        return days;
+    }
+
+    public void setDays(int days) {
+        this.days = days;
+    }
+
     public long getAccountId() {
         return accountId;
     }

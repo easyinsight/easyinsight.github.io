@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Forgot Your Password?</title>
+    <title>Initial Setup</title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">

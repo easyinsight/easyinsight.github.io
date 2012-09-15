@@ -28,6 +28,7 @@ import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
+import com.easyinsight.users.AccountCreditCardBillingInfo;
 import com.easyinsight.users.User;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -40,6 +41,36 @@ import org.hibernate.Session;
 public class AdminService {
 
     private static final String LOC_XML = "<url>\r\n\t<loc>{0}</loc>\r\n</url>\r\n";
+
+    public void applyDays() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            List infos = session.createQuery("from AccountCreditCardBillingInfo ").list();
+            for (Object infoObj : infos) {
+                AccountCreditCardBillingInfo info = (AccountCreditCardBillingInfo) infoObj;
+                if ("100".equals(info.getResponseCode())) {
+                    double amount = Double.parseDouble(info.getAmount());
+                    if (amount == 275) {
+                        info.setDays(365);
+                    } else if (amount == 825) {
+                        info.setDays(365);
+                    } else if (amount == 200) {
+                        info.setDays(31);
+                    } else if (amount == 75) {
+                        info.setDays(31);
+                    } else if (amount == 25) {
+                        info.setDays(31);
+                    }
+                }
+                session.update(info);
+            }
+            session.getTransaction().commit();
+        } finally {
+            session.close();
+        }
+    }
 
     public void logAction(ActionLog actionLog) {
         Session session = Database.instance().createSession();

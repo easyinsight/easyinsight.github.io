@@ -100,8 +100,8 @@
             <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
 	</mx:VBox>
-	<mx:StringValidator source="{userName}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>	
-	<mx:StringValidator source="{fullName}" property="text" id="fullNameValidator" minLength="3" maxLength="40"/>
+	<mx:StringValidator source="{userName}" property="text" id="userNameValidator" minLength="3" maxLength="60"/>
+	<mx:StringValidator source="{fullName}" property="text" id="fullNameValidator" minLength="3" maxLength="60"/>
 	<mx:EmailValidator source="{email}" property="text" id="emailValidator"/>
 	<mx:RemoteObject id="creationService" destination="login">
 		<mx:method name="updateUserLabels" result="savedUser()"/>

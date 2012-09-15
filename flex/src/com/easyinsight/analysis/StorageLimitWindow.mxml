@@ -2,9 +2,6 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import com.easyinsight.account.AccountSizingWindow;
-        import com.easyinsight.account.BasicUpgradeWindow;
-        import com.easyinsight.account.UpgradeEvent;
-        import com.easyinsight.framework.User;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -24,14 +21,7 @@
         public var message:String;
 
         private function upgradeAccount():void {
-            if (User.getInstance().pricingModel == 0) {
-                var window:BasicUpgradeWindow = new BasicUpgradeWindow();
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-                PopUpManager.removePopUp(this);
-            } else {
-                navigateToURL(new URLRequest("/app/billing/accountType.jsp"), "_self");
-            }
+            navigateToURL(new URLRequest("/app/billing/accountType.jsp"), "_self");
         }
         ]]></mx:Script>
     <mx:TextArea text="{message}" width="450" height="65" fontSize="12"/>

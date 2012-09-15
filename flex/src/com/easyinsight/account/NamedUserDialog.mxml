@@ -21,12 +21,11 @@
         import com.easyinsight.util.ProgressAlert;
 
         import mx.binding.utils.BindingUtils;
-
         import mx.collections.ArrayCollection;
         import mx.containers.VBox;
         import mx.controls.Alert;
-        import mx.validators.Validator;
         import mx.managers.PopUpManager;
+        import mx.validators.Validator;
 
         private var validators:Array;
 
@@ -95,7 +94,6 @@
             if (userID == 0) {
                 currentState = "initialCreate";
             }
-            BindingUtils.bindProperty(accountAdminCheckbox, "selected", this, "accountAdmin");
             validators = [ emailValidator, userNameValidator, fullNameValidator ];
             dashboardService.getDashboards.send();
             //if (User.getInstance().getAccountType() >= Account.PRO) {
@@ -127,21 +125,20 @@
                 Alert.show("There are one or more problems with the user information you specified.");
             } else {
                 var user:UserTransferObject = new UserTransferObject();
-                user.analyst = true;
+                user.analyst = false;
                 user.userID = userID;
                 user.email = emailInput.text;
                 user.userName = userNameInput.text;
                 user.name = fullNameInput.text;
                 user.firstName = firstNameInput.text;
                 user.fixedDashboardID = singleViewComboBox.selectedItem.id;
-                user.invoiceRecipient = invoiceCheckbox.selected;
+                user.autoRefreshReports = refreshCheckbox.selected;
                 if (showPersonaOption) {
                     var persona:Object = personaComboBox.selectedItem;
                     if (persona != Persona.EMPTY_PERSONA) {
                         user.personaID = persona.personaID;
                     }
                 }
-                user.accountAdmin = accountAdminCheckbox.selected;
                 if (userID == 0) {
                     ProgressAlert.alert(this, "Adding user to account...", null, creationService.addUserToAccount);
                     creationService.addUserToAccount.send(user, dlsList, requirePasswordChangeCheckbox.selected);
@@ -173,7 +170,7 @@
 
         private function gotDashboards():void {
             var views:ArrayCollection = dashboardService.getDashboards.lastResult as ArrayCollection;
-            views.addItemAt({ id: 0, name: "[ No Fixed View ]"}, 0);
+            views.addItemAt({ id:0, name:"[ No Fixed View ]"}, 0);
             availableViews = views;
         }
 
@@ -242,12 +239,6 @@
                 <mx:FormItem label="Email Address:" direction="horizontal">
                     <mx:TextInput id="emailInput" text="{email}" width="400"/>
                 </mx:FormItem>
-                <mx:FormItem label="Account Administrator:">
-                    <mx:CheckBox id="accountAdminCheckbox" selected="{accountAdmin}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Invoice Recipient:">
-                    <mx:CheckBox id="invoiceCheckbox" selected="{invoiceRecipient}"/>
-                </mx:FormItem>
                 <mx:FormItem label="Send Newsletter to User:">
                     <mx:CheckBox id="newsletterCheckbox" selected="{newsletterSelected}"/>
                 </mx:FormItem>
@@ -262,6 +253,9 @@
                     <util:SmartComboBox dataProvider="{availableViews}" labelField="name" id="singleViewComboBox" selectedProperty="id" selectedValue="{viewID}" enabled="{!accountAdmin}"
                             maxWidth="300"/>
                 </mx:FormItem>
+                <mx:FormItem label="Auto Refresh Reports and Dashboards:">
+                    <mx:CheckBox id="refreshCheckbox" selected="{autoRefresh}"/>
+                </mx:FormItem>
             </mx:Form>
         </mx:VBox>
     </mx:TabNavigator>
@@ -269,8 +263,8 @@
         <util:SaveButton label="{createLabel}" click="save()"/>
         <util:CancelButton label="Cancel" click="cancel()"/>
     </mx:HBox>
-	<mx:StringValidator source="{userNameInput}" property="text" id="userNameValidator" minLength="3" maxLength="60"/>
-	<mx:StringValidator source="{fullNameInput}" property="text" id="fullNameValidator" minLength="3" maxLength="60"/>
+	<mx:StringValidator source="{userNameInput}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>
+	<mx:StringValidator source="{fullNameInput}" property="text" id="fullNameValidator" minLength="3" maxLength="40"/>
 	<mx:EmailValidator source="{emailInput}" property="text" id="emailValidator"/>
 	<mx:RemoteObject id="creationService" destination="accountAdmin">
 		<mx:method name="addUserToAccount" result="created()"/>		
