@@ -153,7 +153,12 @@ function editQuery(id) {
                 $("form#editQuery input[name=uploadType]")[0].value = "append";
             else
                 $("form#editQuery input[name=uploadType]")[0].value = "replace";
+
+            var v = $(document.createElement("a"));
+            v.html("View Values");
+            v.attr("href", "query/list_fields.jsp?id=" + result.id);
             editQueryTab();
+            $("form#editQuery").append(v);
         }
     });
 }

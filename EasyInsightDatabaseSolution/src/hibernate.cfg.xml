@@ -19,5 +19,7 @@
     <mapping class="com.easyinsight.connections.database.data.OracleConnectionInfo" />
     <mapping class="com.easyinsight.connections.database.data.SecurityUser" />
       <mapping class="com.easyinsight.connections.database.data.UploadResult" />
+      <mapping class="com.easyinsight.connections.database.data.FieldInfo" />
+
   </session-factory>
 </hibernate-configuration>

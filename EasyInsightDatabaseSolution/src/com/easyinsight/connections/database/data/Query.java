@@ -34,7 +34,7 @@ public class Query {
     public static Timer getScheduler() {
         return scheduler;
     }
-    
+
     private static Timer scheduler = startTimer();
 
     private static Timer startTimer() {
@@ -52,14 +52,14 @@ public class Query {
                 try {
                     s = DataConnection.getSession();
                     List<Query> queries = s.createQuery("from Query where schedule = true").list();
-                    for(Query query : queries) {
-                         try {
-                             Transaction t = s.beginTransaction();
-                             try {
-                                 query.doUpload(s);
-                             } finally {
-                                 t.commit();
-                             }
+                    for (Query query : queries) {
+                        try {
+                            Transaction t = s.beginTransaction();
+                            try {
+                                query.doUpload(s);
+                            } finally {
+                                t.commit();
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -67,7 +67,7 @@ public class Query {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } finally {
-                    if(s != null)
+                    if (s != null)
                         s.close();
                 }
             }
@@ -77,7 +77,7 @@ public class Query {
     }
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @Column(length = 1024, precision = 1024)
     private String query;
@@ -114,13 +114,12 @@ public class Query {
         setQuery(parameterMap.get("queryValue")[0]);
         setDataSource(parameterMap.get("queryDataSource")[0]);
         setName(parameterMap.get("queryDataSource")[0]);
-//        setName(parameterMap.get("queryName")[0]);
-        if(parameterMap.get("schedule") != null && parameterMap.get("schedule")[0].equals("on")) {
+        if (parameterMap.get("schedule") != null && parameterMap.get("schedule")[0].equals("on")) {
             setSchedule(true);
         } else {
             setSchedule(false);
         }
-        if(parameterMap.get("uploadType") != null && parameterMap.get("uploadType")[0].equals("append")) {
+        if (parameterMap.get("uploadType") != null && parameterMap.get("uploadType")[0].equals("append")) {
             setAppend(true);
         } else {
             setAppend(false);
@@ -162,8 +161,19 @@ public class Query {
 
     public static Query byRefreshToken(Session session, String refreshKey) throws SQLException {
         List<Query> list = session.createQuery("from Query where refreshKey = ?").setString(0, refreshKey).list();
-        if(list.size() == 0) return null;
+        if (list.size() == 0) return null;
         return list.get(0);
+    }
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "query", cascade = CascadeType.ALL)
+    private List<FieldInfo> fieldInfos;
+
+    public List<FieldInfo> getFieldInfos() {
+        return fieldInfos;
+    }
+
+    public void setFieldInfos(List<FieldInfo> fieldInfos) {
+        this.fieldInfos = fieldInfos;
     }
 
     public boolean isSchedule() {
@@ -221,61 +231,48 @@ public class Query {
         UploadResult result = new UploadResult();
         result.setStartTime(new Date());
         result.setQuery(this);
+
+        Map<String, FieldInfo> map = new HashMap<String, FieldInfo>();
+        for (FieldInfo f : getFieldInfos()) {
+            map.put(f.getColumnName(), f);
+        }
+
         try {
             EIUser user = EIUser.instance();
-            if(user == null)
+            if (user == null)
                 throw new RuntimeException("You need to enter your credentials first!");
             conn = this.getConnectionInfo().createConnection();
             rs = this.executeQuery(conn);
-            if(this.getRefreshKey() == null) {
+            if (this.getRefreshKey() == null) {
                 this.setRefreshKey(new BigInteger(130, random).toString(32));
             }
             System.out.println(this.getRefreshKey());
             DataSourceFactory dataSourceFactory = APIUtil.defineDataSource(this.getDataSource(), user.getPublicKey(), user.getSecretKey());
             dataSourceFactory.setRefreshUrl(user.getCurrentUrl());
             dataSourceFactory.setRefreshKey(this.getRefreshKey());
-            for(int column = 1;column <= rs.getMetaData().getColumnCount();column++) {
-                switch (rs.getMetaData().getColumnType(column)) {
-                    case Types.BIGINT:
-                        case Types.TINYINT:
-                        case Types.SMALLINT:
-                        case Types.INTEGER:
-                        case Types.NUMERIC:
-                        case Types.FLOAT:
-                        case Types.DOUBLE:
-                        case Types.DECIMAL:
-                        case Types.REAL:
-                            dataSourceFactory.addMeasure(rs.getMetaData().getColumnName(column));
-                            break;
+            for (int column = 1; column <= rs.getMetaData().getColumnCount(); column++) {
+                String key = rs.getMetaData().getColumnName(column);
+                String fieldName = key;
+                if(map.containsKey(key))
+                    fieldName = map.get(key).getFieldName();
 
-                        case Types.BOOLEAN:
-                        case Types.BIT:
-                        case Types.CHAR:
-                        case Types.NCHAR:
-                        case Types.NVARCHAR:
-                        case Types.VARCHAR:
-                        case Types.LONGVARCHAR:
-                            dataSourceFactory.addGrouping(rs.getMetaData().getColumnName(column));
-                            break;
+                if (map.containsKey(key) && map.get(key).getType() != FieldInfo.DEFAULT) {
 
-                        case Types.DATE:
-                        case Types.TIME:
-                        case Types.TIMESTAMP:
-                            dataSourceFactory.addDate(rs.getMetaData().getColumnName(column));
+                    switch (map.get(key).getType()) {
+                        case FieldInfo.MEASURE:
+                            dataSourceFactory.addMeasure(fieldName);
+
+                            break;
+                        case FieldInfo.GROUPING:
+                            dataSourceFactory.addGrouping(fieldName);
+                            break;
+                        case FieldInfo.DATE:
+                            dataSourceFactory.addDate(fieldName);
                             break;
                         default:
-                            throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(column) + ") is not supported in Easy Insight. Type value: " + rs.getMetaData().getColumnType(column));
-                }
-            }
-
-            DataSourceOperationFactory operationFactory = dataSourceFactory.defineDataSource();
-            dataSourceTarget = this.isAppend() ? operationFactory.addRowsTransaction() : operationFactory.replaceRowsTransaction();
-            dataSourceTarget.beginTransaction();
-            int i = 0;
-            while(rs.next()) {
-                DataRow row = dataSourceTarget.newRow();
-                for(int column = 1;column <= rs.getMetaData().getColumnCount();column++) {
-                    String key = rs.getMetaData().getColumnName(column);
+                            break;
+                    }
+                } else {
                     switch (rs.getMetaData().getColumnType(column)) {
                         case Types.BIGINT:
                         case Types.TINYINT:
@@ -286,12 +283,57 @@ public class Query {
                         case Types.DOUBLE:
                         case Types.DECIMAL:
                         case Types.REAL:
-                            row.addValue(key, rs.getDouble(column));
+                            dataSourceFactory.addMeasure(fieldName);
                             break;
 
                         case Types.BOOLEAN:
                         case Types.BIT:
-                            row.addValue(key,String.valueOf(rs.getBoolean(column)));
+                        case Types.CHAR:
+                        case Types.NCHAR:
+                        case Types.NVARCHAR:
+                        case Types.VARCHAR:
+                        case Types.LONGVARCHAR:
+                            dataSourceFactory.addGrouping(fieldName);
+                            break;
+
+                        case Types.DATE:
+                        case Types.TIME:
+                        case Types.TIMESTAMP:
+                            dataSourceFactory.addDate(fieldName);
+                            break;
+                        default:
+                            throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(column) + ") is not supported in Easy Insight. Type value: " + rs.getMetaData().getColumnType(column));
+                    }
+                }
+            }
+
+            DataSourceOperationFactory operationFactory = dataSourceFactory.defineDataSource();
+            dataSourceTarget = this.isAppend() ? operationFactory.addRowsTransaction() : operationFactory.replaceRowsTransaction();
+            dataSourceTarget.beginTransaction();
+
+            while (rs.next()) {
+                DataRow row = dataSourceTarget.newRow();
+                for (int column = 1; column <= rs.getMetaData().getColumnCount(); column++) {
+                    String key = rs.getMetaData().getColumnName(column);
+                    String fieldName = key;
+                    if(map.containsKey(key))
+                        fieldName = map.get(key).getFieldName();
+                    switch (rs.getMetaData().getColumnType(column)) {
+                        case Types.BIGINT:
+                        case Types.TINYINT:
+                        case Types.SMALLINT:
+                        case Types.INTEGER:
+                        case Types.NUMERIC:
+                        case Types.FLOAT:
+                        case Types.DOUBLE:
+                        case Types.DECIMAL:
+                        case Types.REAL:
+                            row.addValue(fieldName, rs.getDouble(column));
+                            break;
+
+                        case Types.BOOLEAN:
+                        case Types.BIT:
+                            row.addValue(fieldName, String.valueOf(rs.getBoolean(column)));
                             break;
 
                         case Types.CHAR:
@@ -299,7 +341,7 @@ public class Query {
                         case Types.NVARCHAR:
                         case Types.VARCHAR:
                         case Types.LONGVARCHAR:
-                            row.addValue(key, rs.getString(column));
+                            row.addValue(fieldName, rs.getString(column));
                             break;
 
                         case Types.DATE:
@@ -308,11 +350,11 @@ public class Query {
                             Date date;
                             try {
                                 date = rs.getTimestamp(column);
-                            } catch(SQLException e) {
+                            } catch (SQLException e) {
                                 // catching bad dates
                                 date = null;
                             }
-                            row.addValue(key, date);
+                            row.addValue(fieldName, date);
                             break;
                         default:
                             throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(column) + ") is not supported in Easy Insight. Type value: " + rs.getMetaData().getColumnType(column));
@@ -324,7 +366,7 @@ public class Query {
             result.setSuccess(true);
             session.save(result);
 
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             result.setEndTime(new Date());
             result.setSuccess(false);
             result.setMessage(e.getMessage().substring(0, Math.min(4096, e.getMessage().length())));
@@ -332,28 +374,85 @@ public class Query {
             e.printStackTrace(new PrintWriter(sw));
             result.setStackTrace(sw.toString().substring(0, Math.min(4096, sw.toString().length())));
             session.save(result);
-            if(dataSourceTarget != null)
+            if (dataSourceTarget != null)
                 dataSourceTarget.rollback();
             throw e;
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             result.setEndTime(new Date());
             result.setSuccess(false);
-            result.setMessage(e.getMessage().substring(0, Math.min(1024*1024, e.getMessage().length())));
+            result.setMessage(e.getMessage().substring(0, Math.min(1024 * 1024, e.getMessage().length())));
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
-            result.setStackTrace(sw.toString().substring(0, Math.min(1024*1024, sw.toString().length())));
+            result.setStackTrace(sw.toString().substring(0, Math.min(1024 * 1024, sw.toString().length())));
             session.save(result);
-            if(dataSourceTarget != null)
+            if (dataSourceTarget != null)
                 dataSourceTarget.rollback();
             throw e;
         } finally {
-            if(rs != null)
+            if (rs != null)
                 rs.close();
-            if(conn != null)
+            if (conn != null)
                 conn.close();
         }
 
     }
 
+    public void discoverFields(Session session) throws SQLException {
+        Transaction t = session.beginTransaction();
+        Map<String, FieldInfo> map = new HashMap<String, FieldInfo>();
+        for (FieldInfo f : getFieldInfos()) {
+            map.put(f.getColumnName(), f);
+        }
+
+        ResultSet rs = executeQuery(getConnectionInfo().createConnection(), 1);
+        for (int column = 1; column <= rs.getMetaData().getColumnCount(); column++) {
+            String key = rs.getMetaData().getColumnName(column);
+            if (!map.containsKey(key)) {
+                FieldInfo f = new FieldInfo();
+                f.setColumnName(key);
+                f.setFieldName(key);
+                f.setQuery(this);
+                switch (rs.getMetaData().getColumnType(column)) {
+                    case Types.BIGINT:
+                    case Types.TINYINT:
+                    case Types.SMALLINT:
+                    case Types.INTEGER:
+                    case Types.NUMERIC:
+                    case Types.FLOAT:
+                    case Types.DOUBLE:
+                    case Types.DECIMAL:
+                    case Types.REAL:
+                        f.setType(FieldInfo.MEASURE);
+                        break;
+
+                    case Types.BOOLEAN:
+                    case Types.BIT:
+                        f.setType(FieldInfo.GROUPING);
+                        break;
+
+                    case Types.CHAR:
+                    case Types.NCHAR:
+                    case Types.NVARCHAR:
+                    case Types.VARCHAR:
+                    case Types.LONGVARCHAR:
+                        f.setType(FieldInfo.GROUPING);
+                        break;
+
+                    case Types.DATE:
+                    case Types.TIME:
+                    case Types.TIMESTAMP:
+                        f.setType(FieldInfo.DATE);
+                        break;
+                    default:
+                        f.setType(FieldInfo.DEFAULT);
+                }
+                this.getFieldInfos().add(f);
+                session.persist(f);
+            }
+
+        }
+        session.persist(this);
+        t.commit();
+    }
 
 }
