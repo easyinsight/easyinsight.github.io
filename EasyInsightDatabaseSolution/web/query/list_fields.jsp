@@ -30,29 +30,35 @@
         } finally {
             dataSession.close();
         }
-%>
-<h2>Test Results</h2>
+%>    <div>
+    <table class="table">
+        <thead><tr>
+        <th>Column Name</th><th>Field Name</th><th>Field Type</th>
+        </tr>
+        </thead>
 
-<div>
-    <form action="update_fields.jsp" method="post">
+        <tbody>
         <%
             int i = 0;
             for(FieldInfo ff : q.getFieldInfos()) { %>
-            <input type="hidden" name="field_id_<%= i %>" value="<%= ff.getId() %>" />
-            <p><%= ff.getColumnName() %></p>
-            <p>Field Name: <input type="text" name="field_name_<%= i %>" value="<%= ff.getFieldName() %>" /></p>
-            <p>Type: <select name="field_type_<%= i %>">
+        <tr>
+            <td><input type="hidden" name="field_id_<%= i %>" value="<%= ff.getId() %>" />
+            <%= ff.getColumnName() %></td>
+            <td><input type="text" name="field_name_<%= i %>" value="<%= ff.getFieldName() %>" /></td>
+            <td><select name="field_type_<%= i %>">
                 <option value="<%= FieldInfo.DEFAULT %>" <% if(ff.getType() == FieldInfo.DEFAULT) { %>selected="selected"<% } %>>Default</option>
                 <option value="<%= FieldInfo.MEASURE %>" <% if(ff.getType() == FieldInfo.MEASURE) { %>selected="selected"<% } %>>Measure</option>
                 <option value="<%= FieldInfo.GROUPING %>" <% if(ff.getType() == FieldInfo.GROUPING) { %>selected="selected"<% } %>>Grouping</option>
                 <option value="<%= FieldInfo.DATE %>" <% if(ff.getType() == FieldInfo.DATE) { %>selected="selected"<% } %>>Date</option>
-            </select></p>
-        <%
+            </select></td>
+        </tr>
+            <%
                 i = i + 1;
             } %>
+        </tbody>
+    </table>
 
-        <input type="submit" />
-    </form>
+
 </div>
 <%
 } catch (Exception e) { %>

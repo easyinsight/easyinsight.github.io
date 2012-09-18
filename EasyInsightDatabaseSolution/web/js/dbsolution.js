@@ -58,6 +58,7 @@ var updateQuery = createAjaxFunction('query/update.jsp', 'queryResults');
 var createQuery = createAjaxFunction('query/create.jsp', 'queryResults');
 var deleteQuery = createRestFunction('query/delete.jsp', 'queryResults');
 var uploadQuery = createRestFunction('query/upload.jsp', 'queryResults');
+var updateFieldList = createRestFunction('query/update_fields.jsp', 'queryResults');
 var deleteConnection = createRestFunction('connection/delete.jsp', 'connectionResults');
 var updateDbConnection = createAjaxFunction('connection/update.jsp', 'connectionResults');
 var testDbConnection = createAjaxFunction('connection/test.jsp', 'connectionResults');
@@ -154,11 +155,7 @@ function editQuery(id) {
             else
                 $("form#editQuery input[name=uploadType]")[0].value = "replace";
 
-            var v = $(document.createElement("a"));
-            v.html("View Values");
-            v.attr("href", "query/list_fields.jsp?id=" + result.id);
             editQueryTab();
-            $("form#editQuery").append(v);
         }
     });
 }
@@ -171,6 +168,30 @@ function editQueryTab() {
     $('#queryList').hide();
     $("#queryResults").html("");
     $("#queryInfoText").hide();
+    $("#updateFields").hide();
+}
+
+function showFieldList() {
+    $.ajax({
+        url: 'query/list_fields.jsp',
+        data: 'id=' + $("#editQuery input[name=id]").val(),
+        type: 'get',
+        success: function(result) {
+            $("form#updateFields #fieldContent").html(result);
+            displayFieldList();
+        }
+    })
+}
+
+function displayFieldList() {
+    $('#newQueryButton').hide();
+    $('#createQuery')[0].reset();
+    $('#editQuery').hide();
+    $('#createQuery').hide();
+    $('#queryList').hide();
+    $("#queryResults").html("");
+    $("#queryInfoText").hide();
+    $("#updateFields").show();
 }
 
 function resetQueryTab() {
@@ -182,6 +203,7 @@ function resetQueryTab() {
     $('#queryList').show();
     $("#queryResults").html("");
     $("#queryInfoText").show();
+    $("#updateFields").hide();
 }
 
 function showCreateQuery() {
@@ -193,6 +215,17 @@ function showCreateQuery() {
     $('#queryList').hide();
     $("#queryResults").html("");
     $("#queryInfoText").hide();
+    $("#updateFields").hide();
+}
+
+function showUpdateFields() {
+    $('#newQueryButton').hide();
+    $('#editQuery').hide();
+    $('#createQuery').show();
+    $('#queryList').hide();
+    $("#queryResults").html("");
+    $("#queryInfoText").hide();
+    $("#updateFields").hide();
 }
 
 
@@ -224,6 +257,7 @@ function editConnectionTab() {
     $('#newConnectionButton').hide();
     $('#databaseList').hide();
     $('#editConnection').show();
+    $("#updateFields").hide();
 }
 
 function showCreateConnection() {
@@ -248,6 +282,8 @@ $(document).ready(function() {
     $("#editConnection").hide();
     $("#editQuery").hide();
     $("#createQuery").hide();
+    $("#updateFields").hide();
+    $("#updateFields").hide();
     $("#mainTabs").tabs({selected: 3});
 
     $.ajax({
@@ -260,5 +296,4 @@ $(document).ready(function() {
                 }
             }
     });
-//    populateSelectStatement();
 });
