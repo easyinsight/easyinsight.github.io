@@ -1,9 +1,14 @@
 package com.easyinsight.email;
 
 import com.easyinsight.admin.ConstantContactSync;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.util.RandomTextGenerator;
 
 import javax.mail.MessagingException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.io.UnsupportedEncodingException;
 
@@ -102,9 +107,23 @@ public class AccountMemberInvitation {
         }
     }
 
-    public void sendWelcomeEmail(String to) {
+    public void sendWelcomeEmail(String to, EIConnection conn, long userID, String firstName) throws SQLException {
         String body = ConstantContactSync.getContent(ConstantContactSync.CREATION_DAY);
         String subject = "Welcome to Easy Insight!";
+        PreparedStatement queryUnsubscribeStmt = conn.prepareStatement("SELECT unsubscribe_key from user_unsubscribe_key WHERE USER_ID = ?");
+        PreparedStatement insertKeyStmt = conn.prepareStatement("INSERT INTO USER_UNSUBSCRIBE_KEY (USER_ID, UNSUBSCRIBE_KEY) VALUES (?, ?)");
+        queryUnsubscribeStmt.setLong(1, userID);
+        ResultSet unsubscribeRS = queryUnsubscribeStmt.executeQuery();
+        String unsubscribeKey;
+        if (unsubscribeRS.next()) {
+            unsubscribeKey = unsubscribeRS.getString(1);
+        } else {
+            unsubscribeKey = RandomTextGenerator.generateText(25);
+            insertKeyStmt.setLong(1, userID);
+            insertKeyStmt.setString(2, unsubscribeKey);
+            insertKeyStmt.execute();
+        }
+        body = body.replace("{0}", "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey).replace("{1}", firstName);
         try {
             new SendGridEmail().sendEmail(to, subject, body, "sales@easy-insight.com", true, "Easy Insight");
         } catch (Exception e) {

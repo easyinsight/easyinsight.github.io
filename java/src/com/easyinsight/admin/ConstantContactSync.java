@@ -79,319 +79,616 @@ public class ConstantContactSync {
         switch (marketingType) {
             case CREATION_DAY:
                 return "<html>\n" +
-                        "<head>\n" +
-                        "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n" +
-                        "    <title>What's new with Easy Insight...</title>\n" +
-                        "    <style type=\"text/css\" media=\"screen\">\n" +
-                        "        body {\n" +
-                        "            margin: 0;\n" +
-                        "            padding: 0;\n" +
-                        "            font-family: \"Lucida Grande\", verdana, arial, helvetica, sans-serif;\n" +
-                        "        }\n" +
+                        "<body>\n" +
+                        "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"\n" +
+                        "       style=\"margin:0;padding: 10px 0 0;background-color:#fafafa;min-height:100%;width:100%\">\n" +
+                        "    <tbody>\n" +
+                        "    <tr>\n" +
+                        "        <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                   style=\"border:1px solid #dddddd;background-color:#ffffff\">\n" +
+                        "                <tbody>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                               style=\"background-color:#ffffff;border-bottom:0;margin-top: 10px\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td style=\"border-collapse:collapse;color:#202020;font-family:Arial,serif;font-size:34px;font-weight:bold;line-height:100%;padding:0;text-align:center;vertical-align:middle\">\n" +
+                        "                                    <img alt=\"Easy Insight Logo\"\n" +
+                        "                                         style=\"border:0;outline:none;text-decoration:none\" src=\"http://www.easy-insight.com/images/logo2.PNG\">\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td valign=\"top\" style=\"border-collapse:collapse;background-color:#ffffff\">\n" +
+                        "                                    <table border=\"0\" cellpadding=\"20\" cellspacing=\"0\" width=\"100%\">\n" +
+                        "                                        <tbody>\n" +
+                        "                                        <tr>\n" +
+                        "                                            <td valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                                                <div style=\"color:#505050;font-family:Arial,serif;font-size:14px;line-height:150%;text-align:left\">\n" +
                         "\n" +
-                        "        a {\n" +
-                        "            color: #2c6487;\n" +
-                        "            text-decoration: none;\n" +
-                        "        }\n" +
-                        "\n" +
-                        "\n" +
-                        "    </style>\n" +
-                        "\n" +
-                        "\n" +
-                        "</head>\n" +
-                        "<body style=\"width:100%;text-align:center;margin:0 auto;\">\n" +
-                        "<div style=\"width:580px;margin:0 auto;\">\n" +
-                        "    <div style=\"background-color: #F0F0F0;padding:15px\">\n" +
-                        "        <div style=\"background-color: #FFFFFF\">\n" +
-                        "            <div style=\"background-color: #FAFAFA;padding:5px\">\n" +
-                        "                <div>\n" +
-                        "                    <a href=\"http://www.easy-insight.com/\"><img src=\"http://www.easy-insight.com/images/logo2.PNG\" alt=\"Easy Insight Logo\" name=\"logo\" id=\"logo\"/></a>\n" +
-                        "                </div>\n" +
-                        "                <div>\n" +
-                        "                    <a href=\"https://www.easy-insight.com/app\">Sign Into Easy Insight Now</a>\n" +
-                        "                </div>\n" +
-                        "            </div>\n" +
-                        "            <div style=\"padding:10px\">\n" +
-                        "\n" +
-                        "                <div style=\"padding-top:40px;padding-left:10px;padding-right:10px;padding-bottom:25px;float:left;width:275px\">\n" +
-                        "                    <img src=\"http://www.easy-insight.com/images/ReportEditorEmail.jpg\" alt=\"Report Editor Image\"/>\n" +
-                        "                </div>\n" +
-                        "\n" +
-                        "            <h2 style=\"font-size:16px;padding-top:10px\">Building Reports</h2>\n" +
-                        "\n" +
-                        "            <p style=\"font-size:13px;text-align:left\">You can easily build your own reports inside of Easy Insight using our simple drag and drop report editor. Whether it's a simple list, a chart, or something more involved, you can create any type of visualization through the editor. For more information on building reports, take a look at <a href=\"http://www.easy-insight.com/documentation/reportediting.html\">http://www.easy-insight.com/documentation/reportediting.html</a>.</p>\n" +
-                        "\n" +
-                        "            <h2 style=\"font-size:16px\">Prebuilt Reports and Dashboards</h2>\n" +
-                        "\n" +
-                        "            <p style=\"font-size:13px;text-align:left\">A variety of prebuilt reports and dashboards are available to help you get started. Check out the Exchange inside Easy Insight to find a wide variety of available reports and dashboards. In particular, the Recommended Reports section will provide you with a curated set of reports and dashboards designed around common use cases for your particular data source.</p>\n" +
-                        "\n" +
-                        "                <h2 style=\"font-size:16px\">Filtering</h2>\n" +
-                        "\n" +
-                        "                <p style=\"font-size:13px;text-align:left\">Want to see only the set of tasks completed in the last week? Only deals belonging to John Smith and Jane Jones? Take advantage of filters to refine your reports down to the key subsets of information you actually want to look at. Check out the filtering documentation at <a href=\"http://www.easy-insight.com/documentation/filters.html\">http://www.easy-insight.com/documentation/filters.html</a> for more information.</p>\n" +
-                        "\n" +
-                        "                <p style=\"font-size:13px;text-align:left\">Have any questions or comments? Please don't hesitate to contact us at sales@easy-insight.com or support@easy-insight.com!</p>\n" +
-                        "                <div align=\"center\">\n" +
-                        "                    <a href=\"http://twitter.com/easyinsight\"><img border=\"0\" src=\"http://www.easy-insight.com/images/twitter.png\" alt=\"Follow us on Twitter\"/></a>\n" +
-                        "                    <a href=\"http://www.facebook.com/pages/Easy-Insight/445964470213\"><img border=\"0\" src=\"http://www.easy-insight.com/images/facebook.png\" alt=\"Follow us on Facebook\"/></a>\n" +
-                        "                </div>\n" +
-                        "            </div>\n" +
-                        "        </div>\n" +
-                        "    </div>\n" +
-                        "\n" +
-                        "</div>\n" +
-                        "\n" +
+                        "                                                    Dear {1},\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    Welcome to Easy Insight! This is the first of four emails that we\n" +
+                        "                                                    will send you to help you get up and running with Easy Insight!\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Sign in here: <a href=\"https://www.easy-insight.com/app\">Easy\n" +
+                        "                                                    Insight Login</a>\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <b>Getting Started with Connections</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Your first step is to connect to your data with Easy Insight. Check out the links below for a detailed example of how to set up your first connection.\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"http://www.easy-insight.com/screencasts.html#highriseConnection\">Connecting\n" +
+                        "                                                        to Highrise</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"http://www.easy-insight.com/screencasts.html#basecampConnection\">Connecting\n" +
+                        "                                                        to Basecamp</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <b>Building Reports</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Once you have a connection, you're ready to start building your own\n" +
+                        "                                                    custom reports using our drag and drop editor:\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"https://wiki.easy-insight.com/wiki/index.php/Introduction_to_the_Report_Editor\">Report\n" +
+                        "                                                        Editor Documentation</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"http://www.easy-insight.com/screencasts.html#reportEditorIntro\">Intro\n" +
+                        "                                                        to Building Reports</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"http://www.easy-insight.com/screencasts.html#basecampCustomReports\">Building\n" +
+                        "                                                        Custom Reports on Basecamp</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"http://www.easy-insight.com/screencasts.html#highriseCustomReports\">Building\n" +
+                        "                                                        Custom Reports on Highrise</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <b>Filtering</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Filters restrict reports to show data based on criteria you choose, such as limiting results to one customer or project or a specific time range:\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <a href=\"https://wiki.easy-insight.com/wiki/index.php/Filters\">Filter\n" +
+                        "                                                        Documentation</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"http://www.easy-insight.com/screencasts.html#basicFilters\">Filter\n" +
+                        "                                                        Screencast</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Have any questions or comments? Please don't hesitate to contact us\n" +
+                        "                                                    at sales@easy-insight.com or support@easy-insight.com!\n" +
+                        "                                                </div>\n" +
+                        "                                            </td>\n" +
+                        "                                        </tr>\n" +
+                        "                                        </tbody>\n" +
+                        "                                    </table>\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"10\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                               style=\"background-color:#ffffff;border-top:0\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                                    <table border=\"0\" cellpadding=\"10\" cellspacing=\"0\" width=\"100%\">\n" +
+                        "                                        <tbody>\n" +
+                        "                                        <tr>\n" +
+                        "                                            <td colspan=\"2\" valign=\"middle\"\n" +
+                        "                                                style=\"border-collapse:collapse;background-color:#fafafa;border:0\">\n" +
+                        "                                                <div style=\"color:#707070;font-family:Arial,serif;font-size:12px;line-height:125%;text-align:center\">\n" +
+                        "                                                    &nbsp;<a\n" +
+                        "                                                        href=\"https://twitter.com/#!/easyinsight\"\n" +
+                        "                                                        style=\"color:#336699;font-weight:normal;text-decoration:underline\"\n" +
+                        "                                                        target=\"_blank\">Follow on Twitter</a>&nbsp;|&nbsp;<a\n" +
+                        "                                                        href=\"{0}\"\n" +
+                        "                                                        style=\"color:#336699;font-weight:normal;text-decoration:underline\"\n" +
+                        "                                                        target=\"_blank\">unsubscribe from this list</a>&nbsp;\n" +
+                        "                                                </div>\n" +
+                        "                                            </td>\n" +
+                        "                                        </tr>\n" +
+                        "                                        </tbody>\n" +
+                        "                                    </table>\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                </tbody>\n" +
+                        "            </table>\n" +
+                        "            <br></td>\n" +
+                        "    </tr>\n" +
+                        "    </tbody>\n" +
+                        "</table>\n" +
                         "</body>\n" +
                         "</html>";
             case ONE_WEEK:
                 return "<html>\n" +
-                        "<head>\n" +
-                        "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n" +
-                        "    <title>What's new with Easy Insight...</title>\n" +
-                        "    <style type=\"text/css\" media=\"screen\">\n" +
-                        "        body {\n" +
-                        "            margin: 0;\n" +
-                        "            padding: 0;\n" +
-                        "            font-family: \"Lucida Grande\", verdana, arial, helvetica, sans-serif;\n" +
-                        "        }\n" +
+                        "<body>\n" +
+                        "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"\n" +
+                        "       style=\"margin:0;padding: 10px 0 0;background-color:#fafafa;min-height:100%;width:100%\">\n" +
+                        "    <tbody>\n" +
+                        "    <tr>\n" +
+                        "        <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                   style=\"border:1px solid #dddddd;background-color:#ffffff\">\n" +
+                        "                <tbody>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                               style=\"background-color:#ffffff;border-bottom:0\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td style=\"border-collapse:collapse;color:#202020;font-family:Arial,serif;font-size:34px;font-weight:bold;line-height:100%;padding:0;text-align:center;vertical-align:middle\">\n" +
+                        "                                    <img alt=\"Easy Insight Logo\"\n" +
+                        "                                         style=\"border:0;outline:none;text-decoration:none\" src=\"http://www.easy-insight.com/images/logo2.PNG\">\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td valign=\"top\" style=\"border-collapse:collapse;background-color:#ffffff\">\n" +
+                        "                                    <table border=\"0\" cellpadding=\"20\" cellspacing=\"0\" width=\"100%\">\n" +
+                        "                                        <tbody>\n" +
+                        "                                        <tr>\n" +
+                        "                                            <td valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                                                <div style=\"color:#505050;font-family:Arial,serif;font-size:14px;line-height:150%;text-align:left\">\n" +
                         "\n" +
-                        "        a {\n" +
-                        "            color: #2c6487;\n" +
-                        "            text-decoration: none;\n" +
-                        "        }\n" +
-                        "\n" +
-                        "\n" +
-                        "    </style>\n" +
-                        "\n" +
-                        "\n" +
-                        "</head>\n" +
-                        "<body style=\"width:100%;text-align:center;margin:0 auto;\">\n" +
-                        "<div style=\"width:580px;margin:0 auto;\">\n" +
-                        "    <div style=\"background-color: #F0F0F0;padding:15px\">\n" +
-                        "        <div style=\"background-color: #FFFFFF\">\n" +
-                        "            <div style=\"background-color: #FAFAFA;padding:5px\">\n" +
-                        "                <div>\n" +
-                        "                    <a href=\"http://www.easy-insight.com/\"><img src=\"http://www.easy-insight.com/images/logo2.PNG\" alt=\"Easy Insight Logo\" name=\"logo\" id=\"logo\"/></a>\n" +
-                        "                </div>\n" +
-                        "                <div>\n" +
-                        "                    <a href=\"https://www.easy-insight.com/app\">Sign Into Easy Insight Now</a>\n" +
-                        "                </div>\n" +
-                        "            </div>\n" +
-                        "            <div style=\"padding:10px\">\n" +
-                        "\n" +
-                        "            <h2 style=\"font-size:16px\">Scheduled Report Email Delivery</h2>\n" +
-                        "\n" +
-                        "            <p style=\"font-size:13px;text-align:left\">Want a list of the hottest leads in your sales system in your inbox at 6 AM every morning? A chart of hours billed by project sent to your executive team every month? You can schedule any report in Easy Insight to be emailed on a regular basis. Take a look at the Scheduling page inside of the application to get started.</p>\n" +
-                        "\n" +
-                        "            <h2 style=\"font-size:16px\">Exporting to Excel and PDF</h2>\n" +
-                        "\n" +
-                        "            <p style=\"font-size:13px;text-align:left\">You can export any report inside of Easy Insight out into Excel or PDF formats. From the report view, just click on the Export button at the top of the screen. From the window that pops up, you can export into these formats for printing or emailing reports to other members of your team.</p>\n" +
-                        "\n" +
-                        "                <h2 style=\"font-size:16px\">Custom Fields</h2>\n" +
-                        "\n" +
-                        "                <p style=\"font-size:13px;text-align:left\">You can greatly expand your capabilities for reporting on any particular SaaS system with custom fields. Your CRM system doesn't have an Expected Close Date or Target Revenue? You can add custom fields in Easy Insight through multiple mechanisms. Check out our documentation at <a href=\"http://www.easy-insight.com/documentation/customfields.html\">http://www.easy-insight.com/documentation/customfields.html</a> for further information about these capabilities.</p>\n" +
-                        "\n" +
-                        "                <p style=\"font-size:13px;text-align:left\">Have any questions or comments? Please don't hesitate to contact us at sales@easy-insight.com or support@easy-insight.com!</p>\n" +
-                        "                <div align=\"center\">\n" +
-                        "                    <a href=\"http://twitter.com/easyinsight\"><img border=\"0\" src=\"http://www.easy-insight.com/images/twitter.png\" alt=\"Follow us on Twitter\"/></a>\n" +
-                        "                    <a href=\"http://www.facebook.com/pages/Easy-Insight/445964470213\"><img border=\"0\" src=\"http://www.easy-insight.com/images/facebook.png\" alt=\"Follow us on Facebook\"/></a>\n" +
-                        "                </div>\n" +
-                        "                <p>\n" +
-                        "                    <a href=\"{0}\" style=\"font-size: 12px\">\n" +
-                        "                        Thanks, but stop sending this email to me</a>\n" +
-                        "                </p>\n" +
-                        "            </div>\n" +
-                        "        </div>\n" +
-                        "    </div>\n" +
-                        "\n" +
-                        "</div>\n" +
-                        "\n" +
+                        "                                                    Dear {1},\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    We hope you are enjoying using Easy Insight to get the most of your data! This is the second of four emails that we will send you to help you get up and running with Easy Insight!\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Sign in here: <a href=\"https://www.easy-insight.com/app\">Easy\n" +
+                        "                                                    Insight Login</a>\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    Here are a few simple ways to integrate Easy Insight into your daily routine:\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <b>Exporting to Excel, PDF, and More!</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    You can export any report from Easy Insight to Excel, PDF, or PNG for easy sharing with your team. You'll find the Export button on your report and dashboard views.\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <b>Scheduled Report Email Delivery</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    You can export those reports automatically by email on your schedule. Send out a list of hot leads every morning, a project status report every week, or a budget report monthly.\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"https://wiki.easy-insight.com/wiki/index.php/Email_Scheduling_and_Exporting\">Export and Scheduling Documentation</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <b>Mobile Display of Reports</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    You can view reports on your phone or tablet, making it easier than ever to keep a close eye on the pulse of your business. You can display any report in HTML by clicking on the \"View in HTML\" option.\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"https://www.easy-insight.com/app/html\">HTML Version of Application (mobile friendly)</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <b>Embedding Reports into External Sites</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Eliminate the need for users to log into multiple systems! You can embed any Easy Insight report into a variety of systems.\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"https://wiki.easy-insight.com/wiki/index.php/Embedding_Reports_in_External_Systems\">Embedding Easy Insight Reports</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Have any questions or comments? Please don't hesitate to contact us\n" +
+                        "                                                    at sales@easy-insight.com or support@easy-insight.com!\n" +
+                        "                                                </div>\n" +
+                        "                                            </td>\n" +
+                        "                                        </tr>\n" +
+                        "                                        </tbody>\n" +
+                        "                                    </table>\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"10\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                               style=\"background-color:#ffffff;border-top:0\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                                    <table border=\"0\" cellpadding=\"10\" cellspacing=\"0\" width=\"100%\">\n" +
+                        "                                        <tbody>\n" +
+                        "                                        <tr>\n" +
+                        "                                            <td colspan=\"2\" valign=\"middle\"\n" +
+                        "                                                style=\"border-collapse:collapse;background-color:#fafafa;border:0\">\n" +
+                        "                                                <div style=\"color:#707070;font-family:Arial,serif;font-size:12px;line-height:125%;text-align:center\">\n" +
+                        "                                                    &nbsp;<a\n" +
+                        "                                                        href=\"https://twitter.com/#!/easyinsight\"\n" +
+                        "                                                        style=\"color:#336699;font-weight:normal;text-decoration:underline\"\n" +
+                        "                                                        target=\"_blank\">Follow on Twitter</a>&nbsp;|&nbsp;<a\n" +
+                        "                                                        href=\"{0}\"\n" +
+                        "                                                        style=\"color:#336699;font-weight:normal;text-decoration:underline\"\n" +
+                        "                                                        target=\"_blank\">unsubscribe from this list</a>&nbsp;\n" +
+                        "                                                </div>\n" +
+                        "                                            </td>\n" +
+                        "                                        </tr>\n" +
+                        "                                        </tbody>\n" +
+                        "                                    </table>\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                </tbody>\n" +
+                        "            </table>\n" +
+                        "            <br></td>\n" +
+                        "    </tr>\n" +
+                        "    </tbody>\n" +
+                        "</table>\n" +
                         "</body>\n" +
                         "</html>";
             case TWO_WEEKS:
                 return "<html>\n" +
-                        "<head>\n" +
-                        "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n" +
-                        "    <title>What's new with Easy Insight...</title>\n" +
-                        "    <style type=\"text/css\" media=\"screen\">\n" +
-                        "        body {\n" +
-                        "            margin: 0;\n" +
-                        "            padding: 0;\n" +
-                        "            font-family: \"Lucida Grande\", verdana, arial, helvetica, sans-serif;\n" +
-                        "        }\n" +
+                        "<body>\n" +
+                        "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"\n" +
+                        "       style=\"margin:0;padding: 10px 0 0;background-color:#fafafa;min-height:100%;width:100%\">\n" +
+                        "    <tbody>\n" +
+                        "    <tr>\n" +
+                        "        <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                   style=\"border:1px solid #dddddd;background-color:#ffffff\">\n" +
+                        "                <tbody>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                               style=\"background-color:#ffffff;border-bottom:0\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td style=\"border-collapse:collapse;color:#202020;font-family:Arial,serif;font-size:34px;font-weight:bold;line-height:100%;padding:0;text-align:center;vertical-align:middle\">\n" +
+                        "                                    <img alt=\"Easy Insight Logo\"\n" +
+                        "                                         style=\"border:0;outline:none;text-decoration:none\" src=\"http://www.easy-insight.com/images/logo2.PNG\">\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td valign=\"top\" style=\"border-collapse:collapse;background-color:#ffffff\">\n" +
+                        "                                    <table border=\"0\" cellpadding=\"20\" cellspacing=\"0\" width=\"100%\">\n" +
+                        "                                        <tbody>\n" +
+                        "                                        <tr>\n" +
+                        "                                            <td valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                                                <div style=\"color:#505050;font-family:Arial,serif;font-size:14px;line-height:150%;text-align:left\">\n" +
                         "\n" +
-                        "        a {\n" +
-                        "            color: #2c6487;\n" +
-                        "            text-decoration: none;\n" +
-                        "        }\n" +
+                        "                                                    Dear {1},\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    We hope you are enjoying using Easy Insight to get the most of your data! This is the third of four emails that we will send you to help you get up and running with Easy Insight!\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Sign in here: <a href=\"https://www.easy-insight.com/app\">Easy\n" +
+                        "                                                    Insight Login</a>\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <b>Connect to More Systems</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Take a look at our Connections page and see other systems Easy Insight integrates with. For example, you can incorporate your Highrise, Zendesk, and Harvest data into a single executive dashboard:\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"https://wiki.easy-insight.com/wiki/index.php/Data_Sources\">Combining Data Sources</a>\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <b>Custom Fields</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Need to add Probability or Close Date to your Highrise data or an Estimate to your Basecamp data? You can easily add custom fields to any data source:\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <a href=\"https://wiki.easy-insight.com/wiki/index.php/Custom_Fields\">Custom Field Documentation</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"http://www.easy-insight.com/screencasts.html#basicFilters\">Custom Field Screencast</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <b>Scripting</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Easy Insight has a powerful set of scripting capabilities for building complex calculations. Take advantage of our wide variety of functions for more in depth analysis of your data:\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"https://wiki.easy-insight.com/wiki/index.php/Scripting\">Scripting Documentation</a>\n" +
+                        "                                                    <br><br>\n" +
                         "\n" +
-                        "\n" +
-                        "    </style>\n" +
-                        "\n" +
-                        "\n" +
-                        "</head>\n" +
-                        "<body style=\"width:100%;text-align:center;margin:0 auto;\">\n" +
-                        "<div style=\"width:580px;margin:0 auto;\">\n" +
-                        "    <div style=\"background-color: #F0F0F0;padding:15px\">\n" +
-                        "        <div style=\"background-color: #FFFFFF\">\n" +
-                        "            <div style=\"background-color: #FAFAFA;padding:5px\">\n" +
-                        "                <div>\n" +
-                        "                    <a href=\"http://www.easy-insight.com/\"><img src=\"http://www.easy-insight.com/images/logo2.PNG\" alt=\"Easy Insight Logo\" name=\"logo\" id=\"logo\"/></a>\n" +
-                        "                </div>\n" +
-                        "                <div>\n" +
-                        "                    <a href=\"https://www.easy-insight.com/app\">Sign Into Easy Insight Now</a>\n" +
-                        "                </div>\n" +
-                        "            </div>\n" +
-                        "            <div style=\"padding:10px\">\n" +
-                        "\n" +
-                        "            <h2 style=\"font-size:16px\">Connect to More Systems</h2>\n" +
-                        "\n" +
-                        "            <p style=\"font-size:13px;text-align:left\">If you just started using Easy Insight to report on a single system, take a look at our Connections page to see what other systems we might be able to help you with as well. If you just started using Easy Insight for Highrise reporting, but have Zendesk and Harvest in house as well, you can connect your Easy Insight account to those systems as well to get the same sophisticated reporting across all three systems!</p>\n" +
-                        "\n" +
-                        "            <h2 style=\"font-size:16px\">Calculations</h2>\n" +
-                        "\n" +
-                        "            <p style=\"font-size:13px;text-align:left\">Easy Insight has a powerful set of scripting capabilities for building out custom calculations. You can take advantage of a wide variety of functions to build out more in depth analysis on your reports. Take a look at the documentation at <a href=\"http://www.easy-insight.com/documentation/scripting.html\">http://www.easy-insight.com/documentation/scripting.html</a> for more information.</p>\n" +
-                        "\n" +
-                        "                <h2 style=\"font-size:16px\">API</h2>\n" +
-                        "\n" +
-                        "                <p style=\"font-size:13px;text-align:left\">Want to publish your own data into Easy Insight? Easy Insight provides a REST API to make it easy for you to publish in custom data from any system. Our API documentation and helper libraries are available at <a href=\"http://www.easy-insight.com/documentation/api.html\">http://www.easy-insight.com/documentation/api.html</a>.</p>\n" +
-                        "\n" +
-                        "                <p style=\"font-size:13px;text-align:left\">Have any questions or comments? Please don't hesitate to contact us at sales@easy-insight.com or support@easy-insight.com!</p>\n" +
-                        "                <div align=\"center\">\n" +
-                        "                    <a href=\"http://twitter.com/easyinsight\"><img border=\"0\" src=\"http://www.easy-insight.com/images/twitter.png\" alt=\"Follow us on Twitter\"/></a>\n" +
-                        "                    <a href=\"http://www.facebook.com/pages/Easy-Insight/445964470213\"><img border=\"0\" src=\"http://www.easy-insight.com/images/facebook.png\" alt=\"Follow us on Facebook\"/></a>\n" +
-                        "                </div>\n" +
-                        "                <p>\n" +
-                        "                    <a href=\"{0}\" style=\"font-size: 12px\">\n" +
-                        "                        Thanks, but stop sending this email to me</a>\n" +
-                        "                </p>\n" +
-                        "            </div>\n" +
-                        "        </div>\n" +
-                        "    </div>\n" +
-                        "\n" +
-                        "</div>\n" +
-                        "\n" +
+                        "                                                    Have any questions or comments? Please don't hesitate to contact us\n" +
+                        "                                                    at sales@easy-insight.com or support@easy-insight.com!\n" +
+                        "                                                </div>\n" +
+                        "                                            </td>\n" +
+                        "                                        </tr>\n" +
+                        "                                        </tbody>\n" +
+                        "                                    </table>\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"10\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                               style=\"background-color:#ffffff;border-top:0\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                                    <table border=\"0\" cellpadding=\"10\" cellspacing=\"0\" width=\"100%\">\n" +
+                        "                                        <tbody>\n" +
+                        "                                        <tr>\n" +
+                        "                                            <td colspan=\"2\" valign=\"middle\"\n" +
+                        "                                                style=\"border-collapse:collapse;background-color:#fafafa;border:0\">\n" +
+                        "                                                <div style=\"color:#707070;font-family:Arial,serif;font-size:12px;line-height:125%;text-align:center\">\n" +
+                        "                                                    &nbsp;<a\n" +
+                        "                                                        href=\"https://twitter.com/#!/easyinsight\"\n" +
+                        "                                                        style=\"color:#336699;font-weight:normal;text-decoration:underline\"\n" +
+                        "                                                        target=\"_blank\">Follow on Twitter</a>&nbsp;|&nbsp;<a\n" +
+                        "                                                        href=\"{0}\"\n" +
+                        "                                                        style=\"color:#336699;font-weight:normal;text-decoration:underline\"\n" +
+                        "                                                        target=\"_blank\">unsubscribe from this list</a>&nbsp;\n" +
+                        "                                                </div>\n" +
+                        "                                            </td>\n" +
+                        "                                        </tr>\n" +
+                        "                                        </tbody>\n" +
+                        "                                    </table>\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                </tbody>\n" +
+                        "            </table>\n" +
+                        "            <br></td>\n" +
+                        "    </tr>\n" +
+                        "    </tbody>\n" +
+                        "</table>\n" +
                         "</body>\n" +
                         "</html>";
             case THREE_WEEKS:
                 return "<html>\n" +
-                        "<head>\n" +
-                        "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n" +
-                        "    <title>What's new with Easy Insight...</title>\n" +
-                        "    <style type=\"text/css\" media=\"screen\">\n" +
-                        "        body {\n" +
-                        "            margin: 0;\n" +
-                        "            padding: 0;\n" +
-                        "            font-family: \"Lucida Grande\", verdana, arial, helvetica, sans-serif;\n" +
-                        "        }\n" +
+                        "<body>\n" +
+                        "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"\n" +
+                        "       style=\"margin:0;padding: 10px 0 0;background-color:#fafafa;min-height:100%;width:100%\">\n" +
+                        "    <tbody>\n" +
+                        "    <tr>\n" +
+                        "        <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                   style=\"border:1px solid #dddddd;background-color:#ffffff\">\n" +
+                        "                <tbody>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                               style=\"background-color:#ffffff;border-bottom:0\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td style=\"border-collapse:collapse;color:#202020;font-family:Arial,serif;font-size:34px;font-weight:bold;line-height:100%;padding:0;text-align:center;vertical-align:middle\">\n" +
+                        "                                    <img alt=\"Easy Insight Logo\"\n" +
+                        "                                         style=\"border:0;outline:none;text-decoration:none\" src=\"http://www.easy-insight.com/images/logo2.PNG\">\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td valign=\"top\" style=\"border-collapse:collapse;background-color:#ffffff\">\n" +
+                        "                                    <table border=\"0\" cellpadding=\"20\" cellspacing=\"0\" width=\"100%\">\n" +
+                        "                                        <tbody>\n" +
+                        "                                        <tr>\n" +
+                        "                                            <td valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                                                <div style=\"color:#505050;font-family:Arial,serif;font-size:14px;line-height:150%;text-align:left\">\n" +
                         "\n" +
-                        "        a {\n" +
-                        "            color: #2c6487;\n" +
-                        "            text-decoration: none;\n" +
-                        "        }\n" +
-                        "\n" +
-                        "\n" +
-                        "    </style>\n" +
-                        "\n" +
-                        "\n" +
-                        "</head>\n" +
-                        "<body style=\"width:100%;text-align:center;margin:0 auto;\">\n" +
-                        "<div style=\"width:580px;margin:0 auto;\">\n" +
-                        "    <div style=\"background-color: #F0F0F0;padding:15px\">\n" +
-                        "        <div style=\"background-color: #FFFFFF\">\n" +
-                        "            <div style=\"background-color: #FAFAFA;padding:5px\">\n" +
-                        "                <div>\n" +
-                        "                    <a href=\"http://www.easy-insight.com/\"><img src=\"http://www.easy-insight.com/images/logo2.PNG\" alt=\"Easy Insight Logo\" name=\"logo\" id=\"logo\"/></a>\n" +
-                        "                </div>\n" +
-                        "                <div>\n" +
-                        "                    <a href=\"https://www.easy-insight.com/app\">Sign Into Easy Insight Now</a>\n" +
-                        "                </div>\n" +
-                        "            </div>\n" +
-                        "            <div style=\"padding:10px\">\n" +
-                        "\n" +
-                        "            <h2 style=\"font-size:16px\">Building Dashboards</h2>\n" +
-                        "\n" +
-                        "            <p style=\"font-size:13px;text-align:left\">Once you have a handful of reports built up in your Easy Insight system, you can take the next step by connecting them into full interactive dashboards! Take a look at the dashboard documentation at <a href=\"http://www.easy-insight.com/documentation/dashboards.html\">http://www.easy-insight.com/documentation/dashboards.html</a> for more information on how you can build your own dashboards.</p>\n" +
-                        "\n" +
-                        "            <h2 style=\"font-size:16px\">Combining Data Sources</h2>\n" +
-                        "\n" +
-                        "            <p style=\"font-size:13px;text-align:left\">Have multiple Highrise systems you want to combine into a single view? Want to join data from your Constant Contact system with your Salesforce system? Easy Insight has tremendous capabilities around joining data from disparate data sources. Documentation around how to combine data sources is available at <a href=\"http://www.easy-insight.com/documentation/datasources.html#r12\">http://www.easy-insight.com/documentation/datasources.html#r12</a>.</p>\n" +
-                        "\n" +
-                        "                <h2 style=\"font-size:16px\">Customizing Look and Feel</h2>\n" +
-                        "\n" +
-                        "                <p style=\"font-size:13px;text-align:left\">Want to style Easy Insight to meet your corporate branding or just to look a little more like your desktop? You can define styling at a user or account level from the Account Settings page. Whether you just want to change the application background to a particular favorite image or overhaul the entire color scheme, check out the options offered under Account and User Skins to make the look of Easy Insight match your preferences. You can also customize the individual appearance of particular reports by clicking on the \"Edit Report Properties...\" button in the report editor.</p>\n" +
-                        "\n" +
-                        "                <p style=\"font-size:13px;text-align:left\">Have any questions or comments? Please don't hesitate to contact us at sales@easy-insight.com or support@easy-insight.com!</p>\n" +
-                        "                <div align=\"center\">\n" +
-                        "                    <a href=\"http://twitter.com/easyinsight\"><img border=\"0\" src=\"http://www.easy-insight.com/images/twitter.png\" alt=\"Follow us on Twitter\"/></a>\n" +
-                        "                    <a href=\"http://www.facebook.com/pages/Easy-Insight/445964470213\"><img border=\"0\" src=\"http://www.easy-insight.com/images/facebook.png\" alt=\"Follow us on Facebook\"/></a>\n" +
-                        "                </div>\n" +
-                        "                <p>\n" +
-                        "                    <a href=\"{0}\" style=\"font-size: 12px\">\n" +
-                        "                        Thanks, but stop sending this email to me</a>\n" +
-                        "                </p>\n" +
-                        "            </div>\n" +
-                        "        </div>\n" +
-                        "    </div>\n" +
-                        "\n" +
-                        "</div>\n" +
-                        "\n" +
+                        "                                                    Dear {1},\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    We hope you are enjoying using Easy Insight to get the most of your data! This is the fourth of four emails that we will send you to help you get up and running with Easy Insight!\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Sign in here: <a href=\"https://www.easy-insight.com/app\">Easy\n" +
+                        "                                                    Insight Login</a>\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <b>Building Dashboards</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Once you have the reports you want built in Easy Insight, you can easily create your own personal interactive dashboards:\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"https://wiki.easy-insight.com/wiki/index.php/Building_Dashboards\">Building Dashboards Documentation</a>\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <b>Customizing the Look and Feel of your Reports</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Style Easy Insight to meet your corporate branding or use skins to make Easy Insight match your preferences:\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"https://wiki.easy-insight.com/wiki/index.php/Styling\">Styling Documentation</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <a href=\"http://www.easy-insight.com/screencasts.html#stylingReports\">Customizing Look and Feel Screencast</a>\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <b>API</b>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Easy Insight provides a set of REST APIs to simplify reporting on your data from any source within EI:\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <a href=\"http://www.easy-insight.com/api/restapi.html\">API Documentation</a>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Have any questions or comments? Please don't hesitate to contact us\n" +
+                        "                                                    at sales@easy-insight.com or support@easy-insight.com!\n" +
+                        "                                                </div>\n" +
+                        "                                            </td>\n" +
+                        "                                        </tr>\n" +
+                        "                                        </tbody>\n" +
+                        "                                    </table>\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"10\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                               style=\"background-color:#ffffff;border-top:0\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                                    <table border=\"0\" cellpadding=\"10\" cellspacing=\"0\" width=\"100%\">\n" +
+                        "                                        <tbody>\n" +
+                        "                                        <tr>\n" +
+                        "                                            <td colspan=\"2\" valign=\"middle\"\n" +
+                        "                                                style=\"border-collapse:collapse;background-color:#fafafa;border:0\">\n" +
+                        "                                                <div style=\"color:#707070;font-family:Arial,serif;font-size:12px;line-height:125%;text-align:center\">\n" +
+                        "                                                    &nbsp;<a\n" +
+                        "                                                        href=\"https://twitter.com/#!/easyinsight\"\n" +
+                        "                                                        style=\"color:#336699;font-weight:normal;text-decoration:underline\"\n" +
+                        "                                                        target=\"_blank\">Follow on Twitter</a>&nbsp;|&nbsp;<a\n" +
+                        "                                                        href=\"{0}\"\n" +
+                        "                                                        style=\"color:#336699;font-weight:normal;text-decoration:underline\"\n" +
+                        "                                                        target=\"_blank\">unsubscribe from this list</a>&nbsp;\n" +
+                        "                                                </div>\n" +
+                        "                                            </td>\n" +
+                        "                                        </tr>\n" +
+                        "                                        </tbody>\n" +
+                        "                                    </table>\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                </tbody>\n" +
+                        "            </table>\n" +
+                        "            <br></td>\n" +
+                        "    </tr>\n" +
+                        "    </tbody>\n" +
+                        "</table>\n" +
                         "</body>\n" +
                         "</html>";
             case FOUR_WEEKS:
                 return "<html>\n" +
-                        "<head>\n" +
-                        "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n" +
-                        "    <title>What's new with Easy Insight...</title>\n" +
-                        "    <style type=\"text/css\" media=\"screen\">\n" +
-                        "        body {\n" +
-                        "            margin: 0;\n" +
-                        "            padding: 0;\n" +
-                        "            font-family: \"Lucida Grande\", verdana, arial, helvetica, sans-serif;\n" +
-                        "        }\n" +
+                        "<body>\n" +
+                        "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"\n" +
+                        "       style=\"margin:0;padding: 10px 0 0;background-color:#fafafa;min-height:100%;width:100%\">\n" +
+                        "    <tbody>\n" +
+                        "    <tr>\n" +
+                        "        <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                   style=\"border:1px solid #dddddd;background-color:#ffffff\">\n" +
+                        "                <tbody>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                               style=\"background-color:#ffffff;border-bottom:0\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td style=\"border-collapse:collapse;color:#202020;font-family:Arial,serif;font-size:34px;font-weight:bold;line-height:100%;padding:0;text-align:center;vertical-align:middle\">\n" +
+                        "                                    <img alt=\"Easy Insight Logo\"\n" +
+                        "                                         style=\"border:0;outline:none;text-decoration:none\" src=\"http://www.easy-insight.com/images/logo2.PNG\">\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td valign=\"top\" style=\"border-collapse:collapse;background-color:#ffffff\">\n" +
+                        "                                    <table border=\"0\" cellpadding=\"20\" cellspacing=\"0\" width=\"100%\">\n" +
+                        "                                        <tbody>\n" +
+                        "                                        <tr>\n" +
+                        "                                            <td valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                                                <div style=\"color:#505050;font-family:Arial,serif;font-size:14px;line-height:150%;text-align:left\">\n" +
                         "\n" +
-                        "        a {\n" +
-                        "            color: #2c6487;\n" +
-                        "            text-decoration: none;\n" +
-                        "        }\n" +
-                        "\n" +
-                        "\n" +
-                        "    </style>\n" +
-                        "\n" +
-                        "\n" +
-                        "</head>\n" +
-                        "<body style=\"width:100%;text-align:center;margin:0 auto;\">\n" +
-                        "<div style=\"width:580px;margin:0 auto;\">\n" +
-                        "    <div style=\"background-color: #F0F0F0;padding:15px\">\n" +
-                        "        <div style=\"background-color: #FFFFFF\">\n" +
-                        "            <div style=\"background-color: #FAFAFA;padding:5px\">\n" +
-                        "                <div>\n" +
-                        "                    <a href=\"http://www.easy-insight.com/\"><img src=\"http://www.easy-insight.com/images/logo2.PNG\" alt=\"Easy Insight Logo\" name=\"logo\" id=\"logo\"/></a>\n" +
-                        "                </div>\n" +
-                        "                <div>\n" +
-                        "                    <a href=\"https://www.easy-insight.com/app\">Sign Into Easy Insight Now</a>\n" +
-                        "                </div>\n" +
-                        "            </div>\n" +
-                        "            <div style=\"padding:10px\">\n" +
-                        "\n" +
-                        "            <h2 style=\"font-size:16px\">Your Free Trial is About to Expire</h2>\n" +
-                        "\n" +
-                        "            <p style=\"font-size:13px;text-align:left\">Your 30 day free trial with Easy Insight is about to expire. You can enter billing information from the Account page by clicking on \"Set Up Billing.\" Once your trial expires, you'll also be automatically redirected to the billing page. Have any questions about pricing? Check out <a href=\"http://www.easy-insight.com/pricing.html\">http://www.easy-insight.com/pricing.html</a>.</p>\n" +
-                        "\n" +
-                        "                <p style=\"font-size:13px;text-align:left\">We hope you've enjoyed your experience with using Easy Insight! Please don't hesitate to contact us at sales@easy-insight.com or support@easy-insight.com if you have any questions.</p>\n" +
-                        "                <div align=\"center\">\n" +
-                        "                    <a href=\"http://twitter.com/easyinsight\"><img border=\"0\" src=\"http://www.easy-insight.com/images/twitter.png\" alt=\"Follow us on Twitter\"/></a>\n" +
-                        "                    <a href=\"http://www.facebook.com/pages/Easy-Insight/445964470213\"><img border=\"0\" src=\"http://www.easy-insight.com/images/facebook.png\" alt=\"Follow us on Facebook\"/></a>\n" +
-                        "                </div>\n" +
-                        "                <p>\n" +
-                        "                    <a href=\"{0}\" style=\"font-size: 12px\">\n" +
-                        "                        Thanks, but stop sending this email to me</a>\n" +
-                        "                </p>\n" +
-                        "            </div>\n" +
-                        "        </div>\n" +
-                        "    </div>\n" +
-                        "\n" +
-                        "</div>\n" +
-                        "\n" +
+                        "                                                    Dear {1},\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    We hope you have enjoyed your experience using Easy Insight!\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Sign in here: <a href=\"https://www.easy-insight.com/app\">Easy\n" +
+                        "                                                    Insight Login</a>\n" +
+                        "                                                    <br><br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Your 30 day free trial is about to expire.  You can enter billing information from your Account Page by clicking Set Up Billing.  Once your trial expires you will be automatically directed to this page!  If you have questions about pricing, check out our <a href=\"http://www.easy-insight.com/pricing.html\">Pricing Page</a>.\n" +
+                        "                                                    <br>\n" +
+                        "                                                    <br>\n" +
+                        "                                                    Have any questions or comments? Please don't hesitate to contact us\n" +
+                        "                                                    at sales@easy-insight.com or support@easy-insight.com!\n" +
+                        "                                                </div>\n" +
+                        "                                            </td>\n" +
+                        "                                        </tr>\n" +
+                        "                                        </tbody>\n" +
+                        "                                    </table>\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                <tr>\n" +
+                        "                    <td align=\"center\" valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                        <table border=\"0\" cellpadding=\"10\" cellspacing=\"0\" width=\"600\"\n" +
+                        "                               style=\"background-color:#ffffff;border-top:0\">\n" +
+                        "                            <tbody>\n" +
+                        "                            <tr>\n" +
+                        "                                <td valign=\"top\" style=\"border-collapse:collapse\">\n" +
+                        "                                    <table border=\"0\" cellpadding=\"10\" cellspacing=\"0\" width=\"100%\">\n" +
+                        "                                        <tbody>\n" +
+                        "                                        <tr>\n" +
+                        "                                            <td colspan=\"2\" valign=\"middle\"\n" +
+                        "                                                style=\"border-collapse:collapse;background-color:#fafafa;border:0\">\n" +
+                        "                                                <div style=\"color:#707070;font-family:Arial,serif;font-size:12px;line-height:125%;text-align:center\">\n" +
+                        "                                                    &nbsp;<a\n" +
+                        "                                                        href=\"https://twitter.com/#!/easyinsight\"\n" +
+                        "                                                        style=\"color:#336699;font-weight:normal;text-decoration:underline\"\n" +
+                        "                                                        target=\"_blank\">Follow on Twitter</a>&nbsp;|&nbsp;<a\n" +
+                        "                                                        href=\"{0}\"\n" +
+                        "                                                        style=\"color:#336699;font-weight:normal;text-decoration:underline\"\n" +
+                        "                                                        target=\"_blank\">unsubscribe from this list</a>&nbsp;\n" +
+                        "                                                </div>\n" +
+                        "                                            </td>\n" +
+                        "                                        </tr>\n" +
+                        "                                        </tbody>\n" +
+                        "                                    </table>\n" +
+                        "                                </td>\n" +
+                        "                            </tr>\n" +
+                        "                            </tbody>\n" +
+                        "                        </table>\n" +
+                        "                    </td>\n" +
+                        "                </tr>\n" +
+                        "                </tbody>\n" +
+                        "            </table>\n" +
+                        "            <br></td>\n" +
+                        "    </tr>\n" +
+                        "    </tbody>\n" +
+                        "</table>\n" +
                         "</body>\n" +
                         "</html>";
         }
