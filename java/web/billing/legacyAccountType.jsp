@@ -180,7 +180,7 @@
                 <% } %>
                 <div class="row">
                     <div class="span8">
-                        <p>Please note that you have a legacy account which doesn't match any of our newer packages.</p>
+                        <p>Please note that you have a grandfathered account which doesn't match any of our newer packages.</p>
                     </div>
                 </div>
                 <div class="row">
