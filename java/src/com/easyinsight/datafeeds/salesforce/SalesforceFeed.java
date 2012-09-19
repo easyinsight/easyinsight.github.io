@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.easyinsight.pipeline.Pipeline;
+import com.google.gdata.util.common.base.CharEscapers;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -89,6 +91,9 @@ public class SalesforceFeed extends Feed {
             queryBuilder.append(sobjectName);
             StringBuilder whereBuilder = new StringBuilder();
             for (FilterDefinition filter : filters) {
+                if (!filter.getPipelineName().equals(Pipeline.BEFORE) || !filter.validForQuery()) {
+                    continue;
+                }
                 if (filter instanceof FilterValueDefinition) {
                     FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
                     if (filterValueDefinition.getFilteredValues().size() == 1) {
@@ -115,26 +120,38 @@ public class SalesforceFeed extends Feed {
                         whereBuilder.append(")");
                     }
                 } else if (filter instanceof FilterDateRangeDefinition) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat sdf;
+                    AnalysisDateDimension date = (AnalysisDateDimension) filter.getField();
+                    if (date.isDateOnlyField()) {
+                        sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    } else {
+                        sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
+                    }
                     FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filter;
                     whereBuilder.append(filterDateRangeDefinition.getField().getKey().toKeyString());
-                    whereBuilder.append(">=");
+                    whereBuilder.append(" >= ");
                     whereBuilder.append(sdf.format(filterDateRangeDefinition.getStartDate()));
                     whereBuilder.append(" AND ");
                     whereBuilder.append(filterDateRangeDefinition.getField().getKey().toKeyString());
-                    whereBuilder.append("<=");
+                    whereBuilder.append(" <= ");
                     whereBuilder.append(sdf.format(filterDateRangeDefinition.getEndDate()));
                 } else if (filter instanceof RollingFilterDefinition) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat sdf;
+                    AnalysisDateDimension date = (AnalysisDateDimension) filter.getField();
+                    if (date.isDateOnlyField()) {
+                        sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    } else {
+                        sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
+                    }
                     RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;
                     Date endDate = insightRequestMetadata.getNow();
                     Date startDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, endDate));
                     whereBuilder.append(filter.getField().getKey().toKeyString());
-                    whereBuilder.append(">=");
+                    whereBuilder.append(" >= ");
                     whereBuilder.append(sdf.format(startDate));
                     whereBuilder.append(" AND ");
                     whereBuilder.append(filter.getField().getKey().toKeyString());
-                    whereBuilder.append("<=");
+                    whereBuilder.append(" <= ");
                     whereBuilder.append(sdf.format(endDate));
                 }
                 whereBuilder.append(" AND ");
@@ -142,7 +159,9 @@ public class SalesforceFeed extends Feed {
             if (whereBuilder.length() > 0) {
                 whereBuilder.delete(whereBuilder.length() - 5, whereBuilder.length() - 1);
             }
+            //String where = CharEscapers.uriQueryStringEscaper().escape(whereBuilder.toString());
             String where = URLEncoder.encode(whereBuilder.toString(), "UTF-8");
+            //String where = whereBuilder.toString();
             if (where.length() > 0) {
                 queryBuilder.append("+WHERE+").append(where);
             }
