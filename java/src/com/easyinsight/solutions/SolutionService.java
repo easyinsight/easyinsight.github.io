@@ -79,7 +79,7 @@ public class SolutionService {
                 }
             }
 
-            if (!autoSetupDeliveries.isEmpty()) {
+            /*if (!autoSetupDeliveries.isEmpty()) {
                 GeneralDelivery generalDelivery = new GeneralDelivery();
                 generalDelivery.setHtmlEmail(true);
                 List<DeliveryInfo> deliveryInfos = new ArrayList<DeliveryInfo>();
@@ -105,7 +105,7 @@ public class SolutionService {
                 generalDelivery.setScheduleType(weeklyScheduleType);
                 generalDelivery.save(conn, solutionKPIData.getUtcOffset());
                 generalDelivery.setup(conn);
-            }
+            }*/
 
             PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID FROM DASHBOARD, DATA_FEED " +
                     " WHERE DASHBOARD.DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
