@@ -12,6 +12,8 @@
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.users.*" %>
+<%@ page import="org.joda.time.Days" %>
+<%@ page import="org.joda.time.DateTime" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String hashStr = request.getParameter("orderid") + "|" + request.getParameter("amount") + "|" + request.getParameter("response") + "|" + request.getParameter("transactionid") + "|" + request.getParameter("avsresponse") + "|" + request.getParameter("cvvresponse") + "|" + request.getParameter("customer_vault_id") + "|" + request.getParameter("time") + "|" + BillingUtil.getKey();
@@ -50,7 +52,37 @@
         info.setResponseCode(request.getParameter("response_code"));
         info.setResponseString(request.getParameter("responsetext"));
         info.setAccountId(account.getAccountID());
-        info.setDays(yearly ? 365 : 28);
+        if (!"1.00".equals(info.getAmount())) {
+            int daysBetween;
+            if (account.getBillingDayOfMonth() != null && account.getAccountState() == Account.ACTIVE) {
+                Calendar cal = Calendar.getInstance();
+                Integer billingMonthOfYear = account.getBillingMonthOfYear();
+                if (accountTypeChange.isYearly() && billingMonthOfYear == null) {
+                    billingMonthOfYear = cal.get(Calendar.MONTH);
+                } else if (!accountTypeChange.isYearly() && billingMonthOfYear != null) {
+                    billingMonthOfYear = null;
+                }
+                account.setBillingMonthOfYear(billingMonthOfYear);
+
+                cal.set(Calendar.DAY_OF_MONTH, account.getBillingDayOfMonth());
+                if (billingMonthOfYear != null) {
+                    cal.set(Calendar.MONTH, billingMonthOfYear);
+                }
+
+                if (cal.getTime().before(new Date())) {
+                    cal.add(Calendar.MONTH, 1);
+                }
+
+                Date date = cal.getTime();
+                DateTime lastTime = new DateTime(date);
+                DateTime now = new DateTime(System.currentTimeMillis());
+                daysBetween = Days.daysBetween(lastTime, now).getDays();
+            } else {
+                daysBetween = yearly ? 365 : 28;
+            }
+
+            info.setDays(daysBetween);
+        }
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date transTime = df.parse(request.getParameter("time"));
@@ -84,7 +116,7 @@
                     account.setBillingMonthOfYear(c.get(Calendar.MONTH));
                 else
                     account.setBillingMonthOfYear(null);
-            } else {
+            } else if (account.getAccountState() == Account.TRIAL) {
                 Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
                 // billing day of month is at the end of the trial, if there is one
                 if(trialEnd != null) {
