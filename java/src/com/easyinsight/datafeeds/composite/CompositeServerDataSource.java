@@ -261,7 +261,15 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         boolean changed = false;
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
-            beforeRefresh(lastRefreshTime);
+            if (getFeedType().getType() == FeedType.BATCHBOOK_COMPOSITE.getType()) {
+                conn.commit();
+                conn.setAutoCommit(true);
+                beforeRefresh(lastRefreshTime);
+                conn.setAutoCommit(false);
+            } else {
+                beforeRefresh(lastRefreshTime);
+            }
+
             int nodeSize = getCompositeFeedNodes().size();
             List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn);
             int afterNodeSize = getCompositeFeedNodes().size();
