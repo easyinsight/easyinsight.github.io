@@ -64,6 +64,10 @@ public class AccountCreditCardBillingInfo {
     @Column(name="against_credit")
     private boolean againstCredit;
 
+    public AccountCreditCardBillingInfo() {
+
+    }
+
     public boolean isAgainstCredit() {
         return againstCredit;
     }

@@ -647,81 +647,82 @@ public class Account {
 
         LogClass.info("Starting billing for account ID:" + this.getAccountID());
 
-        double credit = calculateCredit(this);
+        //double credit = calculateCredit(this);
+        double credit = 0;
         double cost = createTotalCost();
 
         AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
 
-        if (credit >= cost) {
+        /*if (credit >= cost) {
             info.setAmount(String.valueOf(cost));
             info.setTransactionTime(new Date());
             info.setResponseCode("100");
             info.setDays(getBillingDayOfMonth() != null ? 365 : 28);
             info.setAgainstCredit(true);
-        } else {
-            BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
-            billingSystem.setUsername(ConfigLoader.instance().getBillingUsername());
-            billingSystem.setPassword(ConfigLoader.instance().getBillingPassword());
-            double amount = cost - credit;
-            Map<String, String> params = billingSystem.billAccount(getAccountID(), amount);
+        } else {*/
+        BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
+        billingSystem.setUsername(ConfigLoader.instance().getBillingUsername());
+        billingSystem.setPassword(ConfigLoader.instance().getBillingPassword());
+        double amount = cost - credit;
+        Map<String, String> params = billingSystem.billAccount(getAccountID(), amount);
 
-            boolean successful;
-            if(!params.get("response").equals("1")) {
-                if (getBillingFailures() >= 7) {
-                    setAccountState(Account.BILLING_FAILED);
-                } else {
-                    billingFailures++;
+        boolean successful;
+        if(!params.get("response").equals("1")) {
+            if (getBillingFailures() >= 7) {
+                setAccountState(Account.BILLING_FAILED);
+            } else {
+                billingFailures++;
+            }
+            LogClass.info("Billing failed on " + accountID + ".");
+            successful = false;
+        }
+        else {
+            billingFailures = 0;
+            LogClass.info("Successfully billed " + accountID + " for " + amount + ".");
+            successful = true;
+        }
+
+        info.setAmount(String.valueOf(amount));
+        info.setAccountId(this.getAccountID());
+        info.setResponse(params.get("response"));
+        info.setResponseCode(params.get("response_code"));
+        info.setResponseString(params.get("responsetext"));
+        info.setTransactionID(params.get("transactionid"));
+        info.setTransactionTime(new Date());
+        info.setDays(getBillingDayOfMonth() != null ? 365 : 28);
+
+        if (successful) {
+            String invoiceBody = info.toInvoiceText(this);
+            for (User user : getUsers()) {
+                if (user.isInvoiceRecipient()) {
+                    try {
+                        new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, "support@easy-insight.com", false, "Easy Insight");
+                    } catch (Exception e) {
+                        LogClass.error(e);
+                    }
                 }
-                LogClass.info("Billing failed on " + accountID + ".");
-                successful = false;
             }
-            else {
-                billingFailures = 0;
-                LogClass.info("Successfully billed " + accountID + " for " + amount + ".");
-                successful = true;
-            }
-
-            info.setAmount(String.valueOf(amount));
-            info.setAccountId(this.getAccountID());
-            info.setResponse(params.get("response"));
-            info.setResponseCode(params.get("response_code"));
-            info.setResponseString(params.get("responsetext"));
-            info.setTransactionID(params.get("transactionid"));
-            info.setTransactionTime(new Date());
-            info.setDays(getBillingDayOfMonth() != null ? 365 : 28);
-            if (successful) {
-                String invoiceBody = info.toInvoiceText(this);
+        } else {
+            if (accountState == Account.BILLING_FAILED) {
+                String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information to resume service.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
                 for (User user : getUsers()) {
                     if (user.isInvoiceRecipient()) {
                         try {
-                            new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, "support@easy-insight.com", false, "Easy Insight");
+                            new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
                         } catch (Exception e) {
                             LogClass.error(e);
                         }
                     }
                 }
             } else {
-                if (accountState == Account.BILLING_FAILED) {
-                    String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information to resume service.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
+                if (billingFailures == 1) {
+                    String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information within the next seven days.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
                     for (User user : getUsers()) {
                         if (user.isInvoiceRecipient()) {
                             try {
                                 new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
                             } catch (Exception e) {
                                 LogClass.error(e);
-                            }
-                        }
-                    }
-                } else {
-                    if (billingFailures == 1) {
-                        String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information within the next seven days.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
-                        for (User user : getUsers()) {
-                            if (user.isInvoiceRecipient()) {
-                                try {
-                                    new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
-                                } catch (Exception e) {
-                                    LogClass.error(e);
-                                }
                             }
                         }
                     }
