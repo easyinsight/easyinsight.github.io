@@ -81,7 +81,8 @@
             </div>
             <div class="nav-collapse">
                 <ul class="nav">
-                    <li class="active"><a href="#">Billing Configuration</a></li>
+                    <li class="active"><a href="/app/billing/accountType.jsp">Account Configuration</a></li>
+                    <li><a href="/app/billing">Billing Setup</a></li>
                 </ul>
             </div>
         </div>

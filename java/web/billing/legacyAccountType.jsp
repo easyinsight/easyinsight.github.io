@@ -50,6 +50,8 @@
                 return;
             }
 
+            boolean annual = account.getBillingMonthOfYear() != null;
+
             long usedStorage = new UserAccountAdminService().getAccountStorage();
             String usedStorageString = Account.humanReadableByteCount(usedStorage,  true) + " / " + Account.humanReadableByteCount(account.getMaxSize(), true);
     %>
@@ -226,7 +228,7 @@
                                         <label>Bill Me</label>
                                         <select style="width:280px" name="billingInterval" onchange="updateBillingInterval(this)" id="basicBillingInterval">
                                             <option value="1">Monthly</option>
-                                            <option value="2">Yearly</option>
+                                            <option <%= annual ? "selected=\"selected\"" : "" %> value="2">Yearly</option>
                                         </select>
                                         <div style="float:right">
                                             <span style="font-size: 14px" id="basicPrice"><%= account.createCostString() %></span>
@@ -284,7 +286,7 @@
                                         <label>Bill Me</label>
                                         <select style="width:280px" name="billingInterval" onchange="updateBillingInterval(this)" id="plusBillingInterval">
                                             <option value="1">Monthly</option>
-                                            <option value="2">Yearly</option>
+                                            <option <%= annual ? "selected=\"selected\"" : "" %> value="2">Yearly</option>
                                         </select>
                                         <div style="float:right">
                                             <span style="font-size: 14px" id="plusPrice"><%= account.createCostString() %></span>
@@ -335,7 +337,7 @@
                                         <label>Bill Me</label>
                                         <select style="width:280px" name="billingInterval" onchange="updateBillingInterval(this)" id="proBillingInterval">
                                             <option value="1">Monthly</option>
-                                            <option value="2">Yearly</option>
+                                            <option <%= annual ? "selected=\"selected\"" : "" %> value="2">Yearly</option>
                                         </select>
                                         <div style="float:right">
                                             <span style="font-size: 14px" id="proPrice"><%= account.createCostString() %></span>

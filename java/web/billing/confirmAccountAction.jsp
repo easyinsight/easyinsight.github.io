@@ -6,49 +6,122 @@
 <%@ page import="com.easyinsight.users.AccountCreditCardBillingInfo" %>
 <%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page import="java.util.Date" %>
-<%@ page import="com.easyinsight.html.RedirectUtil" %><%
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
+<%@ page import="java.util.Calendar" %>
+<%@ page import="org.joda.time.DateTime" %>
+<%@ page import="org.joda.time.Days" %><%
     SecurityUtil.populateThreadLocalFromSession(request);
-    EIConnection conn = Database.instance().getConnection();
     Session hibernateSession = Database.instance().createSession();
     try {
-        conn.setAutoCommit(false);
+        hibernateSession.beginTransaction();
         AccountTypeChange accountTypeChange = (AccountTypeChange) session.getAttribute("accountTypeChange");
         double cost;
         double credit;
 
         Account account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+
+        Calendar cal = Calendar.getInstance();
+        Integer billingMonthOfYear = account.getBillingMonthOfYear();
+        if (accountTypeChange.isYearly() && billingMonthOfYear == null) {
+            billingMonthOfYear = cal.get(Calendar.MONTH);
+        } else if (!accountTypeChange.isYearly() && billingMonthOfYear != null) {
+            billingMonthOfYear = null;
+        }
+        cal.set(Calendar.DAY_OF_MONTH, account.getBillingDayOfMonth());
+        if (billingMonthOfYear != null) {
+            cal.set(Calendar.MONTH, billingMonthOfYear);
+        }
+
+        if (cal.getTime().before(new Date())) {
+            if (accountTypeChange.isYearly()) {
+                cal.add(Calendar.YEAR, 1);
+            } else {
+                cal.add(Calendar.MONTH, 1);
+            }
+        }
+
+        Date date = cal.getTime();
+        DateTime lastTime = new DateTime(date);
+        DateTime now = new DateTime(System.currentTimeMillis());
+        int daysBetween = Days.daysBetween(now, lastTime).getDays();
+
+        // how many days until the next billing cycle?
+
         cost = Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(),
                 accountTypeChange.getStorage(), accountTypeChange.isYearly());
         credit = Account.calculateCredit(account);
 
-        if (credit >= cost) {
+        double proratedCost = cost * ((double) daysBetween / (double) ((accountTypeChange.isYearly() ? 365 : 31)));
+
+        int storageType = 0;
+        if (account.getMaxSize() == Account.PROFESSIONAL_MAX_2) {
+            storageType = 1;
+        } else if (account.getMaxSize() == Account.PROFESSIONAL_MAX_3) {
+            storageType = 2;
+        } else if (account.getMaxSize() == Account.PROFESSIONAL_MAX_4) {
+            storageType = 3;
+        }
+        double priorCost = Account.createTotalCost(account.getPricingModel(), account.getAccountType(), account.getMaxUsers(),
+                storageType, accountTypeChange.isYearly());
+
+
+        String target;
+        boolean removeAttribute = false;
+        if (priorCost >= cost) {
+            account.setBillingMonthOfYear(billingMonthOfYear);
             accountTypeChange.apply(account, hibernateSession);
+            removeAttribute = true;
+            target = "done.jsp";
+        } else if (credit >= proratedCost) {
+            accountTypeChange.apply(account, hibernateSession);
+            // it'll bill on the next credit
             AccountCreditCardBillingInfo creditInfo = new AccountCreditCardBillingInfo();
-            creditInfo.setAmount(String.valueOf(cost));
+            creditInfo.setAccountId(account.getAccountID());
+            creditInfo.setAmount(String.valueOf(proratedCost));
             creditInfo.setTransactionTime(new Date());
             creditInfo.setResponseCode("100");
             creditInfo.setAgainstCredit(true);
-            creditInfo.setDays(accountTypeChange.isYearly() ? 365 : 28);
+            account.setBillingMonthOfYear(billingMonthOfYear);
+
+            cal.set(Calendar.DAY_OF_MONTH, account.getBillingDayOfMonth());
+            if (billingMonthOfYear != null) {
+                cal.set(Calendar.MONTH, billingMonthOfYear);
+            }
+
+            if (cal.getTime().before(new Date())) {
+                if (accountTypeChange.isYearly()) {
+                    cal.add(Calendar.YEAR, 1);
+                } else {
+                    cal.add(Calendar.MONTH, 1);
+                }
+            }
+
+            creditInfo.setDays(daysBetween);
             hibernateSession.save(creditInfo);
             hibernateSession.flush();
-            session.removeAttribute("accountTypeChange");
-            response.sendRedirect("done.jsp");
+            removeAttribute = true;
+            target = "done.jsp";
         } else {
-            AccountCreditCardBillingInfo billingInfo = account.upgradeBill(accountTypeChange, cost - credit, hibernateSession);
+            AccountCreditCardBillingInfo billingInfo = account.upgradeBill(accountTypeChange, proratedCost - credit, hibernateSession);
             if ("100".equals(billingInfo.getResponseCode())) {
-                session.removeAttribute("accountTypeChange");
-                response.sendRedirect("done.jsp");
+                removeAttribute = true;
+                target = "done.jsp";
             } else {
-                response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/index.jsp?accountTypeChange=accountTypeChange&error=error&response_code=" + billingInfo.getResponseCode()));
+                target = RedirectUtil.getURL(request, "/app/billing/index.jsp?accountTypeChange=accountTypeChange&error=error&response_code=" + billingInfo.getResponseCode());
             }
         }
+        hibernateSession.update(account);
+        hibernateSession.flush();
+        if (removeAttribute) {
+            session.removeAttribute("accountTypeChange");
+        }
+        hibernateSession.getTransaction().commit();
+        response.sendRedirect(target);
     } catch (Exception e) {
-        conn.rollback();
+        hibernateSession.getTransaction().rollback();
         throw e;
     } finally {
         SecurityUtil.clearThreadLocal();
         hibernateSession.close();
-        conn.setAutoCommit(true);
-        Database.closeConnection(conn);
     }
 %>
