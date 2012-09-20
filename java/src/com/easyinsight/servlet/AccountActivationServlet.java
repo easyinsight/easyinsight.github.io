@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Calendar;
 
 /**
@@ -60,15 +61,24 @@ public class AccountActivationServlet extends HttpServlet {
                     cal.add(Calendar.DAY_OF_YEAR, 30);
                     new AccountActivityStorage().saveAccountTimeChange(accountID, Account.ACTIVE, cal.getTime(), conn);
                 }
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT EMAIL FROM USER WHERE ACCOUNT_ID = ?");
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT EMAIL, USER_ID, FIRST_NAME FROM USER WHERE ACCOUNT_ID = ?");
                 queryStmt.setLong(1, accountID);
                 ResultSet userRS = queryStmt.executeQuery();
                 if (userRS.next()) {
                     final String email = userRS.getString(1);
+                    final long userID = userRS.getInt(2);
+                    final String firstName = userRS.getString(3);
                     new Thread(new Runnable() {
 
                         public void run() {
-                            new AccountMemberInvitation().sendWelcomeEmail(email);
+                            EIConnection conn = Database.instance().getConnection();
+                            try {
+                                new AccountMemberInvitation().sendWelcomeEmail(email, conn, userID, firstName);
+                            } catch (Exception e) {
+                                LogClass.error(e);
+                            } finally {
+                                Database.closeConnection(conn);
+                            }
                         }
                     }).start();
 
