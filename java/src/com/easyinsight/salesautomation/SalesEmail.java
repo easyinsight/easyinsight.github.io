@@ -1,6 +1,7 @@
 package com.easyinsight.salesautomation;
 
 import com.easyinsight.admin.ConstantContactSync;
+import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.logging.LogClass;
@@ -48,6 +49,21 @@ public class SalesEmail implements Runnable {
     public SalesEmail(Account account, User user) {
         this.account = account;
         this.user = user;
+    }
+
+    public static void forceRun() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            leadNurture(SecurityUtil.getUserID(), ONE_DAY, conn);
+            leadNurture(SecurityUtil.getUserID(), ONE_WEEK, conn);
+            leadNurture(SecurityUtil.getUserID(), TWO_WEEKS, conn);
+            leadNurture(SecurityUtil.getUserID(), THREE_WEEKS, conn);
+            leadNurture(SecurityUtil.getUserID(), END_OF_TRIAL, conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public void run() {
@@ -172,7 +188,7 @@ public class SalesEmail implements Runnable {
                 insertKeyStmt.setString(2, unsubscribeKey);
                 insertKeyStmt.execute();
             }
-            String emailBody = string.replace("{0}", "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
+            String emailBody = string.replace("{0}", "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey).replace("{1}", firstName);
             new SendGridEmail().sendEmail(email, subject, emailBody, "sales@easy-insight.com", true, "Easy Insight Marketing");
         }
 
