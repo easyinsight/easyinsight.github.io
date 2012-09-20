@@ -268,7 +268,7 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
     @Override
     protected List<IServerDataSourceDefinition> childDataSources(EIConnection conn) throws Exception {
         List<IServerDataSourceDefinition> defaultChildren = super.childDataSources(conn);
-        Map<String, List<String>> superTags = getOrCreateSuperTags();
+        Map<String, List<String>> superTags = new HashMap<String, List<String>>(getOrCreateSuperTags());
         for (CompositeFeedNode existing : getCompositeFeedNodes()) {
             if (existing.getDataSourceType() == FeedType.BATCHBOOK_SUPER_TAG.getType()) {
                 FeedDefinition existingSource = new FeedStorage().getFeedDefinitionData(existing.getDataFeedID(), conn);
