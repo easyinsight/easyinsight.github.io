@@ -6,8 +6,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
-import com.easyinsight.kpi.KPI;
-import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.users.Account;
 import nu.xom.ParsingException;
 import org.apache.commons.httpclient.Credentials;
@@ -118,6 +116,16 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
         superTags = null;
         superTagMap.clear();
         superTagID = 0;
+    }
+
+    @Override
+    protected void beforeRefresh(Date lastRefreshTime) {
+        super.beforeRefresh(lastRefreshTime);
+        try {
+            getOrCreateSuperTags();
+        } catch (ParsingException e) {
+            throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), this));
+        }
     }
 
     protected void sortSources(List<IServerDataSourceDefinition> children) {
@@ -260,7 +268,7 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
     @Override
     protected List<IServerDataSourceDefinition> childDataSources(EIConnection conn) throws Exception {
         List<IServerDataSourceDefinition> defaultChildren = super.childDataSources(conn);
-        Map<String, List<String>> superTags = new BatchbookSuperTagRetrieval().getSuperTags(this);
+        Map<String, List<String>> superTags = getOrCreateSuperTags();
         for (CompositeFeedNode existing : getCompositeFeedNodes()) {
             if (existing.getDataSourceType() == FeedType.BATCHBOOK_SUPER_TAG.getType()) {
                 FeedDefinition existingSource = new FeedStorage().getFeedDefinitionData(existing.getDataFeedID(), conn);
