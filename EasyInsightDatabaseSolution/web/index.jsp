@@ -529,7 +529,7 @@ input[type=radio], input[type=checkbox] {
                         <div id="fieldContent">
 
                         </div>
-                        <button class="btn btn-inverse" onclick="updateFieldList('#updateFields')">Save Fields</button>
+                        <button class="btn btn-inverse" onclick="cancelUpdateFields()">Cancel</button><button class="btn btn-inverse" onclick="updateFieldList('#updateFields')">Save Fields</button>
                     </form>
                 </div>
             </div>

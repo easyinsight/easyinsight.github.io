@@ -1,3 +1,4 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" session="true" %>
 <%@ page import="java.util.Set" %>
 <%@ page import="com.easyinsight.connections.database.DataConnection" %>
 <%@ page import="org.hibernate.Session" %>
@@ -18,11 +19,15 @@
 
             }
         }
-        t.commit();
+        t.commit(); %>
+              <script type="text/javascript">jSuccess("Success!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
+        <script type="text/javascript">refreshQueries();$('#editQuery')[0].reset();$('#editQuery').hide();$('#newQueryButton').show();$("#queryList").show();$("#queryInfoText").show();$("#updateFields").hide();</script>
+    <%
     } catch(Exception e) {
         t.rollback();
+        %><script type="text/javascript">jError("An error occured: <pre><%= e.getMessage() %></pre>", {HorizontalPosition : 'center', VerticalPosition : 'center'});</script><%
     } finally {
 
         dataSession.close();
     }
-%> Success!
+%>

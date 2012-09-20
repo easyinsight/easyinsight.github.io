@@ -269,6 +269,15 @@ function showCreateConnection() {
     $('#databaseList').hide();
 }
 
+function cancelUpdateFields() {
+    $('#editQuery')[0].reset();
+    $('#editQuery').hide();
+    $('#newQueryButton').show();
+    $("#queryList").show();
+    $("#queryInfoText").show();
+    $("#updateFields").hide();
+}
+
 $(document).ready(function() {
     $("#loadingDiv").ajaxStart(function() {
         $(this).show();
@@ -282,7 +291,6 @@ $(document).ready(function() {
     $("#editConnection").hide();
     $("#editQuery").hide();
     $("#createQuery").hide();
-    $("#updateFields").hide();
     $("#updateFields").hide();
     $("#mainTabs").tabs({selected: 3});
 

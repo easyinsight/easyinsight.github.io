@@ -79,7 +79,7 @@ public class Query {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column(length = 1024, precision = 1024)
+    @Column(length = 30000, precision = 30000)
     private String query;
     private boolean schedule;
     private boolean append;
