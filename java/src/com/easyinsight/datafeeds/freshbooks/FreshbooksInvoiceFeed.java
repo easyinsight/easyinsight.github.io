@@ -71,10 +71,12 @@ public class FreshbooksInvoiceFeed extends FreshbooksFeed {
                         String amountOutstandingString = queryField(invoice, "amount_outstanding/text()");
                         String paidString = queryField(invoice, "paid/text()");
                         String invoiceDateString = queryField(invoice, "date/text()");
+                        String invoiceCurrency = queryField(invoice, "currency_code/text()");
                         Date invoiceDate = df.parse(invoiceDateString);
                         IRow row = dataSet.createRow();
                         String discount = queryField(invoice, "discount/text()");
                         addValue(row, FreshbooksInvoiceSource.INVOICE_ID, invoiceID, keys);
+                        addValue(row, FreshbooksInvoiceSource.INVOICE_CURRENCY, invoiceCurrency, keys);
                         addValue(row, FreshbooksInvoiceSource.INVOICE_NUMBER, invoiceNumber, keys);
                         addValue(row, FreshbooksInvoiceSource.CLIENT_ID, clientID, keys);
                         addValue(row, FreshbooksInvoiceSource.STATUS, status, keys);
