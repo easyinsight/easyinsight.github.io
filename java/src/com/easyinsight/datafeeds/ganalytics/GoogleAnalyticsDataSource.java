@@ -274,6 +274,9 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
+
+        boolean newSource = getFields().size() == 0;
+
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         List<AnalysisItem> standardItems = new ArrayList<AnalysisItem>();
         List<AnalysisItem> adItems = new ArrayList<AnalysisItem>();
@@ -371,7 +374,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         eventItems.add(new AnalysisMeasure(keys.get(TOTAL_EVENTS), "Total Events", AggregationTypes.SUM));
         eventItems.add(new AnalysisMeasure(keys.get(UNIQUE_EVENTS), "Unique Events", AggregationTypes.SUM));
         eventItems.add(new AnalysisMeasure(keys.get(EVENT_VALUE), "Event Value", AggregationTypes.SUM));
-        if (getDataFeedID() == 0) {
+        if (newSource) {
             FeedFolder visitorFolder = defineFolder("Visitor");
             visitorFolder.getChildItems().addAll(standardItems);
             FeedFolder adFolder = defineFolder("Ad Words");
