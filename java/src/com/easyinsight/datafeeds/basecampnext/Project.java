@@ -12,14 +12,20 @@ public class Project {
     private String name;
     private String description;
     private String url;
+    private boolean archived;
     private Date updatedAt;
 
-    public Project(String id, String name, String description, String url, Date updatedAt) {
+    public Project(String id, String name, String description, String url, Date updatedAt, boolean archived) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.url = url;
         this.updatedAt = updatedAt;
+        this.archived = archived;
+    }
+
+    public boolean isArchived() {
+        return archived;
     }
 
     public String getId() {

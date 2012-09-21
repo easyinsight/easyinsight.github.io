@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.basecampnext;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -30,6 +31,7 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
 
     public static final String PROJECT_ID = "Project ID";
     public static final String PROJECT_NAME = "Project Name";
+    public static final String PROJECT_ARCHIVED = "Project Archived";
     public static final String DESCRIPTION = "Project Description";
     public static final String UPDATED_AT = "Project Updated At";
     public static final String URL = "Project URL";
@@ -46,13 +48,18 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(PROJECT_ID, PROJECT_NAME, UPDATED_AT, URL, DESCRIPTION);
+        return Arrays.asList(PROJECT_ID, PROJECT_NAME, UPDATED_AT, URL, DESCRIPTION, PROJECT_ARCHIVED);
     }
 
     @Override
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisitems = new ArrayList<AnalysisItem>();
         analysisitems.add(new AnalysisDimension(keys.get(PROJECT_ID), PROJECT_ID));
+        Key archivedKey = keys.get(PROJECT_ARCHIVED);
+        if (archivedKey == null) {
+            archivedKey = new NamedKey(PROJECT_ARCHIVED);
+        }
+        analysisitems.add(new AnalysisDimension(archivedKey, PROJECT_ARCHIVED));
         analysisitems.add(new AnalysisDimension(keys.get(PROJECT_NAME), PROJECT_NAME));
         analysisitems.add(new AnalysisDimension(keys.get(DESCRIPTION), DESCRIPTION));
         analysisitems.add(new AnalysisDimension(keys.get(URL), URL));
@@ -70,6 +77,7 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
                 IRow row = dataSet.createRow();
                 row.addValue(keys.get(PROJECT_ID), project.getId());
                 row.addValue(keys.get(PROJECT_NAME), project.getName());
+                row.addValue(keys.get(PROJECT_ARCHIVED), String.valueOf(project.isArchived()));
                 row.addValue(keys.get(DESCRIPTION), project.getDescription());
                 row.addValue(keys.get(URL), project.getUrl());
                 row.addValue(keys.get(UPDATED_AT), project.getUpdatedAt());
