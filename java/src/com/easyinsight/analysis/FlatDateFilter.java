@@ -53,9 +53,12 @@ public class FlatDateFilter extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName) {
-        return "year(" + getField().toKeySQL() + ") = ?";
-    }
+        public String toQuerySQL(String tableName) {
+            if(dateLevel == AnalysisDateDimension.MONTH_LEVEL)
+                return "(month(" + getField().toKeySQL() + " = (? + 1)";
+            else
+                return "year(" + getField().toKeySQL() + ") = ?";
+        }
 
     @Override
     public boolean validForQuery() {

@@ -31,6 +31,12 @@
             PopUpManager.removePopUp(this);
         }
 
+        private function addFlatMonthValue():void {
+            var filter:FlatMonthDateFilter = new FlatMonthDateFilter(_feedID, _item, 0, 0);
+            dispatchEvent(new FilterCreationEvent(filter));
+            PopUpManager.removePopUp(this);
+        }
+
         private function addMultiFlatValue():void {
             var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item);
             dispatchEvent(new FilterCreationEvent(filter));
@@ -142,6 +148,16 @@
                                 borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
                                 textAlign="center"/>
                     </mx:VBox>
+                    <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addFlatMonthValue()" mouseChildren="false"
+                                                buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                                                id="singleMonthFlatValueBox"
+                                                rollOver="singleMonthFlatValueBox.setStyle('backgroundColor', 0xDDDDDD)"
+                                                rollOut="singleMonthFlatValueBox.setStyle('backgroundColor', 0xFFFFFF)">
+                                            <mx:Label text="Single Month" fontSize="14"/>
+                                            <mx:TextArea text="Restrict this field to one month"
+                                                    borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
+                                                    textAlign="center"/>
+                                        </mx:VBox>
                     <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addMultiFlatValue()" mouseChildren="false"
                             buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
                             id="multiFlatValueBox"

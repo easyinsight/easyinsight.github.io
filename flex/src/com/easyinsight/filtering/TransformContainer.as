@@ -250,7 +250,10 @@ public class TransformContainer extends HBox
         } else if (filterDefinition.getType() == FilterDefinition.NAMED_REF) {
             filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.NAMED_REF);
         } else if (filterDefinition.getType() == FilterDefinition.FLAT_DATE) {
-            filter = new FlatDateFilter(_feedID,  filterDefinition.field, _reportID,  _dashboardID);
+            if(FlatDateFilterDefinition(filterDefinition).dateLevel == AnalysisItemTypes.MONTH_LEVEL)
+                filter = new FlatMonthDateFilter(_feedID,  filterDefinition.field,  _reportID,  _dashboardID);
+            else
+                filter = new FlatDateFilter(_feedID,  filterDefinition.field, _reportID,  _dashboardID);
         } else if (filterDefinition.getType() == FilterDefinition.ANALYSIS_ITEM) {
             filter = new AnalysisItemFilter(_feedID, filterDefinition.field);
         } else if (filterDefinition.getType() == FilterDefinition.MULTI_FLAT_DATE) {
