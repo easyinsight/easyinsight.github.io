@@ -49,6 +49,11 @@ public class EmptyValue extends Value {
         return "(Empty)";
     }
 
+    @Override
+    public String toHTMLString() {
+        return "";
+    }
+
     public int compareTo(Value value) {
         return 0;
     }
