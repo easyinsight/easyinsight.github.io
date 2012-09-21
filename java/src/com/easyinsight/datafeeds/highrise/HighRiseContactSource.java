@@ -74,6 +74,11 @@ public class HighRiseContactSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_WORK_EMAIL), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_HOME_EMAIL), true));
+        Key homePhone = keys.get(CONTACT_HOME_PHONE);
+        if (homePhone == null) {
+            homePhone = new NamedKey(CONTACT_HOME_PHONE);
+        }
+        analysisItems.add(new AnalysisDimension(homePhone, true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_OTHER_EMAIL), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_MOBILE_PHONE), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_OFFICE_PHONE), true));
