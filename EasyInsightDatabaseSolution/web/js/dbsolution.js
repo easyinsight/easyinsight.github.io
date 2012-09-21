@@ -110,6 +110,10 @@ function editConnection(id) {
         data: 'id=' + id,
         type: 'get',
         success: function(result) {
+            if(result["error"]) {
+                alert('You have been idle, and are being sent back to the login page.');
+                window.location.reload();
+            }
             $("form#editConnection input[name=id]")[0].value = result.id;
             $("form#editConnection input[name=dbUsername]")[0].value = result.username;
             $("form#editConnection input[name=dbPassword]")[0].value = result.password;
@@ -145,6 +149,10 @@ function editQuery(id) {
         data: 'id=' + id,
         type: 'get',
         success: function(result) {
+            if(result["error"]) {
+                alert('You have been idle, and are being sent back to the login page.');
+                window.location.reload();
+            }
             $("form#editQuery input[name=id]")[0].value = result.id;
 
             $("form#editQuery textarea[name=queryValue]")[0].value = result.query;

@@ -11,7 +11,7 @@
 <%@ page contentType="application/json;charset=UTF-8" language="java" session="true" %>
 <%
     if(session.getAttribute("user") == null) {
-        %><jsp:include page="../error.jsp" /><%
+        %>{ "error": "Error" }<%
     } else {
     Session dataSession = DataConnection.getSession();
     try {

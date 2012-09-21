@@ -79,7 +79,7 @@ public class Query {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column(length = 30000, precision = 30000)
+    @Column(length = 5000, precision = 32762)
     private String query;
     private boolean schedule;
     private boolean append;
@@ -323,6 +323,8 @@ public class Query {
                         case Types.TINYINT:
                         case Types.SMALLINT:
                         case Types.INTEGER:
+                            row.addValue(fieldName, rs.getLong(column));
+                            break;
                         case Types.NUMERIC:
                         case Types.FLOAT:
                         case Types.DOUBLE:

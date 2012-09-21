@@ -72,7 +72,7 @@
 <body>
 <div class="container">
     <div class="well" id="mainWell">
-        <div class="row"><div class="offset4"><img style="padding:10px;" src="../images/logo2.PNG" /></div></div>
+        <div class="row"><div class="offset4"><img style="padding:10px;" src="images/logo2.PNG" /></div></div>
             <p class="row"><span style="text-align:left" class="offset1 span6">Please log in.</span></p>
 
         <form action="login.jsp" method="post">
