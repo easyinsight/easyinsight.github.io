@@ -19,6 +19,7 @@ public class CalculationLogic {
         CalculationMetadata calculationMetadata = new CalculationMetadata();
         calculationMetadata.setReport(report);
         calculationMetadata.setInsightRequestMetadata(insightRequestMetadata);
+        calculationMetadata.setDataSourceFields(allItems);
         CalculationTreeNode calculationTreeNode;
         ICalculationTreeVisitor visitor;
         CalculationsParser.expr_return ret;
@@ -72,7 +73,7 @@ public class CalculationLogic {
             if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
                 throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + code + ".", null));
             }
-            LogClass.error(e);
+            LogClass.error("On calculating " + code, e);
             throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of " + code, null));
         }
     }

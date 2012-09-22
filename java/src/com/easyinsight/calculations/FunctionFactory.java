@@ -202,6 +202,14 @@ public class FunctionFactory {
             return new AssignFilterPipeline();
         } else if (s.equals("greaterthanorequal")) {
             return new GreaterThanOrEqual();
+        } else if (s.equals("next")) {
+            return new NextRecord();
+        } else if (s.equals("previous")) {
+            return new PreviousRecord();
+        } else if (s.equals("first")) {
+            return new FirstRecord();
+        } else if (s.equals("last")) {
+            return new LastRecord();
         } else {
             return null;
         }

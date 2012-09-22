@@ -11,6 +11,8 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -28,6 +30,17 @@ public class CalculationMetadata {
     private Collection<FilterDefinition> filters;
     private InsightRequestMetadata insightRequestMetadata;
     private FeedDefinition dataSource;
+    private Map<String, ICalculationCache> cacheMap = new HashMap<String, ICalculationCache>();
+
+    public ICalculationCache getCache(ICacheBuilder cacheBuilder, String key) {
+        ICalculationCache cache = cacheMap.get(key);
+        if (cache == null) {
+            cache = cacheBuilder.createCache();
+            cache.fromDataSet(dataSet);
+            cacheMap.put(key, cache);
+        }
+        return cache;
+    }
 
     public Feed getFeed() {
         return feed;

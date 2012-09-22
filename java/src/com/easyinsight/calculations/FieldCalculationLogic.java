@@ -21,6 +21,8 @@ public class FieldCalculationLogic extends CalculationLogic {
     }
 
     protected void calculateResults(CalculationTreeNode calculationTreeNode, CalculationMetadata calculationMetadata) {
+
+        calculationMetadata.setDataSet(dataSet);
         for (IRow row : dataSet.getRows()) {
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, analysisItem, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);
@@ -32,5 +34,6 @@ public class FieldCalculationLogic extends CalculationLogic {
             }
             row.addValue(analysisItem.createAggregateKey(), value);
         }
+        analysisItem.setReady(true);
     }
 }
