@@ -60,6 +60,7 @@ import com.easyinsight.analysis.gantt.GanttReport;
 import com.easyinsight.analysis.gauge.GaugeDefinition;
 import com.easyinsight.analysis.heatmap.HeatMapDefinition;
 import com.easyinsight.analysis.list.ListDefinition;
+import com.easyinsight.analysis.summary.SummaryDefinition;
 import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
@@ -264,6 +265,7 @@ public class TORegistry {
         var stackedBar:StackedBarChartDefinition;
         var vert:VerticalListDefinition;
         var combVert:CombinedVerticalListDefinition;
+        var summary:SummaryDefinition;
         var gauge:GaugeDefinition;
         var gantt:GanttReport;
         var treeDef:TreeDefinition;

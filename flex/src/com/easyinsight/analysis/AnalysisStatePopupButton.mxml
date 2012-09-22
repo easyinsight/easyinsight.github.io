@@ -83,6 +83,7 @@
         	<node label="List" type="{AnalysisDefinition.LIST}"/>
         	<node label="Crosstab" type="{AnalysisDefinition.CROSSTAB}"/>
         	<node label="Tree" type="{AnalysisDefinition.TREE}"/>
+        	<node label="Summary" type="{AnalysisDefinition.SUMMARY}"/>
         </node>
         <node label="Chart" icon="">
             <node label="Column" type="{AnalysisDefinition.COLUMN}"/>

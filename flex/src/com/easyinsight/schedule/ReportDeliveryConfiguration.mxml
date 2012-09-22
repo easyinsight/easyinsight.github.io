@@ -135,6 +135,7 @@
             <util:dataProvider>
                 <mx:ArrayCollection>
                     <mx:Array>
+                        <mx:Object label="Excel 2007" data="5"/>
                         <mx:Object label="Excel" data="1"/>
                         <mx:Object label="PNG" data="2"/>
                         <mx:Object label="PDF" data="3"/>

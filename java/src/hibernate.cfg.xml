@@ -65,6 +65,7 @@
         <mapping class="com.easyinsight.analysis.ChartDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TimelineDefinitionState"/>
         <mapping class="com.easyinsight.analysis.GanttChartDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.SummaryDefinitionState"/>
         <mapping class="com.easyinsight.analysis.AnalysisDefinitionState"/>
         <mapping class="com.easyinsight.analysis.MapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.CrosstabDefinitionState"/>

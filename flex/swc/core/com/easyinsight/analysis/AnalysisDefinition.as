@@ -53,6 +53,7 @@ import mx.collections.ArrayCollection;
         public static const TREND_GRID:int = 37;
         public static const YTD:int = 38;
         public static const COMPARE_YEARS:int = 39;
+        public static const SUMMARY:int = 40;
 
 		public var dataFeedID:int;
         public var urlKey:String;

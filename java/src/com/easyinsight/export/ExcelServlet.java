@@ -29,12 +29,12 @@ public class ExcelServlet extends HttpServlet {
             try {
                 PreparedStatement queryStmt;
                 if (userID != null) {
-                    queryStmt = conn.prepareStatement("SELECT EXCEL_FILE, REPORT_NAME FROM EXCEL_EXPORT WHERE EXCEL_EXPORT_ID = ? AND " +
+                    queryStmt = conn.prepareStatement("SELECT EXCEL_FILE, REPORT_NAME, EXCEL_FORMAT FROM EXCEL_EXPORT WHERE EXCEL_EXPORT_ID = ? AND " +
                             "USER_ID = ?");
                     queryStmt.setLong(1, imageID);
                     queryStmt.setLong(2, userID);
                 } else {
-                    queryStmt = conn.prepareStatement("SELECT EXCEL_FILE, REPORT_NAME FROM EXCEL_EXPORT WHERE EXCEL_EXPORT_ID = ? AND " +
+                    queryStmt = conn.prepareStatement("SELECT EXCEL_FILE, REPORT_NAME, EXCEL_FORMAT FROM EXCEL_EXPORT WHERE EXCEL_EXPORT_ID = ? AND " +
                             "ANONYMOUS_ID = ?");
                     queryStmt.setLong(1, imageID);
                     queryStmt.setString(2, anonID);
@@ -43,6 +43,8 @@ public class ExcelServlet extends HttpServlet {
                 if (rs.next()) {
                     byte[] bytes = rs.getBytes(1);
                     String reportName = rs.getString(2);
+                    int format = rs.getInt(3);
+                    String extension = format == 1 ? "xlsx" : "xls";
                     resp.setContentType("application/excel");
                     resp.setContentLength(bytes.length);
                     reportName = URLEncoder.encode(reportName, "UTF-8");
@@ -55,7 +57,7 @@ public class ExcelServlet extends HttpServlet {
                         resp.setHeader("Cache-Control","no-cache"); //HTTP 1.1
                         resp.setHeader("Pragma","no-cache"); //HTTP 1.0
                     }
-                    resp.setHeader("Content-disposition","attachment; filename=" + reportName+".xls" );
+                    resp.setHeader("Content-disposition","attachment; filename=" + reportName+"."+extension );
                     resp.setDateHeader ("Expires", 0); //prevents caching at the proxy server
                     resp.getOutputStream().write(bytes);
                     resp.getOutputStream().flush();

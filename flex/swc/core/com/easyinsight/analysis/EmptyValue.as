@@ -15,7 +15,7 @@ package com.easyinsight.analysis
         }
 
         override public function toString():String {
-            return "(No Value)";
+            return "";
         }
 
         override public function getValue():Object {

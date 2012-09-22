@@ -1,7 +1,6 @@
 package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.analysis.definitions.WSCombinedVerticalListDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
@@ -233,14 +232,14 @@ public class DeliveryScheduledTask extends ScheduledTask {
     private DeliveryResult handleDeliveryInfo(DeliveryInfo deliveryInfo, EIConnection conn, int timezoneOffset) throws Exception {
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setUtcOffset(timezoneOffset);
-        if (deliveryInfo.getFormat() == ReportDelivery.EXCEL) {
+        if (deliveryInfo.getFormat() == ReportDelivery.EXCEL || deliveryInfo.getFormat() == ReportDelivery.EXCEL_2007) {
             WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
             analysisDefinition.updateMetadata();
             if (deliveryInfo.getLabel() != null && !"".equals(deliveryInfo.getLabel())) {
                 analysisDefinition.setName(deliveryInfo.getLabel());
             }
             updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
-            byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata, true);
+            byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata, true, deliveryInfo.getFormat() == ReportDelivery.EXCEL_2007);
             if (bytes != null) {
                 return new DeliveryResult(new AttachmentInfo(bytes, deliveryInfo.getName() + ".xls", "application/xls"));
             }
@@ -427,13 +426,13 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
 
                 try {
-                    if (deliveryFormat == ReportDelivery.EXCEL) {
+                    if (deliveryFormat == ReportDelivery.EXCEL || deliveryFormat == ReportDelivery.EXCEL_2007) {
                         WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
                         analysisDefinition.updateMetadata();
                         updateReportWithCustomFilters(analysisDefinition, customFilters);
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                         insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata, sendIfNoData);
+                        byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata, sendIfNoData, deliveryFormat == ReportDelivery.EXCEL_2007);
                         if (bytes != null) {
                             String reportName = analysisDefinition.getName();
                             sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
@@ -517,7 +516,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
             table = ExportService.verticalListToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.YTD) {
             table = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
-        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREE) {
+        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
+                analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
             DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
             table = ExportService.treeReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
@@ -607,6 +607,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
             emails.add(email);
         }
         emailQueryStmt.close();
+        /*
+        select report_delivery.report_delivery_id, analysis.title, report_delivery.scheduled_account_activity_id from analysis, report_delivery, scheduled_account_activity where scheduled_account_activity.user_id = 5008 and scheduled_account_activity.scheduled_account_activity_id = report_delivery.scheduled_account_activity_id and report_delivery.report_id = analysis.analysis_id;
+         */
 
         Map<String, String> baseProps = new HashMap<String, String>();
         

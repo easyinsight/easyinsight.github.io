@@ -17,7 +17,7 @@
         }
 
         private function excel():void {
-            new ExcelCreator().exportExcel(_report, this);
+            new ExcelCreator().exportExcel(_report, this, true);
         }
 
         private function email():void {

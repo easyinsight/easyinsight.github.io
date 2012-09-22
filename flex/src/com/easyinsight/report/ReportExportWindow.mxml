@@ -48,7 +48,12 @@
         }
 
         private function excel():void {
-            new ExcelCreator().exportExcel(_report, this);
+            new ExcelCreator().exportExcel(_report, this, false);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function excel2007():void {
+            new ExcelCreator().exportExcel(_report, this, true);
             PopUpManager.removePopUp(this);
         }
 
@@ -123,26 +128,32 @@
     <mx:HBox>
         <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/table.png')"
                           headerText="Export to Excel"
-                          click="excel()"/>
-        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/document_chart.png')"
-                          headerText="Export to PDF"
-                          click="pdf()"/>
+                          click="excel2007()"/>
+        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/table.png')"
+                                       headerText="Export to Excel 1997-2004"
+                                       click="excel()"/>
     </mx:HBox>
     <mx:HBox>
+        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/document_chart.png')"
+                                       headerText="Export to PDF"
+                                       click="pdf()"/>
         <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/camera.png')"
                           headerText="Export to PNG"
                           click="png()"/>
-        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/calendar.png')"
-                          headerText="Scheduling"
-                          click="schedule()"/>
     </mx:HBox>
     <mx:HBox>
         <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/mail.png')"
                           headerText="Email"
                           click="email()"/>
+        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/calendar.png')"
+                                       headerText="Scheduling"
+                                       click="schedule()"/>
+
+    </mx:HBox>
+    <mx:HBox>
         <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/plasma_tv.png')"
-                          headerText="Embed Report into Website"
-                          click="embed()"/>
+                                       headerText="Embed Report into Website"
+                                       click="embed()"/>
     </mx:HBox>
     <util:CancelButton label="Cancel" click="this.close()"/>
 </util:EISlimWindow>

@@ -2,6 +2,7 @@ package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Value;
+import com.easyinsight.core.StringValue;
 
 import java.util.*;
 
@@ -38,6 +39,18 @@ public class TreeData {
             sb.append(argh.toHTML());
         }
         return sb.toString();
+    }
+
+    public List<TreeRow> toTreeRows() {
+        List<TreeRow> rows = new ArrayList<TreeRow>();
+
+        for (Argh argh : map.values()) {
+            TreeRow treeRow = argh.toTreeRow();
+            rows.add(treeRow);
+
+        }
+
+        return rows;
     }
 
     private Map<Value, Argh> map = new LinkedHashMap<Value, Argh>();
@@ -96,6 +109,39 @@ public class TreeData {
                 map.put(value, argh);
             }
             argh.addRow(row);
+        }
+
+        public TreeRow toTreeRow() {
+            Map<AnalysisItem, Aggregation> sumMap = new HashMap<AnalysisItem, Aggregation>();
+            for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+                if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+                    sumMap.put(analysisMeasure, new AggregationFactory(analysisMeasure, false).getAggregation());
+                }
+            }
+            TreeRow treeRow = new TreeRow();
+            treeRow.setGroupingField(level);
+            treeRow.setGroupingColumn(this.value);
+            for (Argh argh : map.values()) {
+                TreeRow childRow = argh.toTreeRow();
+                treeRow.getChildren().add(childRow);
+                for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+                    if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                        Value value = (Value) childRow.getValues().get(analysisItem.qualifiedName());
+                        Aggregation aggregation = sumMap.get(analysisItem);
+                        aggregation.addValue(value);
+                    }
+                }
+            }
+            TreeRow summaryRow = new TreeRow();
+            summaryRow.setGroupingColumn(new StringValue(""));
+            summaryRow.setSummaryColumn(true);
+            for (Map.Entry<AnalysisItem, Aggregation> entry : sumMap.entrySet()) {
+                summaryRow.getValues().put(entry.getKey().qualifiedName(), entry.getValue().getValue());
+            }
+            treeRow.getChildren().add(summaryRow);
+
+            return treeRow;
         }
 
         public String toHTML() {
@@ -175,6 +221,17 @@ public class TreeData {
             sb.append("</tr>");
             return sb.toString();
         }
+
+        @Override
+        public TreeRow toTreeRow() {
+            TreeRow treeRow = new TreeRow();
+            treeRow.setGroupingField(analysisItem);
+            for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+                treeRow.getValues().put(analysisItem.qualifiedName(), row.getValue(analysisItem));
+            }
+            treeRow.setGroupingColumn(row.getValue(analysisItem));
+            return treeRow;
+        }
     }
 
     private abstract class Argh {
@@ -183,5 +240,7 @@ public class TreeData {
         }
 
         public abstract String toHTML();
+
+        public abstract TreeRow toTreeRow();
     }
 }

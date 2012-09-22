@@ -9,6 +9,7 @@ public class ReportDelivery extends ScheduledDelivery implements IDeliverable {
     public static const PNG:int = 2;
     public static const PDF:int = 3;
     public static const HTML:int = 4;
+    public static const EXCEL_2007:int = 5;
 
     public var reportFormat:int;
     public var reportID:int;
@@ -35,6 +36,7 @@ public class ReportDelivery extends ScheduledDelivery implements IDeliverable {
         var type:String;
         switch (reportFormat) {
             case 1:
+            case 5:
                 type = " as Excel";
                 break;
             case 2:

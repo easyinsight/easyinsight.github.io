@@ -31,7 +31,7 @@
         }
 
         private function excel():void {
-            new ExcelCreator().exportExcel(_report, this);
+            new ExcelCreator().exportExcel(_report, this, true);
             PopUpManager.removePopUp(this);
         }
 

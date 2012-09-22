@@ -36,10 +36,14 @@ import com.itextpdf.text.pdf.PdfPCell;
 
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.sun.mail.smtp.SMTPSendFailedException;
 import flex.messaging.FlexContext;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
 
@@ -194,6 +198,7 @@ public class ExportService {
                     }
                 }
             }
+            queryStmt.close();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -222,6 +227,7 @@ public class ExportService {
                 long activityID = rs.getLong(1);
                 reportDelivery = (ReportDelivery) ScheduledActivity.createActivity(ScheduledActivity.REPORT_DELIVERY, activityID, conn);
             }
+            queryStmt.close();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -255,6 +261,7 @@ public class ExportService {
                     // blah
                 }
             }
+            queryStmt.close();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -277,6 +284,7 @@ public class ExportService {
                     "scheduled_account_activity_id = ?");
             deleteStmt.setLong(1, scheduledActivityID);
             deleteStmt.executeUpdate();
+            deleteStmt.close();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -356,7 +364,7 @@ public class ExportService {
         toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata), conn);
     }
 
-    public void emailReport(WSAnalysisDefinition analysisDefinition, int format, InsightRequestMetadata insightRequestMetadata, String email, String subject, String body,
+    public ReportFault emailReport(WSAnalysisDefinition analysisDefinition, int format, InsightRequestMetadata insightRequestMetadata, String email, String subject, String body,
                             byte[] pdfBytes, int width, int height) {
         boolean includeTitle = true;
         if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
@@ -366,9 +374,13 @@ public class ExportService {
         try {
             analysisDefinition.updateMetadata();
             if (format == ReportDelivery.EXCEL) {
-                byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata, true);
+                byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata, true, false);
                     new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
                             "application/excel");
+            } else if (format == ReportDelivery.EXCEL_2007) {
+                byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata, true, true);
+                new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
+                        "application/excel");
             } else if (format == ReportDelivery.HTML_TABLE) {
                 String html;
                 if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
@@ -380,7 +392,8 @@ public class ExportService {
                     html = ExportService.combinedVerticalListToHTMLTable(analysisDefinition, dataSets, conn, insightRequestMetadata);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.YTD) {
                     html = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREE) {
+                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
                     DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
                     html = ExportService.treeReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
@@ -409,6 +422,16 @@ public class ExportService {
                 }
                 new SendGridEmail().sendAttachmentEmail(email, subject, body, result, name + ".pdf", false, "reports@easy-insight.com", "Easy Insight",
                         "application/pdf");
+            }
+            return null;
+        } catch (ReportException re) {
+            return re.getReportFault();
+        } catch (SMTPSendFailedException smtpException) {
+            if (smtpException.getMessage().contains("Could not send e-mail, max size")) {
+                return new ServerError("The report was too large for our email provider to handle.");
+            } else {
+                LogClass.error(smtpException);
+                throw new RuntimeException(smtpException);
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -864,13 +887,42 @@ public class ExportService {
         return valueString;
     }
 
-    public byte[] exportToExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+    public ExcelResponse exportToExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         try {
             analysisDefinition.updateMetadata();
-            return toExcel(analysisDefinition, insightRequestMetadata, true);
+            byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata, true, false);
+            ExcelResponse response = new ExcelResponse();
+            response.setBytes(bytes);
+            return response;
+        } catch (ReportException re) {
+            ExcelResponse excelResponse = new ExcelResponse();
+            excelResponse.setReportFault(re.getReportFault());
+            return excelResponse;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public ExcelResponse exportToExcel2007(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
+        else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            analysisDefinition.updateMetadata();
+            byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata, true, true);
+            ExcelResponse response = new ExcelResponse();
+            response.setBytes(bytes);
+            return response;
+        } catch (ReportException re) {
+            ExcelResponse excelResponse = new ExcelResponse();
+            excelResponse.setReportFault(re.getReportFault());
+            return excelResponse;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -912,18 +964,18 @@ public class ExportService {
         FlexContext.getHttpRequest().getSession().setAttribute("anonID", anonID);
     }
 
-    public byte[] toExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean onNoData) throws IOException, SQLException {
+    public byte[] toExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean onNoData, boolean format2007) throws IOException, SQLException {
         EIConnection conn = Database.instance().getConnection();
         try {
             ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
 
-            HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, exportMetadata, conn, insightRequestMetadata, onNoData);
+            Workbook workbook = createWorkbookFromList(analysisDefinition, exportMetadata, conn, insightRequestMetadata, onNoData, format2007);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             workbook.write(baos);
             byte[] bytes = baos.toByteArray();
             baos.close();
 
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCEL_EXPORT (USER_ID, EXCEL_FILE, REPORT_NAME, ANONYMOUS_ID) VALUES (?, ?, ?, ?)",
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCEL_EXPORT (USER_ID, EXCEL_FILE, REPORT_NAME, ANONYMOUS_ID, EXCEL_FORMAT) VALUES (?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             BufferedInputStream bis = new BufferedInputStream(bais, 1024);
@@ -937,6 +989,7 @@ public class ExportService {
             String anonID = RandomTextGenerator.generateText(20);
             insertStmt.setString(3, (analysisDefinition.getName() == null || "".equals(analysisDefinition.getName())) ? "export" : analysisDefinition.getName());
             insertStmt.setString(4, anonID);
+            insertStmt.setInt(5, format2007 ? 1 : 0);
             insertStmt.execute();
             long id = Database.instance().getAutoGenKey(insertStmt);
             if (FlexContext.getHttpRequest() != null) {
@@ -944,14 +997,20 @@ public class ExportService {
                 FlexContext.getHttpRequest().getSession().setAttribute("anonID", anonID);
             }
             return bytes;
+        } catch (IllegalArgumentException iae) {
+            if (iae.getMessage().contains("Invalid row number (65536) outside allowable range (0..65535)")) {
+                throw new ReportException(new GenericReportFault("We can only export reports with less than 65,536 rows."));
+            } else {
+                throw iae;
+            }
         } finally {
             Database.closeConnection(conn);
         }
     }
 
-    public byte[] toExcelEmail(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean onNoData) throws IOException, SQLException {
+    public byte[] toExcelEmail(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean onNoData, boolean excel2007) throws IOException, SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
-        HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, exportMetadata, conn, insightRequestMetadata, onNoData);
+        Workbook workbook = createWorkbookFromList(analysisDefinition, exportMetadata, conn, insightRequestMetadata, onNoData, excel2007);
         if (workbook == null) {
             return null;
         }
@@ -1377,13 +1436,18 @@ public class ExportService {
         }
     }
 
-    private HSSFWorkbook createWorkbookFromList(WSAnalysisDefinition listDefinition, ExportMetadata exportMetadata,
-                                                EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean generateWithNoData) throws SQLException {
-        HSSFWorkbook workbook = new HSSFWorkbook();
+    private Workbook createWorkbookFromList(WSAnalysisDefinition listDefinition, ExportMetadata exportMetadata,
+                                                EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean generateWithNoData, boolean format2007) throws SQLException {
+        Workbook workbook;
+        if (format2007) {
+            workbook = new XSSFWorkbook();
+        } else {
+            workbook = new HSSFWorkbook();
+        }
 
         Map<AnalysisItem, Style> styleMap = new HashMap<AnalysisItem, Style>();
 
-        HSSFSheet sheet = workbook.createSheet();
+        Sheet sheet = workbook.createSheet();
         workbook.setSheetName(0, "Data");
 
         boolean hasData;
@@ -1408,28 +1472,36 @@ public class ExportService {
         return workbook;
     }
 
-    private boolean listTrends(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+    private static RichTextString createRichTextString(String string, Cell cell) {
+        if (cell instanceof HSSFCell) {
+            return new HSSFRichTextString(string);
+        } else {
+            return new XSSFRichTextString(string);
+        }
+    }
+
+    private boolean listTrends(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
                                   InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSKPIDefinition crosstabDefinition = (WSKPIDefinition) report;
         TrendDataResults trendDataResults = DataService.getTrendDataResults(crosstabDefinition, insightRequestMetadata, conn);
         List<TrendOutcome> outcomes = trendDataResults.getTrendOutcomes();
-        HSSFRow headerRow = sheet.createRow(0);
+        Row headerRow = sheet.createRow(0);
         int i = 0;
         if (crosstabDefinition.getGroupings() != null) {
             for (i = 0; i < crosstabDefinition.getGroupings().size(); i++) {
                 AnalysisItem grouping = crosstabDefinition.getGroupings().get(i);
-                HSSFCell groupingCell = headerRow.createCell(i);
-                groupingCell.setCellValue(new HSSFRichTextString(grouping.toDisplay()));
+                Cell groupingCell = headerRow.createCell(i);
+                groupingCell.setCellValue(createRichTextString(grouping.toDisplay(), groupingCell));
             }
         }
-        HSSFCell labelCell = headerRow.createCell(i++);
-        labelCell.setCellValue(new HSSFRichTextString("Name"));
-        HSSFCell latestValueCell = headerRow.createCell(i++);
-        latestValueCell.setCellValue(new HSSFRichTextString("Latest Value"));
-        HSSFCell previousValueCell = headerRow.createCell(i++);
-        previousValueCell.setCellValue(new HSSFRichTextString("Previous Value"));
-        HSSFCell percentChangeCell = headerRow.createCell(i);
-        percentChangeCell.setCellValue(new HSSFRichTextString("Percent Change"));
+        Cell labelCell = headerRow.createCell(i++);
+        labelCell.setCellValue(createRichTextString("Name", labelCell));
+        Cell latestValueCell = headerRow.createCell(i++);
+        latestValueCell.setCellValue(createRichTextString("Latest Value", latestValueCell));
+        Cell previousValueCell = headerRow.createCell(i++);
+        previousValueCell.setCellValue(createRichTextString("Previous Value", previousValueCell));
+        Cell percentChangeCell = headerRow.createCell(i);
+        percentChangeCell.setCellValue(createRichTextString("Percent Change", percentChangeCell));
         for (int h = 0; h <= i; h++) {
             sheet.setColumnWidth(h, 5000);
         }
@@ -1439,7 +1511,7 @@ public class ExportService {
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (TrendOutcome trendOutcome : outcomes) {
-            HSSFRow dataRow = sheet.createRow(j++);
+            Row dataRow = sheet.createRow(j++);
             i = 0;
             if (crosstabDefinition.getGroupings() != null) {
                 for (i = 0; i < crosstabDefinition.getGroupings().size(); i++) {
@@ -1449,8 +1521,8 @@ public class ExportService {
                     style.format(dataRow, i, value, grouping, exportMetadata.cal);
                 }
             }
-            HSSFCell labelDataCell = dataRow.createCell(i++);
-            labelDataCell.setCellValue(new HSSFRichTextString(trendOutcome.getMeasure().toDisplay()));
+            Cell labelDataCell = dataRow.createCell(i++);
+            labelDataCell.setCellValue(createRichTextString(trendOutcome.getMeasure().toDisplay(), labelDataCell));
             Style nowMeasureStyle = getStyle(styleMap, trendOutcome.getMeasure(), workbook, exportMetadata, trendOutcome.getNow());
             nowMeasureStyle.format(dataRow, i++, trendOutcome.getNow(), trendOutcome.getMeasure(), exportMetadata.cal);
             Style previousMeasureStyle = getStyle(styleMap, trendOutcome.getMeasure(), workbook, exportMetadata, trendOutcome.getHistorical());
@@ -1464,7 +1536,7 @@ public class ExportService {
         return trendDataResults.getTrendOutcomes().size() > 0;
     }
 
-    private boolean listCrosstab(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+    private boolean listCrosstab(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
                                   InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) report;
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
@@ -1480,7 +1552,7 @@ public class ExportService {
         summaryStyle.cellStyle1.setFillPattern(CellStyle.SOLID_FOREGROUND);
         summaryStyle.cellStyle1.setFont(font);
 
-        HSSFCellStyle crosstabHeaderStyle = workbook.createCellStyle();
+        CellStyle crosstabHeaderStyle = workbook.createCellStyle();
         crosstabHeaderStyle.setFillForegroundColor(IndexedColors.BLACK.getIndex());
         crosstabHeaderStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
         crosstabHeaderStyle.setFont(font);
@@ -1490,20 +1562,20 @@ public class ExportService {
         }
         int rowOffset = crosstabDefinition.getMeasures().size() > 1 ? 3 : 2;
         for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size()) + rowOffset; j++) {
-            HSSFRow row = sheet.createRow(j);
+            Row row = sheet.createRow(j);
             for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabDefinition.getMeasures().size()) + crosstabDefinition.getRows().size() + 1); i++) {
                 CrosstabValue crosstabValue = values[j][i];
                 if (crosstabValue == null) {
                     if (j == (crosstab.getColumnSections().size() + crosstabDefinition.getRows().size()) + 1 &&
                             i == (crosstab.getColumnSections().size() + crosstabDefinition.getRows().size())) {
-                        HSSFCell cell = row.createCell(i);
+                        Cell cell = row.createCell(i);
                         cell.setCellStyle(crosstabHeaderStyle);
                     } else {
-                        HSSFCell cell = row.createCell(i);
+                        Cell cell = row.createCell(i);
                         cell.setCellStyle(crosstabHeaderStyle);
                     }
                 } else {
-                    HSSFCell cell = row.createCell(i);
+                    Cell cell = row.createCell(i);
                     if (crosstabValue.getHeader() == null) {
                         if (crosstabValue.isSummaryValue()) {
                             summaryStyle.format(row, i, crosstabValue.getValue(), measure, exportMetadata.cal);
@@ -1511,7 +1583,7 @@ public class ExportService {
                             measureStyle.format(row, i, crosstabValue.getValue(), measure, exportMetadata.cal);
                         }
                     } else {
-                        cell.setCellValue(new HSSFRichTextString(crosstabValue.getValue().toString()));
+                        cell.setCellValue(createRichTextString(crosstabValue.getValue().toString(), cell));
                         cell.setCellStyle(crosstabHeaderStyle);
                     }
                 }
@@ -1555,17 +1627,17 @@ public class ExportService {
         }
     }
 
-    private boolean listCompareYears(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+    private boolean listCompareYears(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
                          InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSCompareYearsDefinition verticalList = (WSCompareYearsDefinition) report;
         ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
         YearStuff ytdStuff = YTDUtil.getYearStuff(verticalList, dataSet.getDataSet(), dataSet.getPipelineData(), dataSet.getReportItems());
 
-        HSSFRow headerRow = sheet.createRow(0);
+        Row headerRow = sheet.createRow(0);
         sheet.setColumnWidth(0, 5000);
         for (int i = 0; i < ytdStuff.getHeaders().size(); i++) {
             sheet.setColumnWidth(i + 1, 5000);
-            HSSFCell cell = headerRow.createCell(i + 1);
+            Cell cell = headerRow.createCell(i + 1);
             cell.setCellValue(ytdStuff.getHeaders().get(i));
         }
 
@@ -1575,9 +1647,9 @@ public class ExportService {
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (CompareYearsRow ytdValue : ytdStuff.getRows()) {
-            HSSFRow row = sheet.createRow(j++);
+            Row row = sheet.createRow(j++);
             AnalysisItem baseMeasure = ytdValue.getMeasure();
-            HSSFCell rowHeaderCell = row.createCell(0);
+            Cell rowHeaderCell = row.createCell(0);
             rowHeaderCell.setCellValue(baseMeasure.toDisplay());
             int i = 0;
             for (String header : ytdStuff.getHeaders()) {
@@ -1596,7 +1668,7 @@ public class ExportService {
         return dataSet.getDataSet().getRows().size() > 0;
     }
 
-    private boolean listYTD(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+    private boolean listYTD(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
                                   InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSYTDDefinition verticalList = (WSYTDDefinition) report;
         ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
@@ -1610,24 +1682,24 @@ public class ExportService {
                 }
             }
         }
-        HSSFRow headerRow = sheet.createRow(0);
+        Row headerRow = sheet.createRow(0);
         sheet.setColumnWidth(0, 5000);
         for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
             sheet.setColumnWidth(i + 1, 5000);
-            HSSFCell cell = headerRow.createCell(i + 1);
+            Cell cell = headerRow.createCell(i + 1);
             cell.setCellValue(ytdStuff.getIntervals().get(i).toString());
         }
-        HSSFCell ytdCell = headerRow.createCell(ytdStuff.getIntervals().size() + 1);
+        Cell ytdCell = headerRow.createCell(ytdStuff.getIntervals().size() + 1);
         sheet.setColumnWidth(ytdStuff.getIntervals().size() + 1, 5000);
         ytdCell.setCellValue("YTD");
-        HSSFCell avgCell = headerRow.createCell(ytdStuff.getIntervals().size() + 2);
+        Cell avgCell = headerRow.createCell(ytdStuff.getIntervals().size() + 2);
         sheet.setColumnWidth(ytdStuff.getIntervals().size() + 2, 5000);
         avgCell.setCellValue("Average");
         if (hasBenchmark) {
-            HSSFCell bkCell = headerRow.createCell(ytdStuff.getIntervals().size() + 3);
+            Cell bkCell = headerRow.createCell(ytdStuff.getIntervals().size() + 3);
             sheet.setColumnWidth(ytdStuff.getIntervals().size() + 3, 5000);
             bkCell.setCellValue("BK");
-            HSSFCell variationCell = headerRow.createCell(ytdStuff.getIntervals().size() + 4);
+            Cell variationCell = headerRow.createCell(ytdStuff.getIntervals().size() + 4);
             sheet.setColumnWidth(ytdStuff.getIntervals().size() + 4, 5000);
             variationCell.setCellValue("Variation");
         }
@@ -1637,9 +1709,9 @@ public class ExportService {
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (YTDValue ytdValue : ytdStuff.getValues()) {
-            HSSFRow row = sheet.createRow(j++);
+            Row row = sheet.createRow(j++);
             AnalysisMeasure baseMeasure = ytdValue.getAnalysisMeasure();
-            HSSFCell rowHeaderCell = row.createCell(0);
+            Cell rowHeaderCell = row.createCell(0);
             rowHeaderCell.setCellValue(baseMeasure.toDisplay());
             if (ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
                 Map<Value, TimeIntervalValue> map = new HashMap<Value, TimeIntervalValue>();
@@ -1670,23 +1742,23 @@ public class ExportService {
         return dataSet.getDataSet().getRows().size() > 0;
     }
 
-    private boolean listVerticalList(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
+    private boolean listVerticalList(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
                                   InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         WSVerticalListDefinition verticalList = (WSVerticalListDefinition) report;
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         VListInfo vListInfo = getVListInfo(verticalList, dataSet);
-        HSSFRow headerRow = sheet.createRow(0);
+        Row headerRow = sheet.createRow(0);
         for (int i = 0; i < vListInfo.columns.size(); i++) {
             sheet.setColumnWidth(i, 5000);
             SortInfo sortInfo = vListInfo.columns.get(i);
-            HSSFCell cell = headerRow.createCell(i + 1);
+            Cell cell = headerRow.createCell(i + 1);
             cell.setCellValue(sortInfo.label);
         }
         int j = 1;
         for (Map<String, Object> map : vListInfo.dColl) {
-            HSSFRow row = sheet.createRow(j++);
+            Row row = sheet.createRow(j++);
             AnalysisMeasure baseMeasure = (AnalysisMeasure) map.get("baseMeasure");
-            HSSFCell rowHeaderCell = row.createCell(0);
+            Cell rowHeaderCell = row.createCell(0);
             rowHeaderCell.setCellValue(baseMeasure.toDisplay());
             for (int i = 0; i < vListInfo.columns.size(); i++) {
                 SortInfo sortInfo = vListInfo.columns.get(i);
@@ -1698,7 +1770,7 @@ public class ExportService {
         return dataSet.getRows().size() > 0;
     }
 
-    private boolean listExcel(WSAnalysisDefinition listDefinition, HSSFWorkbook workbook, HSSFSheet sheet,
+    private boolean listExcel(WSAnalysisDefinition listDefinition, Workbook workbook, Sheet sheet,
                            InsightRequestMetadata insightRequestMetadata, EIConnection conn, ExportMetadata exportMetadata) {
         ListDataResults listDataResults = (ListDataResults) DataService.list(listDefinition, insightRequestMetadata, conn);
         if (listDefinition.getReportType() == WSAnalysisDefinition.LIST) {
@@ -1707,7 +1779,7 @@ public class ExportService {
                 listDataResults.summarize();
             }
         }
-        HSSFRow headerRow = sheet.createRow(0);
+        Row headerRow = sheet.createRow(0);
         Map<AnalysisItem, Short> positionMap = new HashMap<AnalysisItem, Short>();
         List<AnalysisItem> items = new ArrayList<AnalysisItem>(listDefinition.getAllAnalysisItems());
         items.remove(null);
@@ -1738,24 +1810,24 @@ public class ExportService {
             }
 
             sheet.setColumnWidth(headerPosition, width);
-            HSSFCell headerCell = headerRow.createCell(headerPosition);
+            Cell headerCell = headerRow.createCell(headerPosition);
             String displayName;
             if (analysisItem.getDisplayName() == null) {
                 displayName = analysisItem.getKey().toDisplayName();
             } else {
                 displayName = analysisItem.getDisplayName();
             }
-            headerCell.setCellValue(new HSSFRichTextString(displayName));
+            headerCell.setCellValue(createRichTextString(displayName, headerCell));
             Font font = workbook.createFont();
             font.setBoldweight(Font.BOLDWEIGHT_BOLD);
-            HSSFCellStyle cellStyle = workbook.createCellStyle();
+            CellStyle cellStyle = workbook.createCellStyle();
             cellStyle.setFont(font);
             headerCell.setCellStyle(cellStyle);
         }
 
         int i = 1;
         for (ListRow listRow : listDataResults.getRows()) {
-            HSSFRow row = sheet.createRow(i);
+            Row row = sheet.createRow(i);
             Value[] values = listRow.getValues();
             short cellIndex = 0;
             for (Value value : values) {
@@ -1769,7 +1841,7 @@ public class ExportService {
         if (listDefinition.getReportType() == WSAnalysisDefinition.LIST) {
             WSListDefinition list = (WSListDefinition) listDefinition;
             if (list.isSummaryTotal()) {
-                HSSFRow summaryRow = sheet.createRow(i);
+                Row summaryRow = sheet.createRow(i);
                 for (int j = 0; j < listDataResults.getHeaders().length; j++) {
                     AnalysisItem analysisItem = listDataResults.getHeaders()[j];
                     if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
@@ -1787,22 +1859,22 @@ public class ExportService {
     }
 
     private static class NumericStyle extends Style {
-        private HSSFCellStyle cellStyle1;
-        private HSSFCellStyle cellStyle2;
+        private CellStyle cellStyle1;
+        private CellStyle cellStyle2;
         private boolean flexibleFormatting;
 
-        private NumericStyle(HSSFCellStyle cellStyle1) {
+        private NumericStyle(CellStyle cellStyle1) {
             this.cellStyle1 = cellStyle1;
         }
 
-        private NumericStyle(HSSFCellStyle cellStyle1, HSSFCellStyle cellStyle2) {
+        private NumericStyle(CellStyle cellStyle1, CellStyle cellStyle2) {
             this.cellStyle1 = cellStyle1;
             this.cellStyle2 = cellStyle2;
             this.flexibleFormatting = true;
         }
 
-        public void format(HSSFRow row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal) {
-            HSSFCell cell = row.createCell(cellIndex);
+        public void format(Row row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal) {
+            Cell cell = row.createCell(cellIndex);
             if (value == null) {
                 return;
             }
@@ -1862,15 +1934,15 @@ public class ExportService {
 
     private static class DateStyle extends Style {
 
-        private HSSFCellStyle cellStyle1;
+        private CellStyle cellStyle1;
 
-        private DateStyle(HSSFCellStyle cellStyle1) {
+        private DateStyle(CellStyle cellStyle1) {
             this.cellStyle1 = cellStyle1;
         }
 
         @Override
-        public void format(HSSFRow row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal) {
-            HSSFCell cell = row.createCell(cellIndex);
+        public void format(Row row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal) {
+            Cell cell = row.createCell(cellIndex);
             cell.setCellStyle(cellStyle1);
             if (value.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) value;
@@ -1893,13 +1965,13 @@ public class ExportService {
 
     private static class StringStyle extends Style {
 
-        private HSSFCellStyle cellStyle1;
+        private CellStyle cellStyle1;
 
         private URLLink defaultLink;
 
         private CreationHelper creationHeper;
 
-        private StringStyle(HSSFCellStyle cellStyle1, AnalysisItem analysisItem, HSSFWorkbook workbook) {
+        private StringStyle(CellStyle cellStyle1, AnalysisItem analysisItem, Workbook workbook) {
             this.cellStyle1 = cellStyle1;
             if (analysisItem.getLinks() != null) {
                 URLLink defaultLink = null;
@@ -1916,8 +1988,8 @@ public class ExportService {
         }
 
         @Override
-        public void format(HSSFRow row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal) {
-            HSSFCell cell = row.createCell(cellIndex);
+        public void format(Row row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal) {
+            Cell cell = row.createCell(cellIndex);
             cell.setCellStyle(cellStyle1);
             if (value.type() == Value.STRING) {
                 StringValue stringValue = (StringValue) value;
@@ -1941,7 +2013,7 @@ public class ExportService {
                     link.setAddress(value.getLinks().get(defaultLink.getLabel()));
                     cell.setHyperlink(link);
                 }*/
-                HSSFRichTextString richText = new HSSFRichTextString(string);
+                RichTextString richText = createRichTextString(string, cell);
                 cell.setCellValue(richText);
             } else if (value.type() == Value.NUMBER) {
                 NumericValue numericValue = (NumericValue) value;
@@ -1950,6 +2022,8 @@ public class ExportService {
                     doubleValue = 0;
                 }
                 cell.setCellValue(doubleValue);
+            } else {
+                cell.setCellValue(value.toHTMLString());
             }
         }
     }
@@ -1957,10 +2031,10 @@ public class ExportService {
     private abstract static class Style {
         private AnalysisItem analysisItem;
 
-        public abstract void format(HSSFRow row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal);
+        public abstract void format(Row row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal);
     }
 
-    private Style createStyle(AnalysisItem analysisItem, HSSFWorkbook workbook, ExportMetadata exportMetadata) {
+    private Style createStyle(AnalysisItem analysisItem, Workbook workbook, ExportMetadata exportMetadata) {
         Style style;
         TextReportFieldExtension textExtension = null;
         if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
@@ -1971,7 +2045,7 @@ public class ExportService {
             FormattingConfiguration formattingConfiguration = analysisItem.getFormattingConfiguration();
             switch (formattingConfiguration.getFormattingType()) {
                 case FormattingConfiguration.CURRENCY:
-                    HSSFCellStyle currencyStyle = workbook.createCellStyle();
+                    CellStyle currencyStyle = workbook.createCellStyle();
                     String formatString = exportMetadata.currencySymbol + "##,##0";
                     if (analysisMeasure.getPrecision() > 0) {
                         formatString += ".";
@@ -1983,12 +2057,12 @@ public class ExportService {
                     style = new NumericStyle(currencyStyle);
                     break;
                 case FormattingConfiguration.MILLISECONDS:
-                    HSSFCellStyle genericStyle = workbook.createCellStyle();
+                    CellStyle genericStyle = workbook.createCellStyle();
                     genericStyle.setDataFormat(workbook.createDataFormat().getFormat("0"));
                     style = new NumericStyle(genericStyle);
                     break;
                 case FormattingConfiguration.PERCENTAGE:
-                    HSSFCellStyle percentageStyle = workbook.createCellStyle();
+                    CellStyle percentageStyle = workbook.createCellStyle();
                     String percentFormatString = "0";
                     if (analysisMeasure.getPrecision() > 0) {
                         percentFormatString += ".";
@@ -2000,9 +2074,9 @@ public class ExportService {
                     style = new NumericStyle(percentageStyle);
                     break;
                 default:
-                    HSSFCellStyle style1 = workbook.createCellStyle();
+                    CellStyle style1 = workbook.createCellStyle();
                     style1.setDataFormat(workbook.createDataFormat().getFormat("0"));
-                    HSSFCellStyle style2 = workbook.createCellStyle();
+                    CellStyle style2 = workbook.createCellStyle();
                     String decimalFormatString = "0";
                     if (analysisMeasure.getPrecision() > 0) {
                         decimalFormatString += ".";
@@ -2016,7 +2090,7 @@ public class ExportService {
             }
         } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             int dateFormat = exportMetadata.dateFormat;
-            HSSFCellStyle cellStyle = workbook.createCellStyle();
+            CellStyle cellStyle = workbook.createCellStyle();
             CreationHelper createHelper = workbook.getCreationHelper();
             AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
             if (dateDim.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
@@ -2062,7 +2136,7 @@ public class ExportService {
             }
             style = new DateStyle(cellStyle);
         } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
-            HSSFCellStyle cellStyle = workbook.createCellStyle();
+            CellStyle cellStyle = workbook.createCellStyle();
             cellStyle.setWrapText(true);
             style = new StringStyle(cellStyle, analysisItem, workbook);
         } else {
@@ -2071,7 +2145,7 @@ public class ExportService {
                 DerivedAnalysisDimension dim = (DerivedAnalysisDimension) analysisItem;
                 wordWrap = dim.isWordWrap();
             }
-            HSSFCellStyle genericStyle = workbook.createCellStyle();
+            CellStyle genericStyle = workbook.createCellStyle();
             genericStyle.setDataFormat(workbook.createDataFormat().getFormat("0"));
             if (textExtension != null) {
                 wordWrap = textExtension.isWordWrap() || wordWrap;
@@ -2086,7 +2160,7 @@ public class ExportService {
 
 
 
-    private Style getStyle(Map<AnalysisItem, Style> styleMap, AnalysisItem analysisItem, HSSFWorkbook wb, ExportMetadata exportMetadata, Value value) {
+    private Style getStyle(Map<AnalysisItem, Style> styleMap, AnalysisItem analysisItem, Workbook wb, ExportMetadata exportMetadata, Value value) {
         Style style = styleMap.get(analysisItem);
         if (style == null) {
             style = createStyle(analysisItem, wb, exportMetadata);

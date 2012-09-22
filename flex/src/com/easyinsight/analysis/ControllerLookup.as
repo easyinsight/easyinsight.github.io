@@ -15,6 +15,7 @@ import com.easyinsight.analysis.gantt.GanttController;
 import com.easyinsight.analysis.gauge.GaugeController;
 import com.easyinsight.analysis.heatmap.HeatMapController;
 import com.easyinsight.analysis.list.ListController;
+import com.easyinsight.analysis.summary.SummaryController;
 import com.easyinsight.analysis.tree.TreeController;
 import com.easyinsight.analysis.treemap.TreeMapController;
 import com.easyinsight.analysis.trend.TrendController;
@@ -118,6 +119,9 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.COMPARE_YEARS:
                 controller = CompareYearsController;
+                break;
+            case AnalysisDefinition.SUMMARY:
+                controller = SummaryController;
                 break;
         }
         return controller;

@@ -22,6 +22,7 @@ public class ReportDelivery extends ScheduledDelivery {
     public static final int PNG = 2;
     public static final int PDF = 3;
     public static final int HTML_TABLE = 4;
+    public static final int EXCEL_2007 = 5;
 
     private int reportFormat;
     private long reportID;
@@ -249,10 +250,13 @@ public class ReportDelivery extends ScheduledDelivery {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM TASK_GENERATOR WHERE TASK_GENERATOR_ID = ?");
             deleteStmt.setLong(1, rs.getLong(1));
             deleteStmt.executeUpdate();
+            deleteStmt.close();
             PreparedStatement arghStmt = conn.prepareStatement("DELETE FROM delivery_task_generator WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
             arghStmt.setLong(1, getScheduledActivityID());
             arghStmt.executeUpdate();
+            arghStmt.close();
         }
+        queryStmt.close();
         Session session = Database.instance().createSession(conn);
         try {
             DeliveryTaskGenerator generator = new DeliveryTaskGenerator();

@@ -55,15 +55,12 @@
             var showState:State = new State();
             showState.name = "buttonConfig";
             var ops:Array = [];
-            if (!ApplicationSkin.instance().myDataCombine) {
-                var removeComposite:RemoveChild = new RemoveChild();
-                removeComposite.target = compositeFeedButton;
-                ops.push(removeComposite);
-            }
             if (!User.getInstance().analyst) {
                 var removeConfig:RemoveChild = new RemoveChild();
                 removeConfig.target = customizeButton;
-                ops.push(removeConfig);
+                var removeComposite:RemoveChild = new RemoveChild();
+                removeComposite.target = compositeFeedButton;
+                ops.push(removeConfig, removeComposite);
             }
             showState.overrides = ops;
             states = [ showState ];
@@ -97,7 +94,6 @@
     <mx:RemoteObject id="userService" destination="login">
         <mx:method name="switchHtmlFlex" result="switched()"/>
     </mx:RemoteObject>
-    <!--<mx:Button label="Switch to HTML View" click="htmlView()" labelPlacement="right" fontSize="12" styleName="grayButton" width="180" icon="{globeIcon}"/>-->
     <mx:Button toolTip="Create composite data source..." click="createCompositeFeed()"
                id="compositeFeedButton" icon="{joinIcon}"
                label="Join Data Sources..." labelPlacement="right" fontSize="12" styleName="grayButton"
@@ -105,6 +101,7 @@
     <mx:Button toolTip="Customize Page..." click="customizeMyData()" icon="{configIcon}"
                label="Customize Page..." labelPlacement="right" fontSize="12" styleName="grayButton"
                width="180" id="customizeButton"/>
+    <mx:Button label="Switch to HTML View" click="htmlView()" labelPlacement="right" fontSize="12" styleName="grayButton" width="180" icon="{globeIcon}"/>
     <mx:HRule width="180"/>
     <mx:Label text="Recent Actions" fontSize="16" fontWeight="bold"/>
     <mx:List dataProvider="{recentActions}" backgroundAlpha="0" borderStyle="none" height="100%"
