@@ -241,7 +241,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
             String name = sobjectNode.query("name/text()").get(0).getValue();
             String searchableString = sobjectNode.query("searchable/text()").get(0).getValue();
             boolean searchable = Boolean.parseBoolean(searchableString);
-            if (searchable) {
+            if (searchable || "UserRole".equals(name)) {
                 SalesforceSObjectSource salesforceSObjectSource = new SalesforceSObjectSource();
                 salesforceSObjectSource.setSobjectName(name);
                 salesforceSObjectSource.setFeedName(name);
