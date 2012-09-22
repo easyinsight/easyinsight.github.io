@@ -64,7 +64,8 @@ public class ReportModuleLoader extends EventDispatcher {
                 _reportRendererModule == "TrendModule.swf" || _reportRendererModule == "GaugeModule.swf" ||
                 _reportRendererModule == "LineChartModule.swf" || _reportRendererModule == "AreaChartModule.swf" ||
                 _reportRendererModule == "YTD.swf" || _reportRendererModule == "CompareYears.swf" ||
-                _reportRendererModule == "FormModule.swf") {
+                _reportRendererModule == "FormModule.swf" || _reportRendererModule == "PieChartModule.swf" ||
+                _reportRendererModule == "SummaryModule.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
