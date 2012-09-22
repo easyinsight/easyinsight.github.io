@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
+import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -8,6 +9,7 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.etl.LookupTable;
+import com.easyinsight.export.TreeData;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -600,6 +602,48 @@ public class DataService {
         return trendDataResults;
     }
 
+    public EmbeddedTreeDataResults getEmbeddedTreeResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
+                                                          List<FilterDefinition> drillthroughFilters) {
+        try {
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        // get the core data
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            SecurityUtil.authorizeInsight(reportID);
+            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
+            WSSummaryDefinition report = (WSSummaryDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, report, conn, customFilters, drillthroughFilters);
+            TreeData treeData = new TreeData(report, (AnalysisHierarchyItem) report.getHierarchy(), null);
+            DataSet dataSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+            for (IRow row : dataSet.getRows()) {
+                treeData.addRow(row);
+            }
+            List<TreeRow> rows = treeData.toTreeRows();
+            EmbeddedTreeDataResults crossTabDataResults = new EmbeddedTreeDataResults();
+            crossTabDataResults.setTreeRows(rows);
+            crossTabDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+            crossTabDataResults.setDefinition(report);
+            return crossTabDataResults;
+        } catch (com.easyinsight.security.SecurityException se) {
+            EmbeddedTreeDataResults results = new EmbeddedTreeDataResults();
+            results.setReportFault(new ServerError("You don't have access to this report. Check with your administrator about altering access privileges."));
+            return results;
+        } catch (ReportException dae) {
+            EmbeddedTreeDataResults embeddedDataResults = new EmbeddedTreeDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+        }
+    }
+
     public EmbeddedCompareYearsDataResults getEmbeddedCompareYearsResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
                                                         List<FilterDefinition> drillthroughFilters) {
         try {
@@ -610,7 +654,7 @@ public class DataService {
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
-
+            SecurityUtil.authorizeInsight(reportID);
             WSCompareYearsDefinition wsytdDefinition = (WSCompareYearsDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
 
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, customFilters, drillthroughFilters);
@@ -687,7 +731,7 @@ public class DataService {
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
-            
+            SecurityUtil.authorizeInsight(reportID);
             WSYTDDefinition wsytdDefinition = (WSYTDDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             if (wsytdDefinition.getTimeDimension() instanceof AnalysisDateDimension) {
                 AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
@@ -737,7 +781,7 @@ public class DataService {
                 AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
                 date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
             }
-            
+
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, report, conn);
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
             YTDStuff ytdStuff = YTDUtil.getYTDStuff(wsytdDefinition, nowSet, insightRequestMetadata, conn, reportRetrievalNow.getPipeline().getPipelineData(),
@@ -833,7 +877,42 @@ public class DataService {
         }
     }
 
-
+    public TreeDataResults getTreeDataResults(WSSummaryDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        try {
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+            ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+            TreeData treeData = new TreeData(analysisDefinition, (AnalysisHierarchyItem) analysisDefinition.getHierarchy(), null);
+            DataSet dataSet = listDataSet(analysisDefinition, insightRequestMetadata, conn);
+            for (IRow row : dataSet.getRows()) {
+                treeData.addRow(row);
+            }
+            List<TreeRow> rows = treeData.toTreeRows();
+            TreeDataResults crossTabDataResults = new TreeDataResults();
+            crossTabDataResults.setTreeRows(rows);
+            crossTabDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+            crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+            return crossTabDataResults;
+        } catch (ReportException dae) {
+            TreeDataResults embeddedDataResults = new TreeDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
+        } catch (Throwable e) {
+            LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
+            TreeDataResults embeddedDataResults = new TreeDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            return embeddedDataResults;
+        } finally {
+            Database.closeConnection(conn);
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+        }
+    }
 
     public CrossTabDataResults getCrosstabDataResults(WSCrosstabDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         try {
@@ -1024,8 +1103,8 @@ public class DataService {
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
             insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
 
-            
-            
+
+
 
             if (insightRequestMetadata.getHierarchyOverrides() != null) {
                 for (AnalysisItemOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
@@ -1079,11 +1158,22 @@ public class DataService {
                     String line = toker.nextToken();
                     try {
                         new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                    } catch (FunctionException fe) {
+                        throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + line + ".", null));
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {
-                        LogClass.error(e);
-                        throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of report code " + line + ".", null));
+                        if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
+                            throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + line + ".", null));
+                        }
+                        LogClass.error("On calculating " + line, e);
+                        String message;
+                        if (e.getMessage() == null) {
+                            message = "Internal error";
+                        } else {
+                            message = e.getMessage();
+                        }
+                        throw new ReportException(new AnalysisItemFault(message + " in calculating " + line, null));
                     }
                 }
             }
@@ -1093,11 +1183,22 @@ public class DataService {
                     String line = toker.nextToken();
                     try {
                         new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                    } catch (FunctionException fe) {
+                        throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + line + ".", null));
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {
-                        LogClass.error(e);
-                        throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of data source code " + line + ".", null));
+                        if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
+                            throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + line + ".", null));
+                        }
+                        LogClass.error("On calculating " + line, e);
+                        String message;
+                        if (e.getMessage() == null) {
+                            message = "Internal error";
+                        } else {
+                            message = e.getMessage();
+                        }
+                        throw new ReportException(new AnalysisItemFault(message + " in calculating " + line, null));
                     }
                 }
             }

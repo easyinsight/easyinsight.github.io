@@ -68,7 +68,12 @@ public class AnalysisDefinitionFactory {
             TreeDefinitionState treeDefinitionState = new TreeDefinitionState();
             treeDefinitionState.setTreeDefinitionID(wsTree.getTreeDefinitionID());
             analysisDefinitionState = treeDefinitionState;
-         }else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.FORM)) {
+         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.SUMMARY)) {
+            WSSummaryDefinition wsTree = (WSSummaryDefinition) wsAnalysisDefinition;
+            SummaryDefinitionState treeDefinitionState = new SummaryDefinitionState();
+            treeDefinitionState.setSummaryDefinitionID(wsTree.getSummaryDefinitionID());
+            analysisDefinitionState = treeDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.FORM)) {
             WSForm wsForm = (WSForm) wsAnalysisDefinition;
             FormDefinitionState formDefinitionState = new FormDefinitionState();
             formDefinitionState.setFormID(wsForm.getFormID());
