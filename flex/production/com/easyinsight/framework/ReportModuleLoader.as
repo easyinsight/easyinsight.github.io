@@ -12,6 +12,7 @@ import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartModule;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartModule;
+import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartModule;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartModule;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartModule;
 import com.easyinsight.analysis.crosstab.CrosstabModule;
@@ -19,6 +20,7 @@ import com.easyinsight.analysis.diagram.DiagramModule;
 import com.easyinsight.analysis.form.FormModule;
 import com.easyinsight.analysis.gauge.GaugeModule;
 import com.easyinsight.analysis.list.ListModule;
+import com.easyinsight.analysis.summary.SummaryModule;
 import com.easyinsight.analysis.tree.TreeModule;
 import com.easyinsight.analysis.trend.TrendGridModule;
 import com.easyinsight.analysis.trend.TrendModule;
@@ -132,6 +134,10 @@ public class ReportModuleLoader extends EventDispatcher {
                 return new YTDReport();
             } else if (moduleName == "FormModule.swf") {
                 return new FormModule();
+            } else if (moduleName == "PieChartModule.swf") {
+                return new PieChartModule();
+            } else if (moduleName = "SummaryModule.swf") {
+                return new SummaryModule();
             }
         }
         return moduleInfo.factory.create();
