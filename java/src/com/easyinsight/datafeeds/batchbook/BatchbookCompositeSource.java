@@ -245,7 +245,7 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
                 {
                     FeedDefinition sourceDef = map.get(partyID);
                     FeedDefinition targetDef = map.get(node.getDataFeedID());
-                    Key sourceKey = sourceDef.getField("Party " + node.getDataSourceName());
+                    Key sourceKey = sourceDef.getField("People " + node.getDataSourceName());
                     Key targetKey = targetDef.getField(node.getDataSourceName() + " Record ID");
                     connections.add(new CompositeFeedConnection(partyID, node.getDataFeedID(), sourceKey, targetKey));
                 }
@@ -275,7 +275,7 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
                 BatchbookSuperTagSource batchbook2CustomFieldSource = (BatchbookSuperTagSource) existingSource;
                 superTags.remove(batchbook2CustomFieldSource.getFeedName());
                 //defaultChildren.add(batchbook2CustomFieldSource);
-                break;
+                //break;
             }
         }
         for (String remainingTag : superTags.keySet()) {

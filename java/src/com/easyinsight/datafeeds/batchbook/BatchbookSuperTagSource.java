@@ -54,7 +54,18 @@ public class BatchbookSuperTagSource extends BatchbookBaseSource {
             //String encodedName = URLEncoder.encode(getFeedName(), "UTF-8");
             String encodedName = getFeedName().replace(" ", "%20");
             System.out.println("/service/super_tags/" + encodedName + ".xml");
-            Document doc = runRestRequest("/service/super_tags/" + encodedName + ".xml", httpClient, new Builder(), batchbookCompositeSource.getUrl(), batchbookCompositeSource);
+            Map<String, List<String>> tags = batchbookCompositeSource.getOrCreateSuperTags();
+            List<String> keyList = tags.get(getFeedName());
+            for (String keyName : keyList) {
+                AnalysisItem analysisItem = new AnalysisDimension();
+                Key key = keys.get(keyName);
+                if (key == null) {
+                    key = new NamedKey(keyName);
+                }
+                analysisItem.setKey(key);
+                fieldList.add(analysisItem);
+            }
+            /*Document doc = runRestRequest("/service/super_tags/" + encodedName + ".xml", httpClient, new Builder(), batchbookCompositeSource.getUrl(), batchbookCompositeSource);
             Node node = doc.query("/super_tag").get(0);
             String superTagName = queryField(node, "name/text()");
             Nodes fields = node.query("fields/field");
@@ -75,7 +86,7 @@ public class BatchbookSuperTagSource extends BatchbookBaseSource {
                 }
                 multipleChoiceDimension.setKey(key);
                 fieldList.add(multipleChoiceDimension);
-            }
+            }*/
         } catch (ReportException re) {
             //throw re;
         } catch (Exception e) {

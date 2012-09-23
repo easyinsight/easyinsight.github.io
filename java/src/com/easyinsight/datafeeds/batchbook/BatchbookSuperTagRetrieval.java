@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.batchbook;
 
 import com.easyinsight.analysis.AnalysisDimension;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -45,9 +46,7 @@ public class BatchbookSuperTagRetrieval extends BatchbookBaseSource {
                 } else {
                     fieldName = fieldAttribute.getValue();
                 }
-                //if (fieldType.equals("Multiple choice")) {
-                    fieldList.add(fieldName);
-               // }
+                fieldList.add(fieldName);
             }
             superTags.put(superTagName, fieldList);
         }
