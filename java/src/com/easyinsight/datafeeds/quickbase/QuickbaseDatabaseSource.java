@@ -70,7 +70,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
         QuickbaseCompositeSource quickbaseCompositeSource = (QuickbaseCompositeSource) parentDefinition;
 
-        if (quickbaseCompositeSource.getHost() != null && quickbaseCompositeSource.getHost().contains("rci")) {
+        if (quickbaseCompositeSource.getHost() != null && quickbaseCompositeSource.getHost().contains("rcixxx")) {
             String sessionTicket = quickbaseCompositeSource.getSessionTicket();
             String applicationToken = quickbaseCompositeSource.getApplicationToken();
             String host = quickbaseCompositeSource.getHost();
