@@ -28,6 +28,7 @@ import com.easyinsight.datafeeds.meetup.MeetupDataSource;
 import com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseDatabaseSource;
+import com.easyinsight.datafeeds.quickbase.QuickbaseUserSource;
 import com.easyinsight.datafeeds.redirect.RedirectDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceSObjectSource;
@@ -224,6 +225,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.BATCHBOOK2_COMPANIES, Batchbook2CompanySource.class);
         registerType(FeedType.BATCHBOOK2_CUSTOM, Batchbook2CustomFieldSource.class);
         registerType(FeedType.DATABASE_CONNECTION, DatabaseConnection.class);
+        registerType(FeedType.QUICKBASE_USER_CHILD, QuickbaseUserSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

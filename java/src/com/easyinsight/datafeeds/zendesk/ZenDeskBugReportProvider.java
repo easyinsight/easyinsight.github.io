@@ -31,7 +31,7 @@ public class ZenDeskBugReportProvider {
     }
 
     private static final String ZENDESK_API_USERNAME = "jboe@easy-insight.com";
-    private static final String ZENDESK_API_PASSWORD = "e@symone$";
+    private static final String ZENDESK_API_PASSWORD = "Meese antler";
     private static final String ZENDESK_API_ENDPOINT = "https://easyinsight.zendesk.com/tickets.xml";
     private static final String ZENDESK_ATTACHMENT_API_ENDPOINT = "https://easyinsight.zendesk.com/uploads.xml?filename={0}";
 

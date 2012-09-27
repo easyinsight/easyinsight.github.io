@@ -9,6 +9,7 @@ package com.easyinsight.google {
 public class QuickbaseApplication {
 
     public var name:String;
+    public var dbid:String;
     public var selected:Boolean;
 
     public function QuickbaseApplication() {

@@ -10,30 +10,48 @@ import flash.events.Event;
 
 import mx.containers.HBox;
 import mx.controls.CheckBox;
+import mx.controls.RadioButton;
+import mx.controls.RadioButtonGroup;
 
 public class QuickbaseApplicationSelector extends HBox {
 
-    private var checkbox:CheckBox;
+    private var _checkbox:RadioButton;
     private var app:QuickbaseApplication;
 
     public function QuickbaseApplicationSelector() {
-        checkbox = new CheckBox();
-        checkbox.addEventListener(Event.CHANGE, onChange);
+        _checkbox = new RadioButton();
+        _checkbox.addEventListener(Event.CHANGE, onChange);
+    }
+
+    public function get group():RadioButtonGroup {
+        return _checkbox.group;
+    }
+
+    public function set group(value:RadioButtonGroup):void {
+        _checkbox.group = value;
+    }
+
+    public function get checkbox():RadioButton {
+        return _checkbox;
+    }
+
+    public function set checkbox(value:RadioButton):void {
+        _checkbox = value;
     }
 
     private function onChange(event:Event):void {
-        app.selected = checkbox.selected;
+        app.selected = _checkbox.selected;
     }
 
     override protected function createChildren():void {
         super.createChildren();
-        addChild(checkbox);
+        addChild(_checkbox);
     }
 
     override public function set data(val:Object):void {
         app = val as QuickbaseApplication;
         if (app != null) {
-            checkbox.label = app.name;
+            _checkbox.label = app.name;
         }
     }
 

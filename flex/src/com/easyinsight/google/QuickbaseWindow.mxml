@@ -23,6 +23,10 @@
                     }
                 }
             });
+
+            buttonFactory = new ClassFactory(QuickbaseApplicationSelector);
+            buttonFactory.properties = { group: applicationGroup }
+
         }
 
         private function obtainTicket():void {
@@ -33,6 +37,9 @@
                 quickbaseService.authenticate.send(userNameInput.text, passwordInput.text, host);
             }
         }
+
+        [Bindable]
+        private var buttonFactory:ClassFactory;
 
         private var sessionTicket:String;
         private var host:String;
@@ -51,26 +58,24 @@
         private function gotApplications():void {
             var appNames:ArrayCollection = quickbaseService.getApplications.lastResult as ArrayCollection;
             apps = new ArrayCollection();
-            for each (var appName:String in appNames) {
+            for each (var appName:Object in appNames) {
                 var qbApp:QuickbaseApplication = new QuickbaseApplication();
-                qbApp.name = appName;
+                qbApp.name = appName["name"];
+                qbApp.dbid = appName["dbid"];
                 apps.addItem(qbApp);
             }
             index = 1;
         }
 
         private function create():void {
-            var targetApps:ArrayCollection = new ArrayCollection();
+            var dbid:String = "";
             for each (var qbApp:QuickbaseApplication in apps) {
                 if (qbApp.selected) {
-                    targetApps.addItem(qbApp.name);
+                    dbid = qbApp.dbid;
                 }
             }
-            if (targetApps.length == 0) {
+            if (dbid.length == 0) {
                 Alert.show("You need to select one application from the list to create the data source.");
-                return;
-            } else if (targetApps.length > 1) {
-                Alert.show("You may only select one application from the list.");
                 return;
             }
             /*if (appTokenInput.text == "") {
@@ -78,7 +83,7 @@
                 return;
             }*/
             ProgressAlert.alert(this, "Creating the data source, may take a few minutes...", null, quickbaseService.createDataSource);
-            quickbaseService.createDataSource.send(sessionTicket, appTokenInput.text, targetApps, host, accountVisibleCheckbox.selected,
+            quickbaseService.createDataSource.send(sessionTicket, appTokenInput.text, dbid, host, accountVisibleCheckbox.selected,
                 userNameInput.text, passwordInput.text, cacheCheckbox.selected, saveCredentialsCheckbox.selected);
         }
 
@@ -118,8 +123,9 @@
             </mx:HBox>
         </mx:VBox>
         <mx:VBox horizontalAlign="center" creationComplete="PopUpUtil.centerPopUp(this)">
+            <mx:RadioButtonGroup id="applicationGroup" enabled="true" />
             <mx:Label text="Select an application from the list below."/>
-            <mx:List dataProvider="{apps}" itemRenderer="com.easyinsight.google.QuickbaseApplicationSelector" height="300" width="100%"/>
+            <mx:List dataProvider="{apps}" itemRenderer="{buttonFactory}" height="300" width="100%"/>
             <mx:TextArea width="100%" selectable="false" focusEnabled="false" editable="false" height="50" text="You'll also need to define an application token with access to all of your selected applications. You can define tokens inside of Quickbase under Customize -> Application -> Advanced Settings -> Manage Application Tokens."/>
             <mx:Form>
                 <mx:FormItem label="Application Token:">

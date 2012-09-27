@@ -170,6 +170,7 @@ public class FeedType implements Serializable {
     public static final FeedType DATABASE_CONNECTION = new FeedType(153);
 
     private int type;
+    public static final FeedType QUICKBASE_USER_CHILD = new FeedType(154);
 
     public FeedType() {
     }

@@ -7,10 +7,7 @@ import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.CompositeFeedConnection;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.logging.LogClass;
@@ -49,6 +46,8 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
 
     private boolean supportIndex;
     private boolean preserveCredentials;
+
+    private String applicationId;
 
     @Override
     public void beforeSave(EIConnection conn) throws Exception {
@@ -142,7 +141,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO QUICKBASE_COMPOSITE_SOURCE (DATA_SOURCE_ID, APPLICATION_TOKEN," +
-                "SESSION_TICKET, HOST_NAME, qb_username, qb_password, support_index, preserve_credentials) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                "SESSION_TICKET, HOST_NAME, qb_username, qb_password, support_index, preserve_credentials, application_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, applicationToken);
         insertStmt.setString(3, sessionTicket);
@@ -156,13 +155,14 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         }
         insertStmt.setBoolean(7, supportIndex);
         insertStmt.setBoolean(8, preserveCredentials);
+        insertStmt.setString(9, applicationId);
         insertStmt.execute();
     }
 
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT APPLICATION_TOKEN, SESSION_TICKET, HOST_NAME, qb_username, qb_password, support_index, preserve_credentials FROM " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT APPLICATION_TOKEN, SESSION_TICKET, HOST_NAME, qb_username, qb_password, support_index, preserve_credentials, application_id FROM " +
                 "QUICKBASE_COMPOSITE_SOURCE where data_source_id = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
@@ -179,6 +179,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
                 qbPassword = PasswordStorage.decryptString(encryptedQBPassword);
             }
         }
+        applicationId = rs.getString(8);
     }
 
     @Override
@@ -261,7 +262,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         httpRequest.setHeader("Content-Type", "application/xml");
         httpRequest.setHeader("QUICKBASE-ACTION", action);
         BasicHttpEntity entity = new BasicHttpEntity();
-        String contentString = "<qdbapi>"+requestBody+"</qdbapi>";
+        String contentString = "<qdbapi>" + requestBody + "</qdbapi>";
         byte[] contentBytes = contentString.getBytes();
         entity.setContent(new ByteArrayInputStream(contentBytes));
         entity.setContentLength(contentBytes.length);
@@ -271,5 +272,37 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
 
         String string = client.execute(httpRequest, responseHandler);
         return new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+    }
+
+    @Override
+    protected List<IServerDataSourceDefinition> childDataSources(EIConnection conn) throws Exception {
+        List<IServerDataSourceDefinition> defaultChildren = super.childDataSources(conn);
+        boolean usersDefined = false;
+        for (CompositeFeedNode existing : getCompositeFeedNodes()) {
+            if (existing.getDataSourceType() == FeedType.QUICKBASE_USER_CHILD.getType()) {
+                usersDefined = true;
+            }
+        }
+
+        if (!usersDefined) {
+            QuickbaseUserSource source = new QuickbaseUserSource();
+            newDefinition(source, conn, "", getUploadPolicy());
+            CompositeFeedNode node = new CompositeFeedNode();
+            node.setDataFeedID(source.getDataFeedID());
+            node.setDataSourceType(source.getFeedType().getType());
+            getCompositeFeedNodes().add(node);
+            defaultChildren.add(source);
+        }
+
+
+        return defaultChildren;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
     }
 }

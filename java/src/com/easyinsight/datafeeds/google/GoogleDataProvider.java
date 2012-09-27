@@ -14,6 +14,7 @@ import com.easyinsight.datafeeds.cleardb.ClearDBDataSource;
 import com.easyinsight.datafeeds.cleardb.ClearDBResponse;
 import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseDatabaseSource;
+import com.easyinsight.datafeeds.quickbase.QuickbaseUserSource;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -289,16 +290,21 @@ public class GoogleDataProvider {
         }
     }
 
-    public List<String> getApplications(String sessionTicket, String host) {
+    public List<Map<String, String> > getApplications(String sessionTicket, String host) {
         SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
         EIConnection conn = Database.instance().getConnection();
         try {
             String requestBody = MessageFormat.format(GET_APPLICATIONS_XML, sessionTicket);
             Document doc = executeRequest(host, null, "API_GrantedDBs", requestBody);
-            Nodes databases = doc.query("/qdbapi/databases/dbinfo/dbname/text()");
-            List<String> databaseNames = new ArrayList<String>();
+            Nodes databases = doc.query("/qdbapi/databases/dbinfo");
+            List<Map<String, String> > databaseNames = new ArrayList<Map<String, String>>();
             for (int i = 0; i < databases.size(); i++) {
-                databaseNames.add(databases.get(i).getValue());
+                String name = databases.get(i).query("./dbname/text()").get(0).getValue();
+                String dbid = databases.get(i).query("./dbid/text()").get(0).getValue();
+                Map<String, String> vals = new HashMap<String, String>();
+                vals.put("name", name);
+                vals.put("dbid", dbid);
+                databaseNames.add(vals);
             }
             return databaseNames;
         } catch (Exception e) {
@@ -309,25 +315,29 @@ public class GoogleDataProvider {
         }
     }
 
-    public EIDescriptor createDataSource(String sessionTicket, String applicationToken, List<String> appNames, String host, boolean accountVisible,
+    public EIDescriptor createDataSource(String sessionTicket, String applicationToken, String dbid, String host, boolean accountVisible,
                                          String userName, String password, boolean supportIndex, boolean saveCredentials) {
         SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             //String applicationToken = "txxe32vjyuwicxbjpnpdwjatqb";
-            String requestBody = MessageFormat.format(GET_DATABASES_XML, sessionTicket);
-            Document doc = executeRequest(host, null, "API_GrantedDBs", requestBody);
-            Nodes databases = doc.query("/qdbapi/databases/dbinfo");
+            String requestBody = MessageFormat.format(GET_SCHEMA_XML, sessionTicket);
+            Document doc = executeRequest(host, dbid, "API_GetSchema", requestBody);
+            Nodes databases = doc.query("/qdbapi/table/chdbids/chdbid");
             List<Connection> connections = new ArrayList<Connection>();
+
+            String databaseName = doc.query("/qdbapi/table/name/text()").get(0).getValue();
+
             QuickbaseCompositeSource quickbaseCompositeSource = new QuickbaseCompositeSource();
             quickbaseCompositeSource.setAccountVisible(accountVisible);
             quickbaseCompositeSource.setHost(host);
             quickbaseCompositeSource.setSessionTicket(sessionTicket);
             quickbaseCompositeSource.setApplicationToken(applicationToken);
-            quickbaseCompositeSource.setFeedName(appNames.get(0));
+            quickbaseCompositeSource.setFeedName(databaseName);
             quickbaseCompositeSource.setPreserveCredentials(saveCredentials);
             quickbaseCompositeSource.setSupportIndex(supportIndex);
+            quickbaseCompositeSource.setApplicationId(dbid);
             if (saveCredentials) {
                 quickbaseCompositeSource.setQbUserName(userName);
                 quickbaseCompositeSource.setQbPassword(password);
@@ -342,29 +352,36 @@ public class GoogleDataProvider {
             Map<String, QuickbaseDatabaseSource> map = new HashMap<String, QuickbaseDatabaseSource>();
             for (int i = 0; i < databases.size(); i++) {
                 Node database = databases.get(i);
-                String dbName = database.query("dbname/text()").get(0).getValue();
-                if (dbName.indexOf(":") != 1) {
-                    String appName = dbName.split(":")[0].trim();
-                    if (appNames.contains(appName)) {
-                        QuickbaseDatabaseSource quickbaseDatabaseSource = createDataSource(sessionTicket, applicationToken, database, connections, host);
-                        if (quickbaseDatabaseSource == null) {
-                            continue;
-                        }
-                        quickbaseDatabaseSource.setVisible(false);
-                        quickbaseDatabaseSource.setIndexEnabled(supportIndex);
-                        map.put(quickbaseDatabaseSource.getDatabaseID(), quickbaseDatabaseSource);
-                        quickbaseDatabaseSource.setParentSourceID(quickbaseCompositeSource.getDataFeedID());
-                        UploadPolicy childPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
-                        quickbaseDatabaseSource.setUploadPolicy(childPolicy);
-                        FeedCreationResult result = new FeedCreation().createFeed(quickbaseDatabaseSource, conn, new DataSet(), childPolicy);
-                        result.getTableDefinitionMetadata().commit();
-                        result.getTableDefinitionMetadata().closeConnection();
-                        CompositeFeedNode node = new CompositeFeedNode(quickbaseDatabaseSource.getDataFeedID(), 0, 0, quickbaseDatabaseSource.getFeedName(),
-                                quickbaseDatabaseSource.getFeedType().getType(), quickbaseDatabaseSource.getDataSourceBehavior());
-                        nodes.add(node);
-                    }
+
+                QuickbaseDatabaseSource quickbaseDatabaseSource = createDataSource(sessionTicket, applicationToken, database, connections, host);
+                if (quickbaseDatabaseSource == null) {
+                    continue;
                 }
+                quickbaseDatabaseSource.setVisible(false);
+                quickbaseDatabaseSource.setIndexEnabled(supportIndex);
+                map.put(quickbaseDatabaseSource.getDatabaseID(), quickbaseDatabaseSource);
+                quickbaseDatabaseSource.setParentSourceID(quickbaseCompositeSource.getDataFeedID());
+                UploadPolicy childPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
+                quickbaseDatabaseSource.setUploadPolicy(childPolicy);
+                FeedCreationResult result = new FeedCreation().createFeed(quickbaseDatabaseSource, conn, new DataSet(), childPolicy);
+                result.getTableDefinitionMetadata().commit();
+                result.getTableDefinitionMetadata().closeConnection();
+                CompositeFeedNode node = new CompositeFeedNode(quickbaseDatabaseSource.getDataFeedID(), 0, 0, quickbaseDatabaseSource.getFeedName(),
+                        quickbaseDatabaseSource.getFeedType().getType(), quickbaseDatabaseSource.getDataSourceBehavior());
+                nodes.add(node);
+
             }
+
+//            QuickbaseUserSource qbus = new QuickbaseUserSource();
+//            qbus.setParentSourceID(quickbaseCompositeSource.getDataFeedID());
+//            UploadPolicy childPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
+//            qbus.setUploadPolicy(childPolicy);
+//            FeedCreationResult result = new FeedCreation().createFeed(qbus, conn, new DataSet(), childPolicy);
+//            result.getTableDefinitionMetadata().commit();
+//            result.getTableDefinitionMetadata().closeConnection();
+//            CompositeFeedNode node = new CompositeFeedNode(qbus.getDataFeedID(), 0, 0, qbus.getFeedName(),
+//            qbus.getFeedType().getType(), qbus.getDataSourceBehavior());
+//            nodes.add(node);
 
             quickbaseCompositeSource.setCompositeFeedNodes(nodes);
 
@@ -427,7 +444,7 @@ public class GoogleDataProvider {
         QuickbaseDatabaseSource quickbaseDatabaseSource = new QuickbaseDatabaseSource();
 
 
-        String databaseID = database.query("dbid/text()").get(0).getValue();
+        String databaseID = database.query("./text()").get(0).getValue();
         quickbaseDatabaseSource.setDatabaseID(databaseID);
 
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();

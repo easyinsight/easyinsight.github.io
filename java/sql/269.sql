@@ -1,0 +1,1 @@
+ALTER TABLE QUICKBASE_COMPOSITE_SOURCE add application_id varchar(255);
