@@ -1,6 +1,7 @@
 package com.easyinsight.servlet;
 
 import com.easyinsight.admin.HealthListener;
+import com.easyinsight.analysis.CurrencyRetrieval;
 import com.easyinsight.analysis.ReportCache;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
@@ -46,6 +47,7 @@ public class DMSServlet extends HttpServlet {
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();
                 ServiceUtil.initialize();
+                CurrencyRetrieval.initialize();
                 new Migrations().migrate();
                 // create schedulers...
                 
