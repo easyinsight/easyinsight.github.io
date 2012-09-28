@@ -34,39 +34,33 @@ public class DataRow {
         StringBuilder xmlBuilder = new StringBuilder();
         xmlBuilder.append("<row>");
         for (Map.Entry<String, String> entry : stringValues.entrySet()) {
-            xmlBuilder.append("<");
+            xmlBuilder.append("<value fieldName=\"");
             xmlBuilder.append(entry.getKey());
-            xmlBuilder.append("><![CDATA[");
+            xmlBuilder.append("\"><![CDATA[");
 
             xmlBuilder.append(entry.getValue());
 
-            xmlBuilder.append("]]></");
-            xmlBuilder.append(entry.getKey());
-            xmlBuilder.append(">");
+            xmlBuilder.append("]]></value>");
         }
 
         for (Map.Entry<String, Number> entry : numberValues.entrySet()) {
-            xmlBuilder.append("<");
+            xmlBuilder.append("<value fieldName=\"");
             xmlBuilder.append(entry.getKey());
-            xmlBuilder.append(">");
+            xmlBuilder.append("\">");
 
             xmlBuilder.append(entry.getValue());
 
-            xmlBuilder.append("</");
-            xmlBuilder.append(entry.getKey());
-            xmlBuilder.append(">");
+            xmlBuilder.append("</value>");
         }
 
         for (Map.Entry<String, Date> entry : dateValues.entrySet()) {
-            xmlBuilder.append("<");
+            xmlBuilder.append("<value fieldName=\"");
             xmlBuilder.append(entry.getKey());
-            xmlBuilder.append(">");
+            xmlBuilder.append("\">");
             if(entry.getValue() != null)
                 xmlBuilder.append(dateFormat.format(entry.getValue()));
 
-            xmlBuilder.append("</");
-            xmlBuilder.append(entry.getKey());
-            xmlBuilder.append(">");
+            xmlBuilder.append("</value>");
         }
         xmlBuilder.append("</row>");
         return xmlBuilder.toString();

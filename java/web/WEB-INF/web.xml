@@ -49,6 +49,11 @@
     </filter>
 
     <filter>
+        <filter-name>ValidReactivationFilter</filter-name>
+        <filter-class>com.easyinsight.html.ValidReactivationFilter</filter-class>
+    </filter>
+
+    <filter>
         <filter-name>ValidBillingFilter</filter-name>
         <filter-class>com.easyinsight.html.ValidBillingFilter</filter-class>
     </filter>
@@ -94,6 +99,11 @@
     <filter-mapping>
         <filter-name>ValidActivationFilter</filter-name>
         <url-pattern>/activation/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>ValidReactivationFilter</filter-name>
+        <url-pattern>/reactivate/*</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
@@ -313,6 +323,13 @@
         <servlet-name>UpdateRowsByPK</servlet-name>
         <display-name>UpdateRowsByPK</display-name>
         <servlet-class>com.easyinsight.api.v3.UpdateRowsPKServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>BulkUpdateRows</servlet-name>
+        <display-name>BulkUpdateRows</display-name>
+        <servlet-class>com.easyinsight.api.v3.BulkUpdateRowsServlet</servlet-class>
         <load-on-startup>4</load-on-startup>
     </servlet>
 
@@ -548,6 +565,11 @@
     <servlet-mapping>
         <servlet-name>ReplaceRows</servlet-name>
         <url-pattern>/xml/replaceRows</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BulkUpdateRows</servlet-name>
+        <url-pattern>/xml/bulkUpdateRows</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

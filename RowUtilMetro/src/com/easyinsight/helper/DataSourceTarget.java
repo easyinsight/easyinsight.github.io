@@ -25,7 +25,7 @@ public class DataSourceTarget {
 
     private List<DataRow> rows = new ArrayList<DataRow>();
 
-    DataSourceTarget(String dataSourceKey, String apiKey, String apiSecretKey, int operation) {
+    public DataSourceTarget(String dataSourceKey, String apiKey, String apiSecretKey, int operation) {
         this.dataSourceKey = dataSourceKey;
         this.apiKey = apiKey;
         this.apiSecretKey = apiSecretKey;
@@ -70,6 +70,7 @@ public class DataSourceTarget {
             }
             xmlBuilder.append("</rows>");
 
+            System.out.println(xmlBuilder.toString());
             Document document;
             if (operation == ADD_ROWS) {
                 document = InternalUtil.sendXML(xmlBuilder.toString(), apiKey, apiSecretKey, "addRows");
@@ -103,6 +104,7 @@ public class DataSourceTarget {
             if (!"200".equals(code)) {
                 throw new EasyInsightException(results.get("message"));
             }
+            rows = new ArrayList<DataRow>();
         } catch (EasyInsightException eie) {
             throw eie;
         } catch (Exception e) {

@@ -51,6 +51,10 @@ public class DataSourceOperationFactory {
         return target;
     }
 
+    public BulkUpdateDataSourceTarget bulkUpdateRowsOperation() {
+        return new BulkUpdateDataSourceTarget(dataSourceKey, apiKey, apiSecretKey);
+    }
+
     /**
      * Creates a <code>TransactionTarget</code> object that you can use to add a set of rows to the data source
      * using transactional boundaries.

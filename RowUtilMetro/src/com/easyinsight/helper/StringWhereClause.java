@@ -17,7 +17,7 @@ public class StringWhereClause extends WhereClause {
     @Override
     String toXML() {
         StringBuilder xml = new StringBuilder();
-        xml.append("<where whereType\"string\">");
+        xml.append("<where whereType=\"string\">");
         xml.append("<key>");
         xml.append(getKey());
         xml.append("</key>");
