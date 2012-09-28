@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,11 +62,19 @@ public class ReplaceRowsServlet extends APIServlet {
                 for (int j = 0; j < rowNode.getChildCount(); j++) {
                     Node node = rowNode.getChild(j);
                     if (node instanceof Element) {
-                        Element columnNode = (Element) node;
+                        Element columnNode = (Element) rowNode.getChild(j);
                         String nodeName = columnNode.getLocalName().toLowerCase();
                         AnalysisItem analysisItem = fieldMap.get(nodeName);
                         if (analysisItem == null) {
-                            throw new ServiceRuntimeException("No field was found in the data source definition matching the key of " + nodeName + ".");
+                            Attribute attribute = columnNode.getAttribute("fieldName");
+                            if (attribute == null) {
+                                throw new ServiceRuntimeException("No field was found in the data source definition matching the key of " + nodeName + ".");
+                            }
+                            nodeName = attribute.getValue().toLowerCase();
+                            analysisItem = fieldMap.get(nodeName);
+                            if (analysisItem == null) {
+                                throw new ServiceRuntimeException("No field was found in the data source definition matching the key of " + nodeName + ".");
+                            }
                         }
                         String value = columnNode.getValue().trim();
                         if ("".equals(value)) {
@@ -73,9 +82,14 @@ public class ReplaceRowsServlet extends APIServlet {
                         } else {
                             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                                 try {
-                                    row.addValue(analysisItem.getKey(), dateFormat.parse(value));
-                                } catch (ParseException e) {
-                                    throw new ServiceRuntimeException("We couldn't parse the date value of " + value + " that you passed in with " + nodeName + ". Date values should match the pattern of yyyy-MM-dd'T'HH:mm:ss.");
+                                    long ms = Long.parseLong(value);
+                                    row.addValue(analysisItem.getKey(), new Date(ms));
+                                } catch (NumberFormatException nfe) {
+                                    try {
+                                        row.addValue(analysisItem.getKey(), dateFormat.parse(value));
+                                    } catch (ParseException e) {
+                                        throw new ServiceRuntimeException("We couldn't parse the date value of " + value + " that you passed in with " + nodeName + ". Date values should match the pattern of yyyy-MM-dd'T'HH:mm:ss.");
+                                    }
                                 }
                             } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                                 try {
