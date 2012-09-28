@@ -278,20 +278,22 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     protected List<IServerDataSourceDefinition> childDataSources(EIConnection conn) throws Exception {
         List<IServerDataSourceDefinition> defaultChildren = super.childDataSources(conn);
         boolean usersDefined = false;
-        for (CompositeFeedNode existing : getCompositeFeedNodes()) {
-            if (existing.getDataSourceType() == FeedType.QUICKBASE_USER_CHILD.getType()) {
-                usersDefined = true;
+        if (applicationId != null && !"".equals(applicationId)) {
+            for (CompositeFeedNode existing : getCompositeFeedNodes()) {
+                if (existing.getDataSourceType() == FeedType.QUICKBASE_USER_CHILD.getType()) {
+                    usersDefined = true;
+                }
             }
-        }
 
-        if (!usersDefined) {
-            QuickbaseUserSource source = new QuickbaseUserSource();
-            newDefinition(source, conn, "", getUploadPolicy());
-            CompositeFeedNode node = new CompositeFeedNode();
-            node.setDataFeedID(source.getDataFeedID());
-            node.setDataSourceType(source.getFeedType().getType());
-            getCompositeFeedNodes().add(node);
-            defaultChildren.add(source);
+            if (!usersDefined) {
+                QuickbaseUserSource source = new QuickbaseUserSource();
+                newDefinition(source, conn, "", getUploadPolicy());
+                CompositeFeedNode node = new CompositeFeedNode();
+                node.setDataFeedID(source.getDataFeedID());
+                node.setDataSourceType(source.getFeedType().getType());
+                getCompositeFeedNodes().add(node);
+                defaultChildren.add(source);
+            }
         }
 
 
