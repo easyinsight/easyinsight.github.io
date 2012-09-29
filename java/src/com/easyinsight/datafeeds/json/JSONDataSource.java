@@ -31,6 +31,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -349,7 +350,11 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                         } else if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                             AnalysisDateDimension date = (AnalysisDateDimension) item;
                             DateFormat df = new SimpleDateFormat(date.getCustomDateFormat());
-                            row.addValue(keys.get(keyName), df.parse(value.toString()));
+                            try {
+                                row.addValue(keys.get(keyName), df.parse(value.toString()));
+                            } catch (ParseException e) {
+                                row.addValue(keys.get(keyName), new EmptyValue());
+                            }
                         } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                             if (value instanceof Number) {
                                 row.addValue(keys.get(keyName), (Number) value);
