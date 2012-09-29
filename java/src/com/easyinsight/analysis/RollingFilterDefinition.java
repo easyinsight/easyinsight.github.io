@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -10,6 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.PrimaryKeyJoinColumn;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -38,6 +40,24 @@ public class RollingFilterDefinition extends FilterDefinition {
 
     @Column(name="interval_amount")
     private int customIntervalAmount;
+
+    public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        setInterval(Integer.parseInt(element.getAttribute("interval").getValue()));
+        setCustomBeforeOrAfter(Integer.parseInt(element.getAttribute("customBeforeOrAfter").getValue()));
+        setCustomIntervalType(Integer.parseInt(element.getAttribute("customIntervalType").getValue()));
+        setCustomIntervalAmount(Integer.parseInt(element.getAttribute("customIntervalAmount").getValue()));
+
+    }
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("interval", String.valueOf(interval)));
+        element.addAttribute(new Attribute("customBeforeOrAfter", String.valueOf(interval)));
+        element.addAttribute(new Attribute("customIntervalType", String.valueOf(interval)));
+        element.addAttribute(new Attribute("customIntervalAmount", String.valueOf(interval)));
+        return element;
+    }
 
     public int getCustomBeforeOrAfter() {
         return customBeforeOrAfter;
@@ -130,13 +150,6 @@ public class RollingFilterDefinition extends FilterDefinition {
             }
         }
         return start;
-    }
-
-    @Override
-    public Element toXML(XMLMetadata xmlMetadata) {
-        Element element = super.toXML(xmlMetadata);
-        element.addAttribute(new Attribute("interval", String.valueOf(interval)));
-        return element;
     }
 
     @Override
