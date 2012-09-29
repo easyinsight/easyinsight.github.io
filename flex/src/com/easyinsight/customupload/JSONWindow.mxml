@@ -6,12 +6,11 @@
         import com.easyinsight.customupload.wizard.JSONUploadContext;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
-
-
-
+        import mx.validators.Validator;
 
 
         // Reference to the file on disk (selected by user)
@@ -33,16 +32,22 @@
         private var resultCount:String;
 
         private function next():void {
-            var ds:JSONUploadContext = new JSONUploadContext();
-            ds.url = urlInput.text;
-            ds.httpMethod = int(methodGroup.selectedValue);
-            ds.userName = userNameInput.text;
-            ds.password = passwordInput.text;
-            ds.jsonPath = jsonPathInput.text;
-            ds.nextPagePath = nextPageInput.text;
-            ds.resultsJSONPath = resultCountInput.text;
-            uploadService.analyzeUpload.send(ds);
-
+            urlInput.errorString = null;
+            var results:Array = Validator.validateAll([urlValidator]);
+            if (results.length > 0) {
+                Alert.show("There were one or more errors that need to be corrected.");
+            } else {
+                var ds:JSONUploadContext = new JSONUploadContext();
+                ds.url = urlInput.text;
+                ds.httpMethod = int(methodGroup.selectedValue);
+                ds.userName = userNameInput.text;
+                ds.password = passwordInput.text;
+                ds.jsonPath = jsonPathInput.text;
+                ds.nextPagePath = nextPageInput.text;
+                ds.resultsJSONPath = resultCountInput.text;
+                ProgressAlert.alert(this, "Validating and testing...", null, uploadService.analyzeUpload);
+                uploadService.analyzeUpload.send(ds);
+            }
         }
 
         private function created():void {

@@ -64,8 +64,9 @@ public class JSONUploadContext extends UploadContext {
             }
 
             List<Map> coreArray = null;
+            String jsonString = restMethod.getResponseBodyAsString();
             if (jsonPath == null || "".equals(jsonPath.trim())) {
-                Object obj = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                Object obj = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(jsonString);
                 if (obj instanceof List) {
                     List list = (List) obj;
                     coreArray = new ArrayList<Map>();
@@ -76,13 +77,16 @@ public class JSONUploadContext extends UploadContext {
                     }
                 }
             } else {
-                coreArray = JsonPath.read(restMethod.getResponseBodyAsStream(), jsonPath);
+                coreArray = JsonPath.read(jsonString, jsonPath);
             }
 
+            if (jsonString.length() > 100) {
+                jsonString = jsonString.substring(0, 100);
+            }
             if (coreArray == null) {
-                return "We couldn't find a JSON array at the specified URL. You might need to try a different URL or specify a different JSONPath to find the array within the returned JSON data.";
+                return "We couldn't find a JSON array at the specified URL. You might need to try a different URL or specify a different JSONPath to find the array within the returned JSON data:\n" + jsonString;
             } else if (coreArray.size() == 0) {
-                return "We couldn't find a JSON array at the specified URL. You might need to try a different URL or specify a different JSONPath to find the array within the returned JSON data.";
+                return "We couldn't find a JSON array at the specified URL. You might need to try a different URL or specify a different JSONPath to find the array within the returned JSON data:\n" + jsonString;
             }
         } catch (Exception e) {
             return e.getMessage();
