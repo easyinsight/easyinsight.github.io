@@ -46,6 +46,10 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return hasNew;
     }
 
+    public void reauthorize() {
+
+    }
+
     @Override
     public int getRequiredAccountTier() {
         return Account.BASIC;
@@ -286,6 +290,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             Map<Long, String> tempTables = new HashMap<Long, String>();
             for (IServerDataSourceDefinition source : sources) {
                 ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
+                if (serverDataSourceDefinition.getDataSourceType() == DataSourceInfo.LIVE) {
+                    continue;
+                }
                 tempTables.put(serverDataSourceDefinition.getDataFeedID(),
                         serverDataSourceDefinition.tempLoad(keyMap.get(serverDataSourceDefinition.getDataFeedID()), now,
                         this, callDataID, lastRefreshTime, conn, fullRefresh));
@@ -293,6 +300,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             conn.setAutoCommit(false);
             for (IServerDataSourceDefinition source : sources) {
                 ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
+                if (serverDataSourceDefinition.getDataSourceType() == DataSourceInfo.LIVE) {
+                    continue;
+                }
                 String tempTable = tempTables.get(serverDataSourceDefinition.getDataFeedID());
                 serverDataSourceDefinition.applyTempLoad(conn, accountID, this, lastRefreshTime, tempTable, fullRefresh);
             }
