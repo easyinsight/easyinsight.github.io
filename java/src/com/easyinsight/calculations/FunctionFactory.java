@@ -210,6 +210,8 @@ public class FunctionFactory {
             return new FirstRecord();
         } else if (s.equals("last")) {
             return new LastRecord();
+        } else if (s.equals("days")) {
+            return new Days();
         } else {
             return null;
         }
