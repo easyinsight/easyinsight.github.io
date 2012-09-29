@@ -91,7 +91,9 @@ public abstract class EIV3API implements IEIV3API {
             compositeFeedDefinition.populateFields(conn);
 
             long feedID = new FeedStorage().addFeedDefinitionData(compositeFeedDefinition, conn);
-            DataStorage.liveDataSource(feedID, conn);
+            DataStorage.liveDataSource(feedID, conn, compositeFeedDefinition.getFeedType().getType());
+            // aa3sJmCYupHFx9Arzs1RxlKy9zseNN0xiCvRVih3N/wbTscJyeAdNmQkoj/PTR941mfGodvXLro6B6oIRum8pw==
+            // Iu7eFeECKySBHrB0PsE7YhfFPxnKFyX/ekY3SJ/gpHiY0MTt7H8qj9J67BdTFZU9cXXPGDZHswqh2TSrMEWkog==
             conn.commit();
             return compositeFeedDefinition.getApiKey();
         } catch (ServiceRuntimeException sre) {

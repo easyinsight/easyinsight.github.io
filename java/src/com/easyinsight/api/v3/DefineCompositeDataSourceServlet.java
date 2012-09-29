@@ -127,7 +127,7 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
 
             if (compositeFeedDefinition.getDataFeedID() == 0) {
                 long feedID = new FeedStorage().addFeedDefinitionData(compositeFeedDefinition, conn);
-                DataStorage.liveDataSource(feedID, conn);    
+                DataStorage.liveDataSource(feedID, conn, compositeFeedDefinition.getFeedType().getType());
             } else {
                 new FeedStorage().updateDataFeedConfiguration(compositeFeedDefinition, conn);
             }
