@@ -1,5 +1,12 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Node;
+import nu.xom.Nodes;
+
 import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -26,6 +33,31 @@ public class MultiFlatDateFilter extends FilterDefinition {
 
     @Column(name="end_date_property")
     private String endDateProperty;
+
+    public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        super.customFromXML(element, xmlImportMetadata);
+        Nodes levels = element.query("/levels/level");
+        for (int i = 0; i < levels.size(); i++) {
+            Node level = levels.get(i);
+            String value = level.query("text()").get(0).getValue();
+            DateLevelWrapper wrapper = new DateLevelWrapper();
+            wrapper.setDateLevel(Integer.parseInt(value));
+            this.levels.add(wrapper);
+        }
+    }
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        Element levels = new Element("levels");
+        element.appendChild(levels);
+        for (DateLevelWrapper levelWrapper : this.levels) {
+            Element wrapperElement = new Element("level");
+            wrapperElement.appendChild(String.valueOf(levelWrapper.getDateLevel()));
+            levels.appendChild(wrapperElement);
+        }
+        return element;
+    }
 
     public String getEndDateProperty() {
         return endDateProperty;

@@ -338,11 +338,11 @@ public class FilterValueDefinition extends FilterDefinition {
         element.addAttribute(new Attribute("excludeEmpty", String.valueOf(excludeEmpty)));
         Element values = new Element("values");
         element.appendChild(values);
-        for (Object valueObject : filteredValues) {
+        for (PersistableValue valueObject : persistedValues) {
             Element valueElement = new Element("value");
-            valueElement.appendChild(valueObject.toString());
+            valueElement.appendChild(valueObject.toValue().toString());
+            values.appendChild(valueElement);
         }
-        // if@ualberta.com, 780-492-9120
         return element;
     }
 
