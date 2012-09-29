@@ -6,15 +6,19 @@
                       xmlns:skin="com.easyinsight.skin.*">
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.customupload.JSONWindow;
         import com.easyinsight.datasources.DataSourceType;
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.IPerspective;
         import com.easyinsight.listing.ListingChangeEvent;
 
         import com.easyinsight.skin.ApplicationSkin;
+        import com.easyinsight.util.PopUpUtil;
 
         import mx.controls.Alert;
 
         import mx.events.ItemClickEvent;
+        import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
 
         import mx.managers.BrowserManager;
@@ -91,7 +95,6 @@
                     event.solution.dataSourceType == DataSourceType.CONSTANT_CONTACT ||
                     event.solution.dataSourceType == DataSourceType.FRESHBOOKS ||
                     event.solution.dataSourceType == DataSourceType.HARVEST_COMPOSITE ||
-                    event.solution.dataSourceType == DataSourceType.JSON ||
                     event.solution.dataSourceType == DataSourceType.PIVOTAL_TRACKER ||
                     event.solution.dataSourceType == DataSourceType.SENDGRID ||
                     event.solution.dataSourceType == DataSourceType.BATCHBOOK2 ||
@@ -100,10 +103,19 @@
                 var renderer:NewSolutionDetailRenderer = new NewSolutionDetailRenderer();
                 renderer.solution = event.solution;
                 renderer.installSolution();
+            } else if (event.solution.dataSourceType == DataSourceType.JSON) {
+                var window:JSONWindow = new JSONWindow();
+                window.addEventListener(AnalyzeEvent.ANALYZE, uploadConfigComplete, false, 0, true);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
             } else {
                 var detail:IPerspective = SolutionDetailFactory.createDetailPage(event.solution, false);
                 dispatchEvent(new ListingChangeEvent(detail));
             }
+        }
+
+        private function uploadConfigComplete(event:Event):void {
+            dispatchEvent(event);
         }
 
         public function gotFocus():void {
