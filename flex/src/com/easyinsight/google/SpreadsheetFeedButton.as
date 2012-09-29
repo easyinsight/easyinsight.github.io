@@ -2,11 +2,13 @@ package com.easyinsight.google
 {
 import com.easyinsight.customupload.UploadResponse;
 import com.easyinsight.customupload.wizard.FieldUploadInfo;
+import com.easyinsight.customupload.wizard.SpreadsheetWizard;
 
 
 import com.easyinsight.framework.Credentials;
 import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.genredata.AnalyzeEvent;
+import com.easyinsight.util.PopUpUtil;
 
 import com.easyinsight.util.ProgressAlert;
 
@@ -17,7 +19,8 @@ import mx.binding.utils.BindingUtils;
 import mx.containers.HBox;
 import mx.controls.Alert;
 import mx.controls.Button;
-	import mx.rpc.events.ResultEvent;
+import mx.managers.PopUpManager;
+import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 
 	public class SpreadsheetFeedButton extends HBox
@@ -109,8 +112,12 @@ import mx.controls.Button;
             if (uploadResponse.successful) {
                 var context:GoogleSpreadsheetUploadContext = new GoogleSpreadsheetUploadContext();
                 context.worksheetURL = _data.url;
-                //dispatchEvent(new AnalyzeEvent(new SpreadsheetSetupSource(context, uploadResponse.infos)));
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SPREADSHEET_WIZARD, {uploadContext: context, fields: uploadResponse.infos})));
+                var window:SpreadsheetWizard = new SpreadsheetWizard();
+                window.uploadContext = context;
+                window.fields = uploadResponse.infos;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+                PopUpManager.removePopUp(this);
             } else {
                 Alert.show(uploadResponse.failureMessage);
             }

@@ -37,6 +37,31 @@
 
         [Bindable]
         private var functions:XMLListCollection = new XMLListCollection(new XMLList(<functions>
+            <group label="Data Type">
+                <function label="castsum" signature="castsum(Field)" description="Forces Field to be calculated as a Sum"/>
+                <function label="castaverage" signature="castaverage(Field)" description="Forces Field to be calculated as an Average"/>
+                <function label="castmax" signature="castmax(Field)" description="Forces Field to be calculated as a Maximum"/>
+                <function label="castmin" signature="castmin(Field)" description="Forces Field to be calculated as a Minimum"/>
+                <function label="castcount" signature="castcount(Field)" description="Forces Field to be calculated as a Count"/>
+                <function label="castmedian" signature="castmedian(Field)" description="Forces Field to be calculated as a Median"/>
+                <function label="castvariance" signature="castvariance(Field)" description="Forces Field to be calculated as a Variance"/>
+            </group>
+            <group label="Dates">
+                <function label="date" signature="date(Numeric Field)" description="If no parameter, constructs a date with the present time, if Numeric Field passed in, constructs a date from the number of milliseconds"/>
+                <function label="dayofmonth" signature="dayofmonth(Date Field)" description="Returns the day of month of the date contained in Field"/>
+                <function label="dayofyear" signature="dayofyear(Date Field)" description="Returns the day of year of the date contained in Field"/>
+                <function label="days" signature="days(Number of Days)" description="Translates the specified number of days into milliseconds"/>
+                <function label="daysinmonth" signature="daysinmonth(Date Field)" description="Returns the number of days in the month of the date contained in Field"/>
+                <function label="month" signature="month(Date Field)" description="Returns the month of the date contained in Field"/>
+                <function label="now" signature="now()" description="Returns the current time in milliseconds"/>
+                <function label="weekofyear" signature="weekofyear(Date Field)" description="Returns the week of the year of the date contained in Field"/>
+                <function label="year" signature="year(Date Field)" description="Returns the year of the date contained in Field"/>
+            </group>
+            <group label="Logic">
+                <function label="equalto" signature="equalto(Field1, Field2, Field3, Field4)" description="If Field1 is equal to Field2, return Field3, else return Field 4. Field 4 is optional, will return empty if not specified."/>
+                <function label="greaterthan" signature="greaterthan(Field1, Field2, Field3, Field4)" description="If Field1 is greater than Field2, return Field3, else return Field 4. Field 4 is optional, will return empty if not specified."/>
+                <function label="greaterthanorequal" signature="greaterthan(Field1, Field2, Field3, Field4)" description="If Field1 is greater than or equal to Field2, return Field3, else return Field 4. Field 4 is optional, will return empty if not specified."/>
+            </group>
             <group label="Math">
                 <function label="abs" signature="abs(Number)" description="Calculate the absolute value of Number"/>
                 <function label="acos" signature="acos(Number)" description="Calculate the arccosine of Number"/>
@@ -52,24 +77,13 @@
                 <function label="sqrt" signature="sqrt(Number)" description="Calculate the square root of Number"/>
                 <function label="tan" signature="tan(Number)" description="Calculate the tangent of Number"/>
             </group>
-            <group label="Data Type">
-                <function label="castsum" signature="castsum(Field)" description="Forces Field to be calculated as a Sum"/>
-                <function label="castaverage" signature="castaverage(Field)" description="Forces Field to be calculated as an Average"/>
-                <function label="castmax" signature="castmax(Field)" description="Forces Field to be calculated as a Maximum"/>
-                <function label="castmin" signature="castmin(Field)" description="Forces Field to be calculated as a Minimum"/>
-                <function label="castcount" signature="castcount(Field)" description="Forces Field to be calculated as a Count"/>
-                <function label="castmedian" signature="castmedian(Field)" description="Forces Field to be calculated as a Median"/>
-                <function label="castvariance" signature="castvariance(Field)" description="Forces Field to be calculated as a Variance"/>
-            </group>
-            <group label="Dates">
-                <function label="now" signature="now()" description="Returns the current time in milliseconds"/>
-            </group>
             <group label="Text">
                 <function label="bracketvalue" signature="bracketvalue(String)" description="Returns the first bracketed value found in String. For example, bracketvalue(Deal [John]) would produce a value of John."/>
                 <function label="firstValue" signature="firstValue(String, String)" description="Returns the first non empty value passed into the function."/>
                 <function label="lower" signature="lower(String)" description="Returns a fully lower case version of String."/>
                 <function label="namedbracketdate" signature="namedbracketdate(String, Name, Date Pattern)" description="Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Description, &quot;Target Close&quot;, &quot;MM-dd-YYYY&quot;) will construct a date of &quot;12-15-2010&quot; out of a sample value of [Target Close: 12-15-2010] in the Deal Description field."/>
                 <function label="namedbracketvalue" signature="namedbracketvalue(String, String)" description="Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Name, &quot;Type&quot;) will construct the string &quot;Direct Sales&quot; out of a sample value of [Type: Direct Sales] in the Deal Name field."/>
+                <function label="parsedate" signature="parsedate(Field1, String)" description="Parses Field1 into a date using the format specified in String. For example, parsedate(Date String, &quot;yyyy-MM-dd&quot;) will construct a date using the format of yyyy-MM-dd."/>
                 <function label="replace" signature="replace(Field, Regular Expression, Target String)" description="Replace each substring of this string that matches the given regular expression with the given replacement."/>
                 <function label="substring" signature="substring(String, Start Index, End Index)" description="Returns the value found between Start Index and End Index on String."/>
                 <function label="upper" signature="upper(String)" description="Returns a fully upper case version of String."/>

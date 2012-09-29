@@ -3,6 +3,7 @@ import com.easyinsight.SimpleReportEditor;
 import com.easyinsight.account.AccountBasePage;
 import com.easyinsight.account.Help;
 import com.easyinsight.analysis.AnalysisItemEditor;
+import com.easyinsight.customupload.wizard.SpreadsheetWizard;
 import com.easyinsight.dashboard.DashboardEditor;
 import com.easyinsight.dashboard.DashboardView;
 import com.easyinsight.etl.LookupTableEditor;
@@ -28,12 +29,6 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 break;
             case PerspectiveInfo.REPORT_VIEW:
                 perspective = new DirectUIComponent(new ReportView());
-                break;
-            case PerspectiveInfo.SPREADSHEET_WIZARD:
-                perspective = new ModuleUIComponent("SpreadsheetWizard", "Loading the wizard to process your spreadsheet...");
-                break;
-            case PerspectiveInfo.SPREADSHEET_UPDATE:
-                perspective = new ModuleUIComponent("SpreadsheetUpdateWizard", "Loading the wizard to update your spreadsheet...");
                 break;
             case PerspectiveInfo.COMPOSITE_WORKSPACE:
                 perspective = new DirectUIComponent(new NewCompositeFeedWorkspace());

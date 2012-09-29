@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="600" height="300" creationComplete="doCreationComplete()">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="doCreationComplete()">
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.framework.PerspectiveInfo;
-        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.customupload.wizard.SpreadsheetUpdateWizard;
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
             import mx.collections.ArrayCollection;
@@ -94,7 +94,14 @@
                         uploadService.updateData.send(_feedID, fileData, true);
                     }
                 } else {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SPREADSHEET_UPDATE, {dataSourceID: _feedID, op: op, bytes: fileData, fields: fields})));
+                    var window:SpreadsheetUpdateWizard = new SpreadsheetUpdateWizard();
+                    window.op = op;
+                    window.bytes = fileData;
+                    window.fields = fields;
+                    window.dataSourceID = _feedID;
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpUtil.centerPopUp(window);
+                    //dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SPREADSHEET_UPDATE, {dataSourceID: _feedID, op: op, bytes: fileData, fields: fields})));
                     PopUpManager.removePopUp(this);
                 }
             }
@@ -104,7 +111,7 @@
 		<mx:method name="updateData" result="updatedData()"/>
 		<mx:method name="analyzeUpdate" result="analyzedUpdate()"/>
 	</mx:RemoteObject>
-	<mx:VBox width="100%" height="100%" id="coreVBox" styleName="TitleWindowContents">		
+	<mx:VBox id="coreVBox" backgroundColor="#FFFFFF" paddingBottom="10" paddingLeft="10" paddingTop="10" paddingRight="10">
 		<mx:Form id="coreForm">
 			<mx:FormItem label="Select a file to upload:" direction="horizontal">
 				<mx:TextInput id="txtPhoto" editable="false" />
@@ -119,11 +126,13 @@
 				</mx:HBox>
 				<mx:Label text="Upload successful!" visible="false" id="successMessage"/>
 			</mx:FormItem>		
-			<mx:FormItem label="" direction="horizontal">
-				<mx:Button label="Replace" click="replace()" enabled="false" id="replaceButton"/>
-				<mx:Button label="Append" click="append()" enabled="false" id="appendButton"/>
-				<mx:Button label="Cancel" click="cancel()"/>
-			</mx:FormItem>
+
 		</mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Replace" click="replace()" enabled="false" id="replaceButton"/>
+            <util:SaveButton label="Append" click="append()" enabled="false" id="appendButton"/>
+            <util:CancelButton label="Cancel" click="cancel()"/>
+        </mx:HBox>
 	</mx:VBox>
+
 </util:EITitleWindow>

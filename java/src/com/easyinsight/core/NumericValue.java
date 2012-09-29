@@ -91,6 +91,45 @@ public class NumericValue extends Value implements Serializable {
         return value;
     }
 
+    public static double produceDoubleValueStrict(String valueObj) {
+        Double value;
+        if (valueObj == null || "".equals(valueObj)) {
+            value = 0.;
+        } else {
+            try {
+                value = Double.parseDouble(valueObj);
+            } catch (NumberFormatException e) {
+                // see if we can find a # in there somewhere...
+                char[] transferArray = new char[valueObj.length()];
+                int i = 0;
+                boolean hitNumber = false;
+                boolean seemsValid = true;
+                for (char character : valueObj.toCharArray()) {
+                    if (Character.isLetter(character)) {
+                        seemsValid = false;
+                    } else if (Character.isDigit(character) || character == '.') {
+                        transferArray[i++] = character;
+                        hitNumber = true;
+                    } else {
+                        if (hitNumber && !(character == ',' || character == '%')) {
+                            seemsValid = false;
+                        }
+                    }
+                }
+                if (seemsValid && transferArray.length > 0) {
+                    try {
+                        value = Double.parseDouble(new String(transferArray));
+                    } catch (NumberFormatException e1) {
+                        value = 0.;
+                    }
+                } else {
+                    value = 0.;
+                }
+            }
+        }
+        return value;
+    }
+
     public static boolean testValue(String valueObj) {
         boolean value;
         if (valueObj == null || "".equals(valueObj)) {

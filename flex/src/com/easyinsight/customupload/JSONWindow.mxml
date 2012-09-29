@@ -4,8 +4,10 @@
 	<mx:Script>
     <![CDATA[
         import com.easyinsight.customupload.wizard.JSONUploadContext;
+        import com.easyinsight.customupload.wizard.SpreadsheetWizard;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
@@ -61,7 +63,11 @@
                 ds.jsonPath = jsonPathInput.text;
                 ds.nextPagePath = nextPageInput.text;
                 ds.resultsJSONPath = resultCountInput.text;
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SPREADSHEET_WIZARD, {uploadContext:ds, fields:uploadResponse.infos})));
+                var window:SpreadsheetWizard = new SpreadsheetWizard();
+                window.uploadContext = ds;
+                window.fields = uploadResponse.infos;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
                 PopUpManager.removePopUp(this);
             } else {
                 Alert.show(uploadResponse.failureMessage);

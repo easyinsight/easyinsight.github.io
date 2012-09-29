@@ -74,7 +74,7 @@
             </mx:columns>
         </mx:AdvancedDataGrid>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
 

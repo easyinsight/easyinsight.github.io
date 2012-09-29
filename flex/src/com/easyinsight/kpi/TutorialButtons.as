@@ -1,4 +1,7 @@
 package com.easyinsight.kpi {
+import com.easyinsight.util.CancelButton;
+import com.easyinsight.util.SaveButton;
+
 import flash.events.Event;
 import flash.events.MouseEvent;
 
@@ -6,6 +9,7 @@ import mx.binding.utils.BindingUtils;
 import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.controls.Button;
+import mx.controls.LinkButton;
 
 [Event(name="kpiTutorialNext", type="com.easyinsight.kpi.KPITutorialEvent")]
 [Event(name="kpiTutorialPrevious", type="com.easyinsight.kpi.KPITutorialEvent")]
@@ -117,28 +121,28 @@ public class TutorialButtons extends Canvas {
         var hbox:HBox = new HBox();
         hbox.percentWidth = 100;
         hbox.setStyle("horizontalAlign", "center");
-        var backButton:Button = new Button();
+        var backButton:Button = new SaveButton();
         backButton.label = "Back";
         backButton.setStyle("fontSize", 14);
         backButton.addEventListener(MouseEvent.CLICK, back);
         BindingUtils.bindProperty(backButton, "enabled", this, "backEnabled");
         BindingUtils.bindProperty(backButton, "visible", this, "backVisible");
         hbox.addChild(backButton);
-        var nextButton:Button = new Button();
+        var nextButton:Button = new SaveButton();
         nextButton.label = "Next";
         nextButton.setStyle("fontSize", 14);
         BindingUtils.bindProperty(nextButton, "enabled", this, "nextEnabled");
         BindingUtils.bindProperty(nextButton, "visible", this, "nextVisible");
         nextButton.addEventListener(MouseEvent.CLICK, next);
         hbox.addChild(nextButton);
-        var finishButton:Button = new Button();
+        var finishButton:Button = new SaveButton();
         finishButton.label = "Finish";
         finishButton.setStyle("fontSize", 14);
         BindingUtils.bindProperty(finishButton, "enabled", this, "finishEnabled");
         BindingUtils.bindProperty(finishButton, "visible", this, "finishVisible");
         finishButton.addEventListener(MouseEvent.CLICK, finish);
         hbox.addChild(finishButton);
-        var cancelButton:Button = new Button();
+        var cancelButton:LinkButton = new CancelButton();
         cancelButton.label = "Cancel";
         cancelButton.setStyle("fontSize", 14);
         cancelButton.addEventListener(MouseEvent.CLICK, cancel);

@@ -75,7 +75,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                 }
                 if (newGuess == null) {
                     try {
-                        double numericValue = NumericValue.produceDoubleValue(stringValue.getValue());
+                        double numericValue = NumericValue.produceDoubleValueStrict(stringValue.getValue());
                         if (numericValue == 0) {
                             SimpleDateFormat dateFormat = guessDate(stringValue.getValue());
                             if (dateFormat != null) {

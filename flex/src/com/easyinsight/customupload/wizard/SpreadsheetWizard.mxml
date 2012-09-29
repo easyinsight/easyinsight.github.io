@@ -1,10 +1,11 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
-                        xmlns:kpi="com.easyinsight.kpi.*" xmlns:wizard="com.easyinsight.customupload.wizard.*"
-                        width="100%" height="100%" implements="com.easyinsight.listing.IPerspective">
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+                    xmlns:kpi="com.easyinsight.kpi.*" xmlns:wizard="com.easyinsight.customupload.wizard.*"
+                    width="100%" height="100%"
+                    xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.customupload.UploadResponse;
+        import com.easyinsight.framework.User;
 
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.kpi.KPITutorialEvent;
@@ -16,6 +17,7 @@
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.core.UIComponent;
+        import mx.managers.PopUpManager;
 
         private var _uploadContext:UploadContext;
 
@@ -95,51 +97,40 @@
             //UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
             try {
                 var response:UploadResponse = uploadService.createDataSource.lastResult as UploadResponse;
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(response.feedID)));
+                PopUpManager.removePopUp(this);
+                User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(response.feedID)));
             } catch(e:Error) {
                 Alert.show(e.message);
             }
         }
 
         private function onCancel(event:Event):void {
-            dispatchEvent(new AnalysisCloseEvent());
-        }
-
-        public function gotFocus():void {
-        }
-
-        public function cleanup():void {
+            PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="userUpload" id="uploadService">
         <mx:method name="createDataSource" result="createdDataSource()"/>
     </mx:RemoteObject>
-    <mx:Canvas width="100%" height="100%">
-        <mx:VBox width="100%" height="100%" verticalGap="0">
-            <mx:Box height="50%" width="100%" backgroundColor="0x000000"/>
-            <mx:Box height="50%" width="100%" backgroundColor="0xAAAAAA"/>
-        </mx:VBox>
-        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-            <mx:ViewStack selectedIndex="{panelIndex}" change="onChange(event)"
-                          id="viewStack" resizeToContent="true" width="1000" height="550"
-                          backgroundColor="0xFFFFFF">
-                <kpi:TutorialPanel width="100%" height="100%">
-                    <wizard:DataSourceNamePanel id="dsNamePanel"/>
-                    <kpi:TutorialButtons tutorialPanel="{dsNamePanel}" backEnabled="false" nextEnabled="true"
-                                         finishEnabled="false"
-                                         kpiTutorialNext="dataSourceName = dsNamePanel.dataSourceName; accountVisible = dsNamePanel.accountVisible; panelIndex++"
-                                         kpiTutorialCancel="onCancel(event)"/>
-                </kpi:TutorialPanel>
-                <kpi:TutorialPanel width="100%" height="100%">
-                    <wizard:SpreadsheetFieldIntro id="explainPanel"/>
-                    <kpi:TutorialButtons tutorialPanel="{explainPanel}" backEnabled="true" nextEnabled="true"
-                                         finishEnabled="true"
-                                         kpiTutorialNext="next(null)"
-                                         kpiTutorialPrevious="panelIndex--"
-                                         kpiTutorialFinish="onFinish(event)"
-                                         kpiTutorialCancel="onCancel(event)"/>
-                </kpi:TutorialPanel>
-            </mx:ViewStack>
-        </mx:Box>
-    </mx:Canvas>
-</mx:Module>
+    <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" backgroundColor="#333333">
+        <mx:ViewStack selectedIndex="{panelIndex}" change="onChange(event)"
+                      id="viewStack" resizeToContent="true" width="1000" height="550"
+                      backgroundColor="0xFFFFFF">
+            <kpi:TutorialPanel width="100%" height="100%">
+                <wizard:DataSourceNamePanel id="dsNamePanel"/>
+                <kpi:TutorialButtons tutorialPanel="{dsNamePanel}" backEnabled="false" nextEnabled="true"
+                                     finishEnabled="false"
+                                     kpiTutorialNext="dataSourceName = dsNamePanel.dataSourceName; accountVisible = dsNamePanel.accountVisible; panelIndex++"
+                                     kpiTutorialCancel="onCancel(event)"/>
+            </kpi:TutorialPanel>
+            <kpi:TutorialPanel width="100%" height="100%">
+                <wizard:SpreadsheetFieldIntro id="explainPanel"/>
+                <kpi:TutorialButtons tutorialPanel="{explainPanel}" backEnabled="true" nextEnabled="true"
+                                     finishEnabled="true"
+                                     kpiTutorialNext="next(null)"
+                                     kpiTutorialPrevious="panelIndex--"
+                                     kpiTutorialFinish="onFinish(event)"
+                                     kpiTutorialCancel="onCancel(event)"/>
+            </kpi:TutorialPanel>
+        </mx:ViewStack>
+    </mx:Box>
+</util:EITitleWindow>
