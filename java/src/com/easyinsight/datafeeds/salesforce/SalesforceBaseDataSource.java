@@ -5,7 +5,6 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.constantcontact.ConstantContactCompositeSource;
-import com.easyinsight.kpi.KPI;
 
 import com.easyinsight.users.Account;
 import com.easyinsight.analysis.*;
@@ -175,7 +174,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
     }
 
     public int getDataSourceType() {
-        return DataSourceInfo.LIVE;
+        return DataSourceInfo.COMPOSITE_PULL;
     }
 
     @Override
@@ -216,44 +215,82 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         }
     }
 
-    protected List<IServerDataSourceDefinition> obtainChildDataSources(EIConnection conn) throws Exception {
-        List<IServerDataSourceDefinition> sources = new ArrayList<IServerDataSourceDefinition>();
-        HttpGet httpRequest = new HttpGet(instanceName + "/services/data/v20.0/sobjects/");
-        httpRequest.setHeader("Accept", "application/xml");
-        httpRequest.setHeader("Content-Type", "application/xml");
-        httpRequest.setHeader("Authorization", "OAuth " + accessToken);
+    private static class AuthFailed extends Exception {
+
+    }
+
+    @Override
+    protected List<IServerDataSourceDefinition> childDataSources(EIConnection conn) throws Exception {
+        List<IServerDataSourceDefinition> defaultChildren = super.childDataSources(conn);
+        Document doc;
+        try {
+            HttpGet httpRequest = new HttpGet(instanceName + "/services/data/v20.0/sobjects/");
+            httpRequest.setHeader("Accept", "application/xml");
+            httpRequest.setHeader("Content-Type", "application/xml");
+            httpRequest.setHeader("Authorization", "OAuth " + accessToken);
 
 
-        org.apache.http.client.HttpClient cc = new DefaultHttpClient();
-        ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            org.apache.http.client.HttpClient cc = new DefaultHttpClient();
+            ResponseHandler<String> responseHandler = new BasicResponseHandler();
 
-        String string = cc.execute(httpRequest, responseHandler);
+            String string = cc.execute(httpRequest, responseHandler);
 
-        Builder builder = new Builder();
-        Document doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+            Builder builder = new Builder();
+
+            doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+        } catch (HttpResponseException hre) {
+            if ("Unauthorized".equals(hre.getMessage())) {
+                refreshTokenInfo();
+                HttpGet httpRequest = new HttpGet(instanceName + "/services/data/v20.0/sobjects/");
+                httpRequest.setHeader("Accept", "application/xml");
+                httpRequest.setHeader("Content-Type", "application/xml");
+                httpRequest.setHeader("Authorization", "OAuth " + accessToken);
+
+
+                org.apache.http.client.HttpClient cc = new DefaultHttpClient();
+                ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+                String string = cc.execute(httpRequest, responseHandler);
+
+                Builder builder = new Builder();
+
+                doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+            } else {
+                throw hre;
+            }
+        }
         Nodes sobjectNodes = doc.query("/DescribeGlobal/sobjects");
-        List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
         List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
         List<SFConnection> connectionList = new ArrayList<SFConnection>();
         Map<String, SalesforceSObjectSource> map = new HashMap<String, SalesforceSObjectSource>();
+
+        for (IServerDataSourceDefinition child : defaultChildren) {
+            SalesforceSObjectSource source = (SalesforceSObjectSource) child;
+            map.put(source.getSobjectName(), source);
+        }
+
         for (int i = 0; i < sobjectNodes.size(); i++) {
             Node sobjectNode = sobjectNodes.get(i);
             String name = sobjectNode.query("name/text()").get(0).getValue();
-            String searchableString = sobjectNode.query("searchable/text()").get(0).getValue();
-            boolean searchable = Boolean.parseBoolean(searchableString);
-            if (searchable || "UserRole".equals(name)) {
-                SalesforceSObjectSource salesforceSObjectSource = new SalesforceSObjectSource();
-                salesforceSObjectSource.setSobjectName(name);
-                salesforceSObjectSource.setFeedName(name);
-                newDefinition(salesforceSObjectSource, conn, "", getUploadPolicy());
-                CompositeFeedNode node = new CompositeFeedNode();
-                node.setDataFeedID(salesforceSObjectSource.getDataFeedID());
-                nodes.add(node);
-                map.put(name, salesforceSObjectSource);
-                connectionList.addAll(connections(name));
+            SalesforceSObjectSource existing = map.get(name);
+            if (existing == null) {
+                String searchableString = sobjectNode.query("searchable/text()").get(0).getValue();
+                boolean searchable = Boolean.parseBoolean(searchableString);
+                if (searchable || "UserRole".equals(name)) {
+                //if (searchable) {
+                    SalesforceSObjectSource salesforceSObjectSource = new SalesforceSObjectSource();
+                    salesforceSObjectSource.setSobjectName(name);
+                    salesforceSObjectSource.setFeedName(name);
+                    newDefinition(salesforceSObjectSource, conn, "", getUploadPolicy());
+                    CompositeFeedNode node = new CompositeFeedNode();
+                    node.setDataFeedID(salesforceSObjectSource.getDataFeedID());
+                    getCompositeFeedNodes().add(node);
+                    defaultChildren.add(salesforceSObjectSource);
+                    map.put(name, salesforceSObjectSource);
+                    connectionList.addAll(connections(name));
+                }
             }
         }
-        setCompositeFeedNodes(nodes);
 
         for (SFConnection connection : connectionList) {
             if (connection.source.equals(connection.target)) {
@@ -273,13 +310,14 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                 System.out.println("Connecting " + connection.source + " to " + connection.target);
                 if (sourceItem != null && targetItem != null) {
                     connections.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceItem, targetItem,
-                        source.getFeedName(), target.getFeedName(), false, false, false, false));
+                            source.getFeedName(), target.getFeedName(), false, false, false, false));
                 }
             }
         }
-        setConnections(connections);
-        populateFields(conn);
-        return sources;
+        if (getConnections() == null || getConnections().size() == 0) {
+            setConnections(connections);
+        }
+        return defaultChildren;
     }
 
     private List<SFConnection> connections(String sobjectName) throws Exception {
