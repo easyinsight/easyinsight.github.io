@@ -4,6 +4,7 @@
         import com.adobe.images.JPGEncoder;
         import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.schedule.ReportDelivery;
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.core.UIComponent;
@@ -60,6 +61,12 @@
         }
 
         private function emailed():void {
+            var fault:ReportFault = excelService.emailReport.lastResult as ReportFault;
+            if (fault != null) {
+                var window:UIComponent = fault.createFaultWindow();
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
             PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
