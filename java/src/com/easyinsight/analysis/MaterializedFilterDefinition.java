@@ -29,6 +29,9 @@ public abstract class MaterializedFilterDefinition {
             if (!allows(value)) {
                 rowValid = false;
             }
+            if (filterDefinition.isNotCondition()) {
+                rowValid = !rowValid;
+            }
             filterProcessor.createRow(resultDataSet, row, filterDefinition, rowValid);
         }
         return resultDataSet;

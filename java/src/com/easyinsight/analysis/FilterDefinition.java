@@ -9,6 +9,7 @@ import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.Pipeline;
 import nu.xom.Attribute;
 import nu.xom.Element;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -67,6 +68,9 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name="minimum_role")
     private int minimumRole = 4;
 
+    @Column(name="not_condition")
+    private boolean notCondition;
+
     @Column(name="marmotscript")
     private String marmotScript;
 
@@ -75,6 +79,14 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     @Transient
     transient private String pipelineName;
+
+    public boolean isNotCondition() {
+        return notCondition;
+    }
+
+    public void setNotCondition(boolean notCondition) {
+        this.notCondition = notCondition;
+    }
 
     public String getPipelineName() {
         if (pipelineName == null) {
@@ -219,6 +231,9 @@ public class FilterDefinition implements Serializable, Cloneable {
     }
 
     public boolean validForQuery() {
+        if (notCondition) {
+            return false;
+        }
         if (getField() != null) {
             if (getField().hasType(AnalysisItemTypes.STEP) || getField().hasType(AnalysisItemTypes.RANGE_DIMENSION)) {
                 return false;
@@ -293,9 +308,59 @@ public class FilterDefinition implements Serializable, Cloneable {
             case FilterDefinition.VALUE:
                 filterDefinition = new FilterValueDefinition();
                 break;
+            case FilterDefinition.ANALYSIS_ITEM:
+                filterDefinition = new AnalysisItemFilterDefinition();
+                break;
+            case FilterDefinition.FIRST_VALUE:
+                filterDefinition = new FirstValueFilter();
+                break;
+            case FilterDefinition.LAST_VALUE:
+                filterDefinition = new LastValueFilter();
+                break;
+            case FilterDefinition.MONTH_CUTOFF:
+                filterDefinition = new MonthCutoffFilter();
+                break;
+            case FilterDefinition.MULTI_FLAT_DATE:
+                filterDefinition = new MultiFlatDateFilter();
+                break;
+            case FilterDefinition.NAMED_REF:
+                filterDefinition = new NamedFilterReference();
+                break;
+            case FilterDefinition.NULL:
+                filterDefinition = new NullFilter();
+                break;
+            case FilterDefinition.OR:
+                filterDefinition = new OrFilter();
+                break;
+            case FilterDefinition.PATTERN:
+                filterDefinition = new FilterPatternDefinition();
+                break;
+            case FilterDefinition.RANGE:
+                filterDefinition = new FilterRangeDefinition();
+                break;
+            case FilterDefinition.ROLLING_DATE:
+                filterDefinition = new RollingFilterDefinition();
+                break;
+            case FilterDefinition.DATE:
+                filterDefinition = new FilterDateRangeDefinition();
+                break;
             default:
                 throw new RuntimeException();
         }
+        Nodes fieldNodes = element.query("field");
+        if (fieldNodes.size() == 1) {
+            Element field = (Element) fieldNodes.get(0);
+            filterDefinition.setField(AnalysisItem.fromXML((Element) field.getChild(0), xmlImportMetadata));
+        }
+        filterDefinition.setEnabled(Boolean.parseBoolean(element.getAttribute("enabled").getValue()));
+        filterDefinition.setApplyBeforeAggregation(Boolean.parseBoolean(element.getAttribute("applyBeforeAggregation").getValue()));
+        filterDefinition.setIntrinsic(Boolean.parseBoolean(element.getAttribute("intrinsic").getValue()));
+        filterDefinition.setShowOnReportView(Boolean.parseBoolean(element.getAttribute("showOnReportView").getValue()));
+        filterDefinition.setTemplateFilter(Boolean.parseBoolean(element.getAttribute("templateFilter").getValue()));
+        filterDefinition.setToggleEnabled(Boolean.parseBoolean(element.getAttribute("toggleEnabled").getValue()));
+        filterDefinition.setTrendFilter(Boolean.parseBoolean(element.getAttribute("trendFilter").getValue()));
+        filterDefinition.setMinimumRole(Integer.parseInt(element.getAttribute("minimumRole").getValue()));
+        filterDefinition.setFilterName(element.getAttribute("filterName").getValue());
         filterDefinition.customFromXML(element, xmlImportMetadata);
         return filterDefinition;
     }
@@ -311,7 +376,7 @@ public class FilterDefinition implements Serializable, Cloneable {
         filterElement.addAttribute(new Attribute("toggleEnabled", String.valueOf(toggleEnabled)));
         filterElement.addAttribute(new Attribute("trendFilter", String.valueOf(trendFilter)));
         filterElement.addAttribute(new Attribute("minimumRole", String.valueOf(minimumRole)));
-        filterElement.addAttribute(new Attribute("filterName", filterName));
+        filterElement.addAttribute(new Attribute("filterName", xmlMetadata.value(filterName)));
         if (getField() != null) {
             Element fieldElement = new Element("field");
             filterElement.appendChild(fieldElement);

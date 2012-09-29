@@ -28,7 +28,11 @@ public class FieldFilterComponent implements IComponent {
         for (IRow row : dataSet.getRows()) {
             for (FilterPair filterPair : filterPairs) {
                 Value value = row.getValue(filterPair.filterDefinition.getField());
-                if (!filterPair.materializedFilterDefinition.allows(value)) {
+                boolean invalid = !filterPair.materializedFilterDefinition.allows(value);
+                if (filterPair.filterDefinition.isNotCondition()) {
+                    invalid = !invalid;
+                }
+                if (invalid) {
                     row.addValue(filterPair.analysisItem.createAggregateKey(), new EmptyValue());
                 }
             }

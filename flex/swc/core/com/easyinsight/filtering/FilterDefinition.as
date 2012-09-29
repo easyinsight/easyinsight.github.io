@@ -36,6 +36,7 @@ import flash.events.EventDispatcher;
     public var minimumRole:int = 4;
     public var marmotScript:String;
     public var trendFilter:Boolean;
+    public var notCondition:Boolean;
 		
 		public function FilterDefinition()
 			{

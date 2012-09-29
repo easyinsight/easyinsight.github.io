@@ -52,6 +52,7 @@
             beforeAgg = _filterDefinition.applyBeforeAggregation;
             showOnReportView = _filterDefinition.showOnReportView;
             filterName = _filterDefinition.filterName;
+            inverse = _filterDefinition.notCondition;
             parameterFilter = _filterDefinition.templateFilter;
             toggle = _filterDefinition.toggleEnabled;
             role = _filterDefinition.minimumRole;
@@ -114,6 +115,7 @@
                 _filterDefinition.field = editor.save(_feedID);
             }*/
             _filterDefinition.applyBeforeAggregation = aggregationCheckbox.selected;
+            _filterDefinition.notCondition = inverseCheckbox.selected;
             _filterDefinition.showOnReportView = reportViewCheckbox.selected;
             _filterDefinition.filterName = filterNameInput.text;
             _filterDefinition.templateFilter = parameterFilterCheckbox.selected;
@@ -126,6 +128,9 @@
         private function cancel():void {
             PopUpManager.removePopUp(this);
         }
+
+        [Bindable]
+        private var inverse:Boolean;
 
         [Bindable]
         private var role:int;
@@ -148,6 +153,9 @@
                 </mx:FormItem>
             </mx:Form>
             <mx:Form>
+                <mx:FormItem label="Make This a 'Not' Filter:">
+                    <mx:CheckBox id="inverseCheckbox" selected="{inverse}"/>
+                </mx:FormItem>
                 <mx:FormItem label="Parameter Filter:">
                     <mx:CheckBox id="parameterFilterCheckbox" selected="{parameterFilter}"/>
                 </mx:FormItem>
