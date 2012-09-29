@@ -555,7 +555,7 @@ public class FeedService {
             federatedDataSource.populateFields(conn);
             federatedDataSource.setApiKey(RandomTextGenerator.generateText(12));
             long feedID = feedStorage.addFeedDefinitionData(federatedDataSource, conn);
-            DataStorage.liveDataSource(feedID, conn);
+            DataStorage.liveDataSource(feedID, conn, federatedDataSource.getFeedType().getType());
             return federatedDataSource;
         } catch (Exception e) {
             LogClass.error(e);
@@ -574,7 +574,7 @@ public class FeedService {
             federatedDataSource.populateFields(conn);
             federatedDataSource.setApiKey(RandomTextGenerator.generateText(12));
             long feedID = feedStorage.addFeedDefinitionData(federatedDataSource, conn);
-            DataStorage.liveDataSource(feedID, conn);
+            DataStorage.liveDataSource(feedID, conn, federatedDataSource.getFeedType().getType());
             return federatedDataSource;
 
     }
@@ -598,7 +598,7 @@ public class FeedService {
         feedDef.populateFields(conn);
         feedDef.setApiKey(RandomTextGenerator.generateText(12));
         long feedID = feedStorage.addFeedDefinitionData(feedDef, conn);
-        DataStorage.liveDataSource(feedID, conn);
+        DataStorage.liveDataSource(feedID, conn, feedDef.getFeedType().getType());
         return feedDef;
     }
 

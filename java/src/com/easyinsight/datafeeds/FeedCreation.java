@@ -40,7 +40,7 @@ public class FeedCreation {
             tableDef.createTable();
             tableDef.insertData(dataSet);
         } else {
-            DataStorage.liveDataSource(feedID, conn);
+            DataStorage.liveDataSource(feedID, conn, feedDefinition.getFeedType().getType());
         }
         feedDefinition.setApiKey(RandomTextGenerator.generateText(12));
         feedStorage.updateDataFeedConfiguration(feedDefinition, conn);

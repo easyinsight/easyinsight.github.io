@@ -31,10 +31,6 @@ import org.jetbrains.annotations.Nullable;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 import org.jets3t.service.S3ServiceException;
-import org.jets3t.service.impl.rest.httpclient.RestS3Service;
-import org.jets3t.service.model.S3Bucket;
-import org.jets3t.service.model.S3Object;
-import org.jets3t.service.security.AWSCredentials;
 
 /**
  * User: James Boe
@@ -57,7 +53,7 @@ public class DataStorage implements IDataStorage {
     private List<IDataTransform> transforms = new ArrayList<IDataTransform>();
 
     private JCS reportCache = Cache.getCache(Cache.EMBEDDED_REPORTS);
-                               
+
     /**
      * Creates a read only connection for retrieving data.
      *
@@ -129,16 +125,9 @@ public class DataStorage implements IDataStorage {
 
     public static TempStorage existingTempConnection(FeedDefinition feedDefinition, EIConnection conn, String tableName) {
         Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
-        List<AnalysisItem> cachedCalculations = new ArrayList<AnalysisItem>();
         for (AnalysisItem analysisItem : feedDefinition.getFields()) {
             if (!analysisItem.persistable()) {
                 continue;
-            }
-            if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
-                if (analysisCalculation.isCachedCalculation()) {
-                    cachedCalculations.add(analysisCalculation);
-                }
             }
             Key key = analysisItem.getKey();
             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
@@ -150,10 +139,6 @@ public class DataStorage implements IDataStorage {
             } else {
                 keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
             }
-        }
-        List<IDataTransform> transforms = new ArrayList<IDataTransform>();
-        if (cachedCalculations.size() > 0) {
-            transforms.add(new CachedCalculationTransform(feedDefinition));
         }
         Database database = DatabaseManager.instance().getDatabase(getMetadata(feedDefinition.getDataFeedID(), conn).getDatabase());
         return new TempStorage(keyMetadatas, database, tableName);
@@ -190,7 +175,7 @@ public class DataStorage implements IDataStorage {
         Database database = DatabaseManager.instance().getDatabase(getMetadata(feedDefinition.getDataFeedID(), conn).getDatabase());
         return new TempStorage(feedDefinition.getDataFeedID(), keyMetadatas, database, cachedCalculations, transforms, conn);
     }
-    
+
     private List<AnalysisCalculation> cachedCalculations = new ArrayList<AnalysisCalculation>();
 
     public static DataStorage writeConnection(FeedDefinition feedDefinition, Connection conn, long accountID, boolean systemUpdate) throws SQLException {
@@ -260,6 +245,22 @@ public class DataStorage implements IDataStorage {
 
     private void validateSpace(Connection conn) throws SQLException, StorageLimitException {
         /*if (systemUpdate) return;
+
+        PreparedStatement spaceAllowed = conn.prepareStatement("SELECT ACCOUNT_TYPE, MAX_SIZE, max_days_over_size_boundary, days_over_size_boundary FROM ACCOUNT WHERE account_id = ?");
+        spaceAllowed.setLong(1, accountID);
+        ResultSet spaceRS = spaceAllowed.executeQuery();
+        spaceRS.next();
+        int accountType = spaceRS.getInt(1);
+        long maxSize = spaceRS.getLong(2);
+        int maxDaysOver = spaceRS.getInt(3);
+        int daysOver = spaceRS.getInt(4);
+        spaceAllowed.close();
+
+        if (maxDaysOver == -1) {
+            // if max days over = -1, they're an account we're not monitoring at all for size yet
+            return;
+        }
+
         PreparedStatement queryStmt = conn.prepareStatement("select feed_persistence_metadata.size, feed_persistence_metadata.feed_id, data_feed.feed_type, data_feed.visible, " +
                 "data_feed.parent_source_id, data_feed.feed_name from feed_persistence_metadata, upload_policy_users, user, data_feed where " +
                 "data_feed.data_feed_id = upload_policy_users.feed_id and feed_persistence_metadata.feed_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id and " +
@@ -306,11 +307,7 @@ public class DataStorage implements IDataStorage {
         }
         queryStmt.close();
 
-        PreparedStatement spaceAllowed = conn.prepareStatement("SELECT ACCOUNT_TYPE FROM ACCOUNT WHERE account_id = ?");
-        spaceAllowed.setLong(1, accountID);
-        ResultSet spaceRS = spaceAllowed.executeQuery();
-        spaceRS.next();
-        int accountType = spaceRS.getInt(1);
+
         long allowed;
         if (accountType == Account.ENTERPRISE) {
             allowed = Account.ENTERPRISE_MAX;
@@ -325,7 +322,7 @@ public class DataStorage implements IDataStorage {
         } else if (accountType == Account.PROFESSIONAL) {
             allowed = Account.PROFESSIONAL_MAX;
         } else if (accountType == Account.ADMINISTRATOR) {
-            allowed = Account.ADMINISTRATOR_MAX;           
+            allowed = Account.ADMINISTRATOR_MAX;
         } else {
             throw new RuntimeException("Unknown account type");
         }
@@ -333,8 +330,7 @@ public class DataStorage implements IDataStorage {
         if (usedSize > allowed) {
             long mb = allowed / 1000000L;
             throw new ReportException(new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + " mb. You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier.", statsList));
-        }
-        spaceAllowed.close();*/
+        }*/
 
     }
 
@@ -413,12 +409,12 @@ public class DataStorage implements IDataStorage {
         if (coreDBConn == null) {
             Connection conn = Database.instance().getConnection();
             try {
-                addOrUpdateMetadata(feedID, metadata, conn);
+                addOrUpdateMetadata(feedID, metadata, conn, dataSourceType);
             } finally {
                 Database.closeConnection(conn);
             }
         } else {
-            addOrUpdateMetadata(feedID, metadata, coreDBConn);
+            addOrUpdateMetadata(feedID, metadata, coreDBConn, dataSourceType);
             validateSpace(coreDBConn);
         }
         storageConn.commit();
@@ -535,13 +531,32 @@ public class DataStorage implements IDataStorage {
     public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems) throws Exception {
         return migrate(previousItems, newItems, true);
     }
-    
+
     public boolean calcCompare(AnalysisItem newItem, AnalysisItem previousItem) {
         if (newItem.hasType(AnalysisItemTypes.CALCULATION)) {
             AnalysisCalculation calc = (AnalysisCalculation) newItem;
             return (calc.isCachedCalculation() && !previousItem.persistable());
         }
         return false;
+    }
+
+    public void updateFromPrevious(List<KeyMetadata> keys, String previousTable, String newTable) throws SQLException {
+        StringBuilder columnBuilder = new StringBuilder();
+        StringBuilder selectBuilder = new StringBuilder();
+        Iterator<KeyMetadata> keyIter = keys.iterator();
+        while (keyIter.hasNext()) {
+            KeyMetadata keyMetadata = keyIter.next();
+            columnBuilder.append(keyMetadata.createInsertClause());
+            selectBuilder.append(keyMetadata.createInsertClause());
+            if (keyIter.hasNext()) {
+                columnBuilder.append(",");
+                selectBuilder.append(",");
+            }
+        }
+        String columns = columnBuilder.toString();
+        String insertSQL = "INSERT INTO " + newTable + " (" + columns + ") SELECT " + selectBuilder.toString() + " FROM " + previousTable;
+        PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
+        insertStmt.execute();
     }
 
     public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems, final boolean migrateData) throws Exception {
@@ -578,50 +593,6 @@ public class DataStorage implements IDataStorage {
             int previousVersion = metadata.getVersion();
             this.version = previousVersion + 1;
             this.metadata.setVersion(this.version);
-            List<AnalysisItem> previousKeys = new ArrayList<AnalysisItem>();
-            for (AnalysisItem previousItem : previousItems) {
-                if (previousItem.persistable()) {
-                    previousKeys.add(previousItem);
-                }
-            }
-            DataSet existing = null;
-            Map<Key, KeyMetadata> keyMetadatas;
-            keyMetadatas = new HashMap<Key, KeyMetadata>();
-            Map<Key, Key> keyMap = new HashMap<Key, Key>();
-            for (AnalysisItem analysisItem : previousItems) {
-                if (analysisItem.isDerived()) {
-                    continue;
-                }
-                Key key = analysisItem.createAggregateKey(false);
-                keyMap.put(key.toBaseKey(), key);
-                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                    keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
-                } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                    keyMetadatas.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
-                } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
-                    keyMetadatas.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
-                } else {
-                    keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
-                }
-            }
-            if (migrateData) {
-                if (previousKeys.isEmpty()) {
-                    existing = new DataSet();
-                } else {
-
-                    
-                    InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-                    insightRequestMetadata.setNow(new Date());
-                    insightRequestMetadata.setAggregateQuery(false);
-                    try {
-                        existing = retrieveData(previousKeys, null, 0, keyMetadatas, previousVersion, insightRequestMetadata);
-                    } catch (SQLException e) {
-                        LogClass.error(e);
-                        existing = new DataSet();
-                    }
-                    //existing = new DataSet();
-                }
-            }
 
             ResultSet existsRS = storageConn.getMetaData().getTables(null, null, getTableName(), null);
             if (existsRS.next()) {
@@ -633,31 +604,27 @@ public class DataStorage implements IDataStorage {
             createSQL.execute();
 
             if (migrateData) {
-                for (FieldMigration fieldMigration : fieldMigrations) {
-                    for (IRow row : existing.getRows()) {
-                        Key key = keyMap.get(fieldMigration.key);
-                        Value existingValue = row.getValue(key);
-                        String string = existingValue.toString();
-                        if (fieldMigration.newType == Value.DATE) {
-                        } else if (fieldMigration.newType == Value.NUMBER) {
-                            double doubleValue = NumericValue.produceDoubleValue(string);
-                            row.addValue(fieldMigration.key, new NumericValue(doubleValue));
+                if (!fieldMigrations.isEmpty() || dataSourceType != FeedType.QUICKBASE_CHILD.getType()) {
+                    slowMigrate(previousItems, fieldMigrations, previousVersion);
+                } else {
+                    List<KeyMetadata> keys = new ArrayList<KeyMetadata>();
+                    for (AnalysisItem analysisItem : previousItems) {
+                        if (analysisItem.isDerived()) {
+                            continue;
+                        }
+                        Key key = analysisItem.getKey();
+                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                            keys.add(new KeyMetadata(key, Value.DATE, analysisItem));
+                        } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                            keys.add(new KeyMetadata(key, Value.NUMBER, analysisItem));
+                        } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                            keys.add(new KeyMetadata(key, Value.TEXT, analysisItem));
                         } else {
-                            if (existingValue.type() == Value.NUMBER) {
-                                string = ((Long) ((NumericValue) existingValue).getValue().longValue()).toString();
-                            }
-                            row.addValue(fieldMigration.key, new StringValue(string));
+                            keys.add(new KeyMetadata(key, Value.STRING, analysisItem));
                         }
                     }
+                    updateFromPrevious(keys, "df" + feedID + "v" + previousVersion, getTableName());
                 }
-                DataSet mirror = new DataSet();
-                for (IRow row : existing.getRows()) {
-                    IRow mirrorRow = mirror.createRow();
-                    for (Key key : row.getKeys()) {
-                        mirrorRow.addValue(key.toBaseKey(), row.getValue(key));
-                    }
-                }
-                insertData(mirror);
             }
 
             try {
@@ -669,6 +636,78 @@ public class DataStorage implements IDataStorage {
             }
         }
         return this.version;
+    }
+
+    private void slowMigrate(List<AnalysisItem> previousItems, List<FieldMigration> fieldMigrations, int previousVersion) throws Exception {
+        DataSet existing;
+        List<AnalysisItem> previousKeys = new ArrayList<AnalysisItem>();
+        for (AnalysisItem previousItem : previousItems) {
+            if (previousItem.persistable()) {
+                previousKeys.add(previousItem);
+            }
+        }
+
+        Map<Key, KeyMetadata> keyMetadatas;
+        keyMetadatas = new HashMap<Key, KeyMetadata>();
+        Map<Key, Key> keyMap = new HashMap<Key, Key>();
+        for (AnalysisItem analysisItem : previousItems) {
+            if (analysisItem.isDerived()) {
+                continue;
+            }
+            Key key = analysisItem.createAggregateKey(false);
+            keyMap.put(key.toBaseKey(), key);
+            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
+            } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+            } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
+            } else {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
+            }
+        }
+        if (previousKeys.isEmpty()) {
+            existing = new DataSet();
+        } else {
+
+
+            InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+            insightRequestMetadata.setNow(new Date());
+            insightRequestMetadata.setAggregateQuery(false);
+            try {
+                existing = retrieveData(previousKeys, null, 0, keyMetadatas, previousVersion, insightRequestMetadata);
+            } catch (SQLException e) {
+                LogClass.error(e);
+                existing = new DataSet();
+            }
+        }
+
+
+        for (FieldMigration fieldMigration : fieldMigrations) {
+            for (IRow row : existing.getRows()) {
+                Key key = keyMap.get(fieldMigration.key);
+                Value existingValue = row.getValue(key);
+                String string = existingValue.toString();
+                if (fieldMigration.newType == Value.DATE) {
+                } else if (fieldMigration.newType == Value.NUMBER) {
+                    double doubleValue = NumericValue.produceDoubleValue(string);
+                    row.addValue(fieldMigration.key, new NumericValue(doubleValue));
+                } else {
+                    if (existingValue.type() == Value.NUMBER) {
+                        string = ((Long) ((NumericValue) existingValue).getValue().longValue()).toString();
+                    }
+                    row.addValue(fieldMigration.key, new StringValue(string));
+                }
+            }
+        }
+        DataSet mirror = new DataSet();
+        for (IRow row : existing.getRows()) {
+            IRow mirrorRow = mirror.createRow();
+            for (Key key : row.getKeys()) {
+                mirrorRow.addValue(key.toBaseKey(), row.getValue(key));
+            }
+        }
+        insertData(mirror);
     }
 
     /**
@@ -732,7 +771,7 @@ public class DataStorage implements IDataStorage {
             keyStrings.add(key.toSQL());
         }
 
-        
+
         if (keys == null) {
             keys = new HashMap<Key, KeyMetadata>();
             Iterator<AnalysisItem> iter = reportItems.iterator();
@@ -1440,13 +1479,24 @@ public class DataStorage implements IDataStorage {
         return "df" + feedID + "v" + version;
     }
 
-    private static void addOrUpdateMetadata(long dataFeedID, FeedPersistenceMetadata metadata, Connection conn) {
+    private static void addOrUpdateMetadata(long dataFeedID, FeedPersistenceMetadata metadata, Connection conn, int dataSourceType) {
         try {
-            if (metadata.getMetadataID() > 0) {
-                PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_PERSISTENCE_METADATA_ID = ?");
-                deleteStmt.setLong(1, metadata.getMetadataID());
-                deleteStmt.executeUpdate();
-                deleteStmt.close();
+            if (dataSourceType == FeedType.DATABASE_CONNECTION.getType()) {
+                if (metadata.getMetadataID() > 0) {
+                    PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_ID = ? AND " +
+                            "VERSION = ?");
+                    deleteStmt.setLong(1, dataFeedID);
+                    deleteStmt.setInt(2, metadata.getVersion());
+                    deleteStmt.executeUpdate();
+                    deleteStmt.close();
+                }
+            } else {
+                if (metadata.getMetadataID() > 0) {
+                    PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_PERSISTENCE_METADATA_ID = ?");
+                    deleteStmt.setLong(1, metadata.getMetadataID());
+                    deleteStmt.executeUpdate();
+                    deleteStmt.close();
+                }
             }
 
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO FEED_PERSISTENCE_METADATA (FEED_ID, " +
@@ -1464,20 +1514,20 @@ public class DataStorage implements IDataStorage {
         }
     }
 
-    public static void addOrUpdateMetadata(long dataFeedID, FeedPersistenceMetadata metadata) {
+    public static void addOrUpdateMetadata(long dataFeedID, FeedPersistenceMetadata metadata, int dataSourceType) {
         Connection conn = Database.instance().getConnection();
         try {
-            addOrUpdateMetadata(dataFeedID, metadata, conn);
+            addOrUpdateMetadata(dataFeedID, metadata, conn, dataSourceType);
         } finally {
             Database.closeConnection(conn);
         }
     }
 
-    public static void liveDataSource(long dataSourceID, Connection conn) {
+    public static void liveDataSource(long dataSourceID, Connection conn, int dataSourceType) {
         FeedPersistenceMetadata metadata = new FeedPersistenceMetadata();
         metadata.setVersion(1);
         metadata.setLastData(new Date());
-        addOrUpdateMetadata(dataSourceID, metadata, conn);
+        addOrUpdateMetadata(dataSourceID, metadata, conn, dataSourceType);
     }
 
     private static FeedPersistenceMetadata createDefaultMetadata(Connection conn) {
