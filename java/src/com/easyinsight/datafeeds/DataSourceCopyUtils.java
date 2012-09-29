@@ -52,7 +52,7 @@ public class DataSourceCopyUtils {
         if ((feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL)) {
             buildClonedDataStores(copyData, feedDefinition, clonedFeedDefinition, conn);
         } else {
-            DataStorage.liveDataSource(result.getFeedDefinition().getDataFeedID(), conn);
+            DataStorage.liveDataSource(result.getFeedDefinition().getDataFeedID(), conn, result.getFeedDefinition().getFeedType().getType());
         }
         clonedFeedDefinition.postClone(conn);
 
