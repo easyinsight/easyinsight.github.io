@@ -1,14 +1,17 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.pipeline.DateRangePluginComponent;
 import com.easyinsight.pipeline.IComponent;
+import nu.xom.Attribute;
 import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.sql.PreparedStatement;
@@ -44,6 +47,25 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     private Date endDate;
     @Column(name="sliding")
     private boolean sliding;
+
+    public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            startDate = df.parse(element.getAttribute("startDate").getValue());
+            endDate = df.parse(element.getAttribute("endDate").getValue());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        element.addAttribute(new Attribute("startDate", df.format(startDate)));
+        element.addAttribute(new Attribute("endDate", df.format(startDate)));
+        return element;
+    }
 
     @Override
     public void beforeSave(Session session) {
@@ -248,12 +270,6 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         } else {
             return super.createComponents(pipelineName, filterProcessor, sourceItem, columnLevel);
         }
-    }
-
-    @Override
-    public Element toXML(XMLMetadata xmlMetadata) {
-        Element element = super.toXML(xmlMetadata);
-        return element;
     }
 
     @Override

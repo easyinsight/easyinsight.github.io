@@ -1,7 +1,9 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.logging.LogClass;
+import nu.xom.Attribute;
 import nu.xom.Element;
 import org.hibernate.Session;
 
@@ -56,6 +58,35 @@ public class FilterRangeDefinition extends FilterDefinition {
         setEndValueDefined(true);
     }
 
+    public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        setStartValue(Double.parseDouble(element.getAttribute("startvalue").getValue()));
+        setEndValue(Double.parseDouble(element.getAttribute("endValue").getValue()));
+        setStartValueDefined(Boolean.parseBoolean(element.getAttribute("startValueDefined").getValue()));
+        setEndValueDefined(Boolean.parseBoolean(element.getAttribute("endValueDefined").getValue()));
+        setCurrentStartValue(Double.parseDouble(element.getAttribute("currentStartValue").getValue()));
+        setCurrentStartValueDefined(Boolean.parseBoolean(element.getAttribute("currentStartValueDefined").getValue()));
+        setCurrentEndValue(Double.parseDouble(element.getAttribute("currentEndValue").getValue()));
+        setCurrentEndValueDefined(Boolean.parseBoolean(element.getAttribute("currentEndValueDefined").getValue()));
+        setLowerOperator(Integer.parseInt(element.getAttribute("lowerOperator").getValue()));
+        setUpperOperator(Integer.parseInt(element.getAttribute("upperOperator").getValue()));
+    }
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("startValue", String.valueOf(startValue)));
+        element.addAttribute(new Attribute("endValue", String.valueOf(endValue)));
+        element.addAttribute(new Attribute("startValueDefined", String.valueOf(startValueDefined)));
+        element.addAttribute(new Attribute("endValueDefined", String.valueOf(endValueDefined)));
+        element.addAttribute(new Attribute("currentStartValue", String.valueOf(currentStartValue)));
+        element.addAttribute(new Attribute("currentStartValueDefined", String.valueOf(currentEndValueDefined)));
+        element.addAttribute(new Attribute("currentEndValue", String.valueOf(currentEndValue)));
+        element.addAttribute(new Attribute("currentStartValueDefined", String.valueOf(currentEndValueDefined)));
+        element.addAttribute(new Attribute("lowerOperator", String.valueOf(lowerOperator)));
+        element.addAttribute(new Attribute("upperOperator", String.valueOf(upperOperator)));
+        return element;
+    }
+
     @Override
     public void beforeSave(Session session) {
         super.beforeSave(session);
@@ -63,12 +94,6 @@ public class FilterRangeDefinition extends FilterDefinition {
         if (Double.isNaN(endValue)) endValue = 0;
         if (Double.isNaN(currentStartValue)) currentStartValue = 0;
         if (Double.isNaN(currentEndValue)) currentEndValue = 0;
-    }
-
-    @Override
-    public Element toXML(XMLMetadata xmlMetadata) {
-        Element element = super.toXML(xmlMetadata);
-        return element;
     }
 
     public boolean isCurrentStartValueDefined() {
