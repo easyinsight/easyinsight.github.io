@@ -22,6 +22,14 @@ public class XMLMetadata {
         this.conn = conn;
     }
 
+    public String value(String string) {
+        if (string == null) {
+            return "";
+        } else {
+            return string;
+        }
+    }
+
     public String urlKeyForDashboardID(long dashboardID) {
         try {
             PreparedStatement stmt = conn.prepareStatement("SELECT URL_KEY FROM DASHBOARD WHERE DASHBOARD_ID = ?");
