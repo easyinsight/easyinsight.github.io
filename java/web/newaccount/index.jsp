@@ -61,6 +61,7 @@
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
 <div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
+<div id="trialDiv" style="margin-top: 108px"></div>
 <div style="width:1000px;margin:0 auto;">
     <div id="topBar">
         <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
@@ -78,48 +79,31 @@
         <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
         <a class="inactive" href="/api.html">Developers</a>
     </div>
+    <div id="trialBar">
+        <div style="font-size: 18px;padding-top:15px">More Info? Call 1 (720) 285-8652</div>
+    </div>
     <div id="contentHeaderStart"></div>
     <div id="midContent">
         <form method="post" id="profileForm" action="accountCreation.jsp">
             <input type="hidden" name='OWASP_CSRFTOKEN' value="<%= session.getAttribute("OWASP_CSRFTOKEN")%>" />
             <input type="hidden" id="tier" name="tier" value="<%=StringEscapeUtils.escapeHtml(request.getParameter("tier"))%>"/>
             <input type="hidden" id="wasSubmit" name="wasSubmit" value="1"/>
-            <div>
-                <p style="text-align:center;font-size:32px;font-weight:bold;width: 100%">Start Using Easy Insight
-                    Now!</p>
-
-                <p style="text-align:center;font-size:24px;padding-top:20px;font-family:'Cabin',arial,serif;width: 100%">
-                    Fully functional 30 day free trial, no credit card required</p>
-            </div>
             <div style="width:100%;position:relative;height:500px">
-                <div id="sideBar" style="float:left">
+                <div style="height:450px; width: 655px; float:right;padding-left: 50px;padding-right: 50px;">
+                    <div>
+                        <p style="text-align:center;font-size:32px;font-weight:bold;width: 100%">Start Using Easy Insight
+                            Now!</p>
 
-                    <img style="padding-top:20px" src="/images/chart_column.png" alt="Report Creation"/>
-
-                    <div class="sideBarHeader">Easy to Use</div>
-                    <div style="font-size:14px">Business User Friendly</div>
-                    <div style="font-size:14px">Drag and Drop Reporting</div>
-
-                    <img style="padding-top:40px" src="/images/lock.png" alt="Security"/>
-
-                    <div class="sideBarHeader">Secure and Reliable</div>
-                    <div style="font-size:14px">All SSL, All the Time</div>
-                    <div style="font-size:14px">Daily Backups</div>
-
-                    <img style="padding-top:40px" src="/images/user_headset.png" alt="Customer Service"/>
-
-                    <div class="sideBarHeader">Dedicated Customer Service</div>
-                    <div style="font-size:14px">We're determined to give you the best possible user experience</div>
-                </div>
-
-                <div style="height:450px; width: 575px; float:left">
+                        <p style="text-align:center;font-size:24px;padding-top:20px;font-family:'Cabin',arial,serif;width: 100%">
+                            Fully functional 30 day free trial, no credit card required</p>
+                    </div>
 
                     <div style="color:red; font-size:16px;height:25px;padding-top:10px;padding-bottom:10px;">
                         <% if (errorString != null) { %>
                         <%= errorString %>
                         <% } %>
                     </div>
-                    <table style="padding-top:5px;border-spacing:10px">
+                    <table style="padding-top:5px;border-spacing:10px;padding-left:65px">
                         <tr>
                             <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">
                                 First Name
@@ -161,7 +145,8 @@
                         </tr>
                     </table>
                     <div style="padding-top:20px">
-                        <input type="image" src="/images/GetStartedSmaller2.png" alt="Create Account"/>
+                        <input type="submit" class="btn btn-inverse btn-large" style="margin-top: 8px" value="Create Account"/>
+                        <%--<input type="image" src="/images/GetStartedSmaller2.png" alt="Create Account"/>--%>
                     </div>
                     <div style="fontSize:12px;font-family:'Cabin',arial,serif;color:#333333;padding-top:30px">By
                         clicking Get
@@ -171,7 +156,7 @@
                         policies.
                     </div>
                 </div>
-                <div id="rightSideBar" style="float:left">
+                <div id="rightSideBar" style="float:left;margin-left:20px">
                     <p style="font-size:14px;font-family:'Cabin',arial,serif;text-align: center">What Our Customers are Saying</p>
 
                     <p style="font-size:12px;font-family:'Cabin',arial,serif;padding-top: 20px">
