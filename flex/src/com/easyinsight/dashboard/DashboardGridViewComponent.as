@@ -23,8 +23,6 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
         setStyle("paddingBottom", 0);
         setStyle("horizontalGap", 0);
         setStyle("verticalGap", 0);
-        verticalScrollPolicy = "off";
-        horizontalScrollPolicy = "off";
         addEventListener(SizeOverrideEvent.SIZE_OVERRIDE, onSizeOverride);
     }
     
@@ -34,6 +32,10 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
             for (var j:int = 0; j < dashboardGrid.columns; j++) {
                 var e:DashboardGridItem = findItem(i, j);
                 var gridItem:GridItem = gridRow.getChildAt(j) as GridItem;
+                if (dashboardEditorMetadata != null && dashboardEditorMetadata.borderThickness == 0) {
+                    gridItem.horizontalScrollPolicy = "off";
+                    gridItem.verticalScrollPolicy = "off";
+                }
                 var childSizeInfo:SizeInfo = IDashboardViewComponent(gridItem.getChildAt(0)).obtainPreferredSizeInfo();
                 if (childSizeInfo.preferredWidth != 0) {
                     gridItem.width = childSizeInfo.preferredWidth + dashboardGrid.paddingLeft + dashboardGrid.paddingRight;
@@ -57,6 +59,10 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
 
     protected override function createChildren():void {
         super.createChildren();
+        if (dashboardEditorMetadata != null && dashboardEditorMetadata.borderThickness == 0) {
+            verticalScrollPolicy = "off";
+            horizontalScrollPolicy = "off";
+        }
         var gridAbsoluteHeight:Boolean = false;
         for (var i1:int = 0; i1 < dashboardGrid.rows; i1++) {
             for (var j1:int = 0; j1 < dashboardGrid.columns; j1++) {
@@ -85,6 +91,7 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
             for (var j:int = 0; j < dashboardGrid.columns; j++) {
                 var e:DashboardGridItem = findItem(i, j);
                 var gridItem:GridItem = new GridItem();
+                //gridItem.setStyle("backgroundColor", 0);
 
                 var child:UIComponent = DashboardElementFactory.createViewUIComponent(e.dashboardElement, dashboardEditorMetadata);
                 var childSizeInfo:SizeInfo = IDashboardViewComponent(child).obtainPreferredSizeInfo();
@@ -127,7 +134,6 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
             for (var j:int = 0; j < dashboardGrid.columns; j++) {
                 var e:DashboardGridItem = findItem(i, j);
-                e.dashboardElement;
             }
         }
         return new SizeInfo(dashboardGrid.preferredWidth, dashboardGrid.preferredHeight);
