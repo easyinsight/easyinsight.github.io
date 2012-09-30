@@ -22,6 +22,7 @@ import com.easyinsight.analysis.form.FormReport;
 import com.easyinsight.analysis.gauge.GaugeDefinition;
 import com.easyinsight.analysis.heatmap.HeatMapDefinition;
 import com.easyinsight.analysis.list.ListDefinition;
+import com.easyinsight.analysis.summary.SummaryDefinition;
 import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
@@ -69,6 +70,7 @@ public class StyleConfiguration {
             items.addItem(new ImageReportFormItem("Header Background Image", "headerBackground",  dashboardElement.headerBackground, dashboardElement));
             items.addItem(new ColorReportFormItem("Header Background Color", "headerBackgroundColor",  dashboardElement.headerBackgroundColor, dashboardElement));
             items.addItem(new NumericReportFormItem("Header Background Alpha", "headerBackgroundAlpha",  dashboardElement.headerBackgroundAlpha, dashboardElement, 0, 1));
+            items.addItem(new CheckBoxReportFormItem("Force Scrolling Off", "forceScrollingOff",  dashboardElement.forceScrollingOff, dashboardElement));
         }
         if (dashboardElement is DashboardStack) {
             items.addItem(new CheckBoxReportFormItem("Consolidate Header Elements", "consolidateHeaderElements", DashboardStack(dashboardElement).consolidateHeaderElements, dashboardElement));
@@ -155,6 +157,9 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", TreeDefinition(report).headerColor2, report));
             items.addItem(new CheckBoxReportFormItem("Auto Expand All", "autoExpandAll", TreeDefinition(report).autoExpandAll, report));
             items.addItem(new CheckBoxReportFormItem("Summary Row", "summaryTotal", TreeDefinition(report).summaryTotal, report));
+        }
+        if (report is SummaryDefinition) {
+            items.addItem(new TextReportFormItem("Summary Label", "summaryReportLine", SummaryDefinition(report).summaryReportLine, report));
         }
         if (report is ChartDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show Legend", "showLegend", ChartDefinition(report).showLegend, report));
@@ -290,6 +295,7 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
         items.addItem(new CheckBoxReportFormItem("Log Report", "logReport", report.logReport, report));
         items.addItem(new CheckBoxReportFormItem("Data Source Fields", "dataSourceFields", report.dataSourceFields, report));
+        items.addItem(new CheckBoxReportFormItem("Ad Hoc Execution", "adHocExecution", report.adHocExecution, report));
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];
         items.sort = sort;
