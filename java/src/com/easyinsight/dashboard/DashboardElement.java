@@ -33,6 +33,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     public static final int TEXT = 6;
 
     private long elementID;
+    private boolean forceScrollingOff;
     private String label;
     private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
     private String filterBorderStyle = "solid";
@@ -51,6 +52,14 @@ public abstract class DashboardElement implements Cloneable, Serializable {
 
     private int preferredWidth;
     private int preferredHeight;
+
+    public boolean isForceScrollingOff() {
+        return forceScrollingOff;
+    }
+
+    public void setForceScrollingOff(boolean forceScrollingOff) {
+        this.forceScrollingOff = forceScrollingOff;
+    }
 
     public DashboardElement getParentElement() {
         return parentElement;
@@ -203,7 +212,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     public void loadElement(long elementID, EIConnection conn) throws SQLException {
         PreparedStatement loadStmt = conn.prepareStatement("SELECT LABEL, FILTER_BORDER_STYLE, FILTER_BORDER_COLOR, filter_background_color, filter_background_alpha," +
                 "padding_left, padding_right, padding_top, padding_bottom, header_image_id, user_image.image_name, header_background_color, header_background_alpha," +
-                "preferred_width, preferred_height, dashboard_element_id from dashboard_element " +
+                "preferred_width, preferred_height, dashboard_element_id, force_scrolling_off from dashboard_element " +
                 "left join user_image on dashboard_element.header_image_id = user_image.user_image_id where " +
                 "dashboard_element_id = ?");
         loadStmt.setLong(1, elementID);
@@ -235,14 +244,15 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         setHeaderBackgroundAlpha(rs.getDouble(i++));
         setPreferredWidth(rs.getInt(i++));
         setPreferredHeight(rs.getInt(i++));
-        setElementID(rs.getLong(i));
+        setElementID(rs.getLong(i++));
+        setForceScrollingOff(rs.getBoolean(i));
         loadStmt.close();
     }
 
     public long save(EIConnection conn) throws SQLException {
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_ELEMENT (ELEMENT_TYPE, LABEL, filter_border_style, filter_border_color," +
                 "filter_background_color, filter_background_alpha, padding_left, padding_right, padding_top, padding_bottom, header_image_id," +
-                "header_background_color, header_background_alpha, preferred_width, preferred_height) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "header_background_color, header_background_alpha, preferred_width, preferred_height, force_scrolling_off) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertStmt.setInt(i++, getType());
@@ -263,7 +273,8 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         insertStmt.setInt(i++, headerBackgroundColor);
         insertStmt.setDouble(i++, headerBackgroundAlpha);
         insertStmt.setInt(i++, preferredWidth);
-        insertStmt.setInt(i, preferredHeight);
+        insertStmt.setInt(i++, preferredHeight);
+        insertStmt.setBoolean(i, forceScrollingOff);
         insertStmt.execute();
         setElementID(Database.instance().getAutoGenKey(insertStmt));
         insertStmt.close();

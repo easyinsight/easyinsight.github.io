@@ -23,6 +23,7 @@ public class DashboardElement {
     public var headerBackgroundAlpha:Number = 0;
     public var preferredWidth:int;
     public var preferredHeight:int;
+    public var forceScrollingOff:Boolean;
 
     public function DashboardElement() {
     }

@@ -98,6 +98,10 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     protected override function createChildren():void {
         super.createChildren();
+        if (dashboardStack.forceScrollingOff) {
+            verticalScrollPolicy = "off";
+            horizontalScrollPolicy = "off";
+        }
         buildEffects();
         if (dashboardStack.consolidateHeaderElements) {
             var headerHBox:HBox = new HBox();
