@@ -47,6 +47,10 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
     protected override function createChildren():void {
         super.createChildren();
+        if (dashboardEditorMetadata.borderThickness == 0) {
+            horizontalScrollPolicy = "off";
+            verticalScrollPolicy = "off";
+        }
         var sizeInfo:SizeInfo = obtainPreferredSizeInfo();
         if (sizeInfo.preferredWidth > 0) {
             width = dashboardReport.preferredWidth;
