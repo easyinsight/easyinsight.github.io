@@ -689,7 +689,7 @@ public class Account {
         info.setResponseString(params.get("responsetext"));
         info.setTransactionID(params.get("transactionid"));
         info.setTransactionTime(new Date());
-        info.setDays(getBillingDayOfMonth() != null ? 365 : 28);
+        info.setDays(getBillingMonthOfYear() != null ? 365 : 28);
 
         if (successful) {
             String invoiceBody = info.toInvoiceText(this);
