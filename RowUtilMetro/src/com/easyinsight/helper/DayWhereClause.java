@@ -18,7 +18,7 @@ public class DayWhereClause extends WhereClause {
     @Override
     String toXML() {
         StringBuilder xml = new StringBuilder();
-        xml.append("<where whereType\"string\">");
+        xml.append("<where whereType=\"day\">");
         xml.append("<key>");
         xml.append(getKey());
         xml.append("</key>");
