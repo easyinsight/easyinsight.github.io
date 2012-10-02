@@ -1,3 +1,8 @@
+<%@ page import="org.hibernate.Session" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.users.User" %>
+<%@ page import="java.util.List" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <!DOCTYPE html>
 <html>
 <!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
@@ -8,6 +13,20 @@
     }
     if (errorString != null) {
         request.getSession().removeAttribute("errorString");
+    }
+
+    String userName = (String) session.getAttribute("userName");
+    String email = "";
+    if (userName != null) {
+        Session hibernateSession = Database.instance().createSession();
+        try {
+            List<User> userList = hibernateSession.createQuery("from User where userName = ?").setString(0, userName).list();
+            if (userList.size() > 0) {
+                email = userList.get(0).getEmail();
+            }
+        } finally {
+            hibernateSession.close();
+        }
     }
 %>
 <head>
@@ -81,51 +100,86 @@
 
             <div style="height:450px;padding-left:50px">
                 <p style="font-size:32px;font-weight:bold">Having a problem?</p>
-                <p style="font-size:24px;padding-top:20px;font-family:'Cabin',arial,serif">Send a support request and we'll get right on it!</p>
+
+                <p style="font-size:24px;padding-top:20px;font-family:'Cabin',arial,serif">Send a support request and
+                    we'll get right on it!</p>
+
                 <div style="color:red; font-size:16px;height:25px;padding-top:10px">
                     <% if (errorString != null) { %>
-                        <%= errorString %>
+                    <%= errorString %>
                     <% } %>
                 </div>
                 <table style="padding-top:5px;border-spacing:10px">
                     <tr>
-                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">Subject</td>
+                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">
+                            Subject
+                        </td>
                         <td><input required="required" style="font-size:14px;width:500px" id="subject" type="text"
-                                   value="<%=request.getSession().getAttribute("subject") == null ? "" : request.getSession().getAttribute("subject")%>"
+                                   value="<%=StringEscapeUtils.escapeHtml(request.getSession().getAttribute("subject") == null ? "" : (String) request.getSession().getAttribute("subject"))%>"
                                    name="subject"/></td>
                     </tr>
                     <tr>
-                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">Email</td>
+                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">
+                            Email
+                        </td>
                         <td><input required="required" style="font-size:14px;width:500px" id="email" type="email"
-                                   value="<%=request.getSession().getAttribute("email") == null ? "" : request.getSession().getAttribute("email")%>"
+                                   value="<%=StringEscapeUtils.escapeHtml(request.getSession().getAttribute("email") == null ? email : (String) request.getSession().getAttribute("email"))%>"
                                    name="email"/></td>
                     </tr>
                     <tr>
-                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">Description</td>
+                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">
+                            Description
+                        </td>
                         <td><textarea required="required" style="font-size:14px;width:500px" id="description"
-                                   name="description" rows="5" cols="80"><%=request.getSession().getAttribute("description") == null ? "" : request.getSession().getAttribute("description")%></textarea></td>
+                                      name="description" rows="5"
+                                      cols="80"><%=StringEscapeUtils.escapeHtml(request.getSession().getAttribute("description") == null ? "" : (String) request.getSession().getAttribute("description"))%>
+                        </textarea></td>
                     </tr>
                     <tr>
-                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">Report Type</td>
+                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">
+                            What kind of problem are you having?
+                        </td>
+                        <td><select style="font-size:14px;width:500px" id="problemType" name="problemType">
+                            <option value="account_access">I can't access my account.</option>
+                            <option value="sales_question">I have a question before signing up.</option>
+                            <option value="feature_request">I have a feature request.</option>
+                            <option value="billing_question">I have a question related to my billing.</option>
+                            <option value="activation_email">I haven't received an activation email.</option>
+                            <option value="report_email">I haven't received a scheduled report.</option>
+                            <option value="confused">I don't understand how something works.</option>
+                            <option value="bug">I received an error, or I think something is broken</option>
+                            <option value="other">Other</option>
+                        </select>
+                        </td>
+                    </tr>
+                    <!--
+                    <tr>
+                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">
+                            Report Type
+                        </td>
                         <td><select style="font-size:14px;width:500px" id="reportType" name="reportType">
-                                <option value="">N/A</option>
-                                <option value="chart">Chart</option>
-                            </select>
+                            <option value="">N/A</option>
+                            <option value="chart">Chart</option>
+                        </select>
                         </td>
                     </tr>
                     <tr>
-                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">Connection Name</td>
+                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">
+                            Connection Name
+                        </td>
                         <td><select style="font-size:14px;width:500px" id="connectionName" name="connectionName">
-                                <option value="">N/A</option>
-                                <option value="amazon">Amazon</option>
-                                <option value="basecamp">Basecamp</option>
-                            </select>
+                            <option value="">N/A</option>
+                            <option value="amazon">Amazon</option>
+                            <option value="basecamp">Basecamp</option>
+                        </select>
                         </td>
-                    </tr>
+                    </tr> -->
                     <tr>
-                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">Attachment</td>
+                        <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">
+                            Attachment
+                        </td>
                         <td>
-                            <input type="file" style="font-size:14px;width:500px" id="attachment" name="attachment" />
+                            <input type="file" style="font-size:14px;width:500px" id="attachment" name="attachment"/>
                         </td>
                     </tr>
                 </table>

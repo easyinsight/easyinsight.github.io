@@ -40,9 +40,9 @@ public class ZenDeskBugReportProvider {
                     "  <description>{1}</description>\n" +
                     "  <requester-email>{2}</requester-email>\n" +
                     "  <ticket-field-entries type=\"array\">\n" +
-                    " {3}{4}" +
+                    " {3}{4}{5}" +
                     "  </ticket-field-entries>\n" +
-                    " {5}" +
+                    " {6}" +
                     "</ticket>";
     private static final String ZENDESK_REPORT_TYPE_XML = "<ticket-field-entry>\n" +
             "      <ticket-field-id>20386816</ticket-field-id>\n" +
@@ -54,6 +54,11 @@ public class ZenDeskBugReportProvider {
             "      <value>{0}</value>\n" +
             "    </ticket-field-entry>";
 
+    private static final String ZENDESK_PROBLEM_TYPE_XML = "<ticket-field-entry>\n" +
+                "      <ticket-field-id>21720687</ticket-field-id>\n" +
+                "      <value>{0}</value>\n" +
+                "    </ticket-field-entry>";
+
     private static final String ZENDESK_UPLOAD_XML = "<uploads>{0}</uploads>";
 
     private static HttpClient getHttpClient(String username, String password) {
@@ -64,7 +69,7 @@ public class ZenDeskBugReportProvider {
         return client;
     }
 
-    public void reportBug(String subject, String description, String email, String reportType, String connectionName, String attachment) {
+    public void reportBug(String subject, String description, String email, String problemType, String attachment) {
         try {
             LogClass.error(attachment);
             HttpClient client = getHttpClient(ZENDESK_API_USERNAME, ZENDESK_API_PASSWORD);
@@ -72,14 +77,17 @@ public class ZenDeskBugReportProvider {
             String reportTypeXml = "";
             String connectionXml = "";
             String uploadXml = "";
+            String problemTypeXml = "";
             if(!attachment.isEmpty())
                 uploadXml = MessageFormat.format(ZENDESK_UPLOAD_XML, attachment);
-            if(!reportType.isEmpty())
-                reportTypeXml = MessageFormat.format(ZENDESK_REPORT_TYPE_XML, reportType);
-            if(!connectionName.isEmpty())
-                connectionXml = MessageFormat.format(ZENDESK_CONNECTION_XML, connectionName);
+//            if(!reportType.isEmpty())
+//                reportTypeXml = MessageFormat.format(ZENDESK_REPORT_TYPE_XML, reportType);
+//            if(!connectionName.isEmpty())
+//                connectionXml = MessageFormat.format(ZENDESK_CONNECTION_XML, connectionName);
+            if(!problemType.isEmpty())
+                problemTypeXml = MessageFormat.format(ZENDESK_PROBLEM_TYPE_XML, problemType);
             String content = MessageFormat.format(ZENDESK_TICKET_XML, subject, description, email, reportTypeXml,
-                    connectionXml, uploadXml);
+                    connectionXml, problemTypeXml, uploadXml);
             StringRequestEntity entity = new StringRequestEntity(content, "text/xml", "UTF-8");
             method.setRequestEntity(entity);
             client.executeMethod(method);

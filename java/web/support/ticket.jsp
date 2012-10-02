@@ -30,10 +30,12 @@
     description = description == null ? "" : description;
     String email = (String) params.get("email");
     email = email == null ? "" : email;
-    String reportType = (String) params.get("reportType");
-    reportType = reportType == null ? "" : reportType;
-    String connectionName = (String) params.get("connectionName");
-    connectionName = connectionName == null ? "" : connectionName;
+//    String reportType = (String) params.get("reportType");
+//    reportType = reportType == null ? "" : reportType;
+//    String connectionName = (String) params.get("connectionName");
+//    connectionName = connectionName == null ? "" : connectionName;
+    String problemType = (String) params.get("problemType");
+    problemType = problemType == null ? "" : problemType;
     String attachment = (String) params.get("attachment");
     attachment = attachment == null ? "" : attachment;
 
@@ -42,7 +44,7 @@
         response.sendRedirect("index.jsp");
     }
 
-    provider.reportBug(subject, description, email, reportType, connectionName, uploadToken);
+    provider.reportBug(subject, description, email, problemType, uploadToken);
 %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
