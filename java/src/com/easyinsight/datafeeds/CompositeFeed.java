@@ -66,7 +66,7 @@ public class CompositeFeed extends Feed {
     @Override
     public List<FilterDefinition> getIntrinsicFilters(EIConnection conn) {
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
-        for (CompositeFeedNode child : compositeFeedNodes) {
+        /*for (CompositeFeedNode child : compositeFeedNodes) {
             Feed childDataSource = FeedRegistry.instance().getFeed(child.getDataFeedID(), conn);
             //filters.addAll(childDataSource.getIntrinsicFilters());
             List<FilterDefinition> childFilters = childDataSource.getIntrinsicFilters(conn);
@@ -79,7 +79,7 @@ public class CompositeFeed extends Feed {
                     }
                 }
             }
-        }
+        }*/
         return filters;
     }
 
