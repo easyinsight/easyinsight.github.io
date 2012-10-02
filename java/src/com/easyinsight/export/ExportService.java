@@ -1352,17 +1352,17 @@ public class ExportService {
         }
         sb.append("<table>");
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
-        sb.append("<td></td>");
+        sb.append("<th></th>");
         for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
             /*DateValue interval = (DateValue) ytdStuff.getIntervals().get(i);*/
             String date = createValue(exportMetadata.dateFormat, verticalList.getTimeDimension(), ytdStuff.getIntervals().get(i), exportMetadata.cal, exportMetadata.currencySymbol, false);
-            sb.append("<td style=\"").append(thStyle).append("\">").append(date).append("</td>");
+            sb.append("<th style=\"").append(thStyle).append("\">").append(date).append("</th>");
         }
-        sb.append("<td>").append("YTD").append("</td>");
-        sb.append("<td>").append("Average").append("</td>");
+        sb.append("<th>").append("YTD").append("</th>");
+        sb.append("<th>").append("Average").append("</th>");
         if (hasBenchmark) {
-            sb.append("<td>").append("BK").append("</td>");
-            sb.append("<td>").append("Variation").append("</td>");
+            sb.append("<th>").append("BK").append("</th>");
+            sb.append("<th>").append("Variation").append("</th>");
         }
         sb.append("</tr>");
         AnalysisMeasure percentMeasure = new AnalysisMeasure();
@@ -1373,7 +1373,7 @@ public class ExportService {
             sb.append("<tr>");
             AnalysisMeasure baseMeasure = ytdValue.getAnalysisMeasure();
             // TODO: argh
-            sb.append("<td style=\"").append(tdStyle).append("\">").append(baseMeasure.toDisplay()).append("</td>");
+            sb.append("<td style=\"white-space: nowrap; ").append(tdStyle).append("\">").append(baseMeasure.toDisplay()).append("</td>");
             if (ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
                 Map<Value, TimeIntervalValue> map = new HashMap<Value, TimeIntervalValue>();
                 for (int i = 0; i < ytdValue.getTimeIntervalValues().size(); i++) {
