@@ -4,8 +4,10 @@ import com.easyinsight.api.ServiceRuntimeException;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.util.ServiceUtil;
 import nu.xom.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +33,11 @@ public class CommitServlet extends APIServlet {
             } else {
                 transactionID = transactionIDNodes.get(0).getValue();
             }
+            Nodes callDataIDNodes = document.query("/commit/callDataID/text()");
+            String callDataID = null;
+            if (callDataIDNodes.size() == 1) {
+                callDataID = callDataIDNodes.get(0).getValue();
+            }
             PreparedStatement txnQueryStmt = conn.prepareStatement("SELECT data_transaction_id, data_source_name, replace_data, change_data_source_to_match, temp_table_name " +
                         "FROM data_transaction where external_txn_id = ? AND user_id = ?");
             txnQueryStmt.setString(1, transactionID);
@@ -55,6 +62,14 @@ public class CommitServlet extends APIServlet {
             dataStorage.insertFromSelect(tempTableName);
             dataStorage.commit();
             conn.commit();
+            if (callDataID != null && !"null".equals(callDataID)) {
+                try {
+                    System.out.println("marking done");
+                    ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.DONE);
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
+            }
             return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
         } finally {
             if (dataStorage != null) {

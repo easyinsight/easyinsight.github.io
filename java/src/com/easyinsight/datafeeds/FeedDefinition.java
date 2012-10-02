@@ -687,4 +687,8 @@ public class FeedDefinition implements Cloneable, Serializable {
     public boolean requiresPostOAuthSetup() {
         return false;
     }
+
+    public boolean waitsOnServiceUtil() {
+        return false;
+    }
 }
