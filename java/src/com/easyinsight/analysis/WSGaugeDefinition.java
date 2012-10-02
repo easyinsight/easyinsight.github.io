@@ -218,7 +218,7 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         gaugePropertiesString = gaugePropertiesString.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
 
-        String sss = "$.getJSON('/app/gauge?reportID="+getUrlKey()+timezoneOffset+"&' + strParams, Gauge.getCallback('" +targetDiv +"', '" + getUrlKey() + "', " + gaugePropertiesString + "))";
+        String sss = "$.getJSON('/app/gauge?reportID="+getUrlKey()+timezoneOffset+"&' + strParams, Gauge.getCallback('" +targetDiv +"', '" + getUrlKey() + "', " + gaugePropertiesString + ", " + maxValue+"))";
         return sss;
     }
 

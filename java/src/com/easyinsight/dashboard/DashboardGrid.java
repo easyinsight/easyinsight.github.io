@@ -227,18 +227,30 @@ public class DashboardGrid extends DashboardElement {
         }
         sb.append("}\n");
         sb.append("</script>\n");
-        sb.append("<table style=\"width:100%\">\r\n");
+        sb.append("<div class=\"container\">\n");
         for (int i = 0; i < rows; i++) {
-            sb.append("<tr style=\"width:100%\">\r\n");
+            sb.append("<div class=\"row\">\n");
+            //sb.append("<tr style=\"width:100%\">\r\n");
             for (int j = 0; j < columns; j++) {
-                sb.append("<td style=\"width:"+(100 / columns)+"%\">\r\n");
+                int span;
+                if (columns == 1) {
+                    span = 12;
+                } else if (columns == 2) {
+                    span = 6;
+                } else if (columns == 3) {
+                    span = 4;
+                } else {
+                    span = 2;
+                }
+                sb.append("<div class=\"span" + span + "\">");
+                //sb.append("<td style=\"width:"+(100 / columns)+"%\">\r\n");
                 DashboardGridItem item = findItem(i, j);
                 sb.append(item.getDashboardElement().toHTML(filterHTMLMetadata));
-                sb.append("</td>\r\n");
+                sb.append("</div>\r\n");
             }
-            sb.append("</tr>\r\n");
+            sb.append("</div>\r\n");
         }
-        sb.append("</table>\r\n");
+        sb.append("</div>\n");
         return sb.toString();
     }
 
@@ -284,6 +296,19 @@ public class DashboardGrid extends DashboardElement {
             element = stackItem.getDashboardElement().findElement(dashboardElementID);
             if (element != null) {
                 return element;
+            }
+        }
+        return null;
+    }
+
+    public DashboardUIProperties findHeaderImage() {
+        if (getHeaderBackground() != null) {
+            return new DashboardUIProperties(getHeaderBackgroundColor(), getHeaderBackground());
+        }
+        for (DashboardGridItem stackItem : getGridItems()) {
+            DashboardUIProperties imageDescriptor = stackItem.getDashboardElement().findHeaderImage();
+            if (imageDescriptor != null) {
+                return imageDescriptor;
             }
         }
         return null;
