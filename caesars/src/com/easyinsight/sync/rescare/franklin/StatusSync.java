@@ -18,10 +18,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -69,16 +66,42 @@ public class StatusSync extends HttpServlet {
         resp.getOutputStream().flush();
     }
 
+    public static void main(String args[]) {
+        try {
+            new StatusSync().run().join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Thread run() {
+        try {
+            init();
+            SyncRunnable syncRunnable = new SyncRunnable();
+            syncRunnable.setDaemon(false);
+
+            syncRunnable.start();
+            SyncReferralStatus sr = new SyncReferralStatus();
+            sr.setDaemon(false);
+            sr.start();
+            return syncRunnable;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private class SyncReferralStatus extends Thread {
         @Override
         public void run() {
             try {
+                DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                 HttpClient client = new HttpClient();
                 client.getParams().setAuthenticationPreemptive(true);
                 System.out.println(username + ":" + password);
                 Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
                 client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
-                GetMethod getMethod = new GetMethod("https://www.easy-insight.com/app/xml/reports/qklgRQujbPoEtSWVSwYA");
+                GetMethod getMethod = new GetMethod("https://www.easy-insight.com/app/xml/reports/gLZlVqicWwHcEoHBLFWZ");
                 client.executeMethod(getMethod);
                 Document doc = new Builder().build(getMethod.getResponseBodyAsStream());
 
@@ -90,30 +113,39 @@ public class StatusSync extends HttpServlet {
                     String participantID = rowNode.query("value[@field='Participant ID']").get(0).getValue();
                     String status = rowNode.query("value[@field='Referral Status']").get(0).getValue();
                     String countedDate = rowNode.query("value[@field='Counted Date']").get(0).getValue();
-                    fields.add(new ReferralStatusRecord(participantID, status, countedDate));
-
+                    String originalRosterDate = rowNode.query("value[@field='Original Roster Date Formula']").get(0).getValue();
+                    fields.add(new ReferralStatusRecord(participantID, status, countedDate, originalRosterDate));
                 }
 
-                DataSourceFactory dataSourceFactory = APIUtil.defineDataSource("Participant Referral Statuses", username, password);
+                DataSourceFactory dataSourceFactory = APIUtil.defineDataSource("tZRnXCwCAgQe", username, password);
 
                 dataSourceFactory.addGrouping("ParticipantID");
                 dataSourceFactory.addGrouping("ReferralStatus");
                 dataSourceFactory.addDate("CountedDate");
+                dataSourceFactory.addDate("OriginalRosterDate");
 
                 DataSourceOperationFactory dataSourceOperationFactory = dataSourceFactory.defineDataSource();
 
-                DataSourceTarget dataSourceTarget = dataSourceOperationFactory.replaceRowsOperation();
-
-                dataSourceTarget.flush();
-
-                dataSourceTarget = dataSourceOperationFactory.addRowsOperation();
+                BulkUpdateDataSourceTarget dataSourceTarget = dataSourceOperationFactory.bulkUpdateRowsOperation();
 
                 for (int i = 0; i < fields.size(); i++) {
                     ReferralStatusRecord record = fields.get(i);
-                    DataRow dataRow = dataSourceTarget.newRow();
-                    dataRow.addValue("ParticipantID", record.getParticipantID());
-                    dataRow.addValue("ReferralStatus", record.getStatus());
-                    dataRow.addValue("CountedDate", record.getCountedDate());
+                    if (!record.getOriginalRosterDate().equals("(Empty)")) {
+                        Update update = dataSourceTarget.createUpdate();
+                        DataRow dataRow = update.newRow();
+                        dataRow.addValue("ParticipantID", record.getParticipantID());
+                        dataRow.addValue("ReferralStatus", record.getStatus());
+                        if (!record.getCountedDate().equals("(Empty)"))
+                            dataRow.addValue("CountedDate", record.getCountedDate());
+                        if (!record.getOriginalRosterDate().equals("(Empty)"))
+                            dataRow.addValue("OriginalRosterDate", record.getOriginalRosterDate());
+
+
+                        Date d = sdf.parse(record.getOriginalRosterDate());
+                        Calendar c = Calendar.getInstance();
+                        c.setTime(d);
+                        update.setWhereClauses(new StringWhereClause("ParticipantID", record.getParticipantID()), new DayWhereClause("OriginalRosterDate", c.get(Calendar.DAY_OF_YEAR), c.get(Calendar.YEAR)));
+                    }
                     if ((i % 5000) == 0) {
                         dataSourceTarget.flush();
                     }
@@ -184,6 +216,16 @@ public class StatusSync extends HttpServlet {
         private String status;
         private String countedDate;
 
+        public String getOriginalRosterDate() {
+            return originalRosterDate;
+        }
+
+        public void setOriginalRosterDate(String originalRosterDate) {
+            this.originalRosterDate = originalRosterDate;
+        }
+
+        private String originalRosterDate;
+
         public String getParticipantID() {
             return participantID;
         }
@@ -208,10 +250,11 @@ public class StatusSync extends HttpServlet {
             this.countedDate = countedDate;
         }
 
-        private ReferralStatusRecord(String participantID, String status, String countedDate) {
+        private ReferralStatusRecord(String participantID, String status, String countedDate, String originalRosterDate) {
             this.participantID = participantID;
             this.status = status;
             this.countedDate = countedDate;
+            this.originalRosterDate = originalRosterDate;
         }
     }
 
