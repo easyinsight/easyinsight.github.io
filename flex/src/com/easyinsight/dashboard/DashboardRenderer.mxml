@@ -80,16 +80,19 @@
 
             var fObj:Object = new Object();
             var paramObj:Object = new Object();
+            var toUse:ArrayCollection = new ArrayCollection();
+            var fToAdd:Object = new Object();
             if (_initialFilters != null) {
                 for each (var eFilter:FilterDefinition in _initialFilters) {
                     if (eFilter.getType() == FilterDefinition.ANALYSIS_ITEM) {
                         paramObj[eFilter.filterName] = eFilter;
                     } else {
                         fObj[eFilter.qualifiedName()] = eFilter;
+                        fToAdd[eFilter.qualifiedName()] = eFilter;
                     }
                 }
             }
-            var toUse:ArrayCollection = new ArrayCollection();
+
             for each (var filter:FilterDefinition in dashboard.filters) {
                 if (filter.getType() == FilterDefinition.ANALYSIS_ITEM) {
                     var aFilter:AnalysisItemFilterDefinition = paramObj[filter.filterName];
@@ -103,10 +106,15 @@
                     if (existing) {
                         toUse.addItem(existing);
                         existing.showOnReportView = filter.showOnReportView;
+                        delete fToAdd[filter.qualifiedName()];
                     } else {
                         toUse.addItem(filter);
                     }
                 }
+            }
+
+            for each (var remainingFilter:FilterDefinition in fToAdd) {
+                toUse.addItem(remainingFilter);
             }
             
             var visibleCount:int = 0;
