@@ -306,8 +306,10 @@
             if (transformContainer != null) {
                 filterMap["master"] = transformContainer.getFilterDefinitions();
             }
-            rootView.updateAdditionalFilters(filterMap);
-            rootView.refresh();
+            if (rootView != null) {
+                rootView.updateAdditionalFilters(filterMap);
+                rootView.refresh();
+            }
         }
 
         private function onScript(event:MarmotScriptEvent):void {
