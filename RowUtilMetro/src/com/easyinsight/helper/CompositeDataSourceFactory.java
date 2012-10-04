@@ -90,7 +90,7 @@ public class CompositeDataSourceFactory {
 
                 xmlBuilder.append("<targetDataSourceField>");
                 xmlBuilder.append(connection.getTargetDataSourceField());
-                xmlBuilder.append("</targetDataSource>");
+                xmlBuilder.append("</targetDataSourceField>");
 
                 xmlBuilder.append("</connection>");
             }

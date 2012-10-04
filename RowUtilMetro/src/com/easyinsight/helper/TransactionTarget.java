@@ -21,6 +21,8 @@ public class TransactionTarget {
 
     private String transactionID;
 
+    private String callDataID;
+
     private boolean replaceData;
 
     TransactionTarget(String dataSourceKey, String apiKey, String apiSecretKey, boolean replaceData, int bufferSize) {
@@ -29,6 +31,10 @@ public class TransactionTarget {
         this.apiSecretKey = apiSecretKey;
         this.replaceData = replaceData;
         this.bufferSize = bufferSize;
+    }
+
+    public void setCallDataID(String callDataID) {
+        this.callDataID = callDataID;
     }
 
     public void beginTransaction() {
@@ -75,6 +81,9 @@ public class TransactionTarget {
             xmlBuilder.append("<transactionID>");
             xmlBuilder.append(transactionID);
             xmlBuilder.append("</transactionID>");
+            xmlBuilder.append("<callDataID>");
+            xmlBuilder.append(callDataID);
+            xmlBuilder.append("</callDataID>");
             xmlBuilder.append("</commit>");
             Document document = InternalUtil.sendXML(xmlBuilder.toString(), apiKey, apiSecretKey, "commit");
             NodeList children = document.getChildNodes().item(0).getChildNodes();
