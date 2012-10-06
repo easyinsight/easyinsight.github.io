@@ -133,7 +133,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        int customHeight = htmlReportMetadata.getCustomHeight();
+        String customHeight = htmlReportMetadata.createStyleProperties();
         String xyz = "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getStackedBarChart('"+ targetDiv + "', " + argh + ","+customHeight+"))";
         /*return "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {\n" +
                 "                var s1 = data[\"values\"];\n" +

@@ -109,6 +109,7 @@
     <filter-mapping>
         <filter-name>NoCache</filter-name>
         <url-pattern>/html/*</url-pattern>
+        <url-pattern>/embed/*</url-pattern>
         <url-pattern>/billing/*</url-pattern>
     </filter-mapping>
 

@@ -162,8 +162,9 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             paramBuilder.append("reportID=").append(getUrlKey()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(xAxis.getAnalysisItemID());
             drillString = paramBuilder.toString();
         }*/
-        int customHeight = htmlReportMetadata.getCustomHeight();
-        String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getColumnChartCallback('"+ targetDiv + "', " + argh + ","+customHeight+"))";
+        String styleProps = htmlReportMetadata.createStyleProperties();
+
+        String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getColumnChartCallback('"+ targetDiv + "', " + argh + ","+styleProps+"))";
         return xyz;
     }
 }

@@ -6,12 +6,15 @@ import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.SecurityUtil;
+import org.hibernate.Session;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,7 +32,9 @@ public class HtmlServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String reportIDString = req.getParameter("reportID");
-        SecurityUtil.populateThreadLocalFromSession(req);
+        if (req.getSession().getAttribute("userID") != null) {
+            SecurityUtil.populateThreadLocalFromSession(req);
+        }
         try {
             InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
             long reportID;
@@ -46,16 +51,35 @@ public class HtmlServlet extends HttpServlet {
                 // and retrieving information thereof
 
                 List<FilterDefinition> filters = report.getFilterDefinitions();
+
+                List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
+
+                String drillThroughKey = req.getParameter("drillThroughKey");
+                if (drillThroughKey != null) {
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT drillthrough_save_id FROM drillthrough_save WHERE url_key = ?");
+                    queryStmt.setString(1, drillThroughKey);
+                    ResultSet rs = queryStmt.executeQuery();
+                    rs.next();
+                    long drillthroughSaveID = rs.getLong(1);
+                    PreparedStatement filterStmt = conn.prepareStatement("SELECT filter_id from drillthrough_report_save_filter WHERE drillthrough_save_id = ?");
+                    filterStmt.setLong(1, drillthroughSaveID);
+                    ResultSet filterRS = filterStmt.executeQuery();
+                    while (filterRS.next()) {
+                        Session hibernateSession = Database.instance().createSession(conn);
+                        FilterDefinition filter = (FilterDefinition) hibernateSession.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterRS.getLong(1)).list().get(0);
+                        filter.afterLoad();
+                        drillthroughFilters.add(filter);
+                        hibernateSession.close();
+                    }
+                }
+
+                filters.addAll(drillthroughFilters);
+
                 String dashboardIDString = req.getParameter("dashboardID");
                 if (dashboardIDString != null) {
                     long dashboardID = Long.parseLong(dashboardIDString);
                     Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
                     filters.addAll(dashboard.filtersForReport(reportID));
-                }
-
-                List<FilterDefinition> drillthroughFilters = (List<FilterDefinition>) req.getSession().getAttribute("drillthroughFiltersFor" + report.getAnalysisID());
-                if (drillthroughFilters != null) {
-                    filters.addAll(drillthroughFilters);
                 }
 
                 for (FilterDefinition filter : filters) {
@@ -157,7 +181,9 @@ public class HtmlServlet extends HttpServlet {
                 Database.closeConnection(conn);
             }
         } finally {
-            SecurityUtil.clearThreadLocal();
+            if (req.getSession().getAttribute("userID") != null) {
+                SecurityUtil.clearThreadLocal();
+            }
         }
     }
 

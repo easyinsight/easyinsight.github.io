@@ -2,8 +2,7 @@ package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSBubbleChartDefinition;
-import com.easyinsight.analysis.definitions.WSTwoAxisDefinition;
-import com.easyinsight.core.DateValue;
+import com.easyinsight.analysis.definitions.WSPlotChartDefinition;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import org.json.JSONArray;
@@ -11,12 +10,8 @@ import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: jamesboe
@@ -30,16 +25,36 @@ public class BubbleChartServlet extends HtmlServlet {
 
         JSONObject object = new JSONObject();
         // need series, need ticks
-        WSBubbleChartDefinition bubbleDefinition = (WSBubbleChartDefinition) report;
+        AnalysisMeasure xAxisMeasure;
+        AnalysisMeasure yAxisMeasure;
+        AnalysisMeasure zAxisMeasure = null;
+        AnalysisItem dimension;
+        if (report instanceof WSBubbleChartDefinition) {
+            WSBubbleChartDefinition bubbleDefinition = (WSBubbleChartDefinition) report;
+            xAxisMeasure = (AnalysisMeasure) bubbleDefinition.getXaxisMeasure();
+            yAxisMeasure = (AnalysisMeasure) bubbleDefinition.getYaxisMeasure();
+            zAxisMeasure = (AnalysisMeasure) bubbleDefinition.getZaxisMeasure();
+            dimension = bubbleDefinition.getDimension();
+        } else {
+            WSPlotChartDefinition plotDefinition = (WSPlotChartDefinition) report;
+            xAxisMeasure = (AnalysisMeasure) plotDefinition.getXaxisMeasure();
+            yAxisMeasure = (AnalysisMeasure) plotDefinition.getYaxisMeasure();
+            dimension = plotDefinition.getDimension();
+        }
+
 
         List<JSONArray> arrays = new ArrayList<JSONArray>();
 
         for (IRow row : dataSet.getRows()) {
             JSONArray point = new JSONArray();
-            point.put(row.getValue(bubbleDefinition.getXaxisMeasure()).toDouble());
-            point.put(row.getValue(bubbleDefinition.getYaxisMeasure()).toDouble());
-            point.put(row.getValue(bubbleDefinition.getZaxisMeasure()).toDouble());
-            point.put(row.getValue(bubbleDefinition.getDimension()).toString());
+            point.put(row.getValue(xAxisMeasure).toDouble());
+            point.put(row.getValue(yAxisMeasure).toDouble());
+            if (zAxisMeasure == null) {
+                point.put(20);
+            } else {
+                point.put(row.getValue(zAxisMeasure).toDouble());
+            }
+            point.put(row.getValue(dimension).toString());
             arrays.add(point);
         }
 

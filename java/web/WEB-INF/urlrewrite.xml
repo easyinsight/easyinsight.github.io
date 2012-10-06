@@ -47,13 +47,43 @@
     </rule>
 
     <rule>
+        <from>/html/drillThroughReport/([A-Za-z0-9]+)</from>
+        <to>/html/report.jsp?drillthroughKey=$1</to>
+    </rule>
+
+    <rule>
+        <from>/embed/drillThroughReport/([A-Za-z0-9]+)</from>
+        <to>/embed/embeddedReport.jsp?drillthroughKey=$1</to>
+    </rule>
+
+    <rule>
         <from>/html/embeddedReport/([A-Za-z0-9]+)</from>
-        <to>/html/embeddedReport.jsp?reportID=$1</to>
+        <to>/embed/embeddedReport.jsp?reportID=$1</to>
+    </rule>
+
+    <rule>
+        <from>/embeddedReport/([A-Za-z0-9]+)</from>
+        <to>/embed/embeddedReport.jsp?reportID=$1</to>
     </rule>
 
     <rule>
         <from>/html/dashboard/([A-Za-z0-9]+)</from>
         <to>/html/dashboard.jsp?dashboardID=$1</to>
+    </rule>
+
+    <rule>
+        <from>/html/drillThroughDashboard/([A-Za-z0-9]+)</from>
+        <to>/html/dashboard.jsp?drillthroughKey=$1</to>
+    </rule>
+
+    <rule>
+        <from>/embed/drillThroughDashboard/([A-Za-z0-9]+)</from>
+        <to>/embed/embeddedDashboard.jsp?drillthroughKey=$1</to>
+    </rule>
+
+    <rule>
+        <from>/embeddedDashboard/([A-Za-z0-9]+)</from>
+        <to>/embed/embeddedDashboard.jsp?dashboardID=$1</to>
     </rule>
 
     <rule>

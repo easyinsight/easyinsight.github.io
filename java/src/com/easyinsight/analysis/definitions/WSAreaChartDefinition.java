@@ -119,7 +119,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
         /*argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {afterRefresh();\n" +
                 "                var s1 = data[\"values\"];\n" +
                 "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");\n})";*/
-        int customHeight = htmlReportMetadata.getCustomHeight();
+        String customHeight = htmlReportMetadata.createStyleProperties();
         argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true, " + customHeight + "))";
         System.out.println(argh);
         return argh;

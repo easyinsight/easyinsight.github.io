@@ -147,7 +147,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         argh = argh.replaceAll("\"", "");
 
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        int customHeight = htmlReportMetadata.getCustomHeight();
-        return "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ","+customHeight+"))";
+        String customHeight = htmlReportMetadata.createStyleProperties();
+        return "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ",false,"+customHeight+"))";
     }
 }

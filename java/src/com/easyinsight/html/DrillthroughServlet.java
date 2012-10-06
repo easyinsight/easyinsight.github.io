@@ -4,14 +4,17 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.util.RandomTextGenerator;
+import org.hibernate.Session;
 import org.json.JSONObject;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +28,11 @@ public class DrillthroughServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws Exception {
         Long drillthroughID = Long.parseLong(request.getParameter("drillthroughID"));
         Long sourceField = Long.parseLong(request.getParameter("sourceField"));
+        String embeddedString = request.getParameter("embedded");
+        boolean embedded = false;
+        if (embeddedString != null) {
+            embedded = Boolean.parseBoolean(embeddedString);
+        }
         AnalysisItem linkItem = null;
         Map<String, Object> data = new HashMap<String, Object>();
         for (AnalysisItem analysisItem : report.getAllAnalysisItems()) {
@@ -49,15 +57,62 @@ public class DrillthroughServlet extends HtmlServlet {
         DrillThroughResponse drillThroughResponse = new AnalysisService().drillThrough(drillThrough, data, linkItem, report);
         // return a URL for response redirect?
         JSONObject result = new JSONObject();
+
+
+
         EIDescriptor descriptor = drillThroughResponse.getDescriptor();
         if (descriptor.getType() == EIDescriptor.REPORT) {
             InsightDescriptor insightDescriptor = (InsightDescriptor) descriptor;
-            request.getSession().setAttribute("drillthroughFiltersFor"+ insightDescriptor.getId(), drillThroughResponse.getFilters());
-            result.put("url", "/app/html/report/" + insightDescriptor.getUrlKey());
+            PreparedStatement saveDrillStmt = conn.prepareStatement("INSERT INTO DRILLTHROUGH_SAVE (REPORT_ID, URL_KEY, SAVE_TIME) VALUES (?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            saveDrillStmt.setLong(1, insightDescriptor.getId());
+            String urlKey = RandomTextGenerator.generateText(40);
+            saveDrillStmt.setString(2, urlKey);
+            saveDrillStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            saveDrillStmt.execute();
+            long drillID = Database.instance().getAutoGenKey(saveDrillStmt);
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO DRILLTHROUGH_REPORT_SAVE_FILTER (DRILLTHROUGH_SAVE_ID, FILTER_ID) VALUES (?, ?)");
+            for (FilterDefinition filter : drillThroughResponse.getFilters()) {
+                Session session = Database.instance().createSession(conn);
+                filter.beforeSave(session);
+                session.save(filter);
+                session.flush();
+                session.close();
+                saveStmt.setLong(1, drillID);
+                saveStmt.setLong(2, filter.getFilterID());
+                saveStmt.execute();
+            }
+            if (embedded) {
+                result.put("url", "/app/embed/drillThroughReport/" + urlKey);
+            } else {
+                result.put("url", "/app/html/drillThroughReport/" + urlKey);
+            }
         } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
             DashboardDescriptor dashboardDescriptor = (DashboardDescriptor) descriptor;
-            request.getSession().setAttribute("drillthroughFiltersFor"+ dashboardDescriptor.getId(), drillThroughResponse.getFilters());
-            result.put("url", "/app/html/dashboard/" + dashboardDescriptor.getUrlKey());
+            PreparedStatement saveDrillStmt = conn.prepareStatement("INSERT INTO DRILLTHROUGH_SAVE (DASHBOARD_ID, URL_KEY, SAVE_TIME) VALUES (?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            saveDrillStmt.setLong(1, dashboardDescriptor.getId());
+            String urlKey = RandomTextGenerator.generateText(40);
+            saveDrillStmt.setString(2, urlKey);
+            saveDrillStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            saveDrillStmt.execute();
+            long drillID = Database.instance().getAutoGenKey(saveDrillStmt);
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO DRILLTHROUGH_REPORT_SAVE_FILTER (DRILLTHROUGH_SAVE_ID, FILTER_ID) VALUES (?, ?)");
+            for (FilterDefinition filter : drillThroughResponse.getFilters()) {
+                Session session = Database.instance().createSession(conn);
+                filter.beforeSave(session);
+                session.save(filter);
+                session.flush();
+                session.close();
+                saveStmt.setLong(1, drillID);
+                saveStmt.setLong(2, filter.getFilterID());
+                saveStmt.execute();
+            }
+            if (embedded) {
+                result.put("url", "/app/embed/drillThroughDashboard/" + urlKey);
+            } else {
+                result.put("url", "/app/html/drillThroughDashboard/" + urlKey);
+            }
         }
         response.setContentType("application/json");
         response.getOutputStream().write(result.toString().getBytes());

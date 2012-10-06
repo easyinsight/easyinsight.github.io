@@ -104,7 +104,12 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
 
             JSONObject seriesDefaults = new JSONObject();
             seriesDefaults.put("renderer", "$.jqplot.BubbleRenderer");
-
+            JSONObject axes = new JSONObject();
+            JSONObject xAxis = getMeasureAxis(xaxisMeasure);
+            JSONObject yAxis = getMeasureAxis(yaxisMeasure);
+            axes.put("xaxis", xAxis);
+            axes.put("yaxis", yAxis);
+            jsonParams.put("axes", axes);
             JSONObject rendererOptions = new JSONObject();
             //rendererOptions.put("fillToZero", "true");
             rendererOptions.put("bubbleGradients", "true");
@@ -120,8 +125,8 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
         String argh = params.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        int customHeight = htmlReportMetadata.getCustomHeight();
-        argh = "$.getJSON('/app/bubbleChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('"+ targetDiv + "', " + argh + ","+customHeight+"))";
+        String customHeight = htmlReportMetadata.createStyleProperties();
+        argh = "$.getJSON('/app/bubbleChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('"+ targetDiv + "', " + argh + ",false,"+customHeight+"))";
         System.out.println(argh);
         return argh;
     }

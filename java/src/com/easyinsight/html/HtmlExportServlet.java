@@ -3,10 +3,10 @@ package com.easyinsight.html;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.DeliveryScheduledTask;
+import com.easyinsight.export.ExportProperties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.SQLException;
 
 /**
  * User: jamesboe
@@ -19,7 +19,14 @@ public class HtmlExportServlet extends HtmlServlet {
                            EIConnection conn, WSAnalysisDefinition report) throws Exception {
         String html;
         try {
-            html = DeliveryScheduledTask.createHTMLTable(conn, report, insightRequestMetadata, false, false);
+            String embeddedString = request.getParameter("embedded");
+            boolean embedded = false;
+            if (embeddedString != null) {
+                embedded = Boolean.parseBoolean(embeddedString);
+            }
+            ExportProperties exportProperties = new ExportProperties();
+            exportProperties.setEmbedded(embedded);
+            html = DeliveryScheduledTask.createHTMLTable(conn, report, insightRequestMetadata, false, false, exportProperties);
         } catch (ReportException re) {
             html = re.getReportFault().toHTML();
         }

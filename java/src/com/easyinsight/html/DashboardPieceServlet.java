@@ -34,6 +34,12 @@ public class DashboardPieceServlet extends HttpServlet {
             }
             long dashboardID = Long.parseLong(req.getParameter("dashboardID"));
             long dashboardElementID = Long.parseLong(elementStringID);
+            String drillThroughKey = req.getParameter("drillThroughKey");
+            boolean embedded = false;
+            String embeddedString = req.getParameter("embedded");
+            if (embeddedString != null) {
+                embedded = Boolean.parseBoolean(embeddedString);
+            }
             Dashboard dashboard = new DashboardService().getDashboardView(dashboardID);
             DashboardElement element = dashboard.findElement(dashboardElementID);
             /*PreparedStatement ps = conn.prepareStatement("SELECT ELEMENT_TYPE FROM DASHBOARD_ELEMENT WHERE DASHBOARD_ELEMENT_ID = ?");
@@ -44,7 +50,7 @@ public class DashboardPieceServlet extends HttpServlet {
             DashboardElement element = DashboardStorage.getElement(conn, dashbboardElementID, elementType);*/
             response.setContentType("text/html");
             response.setCharacterEncoding("UTF-8");
-            response.getOutputStream().write(element.toHTML(new FilterHTMLMetadata(dashboard, req)).getBytes());
+            response.getOutputStream().write(element.toHTML(new FilterHTMLMetadata(dashboard, req, drillThroughKey, embedded)).getBytes());
             response.getOutputStream().flush();
         } catch (Exception e) {
             throw new RuntimeException(e);
