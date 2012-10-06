@@ -13,11 +13,29 @@ import java.util.List;
 public class FilterHTMLMetadata {
 
     private Dashboard dashboard;
+    private String drillthroughKey;
+    private boolean embedded;
     private HttpServletRequest request;
     private WSAnalysisDefinition report;
     private String onChange;
     private String filterKey = "reportbase";
     private List<FilterDefinition> filters;
+
+    public boolean isEmbedded() {
+        return embedded;
+    }
+
+    public void setEmbedded(boolean embedded) {
+        this.embedded = embedded;
+    }
+
+    public String getDrillthroughKey() {
+        return drillthroughKey;
+    }
+
+    public void setDrillthroughKey(String drillthroughKey) {
+        this.drillthroughKey = drillthroughKey;
+    }
 
     public String createOnChange() {
         if (dashboard != null) {
@@ -47,9 +65,21 @@ public class FilterHTMLMetadata {
         this.report = report;
     }
 
-    public FilterHTMLMetadata(Dashboard dashboard, HttpServletRequest request) {
+    public FilterHTMLMetadata(Dashboard dashboard, HttpServletRequest request, String drillThroughKey, boolean embedded) {
         this.dashboard = dashboard;
         this.request = request;
+        this.drillthroughKey = drillThroughKey;
+        this.embedded = embedded;
+    }
+
+    private boolean fromStack;
+
+    public boolean isFromStack() {
+        return fromStack;
+    }
+
+    public void setFromStack(boolean fromStack) {
+        this.fromStack = fromStack;
     }
 
     public HttpServletRequest getRequest() {
