@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Class-Path: servlet-api.jar eirestapi.jar json-smart-1.1.jar json-path
+ -0.8.0.jar commons-httpclient-3.1.jar commons-logging-1.1.1.jar commo
+ ns-codec-1.4.jar eirestapi.jar json-smart-1.1.jar json-path-0.8.0.jar
+  commons-httpclient-3.1.jar commons-logging-1.1.1.jar commons-codec-1
+ .4.jar
+
