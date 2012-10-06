@@ -151,6 +151,8 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
     public function set data(value:Object):void {
         _data = value;
         var color:uint = 0;
+        var backgroundColor:uint = 0xFFFFFF;
+        var bold:Object = null;
         var text:String;
         if (value != null) {
             var field:String = analysisItem.qualifiedName();
@@ -170,6 +172,10 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
                         if (objVal.valueExtension != null) {
                             var ext:TextValueExtension = objVal.valueExtension as TextValueExtension;
                             color = ext.color;
+                            if (ext.bold) {
+                                bold = true;
+                            }
+                            backgroundColor = ext.backgroundColor;
                         } else {
                             color = listDefinition.textColor;
                         }
@@ -198,9 +204,16 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         if (rext != null && rext.align != null) {
             align = rext.align.toLowerCase();
         }
-        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color);
+
+        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, bold);
         utf.align = align;
         setTextFormat(utf);
+        if (backgroundColor != 0xFFFFFF) {
+            this.backgroundColor = backgroundColor;
+            this.background = true;
+        }
+        /*backgroundColor = 0x990000;
+        background = true;*/
         new StandardContextWindow(analysisItem, passThrough, this, value, _report);
         invalidateProperties();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));

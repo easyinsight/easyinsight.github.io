@@ -11,6 +11,7 @@ package com.easyinsight.analysis {
 public class TextValueExtension extends ValueExtension {
 
     public var color:uint;
+    public var backgroundColor:uint = 0xFFFFFF;
     public var bold:Boolean;
     public var italic:Boolean;
 

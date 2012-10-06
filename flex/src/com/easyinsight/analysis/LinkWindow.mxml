@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                    creationComplete="feedService.getDescriptors.send()" width="700" height="400">
+                    creationComplete="feedService.getDescriptorsForDataSource.send(_dataSourceID)" width="700" height="400">
     <mx:Script><![CDATA[
         import com.easyinsight.quicksearch.EIDescriptor;
 
@@ -13,7 +13,7 @@
         import mx.validators.Validator;
 
         private function gotDescriptors():void {
-            var descriptors:ArrayCollection = feedService.getDescriptors.lastResult as ArrayCollection;
+            var descriptors:ArrayCollection = feedService.getDescriptorsForDataSource.lastResult as ArrayCollection;
             var reports:Array = [];
             for each (var desc:EIDescriptor in descriptors) {
                 if (desc.getType() == EIDescriptor.DASHBOARD || desc.getType() == EIDescriptor.REPORT) {
@@ -66,7 +66,7 @@
             if (_sourceItem == null) {
 
             } else {
-                urlSampleText = "URL links will connect the report to external URLs. You can use fields to dynamically construct URLs by surrounding the field name with brackets. For example, http://www.google.com?q=["+_sourceItem.key.createString()+"]";
+                urlSampleText = "URL links will connect the report to external URLs. You can use fields to dynamically construct URLs by surrounding the field name with brackets. For example, http://www.google.com?q=[" + _sourceItem.key.createString() + "]";
             }
         }
 
@@ -93,6 +93,13 @@
                     miniWindow = drillthrough.miniWindow;
                 }
             }
+        }
+
+        private var _dataSourceID:int;
+
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
         }
 
         private function save():void {
@@ -146,7 +153,7 @@
         private var script:String;
         ]]></mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
-        <mx:method name="getDescriptors" result="gotDescriptors()"/>
+        <mx:method name="getDescriptorsForDataSource" result="gotDescriptors()"/>
     </mx:RemoteObject>
     <mx:VBox backgroundColor="#FFFFFF" width="100%" height="100%">
         <mx:RadioButtonGroup id="typeGroup" selectedValue="{typeValue}"/>

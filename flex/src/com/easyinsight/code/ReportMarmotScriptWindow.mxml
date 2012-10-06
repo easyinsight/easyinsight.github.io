@@ -1,9 +1,55 @@
 <?xml version="1.0"?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" backgroundColor="#FFFFFF">
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:schedule="com.easyinsight.schedule.*" backgroundColor="#FFFFFF">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.DropArea;
+
+        import mx.collections.XMLListCollection;
+        import mx.controls.AdvancedDataGrid;
+        import mx.controls.DataGrid;
+        import mx.controls.List;
+        import mx.events.DragEvent;
+        import mx.events.ListEvent;
+        import mx.managers.DragManager;
         import mx.managers.PopUpManager;
 
         private var _script:String;
+
+        private var colorTextString:String = "Colors the values of Field to the specified color. For example, to color all Revenue values greater than 500,000 to green, greaterthan([Revenue], 500000, colortext([Revenue], \"#008800\"))";
+
+        [Bindable]
+        private var formattingFunctions:XMLListCollection = new XMLListCollection(new XMLList(<functions>
+            <group label="Dates">
+                <function label="date" signature="date(Numeric Field)" description="If no parameter, constructs a date with the present time, if Numeric Field passed in, constructs a date from the number of milliseconds"/>
+                <function label="dayofmonth" signature="dayofmonth(Date Field)" description="Returns the day of month of the date contained in Field"/>
+                <function label="dayofyear" signature="dayofyear(Date Field)" description="Returns the day of year of the date contained in Field"/>
+                <function label="days" signature="days(Number of Days)" description="Translates the specified number of days into milliseconds"/>
+                <function label="daysinmonth" signature="daysinmonth(Date Field)" description="Returns the number of days in the month of the date contained in Field"/>
+                <function label="month" signature="month(Date Field)" description="Returns the month of the date contained in Field"/>
+                <function label="now" signature="now()" description="Returns the current time in milliseconds"/>
+                <function label="weekofyear" signature="weekofyear(Date Field)" description="Returns the week of the year of the date contained in Field"/>
+                <function label="year" signature="year(Date Field)" description="Returns the year of the date contained in Field"/>
+            </group>
+            <group label="Logic">
+                <function label="equalto" signature="equalto(Field1, Field2, Field3, Field4)" description="If Field1 is equal to Field2, return Field3, else return Field 4. Field 4 is optional, will return empty if not specified."/>
+                <function label="greaterthan" signature="greaterthan(Field1, Field2, Field3, Field4)" description="If Field1 is greater than Field2, return Field3, else return Field 4. Field 4 is optional, will return empty if not specified."/>
+                <function label="greaterthanorequal" signature="greaterthan(Field1, Field2, Field3, Field4)" description="If Field1 is greater than or equal to Field2, return Field3, else return Field 4. Field 4 is optional, will return empty if not specified."/>
+            </group>
+            <group label="Styling">
+                 <function label="colortext" signature="colortext(Field, Color)" description="Colors the values of Field to the specified color. For example, to color all Revenue values greater than 500,000 to green, greaterthan([Revenue], 500000, colortext([Revenue], &quot;#008800&quot;))"/>
+            </group>
+        </functions>));
+
+        [Bindable]
+        private var prerunFunctions:XMLListCollection = new XMLListCollection(new XMLList(<functions>
+            <group label="Functions">
+                <function label="additionalgrouping" signature="uniquefield(Field)" description="Keeps the specified field in the report pipeline as a grouping. For example, you might have a calculation of User Rate * Hours which requires that User ID is in the report as well."/>
+                <function label="assignunique" signature="uniquefield(Field)" description=""/>
+                <function label="uniquefield" signature="uniquefield(Field)" description=""/>
+            </group>
+        </functions>));
 
         [Bindable(event="scriptChanged")]
         public function get script():String {
@@ -14,6 +60,99 @@
             if (_script == value) return;
             _script = value;
             dispatchEvent(new Event("scriptChanged"));
+        }
+
+        [Bindable]
+        private var functionExplanation:String;
+
+        [Bindable]
+        private var functionSignature:String;
+
+        private function dragEnterHandler(event:DragEvent):void {
+            var analysisItem:AnalysisItem;
+            var accept:Boolean = false;
+            if (event.dragInitiator is Tree) {
+                var tree:Tree = event.dragInitiator as Tree;
+                var xml:XML = tree.selectedItem as XML;
+                if (xml != null) {
+                    var name:String = String(xml.name());
+                    if (name == "function") {
+                        accept = true;
+                    }
+                }
+            } else if (event.dragInitiator is List) {
+                var initialList:List = List(event.dragInitiator);
+                analysisItem = initialList.selectedItem as AnalysisItem;
+                accept = analysisItem != null;
+            } else if (event.dragInitiator is DropArea) {
+                var dropArea:DropArea = event.dragInitiator as DropArea;
+                accept = dropArea.analysisItem != null;
+            } else if (event.dragInitiator is AdvancedDataGrid) {
+                var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
+                var analysisItemWrapper:AnalysisItemWrapper = analysisItemLabel.selectedItem as AnalysisItemWrapper;
+                if (analysisItemWrapper.isAnalysisItem()) {
+                    analysisItem = analysisItemWrapper.analysisItem;
+                }
+                accept = analysisItemWrapper.isAnalysisItem();
+            }
+            if (accept) DragManager.acceptDragDrop(event.target as TextArea);
+        }
+
+        [Bindable]
+        private var explanationFunction:String;
+
+        private function dragDropHandler(event:DragEvent):void {
+            var functionOutput:Boolean = false;
+            var outputStr:String;
+            if (event.dragInitiator is DataGrid) {
+                var initialList:DataGrid = DataGrid(event.dragInitiator);
+                var analysisItemWrapper:AnalysisItemWrapper = initialList.selectedItem as AnalysisItemWrapper;
+                outputStr = analysisItemWrapper.analysisItem.display;
+            } else if (event.dragInitiator is DropArea) {
+                var dropArea:DropArea = event.dragInitiator as DropArea;
+                outputStr = dropArea.analysisItem.display;
+            } else if (event.dragInitiator is AdvancedDataGrid) {
+                var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
+                analysisItemWrapper = analysisItemLabel.selectedItem as AnalysisItemWrapper;
+                if (analysisItemWrapper.isAnalysisItem()) {
+                    outputStr = analysisItemWrapper.analysisItem.display;
+                }
+            } else if (event.dragInitiator is Tree) {
+                var tree:Tree = event.dragInitiator as Tree;
+                var xml:XML = tree.selectedItem as XML;
+                if (xml != null) {
+                    var name:String = String(xml.name());
+                    if (name == "function") {
+                        functionOutput = true;
+                        outputStr = String(xml.@signature);
+                    }
+                }
+            }
+            if (!functionOutput) {
+                var str:String = ":<>,.;/?\"\'{}-=+$";
+                var foundSpecialChar:Boolean = false;
+                for (var i:int = 0; i < str.length; i++) {
+                    if (outputStr.indexOf(str.charAt(i)) != -1)
+                        foundSpecialChar = true;
+                }
+                if (foundSpecialChar) {
+                    outputStr = "[" + outputStr + "]";
+                }
+            }
+            var area:CursorTextArea = event.currentTarget as CursorTextArea;
+            area.insertTextAtCursor(outputStr);
+        }
+
+        private function onFunctionClick(event:ListEvent):void {
+            var xml:XML = event.currentTarget.selectedItem;
+            if (xml != null) {
+                var name:String = String(xml.name());
+                if (name == "function") {
+                    explanationFunction = String(xml.@label);
+                    functionExplanation = String(xml.@description);
+                    functionSignature = String(xml.@signature);
+                }
+            }
         }
 
         private var _afterScript:String;
@@ -36,15 +175,46 @@
         }
         ]]></mx:Script>
     <mx:TabNavigator creationPolicy="all">
-        <mx:Box label="Before Load">
-            <mx:TextArea editable="true" borderStyle="solid" borderThickness="1" width="700"
-                 height="400" id="scriptArea" text="{script}"/>
-        </mx:Box>
-        <mx:Box label="On Run">
-            <mx:TextArea editable="true" borderStyle="solid" borderThickness="1" width="700"
-                 height="400" id="afterScriptArea" text="{afterScript}"/>
-        </mx:Box>
-
+        <mx:HBox label="Report Formatting">
+            <mx:VBox horizontalAlign="center">
+                <mx:Label text="Available Functions" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Tree labelField="@label" width="300" itemClick="onFunctionClick(event)" dragEnabled="true" dragMoveEnabled="false"
+                         dataProvider="{formattingFunctions}" showRoot="false">
+                </mx:Tree>
+                <mx:VBox borderStyle="inset" borderThickness="1" backgroundColor="#FFFFFF" visible="{functionSignature != null}">
+                    <mx:Label text="{functionSignature}"/>
+                    <mx:TextArea text="{functionExplanation}" borderStyle="none" backgroundAlpha="0" editable="false"
+                                 selectable="true"
+                                 width="300" height="80"/>
+                </mx:VBox>
+            </mx:VBox>
+            <mx:VBox>
+                <mx:TextArea width="550" height="50" text="Specify any advanced color or style formatting for your report here. For example, to color all Revenue values greater than 500,000 to green, greaterthan([Revenue], 500000, colortext([Revenue], &quot;#008800&quot;))"/>
+                <schedule:CursorTextArea dragEnter="dragEnterHandler(event)"
+                                         dragDrop="dragDropHandler(event)" editable="true" borderStyle="solid" borderThickness="1" width="600"
+                     height="400" id="afterScriptArea" text="{afterScript}"/>
+            </mx:VBox>
+        </mx:HBox>
+        <mx:HBox label="Before Report Runs">
+            <mx:VBox horizontalAlign="center">
+                <mx:Label text="Available Functions" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Tree labelField="@label" width="300" itemClick="onFunctionClick(event)" dragEnabled="true" dragMoveEnabled="false"
+                         dataProvider="{prerunFunctions}" showRoot="false">
+                </mx:Tree>
+                <mx:VBox borderStyle="inset" borderThickness="1" backgroundColor="#FFFFFF" visible="{functionSignature != null}">
+                    <mx:Label text="{functionSignature}"/>
+                    <mx:TextArea text="{functionExplanation}" borderStyle="none" backgroundAlpha="0" editable="false"
+                                 selectable="true"
+                                 width="300" height="80"/>
+                </mx:VBox>
+            </mx:VBox>
+            <mx:VBox>
+                <mx:TextArea width="550" height="50" text="This section of scripting enables you to make advanced customizations to the report before it runs."/>
+                <schedule:CursorTextArea dragEnter="dragEnterHandler(event)"
+                                         dragDrop="dragDropHandler(event)" editable="true" borderStyle="solid" borderThickness="1" width="600"
+                                         height="400" id="scriptArea" text="{script}"/>
+            </mx:VBox>
+        </mx:HBox>
     </mx:TabNavigator>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="Save" click="save()"/>

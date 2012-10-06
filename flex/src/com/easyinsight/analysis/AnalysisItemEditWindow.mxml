@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
-                    xmlns:filters="com.easyinsight.filtering.*"
-        creationComplete="onCreation()"  backgroundColor="#FFFFFF">
+                    xmlns:filters="com.easyinsight.filtering.*" xmlns:analysis="com.easyinsight.analysis.*"
+                    creationComplete="onCreation()" backgroundColor="#FFFFFF">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.commands.CommandEvent;
@@ -46,8 +46,10 @@
 
             linkFactory = new ClassFactory(LinkControls);
             if (_analysisItem != null) {
-                linkFactory.properties = { sourceItem: _analysisItem };
+                linkFactory.properties = { sourceItem: _analysisItem, dataSourceID: dataSourceID };
                 transformContainer.existingFilters = _analysisItem.filters;
+            } else {
+                linkFactory.properties = { dataSourceID: dataSourceID };
             }
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
@@ -111,7 +113,15 @@
             _analysisItem = analysisItem;
             if (_analysisItem != null) {
                 this.links = analysisItem.links;
-                linkIndex = (this.links != null && this.links.length > 0) ? 1 : 0;
+                if (this.links != null) {
+                    if (this.links.length > 1) {
+                        linkIndex = 2;
+                        link = links.getItemAt(0) as Link;
+                    } else if (links.length == 1) {
+                        linkIndex = 1;
+                        link = links.getItemAt(0) as Link;
+                    }
+                }
             }
         }
 
@@ -153,6 +163,9 @@
             Container(editor).label = "Item";
             tabNavigator.addChildAt(editor as DisplayObject, 0);
             if (_analysisItem != null) {
+                if (_analysisItem.links.length == 1) {
+                    link = _analysisItem.links.getItemAt(0) as Link;
+                }
                 if (_analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                 } else {
                     tabNavigator.removeChild(filtersBox);
@@ -221,6 +234,11 @@
             } else {
                 event.analysisItem.filters = new ArrayCollection();
             }
+            if (linkIndex == 1) {
+                var linkColl:ArrayCollection = new ArrayCollection();
+                linkColl.addItem(newLinkPanel.save());
+                links = linkColl;
+            }
             event.analysisItem.links = links;
             if (_reportEditor != null) {
                 _reportEditor.save(event.analysisItem);
@@ -232,18 +250,22 @@
         }
 
         private function save():void {
+            if (linkIndex == 1) {
+                newLinkPanel.validate();
+            }
             editor.addEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
             var valid:Boolean = editor.validate();
             if (valid) editor.save(_dataSourceID);
         }
 
         private function addLink():void {
-            var window:LinkWindow = new LinkWindow();
-            window.sourceItem = _analysisItem;
-            window.addEventListener(LinkMetadataEvent.LINK_DEFINED, onLinkSave, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+            link = new URLLink();
+            links.addItem(link);
+            linkIndex = 1;
         }
+
+        [Bindable]
+        private var link:Link;
 
         private function onLinkSave(event:LinkMetadataEvent):void {
             links.addItem(event.link);
@@ -256,8 +278,26 @@
         }
 
         private function onLinkDelete(event:LinkMetadataEvent):void {
-            links.removeItemAt(links.getItemIndex(event.link));
-            linkIndex = (this.links != null && this.links.length > 0) ? 1 : 0;
+            if (linkIndex == 1) {
+                links.removeItemAt(0);
+                linkIndex = 0;
+            } else {
+                links.removeItemAt(links.getItemIndex(event.link));
+                if (links.length > 0) {
+                    link = links.getItemAt(0) as Link;
+                }
+
+                if (this.links.length > 1) {
+                    linkIndex = 2;
+                    link = links.getItemAt(0) as Link;
+                } else if (links.length == 1) {
+                    linkIndex = 1;
+                    link = links.getItemAt(0) as Link;
+                } else {
+                    linkIndex = 0;
+                    link = null;
+                }
+            }
         }
 
         [Bindable]
@@ -275,15 +315,16 @@
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" id="primaryBox">
         <mx:TabNavigator creationPolicy="all" width="100%" height="100%" resizeToContent="true" tabWidth="120" id="tabNavigator">
             <mx:VBox label="Links" paddingBottom="5" paddingLeft="5" paddingRight="5"
-                 paddingTop="5" horizontalAlign="center" width="550" height="300" updateComplete="onEvent(event)" id="linksBox">
+                 paddingTop="5" horizontalAlign="center" width="620" height="300" updateComplete="onEvent(event)" id="linksBox">
                 <util:AutoSizeTextArea width="515" editable="false" selectable="false" backgroundAlpha="0"
                                        borderStyle="none" fontSize="14"
                                        text="Links allow you to connect your reports to other locations. You can create links to other reports (drillthroughs), as well as links to external URLs."/>
                 <mx:ViewStack selectedIndex="{linkIndex}" width="100%" height="100%">
                     <mx:VBox width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
-                        <mx:Label text="You haven't defined any links yet." fontSize="14"/>
+                        <mx:Label text="You haven't defined a link from this field yet." fontSize="14"/>
                         <mx:Button label="Create a link" click="addLink()" fontSize="14"/>
                     </mx:VBox>
+                    <analysis:NewLinkPanel id="newLinkPanel" link="{link}" dataSourceID="{dataSourceID}"/>
                     <mx:VBox>
                         <mx:Button label="Add Link..." click="addLink()"/>
                         <mx:DataGrid dataProvider="{links}" width="100%" rowHeight="28">
