@@ -76,8 +76,17 @@ public class LoadRowsServlet extends APIServlet {
                     String nodeName = columnNode.getLocalName().toLowerCase();
                     AnalysisItem analysisItem = fieldMap.get(nodeName);
                     if (analysisItem == null) {
-                        throw new ServiceRuntimeException("No field was found in the data source definition matching the key of " + nodeName + ".");
+                        Attribute attribute = columnNode.getAttribute("fieldName");
+                        if (attribute == null) {
+                            throw new ServiceRuntimeException("No field was found in the data source definition matching the key of " + nodeName + ".");
+                        }
+                        nodeName = attribute.getValue().toLowerCase();
+                        analysisItem = fieldMap.get(nodeName);
+                        if (analysisItem == null) {
+                            throw new ServiceRuntimeException("No field was found in the data source definition matching the key of " + nodeName + ".");
+                        }
                     }
+
                     String value = columnNode.getValue().trim();
                     if ("".equals(value)) {
                         row.addValue(analysisItem.getKey(), new EmptyValue());
