@@ -83,6 +83,7 @@ import com.easyinsight.datasources.Batchbook2DataSource;
 import com.easyinsight.datasources.BatchbookDataSource;
 import com.easyinsight.datasources.CloudWatchDataSource;
 import com.easyinsight.datasources.ConstantContactDataSource;
+import com.easyinsight.datasources.DatabaseConnection;
 import com.easyinsight.datasources.FreshbooksDataSource;
 import com.easyinsight.datasources.HarvestDataSource;
 import com.easyinsight.datasources.HighRiseDataSource;
@@ -214,6 +215,7 @@ public class TORegistry {
         var linked:LinkedInDataSource;
         var freshbooks:FreshbooksDataSource;
         var batchbook:BatchbookDataSource;
+        var dbConn:DatabaseConnection;
         var constantContact:ConstantContactDataSource;
         var campaignMonitor:CampaignMonitorDataSourceCreation;
         var qbSource:QuickbaseCompositeSource;

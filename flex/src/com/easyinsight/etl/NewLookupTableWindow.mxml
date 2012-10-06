@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        creationComplete="feedService.searchForSubscribedFeeds.send()">
+        creationComplete="feedService.getFeedDefinition.send(dataSourceID)">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.analysis.AnalysisDateDimension;
@@ -39,10 +39,6 @@
         private var dataSourceID:int;
 
         private function save():void {
-            if (!(dataSourceBox.selectedItem is DataSourceDescriptor)) {
-                Alert.show("You need to select a data source.");
-                return;
-            }
             if (!(sourceFieldBox.selectedItem is AnalysisItem)) {
                 Alert.show("You need to select a field.");
                 return;
@@ -55,7 +51,7 @@
             }
             var lookupTable:LookupTable = new LookupTable();
             lookupTable.name = destinationFieldInput.text;
-            lookupTable.dataSourceID = dataSourceBox.selectedItem.id;
+            lookupTable.dataSourceID = _selectedDataSource.id;
             lookupTable.sourceField = sourceFieldBox.selectedItem as AnalysisItem;
             var targetField:AnalysisItem = new AnalysisItem();
             if (destinationGroup.selectedValue == "grouping") {
@@ -75,29 +71,11 @@
             etlService.saveNewLookupTable.send(lookupTable);
         }
 
-        private function gotDataSources():void {
-            var dataSources:ArrayCollection = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("name", true)];
-            dataSources.sort = sort;
-            dataSources.refresh();
-            var empty:Object = new Object();
-            empty.name = "[ Select a Data Source ]";
-            dataSources.addItemAt(empty, 0);
-            this.dataSources = dataSources;
-            dataSourceIndex = 1;
-        }
-
         protected override function commitProperties():void {
             super.commitProperties();
             if (dataSourceID > 0) {
                 feedService.getFeedDefinition.send(dataSourceID);
             }
-        }
-
-        private function onDSChange():void {
-            fieldIndex = 1;
-            feedService.getFeedDefinition.send(dataSourceBox.selectedItem.id);
         }
 
         private function gotFields():void {
@@ -134,7 +112,6 @@
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
-        <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
         <mx:method name="getFeedDefinition" result="gotFields()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="feeds" id="etlService">
@@ -142,17 +119,6 @@
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-            <mx:FormItem label="Data Source:">
-                <mx:ViewStack resizeToContent="true" selectedIndex="{dataSourceIndex}">
-                    <mx:Box>
-                        <mx:ProgressBar labelPlacement="right" label="Loading available data sources..." indeterminate="true"/>
-                    </mx:Box>
-                    <mx:Box>
-                        <util:SmartComboBox id="dataSourceBox" dataProvider="{dataSources}" labelField="name"
-                            change="onDSChange()" selectedProperty="id" selectedValue="{dataSourceID}"/>
-                    </mx:Box>
-                </mx:ViewStack>
-            </mx:FormItem>
             <mx:FormItem label="Source Field:">
                 <mx:ViewStack resizeToContent="true" selectedIndex="{fieldIndex}">
                     <mx:Box/>
