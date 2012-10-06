@@ -272,11 +272,12 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         for (int i = 0; i < sobjectNodes.size(); i++) {
             Node sobjectNode = sobjectNodes.get(i);
             String name = sobjectNode.query("name/text()").get(0).getValue();
+            System.out.println(name);
             SalesforceSObjectSource existing = map.get(name);
             if (existing == null) {
                 String searchableString = sobjectNode.query("searchable/text()").get(0).getValue();
                 boolean searchable = Boolean.parseBoolean(searchableString);
-                if (searchable || "UserRole".equals(name)) {
+                if (searchable || "UserRole".equals(name) || "OpportunityHistory".equals(name)) {
                 //if (searchable) {
                     SalesforceSObjectSource salesforceSObjectSource = new SalesforceSObjectSource();
                     salesforceSObjectSource.setSobjectName(name);
