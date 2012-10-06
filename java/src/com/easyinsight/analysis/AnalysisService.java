@@ -6,6 +6,8 @@ import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.dashboard.DashboardService;
+import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
@@ -18,6 +20,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.cache.Cache;
 
+import java.io.ByteArrayInputStream;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -29,6 +32,8 @@ import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.storage.CachedCalculationTransform;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IDataTransform;
+import nu.xom.Builder;
+import nu.xom.Document;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -43,6 +48,62 @@ import org.apache.jcs.access.exception.CacheException;
 public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
+
+    public void copyReport(WSAnalysisDefinition source, FeedDefinition dataSource) {
+
+    }
+
+    public List<Revision> showHistory(String urlKey) {
+        List<Revision> revisions = new ArrayList<Revision>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT REPORT_HISTORY_ID, INSERT_TIME FROM REPORT_HISTORY WHERE URL_KEY = ?");
+            stmt.setString(1, urlKey);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                long historyID = rs.getLong(1);
+                Date insertTime = new Date(rs.getTimestamp(2).getTime());
+                Revision revision = new Revision();
+                revision.setId(historyID);
+                revision.setDate(insertTime);
+                revisions.add(revision);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return revisions;
+    }
+
+    public WSAnalysisDefinition fromHistory(long id) {
+        WSAnalysisDefinition returnReport = null;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement stmt = conn.prepareStatement("SELECT REPORT_XML FROM REPORT_HISTORY WHERE REPORT_HISTORY_ID = ?");
+            stmt.setLong(1, id);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            String xml = rs.getString(1);
+            XMLImportMetadata xmlImportMetadata = new XMLImportMetadata();
+            xmlImportMetadata.setConn(conn);
+            Document doc = new Builder().build(new ByteArrayInputStream(xml.getBytes()));
+            AnalysisDefinition report = AnalysisDefinition.fromXML(doc.getRootElement(), xmlImportMetadata);
+            new AnalysisStorage().saveAnalysis(report, conn);
+            conn.commit();
+            returnReport = report.createBlazeDefinition();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+        return returnReport;
+    }
 
     public ReportInfo getReportInfo(long reportID) {
         SecurityUtil.authorizeInsight(reportID);
@@ -603,6 +664,7 @@ public class AnalysisService {
                     } else {
                         FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
                         filterValueDefinition.setField(analysisItem);
+                        filterValueDefinition.setShowOnReportView(false);
                         filterValueDefinition.setSingleValue(true);
                         filterValueDefinition.setEnabled(true);
                         filterValueDefinition.setInclusive(true);
@@ -619,7 +681,9 @@ public class AnalysisService {
                 descriptor = insightResponse.getInsightDescriptor();
             } else {
                 DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
+                String urlKey = new DashboardStorage().urlKeyForID(drillThrough.getDashboardID());
                 dashboardDescriptor.setId(drillThrough.getDashboardID());
+                dashboardDescriptor.setUrlKey(urlKey);
                 descriptor = dashboardDescriptor;
             }
             drillThroughResponse.setDescriptor(descriptor);
@@ -950,7 +1014,7 @@ public class AnalysisService {
             LogClass.error(e);
         }
         long reportID;
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
@@ -974,24 +1038,25 @@ public class AnalysisService {
             analysisDefinition.setUserBindings(bindings);
             analysisDefinition.setAuthorName(SecurityUtil.getUserName());
             analysisStorage.saveAnalysis(analysisDefinition, session);
+            XMLMetadata xmlMetadata = new XMLMetadata();
+            xmlMetadata.setConn(conn);
+            /*String xml = analysisDefinition.toXML(xmlMetadata);
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO REPORT_HISTORY (INSERT_TIME, URL_KEY, REPORT_XML, ACCOUNT_ID) VALUES (?, ?, ?, ?)");
+            saveStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+            saveStmt.setString(2, analysisDefinition.getUrlKey());
+            saveStmt.setString(3, xml);
+            saveStmt.setLong(4, SecurityUtil.getAccountID());
+            saveStmt.execute();*/
             session.flush();
             conn.commit();
             reportID = analysisDefinition.getAnalysisID();
         } catch (Exception e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
             session.close();
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
         session = Database.instance().createSession();
@@ -1069,7 +1134,7 @@ public class AnalysisService {
     }
 
     public InsightResponse openAnalysisIfPossible(String urlKey) {
-        InsightResponse insightResponse;
+        InsightResponse insightResponse = null;
         try {
             try {
                 Connection conn = Database.instance().getConnection();
@@ -1090,10 +1155,32 @@ public class AnalysisService {
                 }
 
             } catch (SecurityException e) {
-                if (e.getReason() == InsightResponse.NEED_LOGIN)
-                    insightResponse = new InsightResponse(InsightResponse.NEED_LOGIN, null);
-                else
-                    insightResponse = new InsightResponse(InsightResponse.REJECTED, null);
+                long userID = SecurityUtil.getUserID(false);
+                if (userID > 0) {
+                    Connection conn = Database.instance().getConnection();
+                    try {
+                        PreparedStatement accountStmt = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, USER_TO_ANALYSIS, ANALYSIS WHERE ANALYSIS.URL_KEY = ? AND " +
+                                "ANALYSIS.ANALYSIS_ID = USER_TO_ANALYSIS.ANALYSIS_ID AND USER_TO_ANALYSIS.USER_ID = USER.USER_ID");
+                        accountStmt.setString(1, urlKey);
+                        ResultSet rs = accountStmt.executeQuery();
+                        if (rs.next()) {
+                            long accountID = rs.getLong(1);
+                            if (accountID == SecurityUtil.getAccountID()) {
+                                insightResponse = new InsightResponse(InsightResponse.PRIVATE_ACCESS, null);
+                            } else {
+                                insightResponse = new InsightResponse(InsightResponse.REJECTED, null);
+                            }
+                        }
+                    } finally {
+                        Database.closeConnection(conn);
+                    }
+                }
+                if (insightResponse == null) {
+                    if (e.getReason() == InsightResponse.NEED_LOGIN)
+                        insightResponse = new InsightResponse(InsightResponse.NEED_LOGIN, null);
+                    else
+                        insightResponse = new InsightResponse(InsightResponse.REJECTED, null);
+                }
             }
         } catch (Exception e) {
             LogClass.error(e);

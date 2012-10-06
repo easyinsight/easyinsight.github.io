@@ -371,7 +371,7 @@ public class FilterValueDefinition extends FilterDefinition {
 
             List<String> stringList = new ArrayList<String>();
             for (Value value : dimensionMetadata.getValues()) {
-                stringList.add(value.toString());
+                stringList.add(value.toHTMLString());
             }
             Collections.sort(stringList);
             if (isAllOption()) {
@@ -396,6 +396,9 @@ public class FilterValueDefinition extends FilterDefinition {
             }
             sb.append("</select>");
 
+            sb.append("<script type=\"text/javascript\">\n");
+            sb.append("updateFilter('" + filterName + "','" + key + "', " + function + ");\n");
+            sb.append("</script>");
         } else {
             String divID = "filter" + getFilterID() + "div";
             sb.append("<div id=\"").append(divID).append("\" class=\"modal hide\">");

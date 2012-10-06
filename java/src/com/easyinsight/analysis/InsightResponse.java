@@ -12,6 +12,7 @@ public class InsightResponse {
     public static final int SUCCESS = 1;
     public static final int NEED_LOGIN = 2;
     public static final int REJECTED = 3;
+    public static final int PRIVATE_ACCESS = 4;
 
     private int status;
     private InsightDescriptor insightDescriptor;
