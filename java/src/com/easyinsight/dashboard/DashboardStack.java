@@ -5,7 +5,6 @@ import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.FilterHTMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.scorecard.Scorecard;
 import org.hibernate.Session;
 
@@ -307,7 +306,7 @@ public class DashboardStack extends DashboardElement {
         }
         for (FilterDefinition filter : filters) {
             if (filter.isShowOnReportView()) {
-                FilterHTMLMetadata metadata = new FilterHTMLMetadata(filterHTMLMetadata.getDashboard(), filterHTMLMetadata.getRequest());
+                FilterHTMLMetadata metadata = new FilterHTMLMetadata(filterHTMLMetadata.getDashboard(), filterHTMLMetadata.getRequest(), null, false);
                 if (gridItems.size() > 1) {
                     metadata.setOnChange("update" + stackID + "");
                 } else {
@@ -392,7 +391,11 @@ public class DashboardStack extends DashboardElement {
                 sb.append(MessageFormat.format("function updateStackDropdown{0}() '{'\n", elementIDString));
                 sb.append(MessageFormat.format("var optionMenu = document.getElementById(\"{0}\");\n", selectID));
                 sb.append("var chosenOption = optionMenu.options[optionMenu.selectedIndex];\n");
-                sb.append("$.get('/app/dashboardPiece?dashboardElementID='+chosenOption.value+'&dashboardID=" + filterHTMLMetadata.getDashboard().getId()+"', function(data){\n");
+                if (filterHTMLMetadata.getDrillthroughKey() == null) {
+                    sb.append("$.get('/app/dashboardPiece?dashboardElementID='+chosenOption.value+'&embedded="+filterHTMLMetadata.isEmbedded()+"&dashboardID=" + filterHTMLMetadata.getDashboard().getId()+"', function(data){\n");
+                } else {
+                    sb.append("$.get('/app/dashboardPiece?dashboardElementID='+chosenOption.value+'&embedded="+filterHTMLMetadata.isEmbedded()+"&dashboardID=" + filterHTMLMetadata.getDashboard().getId()+"&drillThroughKey="+filterHTMLMetadata.getDrillthroughKey()+"', function(data){\n");
+                }
                 sb.append("$('#" + divID + "').html(data);\n");
                 sb.append("});\n");
                 sb.append("}\n");
@@ -498,5 +501,10 @@ public class DashboardStack extends DashboardElement {
             }
         }
         return null;
+    }
+
+    public int requiredInitCount() {
+        DashboardStackItem dashboardStackItem = getGridItems().get(0);
+        return dashboardStackItem.getDashboardElement().requiredInitCount();
     }
 }

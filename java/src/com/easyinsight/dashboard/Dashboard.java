@@ -378,7 +378,10 @@ public class Dashboard implements Cloneable, Serializable {
     }
 
     public Collection<? extends FilterDefinition> filtersForReport(long reportID) {
-        return getRootElement().filtersForReport(reportID);
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        filters.addAll(getFilters());
+        filters.addAll(getRootElement().filtersForReport(reportID));
+        return filters;
     }
 
     public DashboardUIProperties findHeaderImage() {
@@ -387,5 +390,9 @@ public class Dashboard implements Cloneable, Serializable {
 
     public DashboardElement findElement(long dashboardElementID) {
         return getRootElement().findElement(dashboardElementID);
+    }
+
+    public int requiredInitCount() {
+        return getRootElement().requiredInitCount();
     }
 }

@@ -754,7 +754,9 @@ public class UserUploadService {
                                     }
                                 }
 
-                                ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, now);
+                                if (!feedDefinition.waitsOnServiceUtil()) {
+                                    ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, now);
+                                }
                                 conn.commit();
                             } catch (ReportException re) {
                                 if (!conn.getAutoCommit()) {

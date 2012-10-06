@@ -229,7 +229,12 @@ public class DashboardGrid extends DashboardElement {
         sb.append("</script>\n");
         sb.append("<div class=\"container\">\n");
         for (int i = 0; i < rows; i++) {
-            sb.append("<div class=\"row\">\n");
+            if (i < (rows - 1)) {
+                sb.append("<div class=\"row\" style=\"margin-bottom:20px\">\n");
+            } else {
+                sb.append("<div class=\"row\">\n");
+            }
+
             //sb.append("<tr style=\"width:100%\">\r\n");
             for (int j = 0; j < columns; j++) {
                 int span;
@@ -242,7 +247,7 @@ public class DashboardGrid extends DashboardElement {
                 } else {
                     span = 2;
                 }
-                sb.append("<div class=\"span" + span + "\">");
+                sb.append("<div class=\"span" + span + "\" style=\"background-color:#FFFFFF\">");
                 //sb.append("<td style=\"width:"+(100 / columns)+"%\">\r\n");
                 DashboardGridItem item = findItem(i, j);
                 sb.append(item.getDashboardElement().toHTML(filterHTMLMetadata));
@@ -312,5 +317,13 @@ public class DashboardGrid extends DashboardElement {
             }
         }
         return null;
+    }
+
+    public int requiredInitCount() {
+        int count = 0;
+        for (DashboardGridItem stackItem : getGridItems()) {
+            count += stackItem.getDashboardElement().requiredInitCount();
+        }
+        return count;
     }
 }

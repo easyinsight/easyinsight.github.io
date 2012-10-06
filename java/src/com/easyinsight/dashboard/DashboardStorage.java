@@ -27,7 +27,21 @@ import java.util.List;
 public class DashboardStorage {
 
     public String urlKeyForID(long id) {
-        return null;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT URL_KEY FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+            stmt.setLong(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString(1);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public void saveDashboard(Dashboard dashboard) throws Exception {

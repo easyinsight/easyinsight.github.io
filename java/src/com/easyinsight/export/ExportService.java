@@ -38,6 +38,7 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.sun.mail.smtp.SMTPSendFailedException;
 import flex.messaging.FlexContext;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
@@ -407,7 +408,7 @@ public class ExportService {
                     html = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, true, includeTitle);
                 } else {
                     ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle);
+                    html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, new ExportProperties());
                 }
                 String htmlBody = body + html;
                 new SendGridEmail().sendNoAttachmentEmail(email, subject, htmlBody, true, "reports@easy-insight.com", "Easy Insight");
@@ -1248,9 +1249,9 @@ public class ExportService {
             }
         }
         sb.append("<th style=\""+thStyle+"\">Name</th>");
-        sb.append("<th style=\""+thStyle+"\">Latest Value</th>");
-        sb.append("<th style=\""+thStyle+"\">Previous Value</th>");
-        sb.append("<th style=\""+thStyle+"\">Percent Change</th>");
+        sb.append("<th style=\"width:120px;"+thStyle+"\">Latest Value</th>");
+        sb.append("<th style=\"width:120px;"+thStyle+"\">Previous Value</th>");
+        sb.append("<th style=\"width:120px;"+thStyle+"\">Percent Change</th>");
         AnalysisMeasure percentMeasure = new AnalysisMeasure();
         percentMeasure.getFormattingConfiguration().setFormattingType(FormattingConfiguration.PERCENTAGE);
         percentMeasure.setMinPrecision(1);
@@ -2212,7 +2213,7 @@ public class ExportService {
 
     public static String treeReportToHTMLTable(WSAnalysisDefinition report, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
 
-        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
 
         StringBuilder sb = new StringBuilder();
         java.util.List<AnalysisItem> items = new java.util.ArrayList<AnalysisItem>(report.getAllAnalysisItems());
@@ -2251,7 +2252,8 @@ public class ExportService {
         return sb.toString();
     }
 
-    public static String listReportToHTMLTable(WSAnalysisDefinition report, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
+    public static String listReportToHTMLTable(WSAnalysisDefinition report, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle,
+                                               ExportProperties exportProperties) throws SQLException {
 
         if (report.getReportType() == WSAnalysisDefinition.LIST) {
             WSListDefinition list = (WSListDefinition) report;
@@ -2260,7 +2262,7 @@ public class ExportService {
             }
         }
 
-        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
 
         StringBuilder sb = new StringBuilder();
         java.util.List<AnalysisItem> items = new java.util.ArrayList<AnalysisItem>(report.getAllAnalysisItems());
@@ -2350,6 +2352,10 @@ public class ExportService {
                                 String hexString = "#" + Integer.toHexString(textValueExtension.getColor());
                                 styleString.append(";color:").append(hexString);
                             }
+                            if (textValueExtension.getBackgroundColor() != TextValueExtension.WHITE) {
+                                String hexString = "#" + Integer.toHexString(textValueExtension.getBackgroundColor());
+                                styleString.append(";background-color:").append(hexString);
+                            }
                         }
                         sb.append("<td style=\"").append(styleString.toString()).append("\">");
                         //sb.append("<td>");
@@ -2366,14 +2372,14 @@ public class ExportService {
                             } else if (defaultLink instanceof DrillThrough) {
                                 StringBuilder paramBuilder = new StringBuilder();
                                 DrillThrough drillThrough = (DrillThrough) defaultLink;
-                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
+                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
                                 for (AnalysisItem dataItem : items) {
                                     for (int k = 0; k < listDataResults.getHeaders().length; k++) {
                                         AnalysisItem dataHeaderItem = listDataResults.getHeaders()[k];
                                         String encodedValue;
                                         if (dataItem == dataHeaderItem) {
                                             try {
-                                                encodedValue = URLEncoder.encode(listRow.getValues()[k].toString(), "UTF-8");
+                                                encodedValue = StringEscapeUtils.escapeHtml(URLEncoder.encode(listRow.getValues()[k].toString(), "UTF-8"));
                                             } catch (UnsupportedEncodingException e) {
                                                 throw new RuntimeException(e);
                                             }
@@ -2461,7 +2467,7 @@ public class ExportService {
             if (conn == null) {
                 exportMetadata = new ExportMetadata(1, "$", Calendar.getInstance());
             } else {
-                exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+                exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
             }
 
             StringBuilder sb = new StringBuilder();
@@ -2522,7 +2528,7 @@ public class ExportService {
         SecurityUtil.authorizeScorecard(scorecardID);
         EIConnection conn = Database.instance().getConnection();
         try {
-            ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+            ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
             Scorecard scorecard = new ScorecardStorage().getScorecard(scorecardID, conn);
             List<KPIOutcome> outcomes = new ScorecardService().getValues(scorecard.getKpis(), conn, insightRequestMetadata);
             for (KPI kpi : scorecard.getKpis()) {
@@ -2612,7 +2618,7 @@ public class ExportService {
 
     public static String exportScorecard(long scorecardID, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws Exception {
         SecurityUtil.authorizeScorecard(scorecardID);
-        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         Scorecard scorecard = new ScorecardStorage().getScorecard(scorecardID, conn);
         List<KPIOutcome> outcomes = new ScorecardService().getValues(scorecard.getKpis(), conn, insightRequestMetadata);
         for (KPI kpi : scorecard.getKpis()) {

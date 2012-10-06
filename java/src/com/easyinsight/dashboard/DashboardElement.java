@@ -348,4 +348,8 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         }
         return null;
     }
+
+    public int requiredInitCount() {
+        return 0;
+    }
 }

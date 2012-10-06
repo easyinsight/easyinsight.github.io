@@ -251,7 +251,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     analysisDefinition.setName(deliveryInfo.getLabel());
                 }
                 updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
-                String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, true, true);
+                String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, true, true, new ExportProperties());
                 if (table != null) {
                     return new DeliveryResult(table);
                 }
@@ -443,7 +443,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         updateReportWithCustomFilters(analysisDefinition, customFilters);
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                         insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData, true);
+                        String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData, true, new ExportProperties());
                         if (table != null) {
                             sendNoAttachEmails(conn, table, activityID, subject, body, htmlEmail, ScheduledActivity.REPORT_DELIVERY);
                         }
@@ -506,7 +506,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
     }
 
     @Nullable
-    public static String createHTMLTable(EIConnection conn, WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean sendIfNoData, boolean includeTitle) throws SQLException {
+    public static String createHTMLTable(EIConnection conn, WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata,
+                                         boolean sendIfNoData, boolean includeTitle, ExportProperties exportProperties) throws SQLException {
         String table;
         if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
             DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
@@ -528,9 +529,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 return null;
             }
             table = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
-        } /*else if (analysisDefinition.getReportType() == WSAnalysisDefinition.FORM) {
+        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.FORM) {
             table = analysisDefinition.toExportHTML(conn, insightRequestMetadata);
-        } */else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
+        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
             table = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, sendIfNoData, includeTitle);
@@ -542,7 +543,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             if (listDataResults.getReportFault() != null) {
                 return null;
             }
-            table = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle);
+            table = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, exportProperties);
         }
         return table;
     }

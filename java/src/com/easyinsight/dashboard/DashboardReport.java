@@ -180,18 +180,26 @@ public class DashboardReport extends DashboardElement {
 
         // not only do we need the report's filters, we need all filters in the chain above this report
 
-        sb.append("var strParams = \"\";\n" +
-                "            for (var key in filterBase) {\n" +
+        sb.append("var strParams = \"\";\n");
+        if (filterHTMLMetadata.getDrillthroughKey() == null) {
+            sb.append("strParams += 'dashboardID="+filterHTMLMetadata.getDashboard().getId() + "&';\n");
+        } else {
+            sb.append("strParams += 'dashboardID="+filterHTMLMetadata.getDashboard().getId() + "&drillThroughKey="+filterHTMLMetadata.getDrillthroughKey()+"&';\n");
+        }
+        sb.append("            for (var key in filterBase) {\n" +
                 "                var keyedFilter = filterBase[key];\n" +
                 "                for (var filterValue in keyedFilter) {\n" +
                 "                    var value = keyedFilter[filterValue];\n" +
                 "                    strParams += filterValue + \"=\" + value + \"&\";\n" +
-                "                }\n" +
-                "strParams += 'dashboardID="+filterHTMLMetadata.getDashboard().getId() + "&';\n"+
-                "            }");
+                "                }\n");
+        sb.append("}\n");
+
         HTMLReportMetadata htmlReportMetadata = new HTMLReportMetadata();
+        htmlReportMetadata.setEmbedded(filterHTMLMetadata.isEmbedded());
         if (getPreferredHeight() > 0) {
             htmlReportMetadata.setCustomHeight(getPreferredHeight());
+        } else {
+            htmlReportMetadata.setCustomHeight(300);
         }
         htmlReportMetadata.setFullScreenHeight(false);
         sb.append(reportDefinition.toHTML(div, htmlReportMetadata));
@@ -199,7 +207,8 @@ public class DashboardReport extends DashboardElement {
         // $(document).ready(refreshReport('reportTarget517'))
         // refreshReport('div,
         System.out.println("\t\t" + report.getName() + " = renderReport" + report.getId());
-        sb.append("renderReport").append(report.getId()).append("();");
+        sb.append("updateInitCount(renderReport"+report.getId()+")");
+        //sb.append("renderReport").append(report.getId()).append("();");
         sb.append("</script>\n");
         sb.append("<div style=\"font-size:12px;margin-right:10px\">");
         if (isShowLabel()) {
@@ -212,12 +221,18 @@ public class DashboardReport extends DashboardElement {
             }
         }
         sb.append("</div>");
-        sb.append("<div class=\"dashboardReportDiv\" id=\"").append(div).append("\"><div class=\"reportArea\" id=\"").append(div).append("ReportArea\"></div><div class=\"noData\"> There is no data for this report. </div></div>");
+        if (getPreferredHeight() != 0) {
+            sb.append("<div style=\"height:"+(getPreferredHeight()+20)+"px\">");
+        }
+        sb.append("<div class=\"dashboardReportDiv\"  id=\"").append(div).append("\"><div class=\"reportArea\" id=\"").append(div).append("ReportArea\"></div><div class=\"noData\"> Loading the report... </div></div>");
+        if (getPreferredHeight() != 0) {
+            sb.append("</div>");
+        }
         sb.append(reportDefinition.rootHTML());
-        /*sb.append("<script type=\"text/javascript\">\n" +
-                "                    $(document).ready(refreshReport('#reportTarget"+report.getId()+"', "+report.getId()+"));\n" +
-                "                </script>\n" +
-                "                <div id=\"reportTarget"+report.getId()+"\"></div>");*/
         return sb.toString();
+    }
+
+    public int requiredInitCount() {
+        return 1;
     }
 }
