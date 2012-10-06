@@ -8,9 +8,21 @@ import com.easyinsight.core.ValueExtension;
  * Time: 11:46 AM
  */
 public class TextValueExtension extends ValueExtension {
+
+    public static final int WHITE = 16777215;
+
     private int color;
+    private int backgroundColor = WHITE;
     private boolean bold;
     private boolean italic;
+
+    public int getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(int backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
 
     public int getColor() {
         return color;
