@@ -1351,7 +1351,7 @@ public class ExportService {
         if (includeTitle && listDefinition.getName() != null) {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(listDefinition.getName()).append("</h0>").append("</div>");
         }
-        sb.append("<table>");
+        sb.append("<table style=\"width:100%\">");
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<th></th>");
         for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
