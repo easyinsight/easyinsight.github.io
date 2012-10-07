@@ -31,6 +31,12 @@ public class LinkControls extends HBox{
         _sourceItem = value;
     }
 
+    private var _dataSourceID:int;
+
+    public function set dataSourceID(value:int):void {
+        _dataSourceID = value;
+    }
+
     override public function set data(val:Object):void {
         link = val as Link;
     }
@@ -60,6 +66,7 @@ public class LinkControls extends HBox{
     private function onEdit(event:MouseEvent):void {
         var window:LinkWindow = new LinkWindow();
         window.link = link;
+        window.dataSourceID = _dataSourceID;
         window.sourceItem = _sourceItem;
         window.addEventListener(LinkMetadataEvent.LINK_EDITED, passThrough, false, 0, true);
         PopUpManager.addPopUp(window, this, true);
