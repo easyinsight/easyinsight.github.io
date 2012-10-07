@@ -413,6 +413,47 @@ public class FeedService {
         return descriptorList;
     }
 
+    public List<EIDescriptor> getDescriptorsForDataSource(long dataSourceID) {
+        List<EIDescriptor> descriptorList = new ArrayList<EIDescriptor>();
+        long userID = SecurityUtil.getUserID();
+        long accountID = SecurityUtil.getAccountID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            descriptorList.addAll(analysisStorage.getInsightDescriptorsForDataSource(userID, accountID, dataSourceID, conn));
+            descriptorList.addAll(new DashboardStorage().getDashboardsForDataSource(userID, accountID, conn, dataSourceID).values());
+            Map<String, Integer> countMap = new HashMap<String, Integer>();
+            Set<String> dupeNames = new HashSet<String>();
+            Set<String> allNames = new HashSet<String>();
+            for (EIDescriptor descriptor : descriptorList) {
+                if (!allNames.add(descriptor.getName())) {
+                    dupeNames.add(descriptor.getName());
+                }
+            }
+            for (EIDescriptor descriptor : descriptorList) {
+                if (dupeNames.contains(descriptor.getName())) {
+                    Integer count = countMap.get(descriptor.getName());
+                    if (count == null) {
+                        count = 1;
+                    } else {
+                        count = count + 1;
+                    }
+                    countMap.put(descriptor.getName(), count);
+                    descriptor.setName(descriptor.getName() + " (" + count + ")");
+                }
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+        return descriptorList;
+    }
+
     public FeedResponse openFeedIfPossible(String urlKey) {
         FeedResponse feedResponse;
         try {
