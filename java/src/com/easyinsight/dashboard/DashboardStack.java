@@ -307,6 +307,7 @@ public class DashboardStack extends DashboardElement {
         for (FilterDefinition filter : filters) {
             if (filter.isShowOnReportView()) {
                 FilterHTMLMetadata metadata = new FilterHTMLMetadata(filterHTMLMetadata.getDashboard(), filterHTMLMetadata.getRequest(), null, false);
+                metadata.setFromStack(true);
                 if (gridItems.size() > 1) {
                     metadata.setOnChange("update" + stackID + "");
                 } else {
