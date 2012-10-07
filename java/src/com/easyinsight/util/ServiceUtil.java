@@ -17,7 +17,7 @@ public class ServiceUtil {
 
     //private Map<Long, Map<String, CallData>> callDataMap = new HashMap<Long, Map<String, CallData>>();
 
-    private JCS callDataMap = getCache("feedDefinitions");
+    private JCS callDataMap = getCache("serviceUtil");
 
     private JCS getCache(String cacheName) {
 
