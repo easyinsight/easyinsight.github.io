@@ -235,7 +235,13 @@ public abstract class APIServlet extends HttpServlet {
                 }
                 FeedStorage feedStorage = new FeedStorage();
                 FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(entry.getKey());
+
+                boolean changed = false;
                 if(feedDefinition instanceof DatabaseConnection && refreshKey != null && refreshUrl != null) {
+                    DatabaseConnection databaseConnection = (DatabaseConnection) feedDefinition;
+                    if (!refreshKey.equals(databaseConnection.getRefreshKey()) || !refreshUrl.equals(databaseConnection.getRefreshUrl())) {
+                        changed = true;
+                    }
                     ((DatabaseConnection) feedDefinition).setRefreshKey(refreshKey);
                     ((DatabaseConnection) feedDefinition).setRefreshUrl(refreshUrl);
                 }
@@ -253,6 +259,9 @@ public abstract class APIServlet extends HttpServlet {
                     if (newKey) {
                         newFieldsFound = true;
                     }
+                }
+                if (changed) {
+                    new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn);
                 }
                 if (newFieldsFound) {
                     feedDefinition.setFields(analysisItems);
