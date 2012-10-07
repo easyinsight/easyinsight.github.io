@@ -396,9 +396,9 @@ public class FilterValueDefinition extends FilterDefinition {
             }
             sb.append("</select>");
 
-            sb.append("<script type=\"text/javascript\">\n");
+            /*sb.append("<script type=\"text/javascript\">\n");
             sb.append("updateFilter('" + filterName + "','" + key + "', " + function + ");\n");
-            sb.append("</script>");
+            sb.append("</script>");*/
         } else {
             String divID = "filter" + getFilterID() + "div";
             sb.append("<div id=\"").append(divID).append("\" class=\"modal hide\">");

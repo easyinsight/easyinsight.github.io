@@ -369,14 +369,23 @@ public class DashboardStack extends DashboardElement {
                 sb.append("\n<script type=\"text/javascript\">\n");
                 sb.append(globalVar);
                 sb.append(update);
+                String initString;
+                String pieceString;
+                if (filterHTMLMetadata.getDrillthroughKey() == null) {
+                    initString = "/app/dashboardPiece?dashboardElementID="+gridItems.get(0).getDashboardElement().getElementID()+"&embedded="+filterHTMLMetadata.isEmbedded()+"&dashboardID="+filterHTMLMetadata.getDashboard().getId();
+                    pieceString = "/app/dashboardPiece?dashboardElementID=' + contentID.replace('#', '')+'&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"&embedded="+filterHTMLMetadata.isEmbedded();
+                } else {
+                    initString = "/app/dashboardPiece?dashboardElementID="+gridItems.get(0).getDashboardElement().getElementID()+"&embedded="+filterHTMLMetadata.isEmbedded()+"&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"&drillThroughKey="+filterHTMLMetadata.getDrillthroughKey();
+                    pieceString = "/app/dashboardPiece?dashboardElementID=' + contentID.replace('#', '')+'&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"&embedded="+filterHTMLMetadata.isEmbedded()+"&drillThroughKey="+filterHTMLMetadata.getDrillthroughKey();
+                }
                 sb.append("    $(function() {\n" +
-                        "        $('#ds"+gridItems.get(0).getDashboardElement().getElementID()+"').load('/app/dashboardPiece?dashboardElementID="+gridItems.get(0).getDashboardElement().getElementID()+"&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"', function() {\n" +
+                        "        $('#ds"+gridItems.get(0).getDashboardElement().getElementID()+"').load('"+initString+"', function() {\n" +
                         "            $('#"+stackID+"').tab(); //initialize tabs\n" +
                         "        });    \n" +
                         "        $('#"+stackID+"').bind('show', function(e) {    \n" +
                         "           var pattern=/#.+/gi //use regex to get anchor(==selector)\n" +
                         "           var contentID = e.target.toString().match(pattern)[0]; //get anchor         \n" +
-                        "            $(contentID).load('/app/dashboardPiece?dashboardElementID=' + contentID.replace('#', '')+'&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"', function(){\n" +
+                        "            $(contentID).load('"+pieceString+"', function(){\n" +
                         "                $('#"+stackID+"').tab(); //reinitialize tabs\n" +
                         "state" + stackID + " = contentID.replace('#', '');\n" +
                         "            });\n" +
