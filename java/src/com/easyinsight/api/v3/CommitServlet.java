@@ -64,7 +64,7 @@ public class CommitServlet extends APIServlet {
             conn.commit();
             if (callDataID != null && !"null".equals(callDataID)) {
                 try {
-                    System.out.println("marking done");
+                    System.out.println("marking " + callDataID + " done");
                     ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.DONE);
                 } catch (Exception e) {
                     LogClass.error(e);
