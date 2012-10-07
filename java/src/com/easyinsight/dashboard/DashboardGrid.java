@@ -244,6 +244,8 @@ public class DashboardGrid extends DashboardElement {
                     span = 6;
                 } else if (columns == 3) {
                     span = 4;
+                } else if (columns == 4) {
+                    span = 3;
                 } else {
                     span = 2;
                 }
