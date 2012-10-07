@@ -1,6 +1,9 @@
 package com.easyinsight.util;
 
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
+import org.apache.jcs.JCS;
+import org.apache.jcs.access.exception.CacheException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +15,19 @@ import java.util.Map;
  */
 public class ServiceUtil {
 
-    private Map<Long, Map<String, CallData>> callDataMap = new HashMap<Long, Map<String, CallData>>();
+    //private Map<Long, Map<String, CallData>> callDataMap = new HashMap<Long, Map<String, CallData>>();
+
+    private JCS callDataMap = getCache("feedDefinitions");
+
+    private JCS getCache(String cacheName) {
+
+        try {
+            return JCS.getInstance(cacheName);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
 
     public static final int RUNNING = 1;
     public static final int DONE = 2;
@@ -30,40 +45,48 @@ public class ServiceUtil {
 
     public String longRunningCall(long itemID) {
         String callID = itemID + "-" + SecurityUtil.getUserID() + "-" + System.currentTimeMillis();
-        Map<String, CallData> callMap = callDataMap.get(SecurityUtil.getUserID());
+        Map<String, CallData> callMap = (Map<String, CallData>) callDataMap.get(SecurityUtil.getUserID());
         if (callMap == null) {
             callMap = new HashMap<String, CallData>();
-            callDataMap.put(SecurityUtil.getUserID(), callMap);
+            try {
+                callDataMap.put(SecurityUtil.getUserID(), callMap);
+            } catch (CacheException e) {
+                throw new RuntimeException(e);
+            }
         }
         callMap.put(callID, new CallData());
         return callID;
     }
 
+    private Map<String, CallData> get() {
+        return (Map<String, CallData>) callDataMap.get(SecurityUtil.getUserID());
+    }
+
     public void updateStatusMessage(String callDataID, String statusMessage) {
-        callDataMap.get(SecurityUtil.getUserID()).get(callDataID).setStatusMessage(statusMessage);
+        get().get(callDataID).setStatusMessage(statusMessage);
     }
 
     public void updateStatus(String callDataID, int status) {
-        callDataMap.get(SecurityUtil.getUserID()).get(callDataID).setStatus(status);
+        get().get(callDataID).setStatus(status);
     }
 
     public void updateStatus(String callDataID, int status, Object result) {
-        callDataMap.get(SecurityUtil.getUserID()).get(callDataID).setResult(result);
-        callDataMap.get(SecurityUtil.getUserID()).get(callDataID).setStatus(status);
+        get().get(callDataID).setResult(result);
+        get().get(callDataID).setStatus(status);
     }
 
     public void updateStatus(String callDataID, int status, String message) {
-        callDataMap.get(SecurityUtil.getUserID()).get(callDataID).setStatusMessage(message);
-        callDataMap.get(SecurityUtil.getUserID()).get(callDataID).setStatus(status);
+        get().get(callDataID).setStatusMessage(message);
+        get().get(callDataID).setStatus(status);
     }
 
     public CallData getCallData(String callDataID) {
-        CallData callData = callDataMap.get(SecurityUtil.getUserID()).get(callDataID);
+        CallData callData = get().get(callDataID);
         if (callData == null) {
             return null;
         }
         if (callData.getStatus() == DONE || callData.getStatus() == FAILED) {
-            callDataMap.get(SecurityUtil.getUserID()).remove(callDataID);
+            get().remove(callDataID);
         }
         return callData;
     }
