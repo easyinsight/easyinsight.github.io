@@ -261,6 +261,7 @@ public abstract class APIServlet extends HttpServlet {
                     }
                 }
                 if (changed) {
+                    System.out.println("*** DS changed");
                     new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn);
                 }
                 if (newFieldsFound) {
