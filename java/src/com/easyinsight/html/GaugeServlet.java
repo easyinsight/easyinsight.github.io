@@ -34,7 +34,8 @@ public class GaugeServlet extends HtmlServlet {
             String string = ExportService.createValue(0, analysisMeasure, value, Calendar.getInstance(), "$", false);
             jsonObject.put("formattedValue", string);
             if (gaugeDefinition.getBenchmarkMeasure() != null) {
-                jsonObject.put("benchmark", "Benchmark: " + dataSet.getRow(0).getValue(gaugeDefinition.getBenchmarkMeasure()).toDouble());
+                Value benchmarkValue = dataSet.getRow(0).getValue(gaugeDefinition.getBenchmarkMeasure());
+                jsonObject.put("benchmark", "Benchmark: " + ExportService.createValue(0, analysisMeasure, benchmarkValue, Calendar.getInstance(), "$", false));
             }
         }
 
