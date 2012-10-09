@@ -81,7 +81,6 @@ public class CrunchbaseServlet extends HttpServlet implements CommonConstants {
         HttpMethod method = new GetMethod("http://api.crunchbase.com/v/1/companies.js?api_key=5aspbecghgbdjgmdpjufm6rs");
         httpClient.executeMethod(method);
         JSONArray response = (JSONArray) JSONValue.parse(method.getResponseBodyAsStream());
-        int count = 0;
         DataSourceOperationFactory companySource = createCompanySource();
         DataSourceOperationFactory fundingSource = createFundingSource();
         DataSourceOperationFactory investmentSource = createInvestmentSource();
@@ -110,18 +109,22 @@ public class CrunchbaseServlet extends HttpServlet implements CommonConstants {
                 tpe.execute(new Runnable() {
                     public void run() {
                         try {
-                            HttpClient httpClient = new HttpClient();
-                            JSONObject curVal = (JSONObject) ff;
-                            HttpMethod companyData = new GetMethod("http://api.crunchbase.com/v/1/company/" + curVal.get("permalink") + ".js?api_key=5aspbecghgbdjgmdpjufm6rs");
-                            httpClient.executeMethod(companyData);
-                            String s = companyData.getResponseBodyAsString();
-                            try {
-                                JSONObject company = (JSONObject) JSONValue.parse(s);
-                                values.put(company);
-                            } catch(Exception e) {
 
+                            try {
+                                HttpClient httpClient = new HttpClient();
+                                JSONObject curVal = (JSONObject) ff;
+                                HttpMethod companyData = new GetMethod("http://api.crunchbase.com/v/1/company/" + curVal.get("permalink") + ".js?api_key=5aspbecghgbdjgmdpjufm6rs");
+                                httpClient.executeMethod(companyData);
+                                String s = companyData.getResponseBodyAsString();
+                                JSONObject company = (JSONObject) JSONValue.parse(s);
+                                if (company.containsKey("error")) {
+                                    System.out.println(curVal.get("permalink") + " - " + company.get("error"));
+                                }
+
+                                values.put(company);
+                            } catch (Exception e) {
+                                values.put(new JSONObject());
                                 e.printStackTrace();
-                                System.out.println(s);
                             }
 
 
@@ -136,80 +139,87 @@ public class CrunchbaseServlet extends HttpServlet implements CommonConstants {
 
             }
             Thread t = new Thread(new Runnable() {
-                                public void run() {
-                                    try {
-                                        JSONObject company;
-                                        while((company = values.take()) != null) {
-                                            DataRow row = companyRowFactory.newRow();
-                                            System.out.println(company.get("permalink"));
-                                            row.addValue(CRUNCHBASE_NAME.replace(" ", "_"), (String) company.get("name"));
-                                            row.addValue(PERMALINK.replace(" ", "_"), (String) company.get("permalink"));
-                                            row.addValue(CRUNCHBASE_URL.replace(" ", "_"), (String) company.get("crunchbase_url"));
-                                            row.addValue(HOMEPAGE_URL.replace(" ", "_"), (String) company.get("homepage_url"));
-                                            row.addValue(TWITTER_USERNAME.replace(" ", "_"), (String) company.get("twitter_username"));
-                                            row.addValue(CATEGORY_CODE.replace(" ", "_"), (String) company.get("category_code"));
-                                            row.addValue(EMAIL_ADDRESS.replace(" ", "_"), (String) company.get("email_address"));
-                                            row.addValue(PHONE_NUMBER.replace(" ", "_"), (String) company.get("phone_number"));
-                                            row.addValue(DESCRIPTION.replace(" ", "_"), (String) company.get("description"));
-                                            row.addValue(TOTAL_MONEY_RAISED.replace(" ", "_"), (String) company.get("total_money_raised"));
-                                            if (company.get("number_of_employees") != null)
-                                                row.addValue(NUMBER_OF_EMPLOYEES.replace(" ", "_"), (Integer) company.get("number_of_employees"));
-                                            addCbDate(row, company, "founded", FOUNDED_DATE);
-                                            addCbDate(row, company, "deadpooled", DEADPOOLED_DATE);
-                                            if (company.get("created_at") != null)
-                                                row.addValue(CREATED_AT.replace(" ", "_"), sdf.parse((String) company.get("created_at")));
-                                            if (company.get("updated_at") != null)
-                                                row.addValue(UPDATED_AT.replace(" ", "_"), sdf.parse((String) company.get("updated_at")));
+                public void run() {
+                    try {
+                        JSONObject company;
+                        while ((company = values.take()) != null) {
+                            try {
+                                if (company.size() > 0 && company.get("error") == null) {
+                                    DataRow row = companyRowFactory.newRow();
+                                    row.addValue(CRUNCHBASE_NAME.replace(" ", "_"), (String) company.get("name"));
+                                    row.addValue(PERMALINK.replace(" ", "_"), (String) company.get("permalink"));
+                                    row.addValue(CRUNCHBASE_URL.replace(" ", "_"), (String) company.get("crunchbase_url"));
+                                    row.addValue(HOMEPAGE_URL.replace(" ", "_"), (String) company.get("homepage_url"));
+                                    row.addValue(TWITTER_USERNAME.replace(" ", "_"), (String) company.get("twitter_username"));
+                                    row.addValue(CATEGORY_CODE.replace(" ", "_"), (String) company.get("category_code"));
+                                    row.addValue(EMAIL_ADDRESS.replace(" ", "_"), (String) company.get("email_address"));
+                                    row.addValue(PHONE_NUMBER.replace(" ", "_"), (String) company.get("phone_number"));
+                                    row.addValue(DESCRIPTION.replace(" ", "_"), (String) company.get("description"));
+                                    row.addValue(TOTAL_MONEY_RAISED.replace(" ", "_"), (String) company.get("total_money_raised"));
+                                    if (company.get("number_of_employees") != null)
+                                        row.addValue(NUMBER_OF_EMPLOYEES.replace(" ", "_"), (Integer) company.get("number_of_employees"));
+                                    addCbDate(row, company, "founded", FOUNDED_DATE);
+                                    addCbDate(row, company, "deadpooled", DEADPOOLED_DATE);
+                                    if (company.get("created_at") != null)
+                                        row.addValue(CREATED_AT.replace(" ", "_"), sdf.parse((String) company.get("created_at")));
+                                    if (company.get("updated_at") != null)
+                                        row.addValue(UPDATED_AT.replace(" ", "_"), sdf.parse((String) company.get("updated_at")));
 
-                                            row.addValue(TAG_LIST.replace(" ", "_"), (String) company.get("tag_list"));
+                                    row.addValue(TAG_LIST.replace(" ", "_"), (String) company.get("tag_list"));
 
-                                            JSONArray rounds = (JSONArray) company.get("funding_rounds");
-                                            for (Object r : rounds) {
-                                                JSONObject round = (JSONObject) r;
-                                                DataRow roundRow = fundingSourceRowFactory.newRow();
-                                                String roundKey = ((String) round.get("round_code")) + ((String) company.get("permalink")) + String.valueOf(getCbDate(round, "funded").getTime().getTime());
-                                                roundRow.addValue(ROUND_PERMALINK.replace(" ", "_"), (String) company.get("permalink"));
-                                                roundRow.addValue(ROUND_KEY.replace(" ", "_"), roundKey);
-                                                roundRow.addValue(ROUND_SOURCE_URL.replace(" ", "_"), (String) round.get("source_url"));
-                                                roundRow.addValue(ROUND_CODE.replace(" ", "_"), (String) round.get("round_code"));
-                                                roundRow.addValue(SOURCE_DESCRIPTION.replace(" ", "_"), (String) round.get("source_description"));
-                                                roundRow.addValue(RAISED_CURRENCY_CODE.replace(" ", "_"), (String) round.get("raised_currency_code"));
-                                                if (round.get("raised_amount") != null)
-                                                    roundRow.addValue(RAISED_AMOUNT.replace(" ", "_"), (Number) round.get("raised_amount"));
-                                                addCbDate(roundRow, round, "funded", FUNDED_DATE);
+                                    JSONArray rounds = (JSONArray) company.get("funding_rounds");
+                                    for (Object r : rounds) {
+                                        JSONObject round = (JSONObject) r;
+                                        DataRow roundRow = fundingSourceRowFactory.newRow();
+                                        String roundKey = ((String) round.get("round_code")) + ((String) company.get("permalink")) + String.valueOf(getCbDate(round, "funded").getTime().getTime());
+                                        roundRow.addValue(ROUND_PERMALINK.replace(" ", "_"), (String) company.get("permalink"));
+                                        roundRow.addValue(ROUND_KEY.replace(" ", "_"), roundKey);
+                                        roundRow.addValue(ROUND_SOURCE_URL.replace(" ", "_"), (String) round.get("source_url"));
+                                        roundRow.addValue(ROUND_CODE.replace(" ", "_"), (String) round.get("round_code"));
+                                        roundRow.addValue(SOURCE_DESCRIPTION.replace(" ", "_"), (String) round.get("source_description"));
+                                        roundRow.addValue(RAISED_CURRENCY_CODE.replace(" ", "_"), (String) round.get("raised_currency_code"));
+                                        if (round.get("raised_amount") != null)
+                                            roundRow.addValue(RAISED_AMOUNT.replace(" ", "_"), (Number) round.get("raised_amount"));
+                                        addCbDate(roundRow, round, "funded", FUNDED_DATE);
 
-                                                JSONArray investors = (JSONArray) round.get("investments");
-                                                for (Object i : investors) {
-                                                    JSONObject investor = (JSONObject) i;
+                                        JSONArray investors = (JSONArray) round.get("investments");
+                                        for (Object i : investors) {
+                                            JSONObject investor = (JSONObject) i;
 
-                                                    String financialOrg = "";
-                                                    JSONObject org = (JSONObject) investor.get("financial_org");
-                                                    if (org != null) {
-                                                        financialOrg = (String) org.get("permalink");
-                                                    }
-                                                    String companyPermalink = "";
-                                                    JSONObject investingCompany = (JSONObject) investor.get("company");
-                                                    if (investingCompany != null) {
-                                                        companyPermalink = (String) investingCompany.get("permalink");
-                                                    }
-
-                                                    if (!(companyPermalink.equals("") && financialOrg.equals(""))) {
-                                                        DataRow investorRow = investmentSourceRowFactory.newRow();
-                                                        investorRow.addValue(FINANCIAL_ORG_PERMALINK.replace(" ", "_"), financialOrg);
-                                                        investorRow.addValue(FUNDING_ROUND_KEY.replace(" ", "_"), roundKey);
-                                                        investorRow.addValue(COMPANY_PERMALINK.replace(" ", "_"), companyPermalink);
-                                                    }
-                                                }
-
+                                            String financialOrg = "";
+                                            JSONObject org = (JSONObject) investor.get("financial_org");
+                                            if (org != null) {
+                                                financialOrg = (String) org.get("permalink");
                                             }
-                                            latch1.countDown();
-                                            System.out.println(Double.valueOf(size - latch1.getCount()) / Double.valueOf(size));
+                                            String companyPermalink = "";
+                                            JSONObject investingCompany = (JSONObject) investor.get("company");
+                                            if (investingCompany != null) {
+                                                companyPermalink = (String) investingCompany.get("permalink");
+                                            }
+
+                                            if (!(companyPermalink.equals("") && financialOrg.equals(""))) {
+                                                DataRow investorRow = investmentSourceRowFactory.newRow();
+                                                investorRow.addValue(FINANCIAL_ORG_PERMALINK.replace(" ", "_"), financialOrg);
+                                                investorRow.addValue(FUNDING_ROUND_KEY.replace(" ", "_"), roundKey);
+                                                investorRow.addValue(COMPANY_PERMALINK.replace(" ", "_"), companyPermalink);
+                                            }
                                         }
-                                    } catch (Exception i) {
-                                        i.printStackTrace();
+
                                     }
                                 }
-                            });
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            latch1.countDown();
+
+                            System.out.println(Double.valueOf(size - latch1.getCount()) / Double.valueOf(size));
+
+                        }
+                    } catch (Exception i) {
+                        i.printStackTrace();
+                    }
+                }
+            });
             t.start();
 
             latch.await();
