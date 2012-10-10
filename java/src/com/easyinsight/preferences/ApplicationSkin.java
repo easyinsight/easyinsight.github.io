@@ -100,7 +100,11 @@ public class ApplicationSkin implements Serializable {
     }
 
     public void populateProperties(List<ReportProperty> properties) {
-        coreAppBackgroundImage = findImage(properties, "coreAppBackgroundImage", null);
+        try {
+            coreAppBackgroundImage = findImage(properties, "coreAppBackgroundImage", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         try {
             headerBarLogo = findImage(properties, "headerBarLogo", null);
         } catch (Exception e) {
@@ -124,7 +128,11 @@ public class ApplicationSkin implements Serializable {
         reportBackgroundColor = (int) findNumberProperty(properties, "reportBackgroundColor", 0);
         reportTextColor = (int) findNumberProperty(properties, "reportTextColor", 0);
         reportHeader = findBooleanProperty(properties, "reportHeader", false);
-        reportHeaderImage = findImage(properties, "reportHeaderImage", null);
+        try {
+            reportHeaderImage = findImage(properties, "reportHeaderImage", null);
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         myDataName = findBooleanProperty(properties, "myDataName", true);
         myDataSize = findBooleanProperty(properties, "myDataSize", false);
         myDataOwner = findBooleanProperty(properties, "myDataOwner", false);
