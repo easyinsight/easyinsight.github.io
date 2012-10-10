@@ -16,6 +16,8 @@ public class NumericValue extends Value implements Serializable {
     private transient Aggregation aggregation;
     private static final long serialVersionUID = -9170406442789546755L;
 
+    private int calendarType;
+    private int calendarValue;
 
     public NumericValue() {
     }
@@ -27,6 +29,22 @@ public class NumericValue extends Value implements Serializable {
     public NumericValue(Double value, Aggregation aggregation) {
         this.value = value;
         this.aggregation = aggregation;
+    }
+
+    public int getCalendarType() {
+        return calendarType;
+    }
+
+    public void setCalendarType(int calendarType) {
+        this.calendarType = calendarType;
+    }
+
+    public int getCalendarValue() {
+        return calendarValue;
+    }
+
+    public void setCalendarValue(int calendarValue) {
+        this.calendarValue = calendarValue;
     }
 
     @Nullable
