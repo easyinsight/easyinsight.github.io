@@ -43,6 +43,10 @@ public class ServiceUtil {
         return instance;
     }
 
+    public void establishCount(String callDataID, int count) {
+        get().get(callDataID).setRequiredCount(count);
+    }
+
     public String longRunningCall(long itemID) {
         String callID = itemID + "-" + SecurityUtil.getUserID() + "-" + System.currentTimeMillis();
         Map<String, CallData> callMap = (Map<String, CallData>) callDataMap.get(SecurityUtil.getUserID());
@@ -68,6 +72,10 @@ public class ServiceUtil {
 
     public void updateStatus(String callDataID, int status) {
         get().get(callDataID).setStatus(status);
+    }
+
+    public void incrementDone(String callDataID) {
+        get().get(callDataID).incrementCount();
     }
 
     public void updateStatus(String callDataID, int status, Object result) {

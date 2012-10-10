@@ -9,8 +9,25 @@ import java.io.Serializable;
 */
 public class CallData implements Serializable {
     private String statusMessage;
+    private int requiredCount = 1;
+    private int count = 0;
     private int status = ServiceUtil.RUNNING;
     private Object result;
+
+    public void incrementCount() {
+        count++;
+        if (count >= requiredCount) {
+            status = ServiceUtil.DONE;
+        }
+    }
+
+    public int getRequiredCount() {
+        return requiredCount;
+    }
+
+    public void setRequiredCount(int requiredCount) {
+        this.requiredCount = requiredCount;
+    }
 
     public Object getResult() {
         return result;
