@@ -212,6 +212,14 @@ public class FunctionFactory {
             return new LastRecord();
         } else if (s.equals("days")) {
             return new Days();
+        } else if (s.equals("backgroundcolor")) {
+            return new BackgroundColorText();
+        } else if (s.equals("bold")) {
+            return new BoldText();
+        } else if (s.equals("datefilter")) {
+            return new DateFilter();
+        } else if (s.equals("months")) {
+            return new Months();
         } else {
             return null;
         }

@@ -24,6 +24,8 @@ public class DayOfMonth extends Function {
             if (start.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) start;
                 startDate = dateValue.getDate();
+            } else if (start.type() == Value.NUMBER) {
+                startDate = new Date(start.toDouble().longValue());
             }
         }
         if (startDate != null) {
@@ -40,7 +42,13 @@ public class DayOfMonth extends Function {
             TimeZone timeZone = TimeZone.getTimeZone(string);
             calendar.setTimeZone(timeZone);
             calendar.setTimeInMillis(startDate.getTime());
-            return new NumericValue(calendar.get(Calendar.DAY_OF_MONTH));
+            if (params.size() == 2) {
+                int dayToSet = params.get(1).toDouble().intValue();
+                calendar.set(Calendar.DAY_OF_MONTH, dayToSet);
+                return new DateValue(calendar.getTime());
+            } else {
+                return new NumericValue(calendar.get(Calendar.DAY_OF_MONTH));
+            }
         } else {
             return new EmptyValue();
         }

@@ -106,9 +106,16 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
                 result = new NumericValue(result.toDouble() - result2.toDouble());
             } else if (result.type() == Value.DATE && result2.type() == Value.NUMBER) {
                 DateValue dateValue = (DateValue) result;
-                long time = dateValue.getDate().getTime();
-                long delta = (long) (time - result2.toDouble());
-                result = new NumericValue(delta);
+                NumericValue result2Value = (NumericValue) result2;
+                if (result2Value.getCalendarType() > 0) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(result2Value.getCalendarType(), -result2Value.getCalendarValue());
+                    result = new DateValue(cal.getTime());
+                } else {
+                    long time = dateValue.getDate().getTime();
+                    long delta = (long) (time - result2.toDouble());
+                    result = new NumericValue(delta);
+                }
             } else if (result.type() == Value.DATE && result2.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) result;
                 DateValue dateValue2 = (DateValue) result2;
@@ -194,7 +201,15 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         if (row == null) {
             result = new EmptyValue();
         } else {
-            result = row.getValue(node.createAggregateKey());
+            //if (node.ready()) {
+                result = row.getValue(node.createAggregateKey());
+            /*} else {
+                if (analysisItem == null) {
+                    throw new ReportException(new GenericReportFault("A calculation depending on " + node.toDisplay() + " is running before " + node.toDisplay() + " was actually calculated."));
+                } else {
+                    throw new ReportException(new AnalysisItemFault(analysisItem.toDisplay() + " depends on " + node.toDisplay() + ", which hasn't yet been calculated.", analysisItem));
+                }
+            }*/
         }
     }
 

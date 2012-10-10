@@ -8,7 +8,7 @@ import com.easyinsight.core.Value;
  * Date: 10/6/11
  * Time: 12:01 PM
  */
-public class ColorText extends Function {
+public class BackgroundColorText extends Function {
     public Value evaluate() {
         Value target = params.get(0);
         String colorString = minusQuotes(1);
@@ -21,7 +21,7 @@ public class ColorText extends Function {
             textValueExtension = new TextValueExtension();
             target.setValueExtension(textValueExtension);
         }
-        textValueExtension.setColor(color);
+        textValueExtension.setBackgroundColor(color);
         return target;
     }
 
