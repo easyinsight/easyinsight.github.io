@@ -1,5 +1,5 @@
 Chart = {
-    getCallback:function (target, params, showLabels, extras) {
+    getCallback:function (target, params, showLabels, styleProps, extras) {
         return function (data) {
             Utils.noData(data["values"].flatten(), function () {
                 if (showLabels) {
@@ -7,17 +7,29 @@ Chart = {
                     params.legend = $.extend({}, params.legend, {show:true, labels:labels});
                 }
 
-                var height = $(document).height() - 40 - $('#filterRow').height() - $('#reportHeader').height() - 60;
                 var s1 = data["values"];
-                var selector = "#" + target;
-                var selector2 = "#" + target + 'ReportArea';
-                $(selector).height(height);
-                $(selector2).height(height);
+                var customHeight = styleProps["customHeight"];
+                if (customHeight > -1) {
+                    var height;
+                    if (customHeight > 0) {
+                        height = customHeight;
+                    } else {
+                        var verticalMargin = styleProps["verticalMargin"];
+                        height = $(document).height() - $('#filterRow').height() - $('#reportHeader').height() - verticalMargin;
+                        if (height < 400) {
+                            height = 400;
+                        }
+                    }
+
+                    var selector = "#" + target;
+                    var selector2 = "#" + target + 'ReportArea';
+                    $(selector).height(height);
+                    $(selector2).height(height);
+                }
                 if (extras) {
                     extras(data);
                 }
-                var plot1 = $.jqplot(target + 'ReportArea', s1, params);
-                Chart.charts[target] = plot1;
+                Chart.charts[target] = $.jqplot(target + 'ReportArea', s1, params);
 
             }, Chart.cleanup, target);
         };
@@ -32,27 +44,31 @@ Chart = {
         }
     },
 
-    getStackedBarChart:function (target, params) {
-        return Chart.getCallback(target, params, true, function (data) {
-            var series = data["series"];
-            params.series = series;
+    getStackedBarChart:function (target, params, styleProps) {
+        return Chart.getCallback(target, params, true, styleProps, function (data) {
+            params.series = data["series"];
             params.axes.yaxis.ticks = data["ticks"];
         })
     },
 
-    getStackedColumnChart:function (target, params) {
-        return Chart.getCallback(target, params, true, function (data) {
-            var series = data["series"];
-            params.series = series;
+    getStackedColumnChart:function (target, params, styleProps) {
+        return Chart.getCallback(target, params, true, styleProps, function (data) {
+            params.series = data["series"];
             params.axes.xaxis.ticks = data["ticks"];
         })
     },
 
-    getColumnChartCallback:function (target, params) {
-        return Chart.getCallback(target, params, false, function (data) {
+    getColumnChartCallback:function (target, params, styleProps) {
+        return Chart.getCallback(target, params, false, styleProps, function (data) {
             var tt = $("#" + target);
             tt.bind("jqplotDataHighlight", Chart.columnToolTipHover(data["ticks"]));
             tt.bind("jqplotDataUnhighlight", Chart.columnToolTipOut);
+            /*tt.bind('jqplotDataClick',
+                function (ev, seriesIndex, pointIndex, data) {
+                    drillThrough(drillString);
+                    //$('#info2c').html('series: '+seriesIndex+', point: '+pointIndex+', data: '+data+ ', pageX: '+ev.pageX+', pageY: '+ev.pageY);
+                }
+            );*/
         })
     },
 
@@ -78,8 +94,8 @@ Chart = {
         $('#chartpseudotooltip').hide();
     },
 
-    getPieChartCallback:function (target, params) {
-        return Chart.getCallback(target, params, false, function (data) {
+    getPieChartCallback:function (target, params, styleProps) {
+        return Chart.getCallback(target, params, false, styleProps, function (data) {
             var tt = $("#" + target);
             tt.bind("jqplotDataHighlight", Chart.pieToolTipHover);
             tt.bind("jqplotDataUnhighlight", Chart.pieToolTipOut);

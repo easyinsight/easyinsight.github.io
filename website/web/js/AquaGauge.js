@@ -10,7 +10,7 @@ function AquaGauge(target) {
     this.props = new GaugeParams(this.cvsHelper);
 
     //Public method to drawGauge
-    this.refresh = function (currentValue) {
+    this.refresh = function (currentValue, formattedCurrentValue) {
         this.props.currentValue = currentValue;
         validateProps(this.props);        
         var currAngle = ((this.props.endAngle - this.props.startAngle) * (this.props.currentValue - this.props.minValue)) / (this.props.maxValue - this.props.minValue) - this.props.endAngle;
@@ -18,7 +18,7 @@ function AquaGauge(target) {
         drawDial(this.cvsHelper, this.props);
         drawScale(this.cvsHelper, this.props, this.drawGraduation, this.drawValue);
         drawArc(this.cvsHelper, this.props);
-        drawCurrentValue(this.cvsHelper, this.props.currentValue, this.props);
+        drawCurrentValue(this.cvsHelper, formattedCurrentValue, this.props);
         drawPointer(this.cvsHelper, currAngle, this.props);
         drawCenterCircle(this.cvsHelper, this.props);
         if (this.props.showGlossiness)
