@@ -237,6 +237,20 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ExportActivity</servlet-name>
+        <display-name>ExportActivity</display-name>
+        <servlet-class>com.easyinsight.export.ExportScheduledActivityServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ImportActivity</servlet-name>
+        <display-name>ImportActivity</display-name>
+        <servlet-class>com.easyinsight.export.ImportScheduledActivityServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>EIAdmin</servlet-name>
         <display-name>EIAdmin</display-name>
         <servlet-class>com.easyinsight.datafeeds.custom.EIAdminServlet</servlet-class>
@@ -551,6 +565,16 @@
     <servlet-mapping>
         <servlet-name>DefineDataSource</servlet-name>
         <url-pattern>/xml/defineDataSource</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ExportActivity</servlet-name>
+        <url-pattern>/exportActivity</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ImportActivity</servlet-name>
+        <url-pattern>/importActivity</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

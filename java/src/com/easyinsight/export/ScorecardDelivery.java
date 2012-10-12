@@ -1,14 +1,22 @@
 package com.easyinsight.export;
 
+import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.SecurityUtil;
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -132,6 +140,7 @@ public class ScorecardDelivery extends ScheduledDelivery {
             deliveryFormat = rs.getInt(7);
             scorecardName = rs.getString(8);
         }
+        queryStmt.close();
     }
 
     @Override
@@ -142,6 +151,24 @@ public class ScorecardDelivery extends ScheduledDelivery {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public void fromXML(Element root, XMLImportMetadata xmlImportMetadata) {
+        scorecardID = Long.parseLong(root.getAttribute("scorecardID").getValue());
+        subject = root.getAttribute("subject").getValue();
+        body = root.getAttribute("body").getValue();
+        timezoneOffset = Integer.parseInt(root.getAttribute("timezoneOffset").getValue());
+        htmlEmail = Boolean.parseBoolean(root.getAttribute("htmlEmail").getValue());
+    }
+
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element root = new Element("scorecardDelivery");
+        root.addAttribute(new Attribute("scorecardID", String.valueOf(scorecardID)));
+        root.addAttribute(new Attribute("subject", subject));
+        root.addAttribute(new Attribute("body", body));
+        root.addAttribute(new Attribute("timezoneOffset", String.valueOf(timezoneOffset)));
+        root.addAttribute(new Attribute("htmlEmail", String.valueOf(htmlEmail)));
+        return root;
     }
 
     @Override
@@ -165,5 +192,11 @@ public class ScorecardDelivery extends ScheduledDelivery {
         } finally {
             session.close();
         }
+    }
+
+    public void taskNow(EIConnection connection) throws Exception {
+        DeliveryScheduledTask deliveryScheduledTask = new DeliveryScheduledTask();
+        deliveryScheduledTask.setActivityID(getScheduledActivityID());
+        deliveryScheduledTask.execute(new Date(), connection);
     }
 }

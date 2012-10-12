@@ -1,13 +1,14 @@
 package com.easyinsight.export;
 
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.SecurityUtil;
+import nu.xom.Element;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -27,6 +28,10 @@ public abstract class ScheduledActivity {
     private int problemLevel;
 
     private long userID;
+
+    public Element toXML(XMLMetadata xmlMetadata) {
+        return null;
+    }
 
     public long getUserID() {
         return userID;
@@ -182,4 +187,49 @@ public abstract class ScheduledActivity {
     }
 
     public abstract boolean authorize();
+
+    public static void main(String[] args) throws Exception {
+        Class.forName("com.mysql.jdbc.Driver");
+        //Connection connection = DriverManager.getConnection("jdbc:mysql://ec2-23-22-252-83.compute-1.amazonaws.com:3306/dms", "dms", "dms");
+        Database.initialize("ec2-23-22-252-83.compute-1.amazonaws.com", "3306", "dms", "dms", "dms");
+        EIConnection conn = Database.instance().getConnection();
+        //EIConnection conn = new EIConnection(connection);
+        XMLMetadata xmlMetadata = new XMLMetadata();
+        xmlMetadata.setConn(conn);
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCHEDULED_ACCOUNT_ACTIVITY.scheduled_account_activity_id," +
+                "SCHEDULED_ACCOUNT_ACTIVITY.activity_type FROM SCHEDULED_ACCOUNT_ACTIVITY WHERE USER_ID = ?");
+        queryStmt.setLong(1, 2467);
+        ResultSet rs = queryStmt.executeQuery();
+        while (rs.next()) {
+            long activityID = rs.getLong(1);
+            int activityType = rs.getInt(2);
+            try {
+                ScheduledActivity scheduledActivity = ScheduledActivity.createActivity(activityType, activityID, conn);
+                if (scheduledActivity instanceof GeneralDelivery) {
+                    GeneralDelivery generalDelivery = (GeneralDelivery) scheduledActivity;
+                    for (DeliveryInfo info : generalDelivery.getDeliveryInfos()) {
+                        if (info.getType() == DeliveryInfo.SCORECARD) {
+                            System.out.println("*** Found scorecard");
+                        }
+                    }
+                }
+                Element element = scheduledActivity.toXML(xmlMetadata);
+                if (element != null) {
+                    //System.out.println(element.toXML());
+                }
+            } catch (Exception e) {
+                if (e.getMessage() != null && e.getMessage().contains("Orphan")) {
+
+                } else {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+            }
+        }
+
+
+    }
+
+    public void taskNow(EIConnection connection) throws Exception {
+
+    }
 }

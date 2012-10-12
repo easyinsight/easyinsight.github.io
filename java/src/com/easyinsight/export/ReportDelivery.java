@@ -1,9 +1,16 @@
 package com.easyinsight.export;
 
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.email.UserStub;
+import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.security.SecurityUtil;
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 
 import java.sql.*;
@@ -139,6 +146,78 @@ public class ReportDelivery extends ScheduledDelivery {
         return ScheduledActivity.REPORT_DELIVERY;
     }
 
+    public void fromXML(Element root, XMLImportMetadata xmlImportMetadata) {
+        reportID = Long.parseLong(root.getAttribute("reportID").getValue());
+        subject = root.query("subject/text()").get(0).getValue();
+        body = root.query("body/text()").get(0).getValue();
+        deliveryLabel = root.query("deliveryLabel/text()").get(0).getValue();
+        reportFormat = Integer.parseInt(root.getAttribute("reportFormat").getValue());
+        timezoneOffset = Integer.parseInt(root.getAttribute("timezoneOffset").getValue());
+        htmlEmail = Boolean.parseBoolean(root.getAttribute("htmlEmail").getValue());
+        sendIfNoData = Boolean.parseBoolean(root.getAttribute("sendIfNoData").getValue());
+        Nodes filterNodes = root.query("filters/filter");
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        for (int i = 0; i < filterNodes.size(); i++) {
+            Element filterNode = (Element) filterNodes.get(i);
+            filters.add(FilterDefinition.fromXML(filterNode, xmlImportMetadata));
+        }
+        customFilters = filters;
+        Nodes userStubNodes = root.query("userStubs/userStub/text()");
+        for (int i = 0; i < userStubNodes.size(); i++) {
+            long userID = Long.parseLong(userStubNodes.get(i).getValue());
+            UserStub userStub = new UserStub();
+            userStub.setUserID(userID);
+            getUsers().add(userStub);
+        }
+        Nodes emailNodes = root.query("emails/email/text()");
+        for (int i = 0; i < emailNodes.size(); i++) {
+            String email = emailNodes.get(i).getValue();
+            getEmails().add(email);
+        }
+        setScheduleType(ScheduleType.fromXML((Element) root.query("scheduleType").get(0)));
+    }
+
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element root = new Element("reportDelivery");
+        root.addAttribute(new Attribute("dataSourceID", String.valueOf(dataSourceID)));
+        root.appendChild(getScheduleType().toXML());
+        root.addAttribute(new Attribute("reportID", String.valueOf(reportID)));
+        root.addAttribute(new Attribute("subject", subject));
+        Element body = new Element("body");
+        body.appendChild(this.body);
+        root.appendChild(body);
+        Element subject = new Element("subject");
+        subject.appendChild(this.subject);
+        root.appendChild(subject);
+        Element deliveryLabel = new Element("deliveryLabel");
+        deliveryLabel.appendChild(this.deliveryLabel);
+        root.appendChild(deliveryLabel);
+        root.addAttribute(new Attribute("reportFormat", String.valueOf(reportFormat)));
+        root.addAttribute(new Attribute("timezoneOffset", String.valueOf(timezoneOffset)));
+        root.addAttribute(new Attribute("htmlEmail", String.valueOf(htmlEmail)));
+        root.addAttribute(new Attribute("sendIfNoData", String.valueOf(sendIfNoData)));
+        Element filters = new Element("filters");
+        root.appendChild(filters);
+        for (FilterDefinition filterDefinition : getCustomFilters()) {
+            filters.appendChild(filterDefinition.toXML(xmlMetadata));
+        }
+        Element userStubs = new Element("userStubs");
+        for (UserStub userStub : getUsers()) {
+            Element stub = new Element("userStub");
+            stub.appendChild(String.valueOf(userStub.getUserID()));
+            userStubs.appendChild(stub);
+        }
+        root.appendChild(userStubs);
+        Element emails = new Element("emails");
+        for (String emailAddress : getEmails()) {
+            Element email = new Element("email");
+            email.appendChild(emailAddress);
+            emails.appendChild(email);
+        }
+        root.appendChild(emails);
+        return root;
+    }
+
     protected void customSave(EIConnection conn, int utcOffset) throws SQLException {
         super.customSave(conn, utcOffset);
         setTimezoneOffset(utcOffset);
@@ -221,11 +300,13 @@ public class ReportDelivery extends ScheduledDelivery {
                         customFilters.add(filter);
                     }
                 }
+                filterStmt.close();
             }  finally {
                 session.close();
             }
             queryStmt.close();
         } else {
+            queryStmt.close();
             throw new RuntimeException("Orphan activity");
         }
     }
@@ -238,6 +319,12 @@ public class ReportDelivery extends ScheduledDelivery {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public void taskNow(EIConnection connection) throws Exception {
+        DeliveryScheduledTask deliveryScheduledTask = new DeliveryScheduledTask();
+        deliveryScheduledTask.setActivityID(getScheduledActivityID());
+        deliveryScheduledTask.execute(new Date(), connection);
     }
 
     @Override

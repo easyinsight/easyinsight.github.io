@@ -2,6 +2,8 @@ package com.easyinsight.export;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.PreparedStatement;
@@ -28,6 +30,46 @@ public abstract class ScheduleType {
     public static final int MONTHLY = 6;
 
     public abstract int retrieveType();
+
+    public Element toXML() {
+        Element scheduleXML = new Element("scheduleType");
+        scheduleXML.addAttribute(new Attribute("hour", String.valueOf(hour)));
+        scheduleXML.addAttribute(new Attribute("minute", String.valueOf(minute)));
+        scheduleXML.addAttribute(new Attribute("timeOffset", String.valueOf(timeOffset)));
+        scheduleXML.addAttribute(new Attribute("scheduleType", String.valueOf(retrieveType())));
+        return scheduleXML;
+    }
+
+    public static ScheduleType fromXML(Element element) {
+        int type = Integer.parseInt(element.getAttribute("scheduleType").getValue());
+        ScheduleType schedule;
+        switch (type) {
+            case ScheduleType.DAILY:
+                schedule = new DailyScheduleType();
+                break;
+            case ScheduleType.WEEKDAYS:
+                schedule = new WeekdayScheduleType();
+                break;
+            case ScheduleType.MWF:
+                schedule = new MWFScheduleType();
+                break;
+            case ScheduleType.TR:
+                schedule = new TRScheduleType();
+                break;
+            case ScheduleType.WEEKLY:
+                schedule = new WeeklyScheduleType();
+                break;
+            case ScheduleType.MONTHLY:
+                schedule = new MonthlyScheduleType();
+                break;
+            default:
+                throw new RuntimeException();
+        }
+        schedule.setHour(Integer.parseInt(element.getAttribute("hour").getValue()));
+        schedule.setMinute(Integer.parseInt(element.getAttribute("minute").getValue()));
+        schedule.setTimeOffset(Integer.parseInt(element.getAttribute("timeOffset").getValue()));
+        return schedule;
+    }
 
     public int getTimeOffset() {
         return timeOffset;

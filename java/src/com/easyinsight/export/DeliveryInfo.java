@@ -1,7 +1,15 @@
 package com.easyinsight.export;
 
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.datafeeds.FeedStorage;
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Nodes;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,6 +31,50 @@ public class DeliveryInfo {
     private int index;
     private int format;
     private boolean sendIfNoData;
+
+    public void fromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        id = Long.parseLong(element.getAttribute("id").getValue());
+        type = Integer.parseInt(element.getAttribute("type").getValue());
+        format = Integer.parseInt(element.getAttribute("format").getValue());
+        sendIfNoData = Boolean.parseBoolean(element.getAttribute("sendIfNoData").getValue());
+        label = element.getAttribute("label").getValue();
+        Nodes filterNodes = element.query("filters/filter");
+        dataSourceID = Long.parseLong(element.getAttribute("dataSourceID").getValue());
+        try {
+            xmlImportMetadata.setDataSource(new FeedStorage().getFeedDefinitionData(dataSourceID));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        for (int i = 0; i < filterNodes.size(); i++) {
+            Element filterNode = (Element) filterNodes.get(i);
+            filters.add(FilterDefinition.fromXML(filterNode, xmlImportMetadata));
+        }
+        this.filters = filters;
+    }
+
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("deliveryInfo");
+        element.addAttribute(new Attribute("id", String.valueOf(id)));
+        element.addAttribute(new Attribute("type", String.valueOf(type)));
+        element.addAttribute(new Attribute("index", String.valueOf(index)));
+        element.addAttribute(new Attribute("format", String.valueOf(format)));
+        element.addAttribute(new Attribute("dataSourceID", String.valueOf(dataSourceID)));
+        if (label == null) {
+            element.addAttribute(new Attribute("label", ""));
+        } else {
+            element.addAttribute(new Attribute("label", label));
+        }
+        element.addAttribute(new Attribute("sendIfNoData", String.valueOf(sendIfNoData)));
+        Element filters = new Element("filters");
+        element.appendChild(filters);
+        if (this.filters != null) {
+            for (FilterDefinition filterDefinition : this.filters) {
+                filters.appendChild(filterDefinition.toXML(xmlMetadata));
+            }
+        }
+        return element;
+    }
 
     public boolean isSendIfNoData() {
         return sendIfNoData;

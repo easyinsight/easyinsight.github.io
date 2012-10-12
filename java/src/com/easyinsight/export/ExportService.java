@@ -165,6 +165,22 @@ public class ExportService {
         }
     }
 
+    public void copy(ScheduledActivity scheduledActivity) {
+
+    }
+
+    public void runNow(ScheduledDelivery scheduledDelivery) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            scheduledDelivery.taskNow(conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void addOrUpdateSchedule(ScheduledActivity scheduledActivity, int utcOffset, EIConnection conn) throws SQLException {
         scheduledActivity.save(conn, utcOffset);
         scheduledActivity.setup(conn);        

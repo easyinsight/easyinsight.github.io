@@ -1,9 +1,15 @@
 package com.easyinsight.export;
 
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.email.UserStub;
 import com.easyinsight.security.SecurityUtil;
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
@@ -27,6 +33,71 @@ public class GeneralDelivery extends ScheduledDelivery {
     private int timezoneOffset;
     private long senderID;
     private String deliveryLabel;
+
+    public void fromXML(Element root, XMLImportMetadata xmlImportMetadata) {
+        htmlEmail = Boolean.parseBoolean(root.getAttribute("htmlEmail").getValue());
+        timezoneOffset = Integer.parseInt(root.getAttribute("timezoneOffset").getValue());
+        subject = root.query("subject/text()").get(0).getValue();
+        deliveryLabel = root.query("deliveryLabel/text()").get(0).getValue();
+        body = root.query("body/text()").get(0).getValue();
+        Nodes deliveryInfoNodes = root.query("deliveryInfos/deliveryInfo");
+        deliveryInfos = new ArrayList<DeliveryInfo>();
+        for (int i = 0; i < deliveryInfoNodes.size(); i++) {
+            Element deliveryInfoNode = (Element) deliveryInfoNodes.get(i);
+            DeliveryInfo deliveryInfo = new DeliveryInfo();
+            deliveryInfos.add(deliveryInfo);
+            deliveryInfo.fromXML(deliveryInfoNode, xmlImportMetadata);
+        }
+        Nodes userStubNodes = root.query("userStubs/userStub/text()");
+        for (int i = 0; i < userStubNodes.size(); i++) {
+            long userID = Long.parseLong(userStubNodes.get(i).getValue());
+            UserStub userStub = new UserStub();
+            userStub.setUserID(userID);
+            getUsers().add(userStub);
+        }
+        Nodes emailNodes = root.query("emails/email/text()");
+        for (int i = 0; i < emailNodes.size(); i++) {
+            String email = emailNodes.get(i).getValue();
+            getEmails().add(email);
+        }
+        setScheduleType(ScheduleType.fromXML((Element) root.query("scheduleType").get(0)));
+    }
+
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = new Element("multipleDelivery");
+        Element body = new Element("body");
+        element.appendChild(getScheduleType().toXML());
+        body.appendChild(this.body);
+        element.appendChild(body);
+        Element subject = new Element("subject");
+        subject.appendChild(this.subject);
+        element.appendChild(subject);
+        Element deliveryLabel = new Element("deliveryLabel");
+        deliveryLabel.appendChild(this.deliveryLabel);
+        element.appendChild(deliveryLabel);
+        element.addAttribute(new Attribute("htmlEmail", String.valueOf(htmlEmail)));
+        element.addAttribute(new Attribute("timezoneOffset", String.valueOf(timezoneOffset)));
+        Element deliveryInfosElement = new Element("deliveryInfos");
+        element.appendChild(deliveryInfosElement);
+        for (DeliveryInfo deliveryInfo : deliveryInfos) {
+            deliveryInfosElement.appendChild(deliveryInfo.toXML(xmlMetadata));
+        }
+        Element userStubs = new Element("userStubs");
+        for (UserStub userStub : getUsers()) {
+            Element stub = new Element("userStub");
+            stub.appendChild(String.valueOf(userStub.getUserID()));
+            userStubs.appendChild(stub);
+        }
+        element.appendChild(userStubs);
+        Element emails = new Element("emails");
+        for (String emailAddress : getEmails()) {
+            Element email = new Element("email");
+            email.appendChild(emailAddress);
+            emails.appendChild(email);
+        }
+        element.appendChild(emails);
+        return element;
+    }
 
     public String getDeliveryLabel() {
         return deliveryLabel;
@@ -202,6 +273,8 @@ public class GeneralDelivery extends ScheduledDelivery {
                 deliveryInfo.setFilters(customFilters);
                 infos.add(deliveryInfo);
             }
+            getFilterStmt.close();
+            getReportStmt.close();
             PreparedStatement getScorecardStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD_NAME, DELIVERY_INDEX, DELIVERY_FORMAT FROM delivery_to_scorecard, scorecard WHERE GENERAL_DELIVERY_ID = ? AND " +
                     "delivery_to_scorecard.scorecard_id = scorecard.scorecard_id");
             getScorecardStmt.setLong(1, id);
@@ -215,6 +288,7 @@ public class GeneralDelivery extends ScheduledDelivery {
                 deliveryInfo.setType(DeliveryInfo.SCORECARD);
                 infos.add(deliveryInfo);
             }
+            getScorecardStmt.close();
             Collections.sort(infos, new Comparator<DeliveryInfo>() {
 
                 public int compare(DeliveryInfo deliveryInfo, DeliveryInfo deliveryInfo1) {
@@ -223,6 +297,7 @@ public class GeneralDelivery extends ScheduledDelivery {
             });
             setDeliveryInfos(infos);
         }
+        queryStmt.close();
     }
 
     @Override
@@ -258,5 +333,11 @@ public class GeneralDelivery extends ScheduledDelivery {
         } finally {
             session.close();
         }
+    }
+
+    public void taskNow(EIConnection connection) throws Exception {
+        DeliveryScheduledTask deliveryScheduledTask = new DeliveryScheduledTask();
+        deliveryScheduledTask.setActivityID(getScheduledActivityID());
+        deliveryScheduledTask.execute(new Date(), connection);
     }
 }

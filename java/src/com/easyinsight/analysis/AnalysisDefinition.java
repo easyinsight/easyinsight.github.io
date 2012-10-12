@@ -14,6 +14,7 @@ import java.util.*;
 
 import nu.xom.Attribute;
 import nu.xom.Element;
+import nu.xom.Node;
 import nu.xom.Nodes;
 import org.hibernate.Session;
 import org.hibernate.annotations.MapKey;
@@ -659,10 +660,13 @@ public class AnalysisDefinition implements Cloneable {
         report.setUrlKey(root.getAttribute("urlKey").getValue() + "2");
         String dataSourceURLKey = root.getAttribute("dataSourceUrlKey").getValue();
         FeedDefinition dataSource = xmlImportMetadata.dataSourceForURLKey(dataSourceURLKey);
+        report.setDataFeedID(dataSource.getDataFeedID());
         xmlImportMetadata.setDataSource(dataSource);
+        AnalysisDefinitionState state = createReport(reportType);
+        state.subclassFromXML((Element) root.query("reportState").get(0), xmlImportMetadata);
+        report.setAnalysisDefinitionState(state);
         report.setReportType(reportType);
         report.setDataFeedID(dataSource.getDataFeedID());
-        report.setAnalysisDefinitionState(createReport(reportType));
         report.setAccountVisible(Boolean.parseBoolean(root.getAttribute("accountVisible").getValue()));
         report.setPubliclyVisible(Boolean.parseBoolean(root.getAttribute("publiclyVisible").getValue()));
         report.setMarketplaceVisible(Boolean.parseBoolean(root.getAttribute("exchangeVisible").getValue()));
@@ -674,8 +678,17 @@ public class AnalysisDefinition implements Cloneable {
             String structureID = fieldNode.getAttribute("structureID").getValue();
             reportStructure.put(structureID, analysisItem);
         }
-        report.setMarmotScript(root.getAttribute("marmotScript").getValue());
-        report.setDescription(root.getAttribute("description").getValue());
+        Nodes additionalFieldNodes = root.query("additionalFields/analysisItem");
+        List<AnalysisItem> additionalFields = new ArrayList<AnalysisItem>();
+        for (int i = 0; i < additionalFieldNodes.size(); i++) {
+            Element additionalFieldNode = (Element) additionalFieldNodes.get(i);
+            AnalysisItem analysisItem = AnalysisItem.fromXML(additionalFieldNode, xmlImportMetadata);
+            additionalFields.add(analysisItem);
+        }
+        report.setAddedItems(additionalFields);
+        report.setMarmotScript(xmlImportMetadata.getValue(root, "marmotScript/text()"));
+        report.setDescription(xmlImportMetadata.getValue(root, "description/text()"));
+        report.setReportRunMarmotScript(xmlImportMetadata.getValue(root, "reportRunMarmotScript/text()"));
         Nodes filterNodes = root.query("filters/filter");
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         for (int i = 0; i < filterNodes.size(); i++) {
@@ -683,12 +696,26 @@ public class AnalysisDefinition implements Cloneable {
             filters.add(FilterDefinition.fromXML(filterNode, xmlImportMetadata));
         }
         List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
-        Nodes joinNodes = root.query("");
+        Nodes joinNodes = root.query("/joinOverrides/joinOverride");
         for (int i = 0; i < joinNodes.size(); i++) {
-
+            JoinOverride joinOverride = new JoinOverride();
+            joinOverride.fromXML((Element) joinNodes.get(i), xmlImportMetadata);
+            joinOverrides.add(joinOverride);
+        }
+        report.setJoinOverrides(joinOverrides);
+        Node propertyRoot = root.query("reportProperties").get(0);
+        for (int i = 0; i < propertyRoot.getChildCount(); i++) {
+            Node propertyChild = propertyRoot.getChild(i);
+            if (propertyChild instanceof Element) {
+                ReportProperty property = ReportProperty.fromXML((Element) propertyChild);
+                report.getProperties().add(property);
+            }
         }
         report.setFilterDefinitions(filters);
         report.setReportStructure(reportStructure);
+        if (!xmlImportMetadata.getUnknownFields().isEmpty()) {
+            throw new ReportException(new MissingFieldReportFault(xmlImportMetadata.getUnknownFields()));
+        }
         return report;
     }
 
@@ -698,8 +725,8 @@ public class AnalysisDefinition implements Cloneable {
         Element root = new Element("report");
         DateFormat df = new SimpleDateFormat("yyy-MM-dd hh:mm:ss");
         root.addAttribute(new Attribute("type", String.valueOf(getReportType())));
-        root.addAttribute(new Attribute("name", getTitle()));
-        root.addAttribute(new Attribute("urlKey", getUrlKey()));
+        root.addAttribute(new Attribute("name", xmlMetadata.value(getTitle())));
+        root.addAttribute(new Attribute("urlKey", xmlMetadata.value(getUrlKey())));
         root.addAttribute(new Attribute("dataSourceUrlKey", xmlMetadata.urlKeyForDataSourceID(getDataFeedID())));
         root.addAttribute(new Attribute("dateCreated", df.format(dateCreated)));
         root.addAttribute(new Attribute("dateUpdated", df.format(dateUpdated)));
@@ -720,8 +747,10 @@ public class AnalysisDefinition implements Cloneable {
         }
         Element additionalFields = new Element("additionalFields");
         root.appendChild(additionalFields);
-        for (AnalysisItem additionalField : getAddedItems()) {
-            additionalFields.appendChild(additionalField.toXML(xmlMetadata));
+        if (getAddedItems() != null) {
+            for (AnalysisItem additionalField : getAddedItems()) {
+                additionalFields.appendChild(additionalField.toXML(xmlMetadata));
+            }
         }
         Element marmotScript = new Element("marmotScript");
         root.appendChild(marmotScript);
@@ -730,12 +759,12 @@ public class AnalysisDefinition implements Cloneable {
         root.appendChild(reportRunMarmotScript);
         reportRunMarmotScript.appendChild(this.reportRunMarmotScript != null ? this.reportRunMarmotScript : "");
         Element stateElement = analysisDefinitionState.toXML(xmlMetadata);
-        if (stateElement != null) {
-            root.appendChild(stateElement);
-        }
+        root.appendChild(stateElement);
         Element joinOverridesElement = new Element("joinOverrides");
-        for (JoinOverride joinOverride : joinOverrides) {
-            joinOverridesElement.appendChild(joinOverride.toXML(xmlMetadata));
+        if (joinOverrides != null) {
+            for (JoinOverride joinOverride : joinOverrides) {
+                joinOverridesElement.appendChild(joinOverride.toXML(xmlMetadata));
+            }
         }
         Element descriptionElement = new Element("description");
         root.appendChild(descriptionElement);
@@ -759,6 +788,8 @@ public class AnalysisDefinition implements Cloneable {
                 return new CrosstabDefinitionState();
             case WSAnalysisDefinition.TREE:
                 return new TreeDefinitionState();
+            case WSAnalysisDefinition.SUMMARY:
+                return new SummaryDefinitionState();
             case WSAnalysisDefinition.AREA:
             case WSAnalysisDefinition.BAR:
             case WSAnalysisDefinition.COLUMN:
