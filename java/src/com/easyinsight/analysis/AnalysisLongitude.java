@@ -27,4 +27,9 @@ public class AnalysisLongitude extends AnalysisCoordinate {
     public int getType() {
         return super.getType() | AnalysisItemTypes.LONGITUDE;
     }
+
+    @Override
+    public int actualType() {
+        return AnalysisItemTypes.LONGITUDE;
+    }
 }

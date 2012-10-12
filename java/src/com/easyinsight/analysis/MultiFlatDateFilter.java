@@ -34,6 +34,11 @@ public class MultiFlatDateFilter extends FilterDefinition {
     @Column(name="end_date_property")
     private String endDateProperty;
 
+    @Override
+    public int type() {
+        return FilterDefinition.MULTI_FLAT_DATE;
+    }
+
     public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
         super.customFromXML(element, xmlImportMetadata);
         Nodes levels = element.query("/levels/level");

@@ -59,8 +59,8 @@ public class AnalysisStep extends AnalysisDateDimension {
     }
 
     @Override
-    public void afterLoad() {
-        super.afterLoad();
+    public void afterLoad(boolean optimized) {
+        super.afterLoad(optimized);
         if (startDate != null) {
             setStartDate((AnalysisDateDimension) Database.deproxy(getStartDate()));
             getStartDate().afterLoad();

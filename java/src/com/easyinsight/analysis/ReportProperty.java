@@ -66,4 +66,25 @@ public class ReportProperty implements Cloneable {
     public Element toXML() {
         return null;
     }
+
+    public static ReportProperty fromXML(Element element) {
+        ReportProperty reportProperty;
+        if ("reportStringProperty".equals(element.getLocalName())) {
+            reportProperty = new ReportStringProperty();
+        } else if ("reportNumericProperty".equals(element.getLocalName())) {
+            reportProperty = new ReportNumericProperty();
+        } else if ("reportBooleanProperty".equals(element.getLocalName())) {
+            reportProperty = new ReportBooleanProperty();
+        } else if ("reportImageProperty".equals(element.getLocalName())) {
+            reportProperty = new ReportImageProperty();
+        } else {
+            throw new RuntimeException();
+        }
+        reportProperty.customFromXML(element);
+        return reportProperty;
+    }
+
+    protected void customFromXML(Element element) {
+
+    }
 }

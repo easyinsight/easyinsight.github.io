@@ -27,4 +27,9 @@ public class AnalysisLatitude extends AnalysisCoordinate {
     public int getType() {
         return super.getType() | AnalysisItemTypes.LATITUDE;
     }
+
+    @Override
+    public int actualType() {
+        return AnalysisItemTypes.LATITUDE;
+    }
 }

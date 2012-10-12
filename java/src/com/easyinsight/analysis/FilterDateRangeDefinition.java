@@ -48,6 +48,11 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     @Column(name="sliding")
     private boolean sliding;
 
+    @Override
+    public int type() {
+        return FilterDefinition.DATE;
+    }
+
     public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -63,7 +68,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         Element element = super.toXML(xmlMetadata);
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         element.addAttribute(new Attribute("startDate", df.format(startDate)));
-        element.addAttribute(new Attribute("endDate", df.format(startDate)));
+        element.addAttribute(new Attribute("endDate", df.format(endDate)));
         return element;
     }
 

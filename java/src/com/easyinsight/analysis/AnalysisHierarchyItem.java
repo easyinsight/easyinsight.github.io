@@ -1,6 +1,11 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -24,6 +29,43 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         inverseJoinColumns = @JoinColumn(name="hierarchy_level_id", nullable = false))
     private List<HierarchyLevel> hierarchyLevels;
 
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        Element levels = new Element("levels");
+        element.appendChild(levels);
+        for (HierarchyLevel hierarchyLevel : hierarchyLevels) {
+            Element hierarchyLevelElement = new Element("hierarchyLevel");
+            levels.appendChild(hierarchyLevelElement);
+            if (hierarchyLevel == this.hierarchyLevel) {
+                hierarchyLevelElement.addAttribute(new Attribute("currentLevel", "true"));
+            } else {
+                hierarchyLevelElement.addAttribute(new Attribute("currentLevel", "false"));
+            }
+            hierarchyLevelElement.appendChild(hierarchyLevel.getAnalysisItem().toXML(xmlMetadata));
+        }
+        return element;
+    }
+
+    @Override
+    protected void subclassFromXML(Element fieldNode, XMLImportMetadata xmlImportMetadata) {
+        super.subclassFromXML(fieldNode, xmlImportMetadata);
+        List<HierarchyLevel> hierarchyLevelList = new ArrayList<HierarchyLevel>();
+        Nodes levels = fieldNode.query("/levels/hierarchyLevel");
+        for (int i = 0; i < levels.size(); i++) {
+            Element level = (Element) levels.get(i);
+            boolean currentLevel = Boolean.parseBoolean(level.getAttribute("currentLevel").getValue());
+            AnalysisItem analysisItem = AnalysisItem.fromXML((Element) level.getChild(0), xmlImportMetadata);
+            HierarchyLevel hierarchyLevel = new HierarchyLevel();
+            hierarchyLevel.setAnalysisItem(analysisItem);
+            hierarchyLevelList.add(hierarchyLevel);
+            if (currentLevel) {
+                this.hierarchyLevel = hierarchyLevel;
+            }
+        }
+        setHierarchyLevels(hierarchyLevelList);
+    }
+
     public void beforeSave() {
         super.beforeSave();
         int i = 0;
@@ -32,8 +74,8 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         }
     }
 
-    public void afterLoad() {
-        super.afterLoad();
+    public void afterLoad(boolean optimized) {
+        super.afterLoad(optimized);
         if (hierarchyLevels != null) {
             if (getHierarchyLevel() != null) {
                 setHierarchyLevel((HierarchyLevel) Database.deproxy(getHierarchyLevel()));

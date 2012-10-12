@@ -33,6 +33,11 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
     private List<AnalysisItem> availableItems;
 
     @Override
+    public int type() {
+        return FilterDefinition.ANALYSIS_ITEM;
+    }
+
+    @Override
     public void updateIDs(ReplacementMap replacementMap) {
         super.updateIDs(replacementMap);
         if (targetItem != null) {

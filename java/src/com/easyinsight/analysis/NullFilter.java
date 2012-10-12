@@ -24,6 +24,11 @@ public class NullFilter extends FilterDefinition {
     }
 
     @Override
+    public int type() {
+        return FilterDefinition.NULL;
+    }
+
+    @Override
     public String toQuerySQL(String tableName) {
         return null;
     }

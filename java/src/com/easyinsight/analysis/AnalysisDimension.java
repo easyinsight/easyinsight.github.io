@@ -9,6 +9,7 @@ import java.util.Collection;
 import com.easyinsight.database.Database;
 import nu.xom.Attribute;
 import nu.xom.Element;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 
 /**
@@ -37,9 +38,20 @@ public class AnalysisDimension extends AnalysisItem {
         element.addAttribute(new Attribute("summary", String.valueOf(summary)));
         if (keyDimension != null) {
             Element keyDimensionElement = new Element("keyDimension");
-            keyDimensionElement.appendChild(keyDimension.toXML(null));
+            keyDimensionElement.appendChild(keyDimension.toXML(xmlMetadata));
         }
         return element;
+    }
+
+    @Override
+    protected void subclassFromXML(Element fieldNode, XMLImportMetadata xmlImportMetadata) {
+        super.subclassFromXML(fieldNode, xmlImportMetadata);
+        setGroup(Boolean.parseBoolean(fieldNode.getAttribute("groupBy").getValue()));
+        setSummary(Boolean.parseBoolean(fieldNode.getAttribute("summary").getValue()));
+        Nodes keys = fieldNode.query("keyDimension");
+        if (keys.size() == 1) {
+            setKeyDimension((AnalysisDimension) AnalysisItem.fromXML((Element) keys.get(0), xmlImportMetadata));
+        }
     }
 
     public AnalysisDimension() {
@@ -119,8 +131,8 @@ public class AnalysisDimension extends AnalysisItem {
     }
 
     @Override
-    public void afterLoad() {
-        super.afterLoad();
+    public void afterLoad(boolean optimized) {
+        super.afterLoad(optimized);
         if (keyDimension != null) {
             setKeyDimension((AnalysisDimension) Database.deproxy(getKeyDimension()));
             keyDimension.afterLoad();

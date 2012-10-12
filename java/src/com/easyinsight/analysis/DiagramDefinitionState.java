@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSDiagramDefinition;
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -31,10 +32,15 @@ public class DiagramDefinitionState extends AnalysisDefinitionState {
 
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
-        Element element = new Element("diagramReport");
+        Element element = super.toXML(xmlMetadata);
         element.addAttribute(new Attribute("filterName", String.valueOf(filterName)));
         element.addAttribute(new Attribute("dayWindow", String.valueOf(dayWindow)));
         return element;
+    }
+
+    public void subclassFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        filterName = element.getAttribute("filterName").getValue();
+        dayWindow = element.getAttribute("dayWindow").getValue();
     }
 
     @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY)

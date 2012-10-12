@@ -2,6 +2,10 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.TrendColumn;
 import com.easyinsight.analysis.definitions.WSTrendDefinition;
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -28,6 +32,19 @@ public class TrendDefinitionState extends AnalysisDefinitionState {
 
     @Column (name="day_window")
     private String dayWindow;
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("filterName", String.valueOf(filterName)));
+        element.addAttribute(new Attribute("dayWindow", String.valueOf(dayWindow)));
+        return element;
+    }
+
+    public void subclassFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        filterName = element.getAttribute("filterName").getValue();
+        dayWindow = element.getAttribute("dayWindow").getValue();
+    }
 
     @Override
     public WSAnalysisDefinition createWSDefinition() {

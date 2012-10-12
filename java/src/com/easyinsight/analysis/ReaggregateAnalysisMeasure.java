@@ -72,8 +72,8 @@ public class ReaggregateAnalysisMeasure extends AnalysisMeasure {
     }
 
     @Override
-    public void afterLoad() {
-        super.afterLoad();
+    public void afterLoad(boolean optimized) {
+        super.afterLoad(optimized);
         setAggregationItem((AnalysisDimension) Database.deproxy(getAggregationItem()));
         getAggregationItem().afterLoad();
         setWrappedMeasure((AnalysisItem) Database.deproxy(getWrappedMeasure()));

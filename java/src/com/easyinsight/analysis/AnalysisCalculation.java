@@ -51,6 +51,11 @@ public class AnalysisCalculation extends AnalysisMeasure {
     }
 
     @Override
+    public int actualType() {
+        return AnalysisItemTypes.CALCULATION;
+    }
+
+    @Override
     public boolean persistable() {
         return cachedCalculation;
     }

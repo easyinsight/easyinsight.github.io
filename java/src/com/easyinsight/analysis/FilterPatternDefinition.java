@@ -31,6 +31,11 @@ public class FilterPatternDefinition extends FilterDefinition {
     @Column(name="case_sensitive")
     private boolean caseSensitive;
 
+    @Override
+    public int type() {
+        return FilterDefinition.PATTERN;
+    }
+
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
         return new MaterializedFilterPatternDefinition(getField(), pattern, caseSensitive, regex);
     }

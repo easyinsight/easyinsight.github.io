@@ -403,7 +403,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         if (filterDefinitions != null) {
             for (FilterDefinition filter : filterDefinitions) {
-                if (filter.isEnabled()) {
+                if (filter.isEnabled() && !filter.isTemplateFilter()) {
                     if (filter instanceof FilterValueDefinition) {
                         FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
                         if (filterValueDefinition.isAllOption() && filterValueDefinition.getFilteredValues().size() == 1 &&

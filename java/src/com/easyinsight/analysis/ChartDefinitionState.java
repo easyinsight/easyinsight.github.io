@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -40,10 +41,15 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
 
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
-        Element element = new Element("chartDefinitionState");
+        Element element = super.toXML(xmlMetadata);
         element.addAttribute(new Attribute("chartFamily", String.valueOf(chartFamily)));
         element.addAttribute(new Attribute("chartType", String.valueOf(chartType)));
         return element;
+    }
+
+    public void subclassFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        setChartFamily(Integer.parseInt(element.getAttribute("chartFamily").getValue()));
+        setChartType(Integer.parseInt(element.getAttribute("chartType").getValue()));
     }
 
     public static final int COLUMN_FAMILY = 1;

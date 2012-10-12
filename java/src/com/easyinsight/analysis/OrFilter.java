@@ -1,8 +1,10 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import nu.xom.Element;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -31,6 +33,11 @@ public class OrFilter extends FilterDefinition {
 
     public void setFilters(List<FilterDefinition> filters) {
         this.filters = filters;
+    }
+
+    @Override
+    public int type() {
+        return FilterDefinition.OR;
     }
 
     @Override
@@ -128,7 +135,20 @@ public class OrFilter extends FilterDefinition {
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
         Element element = super.toXML(xmlMetadata);
+        Element filters = new Element("filters");
+        element.appendChild(filters);
+        for (FilterDefinition filter : this.filters) {
+            filters.appendChild(filter.toXML(xmlMetadata));
+        }
         return element;
+    }
+
+    public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        Nodes nodes = element.query("/filters/filter");
+        for (int i = 0; i < nodes.size(); i++) {
+            Element filterElement = (Element) nodes.get(i);
+            this.filters.add(FilterDefinition.fromXML(filterElement, xmlImportMetadata));
+        }
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {

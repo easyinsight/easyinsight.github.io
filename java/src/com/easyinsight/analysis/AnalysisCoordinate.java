@@ -52,8 +52,8 @@ public abstract class AnalysisCoordinate extends AnalysisDimension {
     }
 
     @Override
-    public void afterLoad() {
-        super.afterLoad();
+    public void afterLoad(boolean optimized) {
+        super.afterLoad(optimized);
         if (analysisZipCode != null) {
             setAnalysisZipCode((AnalysisZipCode) Database.deproxy(getAnalysisZipCode()));
             analysisZipCode.afterLoad();

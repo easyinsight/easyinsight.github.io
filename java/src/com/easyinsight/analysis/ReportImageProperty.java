@@ -68,4 +68,9 @@ public class ReportImageProperty extends ReportProperty {
         element.appendChild(String.valueOf(imageID));
         return element;
     }
+
+    protected void customFromXML(Element element) {
+        setPropertyName(element.getAttribute("propertyName").getValue());
+        imageID = Long.parseLong(element.getChild(0).getValue());
+    }
 }

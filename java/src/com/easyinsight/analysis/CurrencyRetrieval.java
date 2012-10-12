@@ -26,7 +26,7 @@ public class CurrencyRetrieval {
 
     private Map<String, Double> ratesToEuro = new HashMap<String, Double>();
 
-    private static CurrencyRetrieval instance;
+    private static CurrencyRetrieval instance = new CurrencyRetrieval();
 
     public static CurrencyRetrieval instance() {
         return instance;

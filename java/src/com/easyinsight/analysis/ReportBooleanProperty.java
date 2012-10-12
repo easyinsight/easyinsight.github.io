@@ -48,4 +48,9 @@ public class ReportBooleanProperty extends ReportProperty {
         element.appendChild(String.valueOf(value));
         return element;
     }
+
+    protected void customFromXML(Element element) {
+        setPropertyName(element.getAttribute("propertyName").getValue());
+        value = Boolean.parseBoolean(element.getChild(0).getValue());
+    }
 }

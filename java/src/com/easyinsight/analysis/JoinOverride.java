@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedStorage;
@@ -45,6 +46,15 @@ public class JoinOverride implements Cloneable, Serializable {
 
     @Column(name="marmot_script")
     private String marmotScript;
+
+    public void fromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        Element sourceItemXML = (Element) (element.query("sourceItem").get(0)).getChild(0);
+        sourceItem = AnalysisItem.fromXML(sourceItemXML, xmlImportMetadata);
+        Element targetItemXML = (Element) (element.query("targetItem").get(0)).getChild(0);
+        targetItem = AnalysisItem.fromXML(targetItemXML, xmlImportMetadata);
+        dataSourceID = xmlImportMetadata.dataSourceForURLKey(element.getAttribute("dataSourceID").getValue()).getDataFeedID();
+        marmotScript = element.query("marmotScript/text()").get(0).getValue();
+    }
 
     public String toXML(XMLMetadata xmlMetadata) {
         Element joinOverride = new Element("joinOverride");

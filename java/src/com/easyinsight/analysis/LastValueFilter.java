@@ -38,6 +38,11 @@ public class LastValueFilter extends FilterDefinition {
     public LastValueFilter() {
     }
 
+    @Override
+    public int type() {
+        return FilterDefinition.LAST_VALUE;
+    }
+
     public boolean isAbsolute() {
         return absolute;
     }

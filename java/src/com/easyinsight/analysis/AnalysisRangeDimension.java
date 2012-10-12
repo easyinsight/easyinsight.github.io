@@ -62,8 +62,8 @@ public class AnalysisRangeDimension extends AnalysisDimension {
     }
 
     @Override
-    public void afterLoad() {
-        super.afterLoad();
+    public void afterLoad(boolean optimized) {
+        super.afterLoad(optimized);
         setExplicitOptions(new ArrayList<RangeOption>(getExplicitOptions()));
     }
 

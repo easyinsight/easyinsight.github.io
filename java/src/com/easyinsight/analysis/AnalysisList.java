@@ -34,6 +34,13 @@ public class AnalysisList extends AnalysisDimension {
         return element;
     }
 
+    @Override
+    protected void subclassFromXML(Element fieldNode, XMLImportMetadata xmlImportMetadata) {
+        super.subclassFromXML(fieldNode, xmlImportMetadata);
+        setDelimiter(fieldNode.getAttribute("delimiter").getValue());
+        setExpanded(Boolean.parseBoolean(fieldNode.getAttribute("expanded").getValue()));
+    }
+
     public AnalysisList() {
     }
 

@@ -32,6 +32,11 @@ public class NamedFilterReference extends FilterDefinition {
     public void setReferenceName(String filterName) {
         this.referenceName = filterName;
     }
+    @Override
+    public int type() {
+        return FilterDefinition.NAMED_REF;
+    }
+
 
     @Override
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {

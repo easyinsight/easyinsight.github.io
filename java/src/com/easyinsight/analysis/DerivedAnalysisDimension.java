@@ -36,6 +36,11 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
     @Column(name="apply_before_aggregation")
     private boolean applyBeforeAggregation = true;
 
+    @Override
+    public int actualType() {
+        return AnalysisItemTypes.DERIVED_DIMENSION;
+    }
+
     public String getPipelineName() {
         String pipelineName;
         if (applyBeforeAggregation) {

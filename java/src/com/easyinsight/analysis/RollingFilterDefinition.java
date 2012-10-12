@@ -41,6 +41,11 @@ public class RollingFilterDefinition extends FilterDefinition {
     @Column(name="interval_amount")
     private int customIntervalAmount;
 
+    @Override
+    public int type() {
+        return FilterDefinition.ROLLING_DATE;
+    }
+
     public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
         setInterval(Integer.parseInt(element.getAttribute("interval").getValue()));
         setCustomBeforeOrAfter(Integer.parseInt(element.getAttribute("customBeforeOrAfter").getValue()));

@@ -48,4 +48,9 @@ public class AnalysisText extends AnalysisDimension {
     public int getType() {
         return super.getType() | AnalysisItemTypes.TEXT;
     }
+
+    @Override
+    public int actualType() {
+        return AnalysisItemTypes.TEXT;
+    }
 }

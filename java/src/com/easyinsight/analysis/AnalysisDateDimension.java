@@ -37,12 +37,34 @@ public class AnalysisDateDimension extends AnalysisDimension {
     private boolean dateOnlyField = false;
 
     @Override
+    public int actualType() {
+        return AnalysisItemTypes.DATE_DIMENSION;
+    }
+
+    @Override
     public Element toXML(XMLMetadata xmlMetadata) {
         Element element = super.toXML(xmlMetadata);
         element.addAttribute(new Attribute("dateLevel", String.valueOf(dateLevel)));
-        element.addAttribute(new Attribute("customDateFormat", String.valueOf(customDateFormat)));
-        element.addAttribute(new Attribute("outputDateFormat", String.valueOf(outputDateFormat)));
+        if (customDateFormat == null) {
+            element.addAttribute(new Attribute("customDateFormat", ""));
+        } else {
+            element.addAttribute(new Attribute("customDateFormat", String.valueOf(customDateFormat)));
+        }
+        if (outputDateFormat == null) {
+            element.addAttribute(new Attribute("outputDateFormat", ""));
+        } else {
+            element.addAttribute(new Attribute("outputDateFormat", String.valueOf(outputDateFormat)));
+        }
+
         return element;
+    }
+
+    @Override
+    protected void subclassFromXML(Element fieldNode, XMLImportMetadata xmlImportMetadata) {
+        super.subclassFromXML(fieldNode, xmlImportMetadata);
+        setDateLevel(Integer.parseInt(fieldNode.getAttribute("dateLevel").getValue()));
+        setCustomDateFormat(fieldNode.getAttribute("customDateFormat").getValue());
+        setOutputDateFormat(fieldNode.getAttribute("outputDateFormat").getValue());
     }
 
     private transient DateFormat cachedDateFormat;

@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -34,10 +35,15 @@ public class ListDefinitionState extends AnalysisDefinitionState {
 
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
-        Element element = new Element("listDefinitionState");
+        Element element = super.toXML(xmlMetadata);
         element.addAttribute(new Attribute("showRowNumbers", String.valueOf(showRowNumbers)));
         element.addAttribute(new Attribute("summarizeAll", String.valueOf(summarizeAll)));
         return element;
+    }
+
+    public void subclassFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        setShowRowNumbers(Boolean.parseBoolean(element.getAttribute("showRowNumbers").getValue()));
+        setSummarizeAll(Boolean.parseBoolean(element.getAttribute("summarizeAll").getValue()));
     }
 
     public long getDefinitionID() {

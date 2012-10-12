@@ -42,6 +42,11 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         return pipelineName;
     }
 
+    @Override
+    public int actualType() {
+        return AnalysisItemTypes.DERIVED_DATE;
+    }
+
     public boolean isApplyBeforeAggregation() {
         return applyBeforeAggregation;
     }

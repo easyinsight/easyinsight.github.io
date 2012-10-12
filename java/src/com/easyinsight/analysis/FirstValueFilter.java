@@ -32,6 +32,11 @@ public class FirstValueFilter extends FilterDefinition {
     private int threshold;
 
     @Override
+    public int type() {
+        return FilterDefinition.FIRST_VALUE;
+    }
+
+    @Override
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
         return new MaterializedFirstValueFilter(getField());
     }

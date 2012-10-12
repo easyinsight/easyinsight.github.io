@@ -347,10 +347,10 @@ public class FilterDefinition implements Serializable, Cloneable {
             default:
                 throw new RuntimeException();
         }
-        Nodes fieldNodes = element.query("field");
+        Nodes fieldNodes = element.query("field/analysisItem");
         if (fieldNodes.size() == 1) {
             Element field = (Element) fieldNodes.get(0);
-            filterDefinition.setField(AnalysisItem.fromXML((Element) field.getChild(0), xmlImportMetadata));
+            filterDefinition.setField(AnalysisItem.fromXML(field, xmlImportMetadata));
         }
         filterDefinition.setEnabled(Boolean.parseBoolean(element.getAttribute("enabled").getValue()));
         filterDefinition.setApplyBeforeAggregation(Boolean.parseBoolean(element.getAttribute("applyBeforeAggregation").getValue()));

@@ -2,6 +2,10 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSTrendDefinition;
 import com.easyinsight.analysis.definitions.WSTrendGridDefinition;
+import com.easyinsight.core.XMLImportMetadata;
+import com.easyinsight.core.XMLMetadata;
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 import javax.persistence.*;
 import java.util.List;
@@ -31,6 +35,23 @@ public class TrendGridDefinitionState extends AnalysisDefinitionState {
 
     @Column (name="sort_direction")
     private boolean sortDirection;
+
+    @Override
+    public Element toXML(XMLMetadata xmlMetadata) {
+        Element element = super.toXML(xmlMetadata);
+        element.addAttribute(new Attribute("filterName", String.valueOf(filterName)));
+        element.addAttribute(new Attribute("dayWindow", String.valueOf(dayWindow)));
+        element.addAttribute(new Attribute("sortIndex", String.valueOf(sortIndex)));
+        element.addAttribute(new Attribute("sortDirection", String.valueOf(sortDirection)));
+        return element;
+    }
+
+    public void subclassFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+        filterName = element.getAttribute("filterName").getValue();
+        dayWindow = element.getAttribute("dayWindow").getValue();
+        sortIndex = Integer.parseInt(element.getAttribute("sortIndex").getValue());
+        sortDirection = Boolean.parseBoolean(element.getAttribute("sortDirection").getValue());
+    }
 
     @Override
     public WSAnalysisDefinition createWSDefinition() {
