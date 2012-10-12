@@ -1,5 +1,7 @@
 package com.easyinsight.core;
 
+import com.easyinsight.database.Database;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -12,7 +14,7 @@ import java.util.List;
 @Table(name="derived_item_key")
 @PrimaryKeyJoinColumn(name="item_key_id")
 public class DerivedKey extends Key {
-    @OneToOne
+    @OneToOne (fetch = FetchType.LAZY)
     @JoinColumn(name="parent_item_key_id")
     private Key parentKey;
     @Column(name="feed_id")
@@ -24,6 +26,12 @@ public class DerivedKey extends Key {
     public DerivedKey(Key parentKey, long feedID) {
         this.parentKey = parentKey;
         this.feedID = feedID;
+    }
+
+    public void afterLoad() {
+        super.afterLoad();
+        parentKey = (Key) Database.deproxy(parentKey);
+        parentKey.afterLoad();
     }
 
     @Override

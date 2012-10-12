@@ -1,12 +1,19 @@
 package com.easyinsight.core;
 
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
+import nu.xom.Node;
+import nu.xom.Nodes;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: jamesboe
@@ -16,6 +23,16 @@ import java.sql.SQLException;
 public class XMLImportMetadata {
     private EIConnection conn;
     private FeedDefinition dataSource;
+    private Map<String, AnalysisItem> unknownMappings = new HashMap<String, AnalysisItem>();
+    private Set<String> unknownFields = new HashSet<String>();
+
+    public String getValue(Node node, String query) {
+        Nodes nodes = node.query(query);
+        if (nodes.size() == 0) {
+            return "";
+        }
+        return nodes.get(0).getValue();
+    }
 
     public EIConnection getConn() {
         return conn;
@@ -31,6 +48,14 @@ public class XMLImportMetadata {
 
     public void setDataSource(FeedDefinition dataSource) {
         this.dataSource = dataSource;
+    }
+
+    public void addUnknownField(String field) {
+        unknownFields.add(field);
+    }
+
+    public Set<String> getUnknownFields() {
+        return unknownFields;
     }
 
     public FeedDefinition dataSourceForURLKey(String urlKey) {

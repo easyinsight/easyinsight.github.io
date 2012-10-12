@@ -27,6 +27,10 @@ public class Key implements Comparable<Key>, Serializable, Cloneable {
         return false;
     }
 
+    public void afterLoad() {
+
+    }
+
     public void setPkName(String pkName) {
 
     }
