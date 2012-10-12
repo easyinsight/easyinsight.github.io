@@ -1,8 +1,9 @@
 package com.easyinsight.datafeeds;
 
-import com.easyinsight.core.DataSourceDescriptor;
-import com.easyinsight.core.EIDescriptor;
-import com.easyinsight.core.RolePrioritySet;
+import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.analysis.FormattingConfiguration;
+import com.easyinsight.analysis.Link;
+import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.etl.LookupTableDescriptor;
@@ -26,6 +27,7 @@ import org.hibernate.Session;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.proxy.HibernateProxy;
 
 /**
  * User: jboe
@@ -52,8 +54,7 @@ public class FeedStorage {
     public void removeFeed(long feedId) {
         try {
             feedCache.remove(feedId);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LogClass.error(e);
         }
     }
@@ -266,6 +267,8 @@ public class FeedStorage {
         insertFieldStmt.close();
     }
 
+    long fieldSaveTime = 0;
+
     public List<FeedFolder> getFolders(long dataSourceID, List<AnalysisItem> fields, Connection conn) throws SQLException {
         List<FeedFolder> folders = new ArrayList<FeedFolder>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT FOLDER_ID FROM FOLDER WHERE DATA_SOURCE_ID = ? AND " +
@@ -456,8 +459,17 @@ public class FeedStorage {
         }
         queryFieldsStmt.close();
 
-        List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
+        List<AnalysisItem> analysisItems;
+        try {
+            analysisItems = optimizedRetrieval(feedDefinition, conn, feedID, analysisItemIDs);
+        } catch (Exception e) {
+            analysisItems = slowRetrieval(conn, analysisItemIDs);
+        }
+        feedDefinition.setFields(analysisItems);
+    }
 
+    private List<AnalysisItem> slowRetrieval(Connection conn, Set<Long> analysisItemIDs) throws SQLException {
+        List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         Session session = Database.instance().createSession(conn);
         try {
             for (Long analysisItemID : analysisItemIDs) {
@@ -492,8 +504,162 @@ public class FeedStorage {
         } finally {
             session.close();
         }
-        feedDefinition.setFields(analysisItems);
+        return analysisItems;
     }
+
+    private List<AnalysisItem> optimizedRetrieval(FeedDefinition feedDefinition, Connection conn, long feedID, Set<Long> analysisItemIDs) throws SQLException {
+        List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
+
+        StringBuilder sb = new StringBuilder();
+        for (Long id : analysisItemIDs) {
+            sb.append(id).append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        StringBuilder aIDs = new StringBuilder(sb.toString());
+        Session session = Database.instance().createSession(conn);
+        Map<Long, AnalysisItem> formattingConfigurationIDs = new HashMap<Long, AnalysisItem>(analysisItemIDs.size());
+        Map<Long, AnalysisItem> keyIDs = new HashMap<Long, AnalysisItem>(analysisItemIDs.size());
+        Map<Long, AnalysisItem> coreLookup = new HashMap<Long, AnalysisItem>(analysisItemIDs.size());
+        try {
+            List items = session.createQuery("from AnalysisItem where analysisItemID in (" + sb.toString() + ")").list();
+            for (Object obj : items) {
+
+                AnalysisItem analysisItem = (AnalysisItem) obj;
+
+                AnalysisItem item = (AnalysisItem) Database.deproxy(analysisItem);
+                coreLookup.put(item.getAnalysisItemID(), item);
+
+                analysisItems.add(item);
+
+                item.afterLoad(true);
+                HibernateProxy hibernateProxy = (HibernateProxy) item.getFormattingConfiguration();
+                Serializable id = hibernateProxy.getHibernateLazyInitializer().getIdentifier();
+                formattingConfigurationIDs.put((Long) id, analysisItem);
+                HibernateProxy keyProxy = (HibernateProxy) item.getKey();
+                Serializable keyID = keyProxy.getHibernateLazyInitializer().getIdentifier();
+                keyIDs.put((Long) keyID, analysisItem);
+            }
+            sb = new StringBuilder();
+            for (Long id : formattingConfigurationIDs.keySet()) {
+                sb.append(id).append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+
+            List formattingConfigs = session.createQuery("from FormattingConfiguration where formattingConfigurationID in (" + sb.toString() + ")").list();
+            for (Object obj : formattingConfigs) {
+                FormattingConfiguration formattingConfiguration = (FormattingConfiguration) Database.deproxy(obj);
+                formattingConfigurationIDs.get(formattingConfiguration.getFormattingConfigurationID()).setFormattingConfiguration(formattingConfiguration);
+            }
+
+            sb = new StringBuilder();
+            Iterator<Long> iter = keyIDs.keySet().iterator();
+            List<DerivedKey> derivedKeys = new ArrayList<DerivedKey>();
+            for (int i = 0; i < keyIDs.size(); i++) {
+
+                Long id = iter.next();
+                sb.append(id).append(",");
+            }
+
+            sb.deleteCharAt(sb.length() - 1);
+            List keys = session.createQuery("from Key where keyID in (" + sb.toString() + ")").list();
+            for (Object obj : keys) {
+                Key key = (Key) Database.deproxy(obj);
+                if (key instanceof DerivedKey) {
+                    derivedKeys.add((DerivedKey) key);
+                }
+                keyIDs.get(key.getKeyID()).setKey(key);
+            }
+
+            if (derivedKeys.size() > 0) {
+                StringBuilder dkBuilder = new StringBuilder();
+                Map<Long, List<DerivedKey>> map = new HashMap<Long, List<DerivedKey>>(derivedKeys.size());
+                for (DerivedKey derivedKey : derivedKeys) {
+                    HibernateProxy hibernateProxy = (HibernateProxy) derivedKey.getParentKey();
+                    Long parentKeyID = (Long) hibernateProxy.getHibernateLazyInitializer().getIdentifier();
+                    dkBuilder.append(parentKeyID).append(",");
+                    List<DerivedKey> keyList = map.get(parentKeyID);
+                    if (keyList == null) {
+                        keyList = new ArrayList<DerivedKey>();
+                        map.put(parentKeyID, keyList);
+                    }
+                    keyList.add(derivedKey);
+                }
+                dkBuilder.deleteCharAt(dkBuilder.length() - 1);
+                List parentKeys = session.createQuery("from Key where keyID in (" + dkBuilder.toString() + ")").list();
+                for (Object obj : parentKeys) {
+                    Key key = (Key) obj;
+                    List<DerivedKey> keyList = map.get(key.getKeyID());
+                    for (DerivedKey derivedKey : keyList) {
+                        derivedKey.setParentKey((Key) Database.deproxy(key));
+                        derivedKey.afterLoad();
+                    }
+                }
+            }
+
+            {
+                PreparedStatement linkStmt = conn.prepareStatement("SELECT LINK_ID, ANALYSIS_ITEM_TO_LINK.ANALYSIS_ITEM_ID FROM ANALYSIS_ITEM_TO_LINK, FEED_TO_ANALYSIS_ITEM WHERE FEED_TO_ANALYSIS_ITEM.ANALYSIS_ITEM_ID = ANALYSIS_ITEM_TO_LINK.ANALYSIS_ITEM_ID AND FEED_TO_ANALYSIS_ITEM.FEED_ID = ?");
+                linkStmt.setLong(1, feedID);
+                ResultSet links = linkStmt.executeQuery();
+                sb = new StringBuilder();
+                Map<Long, Long> lookup = new HashMap<Long, Long>();
+                while (links.next()) {
+                    long linkID = links.getLong(1);
+                    long analysisItemID = links.getLong(2);
+                    sb.append(linkID).append(",");
+                    lookup.put(linkID, analysisItemID);
+                }
+                linkStmt.close();
+                for (AnalysisItem analysisItem : coreLookup.values()) {
+                    analysisItem.setLinks(new ArrayList<Link>());
+                }
+                if (sb.length() > 0) {
+                    sb.deleteCharAt(sb.length() - 1);
+                    List linkResults = session.createQuery("from Link where linkID in (" + sb.toString() + ")").list();
+                    for (Object obj : linkResults) {
+                        Link link = (Link) Database.deproxy(obj);
+                        long analysisItemID = lookup.get(link.getLinkID());
+                        AnalysisItem analysisItem = coreLookup.get(analysisItemID);
+                        analysisItem.getLinks().add(link);
+                    }
+                }
+            }
+
+            {
+                PreparedStatement filterStmt = conn.prepareStatement("SELECT FILTER_ID, ANALYSIS_ITEM_TO_FILTER.FILTER_ID FROM ANALYSIS_ITEM_TO_FILTER, FEED_TO_ANALYSIS_ITEM WHERE FEED_TO_ANALYSIS_ITEM.ANALYSIS_ITEM_ID = ANALYSIS_ITEM_TO_FILTER.ANALYSIS_ITEM_ID AND FEED_TO_ANALYSIS_ITEM.FEED_ID = ?");
+                filterStmt.setLong(1, feedID);
+                ResultSet links = filterStmt.executeQuery();
+                sb = new StringBuilder();
+                Map<Long, Long> lookup = new HashMap<Long, Long>();
+                while (links.next()) {
+                    long linkID = links.getLong(1);
+                    long analysisItemID = links.getLong(2);
+                    sb.append(linkID).append(",");
+                    lookup.put(linkID, analysisItemID);
+                }
+                filterStmt.close();
+                for (AnalysisItem analysisItem : coreLookup.values()) {
+                    analysisItem.setFilters(new ArrayList<FilterDefinition>());
+                }
+                if (sb.length() > 0) {
+                    sb.deleteCharAt(sb.length() - 1);
+                    List linkResults = session.createQuery("from FilterDefinition where filterID in (" + sb.toString() + ")").list();
+                    for (Object obj : linkResults) {
+                        FilterDefinition filterDefinition = (FilterDefinition) Database.deproxy(obj);
+                        filterDefinition.afterLoad();
+                        long analysisItemID = lookup.get(filterDefinition.getFilterID());
+                        AnalysisItem analysisItem = coreLookup.get(analysisItemID);
+                        analysisItem.getFilters().add(filterDefinition);
+                    }
+                }
+            }
+
+        } finally {
+            session.close();
+        }
+        return analysisItems;
+    }
+
+    static long time = 0;
 
     public List<AnalysisItem> retrieveFields(long feedID, Connection conn) throws SQLException {
         PreparedStatement queryFieldsStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM_ID FROM FEED_TO_ANALYSIS_ITEM WHERE FEED_ID = ?");
@@ -674,7 +840,9 @@ public class FeedStorage {
             feedDefinition.setMarmotScript(rs.getString(i++));
             feedDefinition.setConcreteFieldsEditable(rs.getBoolean(i++));
             feedDefinition.setRefreshMarmotScript(rs.getString(i));
+            long folderStartTime = System.currentTimeMillis();
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
+            System.out.println("folder time = " + (System.currentTimeMillis() - folderStartTime));
             feedDefinition.setDataSourceBehavior(feedDefinition.getDataSourceType());
             feedDefinition.customLoad(conn);
         } else {
@@ -706,8 +874,8 @@ public class FeedStorage {
     }
 
     private DataSourceDescriptor createDescriptor(long dataFeedID, String feedName, Integer userRole,
-                                            long size, int feedType, Date lastDataTime, Date creationDate, String owner, boolean accountVisible, String urlKey,
-                                            int dataSourceBehavior) throws SQLException {
+                                                  long size, int feedType, Date lastDataTime, Date creationDate, String owner, boolean accountVisible, String urlKey,
+                                                  int dataSourceBehavior) throws SQLException {
         DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(feedName, dataFeedID, feedType, accountVisible, dataSourceBehavior);
         dataSourceDescriptor.setSize(size);
         dataSourceDescriptor.setLastDataTime(lastDataTime);
@@ -847,14 +1015,15 @@ public class FeedStorage {
             dataSources.add((DataSourceDescriptor) dataSource);
         }
         populateChildInformation(conn, dataSources);
+        // 415-536-7285
         return dataSources;
     }
 
     private void getMyDataSources(long userID, EIConnection conn, RolePrioritySet<DataSourceDescriptor> descriptorList) throws SQLException {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, ROLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, DATA_FEED.create_date, DATA_FEED.account_visible, DATA_FEED.api_key, refresh_behavior" +
-                    " FROM (UPLOAD_POLICY_USERS, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) WHERE " +
-                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.VISIBLE = ?");
+                "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, ROLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, DATA_FEED.create_date, DATA_FEED.account_visible, DATA_FEED.api_key, refresh_behavior" +
+                " FROM (UPLOAD_POLICY_USERS, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) WHERE " +
+                "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.VISIBLE = ?");
         PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT FIRST_NAME, NAME FROM USER, UPLOAD_POLICY_USERS WHERE UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
                 "UPLOAD_POLICY_USERS.FEED_ID = ?");
         queryStmt.setLong(1, userID);
@@ -1022,25 +1191,25 @@ public class FeedStorage {
             /*versionStmt.setLong(1, dataSource.getId());
             ResultSet versionRS = versionStmt.executeQuery();
             if (versionRS.next()) {*/
-                //int version = versionRS.getInt(1);
-                childQueryStmt.setLong(1, dataSource.getId());
-                //childQueryStmt.setInt(2, version);
-                Date lastDataTime = dataSource.getLastDataTime();
-                long size = dataSource.getSize();
-                ResultSet childRS = childQueryStmt.executeQuery();
-                while (childRS.next()) {
-                    size += childRS.getLong(1);
-                    Timestamp childLastTime = childRS.getTimestamp(2);
-                    if (childLastTime != null) {
-                        if (lastDataTime == null) {
-                            lastDataTime = new Date(childLastTime.getTime());
-                        } else if (childLastTime.getTime() > lastDataTime.getTime()) {
-                            lastDataTime = new Date(childLastTime.getTime());
-                        }
+            //int version = versionRS.getInt(1);
+            childQueryStmt.setLong(1, dataSource.getId());
+            //childQueryStmt.setInt(2, version);
+            Date lastDataTime = dataSource.getLastDataTime();
+            long size = dataSource.getSize();
+            ResultSet childRS = childQueryStmt.executeQuery();
+            while (childRS.next()) {
+                size += childRS.getLong(1);
+                Timestamp childLastTime = childRS.getTimestamp(2);
+                if (childLastTime != null) {
+                    if (lastDataTime == null) {
+                        lastDataTime = new Date(childLastTime.getTime());
+                    } else if (childLastTime.getTime() > lastDataTime.getTime()) {
+                        lastDataTime = new Date(childLastTime.getTime());
                     }
                 }
-                dataSource.setSize(size);
-                dataSource.setLastDataTime(lastDataTime);
+            }
+            dataSource.setSize(size);
+            dataSource.setLastDataTime(lastDataTime);
             //}
         }
         //versionStmt.close();
