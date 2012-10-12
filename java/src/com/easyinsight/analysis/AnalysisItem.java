@@ -12,6 +12,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.pipeline.Pipeline;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
@@ -30,7 +31,7 @@ import org.hibernate.proxy.HibernateProxy;
 public abstract class AnalysisItem implements Cloneable, Serializable {
     // if we fold out key into its own class...
 
-    @OneToOne
+    @OneToOne (fetch = FetchType.LAZY)
     @JoinColumn(name="item_key_id")
     private Key key;
 
@@ -50,7 +51,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="original_display_name")
     private String originalDisplayName;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name="formatting_configuration_id")
     private FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
 
@@ -94,7 +95,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @JoinColumn(name="sort_item_id")
     private AnalysisItem sortItem;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "analysis_item_to_link",
             joinColumns = @JoinColumn(name = "analysis_item_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "link_id", nullable = false))
@@ -107,8 +108,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="marmotscript")
     private String marmotScript;
 
+    // field connection
+
     @Transient
     private transient String folder;
+
+    @OneToOne (fetch = FetchType.LAZY)
+    @JoinColumn(name="from_field_id")
+    private AnalysisItem fromField;
 
     /*@Transient
     private transient Set<String> pipelineSections;*/
@@ -127,6 +134,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public AnalysisItem getFromField() {
+        return fromField;
+    }
+
+    public void setFromField(AnalysisItem fromField) {
+        this.fromField = fromField;
     }
 
     public void setReady(boolean ready) {
@@ -541,9 +556,18 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (reportFieldExtension != null) {
             analysisItemList.addAll(reportFieldExtension.getAnalysisItems(getEverything));
         }
-        /*if (sortItem != null) {
-            analysisItemSet.addAll(sortItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria, analysisItemSet));
-        }*/
+        if (sortItem != null) {
+            analysisItemList.addAll(sortItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
+        }
+        if (fromField != null) {
+            if (structure.getInsightRequestMetadata().getPipelines(fromField).isEmpty()) {
+                structure.getInsightRequestMetadata().getPipelines(fromField).add(Pipeline.BEFORE);
+            }
+            if (structure.onOrAfter(Pipeline.BEFORE)) {
+                analysisItemList.add(fromField);
+            }
+
+        }
         return analysisItemList;
     }
 
@@ -616,17 +640,30 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public void afterLoad() {
+        afterLoad(false);
+    }
+
+    public void afterLoad(boolean optimized) {
         /*if (virtualDimension != null) {
             for (VirtualTransform transform : virtualDimension.getVirtualTransforms()) {
                 transform.toRemote();
             }
         }*/
         if (!loaded) {
-            for (FilterDefinition filterDefinition : getFilters()) {
-                filterDefinition.afterLoad();
+            if (!optimized) {
+                for (FilterDefinition filterDefinition : getFilters()) {
+                    filterDefinition.afterLoad();
+                }
+                setLinks(new ArrayList<Link>(getLinks()));
+                formattingConfiguration = (FormattingConfiguration) Database.deproxy(formattingConfiguration);
+                key = (Key) Database.deproxy(key);
+                key.afterLoad();
             }
+            /**/
+            /*setFilters(new ArrayList<FilterDefinition>());
+            setLinks(new ArrayList<Link>());*/
 
-            setLinks(new ArrayList<Link>(getLinks()));
+            /**/
             loaded = true;
         }
         if (reportFieldExtension != null) {
@@ -636,6 +673,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (sortItem != null) {
             sortItem = (AnalysisItem) Database.deproxy(sortItem);
             sortItem.afterLoad();
+        }
+        if (fromField != null) {
+            fromField = (AnalysisItem) Database.deproxy(fromField);
+            fromField.afterLoad();
         }
     }
 
@@ -686,6 +727,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (sortItem != null) {
             sortItem.reportSave(session);
             session.saveOrUpdate(sortItem);
+        }
+        if (fromField != null) {
+            fromField.reportSave(session);
+            session.saveOrUpdate(fromField);
         }
     }
 
@@ -829,45 +874,51 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         dataSources.add(0, xmlImportMetadata.getDataSource());
         FeedDefinition baseSource = dataSources.get(dataSources.size() - 1);
         AnalysisItem baseItem = baseSource.findAnalysisItemByKey(baseKey);
-        //Key parentKey = baseItem.getKey();
-        if (dataSources.size() > 1) {
-            for (int i = dataSources.size() - 2; i >= 0; i--) {
-                FeedDefinition parentSource = dataSources.get(i);
-                for (AnalysisItem item : parentSource.getFields()) {
-                    if (item.getKey() instanceof DerivedKey) {
-                        DerivedKey derivedKey = (DerivedKey) item.getKey();
-                        if (derivedKey.getParentKey().equals(baseItem.getKey())) {
-                            baseItem = item;
-                            break;
+        if (baseItem == null) {
+            xmlImportMetadata.addUnknownField(baseKey);
+        } else {
+            //Key parentKey = baseItem.getKey();
+            if (dataSources.size() > 1) {
+                for (int i = dataSources.size() - 2; i >= 0; i--) {
+                    FeedDefinition parentSource = dataSources.get(i);
+                    for (AnalysisItem item : parentSource.getFields()) {
+                        if (item.getKey() instanceof DerivedKey) {
+                            DerivedKey derivedKey = (DerivedKey) item.getKey();
+                            if (derivedKey.getParentKey().equals(baseItem.getKey())) {
+                                baseItem = item;
+                                break;
+                            }
                         }
                     }
                 }
             }
-        }
-        analysisItem.setKey(baseItem.getKey());
-        Nodes filters = fieldNode.query("/filters/filter");
-        for (int i = 0; i < filters.size(); i++) {
-            Element filterNode = (Element) filters.get(i);
-            FilterDefinition filterDefinition = FilterDefinition.fromXML(filterNode, xmlImportMetadata);
-            analysisItem.getFilters().add(filterDefinition);
-        }
-        Nodes links = fieldNode.query("/links/link");
-        for (int i = 0; i < links.size(); i++) {
-            Element filterNode = (Element) links.get(i);
-            for (int j = 0; j < filterNode.getChildCount(); j++) {
-                Node linkNode = filterNode.getChild(j);
-                if (linkNode instanceof Element) {
-                    Link link = Link.fromXML((Element) linkNode, xmlImportMetadata);
-                    analysisItem.getLinks().add(link);
+
+            analysisItem.setKey(baseItem.getKey());
+            Nodes filters = fieldNode.query("/filters/filter");
+            for (int i = 0; i < filters.size(); i++) {
+                Element filterNode = (Element) filters.get(i);
+                FilterDefinition filterDefinition = FilterDefinition.fromXML(filterNode, xmlImportMetadata);
+                analysisItem.getFilters().add(filterDefinition);
+            }
+            Nodes links = fieldNode.query("/links/link");
+            for (int i = 0; i < links.size(); i++) {
+                Element filterNode = (Element) links.get(i);
+                for (int j = 0; j < filterNode.getChildCount(); j++) {
+                    Node linkNode = filterNode.getChild(j);
+                    if (linkNode instanceof Element) {
+                        Link link = Link.fromXML((Element) linkNode, xmlImportMetadata);
+                        analysisItem.getLinks().add(link);
+                    }
                 }
             }
-        }
-        Nodes extensionNodes = fieldNode.query("/fieldExtension");
-        if (extensionNodes.size() > 0) {
-            Element extensionElement = (Element) extensionNodes.get(0);
-            analysisItem.setReportFieldExtension(ReportFieldExtension.fromXML(extensionElement, xmlImportMetadata));
+            Nodes extensionNodes = fieldNode.query("/fieldExtension");
+            if (extensionNodes.size() > 0) {
+                Element extensionElement = (Element) extensionNodes.get(0);
+                analysisItem.setReportFieldExtension(ReportFieldExtension.fromXML(extensionElement, xmlImportMetadata));
 
+            }
         }
+        analysisItem.subclassFromXML(fieldNode, xmlImportMetadata);
         return analysisItem;
     }
 

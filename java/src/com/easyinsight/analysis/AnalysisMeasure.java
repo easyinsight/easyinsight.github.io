@@ -1,10 +1,15 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
+import com.easyinsight.database.Database;
+import com.easyinsight.pipeline.Pipeline;
 import nu.xom.Attribute;
 import nu.xom.Element;
+import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * User: James Boe
@@ -30,6 +35,18 @@ public class AnalysisMeasure extends AnalysisItem {
     @Column(name="min_precision")
     private int minPrecision;
 
+    @OneToOne(cascade=CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JoinColumn(name="currency_grouping")
+    private AnalysisItem currencyField;
+
+    public AnalysisItem getCurrencyField() {
+        return currencyField;
+    }
+
+    public void setCurrencyField(AnalysisItem currencyField) {
+        this.currencyField = currencyField;
+    }
+
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
         Element element = super.toXML(xmlMetadata);
@@ -39,6 +56,16 @@ public class AnalysisMeasure extends AnalysisItem {
         element.addAttribute(new Attribute("precision", String.valueOf(precision)));
         element.addAttribute(new Attribute("minPrecision", String.valueOf(minPrecision)));
         return element;
+    }
+
+    @Override
+    protected void subclassFromXML(Element fieldNode, XMLImportMetadata xmlImportMetadata) {
+        super.subclassFromXML(fieldNode, xmlImportMetadata);
+        setAggregation(Integer.parseInt(fieldNode.getAttribute("aggregation").getValue()));
+        setPrecision(Integer.parseInt(fieldNode.getAttribute("precision").getValue()));
+        setMinPrecision(Integer.parseInt(fieldNode.getAttribute("minPrecision").getValue()));
+        setRowCountField(Boolean.parseBoolean(fieldNode.getAttribute("rowCountField").getValue()));
+        setUnderline(Boolean.parseBoolean(fieldNode.getAttribute("underline").getValue()));
     }
 
     public AnalysisMeasure() {
@@ -80,6 +107,50 @@ public class AnalysisMeasure extends AnalysisItem {
         FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
         formattingConfiguration.setFormattingType(formattingType);
         setFormattingConfiguration(formattingConfiguration);
+    }
+
+    @Override
+    public void afterLoad(boolean optimized) {
+        super.afterLoad(optimized);
+        if (currencyField != null) {
+            currencyField = (AnalysisItem) Database.deproxy(currencyField);
+            currencyField.afterLoad();
+        }
+    }
+
+    @Override
+    public void beforeSave() {
+        super.beforeSave();
+        if (currencyField != null) {
+            currencyField.beforeSave();
+        }
+    }
+
+    public void reportSave(Session session) {
+        super.reportSave(session);
+        if (currencyField != null && currencyField.getAnalysisItemID() == 0) {
+            currencyField.reportSave(session);
+            session.save(currencyField);
+        }
+    }
+
+    @Override
+    public void updateIDs(ReplacementMap replacementMap) {
+        super.updateIDs(replacementMap);
+        if (getCurrencyField() != null) {
+            setCurrencyField(replacementMap.getField(getCurrencyField()));
+        }
+    }
+
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
+        List<AnalysisItem> analysisItems = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
+        if (currencyField != null) {
+            if (structure.getInsightRequestMetadata().getPipelines(currencyField).isEmpty()) {
+                structure.getInsightRequestMetadata().getPipelines(currencyField).add(Pipeline.BEFORE);
+            }
+            analysisItems.add(currencyField);
+        }
+        return analysisItems;
     }
 
     public int getMinPrecision() {
