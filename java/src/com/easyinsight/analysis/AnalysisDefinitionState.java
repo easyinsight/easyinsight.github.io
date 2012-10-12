@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import nu.xom.Element;
 import org.hibernate.Session;
@@ -62,6 +63,11 @@ public abstract class AnalysisDefinitionState implements Cloneable {
     }
 
     public Element toXML(XMLMetadata xmlMetadata) {
-        return null;
+        Element element = new Element("reportState");
+        return element;
+    }
+
+    public void subclassFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
+
     }
 }
