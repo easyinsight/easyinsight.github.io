@@ -1,5 +1,7 @@
 alter table analysis_measure add currency_grouping bigint(20) default null;
+alter table analysis_measure add constraint analysis_measure_ibfk8 foreign key (currency_grouping) references analysis_item (analysis_item_id) on delete cascade;
 alter table analysis_item add from_field_id bigint(20) default null;
+alter table analysis_item add constraint analysis_item_ibfk11 foreign key (from_field_id) references analysis_item (analysis_item_id) on delete cascade;
 
 drop table if exists treasure_data_table;
 create table treasure_data_table(
