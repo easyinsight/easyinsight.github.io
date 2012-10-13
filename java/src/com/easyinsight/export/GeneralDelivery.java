@@ -80,7 +80,10 @@ public class GeneralDelivery extends ScheduledDelivery {
         Element deliveryInfosElement = new Element("deliveryInfos");
         element.appendChild(deliveryInfosElement);
         for (DeliveryInfo deliveryInfo : deliveryInfos) {
-            deliveryInfosElement.appendChild(deliveryInfo.toXML(xmlMetadata));
+            Element child = deliveryInfo.toXML(xmlMetadata);
+            if (child != null) {
+                deliveryInfosElement.appendChild(child);
+            }
         }
         Element userStubs = new Element("userStubs");
         for (UserStub userStub : getUsers()) {

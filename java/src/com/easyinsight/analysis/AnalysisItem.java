@@ -115,6 +115,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     @OneToOne (fetch = FetchType.LAZY)
     @JoinColumn(name="from_field_id")
+    //@Transient
     private AnalysisItem fromField;
 
     /*@Transient
@@ -875,6 +876,12 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         FeedDefinition baseSource = dataSources.get(dataSources.size() - 1);
         AnalysisItem baseItem = baseSource.findAnalysisItemByKey(baseKey);
         if (baseItem == null) {
+            for (AnalysisItem analysisItem1 : xmlImportMetadata.getAdditionalReportItems()) {
+                if (analysisItem1.getKey().toKeyString().equals(baseKey)) {
+                    analysisItem.setKey(analysisItem1.getKey());
+                    break;
+                }
+            }
             xmlImportMetadata.addUnknownField(baseKey);
         } else {
             //Key parentKey = baseItem.getKey();
@@ -892,31 +899,30 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                     }
                 }
             }
-
             analysisItem.setKey(baseItem.getKey());
-            Nodes filters = fieldNode.query("/filters/filter");
-            for (int i = 0; i < filters.size(); i++) {
-                Element filterNode = (Element) filters.get(i);
-                FilterDefinition filterDefinition = FilterDefinition.fromXML(filterNode, xmlImportMetadata);
-                analysisItem.getFilters().add(filterDefinition);
-            }
-            Nodes links = fieldNode.query("/links/link");
-            for (int i = 0; i < links.size(); i++) {
-                Element filterNode = (Element) links.get(i);
-                for (int j = 0; j < filterNode.getChildCount(); j++) {
-                    Node linkNode = filterNode.getChild(j);
-                    if (linkNode instanceof Element) {
-                        Link link = Link.fromXML((Element) linkNode, xmlImportMetadata);
-                        analysisItem.getLinks().add(link);
-                    }
+        }
+        Nodes filters = fieldNode.query("filters/filter");
+        for (int i = 0; i < filters.size(); i++) {
+            Element filterNode = (Element) filters.get(i);
+            FilterDefinition filterDefinition = FilterDefinition.fromXML(filterNode, xmlImportMetadata);
+            analysisItem.getFilters().add(filterDefinition);
+        }
+        Nodes links = fieldNode.query("links/link");
+        for (int i = 0; i < links.size(); i++) {
+            Element filterNode = (Element) links.get(i);
+            for (int j = 0; j < filterNode.getChildCount(); j++) {
+                Node linkNode = filterNode.getChild(j);
+                if (linkNode instanceof Element) {
+                    Link link = Link.fromXML((Element) linkNode, xmlImportMetadata);
+                    analysisItem.getLinks().add(link);
                 }
             }
-            Nodes extensionNodes = fieldNode.query("/fieldExtension");
-            if (extensionNodes.size() > 0) {
-                Element extensionElement = (Element) extensionNodes.get(0);
-                analysisItem.setReportFieldExtension(ReportFieldExtension.fromXML(extensionElement, xmlImportMetadata));
+        }
+        Nodes extensionNodes = fieldNode.query("fieldExtension");
+        if (extensionNodes.size() > 0) {
+            Element extensionElement = (Element) extensionNodes.get(0);
+            analysisItem.setReportFieldExtension(ReportFieldExtension.fromXML(extensionElement, xmlImportMetadata));
 
-            }
         }
         analysisItem.subclassFromXML(fieldNode, xmlImportMetadata);
         return analysisItem;

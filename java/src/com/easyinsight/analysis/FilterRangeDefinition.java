@@ -86,7 +86,7 @@ public class FilterRangeDefinition extends FilterDefinition {
         element.addAttribute(new Attribute("currentStartValue", String.valueOf(currentStartValue)));
         element.addAttribute(new Attribute("currentStartValueDefined", String.valueOf(currentEndValueDefined)));
         element.addAttribute(new Attribute("currentEndValue", String.valueOf(currentEndValue)));
-        element.addAttribute(new Attribute("currentStartValueDefined", String.valueOf(currentEndValueDefined)));
+        element.addAttribute(new Attribute("currentEndValueDefined", String.valueOf(currentEndValueDefined)));
         element.addAttribute(new Attribute("lowerOperator", String.valueOf(lowerOperator)));
         element.addAttribute(new Attribute("upperOperator", String.valueOf(upperOperator)));
         return element;

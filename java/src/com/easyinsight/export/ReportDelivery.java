@@ -1,5 +1,6 @@
 package com.easyinsight.export;
 
+import com.easyinsight.analysis.AnalysisStorage;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
@@ -148,6 +149,7 @@ public class ReportDelivery extends ScheduledDelivery {
 
     public void fromXML(Element root, XMLImportMetadata xmlImportMetadata) {
         reportID = Long.parseLong(root.getAttribute("reportID").getValue());
+        xmlImportMetadata.setAdditionalReportItems(new AnalysisStorage().getAnalysisDefinition(reportID).getAddedItems());
         subject = xmlImportMetadata.getValue(root, "subject/text()");
         deliveryLabel = xmlImportMetadata.getValue(root, "deliveryLabel/text()");
         body = xmlImportMetadata.getValue(root, "body/text()");

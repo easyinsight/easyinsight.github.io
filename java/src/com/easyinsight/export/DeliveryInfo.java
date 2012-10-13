@@ -1,5 +1,6 @@
 package com.easyinsight.export;
 
+import com.easyinsight.analysis.AnalysisStorage;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
@@ -45,6 +46,9 @@ public class DeliveryInfo {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        if (type == REPORT) {
+            xmlImportMetadata.setAdditionalReportItems(new AnalysisStorage().getAnalysisDefinition(id).getAddedItems());
+        }
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         for (int i = 0; i < filterNodes.size(); i++) {
             Element filterNode = (Element) filterNodes.get(i);
@@ -59,6 +63,9 @@ public class DeliveryInfo {
         element.addAttribute(new Attribute("type", String.valueOf(type)));
         element.addAttribute(new Attribute("index", String.valueOf(index)));
         element.addAttribute(new Attribute("format", String.valueOf(format)));
+        if (dataSourceID == 0) {
+            return null;
+        }
         element.addAttribute(new Attribute("dataSourceID", String.valueOf(dataSourceID)));
         if (label == null) {
             element.addAttribute(new Attribute("label", ""));
