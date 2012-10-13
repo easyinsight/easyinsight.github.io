@@ -148,9 +148,9 @@ public class ReportDelivery extends ScheduledDelivery {
 
     public void fromXML(Element root, XMLImportMetadata xmlImportMetadata) {
         reportID = Long.parseLong(root.getAttribute("reportID").getValue());
-        subject = root.query("subject/text()").get(0).getValue();
-        body = root.query("body/text()").get(0).getValue();
-        deliveryLabel = root.query("deliveryLabel/text()").get(0).getValue();
+        subject = xmlImportMetadata.getValue(root, "subject/text()");
+        deliveryLabel = xmlImportMetadata.getValue(root, "deliveryLabel/text()");
+        body = xmlImportMetadata.getValue(root, "body/text()");
         reportFormat = Integer.parseInt(root.getAttribute("reportFormat").getValue());
         timezoneOffset = Integer.parseInt(root.getAttribute("timezoneOffset").getValue());
         htmlEmail = Boolean.parseBoolean(root.getAttribute("htmlEmail").getValue());

@@ -37,9 +37,9 @@ public class GeneralDelivery extends ScheduledDelivery {
     public void fromXML(Element root, XMLImportMetadata xmlImportMetadata) {
         htmlEmail = Boolean.parseBoolean(root.getAttribute("htmlEmail").getValue());
         timezoneOffset = Integer.parseInt(root.getAttribute("timezoneOffset").getValue());
-        subject = root.query("subject/text()").get(0).getValue();
-        deliveryLabel = root.query("deliveryLabel/text()").get(0).getValue();
-        body = root.query("body/text()").get(0).getValue();
+        subject = xmlImportMetadata.getValue(root, "subject/text()");
+        deliveryLabel = xmlImportMetadata.getValue(root, "deliveryLabel/text()");
+        body = xmlImportMetadata.getValue(root, "body/text()");
         Nodes deliveryInfoNodes = root.query("deliveryInfos/deliveryInfo");
         deliveryInfos = new ArrayList<DeliveryInfo>();
         for (int i = 0; i < deliveryInfoNodes.size(); i++) {
