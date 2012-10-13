@@ -448,7 +448,11 @@ public class FeedStorage {
     }
 
     public void retrieveFields(FeedDefinition feedDefinition, Connection conn) throws SQLException {
-        long feedID = feedDefinition.getDataFeedID();
+        feedDefinition.setFields(retrieveFields(feedDefinition.getDataFeedID(), conn));
+    }
+
+    public List<AnalysisItem> retrieveFields(long feedID, Connection conn) throws SQLException {
+
         PreparedStatement queryFieldsStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM_ID FROM FEED_TO_ANALYSIS_ITEM WHERE FEED_ID = ?");
 
         queryFieldsStmt.setLong(1, feedID);
@@ -461,11 +465,12 @@ public class FeedStorage {
 
         List<AnalysisItem> analysisItems;
         try {
-            analysisItems = optimizedRetrieval(feedDefinition, conn, feedID, analysisItemIDs);
+            analysisItems = optimizedRetrieval(conn, feedID, analysisItemIDs);
         } catch (Exception e) {
             analysisItems = slowRetrieval(conn, analysisItemIDs);
         }
-        feedDefinition.setFields(analysisItems);
+        return analysisItems;
+
     }
 
     private List<AnalysisItem> slowRetrieval(Connection conn, Set<Long> analysisItemIDs) throws SQLException {
@@ -507,7 +512,7 @@ public class FeedStorage {
         return analysisItems;
     }
 
-    private List<AnalysisItem> optimizedRetrieval(FeedDefinition feedDefinition, Connection conn, long feedID, Set<Long> analysisItemIDs) throws SQLException {
+    private List<AnalysisItem> optimizedRetrieval(Connection conn, long feedID, Set<Long> analysisItemIDs) throws SQLException {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
 
         StringBuilder sb = new StringBuilder();
@@ -660,36 +665,6 @@ public class FeedStorage {
     }
 
     static long time = 0;
-
-    public List<AnalysisItem> retrieveFields(long feedID, Connection conn) throws SQLException {
-        PreparedStatement queryFieldsStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM_ID FROM FEED_TO_ANALYSIS_ITEM WHERE FEED_ID = ?");
-        queryFieldsStmt.setLong(1, feedID);
-        Set<Long> analysisItemIDs = new HashSet<Long>();
-        ResultSet rs = queryFieldsStmt.executeQuery();
-        while (rs.next()) {
-            analysisItemIDs.add(rs.getLong(1));
-        }
-        queryFieldsStmt.close();
-        List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        Session session = Database.instance().createSession(conn);
-        try {
-            for (Long analysisItemID : analysisItemIDs) {
-                List items = session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, analysisItemID).list();
-                if (items.size() > 0) {
-                    AnalysisItem analysisItem = (AnalysisItem) items.get(0);
-                    /*if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-                        AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
-                        analysisHierarchyItem.setHierarchyLevels(new ArrayList<HierarchyLevel>(analysisHierarchyItem.getHierarchyLevels()));
-                    }*/
-                    analysisItem.afterLoad();
-                    analysisItems.add(analysisItem);
-                }
-            }
-        } finally {
-            session.close();
-        }
-        return analysisItems;
-    }
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws Exception {
         try {
