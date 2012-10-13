@@ -103,12 +103,10 @@ public class ApplicationSkin implements Serializable {
         try {
             coreAppBackgroundImage = findImage(properties, "coreAppBackgroundImage", null);
         } catch (Exception e) {
-            e.printStackTrace();
         }
         try {
             headerBarLogo = findImage(properties, "headerBarLogo", null);
         } catch (Exception e) {
-            LogClass.error(e);
         }
         coreAppBackgroundImageEnabled = propertyEnabled(properties, "coreAppBackgroundImage");
         coreAppBackgroundColor = (int) findNumberProperty(properties, "coreAppBackgroundColor", 0);
@@ -131,7 +129,6 @@ public class ApplicationSkin implements Serializable {
         try {
             reportHeaderImage = findImage(properties, "reportHeaderImage", null);
         } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
         myDataName = findBooleanProperty(properties, "myDataName", true);
         myDataSize = findBooleanProperty(properties, "myDataSize", false);
