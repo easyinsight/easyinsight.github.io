@@ -523,7 +523,7 @@ public class FeedStorage {
         StringBuilder aIDs = new StringBuilder(sb.toString());
         Session session = Database.instance().createSession(conn);
         Map<Long, AnalysisItem> formattingConfigurationIDs = new HashMap<Long, AnalysisItem>(analysisItemIDs.size());
-        Map<Long, AnalysisItem> keyIDs = new HashMap<Long, AnalysisItem>(analysisItemIDs.size());
+        Map<Long, List<AnalysisItem>> keyIDs = new HashMap<Long, List<AnalysisItem>>(analysisItemIDs.size());
         Map<Long, AnalysisItem> coreLookup = new HashMap<Long, AnalysisItem>(analysisItemIDs.size());
         try {
             List items = session.createQuery("from AnalysisItem where analysisItemID in (" + sb.toString() + ")").list();
@@ -542,7 +542,12 @@ public class FeedStorage {
                 formattingConfigurationIDs.put((Long) id, analysisItem);
                 HibernateProxy keyProxy = (HibernateProxy) item.getKey();
                 Serializable keyID = keyProxy.getHibernateLazyInitializer().getIdentifier();
-                keyIDs.put((Long) keyID, analysisItem);
+                List<AnalysisItem> analysisItemList1 = keyIDs.get((Long) keyID);
+                if (analysisItemList1 == null) {
+                    analysisItemList1 = new ArrayList<AnalysisItem>();
+                    keyIDs.put((Long) keyID, analysisItemList1);
+                }
+                analysisItemList1.add(analysisItem);
             }
             sb = new StringBuilder();
             for (Long id : formattingConfigurationIDs.keySet()) {
@@ -572,7 +577,10 @@ public class FeedStorage {
                 if (key instanceof DerivedKey) {
                     derivedKeys.add((DerivedKey) key);
                 }
-                keyIDs.get(key.getKeyID()).setKey(key);
+                List<AnalysisItem> fields = keyIDs.get(key.getKeyID());
+                for (AnalysisItem field : fields) {
+                    field.setKey(key);
+                }
             }
 
             if (derivedKeys.size() > 0) {
