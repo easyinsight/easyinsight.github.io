@@ -71,6 +71,10 @@ public abstract class ScheduleType {
         return schedule;
     }
 
+    protected void subclassFromXML(Element element) {
+
+    }
+
     public int getTimeOffset() {
         return timeOffset;
     }

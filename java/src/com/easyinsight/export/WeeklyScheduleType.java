@@ -1,6 +1,8 @@
 package com.easyinsight.export;
 
 import com.easyinsight.database.EIConnection;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.PreparedStatement;
@@ -25,6 +27,19 @@ public class WeeklyScheduleType extends ScheduleType {
 
     public void setDayOfWeek(int dayOfWeek) {
         this.dayOfWeek = dayOfWeek;
+    }
+
+    @Override
+    public Element toXML() {
+        Element element = super.toXML();
+        element.addAttribute(new Attribute("dayOfWeek", String.valueOf(dayOfWeek)));
+        return element;
+    }
+
+    @Override
+    protected void subclassFromXML(Element element) {
+        super.subclassFromXML(element);
+        dayOfWeek = Integer.parseInt(element.getAttribute("dayOfWeek").getValue());
     }
 
     @Override

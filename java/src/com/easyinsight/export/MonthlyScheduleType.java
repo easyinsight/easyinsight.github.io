@@ -1,6 +1,8 @@
 package com.easyinsight.export;
 
 import com.easyinsight.database.EIConnection;
+import nu.xom.Attribute;
+import nu.xom.Element;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.PreparedStatement;
@@ -29,6 +31,19 @@ public class MonthlyScheduleType extends ScheduleType {
     @Override
     public int retrieveType() {
         return ScheduleType.MONTHLY;
+    }
+
+    @Override
+    public Element toXML() {
+        Element element = super.toXML();
+        element.addAttribute(new Attribute("dayOfMonth", String.valueOf(dayOfMonth)));
+        return element;
+    }
+
+    @Override
+    protected void subclassFromXML(Element element) {
+        super.subclassFromXML(element);
+        dayOfMonth = Integer.parseInt(element.getAttribute("dayOfMonth").getValue());
     }
 
     @Nullable
