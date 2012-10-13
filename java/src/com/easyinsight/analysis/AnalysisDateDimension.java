@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -405,7 +406,12 @@ public class AnalysisDateDimension extends AnalysisDimension {
     public AggregateKey createAggregateKey() {
         // in case of filters, how do we do this...
         if (cachedDateKey == null) {
-            cachedDateKey = new AggregateDateKey(getKey(), getType(), dateLevel, getFilters());
+            try {
+                cachedDateKey = new AggregateDateKey(getKey(), getType(), dateLevel, getFilters());
+            } catch (RuntimeException e) {
+                LogClass.error("On loading " + getDisplayName());
+                throw e;
+            }
         }
         return cachedDateKey;
     }
