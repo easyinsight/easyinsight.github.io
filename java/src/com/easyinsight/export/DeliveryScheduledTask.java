@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 /**
@@ -217,12 +218,27 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 emailQueryStmt.close();
 
 
+                PreparedStatement deliveryAuditStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY_AUDIT (" +
+                        "SCHEDULED_ACCOUNT_ACTIVITY_ID, SUCCESSFUL, TARGET_EMAIL, SEND_DATE) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                 for (UserInfo userInfo : userStubs) {
-                    new SendGridEmail().sendMultipleAttachmentsEmail(userInfo.email, subject, body, htmlEmail, senderEmail, senderName, attachmentInfos);
+                    deliveryAuditStmt.setLong(1, activityID);
+                    deliveryAuditStmt.setInt(2, 0);
+                    deliveryAuditStmt.setString(3, userInfo.email);
+                    deliveryAuditStmt.setTimestamp(4, new java.sql.Timestamp(System.currentTimeMillis()));
+                    deliveryAuditStmt.execute();
+                    long auditID = Database.instance().getAutoGenKey(deliveryAuditStmt);
+                    new SendGridEmail().sendMultipleAttachmentsEmail(userInfo.email, subject, body, htmlEmail, senderEmail, senderName, attachmentInfos, "ReportDelivery", auditID);
                 }
                 for (String email : emails) {
-                    new SendGridEmail().sendMultipleAttachmentsEmail(email, subject, body, htmlEmail, senderEmail, senderName, attachmentInfos);
+                    deliveryAuditStmt.setLong(1, activityID);
+                    deliveryAuditStmt.setInt(2, 0);
+                    deliveryAuditStmt.setString(3, email);
+                    deliveryAuditStmt.setTimestamp(4, new java.sql.Timestamp(System.currentTimeMillis()));
+                    deliveryAuditStmt.execute();
+                    long auditID = Database.instance().getAutoGenKey(deliveryAuditStmt);
+                    new SendGridEmail().sendMultipleAttachmentsEmail(email, subject, body, htmlEmail, senderEmail, senderName, attachmentInfos, "ReportDelivery", auditID);
                 }
+                deliveryAuditStmt.close();
             } finally {
                 SecurityUtil.clearThreadLocal();
             }
@@ -613,37 +629,36 @@ public class DeliveryScheduledTask extends ScheduledTask {
          */
 
         Map<String, String> baseProps = new HashMap<String, String>();
-        
-        PreparedStatement deliveryAuditStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY_AUDIT (ACCOUNT_ID," +
-                "REPORT_DELIVERY_ID, SUCCESSFUL, MESSAGE, TARGET_EMAIL, SEND_DATE) VALUES (?, ?, ?, ?, ?, ?)");
+
+        PreparedStatement deliveryAuditStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY_AUDIT (" +
+                "SCHEDULED_ACCOUNT_ACTIVITY_ID, SUCCESSFUL, TARGET_EMAIL, SEND_DATE) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         for (UserInfo userInfo : userStubs) {
+            deliveryAuditStmt.setLong(1, activityID);
+            deliveryAuditStmt.setInt(2, 0);
+            deliveryAuditStmt.setString(3, userInfo.email);
+            deliveryAuditStmt.setTimestamp(4, new java.sql.Timestamp(System.currentTimeMillis()));
+            deliveryAuditStmt.execute();
+            long auditID = Database.instance().getAutoGenKey(deliveryAuditStmt);
             Map<String, String> userProps = new HashMap<String, String>(baseProps);
             userProps.put("Email", userInfo.email);
             userProps.put("Name", userInfo.firstName + " " + userInfo.lastName);
             String subjectToUse = URLPattern.updateString(subjectLine, null, userProps, new ArrayList<AnalysisItem>()).toString();
             String bodyToUse = URLPattern.updateString(body, null, userProps, new ArrayList<AnalysisItem>()).toString();
-            new SendGridEmail().sendAttachmentEmail(userInfo.email, subjectToUse, bodyToUse, bytes, attachmentName, htmlEmail, senderEmail, senderName, encoding);
-            deliveryAuditStmt.setLong(1, accountID);
-            deliveryAuditStmt.setLong(2, deliveryID);
-            deliveryAuditStmt.setBoolean(3, true);
-            deliveryAuditStmt.setString(4, null);
-            deliveryAuditStmt.setString(5, userInfo.email);
-            deliveryAuditStmt.setTimestamp(6, new java.sql.Timestamp(System.currentTimeMillis()));
-            deliveryAuditStmt.execute();
+            new SendGridEmail().sendAttachmentEmail(userInfo.email, subjectToUse, bodyToUse, bytes, attachmentName, htmlEmail, senderEmail, senderName, encoding, "ReportDelivery", auditID);
         }
         for (String email : emails) {
+            deliveryAuditStmt.setLong(1, activityID);
+            deliveryAuditStmt.setInt(2, 0);
+            deliveryAuditStmt.setString(3, email);
+            deliveryAuditStmt.setTimestamp(4, new java.sql.Timestamp(System.currentTimeMillis()));
+            deliveryAuditStmt.execute();
+            long auditID = Database.instance().getAutoGenKey(deliveryAuditStmt);
             Map<String, String> userProps = new HashMap<String, String>(baseProps);
             userProps.put("Email", email);
             String subjectToUse = URLPattern.updateString(subjectLine, null, userProps, new ArrayList<AnalysisItem>()).toString();
             String bodyToUse = URLPattern.updateString(body, null, userProps, new ArrayList<AnalysisItem>()).toString();
-            new SendGridEmail().sendAttachmentEmail(email, subjectToUse, bodyToUse, bytes, attachmentName, htmlEmail, senderEmail, senderName, encoding);
-            deliveryAuditStmt.setLong(1, accountID);
-            deliveryAuditStmt.setLong(2, deliveryID);
-            deliveryAuditStmt.setBoolean(3, true);
-            deliveryAuditStmt.setString(4, null);
-            deliveryAuditStmt.setString(5, email);
-            deliveryAuditStmt.setTimestamp(6, new java.sql.Timestamp(System.currentTimeMillis()));
-            deliveryAuditStmt.execute();
+            new SendGridEmail().sendAttachmentEmail(email, subjectToUse, bodyToUse, bytes, attachmentName, htmlEmail, senderEmail, senderName, encoding, "ReportDelivery", auditID);
+
         }
         deliveryAuditStmt.close();
     }
@@ -704,11 +719,26 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
         emailQueryStmt.close();
 
+        PreparedStatement deliveryAuditStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY_AUDIT (" +
+                "SCHEDULED_ACCOUNT_ACTIVITY_ID, SUCCESSFUL, TARGET_EMAIL, SEND_DATE) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         for (UserInfo userInfo : userStubs) {
-            new SendGridEmail().sendNoAttachmentEmail(userInfo.email, subjectLine, body + extraBody, htmlEmail, senderEmail, senderName);
+            deliveryAuditStmt.setLong(1, activityID);
+            deliveryAuditStmt.setInt(2, 0);
+            deliveryAuditStmt.setString(3, userInfo.email);
+            deliveryAuditStmt.setTimestamp(4, new java.sql.Timestamp(System.currentTimeMillis()));
+            deliveryAuditStmt.execute();
+            long auditID = Database.instance().getAutoGenKey(deliveryAuditStmt);
+            new SendGridEmail().sendNoAttachmentEmail(userInfo.email, subjectLine, body + extraBody, htmlEmail, senderEmail, senderName, "ReportDelivery", auditID);
         }
         for (String email : emails) {
-            new SendGridEmail().sendNoAttachmentEmail(email, subjectLine, body + extraBody, htmlEmail, senderEmail, senderName);
+            deliveryAuditStmt.setLong(1, activityID);
+            deliveryAuditStmt.setInt(2, 0);
+            deliveryAuditStmt.setString(3, email);
+            deliveryAuditStmt.setTimestamp(4, new java.sql.Timestamp(System.currentTimeMillis()));
+            deliveryAuditStmt.execute();
+            long auditID = Database.instance().getAutoGenKey(deliveryAuditStmt);
+            new SendGridEmail().sendNoAttachmentEmail(email, subjectLine, body + extraBody, htmlEmail, senderEmail, senderName, "ReportDelivery", auditID);
         }
+        deliveryAuditStmt.close();
     }
 }

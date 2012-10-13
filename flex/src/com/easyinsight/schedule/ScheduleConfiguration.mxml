@@ -50,6 +50,20 @@
             _activity = value;
         }
 
+        private var _editEnabled:Boolean = true;
+
+
+        [Bindable(event="editEnabledChanged")]
+        public function get editEnabled():Boolean {
+            return _editEnabled;
+        }
+
+        public function set editEnabled(value:Boolean):void {
+            if (_editEnabled == value) return;
+            _editEnabled = value;
+            dispatchEvent(new Event("editEnabledChanged"));
+        }
+
         protected override function commitProperties():void {
             super.commitProperties();
             if (_activity != null) {
@@ -112,7 +126,7 @@
         }
         ]]></mx:Script>
     <mx:FormItem label="How often should this event happen?">
-        <mx:ComboBox rowCount="6" id="scheduleBox" change="changeSchedule()" selectedItem="{scheduleType}">
+        <mx:ComboBox rowCount="6" id="scheduleBox" change="changeSchedule()" selectedItem="{scheduleType}" enabled="{editEnabled}">
             <mx:dataProvider>
                 <mx:ArrayCollection>
                     <mx:Array>
@@ -132,7 +146,7 @@
             <mx:Box/>
             <mx:Box>
                 <util:SmartComboBox id="dayOfWeekBox" selectedProperty="data" labelField="label"
-                                    selectedValue="{selectedDayOfWeek}" rowCount="7">
+                                    selectedValue="{selectedDayOfWeek}" rowCount="7" enabled="{editEnabled}">
                     <util:dataProvider>
                         <mx:ArrayCollection>
                             <mx:Array>
@@ -154,9 +168,9 @@
         </mx:ViewStack>
     </mx:FormItem>
     <mx:FormItem label="What time of day?" direction="horizontal">
-        <mx:NumericStepper value="{hour}" minimum="0" maximum="23" id="hourStepper"/>
+        <mx:NumericStepper value="{hour}" minimum="0" maximum="23" id="hourStepper" enabled="{editEnabled}"/>
         <mx:Label text=":"/>
-        <mx:NumericStepper value="{minute}" minimum="0" maximum="59" id="minuteStepper"/>
+        <mx:NumericStepper value="{minute}" minimum="0" maximum="59" id="minuteStepper" enabled="{editEnabled}"/>
         <mx:Label text="What time zone is this using?" fontSize="10" textDecoration="underline" toolTip="This time will be your browser local time zone."/>
     </mx:FormItem>
 </mx:Form>

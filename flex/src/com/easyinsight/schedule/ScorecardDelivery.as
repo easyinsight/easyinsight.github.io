@@ -16,8 +16,11 @@ public class ScorecardDelivery extends ScheduledDelivery {
         super();
     }
 
-
     override public function get activityDisplay():String {
+        return describe;
+    }
+
+    override public function get describe():String {
         var type:String;
         switch (deliveryFormat) {
             case 1:

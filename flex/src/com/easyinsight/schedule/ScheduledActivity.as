@@ -15,6 +15,10 @@ public class ScheduledActivity {
         return "";
     }
 
+    public function get describe():String {
+        return "";
+    }
+
     public function get interval():String {
         return scheduleType.interval;
     }

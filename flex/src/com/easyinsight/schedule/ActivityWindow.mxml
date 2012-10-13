@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                   xmlns:schedule="com.easyinsight.schedule.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.sharing.UserStub;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var activityDisplay:String;
+
+        [Bindable]
+        private var deliveryLabel:String;
+
+        [Bindable]
+        private var recipients:ArrayCollection;
+
+        private var _activity:ScheduledDelivery;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            activityDisplay = activity.describe;
+            if (activity is ReportDelivery) {
+                deliveryLabel = ReportDelivery(activity).deliveryLabel;
+            } else if (activity is GeneralDelivery) {
+                deliveryLabel = GeneralDelivery(activity).deliveryLabel;
+            }
+            recipients = new ArrayCollection();
+            for each (var user:UserStub in _activity.users) {
+                recipients.addItem(user);
+            }
+            for each (var email:String in _activity.emails) {
+                recipients.addItem(email);
+            }
+        }
+
+        [Bindable(event="activityChanged")]
+        public function get activity():ScheduledDelivery {
+            return _activity;
+        }
+
+        public function set activity(value:ScheduledDelivery):void {
+            if (_activity == value) return;
+            _activity = value;
+            dispatchEvent(new Event("activityChanged"));
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
+
+        private function onEdit():void {
+            if (activity is ReportDelivery) {
+                var window:ReportDeliveryScheduleWindow = new ReportDeliveryScheduleWindow();
+                window.activity = activity;
+                window.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, passThrough, false, 0, true);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            } else if (activity is ScorecardDelivery) {
+                var scorecardWindow:ScorecardDeliveryScheduleWindow = new ScorecardDeliveryScheduleWindow();
+                scorecardWindow.activity = activity;
+                scorecardWindow.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, passThrough, false, 0, true);
+                PopUpManager.addPopUp(scorecardWindow, this, true);
+                PopUpUtil.centerPopUp(scorecardWindow);
+            } else if (activity is GeneralDelivery) {
+                var generalWindow:GeneralDeliveryScheduleWindow = new GeneralDeliveryScheduleWindow();
+                generalWindow.activity = activity;
+                generalWindow.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, passThrough, false, 0, true);
+                PopUpManager.addPopUp(generalWindow, this, true);
+                PopUpUtil.centerPopUp(generalWindow);
+            }
+            PopUpManager.removePopUp(this);
+        }
+
+        private function runNow():void {
+            ProgressAlert.alert(this, "Running...", "The activity should now have been run.", exportService.runNow);
+            exportService.runNow.send(activity);
+        }
+
+        private function ran():void {
+
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="exportService" destination="exportService">
+        <mx:method name="runNow" result="ran()"/>
+    </mx:RemoteObject>
+    <mx:Label text="{activityDisplay}"/>
+    <mx:Form>
+        <mx:FormItem label="Custom Delivery Label:">
+            <mx:TextInput id="deliveryLabelInput" text="{deliveryLabel}" width="300" editable="false"/>
+        </mx:FormItem>
+    </mx:Form>
+    <schedule:ScheduleConfiguration activity="{activity}" id="scheduleConfiguration" editEnabled="false"/>
+    <mx:Form>
+        <mx:FormItem label="Recipients:">
+            <mx:DataGrid dataProvider="{recipients}" rowHeight="28">
+                <mx:columns>
+                    <util:EIDataGridColumn headerText="User" dataField="displayName" width="300"
+                                           itemRenderer="com.easyinsight.schedule.RecipientRenderer"/>
+                </mx:columns>
+            </mx:DataGrid>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox>
+        <util:SaveButton label="Edit" click="onEdit()"/>
+        <util:SaveButton label="Run Now" click="runNow()"/>
+        <!--<util:SaveButton label="Copy"/>-->
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

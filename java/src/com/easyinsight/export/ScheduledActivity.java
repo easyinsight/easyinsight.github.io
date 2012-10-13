@@ -188,7 +188,7 @@ public abstract class ScheduledActivity {
 
     public abstract boolean authorize();
 
-    /*public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         Class.forName("com.mysql.jdbc.Driver");
         //Connection connection = DriverManager.getConnection("jdbc:mysql://ec2-23-22-252-83.compute-1.amazonaws.com:3306/dms", "dms", "dms");
         Database.initialize("ec2-23-22-252-83.compute-1.amazonaws.com", "3306", "dms", "dms", "dms");
@@ -209,13 +209,14 @@ public abstract class ScheduledActivity {
                     GeneralDelivery generalDelivery = (GeneralDelivery) scheduledActivity;
                     for (DeliveryInfo info : generalDelivery.getDeliveryInfos()) {
                         if (info.getType() == DeliveryInfo.SCORECARD) {
-                            System.out.println("*** Found scorecard");
+                            //System.out.println("*** Found scorecard");
                         }
                     }
                 }
                 Element element = scheduledActivity.toXML(xmlMetadata);
                 if (element != null) {
-                    //System.out.println(element.toXML());
+                    System.out.println(element.toXML());
+                    ExportTester.processLine(element.toXML());
                 }
             } catch (Exception e) {
                 if (e.getMessage() != null && e.getMessage().contains("Orphan")) {
@@ -227,7 +228,7 @@ public abstract class ScheduledActivity {
         }
 
 
-    }*/
+    }
 
     public void taskNow(EIConnection connection) throws Exception {
 

@@ -28,11 +28,7 @@ public class ReportDelivery extends ScheduledDelivery implements IDeliverable {
         super();
     }
 
-
-    override public function get activityDisplay():String {
-        if (deliveryLabel != null && deliveryLabel != "") {
-            return deliveryLabel;
-        }
+    override public function get describe():String {
         var type:String;
         switch (reportFormat) {
             case 1:
@@ -50,6 +46,13 @@ public class ReportDelivery extends ScheduledDelivery implements IDeliverable {
                 break;
         }
         return "Email " + reportName + type;
+    }
+
+    override public function get activityDisplay():String {
+        if (deliveryLabel != null && deliveryLabel != "") {
+            return deliveryLabel;
+        }
+        return describe;
     }
 
     public function setFormat(format:int):void {

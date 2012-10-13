@@ -4,6 +4,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.AttachmentInfo;
 import com.easyinsight.logging.LogClass;
+import org.jetbrains.annotations.Nullable;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -110,7 +111,18 @@ public class SendGridEmail {
 
     }
 
+    private void decorateWithAudit(MimeMessage message, String emailType, long auditID) throws MessagingException {
+        if (emailType != null) {
+            message.addHeaderLine("X-SMTPAPI: {\"unique_args\": {\"emailType\": \""+emailType+"\"}, \"auditID\":\""+auditID+"\"}");
+        }
+    }
+
     public void sendNoAttachmentEmail(String emailAddress, String subject, String htmlBody, boolean htmlEmail, String fromAddress, String fromName)
+            throws MessagingException, UnsupportedEncodingException {
+        sendNoAttachmentEmail(emailAddress, subject, htmlBody, htmlEmail, fromAddress, fromName, null, 0);
+    }
+
+    public void sendNoAttachmentEmail(String emailAddress, String subject, String htmlBody, boolean htmlEmail, String fromAddress, String fromName, @Nullable String emailType, long auditID)
             throws MessagingException, UnsupportedEncodingException {
 
 
@@ -159,6 +171,7 @@ public class SendGridEmail {
         }
 
         message.setContent(multipart);
+        decorateWithAudit(message, emailType, auditID);
 
         if (fromAddress == null) {
             fromAddress = "reports@easy-insight.com";
@@ -176,6 +189,13 @@ public class SendGridEmail {
 
     public void sendAttachmentEmail(String emailAddress, String subject, String htmlBody, byte[] file, String attachmentName, boolean htmlEmail, String fromAddress, String fromName,
                                     String mimeEncoding)
+            throws MessagingException, UnsupportedEncodingException {
+        sendAttachmentEmail(emailAddress, subject, htmlBody, file, attachmentName, htmlEmail, fromAddress, fromName, mimeEncoding, null, 0);
+
+    }
+
+    public void sendAttachmentEmail(String emailAddress, String subject, String htmlBody, byte[] file, String attachmentName, boolean htmlEmail, String fromAddress, String fromName,
+                                    String mimeEncoding, @Nullable String emailType, long auditID)
             throws MessagingException, UnsupportedEncodingException {
 
 
@@ -211,6 +231,8 @@ public class SendGridEmail {
             multipart.addBodyPart(part1);
         }
 
+        decorateWithAudit(message, emailType, auditID);
+
         BodyPart bodyPart = new MimeBodyPart();
         DataSource source = new ByteArrayDataSource(file, mimeEncoding);
         bodyPart.setDataHandler(new DataHandler(source));
@@ -237,6 +259,13 @@ public class SendGridEmail {
 
     public void sendMultipleAttachmentsEmail(String emailAddress, String subject, String htmlBody, boolean htmlEmail, String fromAddress, String fromName,
                                              List<AttachmentInfo> attachments)
+            throws MessagingException, UnsupportedEncodingException {
+        sendMultipleAttachmentsEmail(emailAddress, subject, htmlBody, htmlEmail, fromAddress, fromName, attachments, null, 0);
+
+    }
+
+    public void sendMultipleAttachmentsEmail(String emailAddress, String subject, String htmlBody, boolean htmlEmail, String fromAddress, String fromName,
+                                             List<AttachmentInfo> attachments, @Nullable String emailType, long auditID)
             throws MessagingException, UnsupportedEncodingException {
 
 
@@ -281,6 +310,8 @@ public class SendGridEmail {
 
             multipart.addBodyPart(bodyPart);
         }
+
+        decorateWithAudit(message, emailType, auditID);
 
         message.setContent(multipart);
 

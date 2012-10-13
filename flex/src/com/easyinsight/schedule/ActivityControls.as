@@ -66,24 +66,12 @@ public class ActivityControls extends UIComponent implements IListItemRenderer {
         if (activity is DataSourceRefreshActivity) {
             ProgressAlert.alert(this, "Retrieving information...", null, exportService.getRefreshableDataSources);
             exportService.getRefreshableDataSources.send(activity);    
-        } else if (activity is ReportDelivery) {
-            var window:ReportDeliveryScheduleWindow = new ReportDeliveryScheduleWindow();
-            window.activity = activity;
+        } else {
+            var window:ActivityWindow = new ActivityWindow();
+            window.activity = activity as ScheduledDelivery;
             window.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, passThrough, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-        } else if (activity is ScorecardDelivery) {
-            var scorecardWindow:ScorecardDeliveryScheduleWindow = new ScorecardDeliveryScheduleWindow();
-            scorecardWindow.activity = activity;
-            scorecardWindow.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, passThrough, false, 0, true);
-            PopUpManager.addPopUp(scorecardWindow, this, true);
-            PopUpUtil.centerPopUp(scorecardWindow);
-        } else if (activity is GeneralDelivery) {
-            var generalWindow:GeneralDeliveryScheduleWindow = new GeneralDeliveryScheduleWindow();
-            generalWindow.activity = activity;
-            generalWindow.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, passThrough, false, 0, true);
-            PopUpManager.addPopUp(generalWindow, this, true);
-            PopUpUtil.centerPopUp(generalWindow);
         }
     }
 

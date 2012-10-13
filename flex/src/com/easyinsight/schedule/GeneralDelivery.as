@@ -17,12 +17,15 @@ public class GeneralDelivery extends ScheduledDelivery {
         super();
     }
 
+    override public function get describe():String {
+        return "Email multiple scorecards and reports";
+    }
 
     override public function get activityDisplay():String {
         if (deliveryLabel != null && deliveryLabel != "") {
             return deliveryLabel;
         }
-        return "Email multiple scorecards and reports";
+        return describe;
     }
 }
 }
