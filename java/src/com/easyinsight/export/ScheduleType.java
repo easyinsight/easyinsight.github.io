@@ -68,6 +68,7 @@ public abstract class ScheduleType {
         schedule.setHour(Integer.parseInt(element.getAttribute("hour").getValue()));
         schedule.setMinute(Integer.parseInt(element.getAttribute("minute").getValue()));
         schedule.setTimeOffset(Integer.parseInt(element.getAttribute("timeOffset").getValue()));
+        schedule.subclassFromXML(element);
         return schedule;
     }
 
