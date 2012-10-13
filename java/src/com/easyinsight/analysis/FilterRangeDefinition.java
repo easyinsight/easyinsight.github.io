@@ -64,7 +64,7 @@ public class FilterRangeDefinition extends FilterDefinition {
     }
 
     public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
-        setStartValue(Double.parseDouble(element.getAttribute("startvalue").getValue()));
+        setStartValue(Double.parseDouble(element.getAttribute("startValue").getValue()));
         setEndValue(Double.parseDouble(element.getAttribute("endValue").getValue()));
         setStartValueDefined(Boolean.parseBoolean(element.getAttribute("startValueDefined").getValue()));
         setEndValueDefined(Boolean.parseBoolean(element.getAttribute("endValueDefined").getValue()));
