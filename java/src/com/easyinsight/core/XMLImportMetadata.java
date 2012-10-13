@@ -10,10 +10,7 @@ import nu.xom.Nodes;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -23,6 +20,7 @@ import java.util.Set;
 public class XMLImportMetadata {
     private EIConnection conn;
     private FeedDefinition dataSource;
+    private List<AnalysisItem> additionalReportItems = new ArrayList<AnalysisItem>();
     private Map<String, AnalysisItem> unknownMappings = new HashMap<String, AnalysisItem>();
     private Set<String> unknownFields = new HashSet<String>();
 
@@ -32,6 +30,14 @@ public class XMLImportMetadata {
             return "";
         }
         return nodes.get(0).getValue();
+    }
+
+    public List<AnalysisItem> getAdditionalReportItems() {
+        return additionalReportItems;
+    }
+
+    public void setAdditionalReportItems(List<AnalysisItem> additionalReportItems) {
+        this.additionalReportItems = additionalReportItems;
     }
 
     public EIConnection getConn() {
