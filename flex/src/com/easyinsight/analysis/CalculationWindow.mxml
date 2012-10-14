@@ -204,15 +204,7 @@
                 }
             }
             if (!functionOutput) {
-                var str:String = ":<>,.;/?\"\'{}-=+$";
-                var foundSpecialChar:Boolean = false;
-                for (var i:int = 0; i < str.length; i++) {
-                    if (outputStr.indexOf(str.charAt(i)) != -1)
-                        foundSpecialChar = true;
-                }
-                if (foundSpecialChar) {
-                    outputStr = "[" + outputStr + "]";
-                }
+                outputStr = "[" + outputStr + "]";
             }
             calculationInput.insertTextAtCursor(outputStr);
         }
