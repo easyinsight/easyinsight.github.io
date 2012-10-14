@@ -113,7 +113,7 @@ public class SendGridEmail {
 
     private void decorateWithAudit(MimeMessage message, String emailType, long auditID) throws MessagingException {
         if (emailType != null) {
-            message.addHeaderLine("X-SMTPAPI: {\"unique_args\": {\"emailType\": \""+emailType+"\"}, \"auditID\":\""+auditID+"\"}");
+            message.addHeaderLine("X-SMTPAPI: {\"unique_args\": {\"emailType\": \""+emailType+"\", \"auditID\":\""+auditID+"\"}}");
         }
     }
 
