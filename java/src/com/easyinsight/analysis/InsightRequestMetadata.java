@@ -32,6 +32,21 @@ public class InsightRequestMetadata implements Serializable {
 
     private transient List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
 
+    private transient String targetCurrency;
+    private transient Map<AnalysisItem, AnalysisItem> currencyMap = new HashMap<AnalysisItem, AnalysisItem>();
+
+    public Map<AnalysisItem, AnalysisItem> getCurrencyMap() {
+        return currencyMap;
+    }
+
+    public String getTargetCurrency() {
+        return targetCurrency;
+    }
+
+    public void setTargetCurrency(String targetCurrency) {
+        this.targetCurrency = targetCurrency;
+    }
+
     public void assignDerived(AnalysisItem analysisItem, String pipeline) {
         derivedFieldAssignmentMap.put(analysisItem, pipeline);
     }

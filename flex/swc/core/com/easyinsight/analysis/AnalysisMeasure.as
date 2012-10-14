@@ -1,6 +1,5 @@
 package com.easyinsight.analysis
 {
-import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
 import mx.formatters.Formatter;
 
@@ -14,6 +13,7 @@ import mx.formatters.Formatter;
     public var precision:int = 2;
     public var minPrecision:int;
     public var underline:Boolean;
+    public var currencyField:AnalysisItem;
 		
 		public function AnalysisMeasure(aggregation:int = 1, formattingType:int = 0)
 		{

@@ -3,6 +3,9 @@ package com.easyinsight.pipeline;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSHeatMap;
 import com.easyinsight.calculations.CalcGraph;
+import com.easyinsight.core.DerivedKey;
+import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.etl.LookupTable;
 
@@ -55,6 +58,16 @@ public class StandardReportPipeline extends Pipeline {
             AnalysisList analysisList = (AnalysisList) tag;
             if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
         }
+
+
+        for (AnalysisItem analysisItem : items(AnalysisItemTypes.MEASURE, allNeededAnalysisItems)) {
+            AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+            if (analysisMeasure.getCurrencyField() != null) {
+                components.add(new CurrencyComponent(analysisMeasure, (AnalysisDimension) analysisMeasure.getCurrencyField(), insightRequestMetadata.getTargetCurrency()));
+            }
+        }
+
+
 
         components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.BEFORE, getStructure()));
 
@@ -161,11 +174,11 @@ public class StandardReportPipeline extends Pipeline {
         // need another cleanup component here...
         components.add(new CleanupComponent(Pipeline.LAST, false));
         
-        /*for (AnalysisItem analysisItem : reportItems) {
+        for (AnalysisItem analysisItem : reportItems) {
             if (analysisItem.getSortItem() != null) {
                 components.add(new SortDecorationComponent(analysisItem));
             }
-        }*/
+        }
 
         components.add(new AggregationComponent(AggregationComponent.FINAL, AggregationTypes.RANK));
 
@@ -181,5 +194,17 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new SortComponent());
         components.add(new DateHackComponent());
         return components;
+    }
+
+    private long toID(Key key) {
+        if (key instanceof DerivedKey) {
+            DerivedKey derivedKey = (DerivedKey) key;
+            Key next = derivedKey.getParentKey();
+            if (next instanceof NamedKey) {
+                return derivedKey.getFeedID();
+            }
+            return toID(next);
+        }
+        return 0;
     }
 }

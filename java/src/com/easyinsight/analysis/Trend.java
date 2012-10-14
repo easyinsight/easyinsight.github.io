@@ -1,7 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.definitions.WSKPIDefinition;
-import com.easyinsight.analysis.definitions.WSTrendDefinition;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
@@ -20,17 +18,17 @@ import java.util.Map;
  */
 public class Trend {
 
-    public List<TrendOutcome> calculateTrends(WSKPIDefinition analysisDefinition, DataSet nowSet, DataSet pastSet) {
+    public List<TrendOutcome> calculateTrends(List<? extends AnalysisItem> measures, List<AnalysisItem> groupings, DataSet nowSet, DataSet pastSet) {
         List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
-        for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+        for (AnalysisItem analysisItem : measures) {
             AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
             //TrendOutcome trendOutcome = new TrendOutcome();
             Map<Map<String, Value>, TrendOutcome> outcomeMap = new HashMap<Map<String, Value>, TrendOutcome>();
             if (nowSet.getRows().size() > 0) {
                 for (IRow row : nowSet.getRows()) {
                     Map<String, Value> map = new HashMap<String, Value>();
-                    if (analysisDefinition.getGroupings() != null) {
-                        for (AnalysisItem grouping : analysisDefinition.getGroupings()) {
+                    if (groupings != null) {
+                        for (AnalysisItem grouping : groupings) {
                             map.put(grouping.qualifiedName(), row.getValue(grouping));
                         }
                     }
@@ -44,8 +42,8 @@ public class Trend {
             if (pastSet.getRows().size() > 0) {
                 for (IRow row : pastSet.getRows()) {
                     Map<String, Value> map = new HashMap<String, Value>();
-                    if (analysisDefinition.getGroupings() != null) {
-                        for (AnalysisItem grouping : analysisDefinition.getGroupings()) {
+                    if (groupings != null) {
+                        for (AnalysisItem grouping : groupings) {
                             map.put(grouping.qualifiedName(), row.getValue(grouping));
                         }
                     }

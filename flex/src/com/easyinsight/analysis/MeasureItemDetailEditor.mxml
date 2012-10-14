@@ -1,9 +1,12 @@
 <?xml version="1.0" ?>
 <analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
                                    xmlns:analysis="com.easyinsight.analysis.*"
-                                   xmlns:formatter="com.easyinsight.analysis.formatter.*">
+                                   xmlns:formatter="com.easyinsight.analysis.formatter.*"
+                                   xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.formatter.FormattingConfiguration;
+
+        import mx.collections.ArrayCollection;
 
 
         [Bindable]
@@ -35,7 +38,7 @@
                     break;
                 case "Ranking":
                     analysisMeasure = new AnalysisMeasure(AggregationTypes.RANK);
-                        break;
+                    break;
                 case "Percent of Total":
                     analysisMeasure = new AnalysisMeasure(AggregationTypes.PERCENT_OF_TOTAL);
                     break;
@@ -61,18 +64,46 @@
             analysisMeasure.precision = precisionInput.value;
             analysisMeasure.underline = underlineCheckbox.selected;
             analysisMeasure.minPrecision = minPrecisionInput.value;
+            var currencyField:AnalysisItem = currencyBox.selectedItem as AnalysisItem;
+            if (currencyField != null) {
+                analysisMeasure.currencyField = currencyField;
+            }
         }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            var fieldArray:Array = [];
+            var noComp:Object = { display: "[ No Currency ]"};
+            fieldArray.push(noComp);
+            for each (var g:AnalysisItem in dimensionFields) {
+                fieldArray.push(g);
+            }
+            currencyBox.dataProvider = new ArrayCollection(fieldArray);
+            if (analysisMeasure != null) {
+                currencyBox.selectedValue = analysisMeasure.currencyField != null ? analysisMeasure.currencyField.display : null;
+            }
+        }
+
+        public var analysisMeasure:AnalysisMeasure;
+
+        [Bindable]
+        private var fields:ArrayCollection;
+
+        [Bindable]
+        private var sortDimension:String;
 
         override public function set analysisItem(val:AnalysisItem):void {
             super.analysisItem = val;
             if (val is AnalysisMeasure) {
                 var analysisMeasure:AnalysisMeasure = val as AnalysisMeasure;
+                this.analysisMeasure = analysisMeasure;
                 formattingConfiguration = analysisMeasure.formattingConfiguration;
                 precision = analysisMeasure.precision;
                 minPrecision = analysisMeasure.minPrecision;
                 underline = analysisMeasure.underline;
             }
-        }]]></mx:Script>
+        }
+        ]]></mx:Script>
     <mx:FormItem label="Formatting: ">
         <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
     </mx:FormItem>
@@ -84,5 +115,9 @@
     </mx:FormItem>
     <mx:FormItem label="Minimum Precision:">
         <mx:NumericStepper id="minPrecisionInput" value="{minPrecision}" minimum="0" maximum="50"/>
+    </mx:FormItem>
+    <mx:FormItem label="Currency:">
+        <util:SmartComboBox dataProvider="{fields}" id="currencyBox" labelField="display"
+                            selectedValue="{sortDimension}" selectedProperty="display"/>
     </mx:FormItem>
 </analysis:AnalysisItemDetailEditor>

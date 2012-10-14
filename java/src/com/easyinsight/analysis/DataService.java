@@ -191,13 +191,13 @@ public class DataService {
             System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSKPIDefinition analysisDefinition = (WSKPIDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
             RollingFilterDefinition reportFilter = null;
-            for (FilterDefinition customFilter : customFilters) {
+            for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
                 if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
                     reportFilter = (RollingFilterDefinition) customFilter;
                 }
             }
             if (reportFilter == null) {
-                for (FilterDefinition customFilter : customFilters) {
+                for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
                     if (customFilter instanceof RollingFilterDefinition) {
                         if (analysisDefinition.getFilterName().equals(customFilter.getField().qualifiedName()) ||
                                 analysisDefinition.getFilterName().equals(customFilter.getField().toDisplay())) {
@@ -206,11 +206,13 @@ public class DataService {
                     }
                 }
             }
+            Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
+
             for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
+                if (analysisItem.getReportFieldExtension() != null) {
                     TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
-                    AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
-                    if (dateDimension != null) {
+                    if (trendReportFieldExtension.getDate() != null) {
+                        AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
                         RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
                         rollingFilterDefinition.setField(dateDimension);
                         rollingFilterDefinition.setInterval(reportFilter.getInterval());
@@ -220,20 +222,79 @@ public class DataService {
                             rollingFilterDefinition.setCustomIntervalType(reportFilter.getCustomIntervalType());
                         }
                         analysisItem.getFilters().add(rollingFilterDefinition);
+                        List<AnalysisMeasure> measures = trendMap.get(dateDimension.qualifiedName());
+                        if (measures == null) {
+                            measures = new ArrayList<AnalysisMeasure>();
+                            trendMap.put(dateDimension.qualifiedName(), measures);
+                        }
+                        measures.add((AnalysisMeasure) analysisItem);
+                    } else {
+                        List<AnalysisMeasure> measures = trendMap.get("");
+                        if (measures == null) {
+                            measures = new ArrayList<AnalysisMeasure>();
+                            trendMap.put("", measures);
+                        }
+                        measures.add((AnalysisMeasure) analysisItem);
+                    }
+                } else {
+                    List<AnalysisMeasure> measures = trendMap.get("");
+                    if (measures == null) {
+                        measures = new ArrayList<AnalysisMeasure>();
+                        trendMap.put("", measures);
+                    }
+                    measures.add((AnalysisMeasure) analysisItem);
+                }
+            }
+            List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
+            DataSourceInfo dataSourceInfo = null;
+            for (Map.Entry<String, List<AnalysisMeasure>> entry : trendMap.entrySet()) {
+                String key = entry.getKey();
+                List<AnalysisMeasure> measures = entry.getValue();
+                WSListDefinition tempReport = new WSListDefinition();
+                List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
+                columns.addAll(measures);
+                if (analysisDefinition.getGroupings() != null) {
+                    columns.addAll(analysisDefinition.getGroupings());
+                }
+                tempReport.setFilterDefinitions(analysisDefinition.getFilterDefinitions());
+                tempReport.setColumns(columns);
+                tempReport.setDataFeedID(analysisDefinition.getDataFeedID());
+                tempReport.setAddedItems(analysisDefinition.getAddedItems());
+                tempReport.setMarmotScript(analysisDefinition.getMarmotScript());
+                tempReport.setReportRunMarmotScript(analysisDefinition.getReportRunMarmotScript());
+                tempReport.setJoinOverrides(analysisDefinition.getJoinOverrides());
+                InsightRequestMetadata metadata = new InsightRequestMetadata();
+                metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+                ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
+                dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
+                DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+                DataSet pastSet;
+                if ("".equals(key)) {
+                    pastSet = nowSet;
+                } else {
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
+                    metadata = new InsightRequestMetadata();
+                    metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+                    metadata.setNow(cal.getTime());
+                    ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(metadata, tempReport, conn);
+                    pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
+                }
+                trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
+            }
+            List<TrendOutcome> targetOutcomes = new ArrayList<TrendOutcome>();
+            for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+                for (TrendOutcome trendOutcome : trendOutcomes) {
+                    if (trendOutcome.getMeasure().equals(analysisItem)) {
+                        targetOutcomes.add(trendOutcome);
+                        break;
                     }
                 }
             }
-            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, null);
-            DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
-            insightRequestMetadata.setNow(cal.getTime());
-            ReportRetrieval reportRetrievalPast = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, null);
-            DataSet pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
-            List<TrendOutcome> trendOutcomes = new Trend().calculateTrends(analysisDefinition, nowSet, pastSet);
+            trendOutcomes = targetOutcomes;
             EmbeddedTrendDataResults trendDataResults = new EmbeddedTrendDataResults();
             trendDataResults.setTrendOutcomes(trendOutcomes);
-            trendDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+            trendDataResults.setDataSourceInfo(dataSourceInfo);
             trendDataResults.setDefinition(analysisDefinition);
             return trendDataResults;
         } catch (com.easyinsight.security.SecurityException se) {
@@ -553,6 +614,10 @@ public class DataService {
         }
     }
 
+    private class TrendPartition {
+        private List<AnalysisMeasure> measures;
+    }
+
     public static TrendDataResults getTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         RollingFilterDefinition reportFilter = null;
         for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
@@ -570,6 +635,9 @@ public class DataService {
                 }
             }
         }
+
+        Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
+
         for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
             if (analysisItem.getReportFieldExtension() != null) {
                 TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
@@ -584,21 +652,52 @@ public class DataService {
                         rollingFilterDefinition.setCustomIntervalType(reportFilter.getCustomIntervalType());
                     }
                     analysisItem.getFilters().add(rollingFilterDefinition);
+                    List<AnalysisMeasure> measures = trendMap.get(dateDimension.qualifiedName());
+                    if (measures == null) {
+                        measures = new ArrayList<AnalysisMeasure>();
+                        trendMap.put(dateDimension.qualifiedName(), measures);
+                    }
+                    measures.add((AnalysisMeasure) analysisItem);
                 }
+            } else {
+                List<AnalysisMeasure> measures = trendMap.get("");
+                if (measures == null) {
+                    measures = new ArrayList<AnalysisMeasure>();
+                    trendMap.put("", measures);
+                }
+                measures.add((AnalysisMeasure) analysisItem);
             }
         }
-        ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-        DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
-        insightRequestMetadata.setNow(cal.getTime());
-        ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-        DataSet pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
-        List<TrendOutcome> trendOutcomes = new Trend().calculateTrends(analysisDefinition, nowSet, pastSet);
+        List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
+        DataSourceInfo dataSourceInfo = null;
+        for (List<AnalysisMeasure> measures : trendMap.values()) {
+            WSListDefinition tempReport = new WSListDefinition();
+            List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
+            columns.addAll(measures);
+            if (analysisDefinition.getGroupings() != null) {
+                columns.addAll(analysisDefinition.getGroupings());
+            }
+            tempReport.setFilterDefinitions(analysisDefinition.getFilterDefinitions());
+            tempReport.setColumns(columns);
+            tempReport.setDataFeedID(analysisDefinition.getDataFeedID());
+            tempReport.setAddedItems(analysisDefinition.getAddedItems());
+            tempReport.setMarmotScript(analysisDefinition.getMarmotScript());
+            tempReport.setReportRunMarmotScript(analysisDefinition.getReportRunMarmotScript());
+            tempReport.setJoinOverrides(analysisDefinition.getJoinOverrides());
+            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, tempReport, conn);
+            dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
+            DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
+            insightRequestMetadata.setNow(cal.getTime());
+            ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(insightRequestMetadata, tempReport, conn);
+            DataSet pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
+            trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
+        }
         TrendDataResults trendDataResults = new TrendDataResults();
         trendDataResults.setTrendOutcomes(trendOutcomes);
         trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
-        trendDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+        trendDataResults.setDataSourceInfo(dataSourceInfo);
         return trendDataResults;
     }
 
@@ -832,8 +931,10 @@ public class DataService {
                     }
                 }
             }
+            Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
+
             for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
+                if (analysisItem.getReportFieldExtension() != null) {
                     TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
                     if (trendReportFieldExtension.getDate() != null) {
                         AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
@@ -846,21 +947,80 @@ public class DataService {
                             rollingFilterDefinition.setCustomIntervalType(reportFilter.getCustomIntervalType());
                         }
                         analysisItem.getFilters().add(rollingFilterDefinition);
+                        List<AnalysisMeasure> measures = trendMap.get(dateDimension.qualifiedName());
+                        if (measures == null) {
+                            measures = new ArrayList<AnalysisMeasure>();
+                            trendMap.put(dateDimension.qualifiedName(), measures);
+                        }
+                        measures.add((AnalysisMeasure) analysisItem);
+                    } else {
+                        List<AnalysisMeasure> measures = trendMap.get("");
+                        if (measures == null) {
+                            measures = new ArrayList<AnalysisMeasure>();
+                            trendMap.put("", measures);
+                        }
+                        measures.add((AnalysisMeasure) analysisItem);
+                    }
+                } else {
+                    List<AnalysisMeasure> measures = trendMap.get("");
+                    if (measures == null) {
+                        measures = new ArrayList<AnalysisMeasure>();
+                        trendMap.put("", measures);
+                    }
+                    measures.add((AnalysisMeasure) analysisItem);
+                }
+            }
+            List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
+            DataSourceInfo dataSourceInfo = null;
+            for (Map.Entry<String, List<AnalysisMeasure>> entry : trendMap.entrySet()) {
+                String key = entry.getKey();
+                List<AnalysisMeasure> measures = entry.getValue();
+                WSListDefinition tempReport = new WSListDefinition();
+                List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
+                columns.addAll(measures);
+                if (analysisDefinition.getGroupings() != null) {
+                    columns.addAll(analysisDefinition.getGroupings());
+                }
+                tempReport.setFilterDefinitions(analysisDefinition.getFilterDefinitions());
+                tempReport.setColumns(columns);
+                tempReport.setDataFeedID(analysisDefinition.getDataFeedID());
+                tempReport.setAddedItems(analysisDefinition.getAddedItems());
+                tempReport.setMarmotScript(analysisDefinition.getMarmotScript());
+                tempReport.setReportRunMarmotScript(analysisDefinition.getReportRunMarmotScript());
+                tempReport.setJoinOverrides(analysisDefinition.getJoinOverrides());
+                InsightRequestMetadata metadata = new InsightRequestMetadata();
+                metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+                ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
+                dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
+                DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+                DataSet pastSet;
+                if ("".equals(key)) {
+                    pastSet = nowSet;
+                } else {
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
+                    metadata = new InsightRequestMetadata();
+                    metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+                    metadata.setNow(cal.getTime());
+                    ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(metadata, tempReport, conn);
+                    pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
+                }
+                trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
+            }
+            List<TrendOutcome> targetOutcomes = new ArrayList<TrendOutcome>();
+            for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+                for (TrendOutcome trendOutcome : trendOutcomes) {
+                    if (trendOutcome.getMeasure().equals(analysisItem)) {
+                        targetOutcomes.add(trendOutcome);
+                        break;
                     }
                 }
             }
-            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-            DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
-            insightRequestMetadata.setNow(cal.getTime());
-            ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-            DataSet pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
-            List<TrendOutcome> trendOutcomes = new Trend().calculateTrends(analysisDefinition, nowSet, pastSet);
+            trendOutcomes = targetOutcomes;
             TrendDataResults trendDataResults = new TrendDataResults();
             trendDataResults.setTrendOutcomes(trendOutcomes);
             trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
-            trendDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+            trendDataResults.setDataSourceInfo(dataSourceInfo);
             return trendDataResults;
         } catch (ReportException dae) {
             TrendDataResults embeddedDataResults = new TrendDataResults();
@@ -1248,6 +1408,24 @@ public class DataService {
                     aggregateQuery = false;
                 }
             }
+            String symbol = "$";
+            long accountID = SecurityUtil.getAccountID(false);
+            if (accountID > 0) {
+                PreparedStatement accountStmt = conn.prepareStatement("SELECT CURRENCY_SYMBOL FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+                accountStmt.setLong(1, accountID);
+                ResultSet rs = accountStmt.executeQuery();
+                rs.next();
+                symbol = rs.getString(1);
+            }
+            String currency = "USD";
+            if ("$".equals(symbol)) {
+                currency = "USD";
+            } else if ("Û".equals(symbol)) {
+                currency = "EUR";
+            } else if ("£".equals(symbol) || "?".equals(symbol)) {
+                currency = "GBP";
+            }
+            insightRequestMetadata.setTargetCurrency(currency);
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             insightRequestMetadata.setLookupTableAggregate(analysisDefinition.isLookupTableOptimization());
             insightRequestMetadata.setReportItems(analysisDefinition.getAllAnalysisItems());
