@@ -1416,6 +1416,7 @@ public class DataService {
                 ResultSet rs = accountStmt.executeQuery();
                 rs.next();
                 symbol = rs.getString(1);
+                accountStmt.close();
             }
             String currency = "USD";
             if ("$".equals(symbol)) {
