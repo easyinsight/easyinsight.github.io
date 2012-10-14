@@ -188,7 +188,7 @@ public abstract class ScheduledActivity {
 
     public abstract boolean authorize();
 
-    public static void main(String[] args) throws Exception {
+    /*public static void main(String[] args) throws Exception {
         Class.forName("com.mysql.jdbc.Driver");
         //Connection connection = DriverManager.getConnection("jdbc:mysql://ec2-23-22-252-83.compute-1.amazonaws.com:3306/dms", "dms", "dms");
         Database.initialize("ec2-23-22-252-83.compute-1.amazonaws.com", "3306", "dms", "dms", "dms");
@@ -228,7 +228,7 @@ public abstract class ScheduledActivity {
         }
 
 
-    }
+    }*/
 
     public void taskNow(EIConnection connection) throws Exception {
 
