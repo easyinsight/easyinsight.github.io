@@ -13,6 +13,7 @@
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.analysis.ReportFault;
         import com.easyinsight.customupload.ProblemDataEvent;
+        import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.solutions.AddFeedToSolutionWindow;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.FeedSelectionEvent;
@@ -288,9 +289,23 @@
 
         private function addDataSource():void {
             var window:AddFeedToSolutionWindow = new AddFeedToSolutionWindow();
+            window.filterFunction = filterFields;
             window.addEventListener(FeedSelectionEvent.FEED_SELECTED, onDataSource, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+        }
+
+        private function filterFields(item:Object):Boolean {
+            var dsd:DataSourceDescriptor = item as DataSourceDescriptor;
+            if (dsd.dataSourceType == DataSourceType.COMPOSITE) {
+                return false;
+            }
+            for each (var ds:DataSourceDescriptor in dataSources) {
+                if (ds.id == dsd.id) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private function onDataSource(event:FeedSelectionEvent):void {
