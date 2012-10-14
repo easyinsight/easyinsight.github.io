@@ -391,6 +391,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>SendGridEmailEvent</servlet-name>
+        <display-name>SendGridEmailEvent</display-name>
+        <servlet-class>com.easyinsight.email.SendGridEmailEventServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>DashboardPiece</servlet-name>
         <display-name>DashboardPiece</display-name>
         <servlet-class>com.easyinsight.html.DashboardPieceServlet</servlet-class>
@@ -575,6 +582,11 @@
     <servlet-mapping>
         <servlet-name>ImportActivity</servlet-name>
         <url-pattern>/importActivity</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SendGridEmailEvent</servlet-name>
+        <url-pattern>/sendGridEvent</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
