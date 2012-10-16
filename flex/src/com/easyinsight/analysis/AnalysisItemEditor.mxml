@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:range="com.easyinsight.analysis.range.*"
-         xmlns:analysis="com.easyinsight.analysis.*"
+         xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
          creationComplete="initStuff()" creationPolicy="all"
          implements="com.easyinsight.analysis.IAnalysisItemEditor" horizontalAlign="center" paddingLeft="10">
     <mx:states>
@@ -198,6 +198,9 @@
             this.key = analysisItem.key;
             this.hidden = analysisItem.hidden;
             this.fieldTooltip = analysisItem.tooltip;
+            if (analysisItem.fromField != null) {
+                loadFromAnother = analysisItem.fromField.display;
+            }
             fieldKeyString = analysisItem.key.toBaseKey().createString();
         }
 
@@ -225,6 +228,25 @@
             prepareAggregationBox(index);
             aggregationBox.selectedIndex = aggregationBox.dataProvider.getItemIndex(option);
             aggregationChange(option);
+            var key:Key = startingAnalysisItem.key;
+            if (!(key is DerivedKey)) {
+                coreForm.removeChild(fromAnotherFormItem);
+            } else {
+                var derivedKey:DerivedKey = key as DerivedKey;
+                var valids:Array = [];
+                var noComp:Object = { display: "[ No Selection ]"};
+                valids.push(noComp);
+                for each (var analysisItem:AnalysisItem in dimensionFields) {
+                    var compareKey:Key = analysisItem.key;
+                    if (compareKey is DerivedKey) {
+                        var compareDerivedKey:DerivedKey = compareKey as DerivedKey;
+                        if (compareDerivedKey.feedID != derivedKey.feedID) {
+                            valids.push(analysisItem);
+                        }
+                    }
+                }
+                loadFromAnotherFields = new ArrayCollection(valids);
+            }
         }
 
         private function initStuff():void {
@@ -277,6 +299,10 @@
                     analysisItem.key = key;
                     analysisItem.hidden = hiddenCheckbox.selected;
                     analysisItem.tooltip = fieldTooltipInput.text;
+                    if (loadFromAnotherBox.selectedItem is AnalysisItem) {
+                        var loadItem:AnalysisItem = loadFromAnotherBox.selectedItem as AnalysisItem;
+                        analysisItem.fromField = loadItem;
+                    }
                     detailEditor.save(analysisItem);
                     dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
                 }
@@ -347,6 +373,12 @@
         }
 
         private var aggregationBox:ComboBox;
+
+        [Bindable]
+        private var loadFromAnother:String;
+
+        [Bindable]
+        private var loadFromAnotherFields:ArrayCollection;
 
         [Bindable]
         private var aggIndex:int;
@@ -461,6 +493,9 @@
                 </mx:Box>
             </mx:ViewStack>
 
+        </mx:FormItem>
+        <mx:FormItem label="Load From Another Field: " id="fromAnotherFormItem">
+            <util:SmartComboBox id="loadFromAnotherBox" dataProvider="{loadFromAnotherFields}" selectedProperty="display" selectedValue="{loadFromAnother}" labelField="display"/>
         </mx:FormItem>
     </mx:Form>
     <mx:StringValidator id="nameValidator" source="{fieldNameInput}" property="text" minLength="3"/>
