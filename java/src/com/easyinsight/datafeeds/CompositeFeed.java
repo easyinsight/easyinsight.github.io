@@ -582,11 +582,23 @@ public class CompositeFeed extends Feed {
             }
         }
 
+
+        postProcessFields(analysisItems, queryNodeMap, dataSet, connections);
+
         for (IJoin postJoin : postJoins) {
             QueryStateNode queryStateNode = queryNodeMap.get(postJoin.getTargetFeedID());
             DataSet targetSet = queryStateNode.produceDataSet(insightRequestMetadata);
             dataSet = postJoin.merge(dataSet, targetSet, null, queryStateNode.neededItems, null, queryStateNode.dataSourceName, conn, 0, queryStateNode.feedID, operations).getDataSet();
         }
+
+        /*for (AnalysisItem postItem : analysisItems) {
+            if (postItem instanceof JoinedAnalysisItem) {
+                JoinedAnalysisItem joinedAnalysisItem = (JoinedAnalysisItem) postItem;
+                AnalysisItem item = joinedAnalysisItem.getSourceItem();
+                List<CompositeFeedConnection> fieldConnections = joinedAnalysisItem.getConnections();
+                // for each field connection, build a graph, populate from that...
+            }
+        }*/
 
         dataSet.setAudits(auditStrings);
         Pipeline pipeline = insightRequestMetadata.findPipeline(getName());
@@ -618,6 +630,100 @@ public class CompositeFeed extends Feed {
             dataSet = compositePipeline.toDataSet(dataSet);
         }
         return dataSet;
+    }
+
+    private void postProcessFields(Set<AnalysisItem> analysisItems, Map<Long, QueryStateNode> queryNodeMap, DataSet dataSet, List<IJoin> connections) {
+        for (AnalysisItem postItem : analysisItems) {
+            if (postItem.getFromField() != null) {
+                DerivedKey base = (DerivedKey) postItem.getKey();
+                AnalysisItem fromField = postItem.getFromField();
+                DerivedKey derivedKey = (DerivedKey) fromField.getKey();
+                long dataSourceID = derivedKey.getFeedID();
+                AnalysisItem sourceItem = null;
+                AnalysisItem targetItem = null;
+                for (IJoin join : connections) {
+                    if (join instanceof CompositeFeedConnection) {
+                        CompositeFeedConnection connection = (CompositeFeedConnection) join;
+                        if (connection.getSourceFeedID() == base.getFeedID() && connection.getTargetFeedID() == dataSourceID) {
+                            AnalysisItem testSourceItem = null;
+                            AnalysisItem testTargetItem = null;
+                            if (connection.getSourceItem() == null) {
+                                for (AnalysisItem analysisItem : getFields()) {
+                                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toKeyString().equals(connection.getSourceJoin().toKeyString())) {
+                                        testSourceItem = analysisItem;
+                                        break;
+                                    }
+                                }
+                                for (AnalysisItem analysisItem : getFields()) {
+                                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toKeyString().equals(connection.getTargetJoin().toKeyString())) {
+                                        testTargetItem = analysisItem;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                testSourceItem = connection.getSourceItem();
+                                testTargetItem = connection.getTargetItem();
+                            }
+                            if (testSourceItem.getKey().toKeyString().equals(postItem.getKey().toKeyString())) {
+                                sourceItem = testSourceItem;
+                                targetItem = testTargetItem;
+                            }
+                        } else if (connection.getSourceFeedID() == dataSourceID && connection.getTargetFeedID() == base.getFeedID()) {
+                            AnalysisItem testSourceItem = null;
+                            AnalysisItem testTargetItem = null;
+                            if (connection.getTargetItem() == null) {
+                                for (AnalysisItem analysisItem : getFields()) {
+                                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toKeyString().equals(connection.getTargetJoin().toKeyString())) {
+                                        testTargetItem = analysisItem;
+                                        break;
+                                    }
+                                }
+                                for (AnalysisItem analysisItem : getFields()) {
+                                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toKeyString().equals(connection.getSourceJoin().toKeyString())) {
+                                        testSourceItem = analysisItem;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                testTargetItem = connection.getSourceItem();
+                                testSourceItem = connection.getTargetItem();
+                            }
+                            if (testTargetItem.getKey().toKeyString().equals(postItem.getKey().toKeyString())) {
+                                targetItem = testTargetItem;
+                                sourceItem = testSourceItem;
+                            }
+                        }
+                    }
+
+                }
+                for (AnalysisItem analysisItem : getFields()) {
+                    if (analysisItem.getKey().toKeyString().equals(sourceItem.getKey().toKeyString())) {
+                        sourceItem = analysisItem;
+                        break;
+                    }
+                }
+                for (AnalysisItem analysisItem : getFields()) {
+                    if (analysisItem.getKey().toKeyString().equals(targetItem.getKey().toKeyString())) {
+                        targetItem = analysisItem;
+                        break;
+                    }
+                }
+                DataSet originalSet = queryNodeMap.get(derivedKey.getFeedID()).originalDataSet;
+                Map<Value, Value> rowMap = new HashMap<Value, Value>();
+                for (IRow row : originalSet.getRows()) {
+                    Value indexValue = row.getValue(targetItem);
+                    Value targetValue = row.getValue(fromField);
+                    rowMap.put(indexValue, targetValue);
+                }
+                for (IRow row : dataSet.getRows()) {
+                    Value indexValue = row.getValue(sourceItem);
+                    Value value = rowMap.get(indexValue);
+                    if (value != null) {
+                        row.addValue(postItem.createAggregateKey(), value);
+                    }
+                }
+            }
+        }
     }
 
     private FilterDefinition createJoinFilter(QueryStateNode sourceNode, DataSet dataSet, QueryStateNode targetNode, CompositeFeedConnection connection) {
