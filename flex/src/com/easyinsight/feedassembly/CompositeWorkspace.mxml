@@ -65,7 +65,19 @@
                 feedService.searchForHiddenChildren.send(compositeFeedID);
             }
             addEventListener(ConnectionDeleteEvent.CONNECTION_DELETE, onConnectionDelete);
+            addEventListener(ConnectionDeleteEvent.CONNECTION_TO_TOP, onMoveToTop);
+            addEventListener(ConnectionDeleteEvent.CONNECTION_TO_BOTTOM, onMoveToBottom);
             addEventListener(FeedSelectionEvent.FEED_DELETED, onDataSourceDelete);
+        }
+
+        private function onMoveToTop(event:ConnectionDeleteEvent):void {
+            connections.removeItemAt(connections.getItemIndex(event.connection));
+            connections.addItemAt(event.connection, 0);
+        }
+
+        private function onMoveToBottom(event:ConnectionDeleteEvent):void {
+            connections.removeItemAt(connections.getItemIndex(event.connection));
+            connections.addItemAt(event.connection, connections.length - 1);
         }
 
         private function onConnectionDelete(event:ConnectionDeleteEvent):void {
@@ -345,13 +357,13 @@
                     <mx:Label text="Joins" fontSize="16"/>
                 </mx:HBox>
                 <mx:Button label="Add Join..." click="addConnection()" styleName="grayButton"/>
-                <mx:DataGrid dataProvider="{connections}" width="100%" rowHeight="28">
+                <mx:DataGrid dataProvider="{connections}" rowHeight="28">
                     <mx:columns>
-                        <util:EIDataGridColumn dataField="sourceFeedName" headerText="Data Source"/>
-                        <util:EIDataGridColumn dataField="sourceDisplay" headerText="Source Field"/>
-                        <util:EIDataGridColumn dataField="targetDisplay" headerText="Target Field"/>
-                        <util:EIDataGridColumn dataField="targetFeedName" headerText="Data Source"/>
-                        <util:EIDataGridColumn headerText="" dataField="name" width="100" sortable="false" itemRenderer="com.easyinsight.feedassembly.ConnectionControls"/>
+                        <util:EIDataGridColumn dataField="sourceFeedName" headerText="Source Data Source" sortable="false" width="175"/>
+                        <util:EIDataGridColumn dataField="sourceDisplay" headerText="Source Field" sortable="false" width="210"/>
+                        <util:EIDataGridColumn dataField="targetDisplay" headerText="Target Field" sortable="false" width="210"/>
+                        <util:EIDataGridColumn dataField="targetFeedName" headerText="Target Data Source" sortable="false" width="175"/>
+                        <util:EIDataGridColumn headerText="" dataField="name" width="200" sortable="false" itemRenderer="com.easyinsight.feedassembly.ConnectionControls"/>
                     </mx:columns>
                 </mx:DataGrid>
             </mx:VBox>
