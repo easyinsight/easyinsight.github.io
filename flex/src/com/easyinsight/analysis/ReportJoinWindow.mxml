@@ -29,6 +29,8 @@
             controlsFactory = new ClassFactory(ConnectionControls);
             ClassFactory(controlsFactory).properties = { fields: fields };
             addEventListener(ConnectionDeleteEvent.CONNECTION_DELETE, onConnectionDelete);
+            addEventListener(ConnectionDeleteEvent.CONNECTION_TO_TOP, onMoveToTop);
+            addEventListener(ConnectionDeleteEvent.CONNECTION_TO_BOTTOM, onMoveToBottom);
             ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
             analysisService.determineOverrides.send(dataSourceID, fields);
             /*if (startJoins == null || startJoins.length == 0) {
@@ -47,7 +49,7 @@
         private function gotOverrides():void {
             var results:ReportJoins = analysisService.determineOverrides.lastResult as ReportJoins;
             configurableDataSources = results.configurableDataSources;
-            if (startJoins != null) {
+            if (startJoins != null && startJoins.length > 0) {
                 for each (var joinOverride:JoinOverride in startJoins) {
                     if (joinOverride.dataSourceID == 0) {
                         joinOverride.dataSourceID = DataSourceDescriptor(configurableDataSources.getItemAt(0)).id;
@@ -65,6 +67,16 @@
             dataSourceMap = results.dataSourceMap;
             selectedDataSource = configurableDataSources.getItemAt(0) as DataSourceDescriptor;
             populateJoins(selectedDataSource);
+        }
+
+        private function onMoveToTop(event:ConnectionDeleteEvent):void {
+            connections.removeItemAt(connections.getItemIndex(event.connection));
+            connections.addItemAt(event.connection, 0);
+        }
+
+        private function onMoveToBottom(event:ConnectionDeleteEvent):void {
+            connections.removeItemAt(connections.getItemIndex(event.connection));
+            connections.addItemAt(event.connection, connections.length - 1);
         }
 
         private function onConnectionDelete(event:ConnectionDeleteEvent):void {
@@ -182,21 +194,103 @@
             populateJoins(dataSource);
             selectedDataSource = dataSource;
         }
+
+        private var hits:ArrayCollection = new ArrayCollection();
+
+        private function onKeyword(event:Event):void {
+            var keyword:String = keywordInput.text;
+            if (keyword.length > 1) {
+                keyword = keyword.toLowerCase();
+                var hitColl:ArrayCollection = new ArrayCollection();
+                for each (var conn:CompositeFeedConnection in connections) {
+                    var match:Boolean = (conn.sourceFeedName.toLowerCase().indexOf(keyword) != -1) ||
+                            (conn.targetFeedName.toLowerCase().indexOf(keyword) != -1);
+                    if (match) {
+                        hitColl.addItem(conn);
+                    }
+                }
+                hits = hitColl;
+            } else {
+                hits = new ArrayCollection();
+            }
+            dataGrid.invalidateDisplayList();
+            dataGrid.validateNow();
+            scrollFirstCurrent();
+        }
+
+        private function scrollGridUp():void {
+            var currentVerticalPosition:int = dataGrid.verticalScrollPosition;
+            for (var i:int = hits.length - 1; i >= 0; i--) {
+                var obj:Object = hits.getItemAt(i);
+                var index:int = connections.getItemIndex(obj);
+                if (index < currentVerticalPosition && index >= 0) {
+                    dataGrid.verticalScrollPosition = index;
+                    break;
+                }
+            }
+        }
+
+        private function scrollFirstCurrent():void {
+            var currentVerticalPosition:int = dataGrid.verticalScrollPosition;
+            for each (var obj:Object in hits) {
+                var index:int = connections.getItemIndex(obj);
+                if (index == currentVerticalPosition) {
+                    break;
+                } else if (index > currentVerticalPosition && index <= dataGrid.maxVerticalScrollPosition) {
+                    dataGrid.verticalScrollPosition = index;
+                    break;
+                }
+            }
+        }
+
+        private function scrollGridDown():void {
+            var currentVerticalPosition:int = dataGrid.verticalScrollPosition;
+            for each (var obj:Object in hits) {
+                var index:int = connections.getItemIndex(obj);
+                if (index > currentVerticalPosition && index <= dataGrid.maxVerticalScrollPosition) {
+                    dataGrid.verticalScrollPosition = index;
+                    break;
+                }
+            }
+        }
+
+        private function rowColor(item:Object, color:uint):uint {
+            if (hits.getItemIndex(item) > -1) {
+                return 0xEBEF80;
+            }
+            return color;
+        }
+
+        [Bindable]
+        [Embed(source="../../../../assets/arrow2_down_blue.png")]
+        public var scrollDownIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/arrow2_up_blue.png")]
+        public var scrollUpIcon:Class;
+
+
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="determineOverrides" result="gotOverrides()"/>
     </mx:RemoteObject>
     <mx:ComboBox dataProvider="{configurableDataSources}" labelField="name" id="dataSourceBox" change="onDataSourceChange()"/>
     <mx:Button label="Add Join..." click="addConnection()" styleName="grayButton"/>
-    <mx:DataGrid dataProvider="{connections}" width="600" rowHeight="28" dragMoveEnabled="true" dragEnabled="true" dropEnabled="true">
-        <mx:columns>
-            <util:EIDataGridColumn dataField="sourceFeedName" headerText="Source Data Source"/>
-            <util:EIDataGridColumn dataField="sourceDisplay" headerText="Source Field"/>
-            <util:EIDataGridColumn dataField="targetDisplay" headerText="Target Field"/>
-            <util:EIDataGridColumn dataField="targetFeedName" headerText="Target Data Source"/>
-            <util:EIDataGridColumn headerText="" dataField="name" width="100" sortable="false" itemRenderer="{controlsFactory}"/>
-        </mx:columns>
-    </mx:DataGrid>
+    <mx:HBox width="100%">
+        <mx:TextInput id="keywordInput" change="onKeyword(event)"/>
+        <mx:Button icon="{scrollDownIcon}" click="scrollGridDown()" toolTip="Next Occurrence"/>
+        <mx:Button icon="{scrollUpIcon}" click="scrollGridUp()" toolTip="Previous Occurrence"/>
+    </mx:HBox>
+    <util:EIDataGrid dataProvider="{connections}" rowHeight="28" dragMoveEnabled="true" dragEnabled="true" dropEnabled="true" id="dataGrid"
+            rowColorFunction="rowColor">
+        <util:columns>
+            <util:EIDataGridColumn dataField="sourceFeedName" headerText="Source Data Source" sortable="false" width="175"/>
+            <util:EIDataGridColumn dataField="sourceDisplay" headerText="Source Field" sortable="false" width="225"/>
+            <util:EIDataGridColumn dataField="targetDisplay" headerText="Target Field" sortable="false" width="225"/>
+            <util:EIDataGridColumn dataField="targetFeedName" headerText="Target Data Source" sortable="false" width="175"/>
+            <util:EIDataGridColumn headerText="" dataField="name" width="200" sortable="false" itemRenderer="{controlsFactory}"/>
+        </util:columns>
+    </util:EIDataGrid>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="Save" click="save()"/>
         <util:SaveButton label="Revert to Data Source Default" click="revert()"/>
