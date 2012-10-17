@@ -26,6 +26,16 @@ public class ConnectionControls extends HBox {
 
     private var deleteButton:Button;
     private var editButton:Button;
+    private var topButton:Button;
+    private var bottomButton:Button;
+
+    [Bindable]
+    [Embed(source="../../../../assets/arrow2_down_blue.png")]
+    public var scrollDownIcon:Class;
+
+    [Bindable]
+    [Embed(source="../../../../assets/arrow2_up_blue.png")]
+    public var scrollUpIcon:Class;
 
     private var connection:CompositeFeedConnection;
 
@@ -34,6 +44,16 @@ public class ConnectionControls extends HBox {
         editButton.setStyle("icon", ImageConstants.EDIT_ICON);
         editButton.toolTip = "Edit this connection...";
         editButton.addEventListener(MouseEvent.CLICK, onEdit);
+        topButton = new Button();
+        topButton.addEventListener(MouseEvent.CLICK, toTop);
+        topButton.setStyle("icon", scrollUpIcon);
+        topButton.toolTip = "Move to top of connections";
+
+        bottomButton = new Button();
+        bottomButton.addEventListener(MouseEvent.CLICK, toBottom);
+        bottomButton.setStyle("icon", scrollDownIcon);
+        bottomButton.toolTip = "Move to bottom of connections";
+
         deleteButton = new Button();
         deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.toolTip = "Remove this connection";
@@ -55,13 +75,23 @@ public class ConnectionControls extends HBox {
         _fields = value;
     }
 
+    private function toTop(event:MouseEvent):void {
+        dispatchEvent(new ConnectionDeleteEvent(ConnectionDeleteEvent.CONNECTION_TO_TOP, connection));
+    }
+
+    private function toBottom(event:MouseEvent):void {
+        dispatchEvent(new ConnectionDeleteEvent(ConnectionDeleteEvent.CONNECTION_TO_BOTTOM, connection));
+    }
+
     private function onDelete(event:MouseEvent):void {
-        dispatchEvent(new ConnectionDeleteEvent(connection));
+        dispatchEvent(new ConnectionDeleteEvent(ConnectionDeleteEvent.CONNECTION_DELETE, connection));
     }
 
     override protected function createChildren():void {
         super.createChildren();
         addChild(editButton);
+        addChild(topButton);
+        addChild(bottomButton);
         addChild(deleteButton);
     }
 

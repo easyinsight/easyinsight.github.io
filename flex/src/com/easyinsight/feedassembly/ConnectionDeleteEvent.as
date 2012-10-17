@@ -11,16 +11,18 @@ import flash.events.Event;
 public class ConnectionDeleteEvent extends Event {
 
     public static const CONNECTION_DELETE:String = "connectionDelete";
+    public static const CONNECTION_TO_TOP:String = "connectionToTop";
+    public static const CONNECTION_TO_BOTTOM:String = "connectionToBottom";
 
     public var connection:CompositeFeedConnection;
 
-    public function ConnectionDeleteEvent(connection:CompositeFeedConnection) {
-        super(CONNECTION_DELETE, true);
+    public function ConnectionDeleteEvent(type:String, connection:CompositeFeedConnection) {
+        super(type, true);
         this.connection = connection;
     }
 
     override public function clone():Event {
-        return new ConnectionDeleteEvent(connection);
+        return new ConnectionDeleteEvent(type, connection);
     }
 }
 }
