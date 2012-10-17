@@ -53,7 +53,6 @@ public class BulkUpdateDataSourceTarget {
 
             xmlBuilder.append("</updates>");
 
-            System.out.println(xmlBuilder.toString());
             Document document = InternalUtil.sendXML(xmlBuilder.toString(), apiKey, apiSecretKey, "bulkUpdateRows");
 
 

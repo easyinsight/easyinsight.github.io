@@ -56,7 +56,10 @@ public class StatusSync extends HttpServlet {
             syncRunnable.start();
             SyncReferralStatus sr = new SyncReferralStatus();
             sr.setDaemon(false);
+            WprSync wprSync = new WprSync(username, password);
+            wprSync.setDaemon(false);
             sr.start();
+            wprSync.start();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -26,9 +26,12 @@ public class InternalUtil {
         String encodedAuthorization = enc.encode( userpassword.getBytes() );
         connection.setRequestProperty("Authorization", "Basic "+
             encodedAuthorization);
+        connection.setRequestProperty("Content-Type", "text/xml; charset=utf-8");
         OutputStreamWriter out = new OutputStreamWriter(
                                       connection.getOutputStream());
+        out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         out.write(xml);
+
         out.close();
 
         BufferedReader in = null;
