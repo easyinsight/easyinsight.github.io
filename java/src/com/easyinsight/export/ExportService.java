@@ -73,6 +73,47 @@ public class ExportService {
     public static final String LIST_HEADER_STYLE = "listHeaderStyle";
     public static final String CROSSTAB_SUMMARY_STYLE = "crosstabSummaryStyle";
 
+    public static String getIconImage(TrendOutcome o) {
+        switch (o.getOutcome()) {
+            case KPIOutcome.EXCEEDING_GOAL:
+            case KPIOutcome.POSITIVE:
+                if(o.getDirection() == KPIOutcome.UP_DIRECTION) {
+                    return "arrow2_up_green.png";
+                } else {
+                    return "arrow2_down_green.png";
+                }
+            case KPIOutcome.NEGATIVE:
+                if(o.getDirection() == KPIOutcome.UP_DIRECTION) {
+                    return "arrow2_up_red.png";
+                } else {
+                    return "arrow2_down_red.png";
+                }
+            case KPIOutcome.NEUTRAL:
+                if(o.getDirection() == KPIOutcome.UP_DIRECTION) {
+                    return "arrow2_up_blue.png";
+                } else if (o.getDirection() == KPIOutcome.DOWN_DIRECTION) {
+                    return "arrow2_down_blue.png";
+                } else {
+                    return "bullet_ball_blue.png";
+                }
+            case KPIOutcome.NO_DATA:
+            default:
+                return "bullet_ball_blue.png";
+        }
+    }
+
+    public static String getFontColor(TrendOutcome o) {
+        switch(o.getOutcome()) {
+            case KPIOutcome.EXCEEDING_GOAL:
+            case KPIOutcome.POSITIVE:
+                return "#00ff00";
+            case KPIOutcome.NEGATIVE:
+                return "#ff0000";
+            default:
+                return "inherit";
+        }
+    }
+
     public void seleniumDraw(long requestID, byte[] bytes) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -2186,7 +2227,7 @@ public class ExportService {
         return style;
     }
 
-    private static ExportMetadata createExportMetadata(long accountID, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+    public static ExportMetadata createExportMetadata(long accountID, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         int dateFormat;
         String currencySymbol;
         try {

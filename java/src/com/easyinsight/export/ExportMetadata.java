@@ -7,10 +7,10 @@ import java.util.Calendar;
 * Date: 7/6/12
 * Time: 11:30 AM
 */
-class ExportMetadata {
-    int dateFormat;
-    String currencySymbol;
-    Calendar cal;
+public class ExportMetadata {
+    public int dateFormat;
+    public String currencySymbol;
+    public Calendar cal;
 
     ExportMetadata(int dateFormat, String currencySymbol, Calendar cal) {
         this.dateFormat = dateFormat;

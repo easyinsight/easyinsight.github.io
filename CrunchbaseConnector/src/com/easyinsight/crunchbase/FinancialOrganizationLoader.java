@@ -8,6 +8,10 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -107,7 +111,7 @@ public class FinancialOrganizationLoader implements CommonConstants {
         }
     }
 
-    private static void loadFinancialOrganizations() throws Exception {
+    public static void loadFinancialOrganizations() throws Exception {
         HttpClient httpClient = new HttpClient();
         HttpMethod method = new GetMethod("http://api.crunchbase.com/v/1/financial-organizations.js?api_key=5aspbecghgbdjgmdpjufm6rs");
         httpClient.executeMethod(method);
@@ -116,14 +120,14 @@ public class FinancialOrganizationLoader implements CommonConstants {
         DataSourceOperationFactory financialOrg = createFinancialOrgSource();
         DataSourceOperationFactory fundsSource = createFundsSource();
 
-        final TransactionTarget financialOrgFactory = financialOrg.addRowsTransaction();
-        final TransactionTarget fundsFactory = fundsSource.addRowsTransaction();
+        final TransactionTarget financialOrgFactory = financialOrg.replaceRowsTransaction();
+        final TransactionTarget fundsFactory = fundsSource.replaceRowsTransaction();
 
         financialOrgFactory.beginTransaction();
         fundsFactory.beginTransaction();
 
         final DateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
-        final BlockingQueue<JSONObject> values = new LinkedBlockingQueue<JSONObject>();
+        final BlockingQueue<String> values = new LinkedBlockingQueue<String>();
         try {
             BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
             ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 5, 5000, TimeUnit.MINUTES, queue);
@@ -140,19 +144,37 @@ public class FinancialOrganizationLoader implements CommonConstants {
 
                         HttpClient httpClient = new HttpClient();
                         JSONObject curVal = (JSONObject) ff;
+                        File f = new File("../data/financial_orgs/" + curVal.get("permalink") + ".js");
                         try {
                             try {
-                                HttpMethod companyData = new GetMethod("http://api.crunchbase.com/v/1/financial-organization/" + curVal.get("permalink") + ".js?api_key=5aspbecghgbdjgmdpjufm6rs");
-                                httpClient.executeMethod(companyData);
-                                Object o = JSONValue.parse(companyData.getResponseBodyAsStream());
-                                JSONObject org = (JSONObject) o;
-                                if (org.containsKey("error")) {
-                                    System.out.println(curVal.get("permalink") + " - " + org.get("error"));
+                                if (!f.exists()) {
+                                    HttpMethod companyData = new GetMethod("http://api.crunchbase.com/v/1/financial-organization/" + curVal.get("permalink") + ".js?api_key=5aspbecghgbdjgmdpjufm6rs");
+                                    httpClient.executeMethod(companyData);
+                                    Object o = JSONValue.parse(companyData.getResponseBodyAsStream());
+                                    JSONObject org = (JSONObject) o;
+                                    if (org.containsKey("error")) {
+                                        System.out.println(curVal.get("permalink") + " - " + org.get("error"));
+                                        values.put("");
+                                    } else {
+                                        FileOutputStream fos = new FileOutputStream(f);
+                                        OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+                                        try {
+                                            osw.write(org.toJSONString());
+                                            values.put(f.getName());
+                                        } finally {
+                                            osw.close();
+
+                                        }
+                                    }
+                                } else {
+                                    System.out.println(f.getName() + " already exists.");
+                                    values.put(f.getName());
                                 }
-                                values.put(org);
                             } catch (Exception e) {
-                                values.put(new JSONObject());
+                                values.put("");
+
                             }
+
                         } catch (Exception e) {
                             e.printStackTrace();
                         } finally {
@@ -167,81 +189,106 @@ public class FinancialOrganizationLoader implements CommonConstants {
 
                 public void run() {
                     try {
-                        JSONObject org;
-                        while ((org = values.take()) != null) {
-                            try {
-                                DataRow row = financialOrgFactory.newRow();
+                        String fileName;
+                        FileInputStream fis = null;
+                        while ((fileName = values.take()) != null) {
+                            System.out.println(fileName);
+                            if (!"".equals(fileName)) {
+                                try {
+                                    DataRow row = financialOrgFactory.newRow();
+
+                                    File f = new File("../data/financial_orgs/" + fileName);
+                                    fis = new FileInputStream(f);
+                                    byte[] b = new byte[(int) f.length()];
+                                    fis.read(b);
+                                    String fileData = new String(b, "UTF-8");
+                                    Object o = JSONValue.parse(fileData);
+                                    if (o instanceof String) {
+                                        System.out.println(o);
+                                    }
+
+                                    JSONObject org = (JSONObject) o;
+
+                                    String permalink = (String) org.get("permalink");
+//                                    System.out.println(permalink);
+                                    addKeyVal(row, NAME, (String) org.get("name"));
+                                    addKeyVal(row, PERMALINK, permalink);
+                                    addKeyVal(row, CRUNCHBASE_URL, (String) org.get("crunchbase_url"));
+                                    addKeyVal(row, HOMEPAGE_URL, (String) org.get("blog_url"));
+                                    addKeyVal(row, BLOG_FEED_URL, (String) org.get("blog_feed_url"));
+                                    addKeyVal(row, TWITTER_USERNAME, (String) org.get("twitter_username"));
+                                    addKeyVal(row, PHONE_NUMBER, (String) org.get("phone_number"));
+                                    addKeyVal(row, DESCRIPTION, (String) org.get("description"));
+                                    addKeyVal(row, EMAIL_ADDRESS, (String) org.get("email_address"));
+                                    addKeyVal(row, OVERVIEW, (String) org.get("overview"));
+                                    if (org.get("number_of_employees") != null)
+                                        addKeyVal(row, NUMBER_OF_EMPLOYEES, (Number) org.get("number_of_employees"));
+                                    addKeyVal(row, TAG_LIST, (String) org.get("tag_list"));
+                                    addKeyVal(row, ALIAS_LIST, (String) org.get("alias_list"));
+                                    addCbDate(row, org, "founded", FOUNDED);
+                                    if (org.get("created_at") != null)
+                                        addKeyVal(row, CREATED_AT, sdf.parse((String) org.get("created_at")));
+                                    if (org.get("updated_at") != null)
+                                        addKeyVal(row, UPDATED_AT, sdf.parse((String) org.get("updated_at")));
+
+                                    JSONArray funds = (JSONArray) org.get("funds");
+                                    for (Object j : funds) {
+                                        JSONObject fund = (JSONObject) j;
+                                        DataRow fundRow = fundsFactory.newRow();
+                                        addKeyVal(fundRow, FUNDING_SOURCE_PERMALINK, permalink);
+                                        addKeyVal(fundRow, FUND_NAME, (String) fund.get("name"));
+                                        addKeyVal(fundRow, RAISED_CURRENCY_CODE, (String) fund.get("raised_currency_code"));
+                                        addKeyVal(fundRow, SOURCE_URL, (String) fund.get("source_url"));
+                                        addKeyVal(fundRow, SOURCE_DESCRIPTION, (String) fund.get("source_description"));
+                                        addCbDate(fundRow, fund, "funded", FUNDED);
+                                        if (fund.get("raised_amount") != null)
+                                            addKeyVal(fundRow, RAISED_AMOUNT, (Number) fund.get("raised_amount"));
+                                    }
 
 
-                                String permalink = (String) org.get("permalink");
-                                System.out.println(permalink);
-                                addKeyVal(row, NAME, (String) org.get("name"));
-                                addKeyVal(row, PERMALINK, permalink);
-                                addKeyVal(row, CRUNCHBASE_URL, (String) org.get("crunchbase_url"));
-                                addKeyVal(row, HOMEPAGE_URL, (String) org.get("blog_url"));
-                                addKeyVal(row, BLOG_FEED_URL, (String) org.get("blog_feed_url"));
-                                addKeyVal(row, TWITTER_USERNAME, (String) org.get("twitter_username"));
-                                addKeyVal(row, PHONE_NUMBER, (String) org.get("phone_number"));
-                                addKeyVal(row, DESCRIPTION, (String) org.get("description"));
-                                addKeyVal(row, EMAIL_ADDRESS, (String) org.get("email_address"));
-                                addKeyVal(row, OVERVIEW, (String) org.get("overview"));
-                                if (org.get("number_of_employees") != null)
-                                    addKeyVal(row, NUMBER_OF_EMPLOYEES, (Number) org.get("number_of_employees"));
-                                addKeyVal(row, TAG_LIST, (String) org.get("tag_list"));
-                                addKeyVal(row, ALIAS_LIST, (String) org.get("alias_list"));
-                                addCbDate(row, org, "founded", FOUNDED);
-                                if (org.get("created_at") != null)
-                                    addKeyVal(row, CREATED_AT, sdf.parse((String) org.get("created_at")));
-                                if (org.get("updated_at") != null)
-                                    addKeyVal(row, UPDATED_AT, sdf.parse((String) org.get("updated_at")));
+                                } catch (Exception e) {
+                                    if (e instanceof InterruptedException)
+                                        throw e;
+                                    else
+                                        e.printStackTrace();
 
-                                JSONArray funds = (JSONArray) org.get("funds");
-                                for (Object j : funds) {
-                                    JSONObject fund = (JSONObject) j;
-                                    DataRow fundRow = fundsFactory.newRow();
-                                    addKeyVal(fundRow, FUNDING_SOURCE_PERMALINK, permalink);
-                                    addKeyVal(fundRow, FUND_NAME, (String) fund.get("name"));
-                                    addKeyVal(fundRow, RAISED_CURRENCY_CODE, (String) fund.get("raised_currency_code"));
-                                    addKeyVal(fundRow, SOURCE_URL, (String) fund.get("source_url"));
-                                    addKeyVal(fundRow, SOURCE_DESCRIPTION, (String) fund.get("source_description"));
-                                    addCbDate(fundRow, fund, "funded", FUNDED);
-                                    if (fund.get("raised_amount") != null)
-                                        addKeyVal(fundRow, RAISED_AMOUNT, (Number) fund.get("raised_amount"));
+                                } finally {
+                                    if (fis != null)
+                                        fis.close();
+                                    latch1.countDown();
+
+                                    System.out.println(Double.valueOf(size - latch1.getCount()) / Double.valueOf(size));
                                 }
-
-
-                            } catch (Exception e) {
-                                if (e instanceof InterruptedException)
-                                    throw e;
-                                else
-                                    e.printStackTrace();
-
-                            } finally {
+                            } else {
                                 latch1.countDown();
-                                System.out.println(Double.valueOf(size - latch1.getCount()) / Double.valueOf(size));
                             }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-            });
+
+            }
+
+            );
             t.start();
             latch.await();
+
             latch1.await();
+            System.out.println("latch1 complete.");
             t.interrupt();
             financialOrgFactory.flush();
             financialOrgFactory.commit();
             fundsFactory.flush();
             fundsFactory.commit();
-
-
+            System.out.println(tpe.getActiveCount());
 
         } catch (Exception e) {
             e.printStackTrace();
             financialOrgFactory.rollback();
             fundsFactory.rollback();
         }
+        System.out.println("done.");
     }
 
     private static void addKeyVal(DataRow row, String key, String value) {

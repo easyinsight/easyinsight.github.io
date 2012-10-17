@@ -1,9 +1,12 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisTypes;
-import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.analysis.HTMLReportMetadata;
+import com.easyinsight.analysis.*;
+import com.easyinsight.core.NumericValue;
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.dataset.DataSet;
+import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
+import com.easyinsight.security.SecurityUtil;
 
 import java.util.*;
 
@@ -27,6 +30,44 @@ public class WSTrendDefinition extends WSKPIDefinition {
     @Override
     public String getDataFeedType() {
         return AnalysisTypes.TREND;
+    }
+
+    @Override
+    public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
+            TrendDataResults results = DataService.getTrendDataResults(this, insightRequestMetadata, conn);
+            for (TrendOutcome outcome : results.getTrendOutcomes()) {
+                String fontColor = ExportService.getFontColor(outcome);
+                double v = ((outcome.getNow().toDouble() / outcome.getHistorical().toDouble()) - 1.0) * 100.0;
+
+                sb.append("<div style='width: 250px;height:100px;'><div style='float: right;padding-top: 20px; padding-bottom: 20px; width: 80px;'> <div style='color:");
+                sb.append(fontColor);
+                sb.append(";'>");
+                sb.append("<img src='/app/assets/icons/32x32/");
+                sb.append(ExportService.getIconImage(outcome));
+                sb.append("' /> ");
+                FormattingConfiguration c = new FormattingConfiguration();
+                c.setFormattingType(FormattingConfiguration.PERCENTAGE);
+
+                sb.append(c.createFormatter().format(v));
+
+                sb.append("</div><div>");
+                sb.append(outcome.getMeasure().getDisplayName());
+                sb.append("</div></div> <div style='font-size: 36px;font-weight: bold;padding-top: 34px;padding-bottom: 34px;color:");
+                sb.append(fontColor);
+                sb.append(";'> ");
+                sb.append(ExportService.createValue(0, outcome.getMeasure(), outcome.getNow(), md.cal, md.currencySymbol, false));
+
+                sb.append("</div>");
+
+                sb.append("</div>");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return sb.toString();
     }
 
     @Override

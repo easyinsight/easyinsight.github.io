@@ -84,7 +84,7 @@
             }*/
             ProgressAlert.alert(this, "Creating the data source, may take a few minutes...", null, quickbaseService.createDataSource);
             quickbaseService.createDataSource.send(sessionTicket, appTokenInput.text, dbid, host, accountVisibleCheckbox.selected,
-                userNameInput.text, passwordInput.text, cacheCheckbox.selected, saveCredentialsCheckbox.selected);
+                userNameInput.text, passwordInput.text, true, saveCredentialsCheckbox.selected);
         }
 
         [Bindable]
@@ -133,9 +133,6 @@
                 </mx:FormItem>
                 <mx:FormItem label="Do you want to store these credentials with Easy Insight or use a session ticket?">
                     <mx:CheckBox id="saveCredentialsCheckbox"/>
-                </mx:FormItem>
-                <mx:FormItem label="Do you want Easy Insight to cache any data from this data source?">
-                    <mx:CheckBox id="cacheCheckbox"/>
                 </mx:FormItem>
                 <mx:FormItem label="Do you want to share this data source with other users in the account?">
                     <mx:CheckBox id="accountVisibleCheckbox" selected="true"/>

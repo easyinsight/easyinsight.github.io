@@ -10,6 +10,9 @@ import org.apache.commons.httpclient.methods.GetMethod;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -26,6 +29,8 @@ import java.util.concurrent.*;
  * To change this template use File | Settings | File Templates.
  */
 public class CrunchbaseServlet extends HttpServlet implements CommonConstants {
+
+    public static Object lock;
 
     public static final String CRUNCHBASE_NAME = "Name";
     public static final String PERMALINK = "Permalink";
@@ -61,8 +66,46 @@ public class CrunchbaseServlet extends HttpServlet implements CommonConstants {
 
     @Override
     public void init() throws ServletException {
+        System.out.println("init.");
+        File f = new File(".");
+        System.out.println(f.getAbsolutePath());
+        lock = new Object();
         super.init();
 
+
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        final String param = req.getParameter("clean");
+
+        new Thread(new Runnable() {
+
+            public void run() {
+                synchronized (lock) {
+                    try {
+                        if ("clean".equals(param)) {
+                            File dir = new File("../data/companies");
+                            for (String f : dir.list()) {
+                                new File(dir, f).delete();
+                            }
+                            dir = new File("../data/financial_orgs");
+                            for (String f : dir.list()) {
+                                new File(dir, f).delete();
+                            }
+                        }
+
+                        FinancialOrganizationLoader.loadFinancialOrganizations();
+                        loadCrunchbaseData();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+        resp.getOutputStream().write("Started.".getBytes("UTF-8"));
+        resp.getOutputStream().flush();
 
     }
 
@@ -72,7 +115,6 @@ public class CrunchbaseServlet extends HttpServlet implements CommonConstants {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return;
     }
 
     private static void loadCrunchbaseData() throws Exception {
@@ -86,9 +128,9 @@ public class CrunchbaseServlet extends HttpServlet implements CommonConstants {
         DataSourceOperationFactory investmentSource = createInvestmentSource();
 
 
-        final TransactionTarget companyRowFactory = companySource.addRowsTransaction();
-        final TransactionTarget fundingSourceRowFactory = fundingSource.addRowsTransaction();
-        final TransactionTarget investmentSourceRowFactory = investmentSource.addRowsTransaction();
+        final TransactionTarget companyRowFactory = companySource.replaceRowsTransaction();
+        final TransactionTarget fundingSourceRowFactory = fundingSource.replaceRowsTransaction();
+        final TransactionTarget investmentSourceRowFactory = investmentSource.replaceRowsTransaction();
 
         fundingSourceRowFactory.beginTransaction();
         companyRowFactory.beginTransaction();
@@ -96,7 +138,7 @@ public class CrunchbaseServlet extends HttpServlet implements CommonConstants {
 
 
         final DateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
-        final BlockingQueue<JSONObject> values = new LinkedBlockingQueue<JSONObject>();
+        final BlockingQueue<String> values = new LinkedBlockingQueue<String>();
         try {
             BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
             ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 5, 5000, TimeUnit.MINUTES, queue);
@@ -111,19 +153,37 @@ public class CrunchbaseServlet extends HttpServlet implements CommonConstants {
                         try {
 
                             try {
+
                                 HttpClient httpClient = new HttpClient();
                                 JSONObject curVal = (JSONObject) ff;
-                                HttpMethod companyData = new GetMethod("http://api.crunchbase.com/v/1/company/" + curVal.get("permalink") + ".js?api_key=5aspbecghgbdjgmdpjufm6rs");
-                                httpClient.executeMethod(companyData);
-                                String s = companyData.getResponseBodyAsString();
-                                JSONObject company = (JSONObject) JSONValue.parse(s);
-                                if (company.containsKey("error")) {
-                                    System.out.println(curVal.get("permalink") + " - " + company.get("error"));
+                                File f = new File("../data/companies/" + curVal.get("permalink") + ".js");
+                                if (!f.exists()) {
+                                    HttpMethod companyData = new GetMethod("http://api.crunchbase.com/v/1/company/" + curVal.get("permalink") + ".js?api_key=5aspbecghgbdjgmdpjufm6rs");
+                                    httpClient.executeMethod(companyData);
+                                    String s = companyData.getResponseBodyAsString();
+                                    JSONObject company = (JSONObject) JSONValue.parse(s);
+                                    if (company.containsKey("error")) {
+                                        System.out.println(curVal.get("permalink") + " - " + company.get("error"));
+                                        values.put("");
+                                    } else {
+                                        FileOutputStream fos = new FileOutputStream(f);
+                                        OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+                                        try {
+                                            osw.write(company.toJSONString());
+                                            values.put(f.getName());
+                                        } finally {
+                                            osw.close();
+
+                                        }
+                                    }
+                                } else {
+//                                    System.out.println(f.getName() + " already exists.");
+                                    values.put(f.getName());
                                 }
 
-                                values.put(company);
+
                             } catch (Exception e) {
-                                values.put(new JSONObject());
+                                values.put("");
                                 e.printStackTrace();
                             }
 
@@ -141,75 +201,9 @@ public class CrunchbaseServlet extends HttpServlet implements CommonConstants {
             Thread t = new Thread(new Runnable() {
                 public void run() {
                     try {
-                        JSONObject company;
-                        while ((company = values.take()) != null) {
-                            try {
-                                if (company.size() > 0 && company.get("error") == null) {
-                                    DataRow row = companyRowFactory.newRow();
-                                    row.addValue(CRUNCHBASE_NAME.replace(" ", "_"), (String) company.get("name"));
-                                    row.addValue(PERMALINK.replace(" ", "_"), (String) company.get("permalink"));
-                                    row.addValue(CRUNCHBASE_URL.replace(" ", "_"), (String) company.get("crunchbase_url"));
-                                    row.addValue(HOMEPAGE_URL.replace(" ", "_"), (String) company.get("homepage_url"));
-                                    row.addValue(TWITTER_USERNAME.replace(" ", "_"), (String) company.get("twitter_username"));
-                                    row.addValue(CATEGORY_CODE.replace(" ", "_"), (String) company.get("category_code"));
-                                    row.addValue(EMAIL_ADDRESS.replace(" ", "_"), (String) company.get("email_address"));
-                                    row.addValue(PHONE_NUMBER.replace(" ", "_"), (String) company.get("phone_number"));
-                                    row.addValue(DESCRIPTION.replace(" ", "_"), (String) company.get("description"));
-                                    row.addValue(TOTAL_MONEY_RAISED.replace(" ", "_"), (String) company.get("total_money_raised"));
-                                    if (company.get("number_of_employees") != null)
-                                        row.addValue(NUMBER_OF_EMPLOYEES.replace(" ", "_"), (Integer) company.get("number_of_employees"));
-                                    addCbDate(row, company, "founded", FOUNDED_DATE);
-                                    addCbDate(row, company, "deadpooled", DEADPOOLED_DATE);
-                                    if (company.get("created_at") != null)
-                                        row.addValue(CREATED_AT.replace(" ", "_"), sdf.parse((String) company.get("created_at")));
-                                    if (company.get("updated_at") != null)
-                                        row.addValue(UPDATED_AT.replace(" ", "_"), sdf.parse((String) company.get("updated_at")));
-
-                                    row.addValue(TAG_LIST.replace(" ", "_"), (String) company.get("tag_list"));
-
-                                    JSONArray rounds = (JSONArray) company.get("funding_rounds");
-                                    for (Object r : rounds) {
-                                        JSONObject round = (JSONObject) r;
-                                        DataRow roundRow = fundingSourceRowFactory.newRow();
-                                        String roundKey = ((String) round.get("round_code")) + ((String) company.get("permalink")) + String.valueOf(getCbDate(round, "funded").getTime().getTime());
-                                        roundRow.addValue(ROUND_PERMALINK.replace(" ", "_"), (String) company.get("permalink"));
-                                        roundRow.addValue(ROUND_KEY.replace(" ", "_"), roundKey);
-                                        roundRow.addValue(ROUND_SOURCE_URL.replace(" ", "_"), (String) round.get("source_url"));
-                                        roundRow.addValue(ROUND_CODE.replace(" ", "_"), (String) round.get("round_code"));
-                                        roundRow.addValue(SOURCE_DESCRIPTION.replace(" ", "_"), (String) round.get("source_description"));
-                                        roundRow.addValue(RAISED_CURRENCY_CODE.replace(" ", "_"), (String) round.get("raised_currency_code"));
-                                        if (round.get("raised_amount") != null)
-                                            roundRow.addValue(RAISED_AMOUNT.replace(" ", "_"), (Number) round.get("raised_amount"));
-                                        addCbDate(roundRow, round, "funded", FUNDED_DATE);
-
-                                        JSONArray investors = (JSONArray) round.get("investments");
-                                        for (Object i : investors) {
-                                            JSONObject investor = (JSONObject) i;
-
-                                            String financialOrg = "";
-                                            JSONObject org = (JSONObject) investor.get("financial_org");
-                                            if (org != null) {
-                                                financialOrg = (String) org.get("permalink");
-                                            }
-                                            String companyPermalink = "";
-                                            JSONObject investingCompany = (JSONObject) investor.get("company");
-                                            if (investingCompany != null) {
-                                                companyPermalink = (String) investingCompany.get("permalink");
-                                            }
-
-                                            if (!(companyPermalink.equals("") && financialOrg.equals(""))) {
-                                                DataRow investorRow = investmentSourceRowFactory.newRow();
-                                                investorRow.addValue(FINANCIAL_ORG_PERMALINK.replace(" ", "_"), financialOrg);
-                                                investorRow.addValue(FUNDING_ROUND_KEY.replace(" ", "_"), roundKey);
-                                                investorRow.addValue(COMPANY_PERMALINK.replace(" ", "_"), companyPermalink);
-                                            }
-                                        }
-
-                                    }
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                        String companyFile;
+                        while ((companyFile = values.take()) != null) {
+                            processCompany(companyFile, companyRowFactory, sdf, fundingSourceRowFactory, investmentSourceRowFactory);
                             latch1.countDown();
 
                             System.out.println(Double.valueOf(size - latch1.getCount()) / Double.valueOf(size));
@@ -231,11 +225,103 @@ public class CrunchbaseServlet extends HttpServlet implements CommonConstants {
             fundingSourceRowFactory.commit();
             investmentSourceRowFactory.flush();
             investmentSourceRowFactory.commit();
+            System.out.println("done.");
         } catch (Exception e) {
             e.printStackTrace();
             companyRowFactory.rollback();
             fundingSourceRowFactory.rollback();
             investmentSourceRowFactory.rollback();
+        }
+    }
+
+    private static void processCompany(String companyFile, TransactionTarget companyRowFactory, DateFormat sdf, TransactionTarget fundingSourceRowFactory, TransactionTarget investmentSourceRowFactory) throws Exception {
+        if (!companyFile.equals("")) {
+            FileInputStream fis = null;
+            try {
+                File f = new File("../data/companies/" + companyFile);
+                fis = new FileInputStream(f);
+                byte[] b = new byte[(int) f.length()];
+                fis.read(b);
+                String fileData = new String(b, "UTF-8");
+                Object o = JSONValue.parse(fileData);
+                if (o instanceof String) {
+                    System.out.println(o);
+                }
+                JSONObject company = (JSONObject) o;
+
+                if (company.size() > 0 && company.get("error") == null) {
+                    DataRow row = companyRowFactory.newRow();
+                    row.addValue(CRUNCHBASE_NAME.replace(" ", "_"), (String) company.get("name"));
+                    row.addValue(PERMALINK.replace(" ", "_"), (String) company.get("permalink"));
+                    row.addValue(CRUNCHBASE_URL.replace(" ", "_"), (String) company.get("crunchbase_url"));
+                    row.addValue(HOMEPAGE_URL.replace(" ", "_"), (String) company.get("homepage_url"));
+                    row.addValue(TWITTER_USERNAME.replace(" ", "_"), (String) company.get("twitter_username"));
+                    row.addValue(CATEGORY_CODE.replace(" ", "_"), (String) company.get("category_code"));
+                    row.addValue(EMAIL_ADDRESS.replace(" ", "_"), (String) company.get("email_address"));
+                    row.addValue(PHONE_NUMBER.replace(" ", "_"), (String) company.get("phone_number"));
+                    row.addValue(DESCRIPTION.replace(" ", "_"), (String) company.get("description"));
+                    row.addValue(TOTAL_MONEY_RAISED.replace(" ", "_"), (String) company.get("total_money_raised"));
+                    if (company.get("number_of_employees") != null)
+                        row.addValue(NUMBER_OF_EMPLOYEES.replace(" ", "_"), (Integer) company.get("number_of_employees"));
+                    addCbDate(row, company, "founded", FOUNDED_DATE);
+                    addCbDate(row, company, "deadpooled", DEADPOOLED_DATE);
+                    if (company.get("created_at") != null)
+                        row.addValue(CREATED_AT.replace(" ", "_"), sdf.parse((String) company.get("created_at")));
+                    if (company.get("updated_at") != null)
+                        row.addValue(UPDATED_AT.replace(" ", "_"), sdf.parse((String) company.get("updated_at")));
+
+                    row.addValue(TAG_LIST.replace(" ", "_"), (String) company.get("tag_list"));
+
+                    JSONArray rounds = (JSONArray) company.get("funding_rounds");
+                    for (Object r : rounds) {
+                        JSONObject round = (JSONObject) r;
+                        DataRow roundRow = fundingSourceRowFactory.newRow();
+                        String roundKey = ((String) round.get("round_code")) + ((String) company.get("permalink")) + String.valueOf(getCbDate(round, "funded").getTime().getTime());
+                        roundRow.addValue(ROUND_PERMALINK.replace(" ", "_"), (String) company.get("permalink"));
+                        roundRow.addValue(ROUND_KEY.replace(" ", "_"), roundKey);
+                        roundRow.addValue(ROUND_SOURCE_URL.replace(" ", "_"), (String) round.get("source_url"));
+                        roundRow.addValue(ROUND_CODE.replace(" ", "_"), (String) round.get("round_code"));
+                        roundRow.addValue(SOURCE_DESCRIPTION.replace(" ", "_"), (String) round.get("source_description"));
+                        roundRow.addValue(RAISED_CURRENCY_CODE.replace(" ", "_"), (String) round.get("raised_currency_code"));
+                        if (round.get("raised_amount") != null)
+                            roundRow.addValue(RAISED_AMOUNT.replace(" ", "_"), (Number) round.get("raised_amount"));
+                        addCbDate(roundRow, round, "funded", FUNDED_DATE);
+
+                        JSONArray investors = (JSONArray) round.get("investments");
+                        for (Object i : investors) {
+                            JSONObject investor = (JSONObject) i;
+
+                            String financialOrg = "";
+                            JSONObject org = (JSONObject) investor.get("financial_org");
+                            if (org != null) {
+                                financialOrg = (String) org.get("permalink");
+                            }
+                            String companyPermalink = "";
+                            JSONObject investingCompany = (JSONObject) investor.get("company");
+                            if (investingCompany != null) {
+                                companyPermalink = (String) investingCompany.get("permalink");
+                            }
+
+                            if (!(companyPermalink.equals("") && financialOrg.equals(""))) {
+                                DataRow investorRow = investmentSourceRowFactory.newRow();
+                                investorRow.addValue(FINANCIAL_ORG_PERMALINK.replace(" ", "_"), financialOrg);
+                                investorRow.addValue(FUNDING_ROUND_KEY.replace(" ", "_"), roundKey);
+                                investorRow.addValue(COMPANY_PERMALINK.replace(" ", "_"), companyPermalink);
+                            }
+                        }
+
+                    }
+                }
+            } catch (Exception e) {
+                if (e instanceof InterruptedException) {
+                    throw e;
+                } else {
+                    e.printStackTrace();
+                }
+            } finally {
+                if (fis != null)
+                    fis.close();
+            }
         }
     }
 

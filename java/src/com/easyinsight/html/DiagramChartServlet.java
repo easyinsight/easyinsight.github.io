@@ -3,17 +3,12 @@ package com.easyinsight.html;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSDiagramDefinition;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportService;
-import com.easyinsight.kpi.KPIOutcome;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +61,7 @@ public class DiagramChartServlet extends HtmlServlet {
                         FormattingConfiguration c = new FormattingConfiguration();
                         c.setFormattingType(FormattingConfiguration.PERCENTAGE);
                         node.put("change", c.createFormatter().format(d));
-                        node.put("trendIcon", getIconImage(o, d));
+                        node.put("trendIcon", ExportService.getIconImage(o));
                     }
                 } else {
                     node.put("type", "node");
@@ -105,32 +100,4 @@ public class DiagramChartServlet extends HtmlServlet {
 
     }
 
-    private String getIconImage(TrendOutcome o, double v) {
-        switch (o.getOutcome()) {
-            case KPIOutcome.EXCEEDING_GOAL:
-            case KPIOutcome.POSITIVE:
-                if(o.getDirection() == KPIOutcome.UP_DIRECTION) {
-                    return "arrow2_up_green.png";
-                } else {
-                    return "arrow2_down_green.png";
-                }
-            case KPIOutcome.NEGATIVE:
-                if(o.getDirection() == KPIOutcome.UP_DIRECTION) {
-                    return "arrow2_up_red.png";
-                } else {
-                    return "arrow2_down_red.png";
-                }
-            case KPIOutcome.NEUTRAL:
-                if(o.getDirection() == KPIOutcome.UP_DIRECTION) {
-                    return "arrow2_up_blue.png";
-                } else if (o.getDirection() == KPIOutcome.DOWN_DIRECTION) {
-                    return "arrow2_down_blue.png";
-                } else {
-                    return "bullet_ball_blue.png";
-                }
-            case KPIOutcome.NO_DATA:
-            default:
-                return "bullet_ball_blue.png";
-        }
-    }
 }
