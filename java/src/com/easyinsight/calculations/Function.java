@@ -43,6 +43,10 @@ public abstract class Function implements IFunction {
     private IRow row;
     private AnalysisItem analysisItem;
 
+    public AnalysisItem getAnalysisItem() {
+        return analysisItem;
+    }
+
     public IRow getRow() {
         return row;
     }

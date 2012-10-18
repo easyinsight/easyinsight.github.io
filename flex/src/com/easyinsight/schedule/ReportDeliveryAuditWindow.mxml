@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private function onCreation():void {
+            var audit:ReportDeliveryAudit;
+            ProgressAlert.alert(this, "Retrieving history...", null, exportService.getReportDeliveryAudits);
+            exportService.getReportDeliveryAudits.send(_activityID);
+        }
+
+        private var _activityID:int;
+
+        public function set activityID(value:int):void {
+            _activityID = value;
+        }
+
+        [Bindable]
+        private var audits:ArrayCollection;
+
+        private function gotAudits():void {
+            audits = exportService.getReportDeliveryAudits.lastResult as ArrayCollection;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="exportService" id="exportService">
+        <mx:method name="getReportDeliveryAudits" result="gotAudits()"/>
+    </mx:RemoteObject>
+    <mx:DataGrid dataProvider="{audits}">
+        <mx:columns>
+            <util:EIDataGridColumn headerText="Sent At" dataField="sentAt" width="115"/>
+            <util:EIDataGridColumn headerText="Status" dataField="success" width="100"/>
+            <util:EIDataGridColumn headerText="Message" dataField="message" wordWrap="true" width="300"/>
+            <util:EIDataGridColumn headerText="Email" dataField="email" width="200"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <util:CancelButton label="Close" click="PopUpManager.removePopUp(this)"/>
+</util:EISlimWindow>

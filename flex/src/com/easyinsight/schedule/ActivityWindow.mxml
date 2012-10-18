@@ -83,6 +83,13 @@
         private function ran():void {
 
         }
+
+        private function history():void {
+            var window:ReportDeliveryAuditWindow = new ReportDeliveryAuditWindow();
+            window.activityID = _activity.scheduledActivityID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
         ]]></mx:Script>
     <mx:RemoteObject id="exportService" destination="exportService">
         <mx:method name="runNow" result="ran()"/>
@@ -107,6 +114,7 @@
     <mx:HBox>
         <util:SaveButton label="Edit" click="onEdit()"/>
         <util:SaveButton label="Run Now" click="runNow()"/>
+        <util:SaveButton label="History" click="history()"/>
         <!--<util:SaveButton label="Copy"/>-->
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
     </mx:HBox>

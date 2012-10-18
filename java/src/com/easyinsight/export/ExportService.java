@@ -55,6 +55,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -1798,6 +1799,29 @@ public class ExportService {
             }
         }
         return dataSet.getDataSet().getRows().size() > 0;
+    }
+
+    public List<ReportDeliveryAudit> getReportDeliveryAudits(long activityID) {
+        List<ReportDeliveryAudit> audits = new ArrayList<ReportDeliveryAudit>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SUCCESSFUL, MESSAGE, SEND_DATE, TARGET_EMAIL FROM REPORT_DELIVERY_AUDIT WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+            queryStmt.setLong(1, activityID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                int status = rs.getInt(1);
+                String message = rs.getString(2);
+                Date sendDate = new Date(rs.getTimestamp(3).getTime());
+                String targetEmail = rs.getString(4);
+                audits.add(new ReportDeliveryAudit(targetEmail, status, message, sendDate));
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return audits;
     }
 
     private boolean listVerticalList(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
