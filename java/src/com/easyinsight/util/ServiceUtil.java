@@ -44,7 +44,9 @@ public class ServiceUtil {
     }
 
     public void establishCount(String callDataID, int count) {
-        get().get(callDataID).setRequiredCount(count);
+        CallData callData = get().get(callDataID);
+        callData.setRequiredCount(count);
+        get().put(callDataID, callData);
     }
 
     public String longRunningCall(long itemID) {
@@ -68,24 +70,35 @@ public class ServiceUtil {
 
     public void updateStatusMessage(String callDataID, String statusMessage) {
         get().get(callDataID).setStatusMessage(statusMessage);
+        refreshCache(callDataID);
     }
 
     public void updateStatus(String callDataID, int status) {
         get().get(callDataID).setStatus(status);
+        refreshCache(callDataID);
+    }
+
+    private void refreshCache(String callDataID) {
+        CallData callData = get().get(callDataID);
+        get().put(callDataID, callData);
     }
 
     public void incrementDone(String callDataID) {
-        get().get(callDataID).incrementCount();
+        CallData callData = get().get(callDataID);
+        callData.incrementCount();
+        refreshCache(callDataID);
     }
 
     public void updateStatus(String callDataID, int status, Object result) {
         get().get(callDataID).setResult(result);
         get().get(callDataID).setStatus(status);
+        refreshCache(callDataID);
     }
 
     public void updateStatus(String callDataID, int status, String message) {
         get().get(callDataID).setStatusMessage(message);
         get().get(callDataID).setStatus(status);
+        refreshCache(callDataID);
     }
 
     public CallData getCallData(String callDataID) {
