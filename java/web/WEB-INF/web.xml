@@ -539,6 +539,23 @@
         <servlet-name>SnappCloudCancelUser</servlet-name>
         <servlet-class>com.easyinsight.servlet.snappcloud.CancelUser</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>OpenIDServlet</servlet-name>
+        <servlet-class>com.easyinsight.users.OpenIDServlet</servlet-class>
+        <init-param>
+            <param-name>home_path</param-name>
+            <param-value>/app/</param-value>
+        </init-param>
+        <init-param>
+            <param-name>return_to_path</param-name>
+            <param-value>/app/openid</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>OpenIDServlet</servlet-name>
+        <url-pattern>/openid</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>SnappCloudValidateUser</servlet-name>

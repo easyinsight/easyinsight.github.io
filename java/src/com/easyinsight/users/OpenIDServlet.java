@@ -1,5 +1,8 @@
 package com.easyinsight.users;
 
+import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.security.SecurityUtil;
 import com.google.step2.AuthRequestHelper;
 import com.google.step2.AuthResponseHelper;
 import com.google.step2.ConsumerHelper;
@@ -7,6 +10,7 @@ import com.google.step2.Step2;
 import com.google.step2.discovery.IdpIdentifier;
 import com.google.step2.openid.ui.UiMessageRequest;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Session;
 import org.openid4java.OpenIDException;
 import org.openid4java.consumer.InMemoryConsumerAssociationStore;
 import org.openid4java.discovery.DiscoveryInformation;
@@ -20,6 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.Connection;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -90,8 +96,8 @@ public class OpenIDServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
-            UserInfo user = completeAuthentication(req);
-            req.getSession().setAttribute("user", user);
+            UserServiceResponse response = completeAuthentication(req);
+            SecurityUtil.populateSession(req.getSession(), response);
             resp.sendRedirect(homePath);
         } catch (OpenIDException e) {
             throw new ServletException("Error processing OpenID response", e);
@@ -138,7 +144,7 @@ public class OpenIDServlet extends HttpServlet {
      * @throws org.openid4java.OpenIDException if unable to verify response
      */
 
-    UserInfo completeAuthentication(HttpServletRequest request)
+    UserServiceResponse completeAuthentication(HttpServletRequest request)
             throws OpenIDException {
         HttpSession session = request.getSession();
         ParameterList openidResp = Step2.getParameterList(request);
@@ -230,11 +236,23 @@ public class OpenIDServlet extends HttpServlet {
      * @param request Current servlet request
      * @return User representation
      */
-    UserInfo onSuccess(AuthResponseHelper helper, HttpServletRequest request) {
-        return new UserInfo(helper.getClaimedId().toString(),
-                helper.getAxFetchAttributeValue(Step2.AxSchema.EMAIL),
-                helper.getAxFetchAttributeValue(Step2.AxSchema.FIRST_NAME),
-                helper.getAxFetchAttributeValue(Step2.AxSchema.LAST_NAME));
+    UserServiceResponse onSuccess(AuthResponseHelper helper, HttpServletRequest request) {
+        String email = helper.getAxFetchAttributeValue(Step2.AxSchema.EMAIL);
+
+        EIConnection conn =  Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            List<User> users = session.createQuery("from User where email = ?").setString(0, email).list();
+            if(users.size() == 1) {
+                return UserServiceResponse.createResponse(users.get(0), session, conn);
+            }
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+            Database.closeConnection(conn);
+        }
+        return null;
     }
 
     /**
@@ -245,7 +263,7 @@ public class OpenIDServlet extends HttpServlet {
      * @param request Current servlet request
      * @return User representation
      */
-    UserInfo onFail(AuthResponseHelper helper, HttpServletRequest request) {
+    UserServiceResponse onFail(AuthResponseHelper helper, HttpServletRequest request) {
         return null;
     }
 
