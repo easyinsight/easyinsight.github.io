@@ -8,7 +8,6 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.migration.Migrations;
 import com.easyinsight.datafeeds.DataSourceTypeRegistry;
 import com.easyinsight.datafeeds.FeedRegistry;
-import com.easyinsight.api.APIManager;
 import com.easyinsight.datafeeds.migration.MigrationManager;
 import com.easyinsight.export.HtmlResultCache;
 import com.easyinsight.security.SecurityUtil;
@@ -59,7 +58,6 @@ public class DMSServlet extends HttpServlet {
                 FeedRegistry.initialize();
                 ReportCache.initialize();
                 HtmlResultCache.initialize();
-                new APIManager().start();
                 if (ConfigLoader.instance().isTaskRunner()) {
                     Scheduler.initialize();
                     scheduler = Scheduler.instance();

@@ -6,9 +6,6 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadInternalService;
 import com.easyinsight.database.Database;
-import com.easyinsight.api.APIService;
-import com.easyinsight.api.dynamic.DynamicServiceDefinition;
-import com.easyinsight.api.dynamic.ConfiguredMethod;
 import com.easyinsight.solutions.SolutionInstallInfo;
 import com.easyinsight.security.Roles;
 import com.easyinsight.core.DataSourceDescriptor;
@@ -124,43 +121,9 @@ public class DataSourceCopyUtils {
                 }
             }*/
         }
-        if (clonedFeedDefinition.getDynamicServiceDefinitionID() > 0) {
-            cloneAPIs(conn, feedDefinition, clonedFeedDefinition);
-        }
         return result;
     }
 
-    private static void cloneAPIs(Connection conn, FeedDefinition feedDefinition, FeedDefinition clonedFeedDefinition) {
-        Session session = Database.instance().createSession(conn);
-        try {
-            APIService apiService = new APIService();
-            DynamicServiceDefinition dynamicServiceDefinition = apiService.getDynamicServiceDefinition(feedDefinition.getDataFeedID(), conn, session);
-            List<ConfiguredMethod> clonedConfiguredMethods = new ArrayList<ConfiguredMethod>();
-            for (ConfiguredMethod configuredMethod : dynamicServiceDefinition.getConfiguredMethods()) {
-                List<AnalysisItem> clonedMethodItems = new ArrayList<AnalysisItem>();
-                for (AnalysisItem keyItem : configuredMethod.getKeys()) {
-                    // find that item in the cloned definition...
-                    AnalysisItem matchedItem = null;
-                    for (AnalysisItem clonedItem : clonedFeedDefinition.getFields()) {
-                        if (clonedItem.equals(keyItem)) {
-                            matchedItem = clonedItem;
-                        }
-                    }
-                    clonedMethodItems.add(matchedItem);
-                }
-                ConfiguredMethod clonedMethod = configuredMethod.clone();
-                clonedMethod.setKeys(clonedMethodItems);
-                clonedConfiguredMethods.add(clonedMethod);
-            }
-            DynamicServiceDefinition clonedDefinition = dynamicServiceDefinition.clone();
-            clonedDefinition.setConfiguredMethods(clonedConfiguredMethods);
-            apiService.addDynamicServiceDefinition(clonedDefinition, conn);
-            clonedFeedDefinition.setDynamicServiceDefinitionID(clonedDefinition.getServiceID());
-            session.flush();
-        } finally {
-            session.close();
-        }
-    }
 
     private static List<AnalysisDefinition> getInsightsFromFeed(long feedID, Connection conn) throws SQLException {
         AnalysisStorage analysisStorage = new AnalysisStorage();

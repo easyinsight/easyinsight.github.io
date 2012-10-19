@@ -166,14 +166,6 @@
     </servlet>
 
     <servlet>
-        <servlet-name>cxf</servlet-name>
-        <display-name>cxf</display-name>
-        <description>Apache CXF Endpoint</description>
-        <servlet-class>com.easyinsight.servlet.EICXFServlet</servlet-class>
-        <load-on-startup>0</load-on-startup>
-    </servlet>
-
-    <servlet>
         <servlet-name>DMS</servlet-name>
         <display-name>DMS</display-name>
         <servlet-class>com.easyinsight.servlet.DMSServlet</servlet-class>
@@ -809,11 +801,6 @@
     <servlet-mapping>
         <servlet-name>OAuth</servlet-name>
         <url-pattern>/oauth</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>cxf</servlet-name>
-        <url-pattern>/services/*</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>6000000</session-timeout>

@@ -12,7 +12,6 @@ import com.easyinsight.datafeeds.cleardb.ClearDBDataSource;
 import com.easyinsight.datafeeds.cloudwatch.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.datafeeds.constantcontact.*;
-/*import com.easyinsight.datafeeds.custom.CustomRestSource;*/
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.freshbooks.*;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
@@ -23,7 +22,6 @@ import com.easyinsight.datafeeds.highrise.*;
 import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;*/
 import com.easyinsight.datafeeds.json.JSONDataSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
-import com.easyinsight.datafeeds.marketo.MarketoDataSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
 import com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
@@ -46,10 +44,15 @@ import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
 /*import com.easyinsight.datafeeds.twilio.TwilioCompositeSource;
 import com.easyinsight.datafeeds.twilio.TwilioSomethingSource;*/
+
+import com.easyinsight.datafeeds.treasuredata.TreasureDataQuerySource;
 import com.easyinsight.datafeeds.wholefoods.WholeFoodsSource;
 /*import com.easyinsight.datafeeds.xero.XeroAccountSource;
 import com.easyinsight.datafeeds.xero.XeroBankTransactionSource;
 import com.easyinsight.datafeeds.xero.XeroCompositeSource;*/
+import com.easyinsight.datafeeds.youtrack.YouTrackCompositeSource;
+import com.easyinsight.datafeeds.youtrack.YouTrackIssueSource;
+import com.easyinsight.datafeeds.youtrack.YouTrackProjectSource;
 import com.easyinsight.datafeeds.zendesk.*;
 
 import java.util.HashMap;
@@ -120,7 +123,6 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.HIGHRISE_COMPANY, HighRiseCompanySource.class);
         registerType(FeedType.HIGHRISE_DEAL, HighRiseDealSource.class);
         registerType(FeedType.HIGHRISE_CONTACTS, HighRiseContactSource.class);
-        registerType(FeedType.MARKETO, MarketoDataSource.class);
         registerType(FeedType.PIVOTAL_TRACKER, PivotalTrackerBaseSource.class);
         registerType(FeedType.SENDGRID, SendGridDataSource.class);
         registerType(FeedType.MEETUP, MeetupDataSource.class);
@@ -224,8 +226,12 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.BATCHBOOK2_WEBSITES, Batchbook2WebsiteSource.class);
         registerType(FeedType.BATCHBOOK2_COMPANIES, Batchbook2CompanySource.class);
         registerType(FeedType.BATCHBOOK2_CUSTOM, Batchbook2CustomFieldSource.class);
+        registerType(FeedType.TREASURE_DATA, TreasureDataQuerySource.class);
         registerType(FeedType.DATABASE_CONNECTION, DatabaseConnection.class);
         registerType(FeedType.QUICKBASE_USER_CHILD, QuickbaseUserSource.class);
+        registerType(FeedType.YOUTRACK_COMPOSITE, YouTrackCompositeSource.class);
+        registerType(FeedType.YOUTRACK_PROJECTS, YouTrackProjectSource.class);
+        registerType(FeedType.YOUTRACK_TASKS, YouTrackIssueSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

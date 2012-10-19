@@ -166,11 +166,17 @@ public class FeedType implements Serializable {
     public static final FeedType BATCHBOOK2_ADDRESSES = new FeedType(148);
     public static final FeedType BATCHBOOK2_EMAILS = new FeedType(149);
     public static final FeedType BATCHBOOK2_CUSTOM = new FeedType(150);
+    public static final FeedType WUFOO_COMPOSITE = new FeedType(151);
+    public static final FeedType TREASURE_DATA = new FeedType(152);
 
     public static final FeedType DATABASE_CONNECTION = new FeedType(153);
 
     private int type;
     public static final FeedType QUICKBASE_USER_CHILD = new FeedType(154);
+
+    public static final FeedType YOUTRACK_COMPOSITE = new FeedType(155);
+    public static final FeedType YOUTRACK_PROJECTS = new FeedType(156);
+    public static final FeedType YOUTRACK_TASKS = new FeedType(157);
 
     public FeedType() {
     }

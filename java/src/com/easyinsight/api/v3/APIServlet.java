@@ -1,6 +1,7 @@
 package com.easyinsight.api.v3;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.ReportException;
 import com.easyinsight.api.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -86,6 +87,9 @@ public abstract class APIServlet extends HttpServlet {
                 } catch (ParsingException spe) {
                     conn.rollback();
                     responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>" + spe.getMessage() + "</message>");
+                } catch (ReportException re) {
+                    conn.rollback();
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>" + re.getReportFault().toString() + "</message>");
                 } catch (Exception e) {
                     conn.rollback();
                     LogClass.error(e);

@@ -91,13 +91,10 @@ public class RunReportServlet extends APIServlet {
                     FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
                     String param = request.getParameter(filter.getFilterName());
                     if (param != null) {
-                        /*try {
-                            Integer paramInt = Integer.parseInt(param);
-                            filterValueDefinition.setFilteredValues(Arrays.asList((Object) paramInt));
-                        } catch (NumberFormatException nfe) {*/
-                            filterValueDefinition.setFilteredValues(Arrays.asList((Object) param));
-                        //}
+                        filterValueDefinition.setFilteredValues(Arrays.asList((Object) param));
                     }
+                } else if (filter instanceof RollingFilterDefinition) {
+
                 } else if (filter instanceof FilterDateRangeDefinition) {
                     FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filter;
                     String startParam = request.getParameter(filter.getFilterName() + "_start");
