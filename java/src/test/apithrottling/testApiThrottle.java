@@ -10,7 +10,6 @@ import javax.xml.ws.BindingProvider;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.util.GregorianCalendar;
 
-import org.apache.cxf.binding.soap.SoapFault;
 
 /**
  * Created by IntelliJ IDEA.
