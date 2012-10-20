@@ -11,6 +11,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.util.RandomTextGenerator;
+import org.apache.jcs.JCS;
 import org.hibernate.Session;
 
 import java.sql.*;
@@ -23,6 +24,17 @@ import java.util.Date;
  * Time: 1:24:52 PM
  */
 public class DashboardService {
+
+    private JCS dashboardCache = getCache("dashboards");
+
+    private JCS getCache(String cacheName) {
+        try {
+            return JCS.getInstance(cacheName);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
 
     private DashboardStorage dashboardStorage = new DashboardStorage();
 
@@ -135,10 +147,71 @@ public class DashboardService {
                 dashboard.setAdministrators(Arrays.asList((FeedConsumer) userStub));
             }
             dashboardStorage.saveDashboard(dashboard);
+            String cacheKey = SecurityUtil.getUserID(false) + "-" + dashboard.getId();
+            if (dashboardCache != null) {
+                dashboardCache.remove(cacheKey);
+            }
+
+            Set<Long> reportIDs = dashboard.containedReports();
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT PUBLICLY_VISIBLE, ACCOUNT_VISIBLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                boolean accessProblem = false;
+                for (Long reportID : reportIDs) {
+                    queryStmt.setLong(1, reportID);
+                    ResultSet rs = queryStmt.executeQuery();
+                    if (rs.next()) {
+                        boolean publicVisible = rs.getBoolean(1);
+                        boolean accountVisible = rs.getBoolean(2);
+                        if (dashboard.isPublicVisible() && !publicVisible) {
+                            accessProblem = true;
+                        }
+                        if (dashboard.isAccountVisible() && !accountVisible) {
+                            accessProblem = true;
+                        }
+                    }
+                }
+                dashboard.setReportAccessProblem(accessProblem);
+            } finally {
+                Database.closeConnection(conn);
+            }
+
             return dashboard;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public void updateReportVisibility(long dashboardID) {
+        SecurityUtil.authorizeDashboard(dashboardID);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
+            Set<Long> reportIDs = dashboard.containedReports();
+            if (dashboard.isPublicVisible()) {
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET PUBLICLY_VISIBLE = ? WHERE ANALYSIS_ID = ?");
+                for (long reportID : reportIDs) {
+                    updateStmt.setBoolean(1, dashboard.isPublicVisible());
+                    updateStmt.setLong(2, reportID);
+                    updateStmt.executeUpdate();
+                }
+                updateStmt.close();
+            }
+            if (dashboard.isAccountVisible()) {
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET ACCOUNT_VISIBLE = ? WHERE ANALYSIS_ID = ?");
+                for (long reportID : reportIDs) {
+                    updateStmt.setBoolean(1, dashboard.isAccountVisible());
+                    updateStmt.setLong(2, reportID);
+                    updateStmt.executeUpdate();
+                }
+                updateStmt.close();
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
@@ -210,6 +283,13 @@ public class DashboardService {
         EIConnection conn = Database.instance().getConnection();
         try {
             int role = SecurityUtil.authorizeDashboard(dashboardID);
+            String cacheKey = SecurityUtil.getUserID(false) + "-" + dashboardID;
+            /*if (dashboardCache != null) {
+                Dashboard dashboard = (Dashboard) dashboardCache.get(cacheKey);
+                if (dashboard != null) {
+                    return dashboard;
+                }
+            }*/
             Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
             dashboard.setRole(role);
             Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
@@ -243,6 +323,9 @@ public class DashboardService {
             FilterVisitor filterVisitor = new FilterVisitor(dashboard.getDataSourceID(), dashboardID);
             dashboard.visit(filterVisitor);
             filterVisitor.done();
+            if (dashboardCache != null) {
+                dashboardCache.put(cacheKey, dashboard);
+            }
             return dashboard;
         } catch (Exception e) {
             LogClass.error("On retrieving dashboard " + dashboardID, e);

@@ -1,6 +1,7 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.database.EIConnection;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.sql.PreparedStatement;
@@ -22,6 +23,7 @@ public class DashboardGridItem implements Cloneable, Serializable {
         return gridItem;
     }
 
+    @Nullable
     public DashboardElement getDashboardElement() {
         return dashboardElement;
     }

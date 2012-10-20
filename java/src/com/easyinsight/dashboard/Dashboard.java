@@ -52,6 +52,15 @@ public class Dashboard implements Cloneable, Serializable {
     private String marmotScript;
     private int folder;
     private boolean absoluteSizing;
+    private boolean reportAccessProblem;
+
+    public boolean isReportAccessProblem() {
+        return reportAccessProblem;
+    }
+
+    public void setReportAccessProblem(boolean reportAccessProblem) {
+        this.reportAccessProblem = reportAccessProblem;
+    }
 
     public boolean isAbsoluteSizing() {
         return absoluteSizing;

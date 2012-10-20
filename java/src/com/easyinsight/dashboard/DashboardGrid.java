@@ -139,8 +139,11 @@ public class DashboardGrid extends DashboardElement {
                 DashboardGridItem item = new DashboardGridItem();
                 item.setRowIndex(itemRS.getInt(3));
                 item.setColumnIndex(itemRS.getInt(4));
-                item.setDashboardElement(DashboardStorage.getElement(conn, gridElementID, elementType));
-                item.getDashboardElement().setParentElement(dashboardGrid);
+                DashboardElement element = DashboardStorage.getElement(conn, gridElementID, elementType);
+                item.setDashboardElement(element);
+                if (element != null) {
+                    element.setParentElement(dashboardGrid);
+                }
                 items.add(item);
             }
             dashboardGrid.setGridItems(items);
@@ -154,7 +157,10 @@ public class DashboardGrid extends DashboardElement {
     public Set<Long> containedScorecards() {
         Set<Long> reports = new HashSet<Long>();
         for (DashboardGridItem gridItem : gridItems) {
-            reports.addAll(gridItem.getDashboardElement().containedScorecards());
+            DashboardElement element = gridItem.getDashboardElement();
+            if (element != null) {
+                reports.addAll(element.containedScorecards());
+            }
         }
         return reports;
     }
@@ -162,7 +168,10 @@ public class DashboardGrid extends DashboardElement {
     @Override
     public void updateScorecardIDs(Map<Long, Scorecard> scorecardReplacementMap) {
         for (DashboardGridItem gridItem : gridItems) {
-            gridItem.getDashboardElement().updateScorecardIDs(scorecardReplacementMap);
+            DashboardElement element = gridItem.getDashboardElement();
+            if (element != null) {
+                element.updateScorecardIDs(scorecardReplacementMap);
+            }
         }
     }
 
@@ -170,7 +179,10 @@ public class DashboardGrid extends DashboardElement {
     public Set<Long> containedReports() {
         Set<Long> reports = new HashSet<Long>();
         for (DashboardGridItem gridItem : gridItems) {
-            reports.addAll(gridItem.getDashboardElement().containedReports());
+            DashboardElement element = gridItem.getDashboardElement();
+            if (element != null) {
+                reports.addAll(element.containedReports());
+            }
         }
         return reports;
     }
@@ -182,14 +194,20 @@ public class DashboardGrid extends DashboardElement {
             if (gridItem == null || gridItem.getDashboardElement() == null) {
                 continue;
             }
-            gridItem.getDashboardElement().visit(dashboardVisitor);
+            DashboardElement element = gridItem.getDashboardElement();
+            if (element != null) {
+                element.visit(dashboardVisitor);
+            }
         }
     }
 
     @Override
     public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
         for (DashboardGridItem gridItem : gridItems) {
-            gridItem.getDashboardElement().updateReportIDs(reportReplacementMap);
+            DashboardElement element = gridItem.getDashboardElement();
+            if (element != null) {
+                element.updateReportIDs(reportReplacementMap);
+            }
         }
     }
 
@@ -197,18 +215,25 @@ public class DashboardGrid extends DashboardElement {
     public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {
         List<EIDescriptor> descs = new ArrayList<EIDescriptor>();
         for (DashboardGridItem gridItem : gridItems) {
-            descs.addAll(gridItem.getDashboardElement().allItems(dataSourceItems));
+            DashboardElement element = gridItem.getDashboardElement();
+            if (element != null) {
+                descs.addAll(element.allItems(dataSourceItems));
+            }
         }
         return descs;
     }
 
     @Override
     public Collection<? extends FilterDefinition> filtersForReport(long reportID) {
-        for (DashboardGridItem stackItem : getGridItems()) {
-            Collection<? extends FilterDefinition> filters = stackItem.getDashboardElement().filtersForReport(reportID);
-            if (filters != null && !filters.isEmpty()) {
-                return filters;
+        for (DashboardGridItem gridItem : getGridItems()) {
+            DashboardElement element = gridItem.getDashboardElement();
+            if (element != null) {
+                Collection<? extends FilterDefinition> filters = element.filtersForReport(reportID);
+                if (filters != null && !filters.isEmpty()) {
+                    return filters;
+                }
             }
+
         }
         return new ArrayList<FilterDefinition>();
     }
@@ -223,7 +248,10 @@ public class DashboardGrid extends DashboardElement {
         sb.append("\n<script type=\"text/javascript\">\n");
         sb.append("function updateGrid").append(getElementID()).append("() {\n");
         for (DashboardGridItem e : gridItems) {
-            sb.append("\t").append(e.getDashboardElement().refreshFunction()).append(";\n");
+            DashboardElement element = e.getDashboardElement();
+            if (element != null) {
+                sb.append("\t").append(element.refreshFunction()).append(";\n");
+            }
         }
         sb.append("}\n");
         sb.append("</script>\n");
@@ -249,10 +277,13 @@ public class DashboardGrid extends DashboardElement {
                 } else {
                     span = 2;
                 }
-                sb.append("<div class=\"span" + span + "\" style=\"background-color:#FFFFFF\">");
+                sb.append("<div class=\"span").append(span).append("\" style=\"background-color:#FFFFFF\">");
                 //sb.append("<td style=\"width:"+(100 / columns)+"%\">\r\n");
                 DashboardGridItem item = findItem(i, j);
-                sb.append(item.getDashboardElement().toHTML(filterHTMLMetadata));
+                DashboardElement element = item.getDashboardElement();
+                if (element != null) {
+                    sb.append(element.toHTML(filterHTMLMetadata));
+                }
                 sb.append("</div>\r\n");
             }
             sb.append("</div>\r\n");
@@ -273,7 +304,10 @@ public class DashboardGrid extends DashboardElement {
     public List<String> jsIncludes() {
         List<String> includes = super.jsIncludes();
         for (DashboardGridItem stackItem : getGridItems()) {
-            includes.addAll(stackItem.getDashboardElement().jsIncludes());
+            DashboardElement element = stackItem.getDashboardElement();
+            if (element != null) {
+                includes.addAll(element.jsIncludes());
+            }
         }
         return includes;
     }
@@ -281,7 +315,10 @@ public class DashboardGrid extends DashboardElement {
     public List<String> cssIncludes() {
         List<String> includes = super.cssIncludes();
         for (DashboardGridItem stackItem : getGridItems()) {
-            includes.addAll(stackItem.getDashboardElement().cssIncludes());
+            DashboardElement element = stackItem.getDashboardElement();
+            if (element != null) {
+                includes.addAll(element.cssIncludes());
+            }
         }
         return includes;
     }
@@ -289,7 +326,10 @@ public class DashboardGrid extends DashboardElement {
     public Collection<? extends FilterDefinition> filtersToRender() {
         List<FilterDefinition> includes = new ArrayList<FilterDefinition>();
         for (DashboardGridItem stackItem : getGridItems()) {
-            includes.addAll(stackItem.getDashboardElement().filtersToRender());
+            DashboardElement element = stackItem.getDashboardElement();
+            if (element != null) {
+                includes.addAll(element.filtersToRender());
+            }
         }
         return includes;
     }
@@ -300,9 +340,12 @@ public class DashboardGrid extends DashboardElement {
             return element;
         }
         for (DashboardGridItem stackItem : getGridItems()) {
-            element = stackItem.getDashboardElement().findElement(dashboardElementID);
-            if (element != null) {
-                return element;
+            DashboardElement stackElement = stackItem.getDashboardElement();
+            if (stackElement != null) {
+                element = stackElement.findElement(dashboardElementID);
+                if (element != null) {
+                    return element;
+                }
             }
         }
         return null;
@@ -313,9 +356,12 @@ public class DashboardGrid extends DashboardElement {
             return new DashboardUIProperties(getHeaderBackgroundColor(), getHeaderBackground());
         }
         for (DashboardGridItem stackItem : getGridItems()) {
-            DashboardUIProperties imageDescriptor = stackItem.getDashboardElement().findHeaderImage();
-            if (imageDescriptor != null) {
-                return imageDescriptor;
+            DashboardElement element = stackItem.getDashboardElement();
+            if (element != null) {
+                DashboardUIProperties imageDescriptor = element.findHeaderImage();
+                if (imageDescriptor != null) {
+                    return imageDescriptor;
+                }
             }
         }
         return null;
@@ -324,7 +370,10 @@ public class DashboardGrid extends DashboardElement {
     public int requiredInitCount() {
         int count = 0;
         for (DashboardGridItem stackItem : getGridItems()) {
-            count += stackItem.getDashboardElement().requiredInitCount();
+            DashboardElement element = stackItem.getDashboardElement();
+            if (element != null) {
+                count += element.requiredInitCount();
+            }
         }
         return count;
     }
