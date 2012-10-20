@@ -104,6 +104,8 @@
             } else if (overlayIndex == 3) {
                 overlay = new ReportCanvasErrorDisplay();
                 ReportCanvasErrorDisplay(overlay).stackTrace = stackTrace;
+            } else if (overlayIndex == 4) {
+                overlay = new AccessError();
             }
             if (overlay) {
                 addChild(overlay);

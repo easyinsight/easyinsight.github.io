@@ -28,6 +28,7 @@
                         <account:AccountAdministration width="100%" height="100%"/>
                     </mx:VBox>
                     <account:Newsletter label="Newsletter"/>
+                    <account:NewsUpdate label="News Update"/>
                 </mx:TabNavigator>
             </mx:AddChild>
         </mx:State>

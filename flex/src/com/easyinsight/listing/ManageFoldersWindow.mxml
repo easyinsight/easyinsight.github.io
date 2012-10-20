@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var folders:ArrayCollection;
+
+        private function renamed(event:FolderEvent):void {
+            ProgressAlert.alert(this, "Retrieving folders for this data source...", null, uploadService.getCustomFolders);
+            uploadService.getCustomFolders.send(_dataSourceID);
+        }
+
+        private function deleted():void {
+            ProgressAlert.alert(this, "Retrieving folders for this data source...", null, uploadService.getCustomFolders);
+            uploadService.getCustomFolders.send(_dataSourceID);
+        }
+
+        private function gotFolders():void {
+            folders = uploadService.getCustomFolders.lastResult as ArrayCollection;
+        }
+
+        private var _dataSourceID:int;
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        private function renameFolder(event:FolderEvent):void {
+            var window:RenameFolderWindow = new RenameFolderWindow();
+            window.folder = event.folder;
+            window.addEventListener(FolderEvent.RENAMED_FOLDER, renamed, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function deleteFolder(event:FolderEvent):void {
+            ProgressAlert.alert(this, "Deleting the folder...", null, uploadService.deleteFolder);
+            uploadService.deleteFolder.send(event.folder.id);
+        }
+
+        private function onCreation():void {
+            addEventListener(FolderEvent.RENAME_FOLDER, renameFolder);
+            addEventListener(FolderEvent.DELETE_FOLDER, deleteFolder);
+            ProgressAlert.alert(this, "Retrieving folders for this data source...", null, uploadService.getCustomFolders);
+            uploadService.getCustomFolders.send(_dataSourceID);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="uploadService" destination="userUpload">
+        <mx:method name="deleteFolder" result="deleted()"/>
+        <mx:method name="getCustomFolders" result="gotFolders()"/>
+    </mx:RemoteObject>
+    <mx:DataGrid dataProvider="{folders}" dragMoveEnabled="true" dragEnabled="true" rowHeight="28">
+        <mx:columns>
+            <util:EIDataGridColumn headerText="Name" dataField="name" width="400"/>
+            <util:EIDataGridColumn headerText="" sortable="false" itemRenderer="com.easyinsight.listing.FolderControls" width="100"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <util:CancelButton label="Close" click="dispatchEvent(new Event(Event.COMPLETE)); PopUpManager.removePopUp(this)"/>
+</util:EISlimWindow>

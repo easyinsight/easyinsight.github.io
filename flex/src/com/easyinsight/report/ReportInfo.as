@@ -7,6 +7,7 @@ public class ReportInfo {
 
     public var admin:Boolean;
     public var report:AnalysisDefinition;
+    public var accessDenied:Boolean;
 
     public function ReportInfo() {
     }

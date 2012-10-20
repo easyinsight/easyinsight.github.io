@@ -19,6 +19,7 @@
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.scorecard.ScorecardDescriptor;
         import com.easyinsight.skin.ApplicationSkin;
+        import com.easyinsight.solutions.CustomFolder;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
 
@@ -124,19 +125,33 @@
                 var lookupTablesFolder:DataFolder = new DataFolder("Lookup Tables", 3);
                 var lookupTablesChildren:ArrayCollection = new ArrayCollection();
                 lookupTablesFolder.children = lookupTablesChildren;
+                var folderMap:Object = new Object();
+                for each (var customFolder:CustomFolder in _dataSourceDescriptor.customFolders) {
+                    var customViewFolder:DataFolder = new DataFolder(customFolder.name, customFolder.id);
+                    customViewFolder.children = new ArrayCollection();
+                    folderMap[customFolder.id] = customViewFolder;
+                }
                 for each (var desc:EIDescriptor in dataSourceChildren) {
                     if (desc.getType() == EIDescriptor.LOOKUP_TABLE) {
                         lookupTablesChildren.addItem(desc);
                     } else {
-                        if (desc.folder == EIDescriptor.OTHER_VIEWS_FOLDER) {
-                            otherViewsChildren.addItem(desc);
+                        var targetFolder:DataFolder = folderMap[desc.folder] as DataFolder;
+                        if (targetFolder == null) {
+                            if (desc.folder == EIDescriptor.OTHER_VIEWS_FOLDER) {
+                                otherViewsChildren.addItem(desc);
+                            } else {
+                                mainViewsChildren.addItem(desc);
+                            }
                         } else {
-                            mainViewsChildren.addItem(desc);
+                            targetFolder.children.addItem(desc);
                         }
                     }
                 }
                 var folders:ArrayCollection = new ArrayCollection();
                 folders.addItem(mainViewsFolder);
+                for each (var cFolder:DataFolder in folderMap) {
+                    folders.addItem(cFolder);
+                }
                 folders.addItem(otherViewsFolder);
                 if (lookupTablesChildren.length > 0) {
                     folders.addItem(lookupTablesFolder);

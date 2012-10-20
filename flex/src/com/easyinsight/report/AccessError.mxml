@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<mx:Box width="100%" height="100%" xmlns:mx="http://www.adobe.com/2006/mxml"
+        horizontalAlign="center"
+        verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+
+        [Bindable]
+        private var message:String;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (User.getInstance() == null) {
+                message = "This report is not configured to be accessible without requiring you to first log in to Easy Insight.";
+            } else {
+                message = "You don't have access to this report. Check with your administrator about the access settings on this report.";
+            }
+        }
+        ]]></mx:Script>
+    <mx:Box paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
+            backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
+            cornerRadius="10">
+        <util:AutoSizeTextArea
+                text="{message}"
+                visible="true" fontSize="18" width="400"
+                editable="false" backgroundAlpha="0"/>
+    </mx:Box>
+</mx:Box>

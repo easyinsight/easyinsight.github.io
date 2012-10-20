@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.solutions.CustomFolder;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
+
+        public var folder:CustomFolder;
+
+        [Bindable]
+        private var folderName:String;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            folderName = folder.name;
+        }
+
+        private function rename():void {
+            if (Validator.validateAll([validator]).length == 0) {
+                folder.name = folderNameInput.text;
+                ProgressAlert.alert(this, "Retrieving folders for this data source...", null, uploadService.renameFolder);
+                uploadService.renameFolder.send(folder.id, folderNameInput.text);
+            } else {
+                folderNameInput.setFocus();
+                folderNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            }
+        }
+
+        private function renamed():void {
+            dispatchEvent(new FolderEvent(FolderEvent.RENAMED_FOLDER, folder));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:StringValidator id="validator" source="{folderNameInput}" property="text" minLength="1"/>
+    <mx:RemoteObject id="uploadService" destination="userUpload">
+        <mx:method name="renameFolder" result="renamed()"/>
+    </mx:RemoteObject>
+    <mx:Label text="Folder Name:"/>
+    <mx:TextInput width="400" id="folderNameInput" text="{folderName}"/>
+    <mx:HBox>
+        <util:SaveButton label="Rename the Folder" click="rename()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

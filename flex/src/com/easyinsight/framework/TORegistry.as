@@ -93,6 +93,7 @@ import com.easyinsight.datasources.LinkedInDataSource;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.SampleDataSource;
 import com.easyinsight.datasources.SendGridDataSource;
+import com.easyinsight.datasources.YouTrackCompositeSource;
 import com.easyinsight.datasources.ZendeskDataSource;
 import com.easyinsight.feedassembly.CompositeFeedConnection;
 import com.easyinsight.feedassembly.CompositeFeedNode;
@@ -249,6 +250,7 @@ public class TORegistry {
         var sKPIData:SolutionKPIData;
         var qb:QuickbaseResponse;
         var harvestDS:HarvestDataSource;
+        var yt:YouTrackCompositeSource;
         var listDef:ListDefinition;
         var columnChartDef:ColumnChartDefinition;
         var columnChartDef3D:Column3DChartDefinition;

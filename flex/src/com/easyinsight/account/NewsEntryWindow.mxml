@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.managers.PopUpManager;
+
+        public var newsEntry:NewsEntry;
+
+        [Bindable]
+        private var text:String;
+
+        [Bindable]
+        private var date:Date;
+
+        [Bindable]
+        private var newsEntryTitle:String;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (newsEntry != null) {
+                text = newsEntry.news;
+                date = newsEntry.date;
+                newsEntryTitle = newsEntry.title;
+            }
+        }
+
+        private function save():void {
+            if (newsEntry == null) {
+                newsEntry = new NewsEntry();
+            }
+            newsEntry.news = textArea.text;
+            newsEntry.date = dateChooser.selectedDate;
+            newsEntry.title = titleInput.text;
+            ProgressAlert.alert(this, "Saving...", null, adminService.addNews);
+            adminService.addNews.send(newsEntry);
+        }
+
+        private function saved():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="admin" id="adminService">
+        <mx:method name="addNews" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:VBox backgroundColor="#FFFFFF">
+        <mx:DateField id="dateChooser" selectedDate="{date}"/>
+        <mx:TextInput text="{newsEntryTitle}" id="titleInput" width="700"/>
+        <mx:TextArea width="700" height="400" text="{text}" id="textArea" editable="true" borderStyle="solid" borderThickness="1"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

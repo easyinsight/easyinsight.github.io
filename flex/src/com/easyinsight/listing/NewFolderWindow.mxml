@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
+
+        private function createFolder():void {
+            nameInput.errorString = null;
+            if (Validator.validateAll([ nameValidator ]).length > 0) {
+                nameInput.setFocus();
+                nameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            ProgressAlert.alert(this, "Creating the folder...", null, uploadService.newFolder);
+            uploadService.newFolder.send(nameInput.text, dataSourceID);
+        }
+
+        public var dataSourceID:int;
+
+        private function createdFolder():void {
+            dispatchEvent(new Event(Event.COMPLETE));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="uploadService" destination="userUpload">
+        <mx:method name="newFolder" result="createdFolder()"/>
+    </mx:RemoteObject>
+    <mx:StringValidator id="nameValidator" minLength="1" source="{nameInput}" property="text"/>
+    <mx:Label text="What do you want to name the folder?"/>
+    <mx:TextInput id="nameInput" width="350"/>
+    <mx:HBox>
+        <util:SaveButton label="Create the Folder" click="createFolder()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" height="400" width="700"
+        creationComplete="getNews()">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var newsEntries:ArrayCollection;
+
+        private function getNews():void {
+            adminService.getNews.send();
+        }
+
+        private function gotNews():void {
+            newsEntries = adminService.getNews.lastResult as ArrayCollection;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="admin" id="adminService">
+        <mx:method name="getNews" result="gotNews()"/>
+    </mx:RemoteObject>
+    <mx:List dataProvider="{newsEntries}" variableRowHeight="true" itemRenderer="com.easyinsight.listing.NewsEntryRenderer" width="100%" height="100%"/>
+    <util:CancelButton label="Close" click="PopUpManager.removePopUp(this)"/>
+</util:EITitleWindow>
