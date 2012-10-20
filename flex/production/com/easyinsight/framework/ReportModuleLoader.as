@@ -136,7 +136,7 @@ public class ReportModuleLoader extends EventDispatcher {
                 return new FormModule();
             } else if (moduleName == "PieChartModule.swf") {
                 return new PieChartModule();
-            } else if (moduleName = "SummaryModule.swf") {
+            } else if (moduleName == "SummaryModule.swf") {
                 return new SummaryModule();
             }
         }
