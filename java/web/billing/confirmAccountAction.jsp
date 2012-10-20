@@ -53,13 +53,27 @@
 
         double proratedCost = cost * ((double) daysBetween / (double) ((accountTypeChange.isYearly() ? 365 : 31)));
 
-        int storageType = 0;
-        if (account.getMaxSize() == Account.PROFESSIONAL_MAX_2) {
-            storageType = 1;
-        } else if (account.getMaxSize() == Account.PROFESSIONAL_MAX_3) {
-            storageType = 2;
-        } else if (account.getMaxSize() == Account.PROFESSIONAL_MAX_4) {
-            storageType = 3;
+        int storageType = 1;
+        if (account.getAccountType() == Account.PROFESSIONAL) {
+            if (account.getMaxSize() == Account.PROFESSIONAL_MAX_2) {
+                storageType = 2;
+            } else if (account.getMaxSize() == Account.PROFESSIONAL_MAX_3) {
+                storageType = 3;
+            } else if (account.getMaxSize() == Account.PROFESSIONAL_MAX_4) {
+                storageType = 4;
+            }
+        } else if (account.getAccountType() == Account.PLUS) {
+            if (account.getMaxSize() == Account.PLUS_MAX2) {
+                storageType = 2;
+            } else if (account.getMaxSize() == Account.PLUS_MAX3) {
+                storageType = 3;
+            }
+        } else if (account.getAccountType() == Account.BASIC) {
+            if (account.getMaxSize() == Account.BASIC_MAX2) {
+                storageType = 2;
+            } else if (account.getMaxSize() == Account.BASIC_MAX3) {
+                storageType = 3;
+            }
         }
         double priorCost = Account.createTotalCost(account.getPricingModel(), account.getAccountType(), account.getMaxUsers(),
                 storageType, accountTypeChange.isYearly());

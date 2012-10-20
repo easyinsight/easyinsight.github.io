@@ -74,9 +74,9 @@
                 storageSelection = 1;
             }
         } else {
+            String storageSelectionString = request.getParameter("storageSelection");
+            storageSelection = Integer.parseInt(storageSelectionString);
             if (targetType == Account.PROFESSIONAL) {
-                String storageSelectionString = request.getParameter("storageSelection");
-                storageSelection = Integer.parseInt(storageSelectionString);
                 if (storageSelection == 1) {
                     storage = Account.PROFESSIONAL_MAX;
                 } else if (storageSelection == 2) {
@@ -91,9 +91,21 @@
                     return;
                 }
             } else if (targetType == Account.PLUS) {
-                storage = Account.PLUS_MAX;
+                if (storageSelection == 1) {
+                    storage = Account.PLUS_MAX;
+                } else if (storageSelection == 2) {
+                    storage = Account.PLUS_MAX2;
+                } else if (storageSelection == 3) {
+                    storage = Account.PLUS_MAX3;
+                }
             } else if (targetType == Account.BASIC) {
-                storage = Account.BASIC_MAX;
+                if (storageSelection == 1) {
+                    storage = Account.BASIC_MAX;
+                } else if (storageSelection == 2) {
+                    storage = Account.BASIC_MAX2;
+                } else if (storageSelection == 3) {
+                    storage = Account.BASIC_MAX3;
+                }
             }
         }
 

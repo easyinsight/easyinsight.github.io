@@ -3,6 +3,7 @@ package com.easyinsight.users;
 import com.easyinsight.analysis.ReportTypeOptions;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.preferences.*;
 import org.hibernate.Session;
 
@@ -56,6 +57,9 @@ public class UserServiceResponse {
     private boolean refreshReports;
     private boolean analyst;
     private int pricingModel;
+    private boolean reportMode;
+    private Date newsDate;
+    private Date newsDismissDate;
 
     public static UserServiceResponse createResponseWithUISettings(User user, ApplicationSkin applicationSkin, String personaName) {
         return createResponse(user, applicationSkin, personaName);
@@ -91,13 +95,21 @@ public class UserServiceResponse {
         Account account = user.getAccount();
         System.out.println("Log in from " + user.getUserID() + " - " + user.getEmail());
         byte[] bytes = null;
-        if (applicationSkin.getReportHeaderImage() != null) {
-            EIConnection conn = Database.instance().getConnection();
-            try {
-                bytes = new PreferencesService().getImage(applicationSkin.getReportHeaderImage().getId(), conn);    
-            } finally {
-                Database.closeConnection(conn);
+        Date newsDate = null;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            if (applicationSkin.getReportHeaderImage() != null) {
+                bytes = new PreferencesService().getImage(applicationSkin.getReportHeaderImage().getId(), conn);
             }
+            PreparedStatement dateStmt = conn.prepareStatement("SELECT MAX(ENTRY_TIME) FROM NEWS_ENTRY");
+            ResultSet rs = dateStmt.executeQuery();
+            if (rs.next()) {
+                newsDate = new Date(rs.getTimestamp(1).getTime());
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
         }
         UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
@@ -106,7 +118,8 @@ public class UserServiceResponse {
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
                                 account.getCurrencySymbol(), applicationSkin, account.getFirstDayOfWeek(),
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
-                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst(), account.getPricingModel());
+                    new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst(), account.getPricingModel(),
+                account.isHeatMapEnabled(), newsDate, user.getNewsDismissDate());
         response.setReportImage(bytes);
         return response;
     }
@@ -124,7 +137,8 @@ public class UserServiceResponse {
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
                                String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
-                               boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst, int pricingModel) {
+                               boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst, int pricingModel, boolean reportMode,
+                               Date newsDate, Date newsDismissDate) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -163,6 +177,25 @@ public class UserServiceResponse {
         this.refreshReports = refreshReports;
         this.analyst = analyst;
         this.pricingModel = pricingModel;
+        this.reportMode = reportMode;
+        this.newsDate = newsDate;
+        this.newsDismissDate = newsDismissDate;
+    }
+
+    public Date getNewsDismissDate() {
+        return newsDismissDate;
+    }
+
+    public void setNewsDismissDate(Date newsDismissDate) {
+        this.newsDismissDate = newsDismissDate;
+    }
+
+    public Date getNewsDate() {
+        return newsDate;
+    }
+
+    public void setNewsDate(Date newsDate) {
+        this.newsDate = newsDate;
     }
 
     public boolean isAnalyst() {
@@ -179,6 +212,14 @@ public class UserServiceResponse {
 
     public void setRefreshReports(boolean refreshReports) {
         this.refreshReports = refreshReports;
+    }
+
+    public boolean isReportMode() {
+        return reportMode;
+    }
+
+    public void setReportMode(boolean reportMode) {
+        this.reportMode = reportMode;
     }
 
     public byte[] getReportImage() {

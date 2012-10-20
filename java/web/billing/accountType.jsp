@@ -57,7 +57,7 @@
 
             boolean trial = account.getAccountState() == Account.TRIAL;
 
-            boolean annual = account.getBillingDayOfMonth() != null;
+            boolean annual = account.getBillingMonthOfYear() != null;
 
             String discountString;
             if (annual) {
@@ -65,6 +65,8 @@
             } else {
                 discountString = "$0.00";
             }
+
+            String priceString = account.createCostString();
 
             long usedStorage = new UserAccountAdminService().getAccountStorage();
             String usedStorageString = Account.humanReadableByteCount(usedStorage,  true) + " / " + Account.humanReadableByteCount(account.getMaxSize(), true);
@@ -90,10 +92,10 @@
             var cost;
             var discount;
             if (accountType == 2) {
-                cost = (25 * (billingInterval == 2 ? 12 : 1)) + (designers - 1) * 10 * (billingInterval == 2 ? 12 : 1);
+                cost = (25 * (billingInterval == 2 ? 12 : 1)) + (designers - 1) * 10 * (billingInterval == 2 ? 12 : 1) + storageCost * (billingInterval == 2 ? 12 : 1);
                 discount = (billingInterval == 2 ? cost / 12 : 0);
             } else if (accountType == 3) {
-                cost = (75 * (billingInterval == 2 ? 12 : 1)) + (designers - 1) * 25 * (billingInterval == 2 ? 12 : 1);
+                cost = (75 * (billingInterval == 2 ? 12 : 1)) + (designers - 1) * 25 * (billingInterval == 2 ? 12 : 1) + storageCost * (billingInterval == 2 ? 12 : 1);
                 discount = (billingInterval == 2 ? cost / 12 : 0);
             } else if (accountType == 4) {
                 cost = (200 * (billingInterval == 2 ? 12 : 1)) + (designers - 1) * 50 * (billingInterval == 2 ? 12 : 1) + storageCost * (billingInterval == 2 ? 12 : 1);
@@ -117,7 +119,7 @@
             }
         }
 
-        function updateStorageCost(source) {
+        function updateStorageCostPro(source) {
             var value = parseInt(source.value);
             if (value == 1) {
                 storageCost = 0;
@@ -131,6 +133,30 @@
             updatePrice();
         }
 
+        function updateStorageCostPlus(source) {
+            var value = parseInt(source.value);
+            if (value == 1) {
+                storageCost = 0;
+            } else if (value == 2) {
+                storageCost = 30;
+            } else if (value == 3) {
+                storageCost = 60;
+            }
+            updatePrice();
+        }
+
+        function updateStorageCostBasic(source) {
+            var value = parseInt(source.value);
+            if (value == 1) {
+                storageCost = 0;
+            } else if (value == 2) {
+                storageCost = 15;
+            } else if (value == 3) {
+                storageCost = 30;
+            }
+            updatePrice();
+        }
+
         $(function() {
             $('#accountTab').bind('show', function(e) {
                 var pattern=/#.+/gi;
@@ -139,15 +165,21 @@
                     if (designers > 3) {
                         designers = 3;
                     }
+                    storageCost = 0;
                     accountType = 2;
                     $('#numberDesignersBasic').val(designers);
                     $('#basicBillingInterval').val(billingInterval);
                 } else if (contentID == "#tab2") {
+                    if (designers > 10) {
+                        designers = 10;
+                    }
                     accountType = 3;
+                    storageCost = 0;
                     $('#numberDesignersPlus').val(designers);
                     $('#plusBillingInterval').val(billingInterval);
                 } else if (contentID == "#tab3") {
                     accountType = 4;
+                    storageCost = 0;
                     $('#numberDesignersPro').val(designers);
                     $('#proBillingInterval').val(billingInterval);
                 }
@@ -264,6 +296,7 @@
                                     <h4>WHAT YOU GET</h4>
                                     <ul>
                                         <li>Maximum of three designers</li>
+                                        <li>Five report viewers</li>
                                         <li>Connections to a wide variety of SaaS applications</li>
                                         <li>35 MB of data storage</li>
                                     </ul>
@@ -278,6 +311,12 @@
                                     <form method="post" action="/app/billing/accountTypeAction.jsp?targetType=<%=Account.BASIC%>">
                                         <label>Number of Designers</label>
                                         <input type="text" style="width:290px" name="numberDesigners" value="<%= account.getMaxUsers() %>" id="numberDesignersBasic" onchange="updateAccountValue(this)">
+                                        <label>Storage</label>
+                                        <select style="width:280px" name="storageSelection" onchange="updateStorageCostBasic(storageSelection)" id="basicStorageSelection">
+                                            <option <%= account.getMaxSize() == Account.BASIC_MAX ? "selected=\"selected\"" : "" %> value="1">35 MB (included)</option>
+                                            <option <%= account.getMaxSize() == Account.BASIC_MAX2 ? "selected=\"selected\"" : "" %> value="2">50 MB ($20/mo)</option>
+                                            <option <%= account.getMaxSize() == Account.BASIC_MAX3 ? "selected=\"selected\"" : "" %> value="3">65 MB ($40/mo)</option>
+                                        </select>
                                         <label>Bill Me</label>
                                         <select style="width:280px" name="billingInterval" onchange="updateBillingInterval(this)" id="basicBillingInterval">
                                             <option value="1">Monthly</option>
@@ -326,6 +365,7 @@
                                     <h4>WHAT YOU GET</h4>
                                     <ul>
                                         <li>Maximum of ten designers</li>
+                                        <li>Unlimited report viewers</li>
                                         <li>Schedule email report delivery to anyone</li>
                                         <li>Connections to a wide variety of SaaS applications</li>
                                         <li>90 MB of data storage</li>
@@ -340,19 +380,25 @@
                                     <form method="post" action="/app/billing/accountTypeAction.jsp?targetType=<%=Account.PLUS%>">
                                         <label>Number of Designers</label>
                                         <input type="text" style="width:290px" name="numberDesigners" value="<%= account.getMaxUsers() %>" id="numberDesignersPlus" onchange="updateAccountValue(this)">
+                                        <label>Storage</label>
+                                        <select style="width:280px" name="storageSelection" onchange="updateStorageCostPlus(storageSelection)" id="plusStorageSelection">
+                                            <option <%= account.getMaxSize() == Account.PLUS_MAX ? "selected=\"selected\"" : "" %> value="1">90 MB (included)</option>
+                                            <option <%= account.getMaxSize() == Account.PLUS_MAX2 ? "selected=\"selected\"" : "" %> value="2">120 MB ($30/mo)</option>
+                                            <option <%= account.getMaxSize() == Account.PLUS_MAX3 ? "selected=\"selected\"" : "" %> value="3">150 MB ($60/mo)</option>
+                                        </select>
                                         <label>Bill Me</label>
                                         <select style="width:280px" name="billingInterval" onchange="updateBillingInterval(this)" id="plusBillingInterval">
                                             <option value="1">Monthly</option>
                                             <option <%= annual ? "selected=\"selected\"" : "" %> value="2">Yearly</option>
                                         </select>
                                         <div style="float:right">
-                                            <span style="font-size: 14px" id="plusPrice"><%= discountString %></span>
+                                            <span style="font-size: 14px" id="plusPrice"><%= account.createCostString() %></span>
                                         </div>
                                         <div>
                                             <p style="font-size: 14px">Price</p>
                                         </div>
                                         <div style="float:right">
-                                            <span style="font-size: 14px" id="plusDiscount"><%= account.getBillingMonthOfYear() != null ? "$75.00" : "$0.00" %></span>
+                                            <span style="font-size: 14px" id="plusDiscount"><%= discountString %></span>
                                         </div>
                                         <div>
                                             <p style="font-size: 14px">Discount</p>
@@ -398,7 +444,7 @@
                                         <label>Number of Designers</label>
                                         <input type="text" style="width:290px" name="numberDesigners" value="<%= account.getMaxUsers() %>" id="numberDesignersPro" onchange="updateAccountValue(this)">
                                         <label>Storage</label>
-                                        <select style="width:280px" name="storageSelection" onchange="updateStorageCost(storageSelection)" id="storageSelection">
+                                        <select style="width:280px" name="storageSelection" onchange="updateStorageCostPro(storageSelection)" id="proStorageSelection">
                                             <option <%= account.getMaxSize() == Account.PROFESSIONAL_MAX ? "selected=\"selected\"" : "" %> value="1">250 MB (included)</option>
                                             <option <%= account.getMaxSize() == Account.PROFESSIONAL_MAX_2 ? "selected=\"selected\"" : "" %> value="2">500 MB ($150/mo)</option>
                                             <option <%= account.getMaxSize() == Account.PROFESSIONAL_MAX_3 ? "selected=\"selected\"" : "" %> value="3">750 MB ($300/mo)</option>
@@ -410,13 +456,13 @@
                                             <option <%= annual ? "selected=\"selected\"" : "" %> value="2">Yearly</option>
                                         </select>
                                         <div style="float:right">
-                                            <span style="font-size: 14px" id="proPrice"><%= discountString %></span>
+                                            <span style="font-size: 14px" id="proPrice"><%= account.createCostString() %></span>
                                         </div>
                                         <div>
                                             <p style="font-size: 14px">Price</p>
                                         </div>
                                         <div style="float:right">
-                                            <span style="font-size: 14px" id="proDiscount"><%= account.getBillingMonthOfYear() != null ? "$200.00" : "$0.00" %></span>
+                                            <span style="font-size: 14px" id="proDiscount"><%= discountString %></span>
                                         </div>
                                         <div>
                                             <p style="font-size: 14px">Discount</p>

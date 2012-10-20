@@ -70,9 +70,21 @@ public class AccountTypeChange implements Serializable {
                 storageAmount = Account.PROFESSIONAL_MAX_4;
             }
         } else if (accountType == Account.PLUS) {
-            storageAmount = Account.PLUS_MAX;
+            if (storage == 1) {
+                storageAmount = Account.PLUS_MAX;
+            } else if (storage == 2) {
+                storageAmount = Account.PLUS_MAX2;
+            } else if (storage == 3) {
+                storageAmount = Account.PLUS_MAX3;
+            }
         } else if (accountType == Account.BASIC) {
-            storageAmount = Account.BASIC_MAX;
+            if (storage == 1) {
+                storageAmount = Account.BASIC_MAX;
+            } else if (storage == 2) {
+                storageAmount = Account.BASIC_MAX2;
+            } else if (storage == 3) {
+                storageAmount = Account.BASIC_MAX3;
+            }
         }
         return Account.humanReadableByteCount(storageAmount, true);
     }
@@ -94,9 +106,21 @@ public class AccountTypeChange implements Serializable {
                 storageAmount = Account.PROFESSIONAL_MAX_4;
             }
         } else if (accountType == Account.PLUS) {
-            storageAmount = Account.PLUS_MAX;
+            if (storage == 1) {
+                storageAmount = Account.PLUS_MAX;
+            } else if (storage == 2) {
+                storageAmount = Account.PLUS_MAX2;
+            } else if (storage == 3) {
+                storageAmount = Account.PLUS_MAX3;
+            }
         } else if (accountType == Account.BASIC) {
-            storageAmount = Account.BASIC_MAX;
+            if (storage == 1) {
+                storageAmount = Account.BASIC_MAX;
+            } else if (storage == 2) {
+                storageAmount = Account.BASIC_MAX2;
+            } else if (storage == 3) {
+                storageAmount = Account.BASIC_MAX3;
+            }
         }
         account.setMaxSize(storageAmount);
         session.update(account);

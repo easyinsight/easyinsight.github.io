@@ -19,6 +19,7 @@ package com.easyinsight.framework
         public var invoiceRecipient:Boolean;
         public var autoRefreshReports:Boolean;
         public var analyst:Boolean = true;
+        public var consultant:Boolean;
 		
 		public function UserTransferObject()
 		{

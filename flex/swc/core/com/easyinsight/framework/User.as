@@ -37,6 +37,7 @@ public class User extends EventDispatcher
     public var freeUpgradePossible:Boolean;
     public var analyst:Boolean;
     public var lastLoginDate:Date;
+    public var reportMode:Boolean;
     public var firstLogin:Boolean;
     public var accountName:String;
     public var renewalOptionPossible:Boolean;
@@ -55,6 +56,8 @@ public class User extends EventDispatcher
     public var subdomainEnabled:Boolean;
     public var refreshReports:Boolean;
     public var pricingModel:int;
+    public var newsDate:Date;
+    public var newsDismissDate:Date;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -125,6 +128,7 @@ public class User extends EventDispatcher
         _user.userID = response.userID;        
         _user.billingInformationGiven = response.billingInformationGiven;
         _user.accountState = response.accountState;
+        _user.reportMode = response.reportMode;
         _user.freeUpgradePossible = response.freeUpgradePossible;
         _user.lastLoginDate = response.lastLoginDate;
         _user.firstLogin = response.firstLogin;
@@ -146,6 +150,8 @@ public class User extends EventDispatcher
         _user.refreshReports = response.refreshReports;
         _user.analyst = response.analyst;
         _user.pricingModel = response.pricingModel;
+        _user.newsDate = response.newsDate;
+        _user.newsDismissDate = response.newsDismissDate;
         if (response.reportImage != null) {
             _user.loadBytes(response.reportImage);
         }

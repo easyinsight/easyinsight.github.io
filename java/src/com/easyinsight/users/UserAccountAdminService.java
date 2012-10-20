@@ -813,58 +813,72 @@ public class UserAccountAdminService {
     public long getAccountStorage() throws SQLException {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("select feed_persistence_metadata.size, feed_persistence_metadata.feed_id, data_feed.feed_type, data_feed.visible, " +
-                    "data_feed.parent_source_id, data_feed.feed_name from feed_persistence_metadata, upload_policy_users, user, data_feed where " +
-                    "data_feed.data_feed_id = upload_policy_users.feed_id and feed_persistence_metadata.feed_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id and " +
-                    "user.account_id = ?");
-            queryStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet qRS = queryStmt.executeQuery();
-            Map<Long, DataSourceStats> statsMap = new HashMap<Long, DataSourceStats>();
-            while (qRS.next()) {
-                long size = qRS.getLong(1);
-                long dataSourceID = qRS.getLong(2);
-                int type = qRS.getInt(3);
-                if (type == FeedType.COMPOSITE.getType()) {
-                    continue;
-                }
-                boolean visible = qRS.getBoolean(4);
-                long parentSourceID = qRS.getLong(5);
-                String feedName = qRS.getString(6);
-                DataSourceStats dataSourceStats = statsMap.get(dataSourceID);
-                if (dataSourceStats == null) {
-                    dataSourceStats = new DataSourceStats();
-                }
-                dataSourceStats.setSize(size);
-                dataSourceStats.setVisible(visible);
-                dataSourceStats.setDataSourceID(dataSourceID);
-                dataSourceStats.setName(feedName);
-                if (parentSourceID > 0) {
-                    DataSourceStats parent = statsMap.get(parentSourceID);
-                    if (parent == null) {
-                        parent = new DataSourceStats();
-                        statsMap.put(parentSourceID, parent);
-                    }
-                    parent.getChildStats().add(dataSourceStats);
-                } else {
-                    statsMap.put(dataSourceID, dataSourceStats);
-                }
-            }
-
-            long usedSize = 0;
-            for (DataSourceStats stats : statsMap.values()) {
-                if (stats.isVisible()) {
-
-                    usedSize += stats.getSize();
-                    for (DataSourceStats child : stats.getChildStats()) {
-                        usedSize += child.getSize();
-                        stats.setSize(stats.getSize() + child.getSize());
-                    }
-                }
-            }
-            return usedSize;
+            List<DataSourceStats> statsList = sizeDataSources(conn, SecurityUtil.getAccountID());
+            return usedSize(statsList);
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public static long usedSize(List<DataSourceStats> statsList) {
+        long usedSize = 0;
+        for (DataSourceStats stats : statsList) {
+            if (stats.isVisible()) {
+                usedSize += stats.getSize();
+                for (DataSourceStats child : stats.getChildStats()) {
+                    usedSize += child.getSize();
+                    stats.setSize(stats.getSize() + child.getSize());
+                }
+            }
+        }
+        return usedSize;
+    }
+
+    public static List<DataSourceStats> sizeDataSources(EIConnection conn, long accountID) throws SQLException {
+        PreparedStatement queryStmt = conn.prepareStatement("select feed_persistence_metadata.size, feed_persistence_metadata.feed_id, data_feed.feed_type, data_feed.visible, " +
+                "data_feed.parent_source_id, data_feed.feed_name from feed_persistence_metadata, upload_policy_users, user, data_feed where " +
+                "data_feed.data_feed_id = upload_policy_users.feed_id and feed_persistence_metadata.feed_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id and " +
+                "user.account_id = ?");
+        queryStmt.setLong(1, accountID);
+        ResultSet qRS = queryStmt.executeQuery();
+        Map<Long, DataSourceStats> statsMap = new HashMap<Long, DataSourceStats>();
+        while (qRS.next()) {
+            long size = qRS.getLong(1);
+            long dataSourceID = qRS.getLong(2);
+            int type = qRS.getInt(3);
+            if (type == FeedType.COMPOSITE.getType()) {
+                continue;
+            }
+            boolean visible = qRS.getBoolean(4);
+            long parentSourceID = qRS.getLong(5);
+            String feedName = qRS.getString(6);
+            DataSourceStats dataSourceStats = statsMap.get(dataSourceID);
+            if (dataSourceStats == null) {
+                dataSourceStats = new DataSourceStats();
+            }
+            dataSourceStats.setSize(size);
+            dataSourceStats.setVisible(visible);
+            dataSourceStats.setDataSourceID(dataSourceID);
+            dataSourceStats.setName(feedName);
+            if (parentSourceID > 0) {
+                DataSourceStats parent = statsMap.get(parentSourceID);
+                if (parent == null) {
+                    parent = new DataSourceStats();
+                    statsMap.put(parentSourceID, parent);
+                }
+                parent.getChildStats().add(dataSourceStats);
+            } else {
+                statsMap.put(dataSourceID, dataSourceStats);
+            }
+        }
+
+        List<DataSourceStats> validDataSources = new ArrayList<DataSourceStats>();
+        for (DataSourceStats stats : statsMap.values()) {
+            if (stats.isVisible()) {
+                validDataSources.add(stats);
+            }
+        }
+        return validDataSources;
     }
 
     private AccountStats getAccountStats(EIConnection conn) throws SQLException {

@@ -44,6 +44,21 @@ import javax.servlet.http.HttpSession;
  */
 public class UserService {
 
+    public void dismissNews() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            long userID = SecurityUtil.getUserID();
+            PreparedStatement stmt = conn.prepareStatement("UPDATE USER SET NEWS_DISMISS_DATE = ? WHERE USER_ID = ?");
+            stmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+            stmt.setLong(2, userID);
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public TimerResponse runTimer(TimerRequest timerRequest) {
         boolean rerun = false;
         try {

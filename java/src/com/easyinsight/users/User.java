@@ -92,6 +92,9 @@ public class User {
     @Column(name="html_or_flex")
     private boolean htmlOrFlex;
 
+    @Column(name="news_dismiss_date")
+    private Date newsDismissDate;
+
     public User() {
     }
 
@@ -117,6 +120,14 @@ public class User {
         userTransferObject.setInvoiceRecipient(invoiceRecipient);
         userTransferObject.setAnalyst(analyst);
         return userTransferObject;
+    }
+
+    public Date getNewsDismissDate() {
+        return newsDismissDate;
+    }
+
+    public void setNewsDismissDate(Date newsDismissDate) {
+        this.newsDismissDate = newsDismissDate;
     }
 
     public int getTimezone() {

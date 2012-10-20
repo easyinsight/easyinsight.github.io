@@ -50,7 +50,11 @@ public class Account {
 
     public static final long PERSONAL_MAX = 5000000;
     public static final long BASIC_MAX = 35000000;
+    public static final long BASIC_MAX2 = 50000000;
+    public static final long BASIC_MAX3 = 65000000;
     public static final long PLUS_MAX = 90000000;
+    public static final long PLUS_MAX2 = 120000000;
+    public static final long PLUS_MAX3 = 150000000;
     public static final long PROFESSIONAL_MAX   = 250000000L;
     public static final long PROFESSIONAL_MAX_2 = 500000000L;
     public static final long PROFESSIONAL_MAX_3 = 750000000L;
@@ -172,7 +176,7 @@ public class Account {
     private boolean ilogEnabled;
 
     @Column(name="heat_map_Enabled")
-    private boolean heatMapEnabled;
+    private boolean heatMapEnabled = false;
 
     @Column(name="pricing_model")
     private int pricingModel;
@@ -844,13 +848,27 @@ public class Account {
     }
 
     public double createCost() {
-        int storageType = 0;
-        if (maxSize == Account.PROFESSIONAL_MAX_2) {
-            storageType = 1;
-        } else if (maxSize == Account.PROFESSIONAL_MAX_3) {
-            storageType = 2;
-        } else if (maxSize == Account.PROFESSIONAL_MAX_4) {
-            storageType = 3;
+        int storageType = 1;
+        if (accountType == PROFESSIONAL) {
+            if (maxSize == Account.PROFESSIONAL_MAX_2) {
+                storageType = 2;
+            } else if (maxSize == Account.PROFESSIONAL_MAX_3) {
+                storageType = 3;
+            } else if (maxSize == Account.PROFESSIONAL_MAX_4) {
+                storageType = 4;
+            }
+        } else if (accountType == PLUS) {
+            if (maxSize == Account.PLUS_MAX2) {
+                storageType = 2;
+            } else if (maxSize == Account.PLUS_MAX3) {
+                storageType = 3;
+            }
+        } else if (accountType == BASIC) {
+            if (maxSize == Account.BASIC_MAX2) {
+                storageType = 2;
+            } else if (maxSize == Account.BASIC_MAX3) {
+                storageType = 3;
+            }
         }
         return createBaseCost(pricingModel, accountType, maxUsers, storageType, getBillingMonthOfYear() != null);
     }
@@ -863,13 +881,27 @@ public class Account {
     }
 
     public double createTotalCost() {
-        int storageType = 0;
-        if (maxSize == Account.PROFESSIONAL_MAX_2) {
-            storageType = 1;
-        } else if (maxSize == Account.PROFESSIONAL_MAX_3) {
-            storageType = 2;
-        } else if (maxSize == Account.PROFESSIONAL_MAX_4) {
-            storageType = 3;
+        int storageType = 1;
+        if (accountType == PROFESSIONAL) {
+            if (maxSize == Account.PROFESSIONAL_MAX_2) {
+                storageType = 2;
+            } else if (maxSize == Account.PROFESSIONAL_MAX_3) {
+                storageType = 3;
+            } else if (maxSize == Account.PROFESSIONAL_MAX_4) {
+                storageType = 4;
+            }
+        } else if (accountType == PLUS) {
+            if (maxSize == Account.PLUS_MAX2) {
+                storageType = 2;
+            } else if (maxSize == Account.PLUS_MAX3) {
+                storageType = 3;
+            }
+        } else if (accountType == BASIC) {
+            if (maxSize == Account.BASIC_MAX2) {
+                storageType = 2;
+            } else if (maxSize == Account.BASIC_MAX3) {
+                storageType = 3;
+            }
         }
         return createTotalCost(pricingModel, accountType, maxUsers, storageType, getBillingMonthOfYear() != null);
     }
@@ -889,8 +921,18 @@ public class Account {
         } else {
             if (tier == Account.BASIC) {
                 cost = (25 * (yearly ? 12 : 1)) + (maxUsers - 1) * 10 * (yearly ? 12 : 1);
+                if (maxSize == 2) {
+                    cost += 15 * (yearly ? 12 : 1);
+                } else if (maxSize == 3) {
+                    cost += 30 * (yearly ? 12 : 1);
+                }
             } else if (tier == Account.PLUS) {
                 cost = (75 * (yearly ? 12 : 1)) + (maxUsers - 1) * 25 * (yearly ? 12 : 1);
+                if (maxSize == 2) {
+                    cost += 30 * (yearly ? 12 : 1);
+                } else if (maxSize == 3) {
+                    cost += 60 * (yearly ? 12 : 1);
+                }
             } else if (tier == Account.PROFESSIONAL) {
                 cost = (200 * (yearly ? 12 : 1)) + (maxUsers - 1) * 50 * (yearly ? 12 : 1);
                 if (maxSize == 2) {

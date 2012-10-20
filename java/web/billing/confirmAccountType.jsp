@@ -108,12 +108,8 @@
             gradeMessage = "upgrade";
         } else if (accountTypeChange.getAccountType() < account.getAccountType()) {
             gradeMessage = "downgrade";
-        } else if (accountTypeChange.getDesigners() > account.getMaxUsers()) {
-            gradeMessage = "upgrade";
-        } else if (accountTypeChange.getDesigners() < account.getMaxUsers()) {
-            gradeMessage = "downgrade";
         } else {
-            gradeMessage = "upgrade";
+            gradeMessage = "change";
         }
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
 

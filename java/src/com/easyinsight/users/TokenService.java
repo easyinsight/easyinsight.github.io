@@ -69,9 +69,10 @@ public class TokenService {
                 consumer = new CommonsHttpOAuthConsumer(FreshbooksCompositeSource.CONSUMER_KEY,
                         FreshbooksCompositeSource.CONSUMER_SECRET);
                 consumer.setMessageSigner(new PlainTextMessageSigner());
+                FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) dataSource;
                 provider = new CommonsHttpOAuthProvider(
-                        "https://"+host+".freshbooks.com/oauth/oauth_request.php", "https://"+host+".freshbooks.com/oauth/oauth_access.php",
-                        "https://"+host+".freshbooks.com/oauth/oauth_authorize.php");
+                        freshbooksCompositeSource.getUrl() + "/oauth/oauth_request.php", freshbooksCompositeSource.getUrl()+"/oauth/oauth_access.php",
+                        freshbooksCompositeSource.getUrl()+"/oauth/oauth_authorize.php");
             } else if (type == FeedType.CONSTANT_CONTACT.getType()) {
                 consumer = new DefaultOAuthConsumer("cec7e39c-25fc-43e6-a423-bf02de492d87", "ee72ddd074804402966863aad91b9687");
                 provider = new DefaultOAuthProvider(
@@ -131,12 +132,6 @@ public class TokenService {
                 uri = uri + "&type=web_server";
                 return new OAuthResponse(uri, true);
             } else if (type == FeedType.SALESFORCE.getType()) {
-                /*consumer = new DefaultOAuthConsumer(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY,
-                        SalesforceBaseDataSource.SALESFORCE_SECRET_KEY);
-                provider = new DefaultOAuthProvider(
-                        "https://login.salesforce.com" + "/_nc_external/system/security/oauth/RequestTokenHandler",
-                        "https://login.salesforce.com" + "/_nc_external/system/security/oauth/AccessTokenHandler",
-                        "https://login.salesforce.com" + "/setup/secur/RemoteAccessAuthorizationPage.apexp");*/
 
                 OAuthClientRequest clientRequest = OAuthClientRequest.authorizationLocation("https://na1.salesforce.com/services/oauth2/authorize").
                         setClientId(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY).

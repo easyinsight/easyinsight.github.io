@@ -49,6 +49,9 @@ public class UserServiceResponse
     public var refreshReports:Boolean;
     public var analyst:Boolean;
     public var pricingModel:int;
+    public var reportMode:Boolean;
+    public var newsDate:Date;
+    public var newsDismissDate:Date;
 
     public function UserServiceResponse()
         {
