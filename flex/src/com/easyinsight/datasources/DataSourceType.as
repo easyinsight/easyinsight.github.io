@@ -46,7 +46,10 @@ public class DataSourceType {
     public static const BASECAMP_NEXT:int = 135;
     public static const JSON:int = 141;
     public static const BATCHBOOK2:int = 145;
+    public static const TREASURE_DATA:int = 152;
     public static const DATABASE:int = 153;
+    public static const YOUTRACK:int = 155;
+
 
     public static const OWNER:int = 1;
     public static const EDITOR:int = 2;
