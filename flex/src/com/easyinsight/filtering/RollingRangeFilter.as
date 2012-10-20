@@ -1,6 +1,7 @@
 package com.easyinsight.filtering
 {
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.filtering.CustomRollingInterval;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
@@ -103,6 +104,29 @@ public class RollingRangeFilter extends HBox implements IFilter
     }
 
     private function onFilterEdit(event:FilterEditEvent):void {
+        if (event.filterDefinition is RollingDateRangeFilterDefinition) {
+            var selected:Object = comboBox.selectedItem;
+            var options:Object = new Object();
+            for each (var rangeOption:RangeOption in rangeOptions) {
+                if (rangeOption.data > RollingDateRangeFilterDefinition.ALL) {
+                    options[rangeOption.data] = rangeOption;
+                }
+            }
+            for each (rangeOption in rangeOptions) {
+                if (rangeOption.data > RollingDateRangeFilterDefinition.ALL) {
+                    rangeOptions.removeItemAt(rangeOptions.getItemIndex(rangeOption));
+                }
+            }
+            for each (var interval:CustomRollingInterval in RollingDateRangeFilterDefinition(event.filterDefinition).intervals) {
+                var existing:RangeOption = options[interval.intervalNumber];
+                if (existing == null || existing.label != interval.filterLabel) {
+                    rangeOptions.addItem(new RangeOption(interval.filterLabel, interval.intervalNumber));
+                } else {
+                    rangeOptions.addItem(existing);
+                }
+            }
+            comboBox.selectedItem = selected;
+        }
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
     }
 
@@ -114,9 +138,12 @@ public class RollingRangeFilter extends HBox implements IFilter
             checkbox.toolTip = "Click to disable this filter.";
             checkbox.addEventListener(Event.CHANGE, onChange);
             addChild(checkbox);
-            if (rollingFilter != null && (rollingFilter.intrinsic || rollingFilter.trendFilter)) {
+            /*if (rollingFilter != null && (rollingFilter.intrinsic || rollingFilter.trendFilter)) {
                 checkbox.enabled = false;
                 checkbox.toolTip = "This filter is an intrinsic part of the data source and cannot be disabled.";
+            }*/
+            for each (var interval:CustomRollingInterval in rollingFilter.intervals) {
+                rangeOptions.addItem(new RangeOption(interval.filterLabel, interval.intervalNumber));
             }
         }
 
@@ -182,12 +209,12 @@ public class RollingRangeFilter extends HBox implements IFilter
                 deleteButton = new Button();
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
                 deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
-                if (rollingFilter.intrinsic) {
+                /*if (rollingFilter.intrinsic) {
                     deleteButton.enabled = false;
                     deleteButton.toolTip = "This filter is an intrinsic part of the data source and cannot be deleted.";
-                } else {
+                } else {*/
                     deleteButton.toolTip = "Delete";
-                }
+                //}
             }
             addChild(deleteButton);
         }

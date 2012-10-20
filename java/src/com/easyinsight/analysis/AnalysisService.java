@@ -106,7 +106,13 @@ public class AnalysisService {
     }
 
     public ReportInfo getReportInfo(long reportID) {
-        SecurityUtil.authorizeInsight(reportID);
+        try {
+            SecurityUtil.authorizeInsight(reportID);
+        } catch (Exception e) {
+            ReportInfo reportInfo = new ReportInfo();
+            reportInfo.setAccessDenied(true);
+            return reportInfo;
+        }
         try {
             WSAnalysisDefinition report = openAnalysisDefinition(reportID);
             boolean dataSourceAccessible;

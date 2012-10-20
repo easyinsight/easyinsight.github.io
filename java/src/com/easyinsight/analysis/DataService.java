@@ -1400,6 +1400,11 @@ public class DataService {
                     validQueryItems.add(analysisItem);
                 //}
             }
+
+            for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
+                filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+            }
+
             boolean aggregateQuery = true;
             Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
             items.remove(null);

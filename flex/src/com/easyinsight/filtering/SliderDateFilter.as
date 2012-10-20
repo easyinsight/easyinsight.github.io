@@ -165,22 +165,26 @@ import mx.rpc.events.ResultEvent;
 			hslider.values = [0, 100];
 			hslider.addEventListener(SliderEvent.THUMB_RELEASE, thumbRelease);
             var formatString:String;
-            switch (User.getInstance().dateFormat) {
-                case 0:
-                    formatString = "MM/DD/YYYY";
-                    break;
-                case 1:
-                    formatString = "YYYY-MM-DD";
-                    break;
-                case 2:
-                    formatString = "DD-MM-YYYY";
-                    break;
-                case 3:
-                    formatString = "DD/MM/YYYY";
-                    break;
-                case 4:
-                    formatString = "DD.MM.YYYY";
-                    break;
+            if (User.getInstance() == null) {
+                formatString = "YYYY-MM-DD";
+            } else {
+                switch (User.getInstance().dateFormat) {
+                    case 0:
+                        formatString = "MM/DD/YYYY";
+                        break;
+                    case 1:
+                        formatString = "YYYY-MM-DD";
+                        break;
+                    case 2:
+                        formatString = "DD-MM-YYYY";
+                        break;
+                    case 3:
+                        formatString = "DD/MM/YYYY";
+                        break;
+                    case 4:
+                        formatString = "DD.MM.YYYY";
+                        break;
+                }
             }
 			lowField = new DateField();
             lowField.formatString = formatString;

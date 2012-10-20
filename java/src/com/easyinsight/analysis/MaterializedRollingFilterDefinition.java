@@ -53,7 +53,15 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             endDate = endDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
             limitDate = limitDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
         }
-        mode = rollingFilterDefinition.getCustomBeforeOrAfter();
+        if (rollingFilterDefinition.getInterval() > ALL) {
+            if (rollingFilterDefinition.getStartDate() != null && rollingFilterDefinition.getEndDate() == null) {
+                mode = RollingFilterDefinition.AFTER;
+            } else if (rollingFilterDefinition.getStartDate() == null && rollingFilterDefinition.getEndDate() != null) {
+                mode = RollingFilterDefinition.BEFORE;
+            }
+        } else {
+            mode = rollingFilterDefinition.getCustomBeforeOrAfter();
+        }
     }
 
     public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
@@ -194,6 +202,11 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             case LAST_FULL_QUARTER:
                 // TODO: ?
                 break;
+            default:
+                if (rollingFilterDefinition.getStartDate() == null) {
+                    return 0;
+                }
+                return rollingFilterDefinition.getStartDate().getTime();
         }
         //if (!((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
 
@@ -313,6 +326,11 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             case LAST_FULL_QUARTER:
                 // TODO: ?
                 break;
+            default:
+                if (rollingFilterDefinition.getEndDate() == null) {
+                    return 0;
+                }
+                return rollingFilterDefinition.getEndDate().getTime();
         }
         return cal.getTimeInMillis();
     }

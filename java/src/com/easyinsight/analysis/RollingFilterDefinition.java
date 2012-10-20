@@ -1,18 +1,22 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.DateValue;
+import com.easyinsight.core.Value;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.Feed;
 import nu.xom.Attribute;
 import nu.xom.Element;
+import org.antlr.runtime.RecognitionException;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Column;
-import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -40,6 +44,53 @@ public class RollingFilterDefinition extends FilterDefinition {
 
     @Column(name="interval_amount")
     private int customIntervalAmount;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "filter_to_custom_rolling_interval",
+            joinColumns = @JoinColumn(name = "filter_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "custom_rolling_interval_id", nullable = false))
+    private List<CustomRollingInterval> intervals = new ArrayList<CustomRollingInterval>();
+
+    @Transient
+    private transient Date startDate;
+    @Transient
+    private transient Date endDate;
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public FilterDefinition clone() throws CloneNotSupportedException {
+        RollingFilterDefinition filter = (RollingFilterDefinition) super.clone();
+        List<CustomRollingInterval> intervalList = new ArrayList<CustomRollingInterval>();
+        for (CustomRollingInterval interval : intervals) {
+            intervalList.add(interval.clone());
+        }
+        filter.setIntervals(intervalList);
+        return filter;
+    }
+
+    @Override
+    public void afterLoad() {
+        super.afterLoad();
+        List<CustomRollingInterval> intervals = new ArrayList<CustomRollingInterval>();
+        for (CustomRollingInterval wrapper : this.intervals) {
+            intervals.add(wrapper);
+        }
+        setIntervals(intervals);
+    }
+
+    public List<CustomRollingInterval> getIntervals() {
+        return intervals;
+    }
+
+    public void setIntervals(List<CustomRollingInterval> intervals) {
+        this.intervals = intervals;
+    }
 
     @Override
     public int type() {
@@ -105,10 +156,60 @@ public class RollingFilterDefinition extends FilterDefinition {
         return interval != MaterializedRollingFilterDefinition.ALL && super.validForQuery();
     }
 
+    public void applyCalculationsBeforeRun(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
+                                           Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) {
+        try {
+            for (CustomRollingInterval interval : intervals) {
+                if (interval.isStartDefined()) {
+                    Value value = new ReportCalculation(interval.getStartScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                    if (value.type() == Value.DATE) {
+                        DateValue dateValue = (DateValue) value;
+                        startDate = dateValue.getDate();
+                    } else if (value.type() == Value.NUMBER) {
+                        startDate = new Date(value.toDouble().longValue());
+                    } else {
+                        startDate = null;
+                    }
+                } else {
+                    startDate = null;
+                }
+                if (interval.isEndDefined()) {
+                    Value value = new ReportCalculation(interval.getEndScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                    if (value.type() == Value.DATE) {
+                        DateValue dateValue = (DateValue) value;
+                        endDate = dateValue.getDate();
+                    } else if (value.type() == Value.NUMBER) {
+                        endDate = new Date(value.toDouble().longValue());
+                    } else {
+                        endDate = null;
+                    }
+                } else {
+                    endDate = null;
+                }
+            }
+        } catch (RecognitionException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+    }
+
     public String toQuerySQL(String tableName) {
         StringBuilder queryBuilder = new StringBuilder();
         if (interval == MaterializedRollingFilterDefinition.LAST_DAY) {
             queryBuilder.append("date(").append(getField().toKeySQL()).append(") = (select max(date(").append(getField().toKeySQL()).append(")) from ").append(tableName).append(")");
+        } else if (interval > MaterializedRollingFilterDefinition.ALL) {
+            if (startDate != null && endDate != null) {
+                queryBuilder.append(getField().toKeySQL());
+                queryBuilder.append(" >= ? AND ");
+                queryBuilder.append(getField().toKeySQL());
+                queryBuilder.append(" <= ?");
+            } else if (startDate != null) {
+                queryBuilder.append(getField().toKeySQL());
+                queryBuilder.append(" >= ?");
+            } else if (endDate != null) {
+                queryBuilder.append(getField().toKeySQL());
+                queryBuilder.append(" <= ?");
+            }
         } else {
             if (customBeforeOrAfter == RollingFilterDefinition.AFTER) {
                 queryBuilder.append(getField().toKeySQL());
@@ -127,7 +228,14 @@ public class RollingFilterDefinition extends FilterDefinition {
     }
 
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        if (interval != MaterializedRollingFilterDefinition.LAST_DAY) {
+        if (interval > MaterializedRollingFilterDefinition.ALL) {
+            if (startDate != null) {
+                preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startDate.getTime()));
+            }
+            if (endDate != null) {
+                preparedStatement.setTimestamp(start++, new java.sql.Timestamp(endDate.getTime()));
+            }
+        } else if (interval != MaterializedRollingFilterDefinition.LAST_DAY) {
             Date now = insightRequestMetadata.getNow();
             long startTime = MaterializedRollingFilterDefinition.findStartDate(this, now, insightRequestMetadata);
             long endTime = MaterializedRollingFilterDefinition.findEndDate(this, now, insightRequestMetadata);

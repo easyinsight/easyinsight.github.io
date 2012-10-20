@@ -2,10 +2,14 @@ package com.easyinsight.filtering
 {
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemWrapper;
+import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
 import com.easyinsight.util.PersonaItemComboBox;
+import com.easyinsight.util.PopUpUtil;
+import com.easyinsight.util.SaveButton;
 import com.easyinsight.util.SmartComboBox;
 
 import flash.events.Event;
+import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
@@ -15,8 +19,12 @@ import mx.containers.VBox;
 import mx.containers.ViewStack;
 
 import mx.controls.ComboBox;
+import mx.controls.DataGrid;
 
 import mx.controls.Label;
+import mx.controls.dataGridClasses.DataGridColumn;
+import mx.core.ClassFactory;
+import mx.managers.PopUpManager;
 
 public class DateRangeDetailEditor extends VBox implements IFilterDetailEditor
 {
@@ -124,8 +132,8 @@ public class DateRangeDetailEditor extends VBox implements IFilterDetailEditor
         var settingsStack:ViewStack = new ViewStack();
         settingsStack.resizeToContent = true;
         BindingUtils.bindProperty(settingsStack, "selectedIndex", this, "settingsStackIndex");
-        var noBox:Box = new Box();
-        settingsStack.addChild(noBox);
+        var rollingBox:Box = new VBox();
+        settingsStack.addChild(rollingBox);
         var hbox:HBox = new HBox();
         var lowerBoundBox:VBox = new VBox();
         var lowerBoundLabel:Label = new Label();
@@ -176,8 +184,48 @@ public class DateRangeDetailEditor extends VBox implements IFilterDetailEditor
         hbox.addChild(rightBoundBox);
         settingsStack.addChild(hbox);
         addChild(settingsStack);
-        //lowerBoundBox.addChild();
+        var button:SaveButton = new SaveButton();
+        button.label = "Add New Filter Option...";
+        button.addEventListener(MouseEvent.CLICK, defineCustomFilter);
+        var intervalDG:DataGrid = new DataGrid();
+        if (_filterDefinition is RollingDateRangeFilterDefinition) {
+            customIntervals = RollingDateRangeFilterDefinition(_filterDefinition).intervals;
+        } else {
+            customIntervals = new ArrayCollection();
+        }
+        intervalDG.dataProvider = customIntervals;
+        intervalDG.rowHeight = 28;
+        var labelColumn:DataGridColumn = new DataGridColumn();
+        labelColumn.headerText = "Interval Name";
+        labelColumn.dataField = "filterLabel";
+        labelColumn.width = 200;
+        var editColumn:DataGridColumn = new DataGridColumn();
+        editColumn.headerText = "";
+        editColumn.width = 100;
+        editColumn.sortable = false;
+        editColumn.itemRenderer = new ClassFactory(CustomRollingIntervalActions);
+        var columns:Array = [ labelColumn, editColumn ];
+        intervalDG.columns = columns;
+        rollingBox.addChild(button);
+        rollingBox.addChild(intervalDG);
+        addEventListener(CustomRollingIntervalEvent.FILTER_DELETED, onIntervalDeleted);
+    }
 
+    private var customIntervals:ArrayCollection;
+
+    private function onIntervalAdded(event:CustomRollingIntervalEvent):void {
+        customIntervals.addItem(event.interval);
+    }
+
+    private function onIntervalDeleted(event:CustomRollingIntervalEvent):void {
+        customIntervals.removeItemAt(customIntervals.getItemIndex(event.interval));
+    }
+
+    private function defineCustomFilter(event:MouseEvent):void {
+        var window:CustomRollingIntervalWindow = new CustomRollingIntervalWindow();
+        window.addEventListener(CustomRollingIntervalEvent.FILTER_ADDED, onIntervalAdded, false, 0, true);
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUp(window);
     }
 
     public function makeUpdates():FilterDefinition
@@ -206,6 +254,11 @@ public class DateRangeDetailEditor extends VBox implements IFilterDetailEditor
         } else if (choiceBox.selectedItem == "Relative Date Range") {
             if (_filterDefinition is RollingDateRangeFilterDefinition) {
                 filterToReturn = _filterDefinition;
+                var intervalStart:int = RollingDateRangeFilterDefinition.ALL + 1;
+                for each (var customInterval:CustomRollingInterval in customIntervals) {
+                    customInterval.intervalNumber = intervalStart++;
+                }
+                RollingDateRangeFilterDefinition(filterToReturn).intervals = customIntervals;
             } else {
                 var newDateFilter:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
                 newDateFilter.intrinsic = _filterDefinition.intrinsic;

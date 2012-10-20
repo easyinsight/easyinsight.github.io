@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.YouTrackCompositeSource;
+
+        import mx.controls.Button;
+
+        [Bindable]
+        private var url:String;
+
+
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var obj:YouTrackCompositeSource = new YouTrackCompositeSource();
+            obj.url = urlInput.text;
+            return obj;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:YouTrackCompositeSource = feedDefinition as YouTrackCompositeSource;
+            url = ds.url;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:YouTrackCompositeSource = feedDefinition as YouTrackCompositeSource;
+            ds.url = urlInput.text;
+            ds.ytUserName = userNameInput.text;
+            ds.ytPassword = passwordInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="YouTrack URL:" direction="horizontal">
+            <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="User Name:" direction="horizontal">
+            <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Password:" direction="horizontal">
+            <mx:TextInput id="passwordInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350" displayAsPassword="true"/>
+        </mx:FormItem>
+	</mx:Form>
+</mx:VBox>

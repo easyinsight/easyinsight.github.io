@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.pipeline.FilterComponent;
 import com.easyinsight.pipeline.IComponent;
@@ -79,6 +80,11 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     @Transient
     transient private String pipelineName;
+
+    public void applyCalculationsBeforeRun(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
+                                           Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) {
+
+    }
 
     public boolean isNotCondition() {
         return notCondition;

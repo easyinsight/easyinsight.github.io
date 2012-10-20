@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                   xmlns:schedule="com.easyinsight.schedule.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.schedule.CursorTextArea;
+
+        import mx.collections.XMLListCollection;
+        import mx.events.DragEvent;
+        import mx.events.ListEvent;
+        import mx.managers.DragManager;
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
+
+        public var interval:CustomRollingInterval;
+
+        [Bindable]
+        private var startDateEnabled:Boolean = true;
+        [Bindable]
+        private var startDateScript:String;
+        [Bindable]
+        private var endDateEnabled:Boolean = true;
+        [Bindable]
+        private var endDateScript:String;
+        [Bindable]
+        private var filterLabel:String;
+
+        public var newFilter:Boolean;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (interval != null) {
+                startDateEnabled = interval.startDefined;
+                endDateEnabled = interval.endDefined;
+                startDateScript = interval.startScript;
+                endDateScript = interval.endScript;
+                filterLabel = interval.filterLabel;
+            }
+        }
+
+        [Bindable]
+        private var formattingFunctions:XMLListCollection = new XMLListCollection(new XMLList(<functions>
+            <group label="Dates">
+                <function label="date" signature="date(Numeric Field)" description="If no parameter, constructs a date with the present time, if Numeric Field passed in, constructs a date from the number of milliseconds"/>
+                <function label="dayofmonth" signature="dayofmonth(Date Field)" description="Returns the day of month of the date contained in Field"/>
+                <function label="dayofyear" signature="dayofyear(Date Field)" description="Returns the day of year of the date contained in Field"/>
+                <function label="days" signature="days(Number of Days)" description="Translates the specified number of days into milliseconds"/>
+                <function label="daysinmonth" signature="daysinmonth(Date Field)" description="Returns the number of days in the month of the date contained in Field"/>
+                <function label="month" signature="month(Date Field)" description="Returns the month of the date contained in Field"/>
+                <function label="now" signature="now()" description="Returns the current time in milliseconds"/>
+                <function label="weekofyear" signature="weekofyear(Date Field)" description="Returns the week of the year of the date contained in Field"/>
+                <function label="year" signature="year(Date Field)" description="Returns the year of the date contained in Field"/>
+            </group>
+            <group label="Logic">
+                <function label="equalto" signature="equalto(Field1, Field2, Field3, Field4)" description="If Field1 is equal to Field2, return Field3, else return Field 4. Field 4 is optional, will return empty if not specified."/>
+                <function label="greaterthan" signature="greaterthan(Field1, Field2, Field3, Field4)" description="If Field1 is greater than Field2, return Field3, else return Field 4. Field 4 is optional, will return empty if not specified."/>
+                <function label="greaterthanorequal" signature="greaterthan(Field1, Field2, Field3, Field4)" description="If Field1 is greater than or equal to Field2, return Field3, else return Field 4. Field 4 is optional, will return empty if not specified."/>
+            </group>
+        </functions>));
+
+        private function save():void {
+            if (Validator.validateAll([nameValidator]).length == 0) {
+                var newFilter:Boolean = false;
+                if (interval == null) {
+                    newFilter = true;
+                    interval = new CustomRollingInterval();
+                }
+                interval.startDefined = startDateCheckbox.selected;
+                interval.endDefined = endDateCheckbox.selected;
+                interval.startScript = startDateArea.text;
+                interval.endScript = endDateArea.text;
+                interval.filterLabel = filterLabelInput.text;
+                if (newFilter) {
+                    dispatchEvent(new CustomRollingIntervalEvent(CustomRollingIntervalEvent.FILTER_ADDED, interval));
+                }
+                PopUpManager.removePopUp(this);
+            } else {
+                filterLabelInput.setFocus();
+                filterLabelInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            }
+        }
+
+        private function dragEnterHandler(event:DragEvent):void {
+            var accept:Boolean = false;
+            if (event.dragInitiator is Tree) {
+                var tree:Tree = event.dragInitiator as Tree;
+                var xml:XML = tree.selectedItem as XML;
+                if (xml != null) {
+                    var name:String = String(xml.name());
+                    if (name == "function") {
+                        accept = true;
+                    }
+                }
+            }
+            if (accept) DragManager.acceptDragDrop(event.target as TextArea);
+        }
+
+        [Bindable]
+        private var explanationFunction:String;
+
+        private function dragDropHandler(event:DragEvent):void {
+            var functionOutput:Boolean = false;
+            var outputStr:String;
+            if (event.dragInitiator is Tree) {
+                var tree:Tree = event.dragInitiator as Tree;
+                var xml:XML = tree.selectedItem as XML;
+                if (xml != null) {
+                    var name:String = String(xml.name());
+                    if (name == "function") {
+                        functionOutput = true;
+                        outputStr = String(xml.@signature);
+                    }
+                }
+            }
+            if (!functionOutput) {
+                var str:String = ":<>,.;/?\"\'{}-=+$";
+                var foundSpecialChar:Boolean = false;
+                for (var i:int = 0; i < str.length; i++) {
+                    if (outputStr.indexOf(str.charAt(i)) != -1)
+                        foundSpecialChar = true;
+                }
+                if (foundSpecialChar) {
+                    outputStr = "[" + outputStr + "]";
+                }
+            }
+            var area:CursorTextArea = event.currentTarget as CursorTextArea;
+            area.insertTextAtCursor(outputStr);
+        }
+
+        private function onFunctionClick(event:ListEvent):void {
+            var xml:XML = event.currentTarget.selectedItem;
+            if (xml != null) {
+                var name:String = String(xml.name());
+                if (name == "function") {
+                    explanationFunction = String(xml.@label);
+                    functionExplanation = String(xml.@description);
+                    functionSignature = String(xml.@signature);
+                }
+            }
+        }
+
+        [Bindable]
+        private var functionExplanation:String;
+
+        [Bindable]
+        private var functionSignature:String;
+        ]]></mx:Script>
+    <mx:StringValidator id="nameValidator" source="{filterLabelInput}" property="text" minLength="1"/>
+    <mx:HBox>
+        <mx:VBox horizontalAlign="center">
+            <mx:Label text="Available Functions" fontFamily="Tahoma" fontWeight="bold"/>
+            <mx:Tree labelField="@label" width="300" itemClick="onFunctionClick(event)" dragEnabled="true" dragMoveEnabled="false"
+                     dataProvider="{formattingFunctions}" showRoot="false">
+            </mx:Tree>
+            <mx:VBox borderStyle="inset" borderThickness="1" backgroundColor="#FFFFFF" visible="{functionSignature != null}">
+                <mx:Label text="{functionSignature}"/>
+                <mx:TextArea text="{functionExplanation}" borderStyle="none" backgroundAlpha="0" editable="false"
+                             selectable="true"
+                             width="300" height="80"/>
+            </mx:VBox>
+        </mx:VBox>
+        <mx:Form>
+            <mx:FormItem label="Filter Label:">
+                <mx:TextInput id="filterLabelInput" text="{filterLabel}" width="300"/>
+            </mx:FormItem>
+            <mx:FormItem label="Start Date Enabled:">
+                <mx:CheckBox id="startDateCheckbox" selected="{startDateEnabled}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Start Date Script:">
+                <schedule:CursorTextArea id="startDateArea" dragEnter="dragEnterHandler(event)"
+                                         dragDrop="dragDropHandler(event)" text="{startDateScript}" editable="true" borderStyle="solid" borderThickness="1" width="550" height="75" enabled="{startDateCheckbox.selected}"/>
+            </mx:FormItem>
+            <mx:FormItem label="End Date Enabled:">
+                <mx:CheckBox id="endDateCheckbox" selected="{endDateEnabled}"/>
+            </mx:FormItem>
+            <mx:FormItem label="End Date Script:">
+                <schedule:CursorTextArea id="endDateArea" text="{endDateScript}" dragEnter="dragEnterHandler(event)"
+                                         dragDrop="dragDropHandler(event)" editable="true" borderStyle="solid" borderThickness="1" width="550" height="75" enabled="{endDateCheckbox.selected}"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:HBox>
+
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>
