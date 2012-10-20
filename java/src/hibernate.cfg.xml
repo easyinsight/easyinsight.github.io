@@ -88,6 +88,7 @@
         <mapping class="com.easyinsight.analysis.FlatDateFilter"/>
         <mapping class="com.easyinsight.analysis.NullFilter"/>
         <mapping class="com.easyinsight.analysis.OrFilter"/>
+        <mapping class="com.easyinsight.analysis.CustomRollingInterval"/>
         <mapping class="com.easyinsight.analysis.AnalysisItemFilterDefinition"/>
         <mapping class="com.easyinsight.analysis.MultiFlatDateFilter"/>
         <mapping class="com.easyinsight.analysis.MonthCutoffFilter"/>

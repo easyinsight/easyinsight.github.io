@@ -8,6 +8,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
+import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -34,6 +35,7 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
     public static final String PROJECT_ARCHIVED = "Project Archived";
     public static final String DESCRIPTION = "Project Description";
     public static final String UPDATED_AT = "Project Updated At";
+    public static final String CREATED_AT = "Project Created At";
     public static final String URL = "Project URL";
 
     public BasecampNextProjectSource() {
@@ -48,7 +50,7 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(PROJECT_ID, PROJECT_NAME, UPDATED_AT, URL, DESCRIPTION, PROJECT_ARCHIVED);
+        return Arrays.asList(PROJECT_ID, PROJECT_NAME, UPDATED_AT, URL, DESCRIPTION, PROJECT_ARCHIVED, CREATED_AT);
     }
 
     @Override
@@ -64,6 +66,11 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
         analysisitems.add(new AnalysisDimension(keys.get(DESCRIPTION), DESCRIPTION));
         analysisitems.add(new AnalysisDimension(keys.get(URL), URL));
         analysisitems.add(new AnalysisDateDimension(keys.get(UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
+        Key createdKey = keys.get(CREATED_AT);
+        if (createdKey == null) {
+            createdKey = new NamedKey(CREATED_AT);
+        }
+        analysisitems.add(new AnalysisDateDimension(createdKey, true, AnalysisDateDimension.DAY_LEVEL));
         return analysisitems;
     }
 
@@ -71,9 +78,12 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             DataSet dataSet = new DataSet();
+            HttpClient httpClient = new HttpClient();
             BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
             List<Project> projects = basecampNextCompositeSource.getOrCreateProjectCache().getProjects();
+            DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
             for (Project project : projects) {
+                JSONObject projectObject = runJSONRequestForObject("/projects/" + project.getId() + ".json", basecampNextCompositeSource, httpClient);
                 IRow row = dataSet.createRow();
                 row.addValue(keys.get(PROJECT_ID), project.getId());
                 row.addValue(keys.get(PROJECT_NAME), project.getName());
@@ -81,6 +91,7 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
                 row.addValue(keys.get(DESCRIPTION), project.getDescription());
                 row.addValue(keys.get(URL), project.getUrl());
                 row.addValue(keys.get(UPDATED_AT), project.getUpdatedAt());
+                row.addValue(keys.get(CREATED_AT), format.parseDateTime(projectObject.getString("created_at")).toDate());
             }
             return dataSet;
         } catch (ReportException re) {
