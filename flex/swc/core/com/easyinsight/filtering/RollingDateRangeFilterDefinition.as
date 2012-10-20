@@ -1,6 +1,8 @@
 package com.easyinsight.filtering
 {
-	[Bindable]
+import mx.collections.ArrayCollection;
+
+[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.RollingFilterDefinition")]
 	public class RollingDateRangeFilterDefinition extends FilterDefinition
 	{
@@ -30,6 +32,10 @@ package com.easyinsight.filtering
         public var customBeforeOrAfter:int = LAST;
         public var customIntervalType:int = 2;
         public var customIntervalAmount:int = 1;
+
+        var intervalPH:CustomRollingInterval;
+
+        public var intervals:ArrayCollection = new ArrayCollection();
 		
 		public function RollingDateRangeFilterDefinition()
 		{
