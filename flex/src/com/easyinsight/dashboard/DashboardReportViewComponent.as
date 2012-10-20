@@ -198,6 +198,8 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             if (myFilterColl.length > 0) {
 
                 hasFilters = true;
+                transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
+                transformContainer.dashboardID = dashboardEditorMetadata.dashboardID;
                 transformContainer.existingFilters = myFilterColl;
                 filterMap[elementID] = myFilterColl;
                 updateAdditionalFilters(filterMap);
@@ -207,8 +209,6 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                 transformContainer.setStyle("paddingTop", 10);
                 transformContainer.setStyle("paddingBottom", 10);
                 transformContainer.reportView = true;
-                transformContainer.dashboardID = dashboardEditorMetadata.dashboardID;
-                transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
                 transformContainer.role = dashboardEditorMetadata.role;
                 transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
                 if (visibleFilters > 0) {

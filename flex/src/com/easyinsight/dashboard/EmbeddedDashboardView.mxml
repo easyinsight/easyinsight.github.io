@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*"
          xmlns:util="com.easyinsight.util.*" xmlns:report="com.easyinsight.report.*"
+         xmlns:dashboard="com.easyinsight.dashboard.*"
          width="100%" height="100%" creationComplete="initStuff()">
     <mx:Script>
 		<![CDATA[
@@ -13,6 +14,7 @@
         import com.easyinsight.framework.DataServiceLoadingEvent;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.core.UIComponent;
         import mx.events.FlexEvent;
 
@@ -79,6 +81,7 @@
             }*/
         }
 
+        [Bindable]
         private var dashboard:Dashboard;
 
         [Bindable]
@@ -88,18 +91,15 @@
         private function gotDashboard():void {
             dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
             dataSource = dashboard.dataSourceInfo;
-            var grid:DashboardGrid = dashboard.rootElement as DashboardGrid;
+            /*var grid:DashboardGrid = dashboard.rootElement as DashboardGrid;
             dashboardCanvas.setStyle("backgroundAlpha", grid.backgroundAlpha);
             if (grid.backgroundColor != 0) {
                 dashboardCanvas.setStyle("backgroundColor", grid.backgroundColor);
-            }
+            }*/
             _dataSourceID = dashboard.dataSourceID;
             filterDefinitions = dashboard.filters;
-            if (dashboard.filters.length > 0) {
-                filterIndex = 1;
-            }
-            transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-            var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
+            rootView = dashboardRenderer.createDashboard();
+            /*var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = _dataSourceID;
             dashboardEditorMetadata.role = dashboard.role;
             dashboardEditorMetadata.borderColor = dashboard.borderColor;
@@ -114,18 +114,7 @@
                 rootView.initialRetrieve();
             });
             dashboardCanvas.addChild(rootView as UIComponent);
-        }
-
-        [Bindable]
-        private var rootView:IDashboardViewComponent;
-
-        private function transformsUpdated(event:TransformsUpdatedEvent):void {
-            var filterMap:Object = new Object();
-            if (transformContainer != null) {
-                filterMap["master"] = transformContainer.getFilterDefinitions();
-            }
-            rootView.updateAdditionalFilters(filterMap);
-            rootView.refresh();
+            Alert.show("!");*/
         }
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
@@ -144,7 +133,7 @@
         private var showFilters:Boolean = false;
 
         public function refreshData():void {
-            rootView.refresh();
+            dashboardRenderer.refreshData();
         }
 
         [Bindable]
@@ -161,11 +150,13 @@
         }
 
         [Bindable]
+        public var rootView:IDashboardViewComponent;
+
+        [Bindable]
         private var filterTooltip:String = "Hide Filters";
 
         private function toggleFilterIndex():void {
-            filterIndex = filterIndex == 1 ? 0 : 1;
-            rootView.toggleFilters(filterIndex == 1);
+            dashboardRenderer.toggleFilters();
         }
         ]]>
     </mx:Script>
@@ -180,15 +171,6 @@
                 styleName="grayButton" label="Toggle Filters"/>
         <mx:Spacer width="100%"/>
     </mx:HBox>
-    <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
-        <mx:Box/>
-        <mx:VBox width="100%" horizontalAlign="center">
-            <filtering:TransformContainer id="transformContainer" filterEditable="false"
-                          existingFilters="{filterDefinitions}"
-                          updatedTransforms="transformsUpdated(event)" width="100%"
-                          feedID="{_dataSourceID}" dashboardID="{dashboardID}"/>
-        </mx:VBox>
-    </mx:ViewStack>
-    <util:AntiScrollCanvas height="100%" id="dashboardCanvas" backgroundColor="#FFFFFF"
-                       backgroundAlpha=".8" width="100%"/>
+    <dashboard:DashboardRenderer id="dashboardRenderer" dashboard="{dashboard}" dashboardID="{dashboardID}"
+                                 dataSourceID="{_dataSourceID}" initialFilters="{filterDefinitions}" filterIndex="{filterIndex}"/>
 </mx:VBox>

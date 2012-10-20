@@ -36,6 +36,8 @@ public class Dashboard {
     public var marmotScript:String;
     public var folder:int = EIDescriptor.MAIN_VIEWS_FOLDER;
 
+    public var reportAccessProblem:Boolean;
+
     public function Dashboard() {
     }
 }

@@ -2,7 +2,12 @@
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import com.easyinsight.account.Account;
+        import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.framework.User;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.core.UIComponent;
 
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
@@ -100,6 +105,23 @@
             _dashboard = dashboardService.saveDashboard.lastResult as Dashboard;
             dispatchEvent(new DashboardSaveEvent(_dashboard));
             PopUpManager.removePopUp(this);
+            if (_dashboard.reportAccessProblem) {
+                var window:SavePromptWindow = new SavePromptWindow();
+                window.prompt = "One or more of the reports in this dashboard doesn't match the access settings you specified.";
+                window.defineOption("Change Settings on Reports to Match", "changeSettings");
+                window.defineOption("Leave As Is", "leaveSettings");
+                var parent:UIComponent = this;
+                window.addEventListener("changeSettings", function (event:Event):void {
+                    ProgressAlert.alert(parent, "Updating reports...", null, dashboardService.updateReportVisibility);
+                    dashboardService.updateReportVisibility.send(_dashboard.id);
+                });
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
+        }
+
+        private function updatedVisibility():void {
+
         }
 
         private function onFault(event:FaultEvent):void {
@@ -109,6 +131,7 @@
         ]]></mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="saveDashboard" result="savedDashboard()" fault="onFault(event)"/>
+        <mx:method name="updateReportVisibility" result="updatedVisibility()" />
     </mx:RemoteObject>
     <mx:Canvas width="600" height="400">
         <mx:VBox width="100%" height="100%" verticalGap="0">
@@ -155,7 +178,7 @@
                     </mx:HBox>
                 </mx:VBox>
                 <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-                    <mx:ProgressBar label="Saving the report..." indeterminate="true"/>
+                    <mx:ProgressBar label="Saving the dashboard..." indeterminate="true"/>
                 </mx:Box>
                 <mx:VBox width="100%" height="100%" horizontalAlign="center" paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10">
                     <mx:Label text="We're sorry, but something went wrong in saving the report." fontSize="14"/>

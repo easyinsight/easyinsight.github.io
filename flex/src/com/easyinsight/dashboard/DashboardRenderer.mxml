@@ -60,7 +60,7 @@
                 setStyle("paddingBottom", 0);
             }
 
-            if (ApplicationSkin.instance().reportHeader && dashboard.borderThickness > 0) {
+            if (ApplicationSkin.instance() != null && ApplicationSkin.instance().reportHeader && dashboard.borderThickness > 0) {
                 dashboardStyleArea.setStyle("backgroundColor", ApplicationSkin.instance().headerBackgroundColor);
             } else {
                 dashboardStyleArea.setStyle("backgroundColor", dashboard.backgroundColor);
