@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  borderStyle="solid" borderThickness="1" cornerRadius="8" verticalAlign="middle" width="100%" backgroundColor="#333333" borderColor="#333333">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.formatters.DateFormatter;
+
+        import mx.managers.PopUpManager;
+
+        private function showNews():void {
+            var window:WhatsNew = new WhatsNew();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            var df:DateFormatter = new DateFormatter();
+            df.formatString = "MMM DD YYYY";
+            dateString = "New on " + df.format(User.getInstance().newsDate) + "!";
+        }
+
+        [Bindable]
+        private var dateString:String;
+
+        private function dismiss():void {
+            userService.dismissNews.send();
+            dispatchEvent(new Event('dismissNews'));
+        }
+
+        private function dismissed():void {
+
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="login" id="userService">
+        <mx:method name="dismissNews" result="dismissed()"/>
+    </mx:RemoteObject>
+    <mx:Spacer width="100%"/>
+    <mx:Label text="{dateString}" fontSize="14" color="#FFFFFF"/>
+    <mx:LinkButton label="Take a look at what's new with Easy Insight" fontSize="14" color="#FFFFFF" textDecoration="underline" click="showNews()"/>
+    <mx:Spacer width="100%"/>
+    <mx:LinkButton label="Dismiss" fontSize="12" color="#FFFFFF" textDecoration="underline" click="dismiss()"/>
+</mx:HBox>

@@ -605,6 +605,21 @@
 
         [Bindable]
         private var showScorecard:Boolean = false;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (User.getInstance().newsDate != null) {
+                if (User.getInstance().newsDismissDate == null || User.getInstance().newsDismissDate.getTime() < User.getInstance().newsDate.getTime()) {
+                    var newsBar:NewsBar = new NewsBar();
+                    newsBar.addEventListener("dismissNews", onDismissed);
+                    addChildAt(newsBar, 0);
+                }
+            }
+        }
+
+        private function onDismissed(event:Event):void {
+            removeChild(DisplayObject(event.currentTarget));
+        }
         ]]></mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="deleteAnalysisDefinition" result="deleted()"/>
@@ -621,13 +636,6 @@
     <mx:RemoteObject id="uploadService" destination="userUpload">
         <mx:method name="move" result="moved()"/>
     </mx:RemoteObject>
-    <!--<mx:HBox borderStyle="solid" borderThickness="1" cornerRadius="8" verticalAlign="middle" width="100%" backgroundColor="#333333" borderColor="#333333">
-        <mx:Spacer width="100%"/>
-        <mx:Label text="New on Oct 15, 2012!" fontSize="14" color="#FFFFFF"/>
-        <mx:LinkButton label="Take a look at what's new with Easy Insight" fontSize="14" color="#FFFFFF" textDecoration="underline"/>
-        <mx:Spacer width="100%"/>
-        <mx:LinkButton label="Dismiss" fontSize="12" color="#FFFFFF" textDecoration="underline"/>
-    </mx:HBox>-->
     <mx:HBox paddingLeft="20" paddingRight="20"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
          horizontalGap="20"

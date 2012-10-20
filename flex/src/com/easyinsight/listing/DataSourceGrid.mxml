@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center">
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
         import com.easyinsight.solutions.DataSourceDescriptor;
 
         import mx.collections.ArrayCollection;
@@ -49,6 +50,21 @@
             }
             return ObjectUtil.dateCompare(date1, date2);
         }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (User.getInstance().newsDate != null) {
+                if (User.getInstance().newsDismissDate == null || User.getInstance().newsDismissDate.getTime() < User.getInstance().newsDate.getTime()) {
+                    var newsBar:NewsBar = new NewsBar();
+                    newsBar.addEventListener("dismissNews", onDismissed);
+                    addChildAt(newsBar, 0);
+                }
+            }
+        }
+
+        private function onDismissed(event:Event):void {
+            removeChild(DisplayObject(event.currentTarget));
+        }
         ]]></mx:Script>
     <mx:HBox paddingLeft="20" paddingRight="20"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
@@ -65,4 +81,4 @@
             </mx:columns>
         </mx:DataGrid>
     </mx:HBox>
-</mx:HBox>
+</mx:VBox>

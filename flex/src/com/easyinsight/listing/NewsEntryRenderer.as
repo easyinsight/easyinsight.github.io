@@ -32,10 +32,13 @@ public class NewsEntryRenderer extends VBox {
         textArea = new AutoSizeTextArea();
         textArea.editable = false;
         textArea.width = 600;
+        textArea.verticalScrollPolicy = "off";
+        textArea.horizontalScrollPolicy = "off";
         titleLabel = new Label();
         titleLabel.setStyle("fontSize", 16);
         dateLabel = new Label();
         dateLabel.setStyle("fontSize", 16);
+        setStyle("horizontalAlign", "center");
     }
 
     override protected function createChildren():void {

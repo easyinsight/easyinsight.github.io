@@ -5,6 +5,7 @@
         import com.easyinsight.schedule.CursorTextArea;
 
         import mx.collections.XMLListCollection;
+        import mx.controls.Alert;
         import mx.events.DragEvent;
         import mx.events.ListEvent;
         import mx.managers.DragManager;
@@ -59,6 +60,22 @@
 
         private function save():void {
             if (Validator.validateAll([nameValidator]).length == 0) {
+                if (!startDateCheckbox.selected && !endDateCheckbox.selected) {
+                    Alert.show("You have to at least enable a start date or an end date.");
+                    return;
+                }
+                if (startDateCheckbox.selected) {
+                    if (startDateArea.text == "") {
+                        Alert.show("You need to configure scripting for a start date.");
+                        return;
+                    }
+                }
+                if (endDateCheckbox.selected) {
+                    if (endDateArea.text == "") {
+                        Alert.show("You need to configure scripting for an end date.");
+                        return;
+                    }
+                }
                 var newFilter:Boolean = false;
                 if (interval == null) {
                     newFilter = true;
@@ -158,25 +175,40 @@
                              width="300" height="80"/>
             </mx:VBox>
         </mx:VBox>
-        <mx:Form>
-            <mx:FormItem label="Filter Label:">
-                <mx:TextInput id="filterLabelInput" text="{filterLabel}" width="300"/>
-            </mx:FormItem>
-            <mx:FormItem label="Start Date Enabled:">
-                <mx:CheckBox id="startDateCheckbox" selected="{startDateEnabled}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Start Date Script:">
-                <schedule:CursorTextArea id="startDateArea" dragEnter="dragEnterHandler(event)"
-                                         dragDrop="dragDropHandler(event)" text="{startDateScript}" editable="true" borderStyle="solid" borderThickness="1" width="550" height="75" enabled="{startDateCheckbox.selected}"/>
-            </mx:FormItem>
-            <mx:FormItem label="End Date Enabled:">
-                <mx:CheckBox id="endDateCheckbox" selected="{endDateEnabled}"/>
-            </mx:FormItem>
-            <mx:FormItem label="End Date Script:">
-                <schedule:CursorTextArea id="endDateArea" text="{endDateScript}" dragEnter="dragEnterHandler(event)"
-                                         dragDrop="dragDropHandler(event)" editable="true" borderStyle="solid" borderThickness="1" width="550" height="75" enabled="{endDateCheckbox.selected}"/>
-            </mx:FormItem>
-        </mx:Form>
+        <mx:VBox>
+            <mx:Label text="You can define custom rolling filters through this window. For example:"/>
+            <mx:HBox>
+                <mx:VBox borderStyle="solid" borderThickness="1">
+                    <mx:Label text="Last Two Full Months:"/>
+                    <mx:Label text="Start Date: dayofmonth(nowdate() - months(2), 0)"/>
+                    <mx:Label text="End Date: dayofmonth(nowdate() - months(2), daysinmonth(nowdate() - months(2)))"/>
+                </mx:VBox>
+                <mx:VBox borderStyle="solid" borderThickness="1">
+                    <mx:Label text="After Two Weeks Ago:"/>
+                    <mx:Label text="Start Date: nowdate() - days(14)"/>
+                </mx:VBox>
+            </mx:HBox>
+
+            <mx:Form>
+                <mx:FormItem label="Filter Label:">
+                    <mx:TextInput id="filterLabelInput" text="{filterLabel}" width="300"/>
+                </mx:FormItem>
+                <mx:FormItem label="Start Date Enabled:">
+                    <mx:CheckBox id="startDateCheckbox" selected="{startDateEnabled}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Start Date Script:">
+                    <schedule:CursorTextArea id="startDateArea" dragEnter="dragEnterHandler(event)"
+                                             dragDrop="dragDropHandler(event)" text="{startDateScript}" editable="true" borderStyle="solid" borderThickness="1" width="550" height="75" enabled="{startDateCheckbox.selected}"/>
+                </mx:FormItem>
+                <mx:FormItem label="End Date Enabled:">
+                    <mx:CheckBox id="endDateCheckbox" selected="{endDateEnabled}"/>
+                </mx:FormItem>
+                <mx:FormItem label="End Date Script:">
+                    <schedule:CursorTextArea id="endDateArea" text="{endDateScript}" dragEnter="dragEnterHandler(event)"
+                                             dragDrop="dragDropHandler(event)" editable="true" borderStyle="solid" borderThickness="1" width="550" height="75" enabled="{endDateCheckbox.selected}"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
     </mx:HBox>
 
     <mx:HBox width="100%" horizontalAlign="center">
