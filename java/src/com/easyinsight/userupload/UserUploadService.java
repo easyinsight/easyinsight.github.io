@@ -51,6 +51,27 @@ public class UserUploadService {
     public UserUploadService() {
     }
 
+    public long newFolder(String name, long dataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement saveFolderStmt = conn.prepareStatement("INSERT INTO REPORT_FOLDER (ACCOUNT_ID, FOLDER_NAME, FOLDER_SEQUENCE, DATA_SOURCE_ID) VALUES (?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            saveFolderStmt.setLong(1, SecurityUtil.getAccountID());
+            saveFolderStmt.setString(2, name);
+            saveFolderStmt.setInt(3, 1);
+            saveFolderStmt.setLong(4, dataSourceID);
+            saveFolderStmt.execute();
+            long id = Database.instance().getAutoGenKey(saveFolderStmt);
+            saveFolderStmt.close();
+            return id;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void move(EIDescriptor descriptor, int targetFolder) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -61,12 +82,14 @@ public class UserUploadService {
                 updateStmt.setInt(1, targetFolder);
                 updateStmt.setLong(2, descriptor.getId());
                 updateStmt.executeUpdate();
+                updateStmt.close();
             } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
                 SecurityUtil.authorizeDashboard(descriptor.getId());
                 PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET FOLDER = ? WHERE DASHBOARD_ID = ?");
                 updateStmt.setInt(1, targetFolder);
                 updateStmt.setLong(2, descriptor.getId());
                 updateStmt.executeUpdate();
+                updateStmt.close();
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -192,6 +215,71 @@ public class UserUploadService {
         }
     }
 
+    public void renameFolder(long folderID, String name) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE REPORT_FOLDER SET FOLDER_NAME = ? WHERE REPORT_FOLDER_ID = ? AND ACCOUNT_ID = ?");
+            updateStmt.setString(1, name);
+            updateStmt.setLong(2, folderID);
+            updateStmt.setLong(3, SecurityUtil.getAccountID());
+            updateStmt.executeUpdate();
+            updateStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void deleteFolder(long folderID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET FOLDER = ? WHERE FOLDER = ?");
+            updateStmt.setLong(1, 1);
+            updateStmt.setLong(2, folderID);
+            updateStmt.executeUpdate();
+            updateStmt.close();
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM REPORT_FOLDER WHERE REPORT_FOLDER_ID = ? AND ACCOUNT_ID = ?");
+            deleteStmt.setLong(1, folderID);
+            deleteStmt.setLong(2, SecurityUtil.getAccountID());
+            deleteStmt.executeUpdate();
+            deleteStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public List<CustomFolder> getCustomFolders(long dataSourceID) {
+        List<CustomFolder> folders = new ArrayList<CustomFolder>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement getFoldersStmt = conn.prepareStatement("SELECT REPORT_FOLDER_ID, FOLDER_NAME, DATA_SOURCE_ID FROM REPORT_FOLDER WHERE ACCOUNT_ID = ? AND " +
+                    "DATA_SOURCE_ID = ?");
+            getFoldersStmt.setLong(1, SecurityUtil.getAccountID());
+            getFoldersStmt.setLong(2, dataSourceID);
+            ResultSet folderRS = getFoldersStmt.executeQuery();
+            while (folderRS.next()) {
+                long id = folderRS.getLong(1);
+                String name = folderRS.getString(2);
+                CustomFolder customFolder = new CustomFolder();
+                customFolder.setName(name);
+                customFolder.setId(id);
+                folders.add(customFolder);
+            }
+            getFoldersStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return folders;
+    }
+
     public MyDataTree getFeedAnalysisTree(boolean onlyMyData, long groupID) {
         onlyMyData = false;
         long userID = SecurityUtil.getUserID();
@@ -207,6 +295,8 @@ public class UserUploadService {
             } else {
                 dataSources = feedStorage.getDataSourcesForGroup(userID, groupID, conn);
             }
+
+
 
             Iterator<DataSourceDescriptor> dataSourceIter = dataSources.iterator();
             while (dataSourceIter.hasNext()) {
@@ -240,6 +330,24 @@ public class UserUploadService {
             for (DataSourceDescriptor dataSource : dataSources) {
                 descriptorMap.put(dataSource.getId(), dataSource);
             }
+
+            PreparedStatement getFoldersStmt = conn.prepareStatement("SELECT REPORT_FOLDER_ID, FOLDER_NAME, DATA_SOURCE_ID FROM REPORT_FOLDER WHERE ACCOUNT_ID = ?");
+            getFoldersStmt.setLong(1, SecurityUtil.getAccountID());
+
+            ResultSet folderRS = getFoldersStmt.executeQuery();
+            while (folderRS.next()) {
+                long id = folderRS.getLong(1);
+                String name = folderRS.getString(2);
+                long dataSourceID = folderRS.getLong(3);
+                CustomFolder customFolder = new CustomFolder();
+                customFolder.setName(name);
+                customFolder.setId(id);
+                DataSourceDescriptor dataSourceDescriptor = descriptorMap.get(dataSourceID);
+                if (dataSourceDescriptor != null) {
+                    dataSourceDescriptor.getCustomFolders().add(customFolder);
+                }
+            }
+            getFoldersStmt.close();
 
             if (groupID != 0) {
                 int role = SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
@@ -759,6 +867,7 @@ public class UserUploadService {
                                         stmt.setTimestamp(1, new Timestamp(now.getTime()));
                                         stmt.setLong(2, sourceToRefresh.getDataFeedID());
                                         stmt.execute();
+                                        stmt.close();
                                     }
                                 }
 
