@@ -8,6 +8,15 @@ package com.easyinsight.analysis;
 public class ReportInfo {
     private WSAnalysisDefinition report;
     private boolean admin;
+    private boolean accessDenied;
+
+    public boolean isAccessDenied() {
+        return accessDenied;
+    }
+
+    public void setAccessDenied(boolean accessDenied) {
+        this.accessDenied = accessDenied;
+    }
 
     public WSAnalysisDefinition getReport() {
         return report;
