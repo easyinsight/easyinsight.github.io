@@ -33,7 +33,7 @@ import mx.collections.ArrayCollection;
         public var customIntervalType:int = 2;
         public var customIntervalAmount:int = 1;
 
-        var intervalPH:CustomRollingInterval;
+        private var intervalPH:CustomRollingInterval;
 
         public var intervals:ArrayCollection = new ArrayCollection();
 		
