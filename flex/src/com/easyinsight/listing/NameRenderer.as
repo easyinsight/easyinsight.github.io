@@ -14,10 +14,13 @@ import flash.display.Bitmap;
 import flash.display.BitmapData;
 
 import flash.events.MouseEvent;
+import flash.ui.ContextMenu;
+import flash.ui.ContextMenuItem;
 
 import mx.controls.AdvancedDataGrid;
 
 import mx.controls.AdvancedDataGrid;
+import mx.controls.Alert;
 
 import mx.controls.Image;
 
@@ -39,11 +42,22 @@ public class NameRenderer extends AdvancedDataGridGroupItemRenderer {
         mouseChildren = true;
     }
 
+    /*override public function set data(val:Object):void {
+        super.data = val;
+        var desc:EIDescriptor = val as EIDescriptor;
+        if (desc.getType() == EIDescriptor.FOLDER) {
+            var contextMenu:ContextMenu = new ContextMenu();
+            var editItem:ContextMenuItem = new ContextMenuItem("Edit...");
+            contextMenu.customItems = [ editItem ];
+            this.contextMenu = contextMenu;
+        }
+    }*/
+
     private function dragEnterHandler(event:DragEvent):void {
         var listData:AdvancedDataGridListData = listData as AdvancedDataGridListData;
         var desc:EIDescriptor = listData.item as EIDescriptor;
         if (desc.getType() == EIDescriptor.FOLDER) {
-            if (desc.id == 1 || desc.id == 2) {
+            if (desc.name != "Lookup Tables") {
                 var eiDescriptor:Object = AdvancedDataGrid(NameRenderer(event.currentTarget).listData.owner).selectedItem;
                 if (eiDescriptor is EIDescriptor) {
                     DragManager.acceptDragDrop(event.currentTarget as UIComponent);
@@ -56,6 +70,7 @@ public class NameRenderer extends AdvancedDataGridGroupItemRenderer {
         var listData:AdvancedDataGridListData = listData as AdvancedDataGridListData;
         var desc:EIDescriptor = listData.item as EIDescriptor;
         var eiDescriptor:EIDescriptor = AdvancedDataGrid(NameRenderer(event.currentTarget).listData.owner).selectedItem as EIDescriptor;
+
         dispatchEvent(new ChangeFolderEvent(eiDescriptor, desc as DataFolder));
         // changeFolder(eiDescriptor, desc.id)
     }
