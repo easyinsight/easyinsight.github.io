@@ -1,5 +1,7 @@
 package com.easyinsight.core;
 
+import com.easyinsight.userupload.CustomFolder;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +22,15 @@ public class DataSourceDescriptor extends EIDescriptor {
     private byte[] logoImage;
     private int dataSourceBehavior;
     private List<EIDescriptor> children = new ArrayList<EIDescriptor>();
+    private List<CustomFolder> customFolders = new ArrayList<CustomFolder>();
+
+    public List<CustomFolder> getCustomFolders() {
+        return customFolders;
+    }
+
+    public void setCustomFolders(List<CustomFolder> customFolders) {
+        this.customFolders = customFolders;
+    }
 
     public int getDataSourceBehavior() {
         return dataSourceBehavior;

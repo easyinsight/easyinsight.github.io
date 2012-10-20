@@ -5,6 +5,7 @@ import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.Value;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
@@ -355,9 +356,50 @@ public class ReportCalculation {
         }
     }
 
+    public Value filterApply(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
+                      Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) throws RecognitionException {
+        //DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
+        CalculationMetadata calculationMetadata = new CalculationMetadata();
+        calculationMetadata.setFeed(feed);
+        calculationMetadata.setReport(report);
+        calculationMetadata.setInsightRequestMetadata(insightRequestMetadata);
+        calculationMetadata.setConnection(conn);
+        calculationMetadata.setDataSource(feed.getDataSource());
+        Collection<FilterDefinition> allFilters = new ArrayList<FilterDefinition>();
+        if (report.getFilterDefinitions() != null) {
+            allFilters.addAll(report.getFilterDefinitions());
+        }
+        if (dlsFilters != null) {
+            allFilters.addAll(dlsFilters);
+        }
+        calculationMetadata.setFilters(allFilters);
+        //calculationMetadata.setDataSet(dataSet);
+        calculationMetadata.setDataSourceFields(allFields);
+        CalculationTreeNode calculationTreeNode;
+        ICalculationTreeVisitor visitor;
+        CalculationsParser.expr_return ret;
+        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
+        CommonTokenStream tokes = new CommonTokenStream();
+        tokes.setTokenSource(lexer);
+        CalculationsParser parser = new CalculationsParser(tokes);
+        parser.setTreeAdaptor(new NodeFactory());
+        ret = parser.expr();
+        calculationTreeNode = (CalculationTreeNode) ret.getTree();
+        for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
+            if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
+                calculationTreeNode.deleteChild(i);
+                break;
+            }
+        }
+        visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+        calculationTreeNode.accept(visitor);
+        ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
+        calculationTreeNode.accept(rowVisitor);
+        return rowVisitor.getResult();
+    }
+
     public void apply(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
-                      Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) {
-        try {
+                      Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) throws RecognitionException {
             //DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setFeed(feed);
@@ -395,13 +437,10 @@ public class ReportCalculation {
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);
-        } catch (RecognitionException e) {
-            throw new RuntimeException(e);
-        }
     }
 
-    public void applyAfterReport(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap, IRow row) {
-        try {
+    public void applyAfterReport(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap, IRow row) throws RecognitionException {
+
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setReport(report);
             calculationMetadata.setDataSourceFields(allFields);
@@ -425,8 +464,5 @@ public class ReportCalculation {
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, null, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);
-        } catch (RecognitionException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
