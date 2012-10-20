@@ -59,7 +59,7 @@
             </mx:FormItem>
         </mx:Form>
     </mx:VBox>
-    <mx:StringValidator source="{analysisName}" property="text" minLength="3" id="nameValidator"/>
+    <mx:StringValidator source="{analysisName}" property="text" minLength="2" id="nameValidator"/>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="saveAs" result="saved()"/>
     </mx:RemoteObject>
