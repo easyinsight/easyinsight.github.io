@@ -242,8 +242,12 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
 
     public function gotReport(event:ResultEvent):void {
         var info:ReportInfo = analysisService.getReportInfo.lastResult as ReportInfo;
-        report = info.report;
-        dispatchEvent(new ReportSetupEvent(info));
+        if (info.accessDenied) {
+            overlayIndex = 4;
+        } else {
+            report = info.report;
+            dispatchEvent(new ReportSetupEvent(info));
+        }
     }
 
     private var currentComponent:UIComponent;
