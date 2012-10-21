@@ -32,8 +32,6 @@ import java.util.Map;
  */
 public class DatabaseConnection extends ServerDataSourceDefinition {
 
-    private JCS callDataMap = getCache("dbConnectionCache");
-
     private JCS getCache(String cacheName) {
 
         try {
@@ -105,7 +103,7 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
 
             try {
                 System.out.println("setting call data of " + callDataID + getDataFeedID());
-                callDataMap.put(callDataID + getDataFeedID(), 1);
+                getCache("dbConnectionCache").put(callDataID + getDataFeedID(), 1);
             } catch (CacheException e) {
                 LogClass.error(e);
             }
@@ -120,7 +118,7 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
             int retries = 0;
             boolean gotData;
             do {
-                Integer val = (Integer) callDataMap.get(callDataID + getDataFeedID());
+                Integer val = (Integer) getCache("dbConnectionCache").get(callDataID + getDataFeedID());
                 gotData = val == null || val == 2;
                 System.out.println("value on " + callDataID + getDataFeedID() + " = " + val);
                 retries++;
