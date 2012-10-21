@@ -130,6 +130,7 @@
 
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = dataSourceID;
+            dashboardEditorMetadata.dashboardID = dashboard.id;
             dashboardEditorMetadata.role = dashboard.role;
             dashboardEditorMetadata.fixedID = _fixedID > 0;
             dashboardEditorMetadata.borderColor = dashboard.borderColor;
