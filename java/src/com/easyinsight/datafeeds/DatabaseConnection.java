@@ -7,10 +7,13 @@ import com.easyinsight.analysis.ReportException;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.jcs.JCS;
+import org.apache.jcs.access.exception.CacheException;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -28,6 +31,18 @@ import java.util.Map;
  * Time: 9:23 AM
  */
 public class DatabaseConnection extends ServerDataSourceDefinition {
+
+    private JCS callDataMap = getCache("dbConnectionCache");
+
+    private JCS getCache(String cacheName) {
+
+        try {
+            return JCS.getInstance(cacheName);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
 
     public String getRefreshKey() {
         return refreshKey;
@@ -86,6 +101,15 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
                 refreshEndpoint = getRefreshUrl() + "/refresh/refresh.jsp?refreshKey=" + getRefreshKey() + "&callDataID=" + callDataID;
             }
 
+            System.out.println("Invoking " + refreshEndpoint);
+
+            try {
+                System.out.println("setting call data of " + callDataID + getDataFeedID());
+                callDataMap.put(callDataID + getDataFeedID(), 1);
+            } catch (CacheException e) {
+                LogClass.error(e);
+            }
+
             HttpMethod requestMethod = new GetMethod(refreshEndpoint);
             try {
                 client.executeMethod(requestMethod);
@@ -93,9 +117,30 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
                 throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), this));
             }
 
-
+            int retries = 0;
+            boolean gotData;
+            do {
+                Integer val = (Integer) callDataMap.get(callDataID + getDataFeedID());
+                gotData = val == null || val == 2;
+                System.out.println("value on " + callDataID + getDataFeedID() + " = " + val);
+                retries++;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    gotData = true;
+                }
+            } while (retries < 60 && !gotData);
         }
-        return new DataSet();
+        return null;
+    }
+
+    protected boolean noDataProcessing() {
+        return true;
+    }
+
+    @Override
+    protected boolean clearsData(FeedDefinition parentSource) {
+        return false;
     }
 
     public void customStorage(Connection conn) throws SQLException {

@@ -142,10 +142,19 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
+    protected void beforeRefresh(EIConnection conn) {
+
+    }
+
+    protected boolean noDataProcessing() {
+        return false;
+    }
+
     public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
+            beforeRefresh(conn);
             refreshData(accountID, now, conn, parentDefinition, callDataID, lastRefreshTime, fullRefresh);
             conn.commit();
             ReportCache.instance().flushResults(getDataFeedID());
@@ -234,24 +243,26 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     public void applyTempLoad(EIConnection conn, long accountID, @Nullable FeedDefinition parentDefinition, Date lastRefreshTime, String tempTable, boolean fullRefresh) throws Exception {
         DataStorage dataStorage = null;
         try {
-            dataStorage = DataStorage.writeConnection(this, conn, accountID);
-            if (parentDefinition == null) {
-                fullRefresh = fullRefresh && fullNightlyRefresh();
-            } else {
-                fullRefresh = fullRefresh && parentDefinition.fullNightlyRefresh();
-            }
-            boolean insert = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh;
-            if (insert) {
-                clearData(dataStorage);
-                dataStorage.insertFromSelect(tempTable);
-            } else {
-                if (getUpdateKeyName() == null) {
+            if (!noDataProcessing()) {
+                dataStorage = DataStorage.writeConnection(this, conn, accountID);
+                if (parentDefinition == null) {
+                    fullRefresh = fullRefresh && fullNightlyRefresh();
+                } else {
+                    fullRefresh = fullRefresh && parentDefinition.fullNightlyRefresh();
+                }
+                boolean insert = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh;
+                if (insert) {
+                    clearData(dataStorage);
                     dataStorage.insertFromSelect(tempTable);
                 } else {
-                    dataStorage.updateFromTemp(tempTable, getUpdateKey());
+                    if (getUpdateKeyName() == null) {
+                        dataStorage.insertFromSelect(tempTable);
+                    } else {
+                        dataStorage.updateFromTemp(tempTable, getUpdateKey());
+                    }
                 }
+                dataStorage.commit();
             }
-            dataStorage.commit();
         } catch (Exception e) {
             if (dataStorage != null) {
                 dataStorage.rollback();
@@ -266,6 +277,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
 
     public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) throws Exception {
         boolean changed = false;
+        beforeRefresh(conn);
         MigrationResult migrationResult = migrations(conn, this);
         changed = migrationResult.isChanged() || changed;
         Map<String, Key> keyMap = migrationResult.getKeyMap();

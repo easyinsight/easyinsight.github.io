@@ -834,22 +834,15 @@ public class UserUploadService {
                             try {
                                 conn.setAutoCommit(false);
                                 Date now = new Date();
-                                boolean waitOnDone = false;
                                 List<FeedDefinition> sourcesToRefresh = new ArrayList<FeedDefinition>();
                                 if (feedDefinition.getFeedType().getType() == FeedType.COMPOSITE.getType()) {
                                     CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feedDefinition;
                                     for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
                                         FeedDefinition child = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
-                                        if (child.waitsOnServiceUtil()) {
-                                            waitOnDone = true;
-                                        }
                                         sourcesToRefresh.add(child);
                                     }
                                 } else {
                                     sourcesToRefresh.add(feedDefinition);
-                                }
-                                if (sourcesToRefresh.size() > 0) {
-                                    ServiceUtil.instance().establishCount(callID, sourcesToRefresh.size());
                                 }
                                 for (FeedDefinition sourceToRefresh : sourcesToRefresh) {
                                     if (sourceToRefresh instanceof IServerDataSourceDefinition && (sourceToRefresh.getDataSourceType() == DataSourceInfo.STORED_PULL ||
@@ -871,9 +864,9 @@ public class UserUploadService {
                                     }
                                 }
 
-                                if (!feedDefinition.waitsOnServiceUtil() && !waitOnDone) {
+                                //if (!feedDefinition.waitsOnServiceUtil() && !waitOnDone) {
                                     ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, now);
-                                }
+                                //}
                                 conn.commit();
                             } catch (ReportException re) {
                                 if (!conn.getAutoCommit()) {

@@ -9,6 +9,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.util.ServiceUtil;
 import nu.xom.*;
+import org.apache.jcs.JCS;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
@@ -65,7 +66,7 @@ public class CommitServlet extends APIServlet {
             if (callDataID != null && !"null".equals(callDataID)) {
                 try {
                     System.out.println("marking " + callDataID + " done");
-                    ServiceUtil.instance().incrementDone(callDataID);
+                    JCS.getInstance("dbConnectionCache").put(callDataID + dataSource.getDataFeedID(), 2);
                     //ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.DONE);
                 } catch (Exception e) {
                     LogClass.error(e);
