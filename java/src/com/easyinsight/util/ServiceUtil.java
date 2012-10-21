@@ -5,9 +5,6 @@ import com.easyinsight.security.SecurityUtil;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * User: jamesboe
  * Date: 1/3/11
@@ -44,71 +41,74 @@ public class ServiceUtil {
     }
 
     public void establishCount(String callDataID, int count) {
-        CallData callData = get().get(callDataID);
+        CallData callData = get(callDataID);
         callData.setRequiredCount(count);
-        get().put(callDataID, callData);
+        refreshCache(callDataID);
     }
 
     public String longRunningCall(long itemID) {
         String callID = itemID + "-" + SecurityUtil.getUserID() + "-" + System.currentTimeMillis();
-        Map<String, CallData> callMap = (Map<String, CallData>) callDataMap.get(SecurityUtil.getUserID());
-        if (callMap == null) {
-            callMap = new HashMap<String, CallData>();
-            try {
-                callDataMap.put(SecurityUtil.getUserID(), callMap);
-            } catch (CacheException e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            callDataMap.put(callID, new CallData());
+        } catch (CacheException e) {
+            LogClass.error(e);
         }
-        callMap.put(callID, new CallData());
         return callID;
     }
 
-    private Map<String, CallData> get() {
-        return (Map<String, CallData>) callDataMap.get(SecurityUtil.getUserID());
+    private CallData get(String callDataID) {
+        return (CallData) callDataMap.get(callDataID);
     }
 
     public void updateStatusMessage(String callDataID, String statusMessage) {
-        get().get(callDataID).setStatusMessage(statusMessage);
+        get(callDataID).setStatusMessage(statusMessage);
         refreshCache(callDataID);
     }
 
     public void updateStatus(String callDataID, int status) {
-        get().get(callDataID).setStatus(status);
+        get(callDataID).setStatus(status);
         refreshCache(callDataID);
     }
 
     private void refreshCache(String callDataID) {
-        CallData callData = get().get(callDataID);
-        get().put(callDataID, callData);
+        CallData callData = get(callDataID);
+        try {
+            callDataMap.put(callDataID, callData);
+        } catch (CacheException e) {
+            LogClass.error(e);
+        }
     }
 
     public void incrementDone(String callDataID) {
-        CallData callData = get().get(callDataID);
+        CallData callData = get(callDataID);
         callData.incrementCount();
         refreshCache(callDataID);
     }
 
     public void updateStatus(String callDataID, int status, Object result) {
-        get().get(callDataID).setResult(result);
-        get().get(callDataID).setStatus(status);
+        get(callDataID).setResult(result);
+        get(callDataID).setStatus(status);
         refreshCache(callDataID);
     }
 
     public void updateStatus(String callDataID, int status, String message) {
-        get().get(callDataID).setStatusMessage(message);
-        get().get(callDataID).setStatus(status);
+        get(callDataID).setStatusMessage(message);
+        get(callDataID).setStatus(status);
         refreshCache(callDataID);
     }
 
     public CallData getCallData(String callDataID) {
         //System.out.println("retrieving call data for " + callDataID);
-        CallData callData = get().get(callDataID);
+        CallData callData = get(callDataID);
         if (callData == null) {
             return null;
         }
         if (callData.getStatus() == DONE || callData.getStatus() == FAILED) {
-            get().remove(callDataID);
+            try {
+                callDataMap.remove(callDataID);
+            } catch (CacheException e) {
+                LogClass.error(e);
+            }
         }
         return callData;
     }
