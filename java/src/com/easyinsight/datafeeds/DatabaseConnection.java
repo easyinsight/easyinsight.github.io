@@ -111,6 +111,9 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
             HttpMethod requestMethod = new GetMethod(refreshEndpoint);
             try {
                 client.executeMethod(requestMethod);
+                if (requestMethod.getStatusCode() >= 400) {
+                    throw new ReportException(new DataSourceConnectivityReportFault(requestMethod.getStatusText(), this));
+                }
             } catch (Exception e) {
                 throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), this));
             }
@@ -120,7 +123,6 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
             do {
                 Integer val = (Integer) getCache("dbConnectionCache").get(callDataID + getDataFeedID());
                 gotData = val == null || val == 2;
-                System.out.println("value on " + callDataID + getDataFeedID() + " = " + val);
                 retries++;
                 try {
                     Thread.sleep(1000);

@@ -81,7 +81,6 @@ public class ServiceUtil {
     }
 
     public CallData getCallData(String callDataID) {
-        System.out.println("retrieving call data for " + callDataID);
         CallData callData = get().get(callDataID);
         if (callData == null) {
             return null;

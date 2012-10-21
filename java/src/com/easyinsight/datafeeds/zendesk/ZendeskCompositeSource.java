@@ -82,6 +82,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.ZENDESK_ORGANIZATION);
         types.add(FeedType.ZENDESK_USER);
         types.add(FeedType.ZENDESK_TICKET);
+        types.add(FeedType.ZENDESK_COMMENTS);
         types.add(FeedType.ZENDESK_GROUP_TO_USER);
         return types;
     }
@@ -92,7 +93,8 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.ZENDESK_TICKET, FeedType.ZENDESK_GROUP, ZendeskTicketSource.GROUP_ID, ZendeskGroupSource.ID),
                 new ChildConnection(FeedType.ZENDESK_TICKET, FeedType.ZENDESK_ORGANIZATION, ZendeskTicketSource.ORGANIZATION_ID, ZendeskOrganizationSource.ID),
                 new ChildConnection(FeedType.ZENDESK_GROUP, FeedType.ZENDESK_GROUP_TO_USER, ZendeskGroupSource.ID, ZendeskGroupToUserJoinSource.GROUP_ID),
-                new ChildConnection(FeedType.ZENDESK_GROUP_TO_USER, FeedType.ZENDESK_USER, ZendeskGroupToUserJoinSource.USER_ID, ZendeskUserSource.ID));
+                new ChildConnection(FeedType.ZENDESK_GROUP_TO_USER, FeedType.ZENDESK_USER, ZendeskGroupToUserJoinSource.USER_ID, ZendeskUserSource.ID),
+                new ChildConnection(FeedType.ZENDESK_TICKET, FeedType.ZENDESK_COMMENTS, ZendeskTicketSource.TICKET_ID, ZendeskCommentSource.COMMENT_TICKET_ID));
     }
 
     @Override
@@ -149,7 +151,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         if (url == null || "".equals(url)) {
             return url;
         }
-        String basecampUrl = ((url.startsWith("http://") || url.startsWith("https://")) ? "" : "http://") + url;
+        String basecampUrl = ((url.startsWith("http://") || url.startsWith("https://")) ? "" : "https://") + url;
         if(basecampUrl.endsWith("/")) {
             basecampUrl = basecampUrl.substring(0, basecampUrl.length() - 1);
         }

@@ -177,6 +177,7 @@ public class FeedType implements Serializable {
     public static final FeedType YOUTRACK_COMPOSITE = new FeedType(155);
     public static final FeedType YOUTRACK_PROJECTS = new FeedType(156);
     public static final FeedType YOUTRACK_TASKS = new FeedType(157);
+    public static final FeedType ZENDESK_COMMENTS = new FeedType(158);
 
     public FeedType() {
     }

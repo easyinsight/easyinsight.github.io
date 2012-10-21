@@ -232,6 +232,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.YOUTRACK_COMPOSITE, YouTrackCompositeSource.class);
         registerType(FeedType.YOUTRACK_PROJECTS, YouTrackProjectSource.class);
         registerType(FeedType.YOUTRACK_TASKS, YouTrackIssueSource.class);
+        registerType(FeedType.ZENDESK_COMMENTS, ZendeskCommentSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
