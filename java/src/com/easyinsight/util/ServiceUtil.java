@@ -73,6 +73,7 @@ public class ServiceUtil {
     private void refreshCache(String callDataID) {
         CallData callData = get(callDataID);
         try {
+            callDataMap.remove(callDataID);
             callDataMap.put(callDataID, callData);
         } catch (CacheException e) {
             LogClass.error(e);
