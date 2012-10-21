@@ -70,6 +70,8 @@ public class YouTrackIssueSource extends YouTrackBaseSource {
                 }
                 fields.add(new AnalysisDimension(key));
             }
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -154,6 +156,8 @@ public class YouTrackIssueSource extends YouTrackBaseSource {
             }
 
             return dataSet;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

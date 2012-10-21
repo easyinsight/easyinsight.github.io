@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.youtrack;
 
+import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import nu.xom.Builder;
@@ -20,18 +21,23 @@ import java.text.ParseException;
  */
 public abstract class YouTrackBaseSource extends ServerDataSourceDefinition {
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, YouTrackCompositeSource parentSource) throws ReportException, IOException, ParsingException {
-        System.out.println(parentSource.getUrl() + path);
-        HttpMethod restMethod = new GetMethod(parentSource.getUrl() + path);
+        try {
+            System.out.println(parentSource.getUrl() + path);
+            HttpMethod restMethod = new GetMethod(parentSource.getUrl() + path);
 
-        //restMethod.setRequestHeader("Accept", "application/xml");
-        //restMethod.setRequestHeader("Content-Type", "application/xml");
+            //restMethod.setRequestHeader("Accept", "application/xml");
+            //restMethod.setRequestHeader("Content-Type", "application/xml");
 
-        restMethod.setRequestHeader("Cookie", parentSource.getCookie());
+            restMethod.setRequestHeader("Cookie", parentSource.getCookie());
 
-        client.executeMethod(restMethod);
+            client.executeMethod(restMethod);
 
-        System.out.println(restMethod.getResponseBodyAsString());
-
-        return new Builder().build(restMethod.getResponseBodyAsStream());
+            if (restMethod.getStatusCode() == 401) {
+                throw new ReportException(new DataSourceConnectivityReportFault("Invalid user name or password.", parentSource));
+            }
+            return new Builder().build(restMethod.getResponseBodyAsStream());
+        } catch (IllegalArgumentException e) {
+            throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), parentSource));
+        }
     }
 }

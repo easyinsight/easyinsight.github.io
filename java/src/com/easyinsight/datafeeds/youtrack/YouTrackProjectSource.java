@@ -74,6 +74,8 @@ public class YouTrackProjectSource extends YouTrackBaseSource {
             }
 
             return dataSet;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
