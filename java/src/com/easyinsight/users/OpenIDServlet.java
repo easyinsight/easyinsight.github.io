@@ -70,6 +70,8 @@ public class OpenIDServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String domain = req.getParameter("hd");
+        System.out.println("domain = " + domain);
+        System.out.println("callback = " + req.getParameter("callback"));
         if (domain != null) {
             req.getSession().setAttribute("googleDomain", req.getParameter("hd"));
             req.getSession().setAttribute("googleCallbackURL", req.getParameter("callback"));
@@ -101,6 +103,7 @@ public class OpenIDServlet extends HttpServlet {
         try {
             UserServiceResponse response = completeAuthentication(req);
             if (response.isGoogleAuth()) {
+                System.out.println("redirecting...");
                 resp.sendRedirect(RedirectUtil.getURL(req, "/app/googleAppsWelcome.jsp"));
             } else {
                 SecurityUtil.populateSession(req.getSession(), response);
