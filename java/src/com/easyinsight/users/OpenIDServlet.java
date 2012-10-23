@@ -224,7 +224,7 @@ public class OpenIDServlet extends HttpServlet {
      */
     String baseUrl(HttpServletRequest request) {
         StringBuffer url = new StringBuffer(request.getScheme())
-                .append("://").append(request.getServerName());
+                .append("://").append("staging.easy-insight.com");
 
         if ((request.getScheme().equalsIgnoreCase("http")
                 && request.getServerPort() != 80)
