@@ -17,6 +17,15 @@ public class AccountTransferObject {
     private boolean apiEnabled;
     private Date creationDate;
     private boolean optInEmail;
+    private String googleAppsDomain;
+
+    public String getGoogleAppsDomain() {
+        return googleAppsDomain;
+    }
+
+    public void setGoogleAppsDomain(String googleAppsDomain) {
+        this.googleAppsDomain = googleAppsDomain;
+    }
 
     public String getSnappCloudId() {
         return snappCloudId;
