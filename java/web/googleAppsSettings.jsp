@@ -33,7 +33,7 @@
 
         <div class="span8 offset2">
 
-            <form class="well" method="post" action="/app/googleAppsCreation.jsp" id="loginForm">
+            <form class="well" method="post" action="/app/googleAppsCreateAction.jsp" id="loginForm">
 
                 <input type="hidden" name='OWASP_CSRFTOKEN' value="<%= session.getAttribute("OWASP_CSRFTOKEN")%>" />
                 <div style="width:100%;text-align: center">
