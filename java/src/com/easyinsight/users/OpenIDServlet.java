@@ -101,6 +101,7 @@ public class OpenIDServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
+            System.out.println("handling post...");
             UserServiceResponse response = completeAuthentication(req);
             if (response.isGoogleAuth()) {
                 System.out.println("redirecting...");
