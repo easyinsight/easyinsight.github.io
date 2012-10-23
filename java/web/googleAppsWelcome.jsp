@@ -24,8 +24,7 @@
     <script type="text/javascript" src="/js/bootstrap.min.js"></script>
 </head>
 <%
-    request.getSession().setAttribute("googleDomain", request.getParameter("domain"));
-    request.getSession().setAttribute("googleCallbackURL", request.getParameter("callback"));
+
 %>
 <body>
 <div class="container">

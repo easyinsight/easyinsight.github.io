@@ -18,6 +18,7 @@ import java.util.Date;
  * Time: 5:35:16 PM
  */
 public class UserServiceResponse {
+    private boolean googleAuth;
     private boolean successful;
     private String failureMessage;
     private boolean guestUser;
@@ -60,6 +61,14 @@ public class UserServiceResponse {
     private boolean reportMode;
     private Date newsDate;
     private Date newsDismissDate;
+
+    public boolean isGoogleAuth() {
+        return googleAuth;
+    }
+
+    public void setGoogleAuth(boolean googleAuth) {
+        this.googleAuth = googleAuth;
+    }
 
     public static UserServiceResponse createResponseWithUISettings(User user, ApplicationSkin applicationSkin, String personaName) {
         return createResponse(user, applicationSkin, personaName);
