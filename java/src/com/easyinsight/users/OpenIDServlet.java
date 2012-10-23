@@ -238,13 +238,26 @@ public class OpenIDServlet extends HttpServlet {
      */
     UserServiceResponse onSuccess(AuthResponseHelper helper, HttpServletRequest request) {
         String email = helper.getAxFetchAttributeValue(Step2.AxSchema.EMAIL);
+        String firstName = helper.getAxFetchAttributeValue(Step2.AxSchema.FIRST_NAME);
+        String lastName = helper.getAxFetchAttributeValue(Step2.AxSchema.LAST_NAME);
 
         EIConnection conn =  Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             List<User> users = session.createQuery("from User where email = ?").setString(0, email).list();
             if(users.size() == 1) {
-                return UserServiceResponse.createResponse(users.get(0), session, conn);
+                User user = users.get(0);
+                if (user.getAccount().getGoogleDomainName() == null) {
+                    request.getSession().setAttribute("googleAppsSetupEmail", email);
+                    request.getSession().setAttribute("googleAppsSetupFirstName", firstName);
+                    request.getSession().setAttribute("googleAppsSetupLastName", lastName);
+                } else {
+                    return UserServiceResponse.createResponse(user, session, conn);
+                }
+            } else {
+                request.getSession().setAttribute("googleAppsSetupEmail", email);
+                request.getSession().setAttribute("googleAppsSetupFirstName", firstName);
+                request.getSession().setAttribute("googleAppsSetupLastName", lastName);
             }
         } catch(Exception e) {
             throw new RuntimeException(e);

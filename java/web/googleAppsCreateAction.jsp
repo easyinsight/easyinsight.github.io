@@ -1,0 +1,27 @@
+<%@ page import="com.easyinsight.util.RandomTextGenerator" %>
+<%@ page import="com.easyinsight.users.*" %>
+<%@ page import="com.easyinsight.security.SecurityUtil" %><%
+    String callbackURL = (String) session.getAttribute("googleCallbackURL");
+    String domain = (String) session.getAttribute("googleDomain");
+    String email = (String) session.getAttribute("googleAppsSetupEmail");
+    String firstName = (String) session.getAttribute("googleAppsSetupFirstName");
+    String lastName = (String) session.getAttribute("googleAppsSetupLastName");
+    UserTransferObject admin = new UserTransferObject();
+    admin.setEmail(email);
+    admin.setUserName(email);
+    admin.setFirstName(firstName);
+    admin.setName(lastName);
+    admin.setAccountAdmin(true);
+    admin.setAnalyst(true);
+    admin.setOptInEmail(true);
+    admin.setInitialSetupDone(true);
+    AccountTransferObject accountTransferObject = new AccountTransferObject();
+    accountTransferObject.setAccountType(Account.PLUS);
+    accountTransferObject.setName(request.getParameter("accountName"));
+    accountTransferObject.setGoogleAppsDomain(domain);
+    String password = RandomTextGenerator.generateText(15);
+    new UserService().createAccount(admin, accountTransferObject, password);
+    UserServiceResponse userServiceResponse = new UserService().authenticate(email, password, false);
+    SecurityUtil.populateSession(session, userServiceResponse);
+    response.sendRedirect(callbackURL);
+%>

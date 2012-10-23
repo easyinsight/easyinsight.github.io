@@ -69,6 +69,9 @@ public class Account {
     @Column(name="account_id")
     private long accountID;
 
+    @Column(name="google_domain_name")
+    private String googleDomainName;
+
     @Column(name="manual_invoicing")
     private boolean manualInvoicing;
 
@@ -205,6 +208,14 @@ public class Account {
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public String getGoogleDomainName() {
+        return googleDomainName;
+    }
+
+    public void setGoogleDomainName(String googleDomainName) {
+        this.googleDomainName = googleDomainName;
+    }
 
     public int getDaysOverSizeBoundary() {
         return daysOverSizeBoundary;
