@@ -793,15 +793,20 @@ public class UserService {
             session.update(account);
 
             String activationKey = RandomTextGenerator.generateText(20);
-            if (sourceURL == null) {
-                sourceURL = "https://www.easy-insight.com/app";
+            if (account.getGoogleDomainName() == null) {
+
+                if (sourceURL == null) {
+                    sourceURL = "https://www.easy-insight.com/app";
+                }
+                createAccountActivation(conn, account.getAccountID(), activationKey, sourceURL);
             }
-            createAccountActivation(conn, account.getAccountID(), activationKey, sourceURL);
             //}
             session.flush();
             conn.commit();
             if (SecurityUtil.getSecurityProvider() instanceof DefaultSecurityProvider) {
-                new AccountMemberInvitation().sendActivationEmail(user.getEmail(), user.getFirstName(), activationKey);
+                if (account.getGoogleDomainName() == null) {
+                    new AccountMemberInvitation().sendActivationEmail(user.getEmail(), user.getFirstName(), activationKey);
+                }
                 new Thread(new SalesEmail(account, user)).start();
             }
             new AccountActivityStorage().generateSalesEmailSchedules(user.getUserID(), conn);

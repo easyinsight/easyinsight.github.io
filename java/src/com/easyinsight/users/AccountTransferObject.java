@@ -111,6 +111,7 @@ public class AccountTransferObject {
 
     public Account toAccount() {
         Account account = new Account();
+        account.setGoogleDomainName(googleAppsDomain);
         account.setMaxUsers(maxUsers);
         account.setMaxSize(maxSize);
         account.setOptInEmail(optInEmail);
