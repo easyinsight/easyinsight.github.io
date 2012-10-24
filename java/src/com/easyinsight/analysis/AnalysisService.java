@@ -6,7 +6,6 @@ import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
-import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;

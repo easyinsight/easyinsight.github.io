@@ -1,6 +1,8 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.calculations.*;
+import com.easyinsight.calculations.functions.NamedKeySpecification;
+import com.easyinsight.calculations.NodeFactory;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.core.Key;

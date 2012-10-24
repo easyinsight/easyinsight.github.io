@@ -1,6 +1,7 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.calculations.functions.CastFunction;
 import com.easyinsight.core.Value;
 
 import java.util.List;
@@ -56,6 +57,42 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(StringNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(EqualsNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(NotEqualsNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(GreaterThanNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(GreaterThanEqualToNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(LessThanNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(LessThanEqualToNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(AndNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(OrNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(NotNode node) {
         visitChildren(node);
     }
 

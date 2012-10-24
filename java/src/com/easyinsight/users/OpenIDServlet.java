@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -110,7 +111,12 @@ public class OpenIDServlet extends HttpServlet {
                 resp.sendRedirect(RedirectUtil.getURL(req, "/app/googleAppsWelcome.jsp"));
             } else {
                 SecurityUtil.populateSession(req.getSession(), response);
-                resp.sendRedirect(homePath);
+                SecurityUtil.populateSession(req.getSession(), response);
+                try {
+                    UserService.checkAccountStateOnLogin(req.getSession(), response, req, resp);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
             }
         } catch (OpenIDException e) {
             throw new ServletException("Error processing OpenID response", e);
@@ -131,10 +137,7 @@ public class OpenIDServlet extends HttpServlet {
         IdpIdentifier openId = new IdpIdentifier(op);
 
         String realm = realm(request);
-        String returnToUrl = "https://staging.easy-insight.com/app/openid";
-
-        System.out.println("realm = " + realm);
-        System.out.println("return url = " + returnToUrl);
+        String returnToUrl = returnTo(request);
 
         AuthRequestHelper helper = consumerHelper.getAuthRequestHelper(openId, returnToUrl);
         addAttributes(helper);
@@ -165,7 +168,6 @@ public class OpenIDServlet extends HttpServlet {
         HttpSession session = request.getSession();
         ParameterList openidResp = Step2.getParameterList(request);
         String receivingUrl = currentUrl(request);
-        receivingUrl = receivingUrl.replace("domu-12-31-38-01-d4-11.compute-1.internal:8443", "staging.easy-insight.com");
         DiscoveryInformation discovered =
                 (DiscoveryInformation) session.getAttribute("discovered");
 
@@ -234,7 +236,7 @@ public class OpenIDServlet extends HttpServlet {
      */
     String baseUrl(HttpServletRequest request) {
         StringBuffer url = new StringBuffer(request.getScheme())
-                .append("://").append("staging.easy-insight.com");
+                .append("://").append(request.getServerName());
 
         if ((request.getScheme().equalsIgnoreCase("http")
                 && request.getServerPort() != 80)
@@ -255,32 +257,13 @@ public class OpenIDServlet extends HttpServlet {
      */
     UserServiceResponse onSuccess(AuthResponseHelper helper, HttpServletRequest request) {
         String email = helper.getAxFetchAttributeValue(Step2.AxSchema.EMAIL);
-        String firstName = helper.getAxFetchAttributeValue(Step2.AxSchema.FIRST_NAME);
-        String lastName = helper.getAxFetchAttributeValue(Step2.AxSchema.LAST_NAME);
 
         EIConnection conn =  Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             List<User> users = session.createQuery("from User where email = ?").setString(0, email).list();
             if(users.size() == 1) {
-                User user = users.get(0);
-                if (user.getAccount().getGoogleDomainName() == null) {
-                    UserServiceResponse userServiceResponse = new UserServiceResponse();
-                    userServiceResponse.setGoogleAuth(true);
-                    request.getSession().setAttribute("googleAppsSetupEmail", email);
-                    request.getSession().setAttribute("googleAppsSetupFirstName", firstName);
-                    request.getSession().setAttribute("googleAppsSetupLastName", lastName);
-                    return userServiceResponse;
-                } else {
-                    return UserServiceResponse.createResponse(user, session, conn);
-                }
-            } else {
-                UserServiceResponse userServiceResponse = new UserServiceResponse();
-                userServiceResponse.setGoogleAuth(true);
-                request.getSession().setAttribute("googleAppsSetupEmail", email);
-                request.getSession().setAttribute("googleAppsSetupFirstName", firstName);
-                request.getSession().setAttribute("googleAppsSetupLastName", lastName);
-                return userServiceResponse;
+                return UserServiceResponse.createResponse(users.get(0), session, conn);
             }
         } catch(Exception e) {
             throw new RuntimeException(e);
@@ -288,6 +271,7 @@ public class OpenIDServlet extends HttpServlet {
             session.close();
             Database.closeConnection(conn);
         }
+        return null;
     }
 
     /**

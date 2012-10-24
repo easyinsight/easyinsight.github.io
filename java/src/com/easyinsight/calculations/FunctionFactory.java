@@ -1,11 +1,8 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.AggregationTypes;
+import com.easyinsight.calculations.functions.*;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -34,7 +31,9 @@ public class FunctionFactory {
             return new CastFunction(aggregationMap.get(s), s);
         }
         s = s.toLowerCase();
-        if (s.equals("ln")) {
+        if(s.equals("if")) {
+          return new IfFunction();
+        } else if (s.equals("ln")) {
             return new NaturalLog();
         } else if (s.equals("firstvalue")) {
             return new FirstValueFunction();

@@ -18,21 +18,36 @@ tokens
 	OpenBrace = '[';
 	CloseBrace = ']';
 	Quote = '"';
+	LessThanEqualTo = '<=';
+	GreaterThanEqualTo = '>=';
+	Equals = '==';
+	NotEquals = '!=';
+	GreaterThan = '>';
+	LessThan = '<';
+	And = '&&';
+	Or = '||';
+	Not = '!';
 }
 
 @header { package com.easyinsight.calculations.generated; }
 @lexer::header { package com.easyinsight.calculations.generated; }
 
 
-expr	:	term ((Add^ | Subtract^) term)*;
+expr	:	evaluation ((And^ | Or^) evaluation)*;
+
+
 startExpr
 	:	expr EOF!;
 
+evaluation
+	:	sum ((LessThanEqualTo^ | GreaterThanEqualTo^ | Equals^ | NotEquals^ | GreaterThan^ | LessThan^) sum)*;
+
+sum	:	term ((Add^ | Subtract^) term)*;
 
 term	:	unaryOperator ((Multiply^ | Divide^) unaryOperator)*;
 
 unaryOperator
-	:	(Add^ | Subtract^)? exponent;
+	:	(Add^ | Subtract^ | Not^)? exponent;
 exponent:	factor (Exp^ unaryOperator)?;
 
 factor	:	symbol | parenExpr;

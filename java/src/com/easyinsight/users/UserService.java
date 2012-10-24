@@ -5,6 +5,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
+import com.easyinsight.html.RedirectUtil;
 import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.preferences.PreferencesService;
@@ -22,6 +23,7 @@ import com.easyinsight.billing.BrainTreeBillingSystem;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
 import java.util.*;
@@ -34,6 +36,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import flex.messaging.FlexContext;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 
@@ -43,6 +48,47 @@ import javax.servlet.http.HttpSession;
  * Time: 5:34:56 PM
  */
 public class UserService {
+
+    public static void checkAccountStateOnLogin(HttpSession session, UserServiceResponse userServiceResponse, HttpServletRequest request, HttpServletResponse response) throws IOException, SQLException {
+        String oldRedirectUrl = (String) session.getAttribute("loginRedirect");
+        if (userServiceResponse.getAccountState() == Account.CLOSED) {
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/billingSetupAction.jsp"));
+        } else if (userServiceResponse.getAccountState() == Account.DELINQUENT) {
+            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/billingSetupAction.jsp"));
+        } else if (userServiceResponse.getAccountState() == Account.BILLING_FAILED) {
+            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/billingSetupAction.jsp"));
+        } else if (userServiceResponse.getAccountState() == Account.INACTIVE) {
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/activation/reactivate.jsp"));
+        } else if (userServiceResponse.getAccountState() == Account.REACTIVATION_POSSIBLE) {
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/reactivate"));
+        } else {
+            String urlHash = request.getParameter("urlhash");
+            String rememberMe = request.getParameter("rememberMeCheckbox");
+            if ("on".equals(rememberMe)) {
+                Cookie userNameCookie = new Cookie("eiUserName", userServiceResponse.getUserName());
+                userNameCookie.setSecure(true);
+                userNameCookie.setMaxAge(60 * 60 * 24 * 30);
+                response.addCookie(userNameCookie);
+                Cookie tokenCookie = new Cookie("eiRememberMe", new InternalUserService().createCookie(userServiceResponse.getUserID()));
+                tokenCookie.setSecure(true);
+                tokenCookie.setMaxAge(60 * 60 * 24 * 30);
+                response.addCookie(tokenCookie);
+            }
+            if (userServiceResponse.isFirstLogin()) {
+                response.sendRedirect(RedirectUtil.getURL(request, "/app/user/initialUserSetup.jsp"));
+            } else {
+                session.removeAttribute("loginRedirect");
+                String redirectUrl = RedirectUtil.getURL(request, "/app/");
+                //System.out.println("Redirect url = " + oldRedirectUrl);
+                if(oldRedirectUrl != null) {
+                   redirectUrl = oldRedirectUrl;
+                }
+                if(urlHash != null)
+                   redirectUrl = redirectUrl + urlHash;
+                response.sendRedirect(redirectUrl);
+            }
+        }
+    }
 
     public void dismissNews() {
         EIConnection conn = Database.instance().getConnection();

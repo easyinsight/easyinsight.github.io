@@ -1,12 +1,13 @@
 package test.calculations;
 
+import com.easyinsight.calculations.NodeFactory;
+import com.easyinsight.calculations.generated.CalculationsLexer;
+import com.easyinsight.calculations.generated.CalculationsParser;
 import junit.framework.TestCase;
 import test.util.TestUtil;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.calculations.*;
-import com.easyinsight.calculations.generated.CalculationsParser;
-import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.database.Database;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.FeedStorage;

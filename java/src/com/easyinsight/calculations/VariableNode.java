@@ -1,6 +1,7 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.calculations.functions.NamedKeySpecification;
 import org.antlr.runtime.Token;
 
 import java.util.List;

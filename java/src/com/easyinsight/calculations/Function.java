@@ -16,12 +16,12 @@ import java.util.Map;
  * Time: 8:59:18 PM
  */
 public abstract class Function implements IFunction {
-    List<Value> params;
-    List<List<Value>> columns;
+    protected List<Value> params;
+    protected List<List<Value>> columns;
 
-    Map<Integer, Value> paramMap = new HashMap<Integer, Value>();
+    protected Map<Integer, Value> paramMap = new HashMap<Integer, Value>();
 
-    CalculationMetadata calculationMetadata;
+    protected CalculationMetadata calculationMetadata;
 
     private FunctionNode functionNode;
 
@@ -121,7 +121,7 @@ public abstract class Function implements IFunction {
         return "";
     }
 
-    public Value minusQuotes(Value value) {
+    public static Value minusQuotes(Value value) {
         if (value.type() == Value.STRING) {
             String string = value.toString();
             if (string.length() >= 2) {

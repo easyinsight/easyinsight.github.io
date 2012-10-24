@@ -1,8 +1,9 @@
 package test.calculations;
 
-import junit.framework.TestCase;
+import com.easyinsight.calculations.NodeFactory;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.generated.CalculationsParser;
+import junit.framework.TestCase;
 import com.easyinsight.calculations.*;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;

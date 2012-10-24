@@ -14,5 +14,16 @@ public interface ICalculationTreeVisitor {
     void visit(FunctionNode node);
     void visit(StringNode node);
 
+    void visit(EqualsNode node);
+    void visit(NotEqualsNode node);
+    void visit(GreaterThanNode node);
+    void visit(GreaterThanEqualToNode node);
+    void visit(LessThanNode node);
+    void visit(LessThanEqualToNode node);
+
+    void visit(AndNode node);
+    void visit(OrNode node);
+    void visit(NotNode node);
+
     Value getResult();
 }

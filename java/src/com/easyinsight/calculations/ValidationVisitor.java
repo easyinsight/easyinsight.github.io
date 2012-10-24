@@ -23,6 +23,42 @@ public class ValidationVisitor implements ICalculationTreeVisitor {
         visitChildren(node);
     }
 
+    public void visit(EqualsNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(NotEqualsNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(GreaterThanNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(GreaterThanEqualToNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(LessThanNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(LessThanEqualToNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(AndNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(OrNode node) {
+        visitChildren(node);
+    }
+
+    public void visit(NotNode node) {
+        visitChildren(node);
+    }
+
     public void visit(NumberNode node) {
         visitChildren(node);
     }
