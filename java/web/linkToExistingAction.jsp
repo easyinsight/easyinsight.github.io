@@ -1,6 +1,5 @@
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="org.hibernate.Session" %>
-<%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.users.Account" %>
 <%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
@@ -25,6 +24,7 @@
                 // redirect back to google
                 System.out.println("redirecting back to google URL of " + doneURL);
                 account.setGoogleDomainName(googleDomainName);
+                hibernateSession.update(account);
                 response.sendRedirect(doneURL);
             }
             hibernateSession.getTransaction().commit();
