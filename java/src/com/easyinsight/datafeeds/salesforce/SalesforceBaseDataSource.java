@@ -1,5 +1,8 @@
 package com.easyinsight.datafeeds.salesforce;
 
+import com.easyinsight.core.DerivedKey;
+import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -277,7 +280,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
             if (existing == null) {
                 String searchableString = sobjectNode.query("searchable/text()").get(0).getValue();
                 boolean searchable = Boolean.parseBoolean(searchableString);
-                if (searchable || "UserRole".equals(name) || "OpportunityHistory".equals(name)) {
+                if (searchable || "UserRole".equals(name) || "OpportunityHistory".equals(name) || "OpportunityStage".equals(name)) {
                 //if (searchable) {
                     SalesforceSObjectSource salesforceSObjectSource = new SalesforceSObjectSource();
                     salesforceSObjectSource.setSobjectName(name);
@@ -290,6 +293,9 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                     map.put(name, salesforceSObjectSource);
                     connectionList.addAll(connections(name));
                 }
+            } else {
+                map.put(name, existing);
+                connectionList.addAll(connections(name));
             }
         }
 
@@ -315,9 +321,9 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                 }
             }
         }
-        if (getConnections() == null || getConnections().size() == 0) {
+        //if (getConnections() == null || getConnections().size() == 0) {
             setConnections(connections);
-        }
+        //}
         return defaultChildren;
     }
 
@@ -353,6 +359,34 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
             connections.add(new SFConnection(sobjectName, targetSObject, idField, targetField));
         }
         return connections;
+    }
+
+    @Override
+    public void beforeSave(EIConnection conn) throws Exception {
+        Map<Long, FeedDefinition> childMap = new HashMap<Long, FeedDefinition>();
+        for (AnalysisItem analysisItem : getFields()) {
+            Key key = analysisItem.getKey();
+            //if (key.toBaseKey().indexed()) {
+            if (key instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                FeedDefinition child = childMap.get(derivedKey.getFeedID());
+                if (child == null) {
+                    child = new FeedStorage().getFeedDefinitionData(derivedKey.getFeedID(), conn);
+                    childMap.put(derivedKey.getFeedID(), child);
+                }
+                for (AnalysisItem item : child.getFields()) {
+                    if (item.getKey().getKeyID() == derivedKey.getParentKey().getKeyID()) {
+                        NamedKey namedKey = (NamedKey) item.getKey().toBaseKey();
+                        namedKey.setIndexed(key.toBaseKey().indexed());
+                    }
+                }
+            }
+            //}
+        }
+        for (FeedDefinition dataSource : childMap.values()) {
+            new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
+        }
+        super.beforeSave(conn);
     }
 
     private static class SFConnection {

@@ -116,6 +116,7 @@
 
         public function createHierarchy():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            window.dataSourceID = _dataSourceID;
             window.editorClass = HierarchyWindow;
             window.analysisItems = _wrappers;
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);

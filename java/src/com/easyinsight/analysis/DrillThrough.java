@@ -24,11 +24,22 @@ public class DrillThrough extends Link {
     @Column(name="dashboard_id")
     private Long dashboardID;
 
+    @Column(name="add_all_filters")
+    private boolean addAllFilters;
+
     @Column(name="mini_window")
     private boolean miniWindow;
 
     @Column(name="marmotscript")
     private String marmotScript;
+
+    public boolean isAddAllFilters() {
+        return addAllFilters;
+    }
+
+    public void setAddAllFilters(boolean addAllFilters) {
+        this.addAllFilters = addAllFilters;
+    }
 
     public String getMarmotScript() {
         return marmotScript;

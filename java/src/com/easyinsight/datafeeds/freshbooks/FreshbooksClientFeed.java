@@ -70,9 +70,11 @@ public class FreshbooksClientFeed extends FreshbooksFeed {
                         String zip = queryField(invoice, "p_code/text()");
                         String country = queryField(invoice, "p_country/text()");
                         String organization = queryField(invoice, "organization/text()");
+                        String folder = queryField(invoice, "folder/text()");
 
                         IRow row = dataSet.createRow();
                         addValue(row, FreshbooksClientSource.FIRST_NAME, firstName, keys);
+                        addValue(row, FreshbooksClientSource.FOLDER, folder, keys);
                         addValue(row, FreshbooksClientSource.CLIENT_ID, clientID, keys);
                         addValue(row, FreshbooksClientSource.LAST_NAME, lastName, keys);
                         addValue(row, FreshbooksClientSource.NAME, name, keys);

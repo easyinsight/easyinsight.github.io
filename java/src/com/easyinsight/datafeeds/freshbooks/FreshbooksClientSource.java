@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.freshbooks;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.Feed;
@@ -35,6 +36,7 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
     public static final String STATE = "Client State";
     public static final String POSTAL = "Client Postal Code";
     public static final String COUNTRY = "Client Country";
+    public static final String FOLDER = "Client Folder";
     public static final String ORGANIZATION = "Client Organization";
     public static final String WORK_PHONE = "Client Work Phone";
     public static final String NOTES = "Client Internal Notes";
@@ -48,7 +50,7 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(FIRST_NAME, LAST_NAME, NAME, USERNAME, PRIMARY_STREET1, PRIMARY_STREET2, CITY,
-                STATE, POSTAL, COUNTRY, ORGANIZATION, WORK_PHONE, COUNT, CLIENT_ID, EMAIL, NOTES);
+                STATE, POSTAL, COUNTRY, ORGANIZATION, WORK_PHONE, COUNT, CLIENT_ID, EMAIL, NOTES, FOLDER);
     }
 
     @Override
@@ -70,6 +72,11 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.CITY), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.STATE), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.COUNTRY), true));
+        Key folderKey = keys.get(FreshbooksClientSource.FOLDER);
+        if (folderKey == null) {
+            folderKey = new NamedKey(FreshbooksClientSource.FOLDER);
+        }
+        items.add(new AnalysisDimension(folderKey, true));
         items.add(new AnalysisZipCode(keys.get(FreshbooksClientSource.POSTAL), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.ORGANIZATION), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.WORK_PHONE), true));
@@ -115,9 +122,11 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
                         String country = queryField(invoice, "p_country/text()");
                         String organization = queryField(invoice, "organization/text()");
                         String notes = queryField(invoice, "notes/text()");
+                        String folder = queryField(invoice, "folder/text()");
 
                         IRow row = dataSet.createRow();
                         addValue(row, FreshbooksClientSource.FIRST_NAME, firstName, keys);
+                        addValue(row, FreshbooksClientSource.FOLDER, folder, keys);
                         addValue(row, FreshbooksClientSource.NOTES, notes, keys);
                         addValue(row, FreshbooksClientSource.CLIENT_ID, clientID, keys);
                         addValue(row, FreshbooksClientSource.LAST_NAME, lastName, keys);

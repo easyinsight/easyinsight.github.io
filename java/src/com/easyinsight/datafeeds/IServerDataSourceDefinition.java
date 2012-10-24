@@ -27,6 +27,8 @@ public interface IServerDataSourceDefinition {
      */
     int getRequiredAccountTier();
 
+    void validateTableSetup(EIConnection conn) throws SQLException ;
+
     boolean hasNewData(Date lastRefreshDate, FeedDefinition parent, EIConnection conn) throws Exception;
 
     long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems, FeedDefinition parentDefinition) throws Exception;

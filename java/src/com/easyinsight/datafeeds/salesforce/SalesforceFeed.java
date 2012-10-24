@@ -11,8 +11,9 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.Pipeline;
-import com.google.gdata.util.common.base.CharEscapers;
+import com.easyinsight.storage.DataStorage;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -41,30 +42,53 @@ public class SalesforceFeed extends Feed {
     }
 
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
-        SalesforceBaseDataSource salesforceBaseDataSource;
-        try {
-            salesforceBaseDataSource = (SalesforceBaseDataSource) new FeedStorage().getFeedDefinitionData(getDataSource().getParentSourceID(), conn);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        DataSet dataSet;
+        boolean indexed = true;
+        for (AnalysisItem analysisItem : analysisItems) {
+            if (!analysisItem.getKey().indexed()) {
+                System.out.println(analysisItem.toDisplay() + " was not indexed");
+                indexed = false;
+            }
         }
-        try {
-            return getDataSet(salesforceBaseDataSource, analysisItems, filters, insightRequestMetadata);
-        } catch (ReportException re) {
-            throw re;
-        } catch (AuthFailed authFailed) {
+
+        if (indexed) {
+            DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
             try {
-                salesforceBaseDataSource.refreshTokenInfo();
-                new FeedStorage().updateDataFeedConfiguration(salesforceBaseDataSource);
+                insightRequestMetadata.setGmtData(getDataSource().gmtTime());
+                dataSet = source.retrieveData(analysisItems, filters, null, insightRequestMetadata);
+                return dataSet;
+            } catch (SQLException e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            } finally {
+                source.closeConnection();
+            }
+        } else {
+            SalesforceBaseDataSource salesforceBaseDataSource;
+            try {
+                salesforceBaseDataSource = (SalesforceBaseDataSource) new FeedStorage().getFeedDefinitionData(getDataSource().getParentSourceID(), conn);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            try {
                 return getDataSet(salesforceBaseDataSource, analysisItems, filters, insightRequestMetadata);
             } catch (ReportException re) {
                 throw re;
-            } catch (AuthFailed authFailed1) {
-                throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Salesforce data.", salesforceBaseDataSource));
-            } catch (Exception e1) {
-                throw new RuntimeException(e1);
+            } catch (AuthFailed authFailed) {
+                try {
+                    salesforceBaseDataSource.refreshTokenInfo();
+                    new FeedStorage().updateDataFeedConfiguration(salesforceBaseDataSource);
+                    return getDataSet(salesforceBaseDataSource, analysisItems, filters, insightRequestMetadata);
+                } catch (ReportException re) {
+                    throw re;
+                } catch (AuthFailed authFailed1) {
+                    throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Salesforce data.", salesforceBaseDataSource));
+                } catch (Exception e1) {
+                    throw new RuntimeException(e1);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -165,37 +189,50 @@ public class SalesforceFeed extends Feed {
             if (where.length() > 0) {
                 queryBuilder.append("+WHERE+").append(where);
             }
+
             String url = salesforceBaseDataSource.getInstanceName() + "/services/data/v20.0/query/?q=" + queryBuilder.toString();
-
-            HttpGet httpRequest = new HttpGet(url);
-            httpRequest.setHeader("Accept", "application/xml");
-            httpRequest.setHeader("Content-Type", "application/xml");
-            httpRequest.setHeader("Authorization", "OAuth " + salesforceBaseDataSource.getAccessToken());
-
-
-            org.apache.http.client.HttpClient cc = new DefaultHttpClient();
-            ResponseHandler<String> responseHandler = new BasicResponseHandler();
-
-            String string = cc.execute(httpRequest, responseHandler);
-
-            Builder builder = new Builder();
-            Document doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+            boolean moreData;
             DataSet dataSet = new DataSet();
-            Nodes records = doc.query("/QueryResult/records");
-            for (int i = 0; i < records.size(); i++) {
-                IRow row = dataSet.createRow();
-                Node record = records.get(i);
-                for (AnalysisItem analysisItem : analysisItems) {
-                    if (analysisItem.isCalculated()) {
-                        continue;
-                    }
-                    Nodes results = record.query(analysisItem.getKey().toKeyString() + "/text()");
-                    if (results.size() > 0) {
-                        String value = results.get(0).getValue();
-                        row.addValue(analysisItem.createAggregateKey(), value);
+            do {
+                HttpGet httpRequest = new HttpGet(url);
+                httpRequest.setHeader("Accept", "application/xml");
+                httpRequest.setHeader("Content-Type", "application/xml");
+                httpRequest.setHeader("Authorization", "OAuth " + salesforceBaseDataSource.getAccessToken());
+
+
+                org.apache.http.client.HttpClient cc = new DefaultHttpClient();
+                ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+                String string = cc.execute(httpRequest, responseHandler);
+
+                Builder builder = new Builder();
+                Document doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+
+                Nodes records = doc.query("/QueryResult/records");
+                for (int i = 0; i < records.size(); i++) {
+                    IRow row = dataSet.createRow();
+                    Node record = records.get(i);
+                    for (AnalysisItem analysisItem : analysisItems) {
+                        if (analysisItem.isCalculated()) {
+                            continue;
+                        }
+                        Nodes results = record.query(analysisItem.getKey().toKeyString() + "/text()");
+                        if (results.size() > 0) {
+                            String value = results.get(0).getValue();
+                            row.addValue(analysisItem.createAggregateKey(), value);
+                        }
                     }
                 }
-            }
+
+                Nodes nextRecords = doc.query("/QueryResults/nextRecordsUrl/text()");
+                if (nextRecords.size() == 1) {
+                    url = nextRecords.get(0).getValue();
+                    moreData = true;
+                } else {
+                    moreData = false;
+                }
+            } while (moreData);
+
             return dataSet;
         } catch (ReportException re) {
             throw re;

@@ -263,6 +263,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
     }
 
+    public void validateTableSetup(EIConnection conn) throws SQLException {
+    }
+
     public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) throws Exception {
         boolean changed = false;
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
@@ -282,6 +285,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             changed = nodeSize != afterNodeSize;
             Map<Long, Map<String, Key>> keyMap = new HashMap<Long, Map<String, Key>>();
             for (IServerDataSourceDefinition source : sources) {
+                source.validateTableSetup(conn);
                 ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
                 MigrationResult migrationResult = serverDataSourceDefinition.migrations(conn, this);
                 changed = migrationResult.isChanged() || changed;

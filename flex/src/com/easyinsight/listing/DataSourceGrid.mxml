@@ -55,9 +55,11 @@
             super.createChildren();
             if (User.getInstance().newsDate != null) {
                 if (User.getInstance().newsDismissDate == null || User.getInstance().newsDismissDate.getTime() < User.getInstance().newsDate.getTime()) {
-                    var newsBar:NewsBar = new NewsBar();
-                    newsBar.addEventListener("dismissNews", onDismissed);
-                    addChildAt(newsBar, 0);
+                    if (getChildren().length > 0 && !(getChildAt(0) is NewsBar)) {
+                        var newsBar:NewsBar = new NewsBar();
+                        newsBar.addEventListener("dismissNews", onDismissed);
+                        addChildAt(newsBar, 0);
+                    }
                 }
             }
         }

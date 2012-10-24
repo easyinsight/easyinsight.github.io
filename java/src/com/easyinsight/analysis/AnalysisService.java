@@ -642,7 +642,7 @@ public class AnalysisService {
             } else {
                 throw new RuntimeException();
             }
-            List<FilterDefinition> filters;
+            List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
             if (drillThrough.getMarmotScript() != null && !"".equals(drillThrough.getMarmotScript())) {
 
                 filters = new ArrayList<FilterDefinition>();
@@ -654,7 +654,7 @@ public class AnalysisService {
                 }
             } else {
                 if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                    filters = new ArrayList<FilterDefinition>();
+
                 } else {
                     if (report.getReportType() == WSAnalysisDefinition.HEATMAP) {
                         CoordinateValue coordinateValue = (CoordinateValue) data.get(analysisItem.qualifiedName());
@@ -665,7 +665,7 @@ public class AnalysisService {
                         filterValueDefinition.setInclusive(true);
                         filterValueDefinition.setToggleEnabled(true);
                         filterValueDefinition.setFilteredValues(Arrays.asList((Object) coordinateValue.getZip()));
-                        filters = Arrays.asList((FilterDefinition) filterValueDefinition);
+                        filters.add(filterValueDefinition);
                     } else {
                         FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
                         filterValueDefinition.setField(analysisItem);
@@ -675,7 +675,11 @@ public class AnalysisService {
                         filterValueDefinition.setInclusive(true);
                         filterValueDefinition.setToggleEnabled(true);
                         filterValueDefinition.setFilteredValues(Arrays.asList(data.get(analysisItem.qualifiedName())));
-                        filters = Arrays.asList((FilterDefinition) filterValueDefinition);
+                        filters.add(filterValueDefinition);
+                    }
+                    if (drillThrough.isAddAllFilters()) {
+                        filters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
+                                analysisItem));
                     }
                 }
             }

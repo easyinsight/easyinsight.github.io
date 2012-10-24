@@ -6,7 +6,7 @@
             backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
             cornerRadius="10">
         <util:AutoSizeTextArea
-                text="We're sorry, but something went wrong in retrieving data for this report. We've logged the error on our servers and our engineers will fix it as soon as possible."
+                text="Adjust the filters to match your desired search and click the Run the Report button to actually retrieve data for this report."
                 visible="true" fontSize="18" width="400"
                 editable="false" backgroundAlpha="0" verticalScrollPolicy="off" horizontalScrollPolicy="off"/>
     </mx:Box>

@@ -77,6 +77,7 @@
                     } else if (drillthrough.dashboardID > 0) {
                         qualifiedName = EIDescriptor.DASHBOARD + "-" + drillthrough.dashboardID;
                     }
+                    allFilters = drillthrough.addAllFilters;
                     script = drillthrough.marmotScript;
                     miniWindow = drillthrough.miniWindow;
                 }
@@ -111,7 +112,7 @@
                 if (results.length == 0) {
                     var urlLink:URLLink = new URLLink();
                     urlLink.label = "";
-                    urlLink.defaultLink = true;
+                    urlLink.defaultLink = urlDefaultLinkCheckbox.selected;
                     urlLink.url = urlInput.text;
                     _link = urlLink;
                 } else {
@@ -121,8 +122,9 @@
                 }
             } else {
                 var drillThrough:DrillThrough = new DrillThrough();
-                drillThrough.defaultLink = true;
+                drillThrough.defaultLink = drillthroughDefaultLinkCheckbox.selected;
                 drillThrough.label = "";
+                drillThrough.addAllFilters = allCheckbox.selected;
                 var desc:EIDescriptor = reportChooser.selectedItem as EIDescriptor;
                 if (desc.getType() == EIDescriptor.REPORT) {
                     drillThrough.reportID = desc.id;
@@ -146,6 +148,9 @@
         }
 
         [Bindable]
+        private var allFilters:Boolean;
+
+        [Bindable]
         private var script:String;
         ]]></mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
@@ -164,6 +169,10 @@
                 <mx:Label text="URL: " width="150" fontFamily="Tahoma" fontWeight="bold"/>
                 <mx:TextInput id="urlInput" text="{urlText}" width="450"/>
             </mx:HBox>
+            <mx:HBox width="100%">
+                <mx:Label text="Default Link: " width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:CheckBox id="urlDefaultLinkCheckbox" selected="{defaultLink}"/>
+            </mx:HBox>
         </mx:VBox>
         <mx:VBox>
             <mx:HBox>
@@ -174,6 +183,14 @@
             <mx:HBox>
                 <mx:Label text="Use Popup Window:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
                 <mx:CheckBox label="" id="miniWindowCheckbox" selected="{miniWindow}"/>
+            </mx:HBox>
+            <mx:HBox width="100%">
+                <mx:Label text="Default Link:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:CheckBox id="drillthroughDefaultLinkCheckbox" selected="{defaultLink}"/>
+            </mx:HBox>
+            <mx:HBox width="100%">
+                <mx:Label text="Pass Through All Filters:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:CheckBox id="allCheckbox" selected="{allFilters}"/>
             </mx:HBox>
             <mx:HBox>
                 <mx:Label text="Scripting:" width="150" fontFamily="Tahoma" fontWeight="bold"/>

@@ -12,10 +12,12 @@
                 filterValueDefinition.applyBeforeAggregation = _filterDefinition.applyBeforeAggregation;
                 filterValueDefinition.field = _filterDefinition.field;
                 filterValueDefinition.singleValue = true;
+                filterValueDefinition.inclusive = true;
                 filterValueDefinition.autoComplete = true;
                 _filterDefinition = filterValueDefinition;
             } else {
                 FilterValueDefinition(_filterDefinition).singleValue = true;
+                FilterValueDefinition(_filterDefinition).inclusive = true;
                 FilterValueDefinition(_filterDefinition).autoComplete = true;
             }
             return _filterDefinition;

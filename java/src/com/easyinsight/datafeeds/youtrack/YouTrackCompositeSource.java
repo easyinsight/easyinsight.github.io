@@ -75,6 +75,16 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
         return DataSourceInfo.COMPOSITE_PULL;
     }
 
+    public String createURL() {
+        String target;
+        if (!url.startsWith("http")) {
+            target = "http://" + url;
+        } else {
+            target = url;
+        }
+        return target;
+    }
+
     @Override
     public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         super.exchangeTokens(conn, request, externalPin);

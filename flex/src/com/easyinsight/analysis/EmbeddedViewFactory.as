@@ -31,6 +31,7 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
     private var _filterDefinitions:ArrayCollection;
     private var _additionalFilterDefinitions:ArrayCollection;
     private var _reportType:int;
+    private var _adHocMode:Boolean = true;
 
     private var _reportRendererModule:String;
     //private var _newDefinition:Class;
@@ -46,6 +47,10 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         //setStyle("backgroundColor", 0xCCCCCC);
         this.percentHeight = 100;
         this.percentWidth = 100;
+    }
+
+    public function set adHocMode(value:Boolean):void {
+        _adHocMode = value;
     }
 
     public function set additionalFilterDefinitions(value:ArrayCollection):void {
@@ -245,6 +250,10 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         if (info.accessDenied) {
             overlayIndex = 4;
         } else {
+            if (info.report.adHocExecution) {
+                _adHocMode = false;
+                overlayIndex = 5;
+            }
             report = info.report;
             dispatchEvent(new ReportSetupEvent(info));
         }
@@ -276,25 +285,35 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
     }
 
     public function refresh():void {
-        if (_reportRenderer == null) {
-            pendingRequest = true;
-        } else {
-            var overrides:ArrayCollection = new ArrayCollection();
-            for each (var hierarchyOverride:AnalysisItemOverride in overrideObj) {
-                overrides.addItem(hierarchyOverride);
-            }
-            var filters:ArrayCollection;
-            if (filterDefinitions == null) {
-                filters = new ArrayCollection();
+        retrieveData();
+    }
+
+    public function forceRetrieve():void {
+        retrieveData(true);
+    }
+
+    public function retrieveData(forceRetrieve:Boolean = false):void {
+        if (_adHocMode || forceRetrieve) {
+            if (_reportRenderer == null) {
+                pendingRequest = true;
             } else {
-                filters = new ArrayCollection(filterDefinitions.toArray());
-            }
-            if (_additionalFilterDefinitions != null) {
-                for each (var filter:FilterDefinition in _additionalFilterDefinitions) {
-                    filters.addItem(filter);
+                var overrides:ArrayCollection = new ArrayCollection();
+                for each (var hierarchyOverride:AnalysisItemOverride in overrideObj) {
+                    overrides.addItem(hierarchyOverride);
                 }
+                var filters:ArrayCollection;
+                if (filterDefinitions == null) {
+                    filters = new ArrayCollection();
+                } else {
+                    filters = new ArrayCollection(filterDefinitions.toArray());
+                }
+                if (_additionalFilterDefinitions != null) {
+                    for each (var filter:FilterDefinition in _additionalFilterDefinitions) {
+                        filters.addItem(filter);
+                    }
+                }
+                _dataService.retrieveData(reportID, dataSourceID, filters, false, drillthroughFilters, _noCache, overrides);
             }
-            _dataService.retrieveData(reportID, dataSourceID, filters, false, drillthroughFilters, _noCache, overrides);
         }
     }
 

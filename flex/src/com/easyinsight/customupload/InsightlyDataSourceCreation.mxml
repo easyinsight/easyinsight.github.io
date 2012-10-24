@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.InsightlyCompositeSource;
+
+        import mx.controls.Button;
+
+        [Bindable]
+        private var apiKey:String;
+
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var obj:InsightlyCompositeSource = new InsightlyCompositeSource();
+            obj.apiKey = apiKeyInput.text;
+            return obj;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:InsightlyCompositeSource = feedDefinition as InsightlyCompositeSource;
+            apiKey = ds.apiKey;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:InsightlyCompositeSource = feedDefinition as InsightlyCompositeSource;
+            ds.apiKey = apiKeyInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Insightly API Key:" direction="horizontal">
+            <mx:TextInput id="apiKeyInput" fontWeight="normal" fontFamily="Lucida Grande" text="{apiKey}" width="350"/>
+        </mx:FormItem>
+	</mx:Form>
+</mx:VBox>

@@ -101,6 +101,8 @@
                     event.solution.dataSourceType == DataSourceType.BATCHBOOK2 ||
                     event.solution.dataSourceType == DataSourceType.BATCHBOOK ||
                     event.solution.dataSourceType == DataSourceType.YOUTRACK ||
+                    event.solution.dataSourceType == DataSourceType.WUFOO ||
+                    event.solution.dataSourceType == DataSourceType.INSIGHTLY ||
                     event.solution.dataSourceType == DataSourceType.ZENDESK) {
                 var renderer:NewSolutionDetailRenderer = new NewSolutionDetailRenderer();
                 renderer.solution = event.solution;

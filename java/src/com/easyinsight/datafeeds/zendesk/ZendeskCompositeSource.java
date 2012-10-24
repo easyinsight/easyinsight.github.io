@@ -103,6 +103,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM ZENDESK WHERE data_source_id = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
+        clearStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ZENDESK (URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, DATA_SOURCE_ID) " +
                 "VALUES (?, ?, ?, ?)");
         insertStmt.setString(1, url);
@@ -114,6 +115,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         }
         insertStmt.setLong(4, getDataFeedID());
         insertStmt.execute();
+        insertStmt.close();
     }
 
     @Override

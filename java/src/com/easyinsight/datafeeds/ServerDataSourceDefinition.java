@@ -150,6 +150,9 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         return false;
     }
 
+    public void validateTableSetup(EIConnection conn) throws SQLException {
+    }
+
     public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) {
         EIConnection conn = Database.instance().getConnection();
         try {

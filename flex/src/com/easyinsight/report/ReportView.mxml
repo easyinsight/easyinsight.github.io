@@ -40,6 +40,7 @@
         import com.easyinsight.util.EIErrorEvent;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.SaveButton;
         import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
@@ -519,6 +520,10 @@
             }
         }
 
+        private function runReport(event:MouseEvent = null):void {
+            viewFactory.forceRetrieve();
+        }
+
         private function onSetup(event:ReportSetupEvent):void {
             report = event.reportInfo.report;
 
@@ -541,7 +546,16 @@
             description = report.description;
             admin = event.reportInfo.admin;
 
-
+            if (report.adHocExecution) {
+                var executeButton:SaveButton = new SaveButton();
+                executeButton.label = "Run the Report";
+                executeButton.addEventListener(MouseEvent.CLICK, runReport);
+                var runBox:HBox = new HBox();
+                runBox.setStyle("horizontalAlign", "center");
+                runBox.percentWidth = 100;
+                runBox.addChild(executeButton);
+                addChildAt(runBox, getChildIndex(screenTarget));
+            }
             if (!admin) {
                 if (leftButtonBar.contains(editReportButton)) {
                     leftButtonBar.removeChild(editReportButton);

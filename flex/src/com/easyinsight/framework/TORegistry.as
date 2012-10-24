@@ -88,11 +88,13 @@ import com.easyinsight.datasources.FreshbooksDataSource;
 import com.easyinsight.datasources.HarvestDataSource;
 import com.easyinsight.datasources.HighRiseDataSource;
 import com.easyinsight.datasources.HighriseAdditionalToken;
+import com.easyinsight.datasources.InsightlyCompositeSource;
 import com.easyinsight.datasources.JSONDataSource;
 import com.easyinsight.datasources.LinkedInDataSource;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.SampleDataSource;
 import com.easyinsight.datasources.SendGridDataSource;
+import com.easyinsight.datasources.WufooCompositeSource;
 import com.easyinsight.datasources.YouTrackCompositeSource;
 import com.easyinsight.datasources.ZendeskDataSource;
 import com.easyinsight.feedassembly.CompositeFeedConnection;
@@ -291,6 +293,8 @@ public class TORegistry {
         var qds:QuickbaseDatabaseSource;
         var json:JSONDataSource;
         var bb2:Batchbook2DataSource;
+        var wufoo:WufooCompositeSource;
+        var insightly:InsightlyCompositeSource;
     }
 }
 }

@@ -20,6 +20,7 @@ import com.easyinsight.datafeeds.harvest.*;
 import com.easyinsight.datafeeds.highrise.*;
 /*import com.easyinsight.datafeeds.kashoo.KashooBusinessSource;
 import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;*/
+import com.easyinsight.datafeeds.insightly.*;
 import com.easyinsight.datafeeds.json.JSONDataSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
@@ -50,6 +51,8 @@ import com.easyinsight.datafeeds.wholefoods.WholeFoodsSource;
 /*import com.easyinsight.datafeeds.xero.XeroAccountSource;
 import com.easyinsight.datafeeds.xero.XeroBankTransactionSource;
 import com.easyinsight.datafeeds.xero.XeroCompositeSource;*/
+import com.easyinsight.datafeeds.wufoo.WufooCompositeSource;
+import com.easyinsight.datafeeds.wufoo.WufooFormSource;
 import com.easyinsight.datafeeds.youtrack.YouTrackCompositeSource;
 import com.easyinsight.datafeeds.youtrack.YouTrackIssueSource;
 import com.easyinsight.datafeeds.youtrack.YouTrackProjectSource;
@@ -233,6 +236,14 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.YOUTRACK_PROJECTS, YouTrackProjectSource.class);
         registerType(FeedType.YOUTRACK_TASKS, YouTrackIssueSource.class);
         registerType(FeedType.ZENDESK_COMMENTS, ZendeskCommentSource.class);
+        registerType(FeedType.WUFOO_COMPOSITE, WufooCompositeSource.class);
+        registerType(FeedType.WUFOO_FORM, WufooFormSource.class);
+        registerType(FeedType.INSIGHTLY_COMPOSITE, InsightlyCompositeSource.class);
+        registerType(FeedType.INSIGHTLY_CONTACTS, InsightlyContactSource.class);
+        registerType(FeedType.INSIGHTLY_ORGANIZATIONS, InsightlyOrganisationSource.class);
+        registerType(FeedType.INSIGHTLY_OPPORTUNITIES, InsightlyOpportunitySource.class);
+        registerType(FeedType.INSIGHTLY_PROJECTS, InsightlyProjectSource.class);
+        registerType(FeedType.INSIGHTLY_TASKS, InsightlyTaskSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

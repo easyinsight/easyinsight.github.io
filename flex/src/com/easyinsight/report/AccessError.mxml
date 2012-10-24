@@ -23,6 +23,6 @@
         <util:AutoSizeTextArea
                 text="{message}"
                 visible="true" fontSize="18" width="400"
-                editable="false" backgroundAlpha="0"/>
+                editable="false" backgroundAlpha="0" verticalScrollPolicy="off" horizontalScrollPolicy="off"/>
     </mx:Box>
 </mx:Box>
