@@ -7,6 +7,7 @@ import nu.xom.*;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -26,7 +27,8 @@ public class ContactListCache extends ConstantContactBaseSource {
     public List<ContactList> getOrCreateContactLists(ConstantContactCompositeSource ccSource) throws Exception, OAuthExpectationFailedException, ParsingException, OAuthMessageSignerException, OAuthCommunicationException {
         if (contactLists == null) {
             contactLists = new ArrayList<ContactList>();
-            Document doc = query("https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/lists", ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+            org.apache.http.client.HttpClient client = new DefaultHttpClient();
+            Document doc = query("https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/lists", ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource, client);
             boolean hasMoreData;
             do {
                 hasMoreData = false;
@@ -52,7 +54,7 @@ public class ContactListCache extends ConstantContactBaseSource {
                         hasMoreData = true;
                         String linkURLString = "https://api.constantcontact.com" + linkURL;
                         linkURLString = linkURLString.substring(0, 45) + ccSource.getCcUserName() + linkURLString.substring(linkURLString.indexOf("/lists"));
-                        doc = query(linkURLString, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+                        doc = query(linkURLString, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource, client);
                         break;
                     }
                 }

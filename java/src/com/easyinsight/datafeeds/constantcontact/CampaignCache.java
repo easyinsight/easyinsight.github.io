@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.constantcontact;
 
 import com.easyinsight.datafeeds.FeedDefinition;
 import nu.xom.*;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -19,7 +20,8 @@ public class CampaignCache extends ConstantContactBaseSource {
     public List<Campaign> getOrCreateCampaigns(ConstantContactCompositeSource ccSource) throws Exception {
         if (campaigns == null) {
             campaigns = new ArrayList<Campaign>();
-            Document doc = query("https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns", ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+            org.apache.http.client.HttpClient client = new DefaultHttpClient();
+            Document doc = query("https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns", ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource, client);
             boolean hasMoreData;
             do {
                 hasMoreData = false;
@@ -56,7 +58,7 @@ public class CampaignCache extends ConstantContactBaseSource {
                         hasMoreData = true;
                         String linkURLString = "https://api.constantcontact.com" + linkURL;
                         linkURLString = linkURLString.substring(0, 45) + ccSource.getCcUserName() + linkURLString.substring(linkURLString.indexOf("/campaigns"));
-                        doc = query(linkURLString, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+                        doc = query(linkURLString, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource, client);
                         break;
                     }
                 }

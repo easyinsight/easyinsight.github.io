@@ -49,7 +49,7 @@ public abstract class ConstantContactBaseSource extends ServerDataSourceDefiniti
             return null;
     }
 
-    protected Document query(String queryString, String tokenKey, String tokenSecretKey, FeedDefinition parentSource) throws OAuthExpectationFailedException, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException {
+    protected Document query(String queryString, String tokenKey, String tokenSecretKey, FeedDefinition parentSource, org.apache.http.client.HttpClient client) throws OAuthExpectationFailedException, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException {
         try {
             Builder builder = new Builder();
             OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
@@ -60,7 +60,6 @@ public abstract class ConstantContactBaseSource extends ServerDataSourceDefiniti
             httpRequest.setHeader("Content-Type", "application/xml");
             consumer.sign(httpRequest);
 
-            org.apache.http.client.HttpClient client = new DefaultHttpClient();
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
                 public String handleResponse(final HttpResponse response)
                     throws IOException {
@@ -79,6 +78,7 @@ public abstract class ConstantContactBaseSource extends ServerDataSourceDefiniti
             string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
             string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
             string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
+
             //System.out.println(string);
             return builder.build(new ByteArrayInputStream(string.getBytes("UTF-8")));
         } catch (HttpResponseException e) {

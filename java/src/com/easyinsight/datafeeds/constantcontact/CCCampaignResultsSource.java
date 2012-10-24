@@ -9,6 +9,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import nu.xom.*;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -109,6 +110,8 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
 
             final CountDownLatch latch = new CountDownLatch(campaigns.size());
 
+            final org.apache.http.client.HttpClient client = new DefaultHttpClient();
+
             for (final Campaign campaign : campaigns) {
                 tpe.execute(new Runnable() {
 
@@ -122,7 +125,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                             try {
                                 String eventsURL = "https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns/" + campaign.getId() + "/events/?pageSize=200";
 
-                                Document eventsDoc = query(eventsURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+                                Document eventsDoc = query(eventsURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource, client);
                                 Nodes eventNodes = eventsDoc.query("/service/workspace/collection");
                                 for (int j = 0; j < eventNodes.size(); j++) {
                                     Element eventElement = (Element) eventNodes.get(j);
@@ -130,7 +133,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
 
                                     String string = "https://api.constantcontact.com" + attribute.getValue();
                                     string = string.substring(0, 45) + ccSource.getCcUserName() + string.substring(string.indexOf("/campaigns"));
-                                    Document eventDetailDoc = query(string, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+                                    Document eventDetailDoc = query(string, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource, client);
                                     boolean hasMoreEvents;
                                     do {
                                         hasMoreEvents = false;
@@ -213,7 +216,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                                                 String linkURLString = "https://api.constantcontact.com" + linkURL;
                                                 linkURLString = linkURLString.substring(0, 45) + ccSource.getCcUserName() + linkURLString.substring(linkURLString.indexOf("/campaigns"));
 
-                                                eventDetailDoc = query(linkURLString, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource);
+                                                eventDetailDoc = query(linkURLString, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource, client);
                                                 break;
                                             }
                                         }
