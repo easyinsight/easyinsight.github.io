@@ -131,6 +131,9 @@ public class OpenIDServlet extends HttpServlet {
         String realm = realm(request);
         String returnToUrl = returnTo(request);
 
+        System.out.println("realm = " + realm);
+        System.out.println("return url = " + returnToUrl);
+
         AuthRequestHelper helper = consumerHelper.getAuthRequestHelper(openId, returnToUrl);
         addAttributes(helper);
 
