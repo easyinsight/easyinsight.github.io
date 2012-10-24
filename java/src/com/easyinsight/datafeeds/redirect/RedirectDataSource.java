@@ -47,6 +47,10 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         return Account.PERSONAL;
     }
 
+    public void validateTableSetup(EIConnection conn) throws SQLException {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public boolean hasNewData(Date lastRefreshDate, FeedDefinition parent, EIConnection conn) throws Exception {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
