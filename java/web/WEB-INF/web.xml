@@ -542,6 +542,10 @@
             <param-name>return_to_path</param-name>
             <param-value>/openid</param-value>
         </init-param>
+        <init-param>
+            <param-name>realm</param-name>
+            <param-value>https://staging.easy-insight.com/</param-value>
+        </init-param>
     </servlet>
 
     <servlet-mapping>
