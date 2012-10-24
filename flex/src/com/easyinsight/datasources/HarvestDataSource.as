@@ -1,4 +1,5 @@
 package com.easyinsight.datasources {
+import com.easyinsight.customupload.HarvestConfiguration;
 import com.easyinsight.customupload.HarvestDataSourceCreation;
 
 import mx.collections.ArrayCollection;
@@ -25,6 +26,10 @@ public class HarvestDataSource extends CompositeServerDataSource {
 
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
+        var config:HarvestConfiguration = new HarvestConfiguration();
+        config.dataSourceDefinition = this;
+        config.label = "Harvest Server Configuration";
+        pages.addItem(config);
         return pages;
     }
 

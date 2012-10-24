@@ -15,16 +15,10 @@
         private var feedDefinition:FeedDefinitionData;
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
-            var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
-            this.feedDefinition = ds;
-            url = ds.url;
-            liveDataSource = ds.liveDataSource;
+            this.feedDefinition = feedDefinition;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
-            ds.url = urlInput.text;
-            ds.liveDataSource = liveDataSourceCheckbox.selected;
         }
 
         public function validate():Boolean {
@@ -49,14 +43,5 @@
     <mx:RemoteObject destination="tokenService" id="tokenService">
         <mx:method name="getOAuthURL" result="gotURL()"/>
     </mx:RemoteObject>
-    <mx:Form paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
-        <mx:FormItem label="FreshBooks URL:">
-            <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
-        </mx:FormItem>
-        <mx:FormItem label="Live FreshBooks Connection:" direction="horizontal">
-            <mx:CheckBox id="liveDataSourceCheckbox" selected="{liveDataSource}"/>
-            <!--<mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on inactive projects, you can save time on your synchronization by not pulling those projects across into Easy Insight."/>-->
-        </mx:FormItem>
-	</mx:Form>
     <mx:Button label="Reauthorize Access" click="reauthorize()"/>
 </mx:VBox>
