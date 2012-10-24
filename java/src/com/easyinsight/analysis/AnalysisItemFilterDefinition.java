@@ -115,9 +115,9 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
                 session.save(getField().getKey());
             }
             if (analysisItem.getAnalysisItemID() == 0) {
-                session.save(getField());
+                session.save(analysisItem);
             } else {
-                session.update(getField());
+                session.update(analysisItem);
             }
         }
     }
