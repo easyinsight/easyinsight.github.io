@@ -7,6 +7,7 @@ public class DrillThrough extends Link{
     public var dashboardID:int;
     public var miniWindow:Boolean;
     public var marmotScript:String;
+    public var addAllFilters:Boolean;
 
     public function DrillThrough() {
         super();
