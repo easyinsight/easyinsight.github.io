@@ -129,7 +129,7 @@ public class OpenIDServlet extends HttpServlet {
         IdpIdentifier openId = new IdpIdentifier(op);
 
         String realm = realm(request);
-        String returnToUrl = returnTo(request);
+        String returnToUrl = "https://staging.easy-insight.com/app/openid";
 
         System.out.println("realm = " + realm);
         System.out.println("return url = " + returnToUrl);
