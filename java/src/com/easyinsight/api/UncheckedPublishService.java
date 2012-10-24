@@ -62,7 +62,7 @@ public abstract class UncheckedPublishService extends PublishService {
             throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -97,7 +97,7 @@ public abstract class UncheckedPublishService extends PublishService {
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -132,7 +132,7 @@ public abstract class UncheckedPublishService extends PublishService {
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -170,7 +170,7 @@ public abstract class UncheckedPublishService extends PublishService {
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
