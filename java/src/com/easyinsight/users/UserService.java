@@ -861,7 +861,9 @@ public class UserService {
     }
 
     private void configureNewAccount(Account account) {
-        account.setAccountState(Account.INACTIVE);
+        if (account.getGoogleDomainName() == null) {
+            account.setAccountState(Account.INACTIVE);
+        }
         AccountLimits.configureAccount(account);
     }
 
