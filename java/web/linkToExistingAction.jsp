@@ -4,7 +4,7 @@
 <%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%
-    String googleDomainName = (String) session.getAttribute("googleDomainName");
+    String googleDomainName = (String) session.getAttribute("googleDomain");
     String doneURL = (String) session.getAttribute("googleCallbackURL");
     Long userID = (Long) session.getAttribute("userID");
     if (userID == null) {
@@ -17,17 +17,20 @@
         try {
             hibernateSession.beginTransaction();
             Account account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, (Long) session.getAttribute("accountID")).list().get(0);
+            String url;
             if (account.getGoogleDomainName() != null) {
                 System.out.println("redirecting to domain already linked");
-                response.sendRedirect(RedirectUtil.getURL(request, "/app/domainAlreadyLinked.jsp"));
+                url = RedirectUtil.getURL(request, "/app/domainAlreadyLinked.jsp");
             } else {
                 // redirect back to google
                 System.out.println("redirecting back to google URL of " + doneURL);
+                System.out.println("setting domain name to " + googleDomainName);
                 account.setGoogleDomainName(googleDomainName);
                 hibernateSession.update(account);
-                response.sendRedirect(doneURL);
+                url = doneURL;
             }
             hibernateSession.getTransaction().commit();
+            response.sendRedirect(url);
         } catch (Exception e) {
             hibernateSession.getTransaction().rollback();
         } finally {
