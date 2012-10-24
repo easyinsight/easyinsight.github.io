@@ -163,6 +163,7 @@ public class OpenIDServlet extends HttpServlet {
         HttpSession session = request.getSession();
         ParameterList openidResp = Step2.getParameterList(request);
         String receivingUrl = currentUrl(request);
+        receivingUrl = receivingUrl.replace("domu-12-31-38-01-d4-11.compute-1.internal:8443", "staging.easy-insight.com");
         DiscoveryInformation discovered =
                 (DiscoveryInformation) session.getAttribute("discovered");
 
