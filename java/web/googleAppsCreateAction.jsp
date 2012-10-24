@@ -17,8 +17,9 @@
     admin.setInitialSetupDone(true);
     AccountTransferObject accountTransferObject = new AccountTransferObject();
     accountTransferObject.setAccountType(Account.PLUS);
-    accountTransferObject.setName(request.getParameter("accountName"));
+    accountTransferObject.setName(request.getParameter("companyName"));
     accountTransferObject.setGoogleAppsDomain(domain);
+    accountTransferObject.setAccountState(Account.TRIAL);
     String password = RandomTextGenerator.generateText(15);
     new UserService().createAccount(admin, accountTransferObject, password);
     UserServiceResponse userServiceResponse = new UserService().authenticate(email, password, false);

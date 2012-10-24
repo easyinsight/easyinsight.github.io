@@ -74,7 +74,9 @@ public class OpenIDServlet extends HttpServlet {
         System.out.println("callback = " + req.getParameter("callback"));
         if (domain != null) {
             req.getSession().setAttribute("googleDomain", req.getParameter("hd"));
-            req.getSession().setAttribute("googleCallbackURL", req.getParameter("callback"));
+            if (req.getParameter("callback") != null) {
+                req.getSession().setAttribute("googleCallbackURL", req.getParameter("callback"));
+            }
             // User attempting to login with provided domain, build and OpenID request and redirect
             try {
                 AuthRequest authRequest = startAuthentication(domain, req);
