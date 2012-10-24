@@ -2,7 +2,9 @@
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.users.Account" %>
-<%@ page import="com.easyinsight.html.RedirectUtil" %><%
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%
     String googleDomainName = (String) session.getAttribute("googleDomainName");
     String doneURL = (String) session.getAttribute("googleCallbackURL");
     Long userID = (Long) session.getAttribute("userID");
@@ -11,10 +13,11 @@
         System.out.println("redirecting to log in, no user ID found in session");
         response.sendRedirect(RedirectUtil.getURL(request, "login.jsp"));
     } else {
+        System.out.println("blah");
         Session hibernateSession = Database.instance().createSession();
         try {
             hibernateSession.beginTransaction();
-            Account account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+            Account account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, (Long) session.getAttribute("accountID")).list().get(0);
             if (account.getGoogleDomainName() != null) {
                 System.out.println("redirecting to domain already linked");
                 response.sendRedirect(RedirectUtil.getURL(request, "/app/domainAlreadyLinked.jsp"));
