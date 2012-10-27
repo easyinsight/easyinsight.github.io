@@ -12,6 +12,7 @@ import com.easyinsight.report.ReportNavigationEvent;
 import flash.display.DisplayObject;
 import flash.events.Event;
 import flash.events.EventDispatcher;
+import flash.utils.getQualifiedClassName;
 
 import mx.binding.utils.BindingUtils;
 import mx.binding.utils.ChangeWatcher;
@@ -533,7 +534,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     public function fromExistingDefinition(existingDefinition:AnalysisDefinition):AnalysisDefinition {
-        if (existingDefinition is _newDefinition) {
+        if (getQualifiedClassName(existingDefinition) == getQualifiedClassName(_newDefinition)) {
             return existingDefinition;
         } else {
             var newDef:AnalysisDefinition = new _newDefinition();
