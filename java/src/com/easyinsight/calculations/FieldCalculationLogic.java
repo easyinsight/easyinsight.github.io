@@ -5,6 +5,10 @@ import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.*;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.pipeline.IComponent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -13,11 +17,16 @@ import com.easyinsight.dataset.DataSet;
  */
 public class FieldCalculationLogic extends CalculationLogic {
     private AnalysisItem analysisItem;
+    private List<IComponent> generatedComponents = new ArrayList<IComponent>();
     private DataSet dataSet;
 
     public FieldCalculationLogic(AnalysisItem analysisItem, DataSet dataSet) {
         this.analysisItem = analysisItem;
         this.dataSet = dataSet;
+    }
+
+    public List<IComponent> getGeneratedComponents() {
+        return generatedComponents;
     }
 
     protected void calculateResults(CalculationTreeNode calculationTreeNode, CalculationMetadata calculationMetadata) {
@@ -34,6 +43,7 @@ public class FieldCalculationLogic extends CalculationLogic {
             }
             row.addValue(analysisItem.createAggregateKey(), value);
         }
+        generatedComponents = calculationMetadata.getGeneratedComponents();
         analysisItem.setReady(true);
     }
 }
