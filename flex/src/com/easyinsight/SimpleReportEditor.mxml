@@ -59,6 +59,7 @@
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
@@ -75,6 +76,7 @@
 
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.report.ReportExportWindow;
+        import com.easyinsight.report.ReportNavigationEvent;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.suggestion.IntentionTriggerEvent;
         import com.easyinsight.util.ActionDataSourceLog;
@@ -89,6 +91,8 @@
         import mx.binding.utils.ChangeWatcher;
 
         import mx.collections.ArrayCollection;
+        import mx.collections.ICollectionView;
+        import mx.collections.IHierarchicalCollectionView;
         import mx.collections.Sort;
         import mx.controls.AdvancedDataGrid;
         import mx.controls.Alert;
@@ -475,8 +479,32 @@
             loadingReport = event.type == DataServiceLoadingEvent.LOADING_STARTED;
         }
 
+        private function refactorToDataSource(event:ReportEditorFieldEvent):void {
+            var window:SavePromptWindow = new SavePromptWindow();
+            window.prompt = "Do you want to promote this field to the data source level, making it available to all reports on this data source?";
+            window.defineOption("Promote to Data Source Field", "promoteToDataSource");
+            window.defineOption("Cancel", "leaveSettings");
+            var parent:UIComponent = this;
+            window.addEventListener("promoteToDataSource", function (promoteEvent:Event):void {
+                ProgressAlert.alert(parent, "Updating reports...", null, feedService.fieldToDataSourceLevel);
+                feedService.fieldToDataSourceLevel.send(analysisDefinition, event.item.analysisItem, dataService.dataFeedID);
+            });
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function promoted():void {
+            var report:AnalysisDefinition = feedService.fieldToDataSourceLevel.lastResult as AnalysisDefinition;
+            dispatchEvent(new AnalyzeEvent(new ReportEditorAnalyzeSource(report, 0)));
+        }
+
         public function initializeForWorksheet():void {
             try {
+                if (User.getInstance().reportMode == 0) {
+                    reportMode = "all";
+                } else {
+                    reportMode = "simplified";
+                }
                 if (dataService == null) {
                     dataService = new DataService();
                     dataService.dataFeedID = dataSourceID;
@@ -485,8 +513,10 @@
                 commandProcessor = new CommandProcessor();
                 addEventListener(FieldEditorEvent.FIELD_EDITOR_OPENED, onFieldEditorOpen);
                 addEventListener(FieldEditorEvent.FIELD_EDITOR_CLOSED, onFieldEditorClose);
+                addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
                 addEventListener(ReportPropertiesEvent.REPORT_PROPERTIES, onReportPropertiesEvent);
                 addEventListener(ReportEditorFieldEvent.ITEM_ADD_TO_REPORT, addFieldToReport);
+                addEventListener(ReportEditorFieldEvent.ITEM_REFACTOR_TO_DATA_SOURCE, refactorToDataSource);
                 addEventListener(ReportEditorFieldEvent.ITEM_COPY, fieldEventHandler.copyField);
                 addEventListener(ReportEditorFieldEvent.ITEM_DELETE, fieldEventHandler.deleteField);
                 addEventListener(ReportEditorFieldEvent.ITEM_EDIT, fieldEventHandler.editField);
@@ -513,6 +543,7 @@
                     analysisService.openAnalysisDefinition.send(_reportID);
                 } else if (analysisDefinition != null) {
                     _reportID = analysisDefinition.analysisID;
+                    dataService.dataFeedID = analysisDefinition.dataFeedID;
                     BrowserManager.getInstance().setTitle("Easy Insight - " + this.analysisDefinition.name);
                     if (feedMetadata == null) {
                         initializeState();
@@ -729,6 +760,26 @@
             }
         }
 
+        private function reportNavigation(event:ReportNavigationEvent):void {
+            if (analysisChanged) {
+                createPromptWindow("You have unsaved changes to this report.", function ():void {
+                    if (event.descriptor is InsightDescriptor) {
+                        dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
+                    } else if (event.descriptor is DashboardDescriptor) {
+                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
+                            initialFilters:event.filters})));
+                    }
+                });
+            } else {
+                if (event.descriptor is InsightDescriptor) {
+                    dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
+                } else if (event.descriptor is DashboardDescriptor) {
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
+                        initialFilters:event.filters})));
+                }
+            }
+        }
+
         private function reportView():void {
             var report:InsightDescriptor = new InsightDescriptor();
             report.dataFeedID = dataSourceID;
@@ -874,9 +925,14 @@
             window.wrappers = wrappers;
             window.joinsCustomizable = joinsCustomizable;
             window.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged, false, 0, true);
+            window.addEventListener(AnalyzeEvent.ANALYZE, onRevision, false, 0, true);
             PopUpManager.addPopUp(window, this);
             window.x = propsButton.x - 160;
             window.y = propsButton.y + customFieldButton.height + 10;
+        }
+
+        private function onRevision(event:AnalyzeEvent):void {
+            dispatchEvent(event);
         }
 
         private function customField():void {
@@ -907,11 +963,40 @@
                 dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
             }
         }
+
+        /*private function onChange():void {
+            IHierarchicalCollectionView(fieldGrid.dataProvider).refresh();
+        }
+
+        private function onDataChange():void {
+            IHierarchicalCollectionView(fieldGrid.dataProvider).filterFunction = filterFields;
+        }*/
+
+        /*private function filterFields(item:Object):Boolean {
+            if (findFieldInput.text != null && findFieldInput.text.length > 0) {
+                var wrapper:AnalysisItemWrapper = item as AnalysisItemWrapper;
+                var children:ICollectionView = IHierarchicalCollectionView(fieldGrid.dataProvider).getChildren(wrapper);
+                children.filterFunction = filterFields;
+                children.refresh();
+                if (children.length > 0 || wrapper.displayName.toLowerCase().indexOf(findFieldInput.text.toLowerCase()) != -1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        }*/
+
+        [Bindable]
+        private var reportMode:String = "all";
         ]]>
     </mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="openAnalysisDefinition" result="gotReport()"/>
         <mx:method name="generatePossibleIntentions" result="gotIntentions()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="fieldToDataSourceLevel" result="promoted()"/>
     </mx:RemoteObject>
     <analysis:AnalysisItemEventHandler id="fieldEventHandler" dataSourceID="{dataSourceID}" analysisItems="{wrappers}"/>
     <mx:HBox width="100%" styleName="topButtonBar">
@@ -974,13 +1059,14 @@
                                    icon="@Embed(source='../../../assets/code.png')"/>
                     </mx:Box>
                     <easyinsight:AnotherHackDataGrid width="100%" height="100%" dragEnabled="true" iconFunction="iconFunction"
-                                         id="fieldGrid" backgroundColor="#FFFFFF"
-                                         alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28"
-                                         dragStart="onDragStart(event)" dragExit="onDragEnd()"
-                                         dragComplete="onDragComplete(event)"
-                                         showHeaders="false"
-                                         groupItemRenderer="{rendererFactory}" x="0" y="60">
-                        <easyinsight:dataProvider>
+                                                     id="fieldGrid" backgroundColor="#FFFFFF"
+                                                     alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28"
+                                                     dragStart="onDragStart(event)" dragExit="onDragEnd()"
+                                                     dragComplete="onDragComplete(event)"
+                                                     showHeaders="false"
+                                                     groupItemRenderer="{rendererFactory}" x="0" y="60">
+
+                    <easyinsight:dataProvider>
                             <mx:HierarchicalData source="{availableFields}"/>
                         </easyinsight:dataProvider>
                         <easyinsight:columns>
@@ -999,7 +1085,7 @@
                     <mx:Label text="Report Type:" fontWeight="bold"/>
                     <analysis:AnalysisStatePopupButton analysisStateChange="onAnalysisStateChange(event)"
                                                        id="analysisState"
-                                                       mode="all" x="91" y="0"/>
+                                                       mode="{reportMode}" x="91" y="0"/>
                     <mx:Spacer width="100%"/>
                 </mx:HBox>
             </mx:VBox>
