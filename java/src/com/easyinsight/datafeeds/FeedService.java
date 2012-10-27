@@ -66,8 +66,33 @@ public class FeedService {
         return dataSources;
     }
 
-    public void fieldToDataSourceLevel(AnalysisItem analysisItem, long dataSourceID) {
-
+    public WSAnalysisDefinition fieldToDataSourceLevel(WSAnalysisDefinition report, AnalysisItem analysisItem, long dataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            if (report.getAddedItems().contains(analysisItem)) {
+                report.getAddedItems().remove(analysisItem);
+            }
+            dataSource.getFields().add(analysisItem);
+            new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        if (report.getAnalysisID() > 0) {
+            try {
+                return new AnalysisService().saveAnalysisDefinition(report);
+            } catch (Exception e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            }
+        } else {
+            return report;
+        }
     }
 
     public void convertToCalculation(AnalysisMeasure analysisItem, long dataSourceID, String calculation, boolean rowLevel, boolean cache) {
