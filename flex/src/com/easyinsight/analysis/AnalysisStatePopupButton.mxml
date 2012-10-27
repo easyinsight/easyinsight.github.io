@@ -15,7 +15,8 @@
         public function set mode(mode:String):void {
             if (mode == "all") {
                 xmlList = all;
-
+            } else {
+                xmlList = simplified;
             }
         }
 
@@ -105,6 +106,37 @@
         <node label="Tree Map" type="{AnalysisDefinition.TREEMAP}"/>
         <node label="Gauge" type="{AnalysisDefinition.GAUGE}"/>
         <node label="Gantt" type="{AnalysisDefinition.GANTT}"/>
+        <node label="Form" type="{AnalysisDefinition.FORM}"/>
+        <node label="Advanced" icon="">
+            <node label="Vertical List" type="{AnalysisDefinition.VERTICAL_LIST}"/>
+            <node label="YTD" type="{AnalysisDefinition.YTD}"/>
+            <node label="Compare Years" type="{AnalysisDefinition.COMPARE_YEARS}"/>
+        </node>
+    </mx:XMLList>
+    <mx:XMLList id="simplified">
+        <node label="Grid        ">
+            <node label="List" type="{AnalysisDefinition.LIST}"/>
+            <node label="Crosstab" type="{AnalysisDefinition.CROSSTAB}"/>
+            <node label="Tree" type="{AnalysisDefinition.TREE}"/>
+            <node label="Summary" type="{AnalysisDefinition.SUMMARY}"/>
+        </node>
+        <node label="Chart" icon="">
+            <node label="Column" type="{AnalysisDefinition.COLUMN}"/>
+            <node label="Stacked Column" type="{AnalysisDefinition.STACKED_COLUMN}"/>
+            <node label="Bar" type="{AnalysisDefinition.BAR}"/>
+            <node label="Stacked Bar" type="{AnalysisDefinition.STACKED_BAR}"/>
+            <node label="Line" type="{AnalysisDefinition.LINE}"/>
+            <node label="Pie" type="{AnalysisDefinition.PIE}"/>
+            <node label="Area" type="{AnalysisDefinition.AREA}"/>
+            <node label="Plot" type="{AnalysisDefinition.PLOT}"/>
+            <node label="Bubble" type="{AnalysisDefinition.BUBBLE}"/>
+        </node>
+        <node label="Trend" icon="">
+            <node label="Trends" type="{AnalysisDefinition.TREND}"/>
+            <node label="Trend Grid" type="{AnalysisDefinition.TREND_GRID}"/>
+            <node label="Diagram" type="{AnalysisDefinition.DIAGRAM}"/>
+        </node>
+        <node label="Gauge" type="{AnalysisDefinition.GAUGE}"/>
         <node label="Form" type="{AnalysisDefinition.FORM}"/>
         <node label="Advanced" icon="">
             <node label="Vertical List" type="{AnalysisDefinition.VERTICAL_LIST}"/>
