@@ -69,7 +69,7 @@
             </mx:FormItem>
             <mx:FormItem label="" direction="horizontal">
                 <util:SaveButton label="Save" click="save()"/>
-                <util:SaveButton label="Copy to Another Data Source" click="copyToAnotherDataSource()"/>
+                <!--<util:SaveButton label="Copy to Another Data Source" click="copyToAnotherDataSource()"/>-->
                 <util:CancelButton label="Cancel" click="cancel()"/>
             </mx:FormItem>
         </mx:Form>
