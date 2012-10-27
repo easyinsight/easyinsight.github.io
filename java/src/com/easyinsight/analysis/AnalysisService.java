@@ -48,10 +48,6 @@ public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
 
-    public void copyReport(WSAnalysisDefinition source, FeedDefinition dataSource) {
-
-    }
-
     public List<Revision> showHistory(String urlKey) {
         List<Revision> revisions = new ArrayList<Revision>();
         EIConnection conn = Database.instance().getConnection();
@@ -781,6 +777,50 @@ public class AnalysisService {
             AnalysisDefinition clone = analysisDefinition.clone(null, feed.getFields(), false);
             clone.setAuthorName(SecurityUtil.getUserName());
             clone.setTitle(newName);
+            List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
+            bindings.add(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER));
+            clone.setUserBindings(bindings);
+            session.close();
+            session = Database.instance().createSession(conn);
+            analysisStorage.saveAnalysis(clone, session);
+            session.flush();
+            session.close();
+            reportID = clone.getAnalysisID();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            AnalysisDefinition savedReport = analysisStorage.getPersistableReport(reportID, session);
+            WSAnalysisDefinition result = savedReport.createBlazeDefinition();
+            session.getTransaction().commit();
+            return result;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public WSAnalysisDefinition copyReport(WSAnalysisDefinition saveDefinition, long targetID) {
+        SecurityUtil.authorizeInsight(saveDefinition.getAnalysisID());
+        EIConnection conn = Database.instance().getConnection();
+        long reportID;
+        try {
+            conn.setAutoCommit(false);
+            FeedDefinition targetDataSource = new FeedStorage().getFeedDefinitionData(targetID);
+            Session session = Database.instance().createSession(conn);
+            AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
+            AnalysisDefinition clone = analysisDefinition.clone(targetDataSource, targetDataSource.getFields(), true);
+            clone.setAuthorName(SecurityUtil.getUserName());
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
             bindings.add(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER));
             clone.setUserBindings(bindings);

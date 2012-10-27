@@ -219,6 +219,8 @@ public class FunctionFactory {
             return new DateFilter();
         } else if (s.equals("months")) {
             return new Months();
+        } else if (s.equals("fill")) {
+            return new FillInterval();
         } else {
             return null;
         }

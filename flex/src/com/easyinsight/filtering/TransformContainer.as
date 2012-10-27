@@ -228,7 +228,7 @@ public class TransformContainer extends HBox
                     filter = new ComboBoxFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report);
                 }
             } else {
-                filter = new MultiValueFilter(_feedID, filterDefinition.field);
+                filter = new MultiValueFilter(_feedID, filterDefinition.field, _reportID,  _dashboardID);
             }
         } else if (filterDefinition.getType() == FilterDefinition.DATE) {
             filter = new SliderDateFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
@@ -582,7 +582,7 @@ public class TransformContainer extends HBox
                     if (values.length == 1 && includeFilter) {
                         filter = new ComboBoxFilter(_feedID, key, _reportID, _dashboardID, _report);
                     } else {
-                        filter = new MultiValueFilter(_feedID, key);
+                        filter = new MultiValueFilter(_feedID, key, _reportID, _dashboardID);
                     }
                 } else if (key.hasType(AnalysisItemTypes.MEASURE)) {
                     var filterMeasureRangeDefinition:FilterRangeDefinition = new FilterRangeDefinition();

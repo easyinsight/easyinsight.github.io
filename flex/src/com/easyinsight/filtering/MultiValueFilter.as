@@ -12,7 +12,6 @@ import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.controls.Button;
 import mx.controls.CheckBox;
-import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.core.UIComponent;
 import mx.managers.PopUpManager;
@@ -31,14 +30,28 @@ public class MultiValueFilter extends HBox implements IFilter {
         _loadingFromReport = value;
     }
 
-    public function MultiValueFilter(feedID:int, analysisItem:AnalysisItem) {
+    public function MultiValueFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
         super();
         _analysisItem = analysisItem;
         _feedID = feedID;
+        _reportID = reportID;
+        _dashboardID = dashboardID;
     }
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
         _analysisItems = analysisItems;
+    }
+
+    private var _reportID:int;
+
+    private var _dashboardID:int;
+
+    public function set reportID(value:int):void {
+        _reportID = value;
+    }
+
+    public function set dashboardID(value:int):void {
+        _dashboardID = value;
     }
 
     public function edit(event:MouseEvent):void {
@@ -53,6 +66,8 @@ public class MultiValueFilter extends HBox implements IFilter {
             PopUpUtil.centerPopUpWithY(window, 40);
         } else {
             var window2:EmbeddedMultiValueFilterWindow = new EmbeddedMultiValueFilterWindow();
+            window2.reportID = _reportID;
+            window2.dashboardID = _dashboardID;
             window2.embeddedFilter = _filterDefinition;
             window2.dataSourceID = _feedID;
             window2.addEventListener("updated", onUpdated, false, 0, true);

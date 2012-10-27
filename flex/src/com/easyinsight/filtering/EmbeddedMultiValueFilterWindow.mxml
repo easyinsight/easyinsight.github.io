@@ -37,10 +37,16 @@
             PopUpManager.removePopUp(this);
         }
 
+        [Bindable]
+        public var reportID:int;
+
+        [Bindable]
+        public var dashboardID:int;
+
         ]]></mx:Script>
     <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <filtering:MultiValueFilterWindow filterValueDefinition="{embeddedFilter}"
-                id="mvWindow" typeChangeAllowed="false" feedID="{dataSourceID}" />
+                id="mvWindow" typeChangeAllowed="false" feedID="{dataSourceID}" reportID="{reportID}" dashboardID="{dashboardID}"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <util:SaveButton label="Save" click="save()"/>
             <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

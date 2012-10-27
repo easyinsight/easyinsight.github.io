@@ -118,8 +118,8 @@ public class StandardReportPipeline extends Pipeline {
         }
 
         for (AnalysisItem step : items(AnalysisItemTypes.STEP, allNeededAnalysisItems)) {
-            components.add(new StepCorrelationComponent((AnalysisStep) step));
-            components.add(new StepTransformComponent((AnalysisStep) step));
+            components.add(new StepCorrelationComponent((AnalysisStep) step, null));
+            components.add(new StepTransformComponent((AnalysisStep) step, null));
         }
 
         // done with row level operations, clean everything up

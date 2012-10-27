@@ -4,6 +4,8 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.calculations.*;
 import com.easyinsight.dataset.DataSet;
 
+import java.util.List;
+
 /**
  * User: jamesboe
  * Date: Nov 23, 2009
@@ -28,6 +30,10 @@ public class CalculationComponent implements IComponent, DescribableComponent {
         FieldCalculationLogic fieldCalculationLogic = new FieldCalculationLogic(analysisCalculation, dataSet);
         fieldCalculationLogic.calculate(analysisCalculation.getCalculationString(), pipelineData.getReport(), pipelineData.getAllItems(), pipelineData.getInsightRequestMetadata());
         pipelineData.getReportItems().add(analysisCalculation);
+        List<IComponent> components = fieldCalculationLogic.getGeneratedComponents();
+        for (IComponent component : components) {
+            dataSet = component.apply(dataSet, pipelineData);
+        }
         return dataSet;
     }
 

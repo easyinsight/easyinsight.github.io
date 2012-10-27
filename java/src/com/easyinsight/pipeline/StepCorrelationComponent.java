@@ -15,9 +15,11 @@ import java.util.*;
 public class StepCorrelationComponent implements IComponent {
 
     private AnalysisStep analysisStep;
+    private AnalysisItem target;
 
-    public StepCorrelationComponent(AnalysisStep analysisStep) {
+    public StepCorrelationComponent(AnalysisStep analysisStep, AnalysisItem target) {
         this.analysisStep = analysisStep;
+        this.target = target;
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
@@ -80,7 +82,11 @@ public class StepCorrelationComponent implements IComponent {
                 while (cal.getTimeInMillis() < endTime) {
                     IRow row = dataSet.createRow();
                     row.addValues(this.row);
-                    row.addValue(analysisStep.createAggregateKey(), new DateValue(cal.getTime()));
+                    if (target == null) {
+                        row.addValue(analysisStep.createAggregateKey(), new DateValue(cal.getTime()));
+                    } else {
+                        row.addValue(target.createAggregateKey(), new DateValue(cal.getTime()));
+                    }
                     row.removeValue(start.createAggregateKey());
                     row.removeValue(end.createAggregateKey());
                     row.removeValue(analysisStep.getCorrelationDimension().createAggregateKey());

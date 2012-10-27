@@ -115,7 +115,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     @OneToOne (fetch = FetchType.LAZY)
     @JoinColumn(name="from_field_id")
-    //@Transient
     private AnalysisItem fromField;
 
     /*@Transient

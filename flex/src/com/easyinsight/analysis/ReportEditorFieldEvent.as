@@ -6,6 +6,7 @@ public class ReportEditorFieldEvent extends Event {
     public static const ITEM_COPY:String = "reportItemCopy";
     public static const ITEM_DELETE:String = "reportItemDelete";
     public static const ITEM_EDIT:String = "reportItemEdit";
+    public static const ITEM_REFACTOR_TO_DATA_SOURCE:String = "reportItemRefactorToDataSource";
     public static const ITEM_ADD_TO_REPORT:String = "reportItemAddToReport";
     public static const ITEM_FILTER:String = "reportItemFilter";
 

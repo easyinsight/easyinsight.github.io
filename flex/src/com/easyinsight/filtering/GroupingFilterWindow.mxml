@@ -14,7 +14,7 @@
         }
 
         private function addMultiValue():void {
-            var multiValFilter:MultiValueFilter = new MultiValueFilter(_feedID, _item);
+            var multiValFilter:MultiValueFilter = new MultiValueFilter(_feedID, _item, 0, 0);
             dispatchEvent(new FilterCreationEvent(multiValFilter));
             PopUpManager.removePopUp(this);
         }

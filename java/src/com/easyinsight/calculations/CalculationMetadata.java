@@ -9,10 +9,9 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.pipeline.IComponent;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -31,6 +30,11 @@ public class CalculationMetadata {
     private InsightRequestMetadata insightRequestMetadata;
     private FeedDefinition dataSource;
     private Map<String, ICalculationCache> cacheMap = new HashMap<String, ICalculationCache>();
+    private List<IComponent> generatedComponents = new ArrayList<IComponent>();
+
+    public List<IComponent> getGeneratedComponents() {
+        return generatedComponents;
+    }
 
     public ICalculationCache getCache(ICacheBuilder cacheBuilder, String key) {
         ICalculationCache cache = cacheMap.get(key);

@@ -11,10 +11,13 @@ import com.easyinsight.filtering.TransformContainer;
 import com.easyinsight.filtering.TransformsUpdatedEvent;
 import com.easyinsight.report.EmbedReportContextMenuFactory;
 import com.easyinsight.report.ReportSetupEvent;
+import com.easyinsight.util.SaveButton;
 
 import flash.events.Event;
+import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
+import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.controls.Label;
 
@@ -195,6 +198,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                 }
                 myFilterColl.addItem(filterDefinition);
             }
+            var index:int = dashboardReport.showLabel ? 1 : 0;
             if (myFilterColl.length > 0) {
 
                 hasFilters = true;
@@ -212,8 +216,18 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                 transformContainer.role = dashboardEditorMetadata.role;
                 transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
                 if (visibleFilters > 0) {
-                    addChildAt(transformContainer, dashboardReport.showLabel ? 1 : 0);
+                    addChildAt(transformContainer, index++);
                 }
+            }
+            if (event.reportInfo.report.adHocExecution) {
+                var executeButton:SaveButton = new SaveButton();
+                executeButton.label = "Run the Report";
+                executeButton.addEventListener(MouseEvent.CLICK, runReport);
+                var runBox:HBox = new HBox();
+                runBox.setStyle("horizontalAlign", "center");
+                runBox.percentWidth = 100;
+                runBox.addChild(executeButton);
+                addChildAt(runBox, index);
             }
         }
         viewFactory.additionalFilterDefinitions = createAdditionalFilters(filterMap);
@@ -223,6 +237,10 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             retrievedDataOnce = true;
             viewFactory.refresh();
         }
+    }
+
+    private function runReport(event:MouseEvent):void {
+        viewFactory.forceRetrieve();
     }
 
     public function refresh():void {

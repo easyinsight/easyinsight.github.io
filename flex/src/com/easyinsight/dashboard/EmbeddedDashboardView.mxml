@@ -91,43 +91,8 @@
         private function gotDashboard():void {
             dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
             dataSource = dashboard.dataSourceInfo;
-            /*var grid:DashboardGrid = dashboard.rootElement as DashboardGrid;
-            dashboardCanvas.setStyle("backgroundAlpha", grid.backgroundAlpha);
-            if (grid.backgroundColor != 0) {
-                dashboardCanvas.setStyle("backgroundColor", grid.backgroundColor);
-            }*/
             _dataSourceID = dashboard.dataSourceID;
-            filterDefinitions = dashboard.filters;
             rootView = dashboardRenderer.createDashboard();
-            /*var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
-            dashboardEditorMetadata.dataSourceID = _dataSourceID;
-            dashboardEditorMetadata.role = dashboard.role;
-            dashboardEditorMetadata.borderColor = dashboard.borderColor;
-            dashboardEditorMetadata.borderThickness = dashboard.borderThickness;
-            dashboardEditorMetadata.dashboard = dashboard;
-            dashboardEditorMetadata.dashboardView = this;
-            rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
-            UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
-                var filterMap:Object = new Object();
-                filterMap["master"] = dashboard.filters;
-                rootView.updateAdditionalFilters(filterMap);
-                rootView.initialRetrieve();
-            });
-            dashboardCanvas.addChild(rootView as UIComponent);
-            Alert.show("!");*/
-        }
-
-        private function gotData(event:EmbeddedDataServiceEvent):void {
-            var report:AnalysisDefinition = event.analysisDefinition;
-            if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
-                filterDefinitions = report.filterDefinitions;
-                if (!_showControls) {
-                    filterIndex = 1;
-                }
-            } else {
-                filterIndex = 0;
-                filterDefinitions = new ArrayCollection();
-            }
         }
 
         private var showFilters:Boolean = false;
