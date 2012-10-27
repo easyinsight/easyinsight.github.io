@@ -274,6 +274,15 @@
             return key;
         }
 
+        private function itemCopied(event:AnalysisItemEditEvent):void {
+            var aNode:AnalysisItemNode = new AnalysisItemNode();
+            aNode.analysisItem = event.analysisItem;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
+            fieldHierarchy.addItem(wrapper);
+            allFields.addItem(wrapper);
+            dispatchEvent(new AnalysisChangedEvent());
+        }
+
         private function itemAdded(event:AnalysisItemEditEvent):void {
             if (event.analysisItem.key is NamedKey) {
                 var key:NamedKey = event.analysisItem.key as NamedKey;
@@ -319,7 +328,7 @@
 
         private function onCopy(event:AnalysisItemCopyEvent):void {
             event.analysisItem.concrete = false;
-            toFocus(event.analysisItem, itemAdded);
+            toFocus(event.analysisItem, itemCopied);
         }
 
         [Bindable]
@@ -348,15 +357,13 @@
     <mx:VBox height="100%" width="100%" horizontalAlign="center" paddingTop="5">
         <mx:HBox paddingLeft="5">
             <mx:Button icon="@Embed(source='../../../../../assets/cubes_blue_add.png')"
-                       toolTip="Add Hierarchy..." click="addHierarchy()"/>
-            <mx:Button icon="@Embed(source='../../../../../assets/code.png')"
-                       toolTip="Add Derived Grouping..." click="addDerivedGrouping()"/>
+                       toolTip="Add Hierarchy..." click="addHierarchy()"  styleName="grayButton" label="Add Hierarchy"/>
             <mx:Button icon="@Embed(source='../../../../../assets/text_formula.png')"
-                       toolTip="Add Calculation..." click="addCalculation()"/>
+                       toolTip="Add Calculation..." click="addCalculation()"  styleName="grayButton" label="Add Derived Measure"/>
+            <mx:Button icon="@Embed(source='../../../../../assets/code.png')"
+                       toolTip="Add Derived Grouping..." click="addDerivedGrouping()" styleName="grayButton" label="Add Derived Grouping"/>
             <mx:Button icon="@Embed(source='../../../../../assets/calendar.png')"
-                       toolTip="Add Derived Date..." click="addDerivedDate()"/>
-            <mx:Button icon="@Embed(source='../../../../../assets/graph_edge_curved.png')"
-                       toolTip="Add Cycle..." click="addCycle()()"/>
+                       toolTip="Add Derived Date..." click="addDerivedDate()" styleName="grayButton" label="Add Derived Date"/>
         </mx:HBox>
         <mx:AdvancedDataGrid height="100%" dragEnabled="true" iconFunction="iconFunction"
                              id="fieldGrid" backgroundColor="#FFFFFF"
