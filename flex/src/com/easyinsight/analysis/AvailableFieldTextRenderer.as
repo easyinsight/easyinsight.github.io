@@ -3,6 +3,7 @@ import com.easyinsight.util.PopUpUtil;
 
 import flash.events.ContextMenuEvent;
 import flash.geom.Point;
+import flash.ui.ContextMenu;
 import flash.ui.ContextMenuItem;
 
 import mx.controls.Alert;
@@ -88,6 +89,11 @@ public class AvailableFieldTextRenderer extends UITextField implements IListItem
                     dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_DELETE, wrapper));
                 });
                 items.push(deleteItem);
+                var refactorItem:ContextMenuItem = new ContextMenuItem("Promote to Data Source Field");
+                refactorItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+                    dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_REFACTOR_TO_DATA_SOURCE, wrapper));
+                });
+                items.push(refactorItem);
             }
             if (_calcRefactor && wrapper.analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
                 var calculateItem:ContextMenuItem = new ContextMenuItem("Convert to Calculation");
