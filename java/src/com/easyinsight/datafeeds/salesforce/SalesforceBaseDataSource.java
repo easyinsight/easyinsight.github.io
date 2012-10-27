@@ -363,7 +363,6 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
 
     @Override
     public void beforeSave(EIConnection conn) throws Exception {
-        super.beforeSave(conn);
         Map<Long, FeedDefinition> childMap = new HashMap<Long, FeedDefinition>();
         for (AnalysisItem analysisItem : getFields()) {
             Key key = analysisItem.getKey();
