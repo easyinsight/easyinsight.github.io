@@ -871,6 +871,7 @@ public class UserAccountAdminService {
                 statsMap.put(dataSourceID, dataSourceStats);
             }
         }
+        queryStmt.close();
 
         List<DataSourceStats> validDataSources = new ArrayList<DataSourceStats>();
         for (DataSourceStats stats : statsMap.values()) {
