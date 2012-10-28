@@ -295,7 +295,7 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
         items.addItem(new CheckBoxReportFormItem("Log Report", "logReport", report.logReport, report));
         items.addItem(new CheckBoxReportFormItem("Data Source Fields", "dataSourceFields", report.dataSourceFields, report));
-        items.addItem(new CheckBoxReportFormItem("Ad Hoc Execution", "adHocExecution", report.adHocExecution, report));
+        items.addItem(new CheckBoxReportFormItem("Report Runs Manually", "adHocExecution", report.adHocExecution, report));
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];
         items.sort = sort;
