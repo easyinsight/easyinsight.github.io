@@ -44,7 +44,7 @@
         private var linkLabel:String;
 
         [Bindable]
-        private var defaultLink:Boolean;
+        private var defaultLink:Boolean = true;
 
         [Bindable]
         private var qualifiedName:String;
