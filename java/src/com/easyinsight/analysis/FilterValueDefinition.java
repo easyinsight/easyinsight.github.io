@@ -297,7 +297,7 @@ public class FilterValueDefinition extends FilterDefinition {
             } else if (valueObject instanceof Value) {
                 value = (Value) valueObject;
             } else {
-                throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
+                value = new EmptyValue();
             }
             if (value instanceof StringValue) {
                 StringValue stringValue = (StringValue) value;
