@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.datasources {
-import com.easyinsight.customupload.YouTrackDataSourceCreation;
+import com.easyinsight.customupload.InsightlyDataSourceCreation;
 
 import mx.collections.ArrayCollection;
 
@@ -29,7 +29,7 @@ public class InsightlyCompositeSource extends CompositeServerDataSource {
     }
 
     override public function configClass():Class {
-        return YouTrackDataSourceCreation;
+        return InsightlyDataSourceCreation;
     }
 }
 }
