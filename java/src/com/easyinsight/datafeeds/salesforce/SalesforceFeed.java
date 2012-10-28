@@ -220,18 +220,11 @@ public class SalesforceFeed extends Feed {
                     }
                 }
 
-                Nodes nextRecords = doc.query("/QueryResults/nextRecordsUrl/text()");
+                Nodes nextRecords = doc.query("/QueryResult/nextRecordsUrl/text()");
                 if (nextRecords.size() == 1) {
                     url = nextRecords.get(0).getValue();
-                    System.out.println("**** next records url = " + url);
                     moreData = true;
                 } else {
-                    System.out.println("*** no sign of next records url, children: ");
-                    Element rootElement = doc.getRootElement();
-                    for (int j = 0; j < rootElement.getChildCount(); j++) {
-                        Node node = rootElement.getChild(j);
-                        System.out.println("\tchild: " + node.toXML());
-                    }
                     moreData = false;
                 }
             } while (moreData);
