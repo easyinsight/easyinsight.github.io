@@ -16,7 +16,7 @@
             if (mode == "all") {
                 xmlList = all;
             } else {
-                xmlList = simplified;
+                xmlList = all;
             }
         }
 
