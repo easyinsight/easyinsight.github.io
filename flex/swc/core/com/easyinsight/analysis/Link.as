@@ -5,7 +5,7 @@ public class Link {
     public var label:String;
     public var linkID:int;
     public var codeGenerated:Boolean;
-    public var defaultLink:Boolean;
+    public var defaultLink:Boolean = true;
 
     public function Link() {
     }

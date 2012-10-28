@@ -95,7 +95,7 @@
             var valid:Boolean = true;
             if (typeGroup.selectedValue == "URL") {
                 var results:Array = Validator.validateAll([ urlValidator ]);
-                if (results.length == 0) {
+                if (results.length > 0) {
                     valid = false;
                     urlInput.setFocus();
                     urlInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
