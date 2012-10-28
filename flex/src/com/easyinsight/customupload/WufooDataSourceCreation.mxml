@@ -22,6 +22,7 @@
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:WufooCompositeSource = new WufooCompositeSource();
             obj.url = urlInput.text;
+            obj.wfApiKey = apiInput.text;
             return obj;
         }
 
