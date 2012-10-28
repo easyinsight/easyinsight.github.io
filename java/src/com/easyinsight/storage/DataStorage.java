@@ -26,6 +26,7 @@ import java.util.Date;
 import java.sql.*;
 
 import com.easyinsight.users.DataSourceStats;
+import com.easyinsight.users.UserAccountAdminService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.apache.jcs.JCS;
@@ -219,15 +220,21 @@ public class DataStorage implements IDataStorage {
         if (dataStorage.metadata == null) {
             dataStorage.metadata = createDefaultMetadata(conn);
         }
+        dataStorage.database = DatabaseManager.instance().getDatabase(dataStorage.metadata.getDatabase());
+        if (dataStorage.database == null) {
+            System.out.println("Rebuilding metadata...");
+            dataStorage.metadata = createDefaultMetadata(conn);
+            dataStorage.database = DatabaseManager.instance().getDatabase(dataStorage.metadata.getDatabase());
+            if (dataStorage.database == null) {
+                throw new DatabaseShardException();
+            }
+        }
         dataStorage.keys = keyMetadatas;
         dataStorage.dataSourceType = feedDefinition.getFeedType().getType();
         dataStorage.feedID = feedDefinition.getDataFeedID();
         dataStorage.version = dataStorage.metadata.getVersion();
         dataStorage.coreDBConn = conn;
-        dataStorage.database = DatabaseManager.instance().getDatabase(dataStorage.metadata.getDatabase());
-        if (dataStorage.database == null) {
-            throw new DatabaseShardException();
-        }
+
         dataStorage.storageConn = dataStorage.database.getConnection();
         dataStorage.storageConn.setAutoCommit(false);
         return dataStorage;
@@ -244,7 +251,7 @@ public class DataStorage implements IDataStorage {
     }
 
     private void validateSpace(Connection conn) throws SQLException, StorageLimitException {
-        /*if (systemUpdate) return;
+        if (systemUpdate) return;
 
         PreparedStatement spaceAllowed = conn.prepareStatement("SELECT ACCOUNT_TYPE, MAX_SIZE, max_days_over_size_boundary, days_over_size_boundary FROM ACCOUNT WHERE account_id = ?");
         spaceAllowed.setLong(1, accountID);
@@ -260,78 +267,14 @@ public class DataStorage implements IDataStorage {
             // if max days over = -1, they're an account we're not monitoring at all for size yet
             return;
         }
+        List<DataSourceStats> statsList = UserAccountAdminService.sizeDataSources((EIConnection) conn, accountID);
+        long usedSize = UserAccountAdminService.usedSize(statsList);
 
-        PreparedStatement queryStmt = conn.prepareStatement("select feed_persistence_metadata.size, feed_persistence_metadata.feed_id, data_feed.feed_type, data_feed.visible, " +
-                "data_feed.parent_source_id, data_feed.feed_name from feed_persistence_metadata, upload_policy_users, user, data_feed where " +
-                "data_feed.data_feed_id = upload_policy_users.feed_id and feed_persistence_metadata.feed_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id and " +
-                "user.account_id = ?");
-        queryStmt.setLong(1, accountID);
-        ResultSet qRS = queryStmt.executeQuery();
-        Map<Long, DataSourceStats> statsMap = new HashMap<Long, DataSourceStats>();
-        while (qRS.next()) {
-            long size = qRS.getLong(1);
-            long dataSourceID = qRS.getLong(2);
-            boolean visible = qRS.getBoolean(4);
-            long parentSourceID = qRS.getLong(5);
-            String feedName = qRS.getString(6);
-            DataSourceStats dataSourceStats = statsMap.get(dataSourceID);
-            if (dataSourceStats == null) {
-                dataSourceStats = new DataSourceStats();
-                statsMap.put(dataSourceID, dataSourceStats);
-            }
-            dataSourceStats.setSize(size);
-            dataSourceStats.setVisible(visible);
-            dataSourceStats.setDataSourceID(dataSourceID);
-            dataSourceStats.setName(feedName);
-            statsMap.put(dataSourceID, dataSourceStats);
-            if (parentSourceID > 0) {
-                DataSourceStats parent = statsMap.get(parentSourceID);
-                if (parent == null) {
-                    parent = new DataSourceStats();
-                    statsMap.put(parentSourceID, parent);
-                }
-                parent.getChildStats().add(dataSourceStats);
-            }
-        }
-        List<DataSourceStats> statsList = new ArrayList<DataSourceStats>();
-        long usedSize = 0;
-        for (DataSourceStats stats : statsMap.values()) {
-            if (stats.isVisible()) {
-                usedSize += stats.getSize();
-                for (DataSourceStats child : stats.getChildStats()) {
-                    usedSize += child.getSize();
-                    stats.setSize(stats.getSize() + child.getSize());
-                }
-                statsList.add(stats);
-            }
-        }
-        queryStmt.close();
-
-
-        long allowed;
-        if (accountType == Account.ENTERPRISE) {
-            allowed = Account.ENTERPRISE_MAX;
-        } else if (accountType == Account.PREMIUM) {
-            allowed = Account.PREMIUM_MAX;
-        } else if (accountType == Account.BASIC) {
-            allowed = Account.BASIC_MAX;
-        } else if (accountType == Account.PLUS) {
-            allowed = Account.PLUS_MAX;
-        } else if (accountType == Account.PERSONAL) {
-            allowed = Account.PERSONAL_MAX;
-        } else if (accountType == Account.PROFESSIONAL) {
-            allowed = Account.PROFESSIONAL_MAX;
-        } else if (accountType == Account.ADMINISTRATOR) {
-            allowed = Account.ADMINISTRATOR_MAX;
-        } else {
-            throw new RuntimeException("Unknown account type");
-        }
-        System.out.println("Used size = " + usedSize + " while allowed = " + allowed);
-        if (usedSize > allowed) {
-            long mb = allowed / 1000000L;
+        System.out.println("Used size = " + usedSize + " while allowed = " + maxSize);
+        if (usedSize > maxSize) {
+            String mb = Account.humanReadableByteCount(maxSize, true);
             throw new ReportException(new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + " mb. You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier.", statsList));
-        }*/
-
+        }
     }
 
     public int getVersion() {
@@ -1481,15 +1424,15 @@ public class DataStorage implements IDataStorage {
 
     private static void addOrUpdateMetadata(long dataFeedID, FeedPersistenceMetadata metadata, Connection conn, int dataSourceType) {
         try {
-            if (dataSourceType == FeedType.DATABASE_CONNECTION.getType()) {
-                if (metadata.getMetadataID() > 0) {
+            if (dataSourceType == FeedType.DATABASE_CONNECTION.getType() || dataSourceType == FeedType.SALESFORCE_SUB.getType()) {
+                //if (metadata.getMetadataID() > 0) {
                     PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_ID = ? AND " +
                             "VERSION = ?");
                     deleteStmt.setLong(1, dataFeedID);
                     deleteStmt.setInt(2, metadata.getVersion());
                     deleteStmt.executeUpdate();
                     deleteStmt.close();
-                }
+                //}
             } else {
                 if (metadata.getMetadataID() > 0) {
                     PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_PERSISTENCE_METADATA_ID = ?");
