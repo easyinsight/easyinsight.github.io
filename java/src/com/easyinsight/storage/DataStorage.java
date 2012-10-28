@@ -251,7 +251,7 @@ public class DataStorage implements IDataStorage {
     }
 
     private void validateSpace(Connection conn) throws SQLException, StorageLimitException {
-        if (systemUpdate) return;
+        /*if (systemUpdate) return;
 
         PreparedStatement spaceAllowed = conn.prepareStatement("SELECT ACCOUNT_TYPE, MAX_SIZE, max_days_over_size_boundary, days_over_size_boundary FROM ACCOUNT WHERE account_id = ?");
         spaceAllowed.setLong(1, accountID);
@@ -274,7 +274,7 @@ public class DataStorage implements IDataStorage {
         if (usedSize > maxSize) {
             String mb = Account.humanReadableByteCount(maxSize, true);
             throw new ReportException(new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + " mb. You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier.", statsList));
-        }
+        }*/
     }
 
     public int getVersion() {
