@@ -20,18 +20,18 @@
 
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:InsightlyCompositeSource = new InsightlyCompositeSource();
-            obj.apiKey = apiKeyInput.text;
+            obj.insightlyApiKey = apiKeyInput.text;
             return obj;
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:InsightlyCompositeSource = feedDefinition as InsightlyCompositeSource;
-            apiKey = ds.apiKey;
+            apiKey = ds.insightlyApiKey;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:InsightlyCompositeSource = feedDefinition as InsightlyCompositeSource;
-            ds.apiKey = apiKeyInput.text;
+            ds.insightlyApiKey = apiKeyInput.text;
         }
 
         public function validate():Boolean {
