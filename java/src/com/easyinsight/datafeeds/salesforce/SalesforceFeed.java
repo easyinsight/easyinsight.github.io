@@ -14,10 +14,7 @@ import java.util.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.storage.DataStorage;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Node;
-import nu.xom.Nodes;
+import nu.xom.*;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
@@ -46,7 +43,6 @@ public class SalesforceFeed extends Feed {
         boolean indexed = true;
         for (AnalysisItem analysisItem : analysisItems) {
             if (!analysisItem.getKey().indexed()) {
-                System.out.println(analysisItem.toDisplay() + " was not indexed");
                 indexed = false;
             }
         }
@@ -227,8 +223,15 @@ public class SalesforceFeed extends Feed {
                 Nodes nextRecords = doc.query("/QueryResults/nextRecordsUrl/text()");
                 if (nextRecords.size() == 1) {
                     url = nextRecords.get(0).getValue();
+                    System.out.println("**** next records url = " + url);
                     moreData = true;
                 } else {
+                    System.out.println("*** no sign of next records url, children: ");
+                    Element rootElement = doc.getRootElement();
+                    for (int j = 0; j < rootElement.getChildCount(); j++) {
+                        Node node = rootElement.getChild(j);
+                        System.out.println("\tchild: " + node.toXML());
+                    }
                     moreData = false;
                 }
             } while (moreData);
