@@ -54,7 +54,7 @@ public class DrillthroughServlet extends HtmlServlet {
         if (drillThrough == null) {
             throw new RuntimeException();
         }
-        DrillThroughResponse drillThroughResponse = new AnalysisService().drillThrough(drillThrough, data, linkItem, report);
+        DrillThroughResponse drillThroughResponse = new AnalysisService().drillThrough(drillThrough, data, linkItem, report, null);
         // return a URL for response redirect?
         JSONObject result = new JSONObject();
 
