@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.analysis.definitions.WSStackedBarChartDefinition;
 import com.easyinsight.analysis.definitions.WSStackedColumnChartDefinition;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsParser;
@@ -687,6 +688,32 @@ public class AnalysisService {
                             filterValueDefinition.setToggleEnabled(true);
 
                             filterValueDefinition.setFilteredValues(Arrays.asList(data.get(stackedColumnChartDefinition.getXaxis().qualifiedName())));
+                            filters.add(filterValueDefinition);
+                        }
+                    } else if (report.getReportType() == WSAnalysisDefinition.STACKED_BAR) {
+                        WSStackedBarChartDefinition stackedColumnChartDefinition = (WSStackedBarChartDefinition) report;
+                        {
+                            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+                            filterValueDefinition.setField(stackedColumnChartDefinition.getStackItem());
+                            filterValueDefinition.setShowOnReportView(false);
+                            filterValueDefinition.setSingleValue(true);
+                            filterValueDefinition.setEnabled(true);
+                            filterValueDefinition.setInclusive(true);
+                            filterValueDefinition.setToggleEnabled(true);
+
+                            filterValueDefinition.setFilteredValues(Arrays.asList((Object) altKey));
+                            filters.add(filterValueDefinition);
+                        }
+                        {
+                            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+                            filterValueDefinition.setField(stackedColumnChartDefinition.getYaxis());
+                            filterValueDefinition.setShowOnReportView(false);
+                            filterValueDefinition.setSingleValue(true);
+                            filterValueDefinition.setEnabled(true);
+                            filterValueDefinition.setInclusive(true);
+                            filterValueDefinition.setToggleEnabled(true);
+
+                            filterValueDefinition.setFilteredValues(Arrays.asList(data.get(stackedColumnChartDefinition.getYaxis().qualifiedName())));
                             filters.add(filterValueDefinition);
                         }
                     } else {
