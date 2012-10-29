@@ -222,7 +222,7 @@ public class SalesforceFeed extends Feed {
 
                 Nodes nextRecords = doc.query("/QueryResult/nextRecordsUrl/text()");
                 if (nextRecords.size() == 1) {
-                    url = nextRecords.get(0).getValue();
+                    url = salesforceBaseDataSource.getInstanceName() + nextRecords.get(0).getValue();
                     moreData = true;
                 } else {
                     moreData = false;
