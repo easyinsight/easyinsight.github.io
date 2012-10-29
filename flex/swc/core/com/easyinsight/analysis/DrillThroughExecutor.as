@@ -20,12 +20,14 @@ public class DrillThroughExecutor extends EventDispatcher {
     private var data:Object;
     private var analysisItem:AnalysisItem;
     private var report:AnalysisDefinition;
+    private var altKey:String;
 
-    public function DrillThroughExecutor(drillThrough:DrillThrough, data:Object, analysisItem:AnalysisItem, report:AnalysisDefinition) {
+    public function DrillThroughExecutor(drillThrough:DrillThrough, data:Object, analysisItem:AnalysisItem, report:AnalysisDefinition, altKey:String = null) {
         this.drillThrough = drillThrough;
         this.data = data;
         this.analysisItem = analysisItem;
         this.report = report;
+        this.altKey = altKey;
         analysisService = new RemoteObject();
         analysisService.destination = "analysisDefinition";
         analysisService.drillThrough.addEventListener(ResultEvent.RESULT, onResult);
@@ -33,7 +35,7 @@ public class DrillThroughExecutor extends EventDispatcher {
 
     public function send():void {
         ProgressAlert.alert(Application.application as UIComponent, "Retrieving report information...", null, analysisService.drillThrough);
-        analysisService.drillThrough.send(drillThrough, data, analysisItem, report);
+        analysisService.drillThrough.send(drillThrough, data, analysisItem, report, altKey);
     }
 
     private function onResult(event:ResultEvent):void {

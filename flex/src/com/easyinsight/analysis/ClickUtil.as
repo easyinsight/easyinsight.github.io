@@ -47,7 +47,7 @@ public class ClickUtil {
             } else if (defaultLink is DrillThrough) {
                 utils.addItem(this);
                 var drillThrough:DrillThrough = defaultLink as DrillThrough;
-                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, report);
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, report, altKey);
                 executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();
             }
