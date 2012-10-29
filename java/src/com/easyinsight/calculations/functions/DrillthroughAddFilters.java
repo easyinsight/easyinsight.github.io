@@ -16,7 +16,7 @@ public class DrillthroughAddFilters extends Function {
     public Value evaluate() {
         DrillthroughCalculationMetadata drillthroughCalculationMetadata = (DrillthroughCalculationMetadata) calculationMetadata;
 
-        for (AnalysisItem analysisItem : drillthroughCalculationMetadata.getAnalysisItems()) {
+        /*for (AnalysisItem analysisItem : drillthroughCalculationMetadata.getAnalysisItems()) {
             if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                 FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
                 filterValueDefinition.setField(analysisItem);
@@ -28,7 +28,7 @@ public class DrillthroughAddFilters extends Function {
                 filterValueDefinition.setFilteredValues(Arrays.asList(drillthroughCalculationMetadata.getData().get(analysisItem.qualifiedName())));
                 drillthroughCalculationMetadata.getDrillThroughFilters().add(filterValueDefinition);
             }
-        }
+        }*/
 
         for (FilterDefinition filterDefinition : drillthroughCalculationMetadata.getReport().getFilterDefinitions()) {
             if (filterDefinition.isShowOnReportView() && (filterDefinition instanceof FilterValueDefinition ||
@@ -41,6 +41,7 @@ public class DrillthroughAddFilters extends Function {
                 } catch (CloneNotSupportedException e) {
                     throw new RuntimeException(e);
                 }
+                clone.setToggleEnabled(true);
                 drillthroughCalculationMetadata.getDrillThroughFilters().add(clone);
             }
         }
