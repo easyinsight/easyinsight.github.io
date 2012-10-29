@@ -45,7 +45,6 @@ public abstract class InsightlyBaseSource extends ServerDataSourceDefinition {
             } else if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", insightlyCompositeSource));
             }
-            System.out.println(restMethod.getResponseBodyAsString());
             return (List) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
         } catch (ReportException re) {
             throw re;
