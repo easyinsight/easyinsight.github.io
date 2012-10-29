@@ -265,7 +265,7 @@ public class DataService {
                 tempReport.setJoinOverrides(analysisDefinition.getJoinOverrides());
                 InsightRequestMetadata metadata = new InsightRequestMetadata();
                 metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
-                ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
+                ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(metadata, tempReport, conn, customFilters, new ArrayList<FilterDefinition>());
                 dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
                 DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
                 DataSet pastSet;
@@ -277,7 +277,7 @@ public class DataService {
                     metadata = new InsightRequestMetadata();
                     metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
                     metadata.setNow(cal.getTime());
-                    ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(metadata, tempReport, conn);
+                    ReportRetrieval reportRetrievalPast = ReportRetrieval.reportView(metadata, tempReport, conn, customFilters, new ArrayList<FilterDefinition>());
                     pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
                 }
                 trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
