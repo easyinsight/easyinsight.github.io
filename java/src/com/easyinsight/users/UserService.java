@@ -49,8 +49,7 @@ import javax.servlet.http.HttpSession;
  */
 public class UserService {
 
-    public static void checkAccountStateOnLogin(HttpSession session, UserServiceResponse userServiceResponse, HttpServletRequest request, HttpServletResponse response) throws IOException, SQLException {
-        String oldRedirectUrl = (String) session.getAttribute("loginRedirect");
+    public static void checkAccountStateOnLogin(HttpSession session, UserServiceResponse userServiceResponse, HttpServletRequest request, HttpServletResponse response, String oldRedirectUrl) throws IOException, SQLException {
         if (userServiceResponse.getAccountState() == Account.CLOSED) {
             response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/billingSetupAction.jsp"));
         } else if (userServiceResponse.getAccountState() == Account.DELINQUENT) {

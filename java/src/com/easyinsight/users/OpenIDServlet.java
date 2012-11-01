@@ -112,7 +112,7 @@ public class OpenIDServlet extends HttpServlet {
             } else {
                 SecurityUtil.populateSession(req.getSession(), response);
                 try {
-                    UserService.checkAccountStateOnLogin(req.getSession(), response, req, resp);
+                    UserService.checkAccountStateOnLogin(req.getSession(), response, req, resp, null);
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }

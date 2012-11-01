@@ -24,12 +24,12 @@
     if (!userServiceResponse.isSuccessful()) {
         response.sendRedirect("login.jsp?error=true");
     } else {
-
+        String oldRedirectUrl = (String) session.getAttribute("loginRedirect");
         session.invalidate();
         session = request.getSession(true);
         SecurityUtil.populateSession(session, userServiceResponse);
 
-        UserService.checkAccountStateOnLogin(session, userServiceResponse, request, response);
+        UserService.checkAccountStateOnLogin(session, userServiceResponse, request, response, oldRedirectUrl);
     }
 %><%!
 %>
