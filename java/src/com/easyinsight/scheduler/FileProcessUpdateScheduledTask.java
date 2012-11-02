@@ -9,6 +9,7 @@ import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.dataset.PersistableDataSetForm;
+import com.easyinsight.userupload.DefaultFormatMapper;
 import com.easyinsight.userupload.UploadFormat;
 import com.easyinsight.userupload.UserUploadService;
 
@@ -73,7 +74,7 @@ public class FileProcessUpdateScheduledTask {
             new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn);
             metadata = DataStorage.writeConnection(feedDefinition, conn, accountID);
             UploadFormat uploadFormat = feedDefinition.getUploadFormat();
-            PersistableDataSetForm form = uploadFormat.createDataSet(bytes, feedDefinition.getFields());
+            PersistableDataSetForm form = uploadFormat.createDataSet(bytes, feedDefinition.getFields(), new DefaultFormatMapper(feedDefinition.getFields()));
             if (update) {
                 metadata.truncate();
                 metadata.insertData(form.toDataSet(rowCount));

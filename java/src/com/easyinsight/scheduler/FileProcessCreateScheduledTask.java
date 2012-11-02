@@ -55,7 +55,7 @@ public class FileProcessCreateScheduledTask {
     public void createFeed(Connection conn, byte[] bytes, UploadFormat uploadFormat, List<AnalysisItem> fields, boolean accountVisible) throws Exception {
         DataStorage tableDef = null;
         try {
-            PersistableDataSetForm dataSet = uploadFormat.createDataSet(bytes, fields);
+            PersistableDataSetForm dataSet = uploadFormat.createDataSet(bytes, fields, new DefaultFormatMapper(fields));
 
             for (AnalysisItem field : fields) {
                 dataSet.refreshKey(field.getKey());

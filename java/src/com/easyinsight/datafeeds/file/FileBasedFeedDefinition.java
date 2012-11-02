@@ -149,7 +149,7 @@ public class FileBasedFeedDefinition extends ServerDataSourceDefinition {
                 bufOS.write(buffer, 0, nBytes);
             }
             bufOS.flush();
-            PersistableDataSetForm form = uploadFormat.createDataSet(baos.toByteArray(), getFields());
+            PersistableDataSetForm form = uploadFormat.createDataSet(baos.toByteArray(), getFields(), new DefaultFormatMapper(getFields()));
             return form.toDataSet(rowCount);
         } catch (ReportException re) {
             throw re;
