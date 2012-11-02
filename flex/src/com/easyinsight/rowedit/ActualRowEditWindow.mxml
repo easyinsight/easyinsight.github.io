@@ -8,6 +8,7 @@
         import com.easyinsight.analysis.NumericValue;
         import com.easyinsight.analysis.StringValue;
         import com.easyinsight.analysis.Value;
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.util.SmartComboBox;
 
@@ -153,6 +154,14 @@
         private function deleted():void {
             PopUpManager.removePopUp(this);
         }
+
+        private function loadFromExcel():void {
+            var loadWindow:LoadFromExcelWindow = new LoadFromExcelWindow();
+            loadWindow.dataSourceID = actualRowSet.dataSourceID;
+            PopUpManager.addPopUp(loadWindow, this, true);
+            PopUpUtil.centerPopUp(loadWindow);
+            PopUpManager.removePopUp(this);
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="updateRow" result="updated()"/>
@@ -166,6 +175,7 @@
         <mx:HBox width="100%" horizontalAlign="center">
             <util:SaveButton label="Save" click="save()"/>
             <util:SaveButton label="Delete" click="deleteRow()" enabled="{showDelete}"/>
+            <util:SaveButton label="Load From Excel" click="loadFromExcel()"/>
             <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>

@@ -36,13 +36,13 @@ public abstract class UploadFormat implements Serializable {
         return userUploadAnalysis;
     }
 
-    public PersistableDataSetForm createDataSet(byte[] data, List<AnalysisItem> fields) {
-        return createInternalDataSet(data, null, fields);
+    public PersistableDataSetForm createDataSet(byte[] data, List<AnalysisItem> fields, IUploadFormatMapper formatMapper) {
+        return createInternalDataSet(data, null, fields, formatMapper);
     }
 
     private DataTypeGuesser createDataTypeGuesser(byte[] data) {
         DataTypeGuesser dataTypeGuesser = new DataTypeGuesser();
-        createInternalDataSet(data, dataTypeGuesser, null);
+        createInternalDataSet(data, dataTypeGuesser, null, new DefaultFormatMapper(null));
         return dataTypeGuesser;
     }
 
@@ -57,7 +57,7 @@ public abstract class UploadFormat implements Serializable {
         return keyMap;
     }
 
-    private PersistableDataSetForm createInternalDataSet(byte[] data, IDataTypeGuesser dataTypeGuesser, List<AnalysisItem> analysisItems) {
+    private PersistableDataSetForm createInternalDataSet(byte[] data, IDataTypeGuesser dataTypeGuesser, List<AnalysisItem> analysisItems, IUploadFormatMapper formatMapper) {
         Map<String, Key> keyMap = createKeyMap(analysisItems);
         Map<String, AnalysisItem> analysisItemMap = null;
         if (analysisItems != null) {
@@ -85,12 +85,8 @@ public abstract class UploadFormat implements Serializable {
                     }
                     verticalGridSlice[i] = value;
                 }
-                Key key;
-                if (keyMap == null) {
-                    key = new NamedKey(createName(gridData.headerColumns[j], j));
-                } else {
-                    key = keyMap.get(createName(gridData.headerColumns[j], j));
-                }
+                Key key = formatMapper.reconcileKey(createName(gridData.headerColumns[j], j));
+
                 if (key != null) {
                     columnSegmentMap.put(key, new ColumnSegment(verticalGridSlice));
                 }

@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.DashboardStorage;
@@ -12,11 +13,15 @@ import com.easyinsight.datafeeds.harvest.HarvestProjectSource;
 import com.easyinsight.datafeeds.highrise.HighRiseCompanySource;
 import com.easyinsight.datafeeds.highrise.HighRiseContactSource;
 import com.easyinsight.datafeeds.highrise.HighRiseDealSource;
+import com.easyinsight.dataset.DataSet;
+import com.easyinsight.dataset.PersistableDataSetForm;
 import com.easyinsight.etl.LookupPair;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.etl.LookupTableUtil;
 import com.easyinsight.scorecard.ScorecardInternalService;
 import com.easyinsight.storage.DatabaseShardException;
+import com.easyinsight.userupload.AnalysisItemFormatMapper;
+import com.easyinsight.userupload.ExcelUploadFormat;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -31,6 +36,8 @@ import com.easyinsight.notifications.NotificationBase;
 import com.easyinsight.notifications.DataSourceToGroupNotification;
 import com.easyinsight.users.User;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -50,6 +57,52 @@ public class FeedService {
 
     public FeedService() {
         // this goes into a different data provider        
+    }
+
+    public void generateTemplate(long dataSourceID) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
+        try {
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID);
+            StringBuilder sb = new StringBuilder();
+            for (AnalysisItem field : dataSource.getFields()) {
+                if (field.isConcrete()) {
+                    sb.append(field.toDisplay()).append(",");
+                }
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            System.out.println(sb.toString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void importData(byte[] bytes, long dataSourceID) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
+        EIConnection conn = Database.instance().getConnection();
+        DataStorage dataStorage = null;
+        try {
+            conn.setAutoCommit(false);
+            FeedDefinition dataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+            PersistableDataSetForm data = new ExcelUploadFormat().createDataSet(bytes, dataSource.getFields(), new AnalysisItemFormatMapper(dataSource.getFields()));
+            DataSet dataSet = data.toDataSet(null);
+            dataStorage = DataStorage.writeConnection(dataSource, conn);
+            dataStorage.insertData(dataSet);
+            dataStorage.commit();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
     }
 
     private List<FeedDefinition> resolveToDataSource(Key key, EIConnection conn) throws SQLException {
@@ -74,7 +127,9 @@ public class FeedService {
             if (report.getAddedItems().contains(analysisItem)) {
                 report.getAddedItems().remove(analysisItem);
             }
-            dataSource.getFields().add(analysisItem);
+            AnalysisItem clone = analysisItem.clone();
+            // 888-363-8350
+            dataSource.getFields().add(clone);
             new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
             conn.commit();
         } catch (Exception e) {

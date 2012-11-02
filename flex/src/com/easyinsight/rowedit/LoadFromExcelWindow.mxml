@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        private var file:FileReference = new FileReference();
+
+        private function doBrowse(event:Event):void {
+            file.browse();
+        }
+
+        private static function onIOError(event:IOErrorEvent):void {
+            Alert.show(event.text);
+        }
+
+        public function doSelect(event:Event):void {
+            fileNameText.text = file.name;
+            importEnabled = true;
+        }
+
+        [Bindable]
+        private var importEnabled:Boolean;
+
+        public function doSubmit(event:Event):void {
+            file.load();
+        }
+
+        private var fileData:ByteArray;
+
+        private function doComplete(event:Event):void {
+            fileData = file.data;
+            ProgressAlert.alert(this, "Importing data...", null, feedService.importData);
+            feedService.importData.send(fileData, dataSourceID);
+        }
+
+        private function onCreation():void {
+            file.addEventListener(Event.SELECT, doSelect);
+            file.addEventListener(Event.COMPLETE, doComplete);
+            file.addEventListener(IOErrorEvent.IO_ERROR, onIOError);
+        }
+
+        private function importData():void {
+            file.load();
+
+        }
+
+        public var dataSourceID:int;
+
+        private function importedData():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function generateTemplate():void {
+            feedService.generateTemplate.send(dataSourceID);
+        }
+
+        private var bytes:ByteArray;
+        ]]></mx:Script>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="importData" result="importedData()"/>
+        <mx:method name="generateTemplate"/>
+    </mx:RemoteObject>
+    <mx:FormItem label="Select an Excel spreadsheet to upload:" direction="horizontal">
+        <mx:TextInput id="fileNameText" editable="false"/>
+        <mx:Button label="Browse..." click="doBrowse( event )" />
+    </mx:FormItem>
+    <mx:HBox>
+        <util:SaveButton label="Import" enabled="{importEnabled}" click="importData()"/>
+        <util:SaveButton label="Generate Template" click="generateTemplate()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>
