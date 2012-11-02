@@ -27,6 +27,7 @@ import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.signature.HmacSha1MessageSigner;
 import oauth.signpost.signature.PlainTextMessageSigner;
 
+import javax.servlet.http.HttpSession;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
@@ -41,17 +42,29 @@ public class TokenService {
 
     public static final int CONNECTION_SETUP = 1;
     public static final int NO_CONNECTION = 2;
+    public static final int USER_SOURCE = 3;
 
     public static final String SALESFORCE_CONSUMER_KEY = "3MVG9VmVOCGHKYBQUAbz7d7kk6x2g29kEbyFhTBt7u..yutNvp7evoFyWTm2q4tZfWRdxekrK6fhhwf5BN4Tq";
 
     public OAuthResponse getOAuthURL(int type, boolean redirect, String host, FeedDefinition dataSource, int redirectType) {
+        return getOAuthResponse(type, redirect, dataSource, redirectType, FlexContext.getHttpRequest().getSession());
+    }
+
+    public OAuthResponse getHttpOAuthURL(int type, boolean redirect, int redirectType, HttpSession session) {
+        return getOAuthResponse(type, redirect, null, redirectType, session);
+    }
+
+    private OAuthResponse getOAuthResponse(int type, boolean redirect, FeedDefinition dataSource, int redirectType, HttpSession session) {
         try {
             OAuthConsumer consumer;
             OAuthProvider provider;
+            String dataSourceId = null;
 
             if (dataSource != null) {
                 new FeedStorage().updateDataFeedConfiguration(dataSource);
+                dataSourceId = dataSource.getApiKey();
             }
+
 
             if (type == FeedType.LINKEDIN.getType()) {
                 consumer = new DefaultOAuthConsumer("pMAaMYgowzMITTDFzMoaIbHsCni3iBZKzz3bEvUYoIHlaSAEv78XoOsmpch9YkLq",
@@ -71,8 +84,8 @@ public class TokenService {
                 consumer.setMessageSigner(new PlainTextMessageSigner());
                 FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) dataSource;
                 provider = new CommonsHttpOAuthProvider(
-                        freshbooksCompositeSource.getUrl() + "/oauth/oauth_request.php", freshbooksCompositeSource.getUrl()+"/oauth/oauth_access.php",
-                        freshbooksCompositeSource.getUrl()+"/oauth/oauth_authorize.php");
+                        freshbooksCompositeSource.getUrl() + "/oauth/oauth_request.php", freshbooksCompositeSource.getUrl() + "/oauth/oauth_access.php",
+                        freshbooksCompositeSource.getUrl() + "/oauth/oauth_authorize.php");
             } else if (type == FeedType.CONSTANT_CONTACT.getType()) {
                 consumer = new DefaultOAuthConsumer("cec7e39c-25fc-43e6-a423-bf02de492d87", "ee72ddd074804402966863aad91b9687");
                 provider = new DefaultOAuthProvider(
@@ -92,15 +105,22 @@ public class TokenService {
                 provider = new CommonsHttpOAuthProvider(
                         "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
                         "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
+            } else if (type == FeedType.GOOGLE_PROVISIONING.getType()) {
+                String scope = "https://apps-apis.google.com/a/feeds/user/";
+                consumer = new CommonsHttpOAuthConsumer("119099431019.apps.googleusercontent.com", "UuuYup6nE4M2PjnOv_jEg8Ki");
+                consumer.setMessageSigner(new HmacSha1MessageSigner());
+                provider = new CommonsHttpOAuthProvider(
+                        "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
+                        "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
             } else if (type == FeedType.HARVEST_COMPOSITE.getType()) {
                 HarvestCompositeSource harvestCompositeSource = (HarvestCompositeSource) dataSource;
                 OAuthClientRequest request;
                 if (ConfigLoader.instance().isProduction()) {
                     request = OAuthClientRequest
-                        .authorizationLocation(harvestCompositeSource.getUrl() + "/oauth2/authorize")
-                        .setClientId("7wBqPVAr2om0aWwNbHjFHQ==")
-                        .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
-                        .buildQueryMessage();
+                            .authorizationLocation(harvestCompositeSource.getUrl() + "/oauth2/authorize")
+                            .setClientId("7wBqPVAr2om0aWwNbHjFHQ==")
+                            .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
+                            .buildQueryMessage();
                 } else {
                     request = OAuthClientRequest
                             .authorizationLocation(harvestCompositeSource.getUrl() + "/oauth2/authorize")
@@ -108,8 +128,8 @@ public class TokenService {
                             .setRedirectURI("https://staging.easy-insight.com/app/oauth").setResponseType("code")
                             .buildQueryMessage();
                 }
-                FlexContext.getHttpRequest().getSession().setAttribute("redirectTarget", redirectType);
-                FlexContext.getHttpRequest().getSession().setAttribute("dataSourceID", dataSource.getApiKey());
+                session.setAttribute("redirectTarget", redirectType);
+                session.setAttribute("dataSourceID", dataSource.getApiKey());
                 return new OAuthResponse(request.getLocationUri(), true);
             } else if (type == FeedType.BASECAMP_NEXT_COMPOSITE.getType()) {
                 OAuthClientRequest request;
@@ -137,8 +157,8 @@ public class TokenService {
                         setClientId(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY).
                         setRedirectURI("https://www.easy-insight.com/app/oauth").
                         setResponseType("code").
-                        //setRedirectURI("https://localhost/app/oauth").
-                        buildQueryMessage();
+                        //setRedirectURI("https://staging.easy-insight.com/app/oauth").
+                                buildQueryMessage();
                 FlexContext.getHttpRequest().getSession().setAttribute("redirectTarget", redirectType);
                 FlexContext.getHttpRequest().getSession().setAttribute("dataSourceID", dataSource.getApiKey());
                 return new OAuthResponse(clientRequest.getLocationUri(), true);
@@ -146,17 +166,26 @@ public class TokenService {
             } else {
                 throw new RuntimeException();
             }
-            FlexContext.getHttpRequest().getSession().setAttribute("oauthConsumer", consumer);
-            FlexContext.getHttpRequest().getSession().setAttribute("oauthProvider", provider);
+            session.setAttribute("oauthConsumer", consumer);
+            session.setAttribute("oauthProvider", provider);
 
             String requestToken;
             if (redirect) {
                 if (ConfigLoader.instance().isProduction()) {
-                    //requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
-                    requestToken = provider.retrieveRequestToken(consumer, "https://www.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    //requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.comasy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    if(dataSourceId != null) {
+                        requestToken = provider.retrieveRequestToken(consumer, "https://www.easy-insight.com/app/oauth?redirectTarget=" + redirectType + "&dataSourceID=" + dataSourceId);
+                    } else {
+                        requestToken = provider.retrieveRequestToken(consumer, "https://www.easy-insight.com/app/oauth?redirectTarget=" + redirectType + "&type=googleProvider");
+                    }
+
                 } else {
-                    //requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
-                    requestToken = provider.retrieveRequestToken(consumer, "https://localhost:4443/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    //requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    if(dataSourceId != null) {
+                        requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget=" + redirectType + "&dataSourceID=" + dataSourceId);
+                    } else {
+                        requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget=" + redirectType + "&type=googleProvider");
+                    }
                 }
             } else {
                 requestToken = provider.retrieveRequestToken(consumer, OAuth.OUT_OF_BAND);
