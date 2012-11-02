@@ -1,0 +1,1 @@
+alter table account add (google_oauth_secret_token varchar(255), google_oauth_token varchar(255));

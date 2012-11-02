@@ -72,6 +72,12 @@ public class Account {
     @Column(name="google_domain_name")
     private String googleDomainName;
 
+    @Column(name="google_oauth_secret_token")
+    private String googleSecretToken;
+
+    @Column(name="google_oauth_token")
+    private String googleToken;
+
     @Column(name="manual_invoicing")
     private boolean manualInvoicing;
 
@@ -208,6 +214,22 @@ public class Account {
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public String getGoogleSecretToken() {
+        return googleSecretToken;
+    }
+
+    public void setGoogleSecretToken(String googleSecretToken) {
+        this.googleSecretToken = googleSecretToken;
+    }
+
+    public String getGoogleToken() {
+        return googleToken;
+    }
+
+    public void setGoogleToken(String googleToken) {
+        this.googleToken = googleToken;
+    }
 
     public String getGoogleDomainName() {
         return googleDomainName;

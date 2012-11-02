@@ -20,6 +20,6 @@ public class IfFunction extends Function {
     }
 
     public int getParameterCount() {
-        return 3;  //To change body of implemented methods use File | Settings | File Templates.
+        return 3;
     }
 }

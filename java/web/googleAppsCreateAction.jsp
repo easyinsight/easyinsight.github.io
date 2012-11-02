@@ -1,7 +1,8 @@
 <%@ page import="com.easyinsight.util.RandomTextGenerator" %>
 <%@ page import="com.easyinsight.users.*" %>
-<%@ page import="com.easyinsight.security.SecurityUtil" %><%
-    String callbackURL = (String) session.getAttribute("googleCallbackURL");
+<%@ page import="com.easyinsight.security.SecurityUtil" %>
+<%@ page import="com.easyinsight.datafeeds.FeedType" %><%
+
     String domain = (String) session.getAttribute("googleDomain");
     String email = (String) session.getAttribute("googleAppsSetupEmail");
     String firstName = (String) session.getAttribute("googleAppsSetupFirstName");
@@ -24,5 +25,5 @@
     new UserService().createAccount(admin, accountTransferObject, password);
     UserServiceResponse userServiceResponse = new UserService().authenticate(email, password, false);
     SecurityUtil.populateSession(session, userServiceResponse);
-    response.sendRedirect(callbackURL);
+    response.sendRedirect(new TokenService().getHttpOAuthURL(FeedType.GOOGLE_PROVISIONING.getType(), true, TokenService.USER_SOURCE, session).getRequestToken());
 %>
