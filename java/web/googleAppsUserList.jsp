@@ -70,8 +70,8 @@
                     GoogleOAuthParameters params = new GoogleOAuthParameters();
                     params.setOAuthConsumerKey("119099431019.apps.googleusercontent.com");
                     params.setOAuthConsumerSecret("UuuYup6nE4M2PjnOv_jEg8Ki");
-                    params.setOAuthToken(token);
-                    params.setOAuthTokenSecret(secretToken);
+//                    params.setOAuthToken(token);
+//                    params.setOAuthTokenSecret(secretToken);
                     us.setOAuthCredentials(params, new OAuthHmacSha1Signer());
                     UserFeed feed = us.getFeed(new URL("https://apps-apis.google.com/a/feeds/" + domain + "/user/2.0"), UserFeed.class);
                     for(UserEntry user : feed.getEntries()) {

@@ -25,5 +25,6 @@
     new UserService().createAccount(admin, accountTransferObject, password);
     UserServiceResponse userServiceResponse = new UserService().authenticate(email, password, false);
     SecurityUtil.populateSession(session, userServiceResponse);
-    response.sendRedirect(new TokenService().getHttpOAuthURL(FeedType.GOOGLE_PROVISIONING.getType(), true, TokenService.USER_SOURCE, session).getRequestToken());
+//    response.sendRedirect(new TokenService().getHttpOAuthURL(FeedType.GOOGLE_PROVISIONING.getType(), true, TokenService.USER_SOURCE, session).getRequestToken());
+    response.sendRedirect("googleAppsUserList.jsp");
 %>
