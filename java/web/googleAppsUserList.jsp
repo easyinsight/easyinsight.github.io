@@ -60,7 +60,6 @@
                     Which users do you want to import into Easy Insight from your Google Apps account?
                 </p>
                 <div class="well" style="background-color: #FAFAFA">
-                <form>
                 <%
                     Session hibernateSession = Database.instance().createSession();
                     Transaction t = hibernateSession.beginTransaction();
@@ -100,7 +99,6 @@
                 <% }
                 }
                 %>
-                </form>
                 </div>
                 <div class="row" style="padding-top:20px">
                     <div class="span4" style="padding-top: 4px">
