@@ -16,6 +16,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="com.easyinsight.users.User" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%
     try {
         SecurityUtil.populateThreadLocalFromSession(request);
@@ -29,8 +30,6 @@
         try {
             long accountId = (Long) session.getAttribute("accountID");
             Account account = (Account) hibernateSession.get(Account.class, accountId);
-            secretToken = account.getGoogleSecretToken();
-            token = account.getGoogleToken();
             domain = account.getGoogleDomainName();
             long userId = (Long) session.getAttribute("userID");
             User user = (User) hibernateSession.get(User.class, userId);
@@ -61,12 +60,18 @@
                     String username = s.substring(5, s.length());
                     if (username.equals(user.getLogin().getUserName())) {
                         String eiUsername = username + "@" + domain;
-                        uaas.addUserToAccount(new UserTransferObject(eiUsername, 0, eiUsername, user.getName().getFamilyName(), user.getName().getGivenName()), dlsList, true);
+                        if(!eiUsername.equals(email))
+                            uaas.addUserToAccount(new UserTransferObject(eiUsername, 0, eiUsername, user.getName().getFamilyName(), user.getName().getGivenName()), dlsList, true);
                     }
                 }
             }
         }
-    } finally {
+    } catch(Exception e) {
+        response.sendRedirect(RedirectUtil.getURL(request, "/app/googleAppsUserList.jsp?error=true"));
+    }
+    finally {
         SecurityUtil.clearThreadLocal();
     }
+    String redirectUrl = (String) session.getAttribute("googleCallbackURL");
+    response.sendRedirect(redirectUrl);
 %>

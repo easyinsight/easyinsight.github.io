@@ -29,7 +29,7 @@
         }
 
         .center_stuff {
-            text-align:center;
+            text-align: center;
         }
     </style>
     <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
@@ -57,8 +57,6 @@
                     try {
                         long accountId = (Long) session.getAttribute("accountID");
                         Account account = (Account) hibernateSession.get(Account.class, accountId);
-                        secretToken = account.getGoogleSecretToken();
-                        token = account.getGoogleToken();
                         domain = account.getGoogleDomainName();
                         long userId = (Long) session.getAttribute("userID");
                         User user = (User) hibernateSession.get(User.class, userId);
@@ -75,18 +73,21 @@
                     GoogleOAuthParameters params = new GoogleOAuthParameters();
                     params.setOAuthConsumerKey("119099431019.apps.googleusercontent.com");
                     params.setOAuthConsumerSecret("UuuYup6nE4M2PjnOv_jEg8Ki");
-
-//                    params.setOAuthToken(token);
-//                    params.setOAuthTokenSecret(secretToken);
                     us.setOAuthCredentials(params, new OAuthHmacSha1Signer());
 
                     UserFeed feed = us.getFeed(new URL("https://apps-apis.google.com/a/feeds/" + domain + "/user/2.0?xoauth_requestor_id=" + email), UserFeed.class);
-                    for(UserEntry user : feed.getEntries()) {
-                        %>
-                        <p><input type="checkbox" name="user_<%= user.getLogin().getUserName() %>" /> <%= user.getLogin().getUserName() %>@<%= domain %></p>
-                    <%}
+                    for (UserEntry user : feed.getEntries()) {
+                        if (!email.equals(user.getLogin().getUserName() + "@" + domain)) {
                 %>
-                <input type="submit" />
+
+                <p><input type="checkbox"
+                          name="user_<%= user.getLogin().getUserName() %>"/> <%= user.getLogin().getUserName() %>
+                    @<%= domain %>
+                </p>
+                <% }
+                }
+                %>
+                <input type="submit"/>
             </form>
         </div>
     </div>
