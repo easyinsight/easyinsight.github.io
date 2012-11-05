@@ -45,6 +45,10 @@
 
         <div class="span8 offset2">
 
+            <p style="font-size: 20px; line-height:24px;padding-top: 30px">
+                Which users do you want to import into Easy Insight from your Google apps account?
+            </p>
+
             <form class="well" method="post" action="/app/google/addUsers.jsp" id="loginForm">
 
                 <%
@@ -80,14 +84,14 @@
                         if (!email.equals(user.getLogin().getUserName() + "@" + domain)) {
                 %>
 
-                <p><input type="checkbox"
+                <p style="font-size:20px"><input type="checkbox"
                           name="user_<%= user.getLogin().getUserName() %>"/> <%= user.getLogin().getUserName() %>
                     @<%= domain %>
                 </p>
                 <% }
                 }
                 %>
-                <input type="submit"/>
+                <input type="submit" class="btn btn-primary"/>
             </form>
         </div>
     </div>
