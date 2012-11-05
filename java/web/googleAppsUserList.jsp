@@ -59,7 +59,8 @@
                 <p style="font-size: 20px; line-height:24px;padding-top: 20px;padding-bottom:20px">
                     Which users do you want to import into Easy Insight from your Google Apps account?
                 </p>
-                <form class="well" style="background-color: #FAFAFA">
+                <div class="well" style="background-color: #FAFAFA">
+                <form>
                 <%
                     Session hibernateSession = Database.instance().createSession();
                     Transaction t = hibernateSession.beginTransaction();
@@ -100,6 +101,7 @@
                 }
                 %>
                 </form>
+                </div>
                 <div class="row" style="padding-top:20px">
                     <div class="span4" style="padding-top: 4px">
                         <a style="font-size:20px" href="<%= (String) session.getAttribute("googleCallbackURL") %>">I'll Do It Later</a>
