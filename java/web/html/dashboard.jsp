@@ -95,6 +95,10 @@
         function refreshDashboard() {
             <%= dashboard.getRootElement().refreshFunction() %>
         }
+
+        function afterRefresh() {
+
+        }
     </script>
 </head>
 <body>

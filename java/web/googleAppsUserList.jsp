@@ -11,6 +11,7 @@
 
 <!DOCTYPE html>
 <%@ page import="com.easyinsight.html.RedirectUtil" %>
+<%@ page import="com.easyinsight.users.User" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -52,12 +53,16 @@
                     String secretToken = null;
                     String token = null;
                     String domain = null;
+                    String email = null;
                     try {
                         long accountId = (Long) session.getAttribute("accountID");
                         Account account = (Account) hibernateSession.get(Account.class, accountId);
                         secretToken = account.getGoogleSecretToken();
                         token = account.getGoogleToken();
                         domain = account.getGoogleDomainName();
+                        long userId = (Long) session.getAttribute("userID");
+                        User user = (User) hibernateSession.get(User.class, userId);
+                        email = user.getEmail();
                         t.commit();
                     } catch (Exception e) {
                         t.rollback();
@@ -70,10 +75,12 @@
                     GoogleOAuthParameters params = new GoogleOAuthParameters();
                     params.setOAuthConsumerKey("119099431019.apps.googleusercontent.com");
                     params.setOAuthConsumerSecret("UuuYup6nE4M2PjnOv_jEg8Ki");
+
 //                    params.setOAuthToken(token);
 //                    params.setOAuthTokenSecret(secretToken);
                     us.setOAuthCredentials(params, new OAuthHmacSha1Signer());
-                    UserFeed feed = us.getFeed(new URL("https://apps-apis.google.com/a/feeds/" + domain + "/user/2.0"), UserFeed.class);
+
+                    UserFeed feed = us.getFeed(new URL("https://apps-apis.google.com/a/feeds/" + domain + "/user/2.0?xoauth_requestor_id=" + email), UserFeed.class);
                     for(UserEntry user : feed.getEntries()) {
                         %>
                         <p><input type="checkbox" name="user_<%= user.getLogin().getUserName() %>" /> <%= user.getLogin().getUserName() %>@<%= domain %></p>
