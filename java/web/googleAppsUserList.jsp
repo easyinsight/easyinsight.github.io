@@ -101,11 +101,11 @@
                 %>
                 <div class="row" style="padding-top:30px">
                     <div class="span4" style="padding-top: 4px">
-                        <a style="font-size:20px" href="<%= RedirectUtil.getURL(request, "/app/linkToExistingAction.jsp")%>">I'll Do It Later</a>
+                        <a style="font-size:20px" href="<%= (String) session.getAttribute("googleCallbackURL") %>">I'll Do It Later</a>
                     </div>
                     <div class="span3">
                         <div style="float:right">
-                            <a class="btn btn-primary" style="font-size:20px" href="<%= RedirectUtil.getURL(request, "/app/googleAppsSettings.jsp")%>">Add Selected Contacts</a>
+                            <input type="submit" style="font-size:20px" class="btn btn-primary" value="Add Selected Contacts"/>
                         </div>
                     </div>
                 </div>
