@@ -15,6 +15,7 @@
 <%@ page import="com.easyinsight.preferences.UserDLS" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="com.easyinsight.users.User" %>
 <%
     try {
         SecurityUtil.populateThreadLocalFromSession(request);
@@ -24,12 +25,16 @@
         String domain = null;
         String secretToken = null;
         String token = null;
+        String email = null;
         try {
             long accountId = (Long) session.getAttribute("accountID");
             Account account = (Account) hibernateSession.get(Account.class, accountId);
             secretToken = account.getGoogleSecretToken();
             token = account.getGoogleToken();
             domain = account.getGoogleDomainName();
+            long userId = (Long) session.getAttribute("userID");
+            User user = (User) hibernateSession.get(User.class, userId);
+            email = user.getEmail();
             t.commit();
         } catch (Exception e) {
             t.rollback();
@@ -45,10 +50,9 @@
         GoogleOAuthParameters params = new GoogleOAuthParameters();
         params.setOAuthConsumerKey("119099431019.apps.googleusercontent.com");
         params.setOAuthConsumerSecret("UuuYup6nE4M2PjnOv_jEg8Ki");
-        params.setOAuthToken(token);
-        params.setOAuthTokenSecret(secretToken);
+
         us.setOAuthCredentials(params, new OAuthHmacSha1Signer());
-        UserFeed feed = us.getFeed(new URL("https://apps-apis.google.com/a/feeds/" + domain + "/user/2.0"), UserFeed.class);
+        UserFeed feed = us.getFeed(new URL("https://apps-apis.google.com/a/feeds/" + domain + "/user/2.0?xoauth_requestor_id=" + email), UserFeed.class);
         UserAccountAdminService uaas = new UserAccountAdminService();
         List<UserDLS> dlsList = new ArrayList<UserDLS>();
         for (UserEntry user : feed.getEntries()) {
