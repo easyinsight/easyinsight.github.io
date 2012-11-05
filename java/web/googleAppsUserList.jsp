@@ -59,7 +59,7 @@
                 <p style="font-size: 20px; line-height:24px;padding-top: 20px;padding-bottom:20px">
                     Which users do you want to import into Easy Insight from your Google Apps account?
                 </p>
-                <div class="well" style="background-color: #FAFAFA">
+                <div class="well" style="background-color: #FAFAFA;overflow: auto;max-height: 30px">
                 <%
                     Session hibernateSession = Database.instance().createSession();
                     Transaction t = hibernateSession.beginTransaction();
