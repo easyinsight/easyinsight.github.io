@@ -45,11 +45,20 @@
 
         <div class="span8 offset2">
 
-            <p style="font-size: 20px; line-height:24px;padding-top: 30px">
-                Which users do you want to import into Easy Insight from your Google apps account?
-            </p>
+
 
             <form class="well" method="post" action="/app/google/addUsers.jsp" id="loginForm">
+
+                <div style="width:100%;text-align: center">
+                    <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
+                </div>
+                <div style="width:100%;text-align: center">
+                    <h1 style="padding-top:40px">Import Users</h1>
+                </div>
+
+                <p style="font-size: 20px; line-height:24px;padding-top: 30px;padding-bottom:30px">
+                    Which users do you want to import into Easy Insight from your Google apps account?
+                </p>
 
                 <%
                     Session hibernateSession = Database.instance().createSession();
@@ -85,13 +94,21 @@
                 %>
 
                 <p style="font-size:20px"><input type="checkbox"
-                          name="user_<%= user.getLogin().getUserName() %>"/> <%= user.getLogin().getUserName() %>
-                    @<%= domain %>
+                          name="user_<%= user.getLogin().getUserName() %>"/> <%= user.getLogin().getUserName() %>@<%= domain %>
                 </p>
                 <% }
                 }
                 %>
-                <input type="submit" class="btn btn-primary"/>
+                <div class="row" style="padding-top:30px">
+                    <div class="span4" style="padding-top: 4px">
+                        <a style="font-size:20px" href="<%= RedirectUtil.getURL(request, "/app/linkToExistingAction.jsp")%>">I'll Do It Later</a>
+                    </div>
+                    <div class="span3">
+                        <div style="float:right">
+                            <a class="btn btn-primary" style="font-size:20px" href="<%= RedirectUtil.getURL(request, "/app/googleAppsSettings.jsp")%>">Add Selected Contacts</a>
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
