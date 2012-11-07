@@ -1,35 +1,42 @@
 <%@ page import="com.easyinsight.connections.database.DataConnection" %>
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="com.easyinsight.connections.database.data.Query" %>
+<%@ page import="com.easyinsight.connections.database.data.FieldInfo" %>
+<%@ page import="java.util.ArrayList" %>
 <!DOCTYPE html>
 <%
     String token = request.getParameter("refreshKey");
-    Session dataSession = null;
+    final String callDataID = request.getParameter("callDataID");
+    System.out.println("call data ID = " + callDataID);
+    Session dataSession = DataConnection.getSession();
     try {
-        dataSession = DataConnection.getSession();
         final Query q = Query.byRefreshToken(dataSession, token);
-        if(q != null) {
-            Thread t = new Thread(new Runnable() {
+        q.setFieldInfos(new ArrayList<FieldInfo>(q.getFieldInfos()));
 
-                public void run() {
-                    Session ds = null;
-                    try {
-                        ds = DataConnection.getSession();
-                    q.doUpload(ds);
-                    } catch(Exception e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        if(ds != null)
-                            ds.close();
-                    }
+        Thread t = new Thread(new Runnable() {
 
+            public void run() {
+                Session ds = DataConnection.getSession();
+                try {
+                    ds.beginTransaction();
+                    q.doUpload(ds, callDataID);
+                    ds.getTransaction().commit();
+                } catch (Exception e) {
+                    ds.getTransaction().rollback();
+                    throw new RuntimeException(e);
+                } finally {
+                    if (ds != null)
+                        ds.close();
                 }
-            });
-            t.setDaemon(false);
-            t.start();
-        }
 
-    } catch(Exception e) {
+            }
+        });
+        t.setDaemon(false);
+        t.start();
+
+
+    } catch (Exception e) {
+        e.printStackTrace();
         throw new RuntimeException(e);
     } finally {
         dataSession.close();

@@ -401,7 +401,7 @@ input[type=radio], input[type=checkbox] {
         <ul>
             <li><a href="#securityTab">SECURITY</a></li>
             <li><a href="#queriesTab">QUERIES</a></li>
-            <li><a href="#connectionsTab">DATA SOURCE</a></li>
+            <li><a href="#connectionsTab">DATA SOURCES</a></li>
             <li><a href="#userTab">USER INFO</a></li>
         </ul>
         <div id="securityTab">
