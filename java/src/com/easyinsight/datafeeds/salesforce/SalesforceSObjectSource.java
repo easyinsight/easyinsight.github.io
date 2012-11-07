@@ -5,6 +5,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IDataStorage;
 import nu.xom.*;
@@ -147,7 +148,8 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
             }
             return items;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            LogClass.error(e.getMessage() + " on trying to load fields for " + getFeedName(), e);
+            return new ArrayList<AnalysisItem>();
         }
     }
 
