@@ -44,6 +44,7 @@ public class SalesforceFeed extends Feed {
         for (AnalysisItem analysisItem : analysisItems) {
             if (!analysisItem.getKey().indexed()) {
                 indexed = false;
+                System.out.println(analysisItem.toDisplay() + " was not indexed");
             }
         }
 
