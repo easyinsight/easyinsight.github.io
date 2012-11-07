@@ -28,7 +28,7 @@ public class DataConnection {
         return factory;
     }
 
-    public static Session getSession() throws SQLException {
+    public static Session getSession() {
         return factory.openSession();
     }
     

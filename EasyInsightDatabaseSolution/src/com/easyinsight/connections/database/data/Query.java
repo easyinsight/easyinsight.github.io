@@ -64,8 +64,6 @@ public class Query {
                             e.printStackTrace();
                         }
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
                 } finally {
                     if (s != null)
                         s.close();
@@ -225,6 +223,11 @@ public class Query {
     }
 
     public void doUpload(Session session) throws SQLException, DatatypeConfigurationException {
+        doUpload(session, null);
+    }
+
+    public void doUpload(Session session, String callDataID) throws SQLException, DatatypeConfigurationException {
+        System.out.println("and here, call data ID = " + callDataID);
         Connection conn = null;
         ResultSet rs = null;
         TransactionTarget dataSourceTarget = null;
@@ -309,6 +312,8 @@ public class Query {
 
             DataSourceOperationFactory operationFactory = dataSourceFactory.defineDataSource();
             dataSourceTarget = this.isAppend() ? operationFactory.addRowsTransaction() : operationFactory.replaceRowsTransaction();
+            System.out.println("** call data ID = " + callDataID);
+            dataSourceTarget.setCallDataID(callDataID);
             dataSourceTarget.beginTransaction();
 
             while (rs.next()) {

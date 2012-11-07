@@ -73,13 +73,10 @@ public class SecurityUser {
         try {
             s = DataConnection.getSession();
             return s.createQuery("from SecurityUser").list().size();
-        } catch (SQLException e) {
-            e.printStackTrace();
         } finally {
             if(s != null)
                 s.close();
         }
-        return -1;
     }
 
     public long getId() {
