@@ -322,7 +322,7 @@ public class GoogleDataProvider {
         try {
             conn.setAutoCommit(false);
             //String applicationToken = "txxe32vjyuwicxbjpnpdwjatqb";
-            String requestBody = MessageFormat.format(GET_SCHEMA_XML, sessionTicket);
+            String requestBody = MessageFormat.format(GET_SCHEMA_XML, sessionTicket, applicationToken);
             Document doc = executeRequest(host, dbid, "API_GetSchema", requestBody);
             Nodes databases = doc.query("/qdbapi/table/chdbids/chdbid");
             List<Connection> connections = new ArrayList<Connection>();
