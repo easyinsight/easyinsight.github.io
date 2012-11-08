@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 public class AccountMemberInvitation {
 
     public static final String newUserInviteText = "<p>{0} has invited you to the {1} Easy Insight account.</p><p>All you need to do get started is sign in at:</p><a href=\"{2}\">{2}</a><hr/><p>You can log with the following credentials:</p><p>User Name: {3}</p><p>Password: {4}</p>{5}<hr/><p>Have questions? Contact {0} at {6}</p>";
+    public static final String googleAppsInviteText = "<p>{0} has invited you to the {1} Easy Insight account.</p><p>Easy Insight should now be available on your Google Apps account through the tool bar.</p><hr/><p>Have questions? Contact {0} at {2}</p>";
     public static final String subjectText = "{0} has invited you to Easy Insight";
 
     private static final String resetPasswordText =
@@ -85,6 +86,18 @@ public class AccountMemberInvitation {
 
     public void sendAccountEmail(String to, String adminFirstName, String accountOwner, String userName, String password, String companyName, String loginURL, String adminEmail, String sso) {
         String body = MessageFormat.format(newUserInviteText, (adminFirstName != null ? adminFirstName : "") + " " + accountOwner, companyName, loginURL, userName, password, sso, adminEmail);
+        String subject = MessageFormat.format(subjectText, (adminFirstName != null ? adminFirstName : "") + " " + accountOwner);
+        try {
+            new SendGridEmail().sendEmail(to, subject, body, "support@easy-insight.com", true, "Easy Insight on behalf of " +
+                    (adminFirstName == null ? accountOwner : adminFirstName + " " + accountOwner));
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendGoogleAppsAccountEmail(String to, String adminFirstName, String accountOwner, String companyName, String adminEmail) {
+        String body = MessageFormat.format(googleAppsInviteText, (adminFirstName != null ? adminFirstName : "") + " " + accountOwner, companyName, adminEmail);
         String subject = MessageFormat.format(subjectText, (adminFirstName != null ? adminFirstName : "") + " " + accountOwner);
         try {
             new SendGridEmail().sendEmail(to, subject, body, "support@easy-insight.com", true, "Easy Insight on behalf of " +
