@@ -1,5 +1,6 @@
 package com.easyinsight.users;
 
+import com.easyinsight.security.SecurityUtil;
 import org.hibernate.Session;
 
 import java.io.Serializable;
@@ -125,5 +126,6 @@ public class AccountTypeChange implements Serializable {
         account.setMaxSize(storageAmount);
         session.update(account);
         session.flush();
+        SecurityUtil.changeAccountType(account.getAccountType());
     }
 }

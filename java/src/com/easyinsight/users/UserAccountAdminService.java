@@ -393,7 +393,10 @@ public class UserAccountAdminService {
         }
     }
 
-    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, boolean requirePasswordChange) {
+    public static final int DEFAULT = 1;
+    public static final int GOOGLE_APPS = 1;
+
+    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, boolean requirePasswordChange, final int source) {
         SecurityUtil.authorizeAccountAdmin();
         long accountID = SecurityUtil.getAccountID();
         UserCreationResponse userCreationResponse;
@@ -464,7 +467,11 @@ public class UserAccountAdminService {
                     conn.commit();
                     new Thread(new Runnable() {
                         public void run() {
-                            new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password, accountName, loginURL, adminEmail, sso);
+                            if (source == GOOGLE_APPS) {
+                                new AccountMemberInvitation().sendGoogleAppsAccountEmail(userEmail, adminFirstName, adminName, accountName, adminEmail);
+                            } else {
+                                new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password, accountName, loginURL, adminEmail, sso);
+                            }
                         }
                     }).start();
                     userCreationResponse = new UserCreationResponse(user.getUserID());
@@ -489,6 +496,10 @@ public class UserAccountAdminService {
             }
         }
         return userCreationResponse;
+    }
+
+    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, boolean requirePasswordChange) {
+        return addUserToAccount(userTransferObject, userDLSList, requirePasswordChange, DEFAULT);
     }
 
     /*

@@ -8,9 +8,7 @@
 <%@ page import="com.google.gdata.data.appsforyourdomain.provisioning.UserFeed" %>
 <%@ page import="java.net.URL" %>
 <%@ page import="com.google.gdata.data.appsforyourdomain.provisioning.UserEntry" %>
-
 <!DOCTYPE html>
-<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
@@ -59,7 +57,7 @@
                 <p style="font-size: 20px; line-height:24px;padding-top: 20px;padding-bottom:20px">
                     Which users do you want to import into Easy Insight from your Google Apps account?
                 </p>
-                <div class="well" style="background-color: #FAFAFA;overflow: auto;max-height: 30px">
+                <div class="well" style="background-color: #FAFAFA;overflow: auto;max-height: 250px">
                 <%
                     Session hibernateSession = Database.instance().createSession();
                     Transaction t = hibernateSession.beginTransaction();

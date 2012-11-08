@@ -61,7 +61,8 @@
                     if (username.equals(user.getLogin().getUserName())) {
                         String eiUsername = username + "@" + domain;
                         if(!eiUsername.equals(email))
-                            uaas.addUserToAccount(new UserTransferObject(eiUsername, 0, eiUsername, user.getName().getFamilyName(), user.getName().getGivenName()), dlsList, true);
+                            uaas.addUserToAccount(new UserTransferObject(eiUsername, 0, eiUsername, user.getName().getFamilyName(), user.getName().getGivenName()), dlsList, true,
+                                    UserAccountAdminService.GOOGLE_APPS);
                     }
                 }
             }
