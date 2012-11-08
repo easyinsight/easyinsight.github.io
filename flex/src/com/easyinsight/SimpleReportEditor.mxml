@@ -32,6 +32,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemCopyEvent;
+        import com.easyinsight.analysis.AnalysisItemEditEvent;
         import com.easyinsight.analysis.AnalysisItemEditWindow;
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypeRenderer;
@@ -47,6 +48,7 @@
         import com.easyinsight.analysis.FieldDoubleClickEvent;
         import com.easyinsight.analysis.FieldEditorEvent;
         import com.easyinsight.analysis.GenericDefinitionEditWindow;
+        import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.ImprovedSaveWindow;
         import com.easyinsight.analysis.PromptEvent;
@@ -303,7 +305,30 @@
         private function onIntentionEvent(event:IntentionTriggerEvent):void {
             if (event.newField) {
                 dataView.addItem(event.newField);
+            } else if (event.newHierarchy) {
+                var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+                window.dataSourceID = dataService.dataFeedID;
+                window.editorClass = HierarchyWindow;
+                window.analysisItems = wrappers;
+                window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
+                PopUpManager.addPopUp(window, this);
+                PopUpUtil.centerPopUp(window);
             }
+        }
+
+        private function onNewItem(event:AnalysisItemEditEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            dispatchEvent(event);
+            var node:AnalysisItemNode = new AnalysisItemNode();
+            node.analysisItem = event.analysisItem;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
+            availableFields.addItem(wrapper);
+            wrappers.addItem(wrapper);
+            if (_analysisDefinition.addedItems == null) {
+                _analysisDefinition.addedItems = new ArrayCollection();
+            }
+            _analysisDefinition.addedItems.addItem(event.analysisItem);
+            dataView.addItem(event.analysisItem);
         }
 
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
@@ -500,7 +525,7 @@
 
         public function initializeForWorksheet():void {
             try {
-                if (User.getInstance().reportMode == 0) {
+                if (User.getInstance().reportMode) {
                     reportMode = "all";
                 } else {
                     reportMode = "simplified";
@@ -684,6 +709,21 @@
             }
         }
 
+        private function createNoDiscardPromptWindow(prompt:String, doneHandler:Function):void {
+            var window:SavePromptWindow = new SavePromptWindow();
+            window.defineOption("Save", PromptEvent.PROMPT_SAVE);
+            window.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
+            window.prompt = prompt;
+            window.addEventListener(PromptEvent.PROMPT_SAVE, function (event:PromptEvent):void {
+                save(true, function (event:SavedAnalysisEvent):void {
+                    AnalysisUtil.updateReport(analysisDefinition, event.report);
+                    doneHandler.call();
+                });
+            }, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         private function createPromptWindow(prompt:String, doneHandler:Function):void {
             var window:SavePromptWindow = new SavePromptWindow();
             window.prompt = prompt;
@@ -751,7 +791,11 @@
         }
 
         private function goReport():void {
-            if (analysisChanged) {
+            if (analysisDefinition.analysisID == 0) {
+                createNoDiscardPromptWindow("You have unsaved changes to this report.", function ():void {
+                    reportView();
+                });
+            } else if (analysisChanged) {
                 createPromptWindow("You have unsaved changes to this report.", function ():void {
                     reportView();
                 });
@@ -951,7 +995,17 @@
         }
 
         private function onViewInHTML():void {
-            navigateToURL(new URLRequest("/app/html/report/" + analysisDefinition.urlKey), "_blank");
+            if (analysisDefinition.analysisID == 0) {
+                createNoDiscardPromptWindow("You have unsaved changes to this report.", function():void {
+                    navigateToURL(new URLRequest("/app/html/report/" + analysisDefinition.urlKey), "_blank");
+                });
+            } else if (analysisChanged) {
+                createPromptWindow("You have unsaved changes to this report.", function():void {
+                    navigateToURL(new URLRequest("/app/html/report/" + analysisDefinition.urlKey), "_blank");
+                });
+            } else {
+                navigateToURL(new URLRequest("/app/html/report/" + analysisDefinition.urlKey), "_blank");
+            }
         }
 
         private function goAdmin():void {
