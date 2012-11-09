@@ -1,6 +1,7 @@
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="com.easyinsight.connections.database.DataConnection" %>
 <%@ page import="com.easyinsight.connections.database.data.Query" %>
+<%@ page import="sun.misc.Regexp" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -21,7 +22,7 @@
                 "id": <%= q.getId() %>,
                 "name": "<%= q.getName() %>",
                 "connectionId": <%= q.getConnectionInfo().getId() %>,
-                "query": "<%= q.getQuery() %>",
+                "query": "<%= q.getQuery().replace("\n", "\\n") %>",
                 "dataSource": "<%= q.getDataSource() %>",
                 "schedule": <%= q.isSchedule() %>,
                 "append": <%= q.isAppend() %>

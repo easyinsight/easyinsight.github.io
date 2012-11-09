@@ -5,6 +5,7 @@
 <%@ page import="com.easyinsight.connections.database.DataConnection" %>
 <%@ page import="com.easyinsight.connections.database.data.ConnectionInfo" %>
 <%@ page import="com.easyinsight.connections.database.data.FieldInfo" %>
+<%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -42,9 +43,9 @@
             int i = 0;
             for(FieldInfo ff : q.getFieldInfos()) { %>
         <tr>
-            <td><input type="hidden" name="field_id_<%= i %>" value="<%= ff.getId() %>" />
+            <td><input type="hidden" name="field_id_<%= i %>" value="<%= StringEscapeUtils.escapeHtml4(String.valueOf(ff.getId())) %>" />
             <%= ff.getColumnName() %></td>
-            <td><input type="text" name="field_name_<%= i %>" value="<%= ff.getFieldName() %>" /></td>
+            <td><input type="text" name="field_name_<%= i %>" value="<%= StringEscapeUtils.escapeHtml4(ff.getFieldName()) %>" /></td>
             <td><select name="field_type_<%= i %>">
                 <option value="<%= FieldInfo.DEFAULT %>" <% if(ff.getType() == FieldInfo.DEFAULT) { %>selected="selected"<% } %>>Default</option>
                 <option value="<%= FieldInfo.MEASURE %>" <% if(ff.getType() == FieldInfo.MEASURE) { %>selected="selected"<% } %>>Measure</option>

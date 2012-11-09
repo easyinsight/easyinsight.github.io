@@ -164,6 +164,10 @@ function editQuery(id) {
                 $("form#editQuery input[name=uploadType]")[0].value = "replace";
 
             editQueryTab();
+        },
+        error: function(a, b) {
+            console.log(a);
+            console.log(b);
         }
     });
 }

@@ -2,6 +2,7 @@ package com.easyinsight.connections.database.data;
 
 import javax.persistence.Entity;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.DriverManager;
 import java.text.MessageFormat;
@@ -71,5 +72,11 @@ public class MySqlConnectionInfo extends ConnectionInfo {
 
     public void setDatabaseName(String databaseName) {
         this.databaseName = databaseName;
+    }
+
+    @Override
+    public void alterStatement(PreparedStatement statement) throws SQLException {
+        super.alterStatement(statement);
+        statement.setFetchSize(Integer.MIN_VALUE);
     }
 }

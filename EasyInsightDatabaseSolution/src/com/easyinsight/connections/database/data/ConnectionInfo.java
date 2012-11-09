@@ -86,6 +86,10 @@ public abstract class ConnectionInfo {
     public abstract String toJSON();
 
 
+    public void alterStatement(PreparedStatement statement) throws SQLException {
+
+    }
+
     public static ConnectionInfo createConnectionInfo(Map<String, String[]> parameterMap) {
         ConnectionInfo connectionInfo = null;
         if ("mysql".equals(parameterMap.get("dbType")[0])) {
@@ -124,9 +128,5 @@ public abstract class ConnectionInfo {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void adjustStatement(PreparedStatement statement) {
-
     }
 }
