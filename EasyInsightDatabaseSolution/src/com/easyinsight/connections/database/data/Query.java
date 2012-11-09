@@ -142,7 +142,7 @@ public class Query {
 
     public ResultSet executeQuery(Connection conn) throws SQLException {
         PreparedStatement statement = conn.prepareStatement(getQuery());
-        statement.setFetchSize(Integer.MIN_VALUE);
+//        statement.setFetchSize(Integer.MIN_VALUE);
         return statement.executeQuery();
     }
 

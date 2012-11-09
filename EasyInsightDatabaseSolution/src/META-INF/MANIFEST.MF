@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Class-Path: servlet-api.jar bcprov-jdk15-140.jar wss4j-1.5.4.jar antlr
+ .jar asm.jar cglib.jar commons-collections.jar commons-logging.jar de
+ rby.jar dom4j.jar eirestapi.jar ejb3-persistence.jar hibernate-annota
+ tions.jar hibernate.jar jta.jar mysql-connector-java-3.1.14-bin.jar s
+ qljdbc4.jar
+Main-Class: com.easyinsight.connections.database.PasswordReset
+
