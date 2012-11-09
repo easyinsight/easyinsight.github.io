@@ -66,7 +66,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             DerivedKey derivedKey = (DerivedKey) key;
             long childDataSourceID = derivedKey.getFeedID();
             try {
-                return new FeedStorage().getFeedDefinitionData(childDataSourceID).checkDateTime(name, key);
+                return new FeedStorage().getFeedDefinitionData(childDataSourceID).checkDateTime(name, derivedKey.getParentKey());
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
