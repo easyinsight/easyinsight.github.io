@@ -56,11 +56,19 @@ public class GoogleAnalyticsFeed extends Feed {
             AnalyticsService as = getAnalyticsService();
 
             if ("title".equals(queryItem.getKey().toKeyString())) {
-                String baseUrl = "https://www.google.com/analytics/feeds/accounts/default";
-                AccountFeed accountFeed = as.getFeed(new URL(baseUrl), AccountFeed.class);
-                for (AccountEntry accountEntry : accountFeed.getEntries()) {
-                    String title = accountEntry.getTitle().getPlainText();
-                    metadata.addValue(analysisItem, new StringValue(title), insightRequestMetadata);
+                URL queryURL = new URL("https://www.googleapis.com/analytics/v2.4/management/accounts");
+                ManagementFeed accountsFeed = as.getFeed(queryURL, ManagementFeed.class);
+                for (ManagementEntry accountEntry : accountsFeed.getEntries()) {
+                    String accountID = accountEntry.getProperty("ga:accountId");
+                    ManagementFeed webPropertyFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/" + accountID + "/webproperties"), ManagementFeed.class);
+                    for (ManagementEntry webPropertyEntry : webPropertyFeed.getEntries()) {
+
+                        String webPropertyID = webPropertyEntry.getProperty("ga:WebPropertyId");
+                        ManagementFeed profilesFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/" + accountID + "/webproperties/" + webPropertyID + "/profiles"), ManagementFeed.class);
+                        for (ManagementEntry profileEntry : profilesFeed.getEntries()) {
+                            metadata.addValue(analysisItem, new StringValue(profileEntry.getProperty("ga:profileName")), insightRequestMetadata);
+                        }
+                    }
                 }
             } else {
                 URL queryURL = new URL("https://www.googleapis.com/analytics/v2.4/management/accounts");
@@ -249,10 +257,10 @@ public class GoogleAnalyticsFeed extends Feed {
             //AccountFeed accountFeed = as.getFeed(new URL(baseUrl), AccountFeed.class);
 
             for (ManagementEntry accountEntry : accountsFeed.getEntries()) {
-                String title = accountEntry.getTitle().getPlainText();
+               /* String title = accountEntry.getTitle().getPlainText();
                 if (!titleFilters.isEmpty() && !titleFilters.contains(title)) {
                     continue;
-                }
+                }*/
 
                 //String ids = accountEntry.getTableId().getValue();
                 String accountID = accountEntry.getProperty("ga:accountId");
@@ -263,6 +271,10 @@ public class GoogleAnalyticsFeed extends Feed {
                     ManagementFeed profilesFeed = as.getFeed(new URL("https://www.googleapis.com/analytics/v2.4/management/accounts/" + accountID + "/webproperties/" + webPropertyID + "/profiles"), ManagementFeed.class);
                     for (ManagementEntry profileEntry : profilesFeed.getEntries()) {
                         String ids = profileEntry.getProperty("dxp:tableId");
+                        String title = profileEntry.getProperty("ga:profileName");
+                        if (!titleFilters.isEmpty() && !titleFilters.contains(title)) {
+                            continue;
+                        }
                         //String ids = "";
                         StringBuilder urlBuilder = new StringBuilder("https://www.google.com/analytics/feeds/data?ids=");
                         urlBuilder.append(ids);
