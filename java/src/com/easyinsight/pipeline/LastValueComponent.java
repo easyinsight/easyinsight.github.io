@@ -99,13 +99,28 @@ public class LastValueComponent implements IComponent, DescribableComponent {
 
     private Map<Key, Value> createKeyMap(IRow row, PipelineData pipelineData, AnalysisDimension sortDim) {
         DerivedKey derivedKey = (DerivedKey) sortDim.getKey();
-        long tableID = derivedKey.getFeedID();
+        long tableID;
+        if (derivedKey.getParentKey() instanceof DerivedKey) {
+            tableID = ((DerivedKey) derivedKey.getParentKey()).getFeedID();
+        } else {
+            tableID = derivedKey.getFeedID();
+        }
         Map<Key, Value> map = new HashMap<Key, Value>();
         for (AnalysisItem item : pipelineData.getReportItems()) {
             if (item.hasType(AnalysisItemTypes.DIMENSION)) {
+                AnalysisDimension analysisDimension = (AnalysisDimension) item;
+                if (!analysisDimension.isGroup()) {
+                    continue;
+                }
                 if (item.getKey() instanceof DerivedKey) {
                     DerivedKey childKey = (DerivedKey) item.getKey();
-                    if (childKey.getFeedID() == tableID) {
+                    long childID;
+                    if (childKey.getParentKey() instanceof DerivedKey) {
+                        childID = ((DerivedKey) childKey.getParentKey()).getFeedID();
+                    } else {
+                        childID = childKey.getFeedID();
+                    }
+                    if (childID == tableID) {
                         continue;
                     }
                 }
