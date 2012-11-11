@@ -161,7 +161,7 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
 
                 Map<String, MilestoneInfo> milestoneMap = new HashMap<String, MilestoneInfo>();
 
-                if (!"archived".equals(projectStatus)) {
+                //if (!"archived".equals(projectStatus)) {
                     Document milestoneList;
 
                     int milestoneCount;
@@ -230,7 +230,7 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
                     } catch (Http403Exception e) {
                         // ignore
                     }
-                }
+               // }
 
 
                 Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/todo_lists.xml", client, builder, url, null, false, parentDefinition, false);
