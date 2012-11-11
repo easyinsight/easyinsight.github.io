@@ -582,6 +582,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
             for (AnalysisItem analysisItem : allItems) {
+                if (!analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                    continue;
+                }
                 List<AnalysisItem> myItems = displayMap.get(analysisItem.toDisplay());
                 if (myItems == null) {
                     myItems = new ArrayList<AnalysisItem>(1);
