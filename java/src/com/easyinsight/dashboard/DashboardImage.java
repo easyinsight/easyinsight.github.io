@@ -8,6 +8,7 @@ import com.easyinsight.scorecard.Scorecard;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +40,11 @@ public class DashboardImage extends DashboardElement {
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_IMAGE (DASHBOARD_ELEMENT_ID, user_image_id) " +
                 "VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, getElementID());
-        insertStmt.setLong(2, imageDescriptor.getId());
+        if (imageDescriptor == null) {
+            insertStmt.setNull(2, Types.BIGINT);
+        } else {
+            insertStmt.setLong(2, imageDescriptor.getId());
+        }
         insertStmt.execute();
         return id;
     }
@@ -69,18 +74,20 @@ public class DashboardImage extends DashboardElement {
     }
 
     public static DashboardElement loadImage(long elementID, EIConnection conn) throws SQLException {
-        DashboardImage dashboardReport = null;
+        DashboardImage dashboardImage;
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_IMAGE.user_image_id, USER_IMAGE.image_name from dashboard_image, user_image " +
                 "where dashboard_element_id = ? and dashboard_image.user_image_id = user_image.user_image_id");
         queryStmt.setLong(1, elementID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
-            dashboardReport = new DashboardImage();
+            dashboardImage = new DashboardImage();
             ImageDescriptor imageDescriptor = new ImageDescriptor();
             imageDescriptor.setId(rs.getLong(1));
             imageDescriptor.setName(rs.getString(2));
-            dashboardReport.setImageDescriptor(imageDescriptor);
+            dashboardImage.setImageDescriptor(imageDescriptor);
+        } else {
+            dashboardImage = new DashboardImage();
         }
-        return dashboardReport;
+        return dashboardImage;
     }
 }
