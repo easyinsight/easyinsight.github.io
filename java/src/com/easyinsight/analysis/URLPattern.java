@@ -20,6 +20,9 @@ public class URLPattern {
     private static final Pattern keyPattern = Pattern.compile(patternStr);
 
     public static List<String> getKeys(String pattern) {
+        if (pattern == null) {
+            return new ArrayList<String>();
+        }
         List<String> results = new LinkedList<String>();
         Matcher m = keyPattern.matcher(pattern);
         while(m.find()) {
@@ -44,7 +47,9 @@ public class URLPattern {
         Map<String, Key> values = new HashMap<String, Key>();
         Map<String, Key> keyMap = new HashMap<String, Key>();
         for (AnalysisItem field : fields) {
-            values.put(field.toDisplay(), field.createAggregateKey());
+            if (field.hasType(AnalysisItemTypes.DIMENSION)) {
+                values.put(field.toDisplay(), field.createAggregateKey());
+            }
         }
         if (row != null) {
             for(Key k : row.getKeys()) {
