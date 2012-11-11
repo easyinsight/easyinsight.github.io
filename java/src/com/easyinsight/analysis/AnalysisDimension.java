@@ -143,7 +143,9 @@ public class AnalysisDimension extends AnalysisItem {
         if (value.type() == Value.STRING) {
             StringValue stringValue = (StringValue) value;
             try {
-                value = new NumericValue(Integer.parseInt(stringValue.toString()));
+                Value newValue = new NumericValue(Integer.parseInt(stringValue.toString()));
+                newValue.setLinks(value.getLinks());
+                value = newValue;
             } catch (NumberFormatException e) {
             }
         }
