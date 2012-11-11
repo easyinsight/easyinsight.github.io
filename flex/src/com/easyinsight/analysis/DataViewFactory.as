@@ -548,7 +548,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         }
     }
 
-    private function copyStandardData(source:AnalysisDefinition, target:AnalysisDefinition):void {
+    private static function copyStandardData(source:AnalysisDefinition, target:AnalysisDefinition):void {
         target.name = source.name;
         target.dataFeedID = source.dataFeedID;
         target.analysisID = source.analysisID;
@@ -577,6 +577,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.reportRunMarmotScript = source.reportRunMarmotScript;
         target.joinOverrides = source.joinOverrides;
         target.folder = source.folder;
+        target.urlKey = source.urlKey;
     }
 
     public function createNewDefinition():AnalysisDefinition {
