@@ -63,8 +63,15 @@ public class FeedService {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         try {
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID);
+            List<AnalysisItem> fields = new ArrayList<AnalysisItem>(dataSource.getFields());
+            Collections.sort(fields, new Comparator<AnalysisItem>() {
+
+                public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                    return analysisItem.toDisplay().compareTo(analysisItem1.toDisplay());
+                }
+            });
             StringBuilder sb = new StringBuilder();
-            for (AnalysisItem field : dataSource.getFields()) {
+            for (AnalysisItem field : fields) {
                 if (field.isConcrete()) {
                     sb.append(field.toDisplay()).append(",");
                 }
