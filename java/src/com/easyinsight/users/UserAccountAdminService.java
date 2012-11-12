@@ -394,7 +394,7 @@ public class UserAccountAdminService {
     }
 
     public static final int DEFAULT = 1;
-    public static final int GOOGLE_APPS = 1;
+    public static final int GOOGLE_APPS = 2;
 
     public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, boolean requirePasswordChange, final int source) {
         SecurityUtil.authorizeAccountAdmin();
@@ -402,6 +402,10 @@ public class UserAccountAdminService {
         UserCreationResponse userCreationResponse;
         String message = doesUserExist(userTransferObject.getUserName(), userTransferObject.getEmail());
         if (message != null) {
+            if (source == GOOGLE_APPS) {
+                // just ignore in the case of google apps linking to an existing user
+                return null;
+            }
             userCreationResponse = new UserCreationResponse(message);
         } else {
             EIConnection conn = Database.instance().getConnection();
