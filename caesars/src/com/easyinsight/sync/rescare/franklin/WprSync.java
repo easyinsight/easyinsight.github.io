@@ -28,7 +28,7 @@ public class WprSync extends BaseSyncThread {
 
     public WprSync(String username, String password) {
         super(password, username);
-        this.reportId = "EyfcEXySRXCfuLBsRHcX";
+        this.reportId = "EIbkeKVRJFOUrDbTATvF";
         this.sourceName = "WPR Data Mart";
     }
 
@@ -99,7 +99,6 @@ public class WprSync extends BaseSyncThread {
         pastMonth.put(EMPLOYED_BELOW_WPR, getField(data, "Employed PM Below WPR"));
 
         records.add(pastMonth);
-
     }
 
 }

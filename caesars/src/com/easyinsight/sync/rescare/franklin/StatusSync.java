@@ -58,8 +58,13 @@ public class StatusSync extends HttpServlet {
             sr.setDaemon(false);
             WprSync wprSync = new WprSync(username, password);
             wprSync.setDaemon(false);
+
+            EmploymentSync employmentSync = new EmploymentSync(username, password);
+            employmentSync.setDaemon(false);
+
             sr.start();
             wprSync.start();
+            employmentSync.start();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -73,9 +73,6 @@ public abstract class BaseSyncThread extends Thread {
                 DataRow r = u.newRow();
                 for(String s : rec.keySet()) {
                     if(rec.get(s) instanceof String) {
-//                        if(s.equals("ParticipantID")) {
-//                            System.out.println(s + ": " + rec.get(s));
-//                        }
                         r.addValue(s, (String) rec.get(s));
                     } else if (rec.get(s) instanceof Number) {
                         r.addValue(s, (Number) rec.get(s));
