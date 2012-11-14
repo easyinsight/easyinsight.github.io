@@ -3,7 +3,15 @@
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%
-    com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+    String ipAddress  = request.getHeader("X-FORWARDED-FOR");
+    if(ipAddress == null) {
+        ipAddress = request.getRemoteAddr();
+    }
+    try {
+        com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+    } catch(Exception e) {
+        throw new RuntimeException("Problem on firstLoginAction page from " + ipAddress);
+    }
     try {
         request.getSession().removeAttribute("errorString");
         String password = request.getParameter("password");
