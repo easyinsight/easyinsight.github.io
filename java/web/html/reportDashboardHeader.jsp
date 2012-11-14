@@ -1,4 +1,4 @@
-<script type="text/javascript" src="/js/jquery.jqplot.min.js"></script>
+<script type="text/javascript" src="/js/jquery.jqplot.js"></script>
 <script type="text/javascript" src="/js/date.js"></script>
 <script type="text/javascript" src="/js/jquery.datePicker.js"></script>
 <link href="/css/datePicker.css" rel="stylesheet" />

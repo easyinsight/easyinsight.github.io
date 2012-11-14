@@ -147,6 +147,7 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         includes.add("/js/plugins/jqplot.pointLabels.min.js");
         includes.add("/js/plugins/jqplot.highlighter.min.js");
         includes.add("/js/plugins/jqplot.cursor.min.js");
+
         return includes;
     }
 
@@ -202,5 +203,49 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         xAxisTicketOptions.put("angle", -15);
         xAxis.put("tickOptions", xAxisTicketOptions);
         return xAxis;
+    }
+
+    protected JSONArray transformColors(JSONArray colors) {
+        JSONArray newColors = new JSONArray();
+        try {
+
+            for (int i = 0; i < colors.length(); i++) {
+                JSONArray gradient = new JSONArray();
+                String color2 = "'#FFFFFF'";
+                Object color = colors.get(i);
+
+
+                JSONObject colorStop = new JSONObject();
+                colorStop.put("point", 1);
+                colorStop.put("color", color);
+                gradient.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", .9);
+                colorStop.put("color", color2);
+                gradient.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", .5);
+                colorStop.put("color", color);
+                gradient.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", .15);
+                colorStop.put("color", color);
+                gradient.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", 0);
+                colorStop.put("color", color2);
+                gradient.put(colorStop);
+
+
+                newColors.put(gradient);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return newColors;
     }
 }

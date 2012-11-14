@@ -3141,6 +3141,7 @@
                 hp = s._highlightThreshold;
                 switch (s.renderer.constructor) {
                     case $.jqplot.BarRenderer:
+                    case $.jqplot.GradientBarRenderer:
                         x = gridpos.x;
                         y = gridpos.y;
                         for (j=0; j<s._barPoints.length; j++) {
@@ -3717,31 +3718,37 @@
         
    $.jqplot.ColorGenerator = function(colors) {
         colors = colors || $.jqplot.config.defaultColors;
-        var idx = 0;
+        this.idx = 0;
         
-        this.next = function () { 
-            if (idx < colors.length) {
-                return colors[idx++];
+        this.next = function () {
+            if (this.idx < colors.length) {
+
+                return colors[this.idx++];
             }
             else {
-                idx = 0;
-                return colors[idx++];
+                this.idx = 0;
+
+                return colors[this.idx++];
             }
         };
         
-        this.previous = function () { 
-            if (idx > 0) {
-                return colors[idx--];
+        this.previous = function () {
+
+            if (this.idx > 0) {
+
+                return colors[this.idx--];
             }
             else {
-                idx = colors.length-1;
-                return colors[idx];
+                this.idx = colors.length-1;
+
+                return colors[this.idx];
             }
         };
         
         // get a color by index without advancing pointer.
         this.get = function(i) {
             var idx = i - colors.length * Math.floor(i/colors.length);
+
             return colors[idx];
         };
         
@@ -3750,15 +3757,15 @@
         };
         
         this.reset = function() {
-            idx = 0;
+            this.idx = 0;
         };
 
         this.getIndex = function() {
-            return idx;
+            return this.idx;
         };
 
         this.setIndex = function(index) {
-            idx = index;
+            this.idx = index;
         };
     };
 

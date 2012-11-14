@@ -51,7 +51,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
-        includes.add("/js/plugins/jqplot.pieRenderer.min.js");
+        includes.add("/js/plugins/jqplot.gradientPieRenderer.js");
         includes.add("/js/plugins/jqplot.highlighter.min.js");
         includes.add("/js/plugins/jqplot.cursor.min.js");
         includes.add("/js/plugins/jqplot.pointLabels.min.js");

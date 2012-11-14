@@ -4,6 +4,8 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.ReportProperty;
 import com.easyinsight.analysis.ReportStringProperty;
 import com.easyinsight.analysis.WSChartDefinition;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -75,4 +77,5 @@ public abstract class WSYAxisDefinition extends WSChartDefinition {
         properties.add(new ReportStringProperty("colorScheme", colorScheme));
         return properties;
     }
+
 }

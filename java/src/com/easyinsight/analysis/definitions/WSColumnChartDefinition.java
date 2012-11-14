@@ -92,7 +92,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
-        includes.add("/js/plugins/jqplot.barRenderer.min.js");
+        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
         includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
@@ -110,26 +110,61 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         String color;
+        String color2;
         if (useChartColor) {
-            color = String.format("#%06X", (0xFFFFFF & chartColor));
+            color = String.format("'#%06X'", (0xFFFFFF & chartColor));
+            color2 = String.format("'#%06X'", (0xFFFFFF & gradientColor));
         } else {
-            color = "#FF0000";
+            color = "'#FF0000'";
+            color2 = "'#990000'";
         }
 
         JSONObject params;
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
             if (getMeasures().size() == 1) {
-                jsonParams.put("seriesColors", new JSONArray(Arrays.asList("'" + color + "'")));
+                JSONArray colorObj = new JSONArray();
+
+                JSONObject colorStop = new JSONObject();
+                colorStop.put("point", 0);
+                colorStop.put("color", color);
+                colorObj.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", .15);
+                colorStop.put("color", color2);
+                colorObj.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", .5);
+                colorStop.put("color", color);
+                colorObj.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", .9);
+                colorStop.put("color", color);
+                colorObj.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", 1);
+                colorStop.put("color", color2);
+                colorObj.put(colorStop);
+
+//                colorObj.put("first", "'" + color + "'");
+//                colorObj.put("second", "'" + color2 + "'");
+                jsonParams.put("seriesColors", new JSONArray(Arrays.asList(colorObj)));
             } else {
                 JSONArray seriesColors = getSeriesColors();
                 jsonParams.put("seriesColors", seriesColors);
                 jsonParams.put("legend", getLegend());
             }
             JSONObject seriesDefaults = new JSONObject();
-            seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
+
+            seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
             JSONObject rendererOptions = new JSONObject();
             rendererOptions.put("fillToZero", "true");
+            rendererOptions.put("varyBarColor", "true");
+            rendererOptions.put("barMargin", (45 / 2));
             seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = getGrid();

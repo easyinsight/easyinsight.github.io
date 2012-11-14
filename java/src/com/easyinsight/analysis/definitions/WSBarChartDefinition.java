@@ -95,7 +95,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
-        includes.add("/js/plugins/jqplot.barRenderer.min.js");
+        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
         includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
@@ -108,27 +108,76 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         String color;
-        if (useChartColor) {
-            color = String.format("#%06X", (0xFFFFFF & chartColor));
-        } else {
-            color = "#FF0000";
+        String color2;
+        JSONArray colorObj = new JSONArray();
+        try {
+            if (useChartColor) {
+                color = String.format("'#%06X'", (0xFFFFFF & chartColor));
+                color2 = String.format("'#%06X'", (0xFFFFFF & gradientColor));
+                JSONObject colorStop = new JSONObject();
+                colorStop.put("point", 0);
+                colorStop.put("color", color);
+                colorObj.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", 1);
+                colorStop.put("color", color2);
+                colorObj.put(colorStop);
+            } else {
+
+                color = "'#FF0000'";
+                color2 = "'#990000'";
+
+
+                JSONObject colorStop = new JSONObject();
+                colorStop.put("point", 0);
+                colorStop.put("color", color);
+                colorObj.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", .15);
+                colorStop.put("color", color2);
+                colorObj.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", .5);
+                colorStop.put("color", color);
+                colorObj.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", .9);
+                colorStop.put("color", color);
+                colorObj.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", 1);
+                colorStop.put("color", color2);
+                colorObj.put(colorStop);
+            }
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
 
         JSONObject params;
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
             if (getMeasures().size() == 1) {
-                jsonParams.put("seriesColors", new JSONArray(Arrays.asList("'" + color + "'")));
+
+
+                jsonParams.put("seriesColors", new JSONArray(Arrays.asList(colorObj)));
+
             } else {
                 JSONArray seriesColors = getSeriesColors();
                 jsonParams.put("seriesColors", seriesColors);
                 jsonParams.put("legend", getLegend());
             }
             JSONObject seriesDefaults = new JSONObject();
-            seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
+            seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
             JSONObject rendererOptions = new JSONObject();
             rendererOptions.put("fillToZero", "true");
             rendererOptions.put("barDirection", "'horizontal'");
+            rendererOptions.put("varyBarColor", "true");
+            rendererOptions.put("barMargin", (45 / 2));
             seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = getGrid();
@@ -148,6 +197,6 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
 
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
         String customHeight = htmlReportMetadata.createStyleProperties();
-        return "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ",false,"+customHeight+"))";
+        return "$.getJSON('/app/columnChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ",false," + customHeight + "))";
     }
 }

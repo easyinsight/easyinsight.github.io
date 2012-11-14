@@ -95,7 +95,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
-        includes.add("/js/plugins/jqplot.barRenderer.min.js");
+        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
         includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
@@ -106,6 +106,13 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     }
 
     @Override
+        protected JSONObject getLegend() throws JSONException {
+            JSONObject o = super.getLegend();
+            o.put("renderer", "$.jqplot.GradientTableLegendRenderer");
+            return o;
+        }
+
+    @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
         JSONObject params;
@@ -114,9 +121,12 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
             jsonParams.put("legend", getLegend());
             jsonParams.put("stackSeries", "true");
             JSONObject seriesDefaults = new JSONObject();
-            seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
+            seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
             JSONObject rendererOptions = new JSONObject();
             rendererOptions.put("barDirection", "'vertical'");
+            rendererOptions.put("varyBarColor", "true");
+            rendererOptions.put("barMargin", 45);
+            rendererOptions.put("highlightMouseOver", "true");
             seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
             jsonParams.put("grid", getGrid());
@@ -126,6 +136,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
             jsonParams.put("axes", axes);
             JSONArray seriesColors = getSeriesColors();
             jsonParams.put("seriesColors", seriesColors);
+
             params = new JSONObject(jsonParams);
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -140,4 +151,52 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
                 "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";*/
         return xyz;
     }
+
+    protected JSONArray getSeriesColors() {
+        return transformColors(super.getSeriesColors());
+    }
+
+    protected JSONArray transformColors(JSONArray colors) {
+            JSONArray newColors = new JSONArray();
+            try {
+
+                for (int i = 0; i < colors.length(); i++) {
+                    JSONArray gradient = new JSONArray();
+                    String color2 = "'#FFFFFF'";
+                    Object color = colors.get(i);
+
+
+                    JSONObject colorStop = new JSONObject();
+                    colorStop.put("point", 0);
+                    colorStop.put("color", color);
+                    gradient.put(colorStop);
+
+                    colorStop = new JSONObject();
+                    colorStop.put("point", .15);
+                    colorStop.put("color", color2);
+                    gradient.put(colorStop);
+
+                    colorStop = new JSONObject();
+                    colorStop.put("point", .5);
+                    colorStop.put("color", color);
+                    gradient.put(colorStop);
+
+                    colorStop = new JSONObject();
+                    colorStop.put("point", .9);
+                    colorStop.put("color", color);
+                    gradient.put(colorStop);
+
+                    colorStop = new JSONObject();
+                    colorStop.put("point", 1);
+                    colorStop.put("color", color2);
+                    gradient.put(colorStop);
+
+
+                    newColors.put(gradient);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return newColors;
+        }
 }

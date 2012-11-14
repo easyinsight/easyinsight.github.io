@@ -95,7 +95,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
-        includes.add("/js/plugins/jqplot.barRenderer.min.js");
+        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
         includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
@@ -113,9 +113,11 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
             jsonParams.put("legend", getLegend());
             jsonParams.put("stackSeries", "true");
             JSONObject seriesDefaults = new JSONObject();
-            seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
+            seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
             JSONObject rendererOptions = new JSONObject();
             rendererOptions.put("barDirection", "'horizontal'");
+            rendererOptions.put("varyBarColor", "true");
+            rendererOptions.put("barMargin", 45);
             seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = getGrid();
@@ -134,10 +136,22 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
         String customHeight = htmlReportMetadata.createStyleProperties();
-        String xyz = "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getStackedBarChart('"+ targetDiv + "', " + argh + ","+customHeight+"))";
+        String xyz = "$.getJSON('/app/stackedChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getStackedBarChart('" + targetDiv + "', " + argh + "," + customHeight + "))";
         /*return "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {\n" +
                 "                var s1 = data[\"values\"];\n" +
                 "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";*/
         return xyz;
     }
+
+    @Override
+    protected JSONObject getLegend() throws JSONException {
+        JSONObject o = super.getLegend();
+        o.put("renderer", "$.jqplot.GradientTableLegendRenderer");
+        return o;
+    }
+
+    protected JSONArray getSeriesColors() {
+        return transformColors(super.getSeriesColors());
+    }
+
 }
