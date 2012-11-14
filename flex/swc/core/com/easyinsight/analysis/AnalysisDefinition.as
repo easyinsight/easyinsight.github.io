@@ -96,6 +96,7 @@ import mx.collections.ArrayCollection;
         public var lookupTableOptimization:Boolean = false;
         public var rowsEditable:Boolean;
         public var adHocExecution:Boolean;
+        public var cacheable:Boolean;
 
 		public function AnalysisDefinition()
 		{

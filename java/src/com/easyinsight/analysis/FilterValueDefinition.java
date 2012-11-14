@@ -338,10 +338,40 @@ public class FilterValueDefinition extends FilterDefinition {
         element.addAttribute(new Attribute("excludeEmpty", String.valueOf(excludeEmpty)));
         Element values = new Element("values");
         element.appendChild(values);
-        for (PersistableValue valueObject : persistedValues) {
-            Element valueElement = new Element("value");
-            valueElement.appendChild(valueObject.toValue().toString());
-            values.appendChild(valueElement);
+        if (persistedValues != null) {
+            for (PersistableValue valueObject : persistedValues) {
+                Element valueElement = new Element("value");
+                valueElement.appendChild(valueObject.toValue().toString());
+                values.appendChild(valueElement);
+            }
+        } else if (filteredValues != null) {
+            Set<Value> valueSet = new HashSet<Value>();
+            for (Object valueObject : filteredValues) {
+                Value value;
+                if (valueObject instanceof String) {
+                    value = new StringValue((String) valueObject);
+                } else if (valueObject instanceof Number) {
+                    value = new NumericValue((Number) valueObject);
+                } else if (valueObject instanceof Date) {
+                    value = new DateValue((Date) valueObject);
+                } else if (valueObject instanceof Value) {
+                    value = (Value) valueObject;
+                } else {
+                    value = new EmptyValue();
+                }
+                if (value instanceof StringValue) {
+                    StringValue stringValue = (StringValue) value;
+                    if ("(No Value)".equals(stringValue.getValue())) {
+                        value = new EmptyValue();
+                    }
+                }
+                valueSet.add(value);
+            }
+            for (Value value : valueSet) {
+                Element valueElement = new Element("value");
+                valueElement.appendChild(value.toString());
+                values.appendChild(valueElement);
+            }
         }
         return element;
     }
