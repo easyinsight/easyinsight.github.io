@@ -3,11 +3,11 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.export.TreeData;
 import com.easyinsight.intention.IntentionSuggestion;
@@ -15,6 +15,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.StandardReportPipeline;
+import org.apache.jcs.JCS;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -506,6 +507,8 @@ public class DataService {
 
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters) {
+        // TODO: tweaking
+
         try {
             UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         } catch (InterruptedException e) {
@@ -515,13 +518,31 @@ public class DataService {
         try {
             SecurityUtil.authorizeInsight(reportID);
             System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
+
             conn.setAutoCommit(false);
             WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
-            analysisDefinition.setDataFeedID(dataSourceID);
+            CacheKey cacheKey = null;
+            if (analysisDefinition.isCacheable()) {
+                List<String> filters = new ArrayList<String>();
+                XMLMetadata xmlMetadata = new XMLMetadata();
+                xmlMetadata.setConn(conn);
+                for (FilterDefinition filter : customFilters) {
+                    filters.add(filter.toXML(xmlMetadata).toXML());
+                }
+                cacheKey = new CacheKey(reportID, filters);
+                EmbeddedResults embeddedResults = ReportCache.instance().getResults(dataSourceID, cacheKey);
+                if (embeddedResults != null) {
+                    return embeddedResults;
+                }
+            }
             if (analysisDefinition == null) {
                 return null;
             }
+            analysisDefinition.setDataFeedID(dataSourceID);
             EmbeddedResults results = getEmbeddedResultsForReport(analysisDefinition, customFilters, insightRequestMetadata, drillThroughFilters, conn);
+            if (cacheKey != null) {
+                ReportCache.instance().storeReport(dataSourceID, cacheKey, results);
+            }
             conn.commit();
             return results;
         } catch (com.easyinsight.security.SecurityException se) {
@@ -614,10 +635,6 @@ public class DataService {
         }
     }
 
-    private class TrendPartition {
-        private List<AnalysisMeasure> measures;
-    }
-
     public static TrendDataResults getTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         RollingFilterDefinition reportFilter = null;
         for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
@@ -635,7 +652,6 @@ public class DataService {
                 }
             }
         }
-
         Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
 
         for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
@@ -658,6 +674,13 @@ public class DataService {
                         trendMap.put(dateDimension.qualifiedName(), measures);
                     }
                     measures.add((AnalysisMeasure) analysisItem);
+                } else {
+                    List<AnalysisMeasure> measures = trendMap.get("");
+                    if (measures == null) {
+                        measures = new ArrayList<AnalysisMeasure>();
+                        trendMap.put("", measures);
+                    }
+                    measures.add((AnalysisMeasure) analysisItem);
                 }
             } else {
                 List<AnalysisMeasure> measures = trendMap.get("");
@@ -670,7 +693,9 @@ public class DataService {
         }
         List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
         DataSourceInfo dataSourceInfo = null;
-        for (List<AnalysisMeasure> measures : trendMap.values()) {
+        for (Map.Entry<String, List<AnalysisMeasure>> entry : trendMap.entrySet()) {
+            String key = entry.getKey();
+            List<AnalysisMeasure> measures = entry.getValue();
             WSListDefinition tempReport = new WSListDefinition();
             List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
             columns.addAll(measures);
@@ -684,16 +709,35 @@ public class DataService {
             tempReport.setMarmotScript(analysisDefinition.getMarmotScript());
             tempReport.setReportRunMarmotScript(analysisDefinition.getReportRunMarmotScript());
             tempReport.setJoinOverrides(analysisDefinition.getJoinOverrides());
-            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, tempReport, conn);
+            InsightRequestMetadata metadata = new InsightRequestMetadata();
+            metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
             dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
-            insightRequestMetadata.setNow(cal.getTime());
-            ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(insightRequestMetadata, tempReport, conn);
-            DataSet pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
+            DataSet pastSet;
+            if ("".equals(key)) {
+                pastSet = nowSet;
+            } else {
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
+                metadata = new InsightRequestMetadata();
+                metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+                metadata.setNow(cal.getTime());
+                ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(metadata, tempReport, conn);
+                pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
+            }
             trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
         }
+        List<TrendOutcome> targetOutcomes = new ArrayList<TrendOutcome>();
+        for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+            for (TrendOutcome trendOutcome : trendOutcomes) {
+                if (trendOutcome.getMeasure().equals(analysisItem)) {
+                    targetOutcomes.add(trendOutcome);
+                    break;
+                }
+            }
+        }
+        trendOutcomes = targetOutcomes;
         TrendDataResults trendDataResults = new TrendDataResults();
         trendDataResults.setTrendOutcomes(trendOutcomes);
         trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));

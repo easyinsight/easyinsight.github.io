@@ -87,6 +87,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean visibleAtFeedLevel;
     private boolean recommendedExchange;
     private boolean autoSetupDelivery;
+    private boolean cacheable;
     private Date dateCreated;
     private Date dateUpdated;
     private String description;
@@ -109,6 +110,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private double backgroundAlpha = 1;
 
     private boolean rowsEditable;
+
+    public boolean isCacheable() {
+        return cacheable;
+    }
+
+    public void setCacheable(boolean cacheable) {
+        this.cacheable = cacheable;
+    }
 
     public boolean isAdHocExecution() {
         return adHocExecution;
@@ -711,6 +720,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         headerImage =  findImage(properties, "headerImage", null);
         lookupTableOptimization =  findBooleanProperty(properties, "lookupTableOptimization", false);
         adHocExecution = findBooleanProperty(properties, "adHocExecution", false);
+        cacheable = findBooleanProperty(properties, "cacheable", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -724,6 +734,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("dataSourceFields", dataSourceFields));
         properties.add(new ReportBooleanProperty("lookupTableOptimization", lookupTableOptimization));
         properties.add(new ReportBooleanProperty("adHocExecution", adHocExecution));
+        properties.add(new ReportBooleanProperty("cacheable", cacheable));
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }
