@@ -17,7 +17,14 @@ import java.util.Date;
 public class ParseDate extends Function {
     public Value evaluate() {
         try {
-            String value = params.get(0).toString();
+            Value start = params.get(0);
+            String string = start.toString();
+            String value;
+            if (string.startsWith("\"")) {
+                value = minusQuotes(0);
+            } else {
+                value = string;
+            }
             String format = minusQuotes(1);
             SimpleDateFormat sdf = new SimpleDateFormat(format);
             Date date = sdf.parse(value);
