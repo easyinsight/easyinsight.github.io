@@ -72,14 +72,15 @@ public class FreshbooksTimeEntrySource extends FreshbooksBaseSource {
             return new DataSet();
         }
         try {
-            DataSet dataSet = new DataSet();
+
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
             int requestPage = 1;
             int pages;
             int currentPage;
             do {
-                Document invoicesDoc = query("time_entry.list", "<page>" + requestPage + "</page>", freshbooksCompositeSource);
+                DataSet dataSet = new DataSet();
+                Document invoicesDoc = query("time_entry.list", "<page>" + requestPage + "</page><per_page>100</per_page>", freshbooksCompositeSource);
                 Nodes timeNodes = invoicesDoc.query("/response/time_entries");
                 if (timeNodes.size() == 0) {
                     return dataSet;
@@ -114,8 +115,10 @@ public class FreshbooksTimeEntrySource extends FreshbooksBaseSource {
                     addValue(row, FreshbooksTimeEntrySource.COUNT, 1, keys);
                 }
                 requestPage++;
+                loadingProgress(0, 0, "Retrieving Time Entries page " + requestPage + " of " + pages, callDataID);
+                IDataStorage.insertData(dataSet);
             } while (currentPage < pages);
-            return dataSet;
+            return null;
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
