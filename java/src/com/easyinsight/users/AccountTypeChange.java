@@ -57,11 +57,10 @@ public class AccountTypeChange implements Serializable {
         this.yearly = yearly;
     }
 
-    public String storageString() {
-
+    public static long storageAmount(int accountType, int storage) {
         long storageAmount = 0;
         if (accountType == Account.PROFESSIONAL) {
-            if (storage == 1) {
+            if (storage == 0 || storage == 1) {
                 storageAmount = Account.PROFESSIONAL_MAX;
             } else if (storage == 2) {
                 storageAmount = Account.PROFESSIONAL_MAX_2;
@@ -71,7 +70,7 @@ public class AccountTypeChange implements Serializable {
                 storageAmount = Account.PROFESSIONAL_MAX_4;
             }
         } else if (accountType == Account.PLUS) {
-            if (storage == 1) {
+            if (storage == 0 || storage == 1) {
                 storageAmount = Account.PLUS_MAX;
             } else if (storage == 2) {
                 storageAmount = Account.PLUS_MAX2;
@@ -79,7 +78,7 @@ public class AccountTypeChange implements Serializable {
                 storageAmount = Account.PLUS_MAX3;
             }
         } else if (accountType == Account.BASIC) {
-            if (storage == 1) {
+            if (storage == 0 || storage == 1) {
                 storageAmount = Account.BASIC_MAX;
             } else if (storage == 2) {
                 storageAmount = Account.BASIC_MAX2;
@@ -87,6 +86,13 @@ public class AccountTypeChange implements Serializable {
                 storageAmount = Account.BASIC_MAX3;
             }
         }
+        return storageAmount;
+    }
+
+    public String storageString() {
+
+        long storageAmount = storageAmount(accountType, storage);
+
         return Account.humanReadableByteCount(storageAmount, true);
     }
 
@@ -95,37 +101,14 @@ public class AccountTypeChange implements Serializable {
 
         account.setAccountType(accountType);
 
-        long storageAmount = 0;
-        if (accountType == Account.PROFESSIONAL) {
-            if (storage == 1) {
-                storageAmount = Account.PROFESSIONAL_MAX;
-            } else if (storage == 2) {
-                storageAmount = Account.PROFESSIONAL_MAX_2;
-            } else if (storage == 3) {
-                storageAmount = Account.PROFESSIONAL_MAX_3;
-            } else if (storage == 4) {
-                storageAmount = Account.PROFESSIONAL_MAX_4;
-            }
-        } else if (accountType == Account.PLUS) {
-            if (storage == 1) {
-                storageAmount = Account.PLUS_MAX;
-            } else if (storage == 2) {
-                storageAmount = Account.PLUS_MAX2;
-            } else if (storage == 3) {
-                storageAmount = Account.PLUS_MAX3;
-            }
-        } else if (accountType == Account.BASIC) {
-            if (storage == 1) {
-                storageAmount = Account.BASIC_MAX;
-            } else if (storage == 2) {
-                storageAmount = Account.BASIC_MAX2;
-            } else if (storage == 3) {
-                storageAmount = Account.BASIC_MAX3;
-            }
-        }
+        long storageAmount = storageAmount(accountType, storage);
         account.setMaxSize(storageAmount);
         session.update(account);
         session.flush();
-        SecurityUtil.changeAccountType(account.getAccountType());
+        try {
+            SecurityUtil.changeAccountType(account.getAccountType());
+        } catch (Exception e) {
+
+        }
     }
 }
