@@ -121,7 +121,7 @@
         } else if (accountTypeChange.getAccountType() == Account.PROFESSIONAL) {
             accountTypeString = "Professional";
         } else {
-            throw new RuntimeException("Uknown type " + accountTypeChange.getAccountType());
+            throw new RuntimeException("Unknown type " + accountTypeChange.getAccountType());
         }
 
         if (account.getPricingModel() > 0) {

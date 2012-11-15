@@ -77,7 +77,7 @@
             String storageSelectionString = request.getParameter("storageSelection");
             storageSelection = Integer.parseInt(storageSelectionString);
             if (targetType == Account.PROFESSIONAL) {
-                if (storageSelection == 1) {
+                if (storageSelection == 0 || storageSelection == 1) {
                     storage = Account.PROFESSIONAL_MAX;
                 } else if (storageSelection == 2) {
                     storage = Account.PROFESSIONAL_MAX_2;
@@ -91,7 +91,7 @@
                     return;
                 }
             } else if (targetType == Account.PLUS) {
-                if (storageSelection == 1) {
+                if (storageSelection == 0 || storageSelection == 1) {
                     storage = Account.PLUS_MAX;
                 } else if (storageSelection == 2) {
                     storage = Account.PLUS_MAX2;
@@ -99,7 +99,7 @@
                     storage = Account.PLUS_MAX3;
                 }
             } else if (targetType == Account.BASIC) {
-                if (storageSelection == 1) {
+                if (storageSelection == 0 || storageSelection == 1) {
                     storage = Account.BASIC_MAX;
                 } else if (storageSelection == 2) {
                     storage = Account.BASIC_MAX2;
