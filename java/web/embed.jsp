@@ -15,12 +15,16 @@
         String reportName = request.getParameter("reportName");
         String showToolbar = request.getParameter("showToolbar");
         String showFilters = request.getParameter("showFilters");
+        String showHeader = request.getParameter("showHeader");
         String flashVars = "analysisID=" + reportID + "&reportType=" + reportType + "&reportName=" + reportName + "&dataSourceID=" + dataSourceID;
         if (showToolbar != null) {
             flashVars = flashVars + "&showToolbar=" + showToolbar;
         }
         if (showFilters != null) {
             flashVars = flashVars + "&showFilters=" + showFilters;
+        }
+        if (showHeader != null) {
+            flashVars = flashVars + "&showHeader=" + showHeader;
         }
         InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossible(reportID);
         if (insightResponse.getStatus() == InsightResponse.NEED_LOGIN) {

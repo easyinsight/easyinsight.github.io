@@ -25,6 +25,20 @@
 
         private var _insecureEmbed:Boolean;
 
+        private var _showHeader:Boolean;
+
+        [Bindable(event="showHeaderChanged")]
+        public function get showHeader():Boolean {
+            return _showHeader;
+        }
+
+        public function set showHeader(value:Boolean):void {
+            if (_showHeader == value) return;
+            _showHeader = value;
+            dispatchEvent(new Event("showHeaderChanged"));
+            updateURL();
+        }
+
         [Bindable(event="showToolbarChanged")]
         public function get showToolbar():Boolean {
             return _showToolbar;
@@ -126,6 +140,9 @@
             if (_showFilters) {
                 str += sym + "showFilters=1";
             }
+            if (_showHeader) {
+                str += sym + "showHeader=1";
+            }
             url = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\"" + str + "\"></iframe>";
         }
 
@@ -149,10 +166,13 @@
                 <mx:NumericStepper id="heightStepper" value="{reportHeight}" minimum="50" maximum="2400" change="reportHeight = heightStepper.value"/>
             </mx:FormItem>
             <mx:FormItem label="Show Tool Bar:">
-                <mx:CheckBox id="toolBarCheckbox" change="showToolbar = toolBarCheckbox.selected"/>
+                <mx:CheckBox id="toolBarCheckbox" change="showToolbar = toolBarCheckbox.selected" selected="true"/>
             </mx:FormItem>
             <mx:FormItem label="Show Filters:">
-                <mx:CheckBox id="filtersCheckbox" change="showFilters = filtersCheckbox.selected"/>
+                <mx:CheckBox id="filtersCheckbox" change="showFilters = filtersCheckbox.selected" selected="true"/>
+            </mx:FormItem>
+            <mx:FormItem label="Show Header:">
+                <mx:CheckBox id="headerCheckbox" change="showHeader = headerCheckbox.selected"/>
             </mx:FormItem>
         </mx:Form>
         <mx:Label text="You can paste this HTML into any web page to embed the report into the page." fontSize="14"/>

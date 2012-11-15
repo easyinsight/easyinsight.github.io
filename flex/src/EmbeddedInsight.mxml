@@ -16,9 +16,11 @@
         import com.easyinsight.framework.LoginObject;
         import com.easyinsight.framework.LoginResponse;
         import com.easyinsight.framework.TORegistry;
+
         //import com.easyinsight.framework.TORegistry2;
 
         //import com.easyinsight.framework.TORegistry;
+
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
         import com.easyinsight.report.EmbedReportContextMenuFactory;
@@ -40,13 +42,27 @@
 
         private var _showToolbar:Boolean;
 
+        private var _showHeader:Boolean;
+
+
+        [Bindable(event="showHeaderChanged")]
+        public function get showHeader():Boolean {
+            return _showHeader;
+        }
+
+        public function set showHeader(value:Boolean):void {
+            if (_showHeader == value) return;
+            _showHeader = value;
+            dispatchEvent(new Event("showHeaderChanged"));
+        }
+
         [Bindable("showToolbarChanged")]
         public function get showToolbar():Boolean {
             return _showToolbar;
         }
 
         public function set showToolbar(value:Boolean):void {
-            if(_showToolbar == value) return;
+            if (_showToolbar == value) return;
             _showToolbar = value;
             dispatchEvent(new Event("showToolbarChanged"));
         }
@@ -54,7 +70,7 @@
         [Bindable]
         private var showFilters:Boolean;
 
-        [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf",fontName="Lucida Grande", fontStyle="normal")]
+        [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf", fontName="Lucida Grande", fontStyle="normal")]
         private var myNormalLucida:Class;
 
         private function handleFlashVars():void {
@@ -69,10 +85,9 @@
             this.reportName = String(Application.application.parameters.reportName);
 
             this.showToolbar = int(Application.application.parameters.showToolbar) == 1;
-
+            this.showHeader = int(Application.application.parameters.showHeader) == 1;
 
             this.showFilters = int(Application.application.parameters.showFilters) == 1;
-
 
 
             var showFiltersMenu:ContextMenuItem = new ContextMenuItem("Toggle Filters");
@@ -81,12 +96,12 @@
             // yay binding closure hack
             var s = this;
 
-            showFiltersMenu.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+            showFiltersMenu.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
                 s.showFilters = !s.showFilters;
             });
 
 
-            showToolbarMenu.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+            showToolbarMenu.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
                 s.showToolbar = !s.showToolbar;
             });
 
@@ -106,7 +121,7 @@
         }
 
         private function dependancies():void {
-             TORegistry.registerTypes();
+            TORegistry.registerTypes();
         }
 
         [Bindable]
@@ -157,7 +172,7 @@
 
         private function quietLogin(authResponse:UserServiceResponse, navigate:Boolean):void {
             User.initializeUser(authResponse);
-            User.getInstance().userName = authResponse.userName;            
+            User.getInstance().userName = authResponse.userName;
             stackIndex = 2;
         }
 
@@ -169,8 +184,7 @@
         private function loginEvent(event:LoginEvent):void {
             stackIndex = 2;
         }
-            
-		]]>
+        ]]>
 	</mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="openAnalysisIfPossible" result="gotReportInfo()"/>
@@ -186,6 +200,6 @@
         <dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
                                       dataSourceID="{dataSourceID}" reportType="{reportType}"
                                       showToolbar="{showToolbar}"
-                                        showFilters="{showFilters}" />
+                                        showFilters="{showFilters}" showHeader="{showHeader}"/>
     </mx:ViewStack>
 </mx:Application>

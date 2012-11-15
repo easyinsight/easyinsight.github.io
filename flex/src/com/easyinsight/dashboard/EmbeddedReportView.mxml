@@ -259,6 +259,24 @@
                 filterTooltip = "Hide Filters";
             }
         }
+
+        [Bindable]
+        private var headerVisible:Boolean;
+
+
+        private var _showHeader:Boolean;
+
+
+        [Bindable(event="showHeaderChanged")]
+        public function get showHeader():Boolean {
+            return _showHeader;
+        }
+
+        public function set showHeader(value:Boolean):void {
+            if (_showHeader == value) return;
+            _showHeader = value;
+            dispatchEvent(new Event("showHeaderChanged"));
+        }
         ]]>
     </mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
@@ -274,6 +292,19 @@
                     labelPlacement="right" label="Export"/>
             <mx:Button toolTip="{filterTooltip}" click="toggleFilterIndex()" icon="{filterIcon}" labelPlacement="right"
                     styleName="grayButton" label="Toggle Filters"/>
+            <mx:Spacer width="100%"/>
+        </mx:HBox>
+    </mx:ViewStack>
+    <mx:ViewStack width="100%" resizeToContent="true" selectedIndex="{showHeader ? 1 : 0}">
+        <mx:Box/>
+        <mx:HBox width="100%" id="headerArea" paddingTop="5" paddingBottom="5" paddingLeft="10" verticalAlign="middle">
+            <mx:Box backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" borderColor="#FFFFFF" borderThickness="1" cornerRadius="5"
+                    borderStyle="solid" visible="{headerVisible}">
+                <mx:Image id="logoImage"/>
+            </mx:Box>
+            <mx:Spacer width="100%"/>
+            <mx:HBox id="breadCrumbBox"/>
+            <mx:Label text="{_reportName}" fontSize="24" maxWidth="600" id="reportLabel"/>
             <mx:Spacer width="100%"/>
         </mx:HBox>
     </mx:ViewStack>
