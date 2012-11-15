@@ -5,7 +5,6 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
-import com.easyinsight.security.SecurityUtil;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -16,7 +15,7 @@ import java.util.TimeZone;
  * Date: 12/29/11
  * Time: 1:15 PM
  */
-public class DayOfWeek extends Function {
+public class DayOfQuarter extends Function {
     public Value evaluate() {
         Date startDate = null;
         if (params.size() == 0) {
@@ -26,6 +25,8 @@ public class DayOfWeek extends Function {
             if (start.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) start;
                 startDate = dateValue.getDate();
+            } else if (start.type() == Value.NUMBER) {
+                startDate = new Date(start.toDouble().longValue());
             }
         }
         if (startDate != null) {
@@ -42,14 +43,18 @@ public class DayOfWeek extends Function {
             TimeZone timeZone = TimeZone.getTimeZone(string);
             calendar.setTimeZone(timeZone);
             calendar.setTimeInMillis(startDate.getTime());
+
+
             if (params.size() == 2) {
+                int quarterMonth = calendar.get(Calendar.MONTH) - calendar.get(Calendar.MONTH) % 3;
+                calendar.set(Calendar.MONTH, quarterMonth);
+                calendar.set(Calendar.DAY_OF_MONTH, 0);
                 int dayToSet = params.get(1).toDouble().intValue();
-                calendar.set(Calendar.DAY_OF_WEEK, dayToSet);
+                calendar.add(Calendar.DAY_OF_YEAR, dayToSet);
                 return new DateValue(calendar.getTime());
             } else {
-                calendar.setFirstDayOfWeek(SecurityUtil.getFirstDayOfWeek());
+                return new NumericValue(calendar.get(Calendar.DAY_OF_MONTH));
             }
-            return new NumericValue(calendar.get(Calendar.DAY_OF_WEEK));
         } else {
             return new EmptyValue();
         }

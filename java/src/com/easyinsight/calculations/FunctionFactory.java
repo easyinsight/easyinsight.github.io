@@ -221,6 +221,10 @@ public class FunctionFactory {
             return new Months();
         } else if (s.equals("fill")) {
             return new FillInterval();
+        } else if (s.equals("weeks")) {
+            return new Weeks();
+        } else if (s.equals("dayofquarter")) {
+            return new DayOfQuarter();
         } else {
             return null;
         }
