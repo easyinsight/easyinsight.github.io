@@ -21,6 +21,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
     private static interface Populator {
         JSONArray createArray(Double measure, Integer index);
+
         public Integer getIndex(JSONArray jsonArray) throws JSONException;
     }
 
@@ -84,6 +85,31 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
         JSONArray axisNames = new JSONArray();
         JSONArray series = new JSONArray();
+
+        JSONObject params = new JSONObject();
+        JSONObject seriesDefaults = new JSONObject();
+        JSONObject rendererOptions = new JSONObject();
+
+
+        seriesDefaults.put("rendererOptions", rendererOptions);
+
+        params.put("seriesDefaults", seriesDefaults);
+        object.put("params", params);
+
+        Link l = stackItem.defaultLink();
+
+        rendererOptions.put("highlightMouseOver", l != null);
+
+        if (l != null && l instanceof DrillThrough) {
+            JSONObject drillthrough = new JSONObject();
+            drillthrough.put("reportID", report.getUrlKey());
+            drillthrough.put("id", l.getLinkID());
+            drillthrough.put("source", stackItem.getAnalysisItemID());
+            drillthrough.put("xaxis", xAxisItem.getAnalysisItemID());
+            drillthrough.put("stack", stackItem.getAnalysisItemID());
+            object.put("drillthrough", drillthrough);
+        }
+
 
         for (IRow row : dataSet.getRows()) {
 

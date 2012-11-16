@@ -7,6 +7,10 @@ Chart = {
                     params.legend = $.extend({}, params.legend, {show:true, labels:labels});
                 }
 
+                if(data["params"]) {
+                    params = $.extend(true, {}, params, data["params"]);
+                }
+
                 var s1 = data["values"];
                 var customHeight = styleProps["customHeight"];
                 if (customHeight > -1) {
@@ -25,10 +29,28 @@ Chart = {
                     var selector2 = "#" + target + 'ReportArea';
                     $(selector).height(height);
                     $(selector2).height(height);
+
                 }
+
                 if (extras) {
                     extras(data);
                 }
+
+//                if(data["drillthrough"]) {
+//                    var tt = $("#" + target);
+//                    tt.bind("jqplotDataClick", function(event, seriesIndex, pointIndex, curData) {
+//                        var drillthrough = data["drillthrough"];
+//                        var s = 'reportID=' + drillthrough["reportID"] + '&drillthroughID=' + drillthrough["id"] + '&sourceField=' +
+//                                                    drillthrough["source"] + '&f' + drillthrough["xaxis"] + "=" + encodeURI(data["ticks"][pointIndex]);
+//                        if(drillthrough["stack"]) {
+//                            s = s + "&f" + drillthrough["stack"] + "=" + encodeURI(data["series"][seriesIndex].label);
+//                        }
+//                        console.log(s);
+//                        drillThrough(s);
+//
+//                    });
+//                }
+
                 Chart.charts[target] = $.jqplot(target + 'ReportArea', s1, params);
 
             }, Chart.cleanup, target);

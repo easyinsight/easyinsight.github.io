@@ -27,7 +27,7 @@ public class WprSync extends BaseSyncThread {
     public static final String EMPLOYED_BELOW_WPR = "Employed Below WPR";
 
     public WprSync(String username, String password) {
-        super(password, username);
+        super(username, password);
         this.reportId = "EIbkeKVRJFOUrDbTATvF";
         this.sourceName = "WPR Data Mart";
     }

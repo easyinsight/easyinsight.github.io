@@ -933,4 +933,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     protected void subclassFromXML(Element fieldNode, XMLImportMetadata xmlImportMetadata) {
 
     }
+
+    public Link defaultLink() {
+        if(getLinks() != null)
+            for(Link l : getLinks()) {
+                if(l.isDefaultLink())
+                    return l;
+            }
+
+        return null;
+    }
 }

@@ -32,7 +32,7 @@ public abstract class BaseSyncThread extends Thread {
     protected String reportId;
     protected String sourceName;
 
-    public BaseSyncThread(String password, String username) {
+    public BaseSyncThread(String username, String password) {
 
         this.password = password;
         this.username = username;

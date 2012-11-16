@@ -1,6 +1,8 @@
 package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.analysis.definitions.WSStackedBarChartDefinition;
+import com.easyinsight.analysis.definitions.WSStackedColumnChartDefinition;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.dashboard.DashboardDescriptor;
@@ -54,7 +56,15 @@ public class DrillthroughServlet extends HtmlServlet {
         if (drillThrough == null) {
             throw new RuntimeException();
         }
-        DrillThroughResponse drillThroughResponse = new AnalysisService().drillThrough(drillThrough, data, linkItem, report, null);
+
+        String altKey = null;
+
+        if(report.getReportType() == WSAnalysisDefinition.STACKED_BAR) {
+            altKey = String.valueOf(((WSStackedBarChartDefinition) report).getStackItem().getAnalysisItemID());
+        } else if(report.getReportType() == WSAnalysisDefinition.STACKED_COLUMN) {
+            altKey = String.valueOf(((WSStackedColumnChartDefinition) report).getStackItem().getAnalysisItemID());
+        }
+        DrillThroughResponse drillThroughResponse = new AnalysisService().drillThrough(drillThrough, data, linkItem, report, altKey);
         // return a URL for response redirect?
         JSONObject result = new JSONObject();
 

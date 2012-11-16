@@ -31,9 +31,22 @@ public class ColumnChartServlet extends HtmlServlet {
         List<AnalysisItem> measures;
         JSONArray blahArray = new JSONArray();
 
+        JSONObject params = new JSONObject();
+        JSONObject seriesDefaults = new JSONObject();
+        JSONObject rendererOptions = new JSONObject();
+
+
+
+
+        seriesDefaults.put("rendererOptions", rendererOptions);
+
+        params.put("seriesDefaults", seriesDefaults);
+        object.put("params", params);
+
         if (report instanceof WSColumnChartDefinition) {
             WSColumnChartDefinition columnChartDefinition = (WSColumnChartDefinition) report;
             xAxisItem = columnChartDefinition.getXaxis();
+
             measures = columnChartDefinition.getMeasures();
         } else if (report instanceof WSBarChartDefinition) {
             WSBarChartDefinition columnChartDefinition = (WSBarChartDefinition) report;
@@ -45,6 +58,20 @@ public class ColumnChartServlet extends HtmlServlet {
             measures = pieChart.getMeasures();
         } else {
             throw new RuntimeException();
+        }
+
+        // drillthroughs
+        Link l = xAxisItem.defaultLink();
+
+        rendererOptions.put("highlightMouseOver", l != null);
+
+        if(l != null && l instanceof DrillThrough) {
+            JSONObject drillthrough = new JSONObject();
+            drillthrough.put("reportID", report.getUrlKey());
+            drillthrough.put("id", l.getLinkID());
+            drillthrough.put("source", xAxisItem.getAnalysisItemID());
+            drillthrough.put("xaxis", xAxisItem.getAnalysisItemID());
+            object.put("drillthrough", drillthrough);
         }
 
         for (AnalysisItem measure : measures) {
@@ -75,6 +102,10 @@ public class ColumnChartServlet extends HtmlServlet {
         object.put("ticks", ticks);
 
         object.put("values", blahArray);
+
+
+
+
         System.out.println(object.toString());
         response.setContentType("application/json");
         response.getOutputStream().write(object.toString().getBytes());

@@ -537,7 +537,7 @@
                     }
 
                     var clr = opts.fillStyle || this.color[0]["color"];
-                    this._dataColors.push(clr);
+                    this._dataColors.push(this.color[0]["color"]);
                     opts.fillStyle = opts.fillStyle || createGradientFill(this.color, p1, p2, ctx);
                     this.renderer.shapeRenderer.draw(ctx, points, opts);
                 }

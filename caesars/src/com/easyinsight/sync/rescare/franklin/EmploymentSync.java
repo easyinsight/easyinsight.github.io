@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class EmploymentSync extends BaseSyncThread {
 
-    private static final String PARTICIPANT_ID = "Participant ID";
+    private static final String PARTICIPANT_ID = "ParticipantID";
     private static final String EFFECTIVE_MONTH = "Effective Month";
     private static final String EMPLOYED = "Employed";
     private static final String FULL_TIME = "Full Time";
@@ -38,11 +38,11 @@ public class EmploymentSync extends BaseSyncThread {
     private static final String ONE_HUNDRED_EIGHTY_DAYS_UNVERIFIED = "180 Days Unverified";
 
     public static void main(String[] args) {
-        new EmploymentSync("e@symone$", "alanrc@easy-insight.com").run();
+        new EmploymentSync("alanrc@easy-insight.com", "e@symone$").run();
     }
 
-    public EmploymentSync(String password, String username) {
-        super(password, username);
+    public EmploymentSync(String username, String password) {
+        super(username, password);
         this.reportId = "EIbkeKVRJFOUrDbTATvF";
         this.sourceName = "Employment Data Mart";
     }
