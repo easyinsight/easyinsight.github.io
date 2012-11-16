@@ -1,6 +1,7 @@
 package com.easyinsight.scheduler;
 
 import com.easyinsight.analysis.ReportException;
+import com.easyinsight.analysis.ReportFault;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.email.UserStub;
@@ -14,6 +15,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Column;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
@@ -87,7 +89,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
 
                         if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
                             try {
-                                boolean result = dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null, null, ((FeedDefinition) dataSource).getLastRefreshStart(), true);
+                                boolean result = dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null, null, ((FeedDefinition) dataSource).getLastRefreshStart(), true, new ArrayList<ReportFault>());
                                 ((FeedDefinition)dataSource).setLastRefreshStart(now);
                                 if (result) {
                                     new DataSourceInternalService().updateFeedDefinition((FeedDefinition) dataSource, conn, true, true);

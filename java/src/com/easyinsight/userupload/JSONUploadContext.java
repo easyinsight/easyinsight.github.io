@@ -2,6 +2,7 @@ package com.easyinsight.userupload;
 
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.ReportException;
+import com.easyinsight.analysis.ReportFault;
 import com.easyinsight.core.*;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.database.EIConnection;
@@ -167,7 +168,7 @@ public class JSONUploadContext extends UploadContext {
         jsonDataSource.setNextPageString(nextPagePath);
         jsonDataSource.setResultsJSONPath(resultsJSONPath);
         long id = jsonDataSource.create(conn, analysisItems, null);
-        jsonDataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, "", null, true);
+        jsonDataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, "", null, true, new ArrayList<ReportFault>());
         return id;
     }
 
