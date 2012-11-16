@@ -33,6 +33,28 @@ public class DrillThrough extends Link {
     @Column(name="marmotscript")
     private String marmotScript;
 
+    @Column(name="show_drillthrough_filters")
+    private boolean showDrillThroughFilters;
+
+    @Column(name="filter_row_groupings")
+    private boolean filterRowGroupings;
+
+    public boolean isShowDrillThroughFilters() {
+        return showDrillThroughFilters;
+    }
+
+    public void setShowDrillThroughFilters(boolean showDrillThroughFilters) {
+        this.showDrillThroughFilters = showDrillThroughFilters;
+    }
+
+    public boolean isFilterRowGroupings() {
+        return filterRowGroupings;
+    }
+
+    public void setFilterRowGroupings(boolean filterRowGroupings) {
+        this.filterRowGroupings = filterRowGroupings;
+    }
+
     public boolean isAddAllFilters() {
         return addAllFilters;
     }

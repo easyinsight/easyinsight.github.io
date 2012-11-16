@@ -319,7 +319,7 @@
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" id="primaryBox">
         <mx:TabNavigator creationPolicy="all" width="100%" height="100%" resizeToContent="true" tabWidth="120" id="tabNavigator">
             <mx:VBox label="Links" paddingBottom="5" paddingLeft="5" paddingRight="5"
-                 paddingTop="5" horizontalAlign="center" width="700" height="340" updateComplete="onEvent(event)" id="linksBox">
+                 paddingTop="5" horizontalAlign="center" width="700" height="380" updateComplete="onEvent(event)" id="linksBox">
                 <util:AutoSizeTextArea width="515" editable="false" selectable="false" backgroundAlpha="0"
                                        borderStyle="none" fontSize="14"
                                        text="Links allow you to connect your reports to other locations. You can create links to other reports (drillthroughs), as well as links to external URLs."/>

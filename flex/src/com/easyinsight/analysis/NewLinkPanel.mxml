@@ -80,6 +80,8 @@
                     allFilters = drillthrough.addAllFilters;
                     script = drillthrough.marmotScript;
                     miniWindow = drillthrough.miniWindow;
+                    showFilters = drillthrough.showDrillThroughFilters;
+                    createFiltersOnGroupings = drillthrough.filterRowGroupings;
                 }
             }
         }
@@ -107,9 +109,13 @@
         public function save():Link {
             var firstLink:Link = _link;
             var valid:Boolean = true;
+            var typeChanged:Boolean = false;
             if (typeGroup.selectedValue == "URL") {
                 var results:Array = Validator.validateAll([ urlValidator ]);
                 if (results.length == 0) {
+                    if (_link != null && _link is DrillThrough) {
+                        typeChanged = true;
+                    }
                     var urlLink:URLLink = new URLLink();
                     urlLink.label = "";
                     urlLink.defaultLink = urlDefaultLinkCheckbox.selected;
@@ -121,10 +127,15 @@
                     urlInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
                 }
             } else {
+                if (_link != null && _link is URLLink) {
+                    typeChanged = true;
+                }
                 var drillThrough:DrillThrough = new DrillThrough();
                 drillThrough.defaultLink = drillthroughDefaultLinkCheckbox.selected;
                 drillThrough.label = "";
                 drillThrough.addAllFilters = allCheckbox.selected;
+                drillThrough.showDrillThroughFilters = showFiltersCheckbox.selected;
+                drillThrough.filterRowGroupings = createFiltersOnRowGroupingsCheckbox.selected;
                 var desc:EIDescriptor = reportChooser.selectedItem as EIDescriptor;
                 if (desc.getType() == EIDescriptor.REPORT) {
                     drillThrough.reportID = desc.id;
@@ -136,7 +147,9 @@
                 _link = drillThrough;
             }
             if (valid) {
-                _link.linkID = linkID;
+                if (!typeChanged) {
+                    _link.linkID = linkID;
+                }
 
                 if (firstLink == null) {
                     dispatchEvent(new LinkMetadataEvent(LinkMetadataEvent.LINK_DEFINED, _link));
@@ -146,6 +159,12 @@
             }
             return _link;
         }
+
+        [Bindable]
+        private var createFiltersOnGroupings:Boolean;
+
+        [Bindable]
+        private var showFilters:Boolean;
 
         [Bindable]
         private var allFilters:Boolean;
@@ -166,34 +185,42 @@
                   selectedIndex="{stackIndex}">
         <mx:VBox width="100%">
             <mx:HBox width="100%">
-                <mx:Label text="URL: " width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Label text="URL: " width="200" fontFamily="Tahoma" fontWeight="bold"/>
                 <mx:TextInput id="urlInput" text="{urlText}" width="450"/>
             </mx:HBox>
             <mx:HBox width="100%">
-                <mx:Label text="Default Link: " width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Label text="Default Link: " width="200" fontFamily="Tahoma" fontWeight="bold"/>
                 <mx:CheckBox id="urlDefaultLinkCheckbox" selected="{defaultLink}"/>
             </mx:HBox>
         </mx:VBox>
         <mx:VBox>
             <mx:HBox>
-                <mx:Label text="Target Report:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Label text="Target Report:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
                 <util:SmartComboBox id="reportChooser" dataProvider="{reports}" labelField="name" selectedProperty="qualifiedName"
                         selectedValue="{qualifiedName}" rowCount="12"/>
             </mx:HBox>
             <mx:HBox>
-                <mx:Label text="Use Popup Window:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Label text="Use Popup Window:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
                 <mx:CheckBox label="" id="miniWindowCheckbox" selected="{miniWindow}"/>
             </mx:HBox>
             <mx:HBox width="100%">
-                <mx:Label text="Default Link:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Label text="Default Link:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
                 <mx:CheckBox id="drillthroughDefaultLinkCheckbox" selected="{defaultLink}"/>
             </mx:HBox>
             <mx:HBox width="100%">
-                <mx:Label text="Pass Through All Filters:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Label text="Pass Through All Report Filters:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
                 <mx:CheckBox id="allCheckbox" selected="{allFilters}"/>
             </mx:HBox>
+            <mx:HBox width="100%">
+                <mx:Label text="Show Filters On Target Report:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:CheckBox id="showFiltersCheckbox" selected="{showFilters}"/>
+            </mx:HBox>
+            <mx:HBox width="100%">
+                <mx:Label text="Create Filters on Row Groupings:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:CheckBox id="createFiltersOnRowGroupingsCheckbox" selected="{createFiltersOnGroupings}"/>
+            </mx:HBox>
             <mx:HBox>
-                <mx:Label text="Scripting:" width="150" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Label text="Scripting:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
                 <mx:TextArea text="{script}" width="450" height="70" editable="true" id="scriptArea" borderStyle="inset" borderThickness="1"/>
             </mx:HBox>
         </mx:VBox>

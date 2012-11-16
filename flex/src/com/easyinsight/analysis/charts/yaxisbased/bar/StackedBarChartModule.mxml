@@ -297,7 +297,7 @@
 
         private function onChartClick(event:ChartItemEvent):void {
             var series:BarSeries = event.hitData.chartItem.element as BarSeries;
-            var key:String = series.yField;
+            var key:String = series.xField;
             ClickUtil.doStuff(defaultLink, event.hitData.item, barChartDef.stackItem, this, barChartDef, key, barChart);
         }
 

@@ -13,6 +13,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.dataset.PersistableDataSetForm;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.security.*;
@@ -33,6 +34,8 @@ import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.storage.CachedCalculationTransform;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IDataTransform;
+import com.easyinsight.userupload.AnalysisItemFormatMapper;
+import com.easyinsight.userupload.ExcelUploadFormat;
 import nu.xom.Builder;
 import nu.xom.Document;
 import org.antlr.runtime.ANTLRStringStream;
@@ -305,6 +308,87 @@ public class AnalysisService {
             }
         }
         return analysisItem;
+    }
+
+    public void importRows(byte[] bytes, long dataSourceID) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
+        // have to translate provider name -> related provider
+        DataStorage dataStorage = null;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            // TODO: fix
+            FeedDefinition useSource;
+            if (dataSource.getFeedName().equals("Therapy Works")) {
+                useSource = resolveToName(dataSource, "Data Log");
+            } else {
+                useSource = dataSource;
+            }
+
+            AnalysisItemFormatMapper mapper = new AnalysisItemFormatMapper(useSource.getFields());
+            Key providerPseudoField = new NamedKey("Provider");
+            Key locationPseudoField = new NamedKey("Location");
+            mapper.assignPseudoKey("Provider", providerPseudoField);
+            mapper.assignPseudoKey("Location", locationPseudoField);
+            PersistableDataSetForm data = new ExcelUploadFormat().createDataSet(bytes, useSource.getFields(), mapper);
+            DataSet dataSet = data.toDataSet(null);
+            Map<List<String>, String> map = new HashMap<List<String>, String>();
+
+            AnalysisItem relatedProviderField = null;
+            AnalysisItem locationField = null;
+            AnalysisItem providerField = null;
+            for (AnalysisItem field : useSource.getFields()) {
+                if ("Related Provider".equals(field.toDisplay())) {
+                    relatedProviderField = field;
+                } else if ("Provider Name".equals(field.toDisplay())) {
+                    providerField = field;
+                } else if ("Location Name".equals(field.toDisplay())) {
+                    locationField = field;
+                }
+            }
+
+            WSListDefinition list = new WSListDefinition();
+            list.setDataFeedID(dataSourceID);
+            list.setFilterDefinitions(new ArrayList<FilterDefinition>());
+            list.setColumns(Arrays.asList(locationField, providerField, relatedProviderField));
+            DataSet dataSet1 = DataService.listDataSet(list, new InsightRequestMetadata(), conn);
+            for (IRow row : dataSet1.getRows()) {
+                List<String> key = new ArrayList<String>();
+                key.add(row.getValue(providerField.createAggregateKey()).toString());
+                key.add(row.getValue(locationField.createAggregateKey()).toString());
+                map.put(key, row.getValue(relatedProviderField.createAggregateKey()).toString());
+            }
+
+            for (IRow row : dataSet.getRows()) {
+                // retrieve location
+                // retrieve provider
+                // look up the actual related provider
+                List<String> pair = new ArrayList<String>();
+                Value provider = row.getValue(providerPseudoField);
+                Value location = row.getValue(locationPseudoField);
+                pair.add(provider.toString());
+                pair.add(location.toString());
+                String relatedProvider = map.get(pair);
+                if (relatedProvider == null) {
+                } else {
+                    row.addValue(relatedProviderField.getKey(), relatedProvider);
+                }
+            }
+            dataStorage = DataStorage.writeConnection(dataSource, conn);
+            dataStorage.insertData(dataSet);
+            dataStorage.commit();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
     }
 
     public void addRow(ActualRow actualRow, long dataSourceID) {
@@ -662,6 +746,7 @@ public class AnalysisService {
                         filterValueDefinition.setEnabled(true);
                         filterValueDefinition.setInclusive(true);
                         filterValueDefinition.setToggleEnabled(true);
+                        filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
                         filterValueDefinition.setFilteredValues(Arrays.asList((Object) coordinateValue.getZip()));
                         filters.add(filterValueDefinition);
                     } else if (report.getReportType() == WSAnalysisDefinition.STACKED_COLUMN) {
@@ -669,7 +754,7 @@ public class AnalysisService {
                         {
                             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
                             filterValueDefinition.setField(stackedColumnChartDefinition.getStackItem());
-                            filterValueDefinition.setShowOnReportView(false);
+                            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
                             filterValueDefinition.setSingleValue(true);
                             filterValueDefinition.setEnabled(true);
                             filterValueDefinition.setInclusive(true);
@@ -681,7 +766,7 @@ public class AnalysisService {
                         {
                             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
                             filterValueDefinition.setField(stackedColumnChartDefinition.getXaxis());
-                            filterValueDefinition.setShowOnReportView(false);
+                            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
                             filterValueDefinition.setSingleValue(true);
                             filterValueDefinition.setEnabled(true);
                             filterValueDefinition.setInclusive(true);
@@ -695,7 +780,7 @@ public class AnalysisService {
                         {
                             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
                             filterValueDefinition.setField(stackedColumnChartDefinition.getStackItem());
-                            filterValueDefinition.setShowOnReportView(false);
+                            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
                             filterValueDefinition.setSingleValue(true);
                             filterValueDefinition.setEnabled(true);
                             filterValueDefinition.setInclusive(true);
@@ -707,7 +792,7 @@ public class AnalysisService {
                         {
                             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
                             filterValueDefinition.setField(stackedColumnChartDefinition.getYaxis());
-                            filterValueDefinition.setShowOnReportView(false);
+                            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
                             filterValueDefinition.setSingleValue(true);
                             filterValueDefinition.setEnabled(true);
                             filterValueDefinition.setInclusive(true);
@@ -717,19 +802,53 @@ public class AnalysisService {
                             filters.add(filterValueDefinition);
                         }
                     } else {
+                        Object target = data.get(analysisItem.qualifiedName());
+                        boolean multiValue = false;
+                        if (target instanceof Value) {
+                            Value value = (Value) target;
+                            if (value.getOtherValues() != null) {
+                                multiValue = true;
+                            }
+                        }
                         FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
                         filterValueDefinition.setField(analysisItem);
-                        filterValueDefinition.setShowOnReportView(false);
-                        filterValueDefinition.setSingleValue(true);
+                        filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+
                         filterValueDefinition.setEnabled(true);
                         filterValueDefinition.setInclusive(true);
                         filterValueDefinition.setToggleEnabled(true);
-                        filterValueDefinition.setFilteredValues(Arrays.asList(data.get(analysisItem.qualifiedName())));
+                        if (multiValue) {
+                            filterValueDefinition.setSingleValue(false);
+                            Value value = (Value) target;
+                            List<Object> objs = new ArrayList<Object>();
+                            for (Value val : value.getOtherValues()) {
+                                objs.add(val);
+                            }
+                            filterValueDefinition.setFilteredValues(objs);
+                        } else {
+                            filterValueDefinition.setSingleValue(true);
+                            filterValueDefinition.setFilteredValues(Arrays.asList(data.get(analysisItem.qualifiedName())));
+                        }
                         filters.add(filterValueDefinition);
                     }
                     if (drillThrough.isAddAllFilters()) {
                         filters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
                                 analysisItem));
+                    }
+                    if (drillThrough.isFilterRowGroupings()) {
+                        for (AnalysisItem grouping : report.getAllAnalysisItems()) {
+                            if (grouping.hasType(AnalysisItemTypes.DIMENSION)) {
+                                FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+                                filterValueDefinition.setField(grouping);
+                                filterValueDefinition.setSingleValue(true);
+                                filterValueDefinition.setEnabled(true);
+                                filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                                filterValueDefinition.setToggleEnabled(true);
+                                filterValueDefinition.setInclusive(true);
+                                filterValueDefinition.setFilteredValues(Arrays.asList(data.get(grouping.qualifiedName())));
+                                filters.add(filterValueDefinition);
+                            }
+                        }
                     }
                 }
             }
@@ -764,6 +883,8 @@ public class AnalysisService {
             if (value2 != null) date2 = transform(dateFormat, value2);
             if (value3 != null) date3 = transform(dateFormat, value3);
             return Arrays.asList(date1, date2, date3);
+        } catch (IllegalArgumentException iae) {
+            return new ArrayList<Date>();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -781,10 +902,20 @@ public class AnalysisService {
     }
 
     public AnalysisItem cloneItem(AnalysisItem analysisItem) {
+        System.out.println("WHYYYYYYYYYYYY");
         try {
             AnalysisItem copy = analysisItem.clone();
-            copy.setOriginalDisplayName(analysisItem.toDisplay());
-            copy.setDisplayName("Copy of " + analysisItem.toDisplay());
+            if (copy instanceof AnalysisHierarchyItem ||
+                    copy instanceof AnalysisCalculation ||
+                    copy instanceof DerivedAnalysisDateDimension ||
+                    copy instanceof DerivedAnalysisDimension) {
+                Key key = new NamedKey("Copy of " + analysisItem.toDisplay());
+                copy.setKey(key);
+                copy.setDisplayName("Copy of " + analysisItem.toDisplay());
+            } else {
+                copy.setOriginalDisplayName(analysisItem.toDisplay());
+                copy.setDisplayName("Copy of " + analysisItem.toDisplay());
+            }
             copy.setConcrete(false);
             return copy;
         } catch (Exception e) {
@@ -874,6 +1005,7 @@ public class AnalysisService {
             Session session = Database.instance().createSession(conn);
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
             AnalysisDefinition clone = analysisDefinition.clone(targetDataSource, targetDataSource.getFields(), true);
+            clone.setDataFeedID(targetDataSource.getDataFeedID());
             clone.setAuthorName(SecurityUtil.getUserName());
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
             bindings.add(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER));
@@ -920,7 +1052,7 @@ public class AnalysisService {
 
             for (AnalysisDefinition report : reports.values()) {
                 report.setTemporaryReport(false);
-                new AnalysisStorage().clearCache(report.getAnalysisID());
+                new AnalysisStorage().clearCache(report.getAnalysisID(), report.getDataFeedID());
                 session.update(report);
             }
             session.flush();
@@ -961,7 +1093,7 @@ public class AnalysisService {
         SecurityUtil.authorizeInsight(reportID);
         Connection conn = Database.instance().getConnection();
         try {
-            new AnalysisStorage().clearCache(reportID);
+            new AnalysisStorage().clearCache(reportID, 0);
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET ACCOUNT_VISIBLE = ? WHERE ANALYSIS_ID = ?");
             updateStmt.setBoolean(1, false);
             updateStmt.setLong(2, reportID);
@@ -1413,6 +1545,14 @@ public class AnalysisService {
             Database.closeConnection(conn);
         }
     }
+    /*
+    class com.easyinsight.pipeline.FilterComponent -
+    [{Subject=filtering duplicate data, Organization Name=Easy Insight, Comment Created At=2012-11-05},
+    {Subject=Problems setting up application, Organization Name=Easy Insight, Comment Created At=2012-11-05},
+    {Subject=Zendesk Integration, Organization Name=Easy Insight, Comment Created At=2012-11-05},
+    {Subject=Help Doc and Reseller, Organization Name=(Empty), Comment Created At=2012-11-01},
+    {Subject=Zendesk Integration, Organization Name=(Empty), Comment Created At=2012-11-05}, {Subject=Problems setting up application, Organization Name=(Empty), Comment Created At=2012-11-04}, {Subject=Help Doc and Reseller, Organization Name=Easy Insight, Comment Created At=2012-11-05}, {Subject=filtering duplicate data, Organization Name=(Empty), Comment Created At=2012-11-04}]
+     */
 
     public List<Intention> getIntentions(WSAnalysisDefinition report, List<AnalysisItem> fields, int scope, int type) {
         try {

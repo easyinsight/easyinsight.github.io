@@ -9,6 +9,7 @@ import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
+import com.easyinsight.scorecard.DataSourceRefreshEvent;
 import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.scorecard.ScorecardInternalService;
 import com.easyinsight.storage.DataStorage;
@@ -77,7 +78,8 @@ public class UserUploadService {
         try {
             if (descriptor.getType() == EIDescriptor.REPORT) {
                 SecurityUtil.authorizeInsight(descriptor.getId());
-                new AnalysisStorage().clearCache(descriptor.getId());
+                InsightDescriptor insightDescriptor = (InsightDescriptor) descriptor;
+                new AnalysisStorage().clearCache(descriptor.getId(), insightDescriptor.getDataFeedID());
                 PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET FOLDER = ? WHERE ANALYSIS_ID = ?");
                 updateStmt.setInt(1, targetFolder);
                 updateStmt.setLong(2, descriptor.getId());
@@ -832,6 +834,7 @@ public class UserUploadService {
                             SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
                             EIConnection conn = Database.instance().getConnection();
                             try {
+                                List<ReportFault> warnings = new ArrayList<ReportFault>();
                                 conn.setAutoCommit(false);
                                 Date now = new Date();
                                 List<FeedDefinition> sourcesToRefresh = new ArrayList<FeedDefinition>();
@@ -848,7 +851,10 @@ public class UserUploadService {
                                     if (sourceToRefresh instanceof IServerDataSourceDefinition && (sourceToRefresh.getDataSourceType() == DataSourceInfo.STORED_PULL ||
                                             sourceToRefresh.getDataSourceType() == DataSourceInfo.COMPOSITE_PULL)) {
                                         IServerDataSourceDefinition refreshable = (IServerDataSourceDefinition) sourceToRefresh;
-                                        boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false);
+                                        DataSourceRefreshEvent info = new DataSourceRefreshEvent();
+                                        info.setDataSourceName("Synchronizing with " + refreshable.getFeedName());
+                                        ServiceUtil.instance().updateStatus(callID, ServiceUtil.RUNNING, info);
+                                        boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings);
                                         sourceToRefresh.setVisible(true);
                                         sourceToRefresh.setLastRefreshStart(now);
                                         if (changed) {
@@ -864,9 +870,15 @@ public class UserUploadService {
                                     }
                                 }
 
-                                //if (!feedDefinition.waitsOnServiceUtil() && !waitOnDone) {
-                                    ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, now);
-                                //}
+                                ReportFault warning = null;
+                                if (!warnings.isEmpty()) {
+                                    warning = warnings.get(warnings.size() - 1);
+                                }
+                                DataSourceRefreshResult result = new DataSourceRefreshResult();
+                                result.setDate(now);
+                                result.setWarning(warning);
+                                ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result);
+
                                 conn.commit();
                             } catch (ReportException re) {
                                 if (!conn.getAutoCommit()) {
@@ -1118,7 +1130,7 @@ public class UserUploadService {
                         try {
                             conn.setAutoCommit(false);
                             Date now = new Date();
-                            boolean changed = serverDataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, dataSource.getLastRefreshStart(), false);
+                            boolean changed = serverDataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, dataSource.getLastRefreshStart(), false, new ArrayList<ReportFault>());
                             dataSource.setVisible(true);
                             dataSource.setLastRefreshStart(now);
                             if (changed) {
@@ -1127,7 +1139,9 @@ public class UserUploadService {
                                 feedStorage.updateDataFeedConfiguration(dataSource, conn);
                             }
                             conn.commit();
-                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, now);
+                            DataSourceRefreshResult result = new DataSourceRefreshResult();
+                            result.setDate(now);
+                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result);
                         } catch (ReportException re) {
                             if (!conn.getAutoCommit()) {
                                 conn.rollback();

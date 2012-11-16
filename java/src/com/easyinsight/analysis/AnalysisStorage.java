@@ -194,10 +194,11 @@ public class AnalysisStorage {
         }
     }
 
-    public void clearCache(long reportID) {
+    public void clearCache(long reportID, long dataSourceID) {
         if (reportCache != null) {
             try {
                 reportCache.remove(reportID);
+                ReportCache.instance().flushResults(dataSourceID);
             } catch (CacheException e) {
             }
         }
@@ -205,7 +206,7 @@ public class AnalysisStorage {
 
     public void saveAnalysis(AnalysisDefinition analysisDefinition, Session session) {
         if (analysisDefinition.getAnalysisID() != null) {
-            clearCache(analysisDefinition.getAnalysisID());
+            clearCache(analysisDefinition.getAnalysisID(), analysisDefinition.getDataFeedID());
         }
         if (analysisDefinition.getAnalysisID() != null && analysisDefinition.getAnalysisID() == 0) {
             analysisDefinition.setAnalysisID(null);
@@ -443,7 +444,7 @@ public class AnalysisStorage {
             session.beginTransaction();
             session.delete(analysisDefinition);
             session.getTransaction().commit();
-            clearCache(analysisDefinition.getAnalysisID());
+            clearCache(analysisDefinition.getAnalysisID(), analysisDefinition.getDataFeedID());
         } catch (Exception e) {
             
             session.getTransaction().rollback();
@@ -458,7 +459,7 @@ public class AnalysisStorage {
         try {
             session.delete(analysisDefinition);
             if (analysisDefinition.getAnalysisID() != null) {
-                clearCache(analysisDefinition.getAnalysisID());
+                clearCache(analysisDefinition.getAnalysisID(), analysisDefinition.getDataFeedID());
             }
         } finally {
             session.close();
