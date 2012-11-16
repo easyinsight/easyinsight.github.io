@@ -9,7 +9,6 @@ import com.easyinsight.users.User;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
-import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.database.Database;
 import com.easyinsight.storage.DataStorage;
@@ -153,27 +152,6 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     public void validateTableSetup(EIConnection conn) throws SQLException {
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            beforeRefresh(conn);
-            refreshData(accountID, now, conn, parentDefinition, callDataID, lastRefreshTime, fullRefresh);
-            conn.commit();
-            ReportCache.instance().flushResults(getDataFeedID());
-            return new CredentialsResponse(true, getDataFeedID());
-        } catch (ReportException re) {
-            return new CredentialsResponse(false, re.getReportFault());
-        } catch (Exception e) {
-            LogClass.error(e);
-            conn.rollback();
-            return new CredentialsResponse(false, e.getMessage(), getDataFeedID());
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
-    }
-
     public MigrationResult migrations(EIConnection conn, FeedDefinition parentDefinition) throws Exception {
         boolean changed = false;
         Map<String, Key> keys = newDataSourceFields(parentDefinition);
@@ -243,7 +221,8 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         dataStorage.truncate();
     }
 
-    public void applyTempLoad(EIConnection conn, long accountID, @Nullable FeedDefinition parentDefinition, Date lastRefreshTime, String tempTable, boolean fullRefresh) throws Exception {
+    public void applyTempLoad(EIConnection conn, long accountID, @Nullable FeedDefinition parentDefinition, Date lastRefreshTime,
+                              String tempTable, boolean fullRefresh, List<ReportFault> warnings) throws Exception {
         DataStorage dataStorage = null;
         try {
             if (!noDataProcessing()) {
@@ -265,6 +244,9 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
                     }
                 }
                 dataStorage.commit();
+                if (dataStorage.getWarning() != null) {
+                    warnings.add(dataStorage.getWarning());
+                }
             }
         } catch (Exception e) {
             if (dataStorage != null) {
@@ -278,7 +260,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh, List<ReportFault> warnings) throws Exception {
         boolean changed = false;
         beforeRefresh(conn);
         MigrationResult migrationResult = migrations(conn, this);
@@ -290,7 +272,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         String tempTable = tempLoad(keyMap, now, this, callDataID, lastRefreshTime, conn, fullRefresh);
 
         conn.setAutoCommit(false);
-        applyTempLoad(conn, accountID, null, lastRefreshTime, tempTable, fullRefresh);
+        applyTempLoad(conn, accountID, null, lastRefreshTime, tempTable, fullRefresh, warnings);
 
         refreshDone();
         return changed;

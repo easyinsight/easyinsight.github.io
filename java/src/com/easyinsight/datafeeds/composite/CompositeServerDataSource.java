@@ -9,6 +9,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.intention.DataSourceIntention;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.scorecard.DataSourceRefreshEvent;
 import com.easyinsight.users.User;
 import com.easyinsight.users.Account;
 import com.easyinsight.dataset.DataSet;
@@ -22,6 +23,7 @@ import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.easyinsight.util.ServiceUtil;
 import org.hibernate.Session;
 
 import javax.servlet.http.HttpServletRequest;
@@ -266,7 +268,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     public void validateTableSetup(EIConnection conn) throws SQLException {
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh, List<ReportFault> warnings) throws Exception {
         boolean changed = false;
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
@@ -286,6 +288,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             Map<Long, Map<String, Key>> keyMap = new HashMap<Long, Map<String, Key>>();
             for (IServerDataSourceDefinition source : sources) {
                 source.validateTableSetup(conn);
+                DataSourceRefreshEvent info = new DataSourceRefreshEvent();
+                info.setDataSourceName("Looking for any changed fields on " + source.getFeedName());
+                ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.RUNNING, info);
                 ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
                 MigrationResult migrationResult = serverDataSourceDefinition.migrations(conn, this);
                 changed = migrationResult.isChanged() || changed;
@@ -299,6 +304,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 if (serverDataSourceDefinition.getDataSourceType() == DataSourceInfo.LIVE) {
                     continue;
                 }
+                DataSourceRefreshEvent info = new DataSourceRefreshEvent();
+                info.setDataSourceName("Retrieving data from " + source.getFeedName());
+                ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.RUNNING, info);
                 tempTables.put(serverDataSourceDefinition.getDataFeedID(),
                         serverDataSourceDefinition.tempLoad(keyMap.get(serverDataSourceDefinition.getDataFeedID()), now,
                         this, callDataID, lastRefreshTime, conn, fullRefresh));
@@ -309,8 +317,11 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 if (serverDataSourceDefinition.getDataSourceType() == DataSourceInfo.LIVE) {
                     continue;
                 }
+                DataSourceRefreshEvent info = new DataSourceRefreshEvent();
+                info.setDataSourceName("Persisting data from " + source.getFeedName());
+                ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.RUNNING, info);
                 String tempTable = tempTables.get(serverDataSourceDefinition.getDataFeedID());
-                serverDataSourceDefinition.applyTempLoad(conn, accountID, this, lastRefreshTime, tempTable, fullRefresh);
+                serverDataSourceDefinition.applyTempLoad(conn, accountID, this, lastRefreshTime, tempTable, fullRefresh, warnings);
             }
             refreshDone();
         } finally {

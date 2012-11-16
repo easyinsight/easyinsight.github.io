@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.ReportException;
+import com.easyinsight.analysis.ReportFault;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
@@ -87,7 +88,7 @@ public interface IServerDataSourceDefinition {
 
     Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition);
 
-    boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) throws Exception;
+    boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh, List<ReportFault> warnings) throws Exception;
 
     /*boolean migrations(EIConnection conn, FeedDefinition parentDefinition) throws Exception;
 
