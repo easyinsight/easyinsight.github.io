@@ -4,6 +4,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.CallData;
         import com.easyinsight.administration.feed.CredentialsResponse;
+        import com.easyinsight.analysis.DataSourceRefreshResult;
         import com.easyinsight.analysis.ReportFault;
         import com.easyinsight.customupload.ProblemDataEvent;
         import com.easyinsight.scorecard.DataSourceAsyncEvent;
@@ -81,8 +82,16 @@
             }
             if (callData.status == CallData.DONE) {
                 timer.stop();
-                var newDate:Date = callData.result as Date;
+                var refreshResult:DataSourceRefreshResult = callData.result as DataSourceRefreshResult;
+                var newDate:Date = refreshResult.date;
                 dispatchEvent(new DataSourceRefreshEvent(newDate));
+
+                if (refreshResult.warning != null) {
+                    var tWindow:UIComponent = ReportFault(refreshResult.warning).createFaultWindow();
+                    PopUpManager.addPopUp(tWindow, this, true);
+                    PopUpUtil.centerPopUp(tWindow);
+                }
+
                 PopUpManager.removePopUp(this);
             } else if (callData.status == CallData.FAILED) {
                 timer.stop();
