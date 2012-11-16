@@ -52,6 +52,7 @@ public class UserServiceResponse
     public var reportMode:Boolean;
     public var newsDate:Date;
     public var newsDismissDate:Date;
+    public var accountOverSize:Boolean;
 
     public function UserServiceResponse()
         {

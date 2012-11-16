@@ -58,6 +58,7 @@ public class User extends EventDispatcher
     public var pricingModel:int;
     public var newsDate:Date;
     public var newsDismissDate:Date;
+    public var accountOverSize:Boolean;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -152,6 +153,7 @@ public class User extends EventDispatcher
         _user.pricingModel = response.pricingModel;
         _user.newsDate = response.newsDate;
         _user.newsDismissDate = response.newsDismissDate;
+        _user.accountOverSize = response.accountOverSize;
         if (response.reportImage != null) {
             _user.loadBytes(response.reportImage);
         }

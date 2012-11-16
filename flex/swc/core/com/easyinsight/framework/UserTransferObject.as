@@ -20,12 +20,18 @@ package com.easyinsight.framework
         public var autoRefreshReports:Boolean;
         public var analyst:Boolean = true;
         public var consultant:Boolean;
+        public var lastLoginDate:Date;
+
+        public var selected:Boolean;
 		
 		public function UserTransferObject()
 		{
 		}
 
         public function get fullName():String {
+            if (firstName == null || firstName == "") {
+                return name;
+            }
             return firstName + " " + name;
         }
 	}

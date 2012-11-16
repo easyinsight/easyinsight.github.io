@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 
 /**
  * User: jboe
@@ -61,6 +62,7 @@ public class UserServiceResponse {
     private boolean reportMode;
     private Date newsDate;
     private Date newsDismissDate;
+    private boolean accountOverSize;
 
     public boolean isGoogleAuth() {
         return googleAuth;
@@ -105,6 +107,7 @@ public class UserServiceResponse {
         System.out.println("Log in from " + user.getUserID() + " - " + user.getEmail());
         byte[] bytes = null;
         Date newsDate = null;
+        boolean accountOverSize = false;
         EIConnection conn = Database.instance().getConnection();
         try {
             if (applicationSkin.getReportHeaderImage() != null) {
@@ -115,6 +118,9 @@ public class UserServiceResponse {
             if (rs.next()) {
                 newsDate = new Date(rs.getTimestamp(1).getTime());
             }
+            List<DataSourceStats> statsList = UserAccountAdminService.sizeDataSources(conn, account.getAccountID());
+            long usedSize = UserAccountAdminService.usedSize(statsList);
+            accountOverSize = usedSize > account.getMaxSize();
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
@@ -128,7 +134,7 @@ public class UserServiceResponse {
                                 account.getCurrencySymbol(), applicationSkin, account.getFirstDayOfWeek(),
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
                     new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst(), account.getPricingModel(),
-                account.isHeatMapEnabled(), newsDate, user.getNewsDismissDate());
+                account.isHeatMapEnabled(), newsDate, user.getNewsDismissDate(), accountOverSize);
         response.setReportImage(bytes);
         return response;
     }
@@ -147,7 +153,7 @@ public class UserServiceResponse {
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
                                String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
                                boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst, int pricingModel, boolean reportMode,
-                               Date newsDate, Date newsDismissDate) {
+                               Date newsDate, Date newsDismissDate, boolean accountOverSize) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -189,6 +195,15 @@ public class UserServiceResponse {
         this.reportMode = reportMode;
         this.newsDate = newsDate;
         this.newsDismissDate = newsDismissDate;
+        this.accountOverSize = accountOverSize;
+    }
+
+    public boolean isAccountOverSize() {
+        return accountOverSize;
+    }
+
+    public void setAccountOverSize(boolean accountOverSize) {
+        this.accountOverSize = accountOverSize;
     }
 
     public Date getNewsDismissDate() {
