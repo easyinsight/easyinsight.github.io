@@ -119,6 +119,7 @@ public class User {
         userTransferObject.setAutoRefreshReports(refreshReports);
         userTransferObject.setInvoiceRecipient(invoiceRecipient);
         userTransferObject.setAnalyst(analyst);
+        userTransferObject.setLastLoginDate(lastLoginDate);
         return userTransferObject;
     }
 
@@ -351,7 +352,6 @@ public class User {
         setAccountAdmin(transferObject.isAccountAdmin());
         setEmail(transferObject.getEmail());
         setFirstName(transferObject.getFirstName());
-        setLastLoginDate(transferObject.getLastLoginDate());
         setPersonaID(transferObject.getPersonaID() > 0 ? transferObject.getPersonaID() : null);
         setName(transferObject.getName());
         setTitle(transferObject.getTitle());

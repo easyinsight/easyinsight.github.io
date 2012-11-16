@@ -52,8 +52,17 @@ public class DataStorage implements IDataStorage {
     private int dataSourceType;
     private static DateDimCache dateDimCache = new DateDimCache();
     private List<IDataTransform> transforms = new ArrayList<IDataTransform>();
+    private ReportFault warning;
 
     private JCS reportCache = Cache.getCache(Cache.EMBEDDED_REPORTS);
+
+    public ReportFault getWarning() {
+        return warning;
+    }
+
+    public void setWarning(ReportFault warning) {
+        this.warning = warning;
+    }
 
     /**
      * Creates a read only connection for retrieving data.
@@ -251,9 +260,9 @@ public class DataStorage implements IDataStorage {
     }
 
     private void validateSpace(Connection conn) throws SQLException, StorageLimitException {
-        /*if (systemUpdate) return;
+        if (systemUpdate) return;
 
-        PreparedStatement spaceAllowed = conn.prepareStatement("SELECT ACCOUNT_TYPE, MAX_SIZE, max_days_over_size_boundary, days_over_size_boundary FROM ACCOUNT WHERE account_id = ?");
+        PreparedStatement spaceAllowed = conn.prepareStatement("SELECT ACCOUNT_TYPE, MAX_SIZE, max_days_over_size_boundary, days_over_size_boundary, last_boundary_date FROM ACCOUNT WHERE account_id = ?");
         spaceAllowed.setLong(1, accountID);
         ResultSet spaceRS = spaceAllowed.executeQuery();
         spaceRS.next();
@@ -261,6 +270,7 @@ public class DataStorage implements IDataStorage {
         long maxSize = spaceRS.getLong(2);
         int maxDaysOver = spaceRS.getInt(3);
         int daysOver = spaceRS.getInt(4);
+        Date lastBoundaryDate = spaceRS.getTimestamp(5);
         spaceAllowed.close();
 
         if (maxDaysOver == -1) {
@@ -270,11 +280,35 @@ public class DataStorage implements IDataStorage {
         List<DataSourceStats> statsList = UserAccountAdminService.sizeDataSources((EIConnection) conn, accountID);
         long usedSize = UserAccountAdminService.usedSize(statsList);
 
-        System.out.println("Used size = " + usedSize + " while allowed = " + maxSize);
         if (usedSize > maxSize) {
             String mb = Account.humanReadableByteCount(maxSize, true);
-            throw new ReportException(new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + " mb. You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier.", statsList));
-        }*/
+            // first, if the account is using more than absolute limit, just throw an exception
+            if (usedSize > (maxSize * 2)) {
+                throw new ReportException(new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + ". You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier.", statsList));
+            }
+            if (daysOver > maxDaysOver) {
+                throw new ReportException(new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + ". You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier.", statsList));
+            }
+
+            Calendar now = Calendar.getInstance();
+            Calendar cal = Calendar.getInstance();
+            if (lastBoundaryDate != null) {
+                cal.setTime(lastBoundaryDate);
+            }
+            if (lastBoundaryDate != null && (cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && cal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR))) {
+                // we're already on overage for today
+            } else {
+                daysOver++;
+            }
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET DAYS_OVER_SIZE_BOUNDARY = ?, LAST_BOUNDARY_DATE = ? WHERE ACCOUNT_ID = ?");
+            updateStmt.setInt(1, daysOver);
+            updateStmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+            updateStmt.setLong(3, accountID);
+            updateStmt.executeUpdate();
+            updateStmt.close();
+
+            warning = new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + ". You will need to either upgrade your account or reduce the size of data within " + (maxDaysOver - daysOver + 1) + " days to keep refreshing your data.", statsList);
+        }
     }
 
     public int getVersion() {

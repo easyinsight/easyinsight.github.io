@@ -196,6 +196,9 @@ public class Account {
     @Column(name="max_days_over_size_boundary")
     private int maxDaysOverSizeBoundary;
 
+    @Column(name="last_boundary_date")
+    private Date lastBoundaryDate;
+
     @Column(name="address_line1")
     private String addressLine1;
     @Column(name="address_line2")
@@ -214,6 +217,14 @@ public class Account {
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public Date getLastBoundaryDate() {
+        return lastBoundaryDate;
+    }
+
+    public void setLastBoundaryDate(Date lastBoundaryDate) {
+        this.lastBoundaryDate = lastBoundaryDate;
+    }
 
     public String getGoogleSecretToken() {
         return googleSecretToken;
