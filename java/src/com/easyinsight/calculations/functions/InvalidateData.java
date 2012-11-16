@@ -1,11 +1,13 @@
 package com.easyinsight.calculations.functions;
 
+import com.easyinsight.analysis.ReportFault;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.security.SecurityUtil;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -46,7 +48,7 @@ public class InvalidateData extends Function {
             IServerDataSourceDefinition dataSourceDefinition = (IServerDataSourceDefinition) dataSource;
             if (dataSource.getLastRefreshStart() == null || dataSourceDefinition.hasNewData(dataSource.getLastRefreshStart(), parent, calculationMetadata.getConnection())) {
                 Date now = new Date();
-                boolean changed = dataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), calculationMetadata.getConnection(), null, null, dataSource.getLastRefreshStart(), false);
+                boolean changed = dataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), calculationMetadata.getConnection(), null, null, dataSource.getLastRefreshStart(), false, new ArrayList<ReportFault>());
                 dataSource.setVisible(true);
                 dataSource.setLastRefreshStart(now);
                 if (changed) {

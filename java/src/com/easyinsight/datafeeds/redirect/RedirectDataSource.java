@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.redirect;
 
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.analysis.ReportFault;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -122,7 +123,7 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         redirectDataSourceID = rs.getLong(1);
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh, List<ReportFault> warnings) throws Exception {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
