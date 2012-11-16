@@ -24,6 +24,10 @@ public class AnalysisItemFormatMapper implements IUploadFormatMapper {
         }
     }
 
+    public void assignPseudoKey(String label, Key key) {
+        keyMap.put(label, key);
+    }
+
     public Key reconcileKey(String keyName) {
         return keyMap.get(keyName);
     }
