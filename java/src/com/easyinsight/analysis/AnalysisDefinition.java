@@ -509,6 +509,10 @@ public class AnalysisDefinition implements Cloneable {
                 } else {
                     Key clonedKey = analysisItem.getKey().clone();
                     analysisItem.setKey(clonedKey);
+                    if (!addedItems.contains(analysisItem)) {
+                        analysisItem.setConcrete(false);
+                        addedItems.add(analysisItem);
+                    }
                 }
             }
         }
