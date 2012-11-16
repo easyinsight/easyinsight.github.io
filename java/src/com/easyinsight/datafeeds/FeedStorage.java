@@ -1,14 +1,11 @@
 package com.easyinsight.datafeeds;
 
-import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.analysis.FormattingConfiguration;
-import com.easyinsight.analysis.Link;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.userupload.*;
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.security.Roles;
@@ -54,6 +51,7 @@ public class FeedStorage {
     public void removeFeed(long feedId) {
         try {
             feedCache.remove(feedId);
+            ReportCache.instance().flushResults(feedId);
         } catch (Exception e) {
             LogClass.error(e);
         }
@@ -677,6 +675,7 @@ public class FeedStorage {
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws Exception {
         try {
             if (feedCache != null) {
+                ReportCache.instance().flushResults(feedDefinition.getDataFeedID());
                 feedCache.remove(feedDefinition.getDataFeedID());
                 if (FeedRegistry.instance() != null) {
                     FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
