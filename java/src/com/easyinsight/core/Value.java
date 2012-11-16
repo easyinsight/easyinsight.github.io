@@ -3,6 +3,7 @@ package com.easyinsight.core;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,8 +34,17 @@ public abstract class Value implements Serializable, Comparable<Value> {
     private Map<String, String> links;
 
     private Value originalValue;
+    private List<Value> otherValues;
     private Value sortValue;
     private ValueExtension valueExtension;
+
+    public List<Value> getOtherValues() {
+        return otherValues;
+    }
+
+    public void setOtherValues(List<Value> otherValues) {
+        this.otherValues = otherValues;
+    }
 
     public ValueExtension getValueExtension() {
         return valueExtension;

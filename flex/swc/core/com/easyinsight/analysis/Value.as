@@ -1,6 +1,8 @@
 package com.easyinsight.analysis
 {
-	[Bindable]
+import mx.collections.ArrayCollection;
+
+[Bindable]
 	[RemoteClass(alias="com.easyinsight.core.Value")]
 	public class Value
 	{
@@ -13,6 +15,7 @@ package com.easyinsight.analysis
         public var links:Object;
         public var sortValue:Value;
         public var originalValue:Value;
+        public var otherValues:ArrayCollection;
         public var summary:Boolean;
         public var valueExtension:ValueExtension;
 
