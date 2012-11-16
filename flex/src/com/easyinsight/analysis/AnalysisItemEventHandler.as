@@ -1,6 +1,7 @@
 package com.easyinsight.analysis {
 import com.easyinsight.AnalysisItemDeleteEvent;
 import com.easyinsight.util.PopUpUtil;
+import com.easyinsight.util.ProgressAlert;
 
 import mx.collections.ArrayCollection;
 import mx.controls.Alert;
@@ -38,6 +39,7 @@ public class AnalysisItemEventHandler extends UIComponent {
     public function copyField(event:ReportEditorFieldEvent):void {
         tmpX = event.x;
         tmpY = event.y;
+        ProgressAlert.alert(this, "Copying the field...", null, analysisService.cloneItem);
         analysisService.cloneItem.send(event.item.analysisItem);
     }
 
