@@ -118,9 +118,9 @@ public class UserServiceResponse {
             if (rs.next()) {
                 newsDate = new Date(rs.getTimestamp(1).getTime());
             }
-            List<DataSourceStats> statsList = UserAccountAdminService.sizeDataSources(conn, account.getAccountID());
+            /*List<DataSourceStats> statsList = UserAccountAdminService.sizeDataSources(conn, account.getAccountID());
             long usedSize = UserAccountAdminService.usedSize(statsList);
-            accountOverSize = usedSize > account.getMaxSize();
+            accountOverSize = usedSize > account.getMaxSize();*/
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
