@@ -159,6 +159,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         }
 
         JSONObject params;
+        JSONObject fullObject = new JSONObject();
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
             if (getMeasures().size() == 1) {
@@ -189,10 +190,14 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
             axes.put("yaxis", yAxis);
             jsonParams.put("axes", axes);
             params = new JSONObject(jsonParams);
+            fullObject.put("jqplotOptions", params);
+            JSONObject drillthroughOptions = new JSONObject();
+            drillthroughOptions.put("embedded", htmlReportMetadata.isEmbedded());
+            fullObject.put("drillthrough", drillthroughOptions);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        String argh = params.toString();
+        String argh = fullObject.toString();
         argh = argh.replaceAll("\"", "");
 
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";

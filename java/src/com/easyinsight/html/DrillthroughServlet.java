@@ -59,10 +59,8 @@ public class DrillthroughServlet extends HtmlServlet {
 
         String altKey = null;
 
-        if(report.getReportType() == WSAnalysisDefinition.STACKED_BAR) {
-            altKey = String.valueOf(((WSStackedBarChartDefinition) report).getStackItem().getAnalysisItemID());
-        } else if(report.getReportType() == WSAnalysisDefinition.STACKED_COLUMN) {
-            altKey = String.valueOf(((WSStackedColumnChartDefinition) report).getStackItem().getAnalysisItemID());
+        if(report.getReportType() == WSAnalysisDefinition.STACKED_BAR || report.getReportType() == WSAnalysisDefinition.STACKED_COLUMN) {
+            altKey = request.getParameter("f" + String.valueOf(((WSStackedBarChartDefinition) report).getStackItem().getAnalysisItemID()));
         }
         DrillThroughResponse drillThroughResponse = new AnalysisService().drillThrough(drillThrough, data, linkItem, report, altKey);
         // return a URL for response redirect?

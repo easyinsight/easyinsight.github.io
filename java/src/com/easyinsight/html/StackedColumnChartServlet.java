@@ -2,6 +2,7 @@ package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.*;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import org.json.JSONArray;
@@ -121,6 +122,8 @@ public class StackedColumnChartServlet extends HtmlServlet {
                 index = i++;
                 indexMap.put(xAxisValue, index);
             }
+
+
             List<JSONArray> array = seriesMap.get(stackValue);
             if (array == null) {
                 JSONObject seriesObj = new JSONObject();
@@ -129,7 +132,9 @@ public class StackedColumnChartServlet extends HtmlServlet {
                 array = new ArrayList<JSONArray>();
                 seriesMap.put(stackValue, array);
             }
-            Double measure = row.getValue(measureItem).toDouble();
+
+            Value curValue = row.getValue(measureItem);
+            Double measure = curValue.toDouble();
 
             array.add(populator.createArray(measure, index));
         }
@@ -167,6 +172,8 @@ public class StackedColumnChartServlet extends HtmlServlet {
         object.put("values", blahs);
         object.put("ticks", axisNames);
         object.put("series", series);
+
+
         System.out.println(blahs);
         response.setContentType("application/json");
         response.getOutputStream().write(object.toString().getBytes());

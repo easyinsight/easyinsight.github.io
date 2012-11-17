@@ -120,6 +120,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         }
 
         JSONObject params;
+        JSONObject fullObject = new JSONObject();
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
             if (getMeasures().size() == 1) {
@@ -175,10 +176,16 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
             jsonParams.put("axes", axes);
             params = new JSONObject(jsonParams);
+            fullObject.put("jqplotOptions", params);
+            JSONObject drillthroughOptions = new JSONObject();
+            drillthroughOptions.put("embedded", htmlReportMetadata.isEmbedded());
+            fullObject.put("drillthrough", drillthroughOptions);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        String argh = params.toString();
+
+
+        String argh = fullObject.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
         /*AnalysisItem xAxis = getXaxis();

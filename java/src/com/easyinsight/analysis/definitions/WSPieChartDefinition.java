@@ -65,6 +65,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
         JSONObject params;
+        JSONObject data = new JSONObject();
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
             JSONObject seriesDefaults = new JSONObject();
@@ -79,10 +80,14 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
             JSONArray seriesColors = getSeriesColors();
             jsonParams.put("seriesColors", seriesColors);
             params = new JSONObject(jsonParams);
+            data.put("jqplotOptions", params);
+            JSONObject drillthrough = new JSONObject();
+            drillthrough.put("embedded", htmlReportMetadata.isEmbedded());
+            data.put("drillthrough", drillthrough);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        String argh = params.toString();
+        String argh = data.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
         String customHeight = htmlReportMetadata.createStyleProperties();
