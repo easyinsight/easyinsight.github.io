@@ -171,10 +171,10 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
 
                     JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
-                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray);
+                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource);
 
                     JSONArray completedArray = todoMasterObject.getJSONArray("completed");
-                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray);
+                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource);
                 }
                 JSONArray completedTodoListArray = runJSONRequest("projects/"+projectID+"/todolists/completed.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
                 for (int j = 0; j < completedTodoListArray.length(); j++) {
@@ -195,10 +195,10 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
 
                     JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
-                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray);
+                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource);
 
                     JSONArray completedArray = todoMasterObject.getJSONArray("completed");
-                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray);
+                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource);
                 }
                 if (lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
                     IDataStorage.insertData(dataSet);
@@ -215,7 +215,9 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
         }
     }
 
-    private void parseTodoList(Map<String, Key> keys, DataSet dataSet, String projectID, String todoListID, String todoListName, String todoListDescription, String todoListURL, Date todoListUpdatedAt, JSONArray todoArray) throws JSONException {
+    private void parseTodoList(Map<String, Key> keys, DataSet dataSet, String projectID, String todoListID, String todoListName,
+                               String todoListDescription, String todoListURL, Date todoListUpdatedAt, JSONArray todoArray,
+                               BasecampNextCompositeSource parentSource) throws JSONException {
         for (int k = 0; k < todoArray.length(); k++) {
             JSONObject todoObject = todoArray.getJSONObject(k);
             IRow row = dataSet.createRow();
@@ -257,6 +259,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             row.addValue(keys.get(TODO_ID), todoID);
             row.addValue(keys.get(TODO_NAME), todoContent);
             row.addValue(keys.get(TODO_COMPLETED), completedAt != null ? "Completed" : "Not Completed");
+            row.addValue(keys.get(TODO_URL), "https://basecamp.com/"+parentSource.getEndpoint()+"/projects/"+projectID+"/todos/"+todoID);
         }
     }
 }
