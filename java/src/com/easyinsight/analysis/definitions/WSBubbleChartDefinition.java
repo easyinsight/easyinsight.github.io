@@ -99,6 +99,7 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
         JSONObject params;
+        JSONObject object = new JSONObject();
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
 
@@ -119,10 +120,11 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
             JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
             params = new JSONObject(jsonParams);
+            object.put("jqplotOptions", params);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        String argh = params.toString();
+        String argh = object.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
         String customHeight = htmlReportMetadata.createStyleProperties();

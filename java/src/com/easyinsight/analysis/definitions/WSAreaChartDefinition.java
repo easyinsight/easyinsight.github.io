@@ -64,6 +64,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
         JSONObject params;
+        JSONObject object = new JSONObject();
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
             JSONObject legend = getLegend();
@@ -109,10 +110,12 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
             JSONArray seriesColors = getSeriesColors();
             jsonParams.put("seriesColors", seriesColors);
             params = new JSONObject(jsonParams);
+
+            object.put("jqplotOptions", params);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        String argh = params.toString();
+        String argh = object.toString();
         argh = argh.replaceAll("\"", "");
 
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
