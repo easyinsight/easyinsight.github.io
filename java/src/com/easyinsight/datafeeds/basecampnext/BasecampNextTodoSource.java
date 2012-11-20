@@ -91,7 +91,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
         timeToDue.setCalculationString("equalto([Todo Completed], \"Completed\", 0, [Todo Due At] - now())");
         AnalysisCalculation overdueTodoCount = new AnalysisCalculation();
         overdueTodoCount.setKey(new NamedKey("Overdue Todo Count"));
-        overdueTodoCount.setCalculationString("equalto([Todo Completed], \"Completed\", 0, greaterthan([Todo Due At], 0, greaterthan([Todo Due At], now(), 0, 1), 0))");
+        overdueTodoCount.setCalculationString("notnull([Todo ID], equalto([Todo Completed], \"Completed\", 0, greaterthan([Todo Due At], 0, greaterthanorequal([Todo Due At], now(), 0, 1), 0)))");
         analysisitems.add(timeToDue);
         analysisitems.add(overdueTodoCount);
         analysisitems.add(new AnalysisDateDimension(keys.get(TODO_LIST_UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
@@ -112,10 +112,6 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             }
         }
         return null;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(format.parseDateTime("2012-05-01T10:32:45Z"));
     }
 
     private Date parseDueDate(String string) {
