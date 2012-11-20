@@ -702,7 +702,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return null;
     }
 
-    public void tweakReport(DataSet dataSet) {
+    public void tweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
     }
 
     public List<IComponent> createComponents() {
