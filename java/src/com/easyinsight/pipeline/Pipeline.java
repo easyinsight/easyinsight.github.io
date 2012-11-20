@@ -10,7 +10,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportService;
-import com.easyinsight.intention.IntentionSuggestion;
 
 import java.util.*;
 
@@ -337,13 +336,13 @@ public abstract class Pipeline {
     
     private StringBuilder logger = new StringBuilder();
 
-    public DataResults toList(DataSet dataSet, EIConnection conn) {
+    public DataResults toList(DataSet dataSet, EIConnection conn, Map<AnalysisItem, AnalysisItem> aliases) {
         for (IComponent component : components) {
             //System.out.println(component.getClass() + " - " + dataSet.getRows());
-            if (pipelineData.getReport().isLogReport()) {
+            /*if (pipelineData.getReport().isLogReport()) {
                 logger.append("<h1>" + component.getClass().getName() + "</h1>");
                 logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, conn, pipelineData.getInsightRequestMetadata()));
-            }
+            }*/
             long startTime = System.currentTimeMillis();
             dataSet = component.apply(dataSet, pipelineData);
             long endTime = System.currentTimeMillis();
@@ -352,7 +351,7 @@ public abstract class Pipeline {
             }*/
         }
         resultSet = dataSet;
-        DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()));
+        DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()), aliases);
         for (IComponent component : components) {
             component.decorate(results);
         }
