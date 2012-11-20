@@ -195,7 +195,7 @@ public class DataSet implements Serializable {
         rows.add(row);
     }
 
-    public DataResults toListDataResults(List<AnalysisItem> columns) {
+    public DataResults toListDataResults(List<AnalysisItem> columns, Map<AnalysisItem, AnalysisItem> aliases) {
         ListRow[] listRows = new ListRow[getRows().size()];
         int rowCount = 0;
         for (IRow row : getRows()) {
@@ -211,9 +211,16 @@ public class DataSet implements Serializable {
             rowCount++;
         }
         ListDataResults listDataResults = new ListDataResults();
-        List<AnalysisItem> allColumns = new ArrayList<AnalysisItem>(columns);
-        AnalysisItem[] headers = new AnalysisItem[allColumns.size()];
-        allColumns.toArray(headers);
+        AnalysisItem[] headers = new AnalysisItem[columns.size()];
+        int i = 0;
+        for (AnalysisItem analysisItem : columns) {
+            AnalysisItem alias = aliases.get(analysisItem);
+            if (alias == null) {
+                headers[i++] = analysisItem;
+            } else {
+                headers[i++] = alias;
+            }
+        }
         listDataResults.setHeaders(headers);
         listDataResults.setRows(listRows);
         return listDataResults;
