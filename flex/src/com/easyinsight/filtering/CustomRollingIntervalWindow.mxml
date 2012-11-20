@@ -43,12 +43,16 @@
             <group label="Dates">
                 <function label="date" signature="date(Numeric Field)" description="If no parameter, constructs a date with the present time, if Numeric Field passed in, constructs a date from the number of milliseconds"/>
                 <function label="dayofmonth" signature="dayofmonth(Date Field)" description="Returns the day of month of the date contained in Field"/>
+                <function label="dayofquarter" signature="dayofquarter(Date Field)" description="Returns the day of quarter of the date contained in Field"/>
+                <function label="dayofweek" signature="dayofweek(Date Field)" description="Returns the day of week of the date contained in Field"/>
                 <function label="dayofyear" signature="dayofyear(Date Field)" description="Returns the day of year of the date contained in Field"/>
                 <function label="days" signature="days(Number of Days)" description="Translates the specified number of days into milliseconds"/>
                 <function label="daysinmonth" signature="daysinmonth(Date Field)" description="Returns the number of days in the month of the date contained in Field"/>
                 <function label="month" signature="month(Date Field)" description="Returns the month of the date contained in Field"/>
+                <function label="months" signature="months(Number of Months)" description="Translates the specified number of months into milliseconds"/>
                 <function label="now" signature="now()" description="Returns the current time in milliseconds"/>
                 <function label="weekofyear" signature="weekofyear(Date Field)" description="Returns the week of the year of the date contained in Field"/>
+                <function label="weeks" signature="weeks(Number of Weeks)" description="Translates the specified number of weeks into milliseconds"/>
                 <function label="year" signature="year(Date Field)" description="Returns the year of the date contained in Field"/>
             </group>
             <group label="Logic">
@@ -180,12 +184,12 @@
             <mx:HBox>
                 <mx:VBox borderStyle="solid" borderThickness="1">
                     <mx:Label text="Last Two Full Months:"/>
-                    <mx:Label text="Start Date: dayofmonth(nowdate() - months(2), 0)"/>
-                    <mx:Label text="End Date: dayofmonth(nowdate() - months(2), daysinmonth(nowdate() - months(2)))"/>
+                    <mx:Text text="Start Date: dayofmonth(nowdate() - months(2), 0)" selectable="true"/>
+                    <mx:Text text="End Date: dayofmonth(nowdate() - months(2), daysinmonth(nowdate() - months(2)))" selectable="true"/>
                 </mx:VBox>
                 <mx:VBox borderStyle="solid" borderThickness="1">
                     <mx:Label text="After Two Weeks Ago:"/>
-                    <mx:Label text="Start Date: nowdate() - days(14)"/>
+                    <mx:Text text="Start Date: nowdate() - days(14)" selectable="true"/>
                 </mx:VBox>
             </mx:HBox>
 

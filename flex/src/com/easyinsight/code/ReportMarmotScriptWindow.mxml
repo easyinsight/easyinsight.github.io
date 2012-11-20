@@ -38,6 +38,7 @@
                 <function label="greaterthanorequal" signature="greaterthan(Field1, Field2, Field3, Field4)" description="If Field1 is greater than or equal to Field2, return Field3, else return Field 4. Field 4 is optional, will return empty if not specified."/>
             </group>
             <group label="Styling">
+                 <function label="backgroundcolor" signature="backgroundcolor(Field, Color)" description="Colors the background of values of Field to the specified color. For example, to set the background color of all Revenue values greater than 500,000 to green, greaterthan([Revenue], 500000, backgroundcolor([Revenue], &quot;#008800&quot;))"/>
                  <function label="colortext" signature="colortext(Field, Color)" description="Colors the values of Field to the specified color. For example, to color all Revenue values greater than 500,000 to green, greaterthan([Revenue], 500000, colortext([Revenue], &quot;#008800&quot;))"/>
             </group>
         </functions>));

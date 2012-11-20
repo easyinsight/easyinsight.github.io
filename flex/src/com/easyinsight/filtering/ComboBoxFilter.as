@@ -15,6 +15,7 @@ import flash.utils.Dictionary;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.ComboBox;
@@ -334,68 +335,80 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
-        var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = metadata as AnalysisDimensionResultMetadata;
-        var valueObj:Dictionary = new Dictionary();
-        if (analysisDimensionResultMetadata != null && analysisDimensionResultMetadata.values != null) {
-            for each (var value:Value in analysisDimensionResultMetadata.values) {
-                var string:String = String(value.getValue());
-                valueObj[string] = true;
+        try {
+            if (!(metadata is AnalysisDimensionResultMetadata)) {
+                if (_filterEditable) {
+                    deleteButton.enabled = true;
+                }
+                valuesSet = false;
+                invalidateDisplayList();
+                return;
             }
-        }
-        if (_filterDefinition != null && _filterDefinition.excludeEmpty) {
-            delete valueObj[""];
-        }
-        var strings:Array = [];
-        for (var str:String in valueObj) {
-            strings.push(str);
-        }
-        strings = strings.sort(Array.CASEINSENSITIVE | Array.DESCENDING);
-        if (_filterDefinition != null && _filterDefinition.allOption) {
-            strings.push("All");
-        }
-        strings = strings.reverse();
-        comboBox.dataProvider = new ArrayCollection(strings);
-        comboBox.rowCount = Math.min(strings.length, 15);
-        var selectedValue:String;
-        if (_filterDefinition.filteredValues.length == 0 && strings.length > 0) {
-            _filterDefinition.filteredValues.addItem(strings[0]);
-        }
-        if (_filterDefinition.filteredValues.length > 0) {
-            var filterObj:Object = _filterDefinition.filteredValues.getItemAt(0);
-            if (filterObj is Value) {
-                selectedValue = String(filterObj.getValue());
+            var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = metadata as AnalysisDimensionResultMetadata;
+            var valueObj:Dictionary = new Dictionary();
+            if (analysisDimensionResultMetadata != null && analysisDimensionResultMetadata.values != null) {
+                for each (var value:Value in analysisDimensionResultMetadata.values) {
+                    var string:String = String(value.getValue());
+                    valueObj[string] = true;
+                }
+            }
+            if (_filterDefinition != null && _filterDefinition.excludeEmpty) {
+                delete valueObj[""];
+            }
+            var strings:Array = [];
+            for (var str:String in valueObj) {
+                strings.push(str);
+            }
+            strings = strings.sort(Array.CASEINSENSITIVE | Array.DESCENDING);
+            if (_filterDefinition != null && _filterDefinition.allOption) {
+                strings.push("All");
+            }
+            strings = strings.reverse();
+            comboBox.dataProvider = new ArrayCollection(strings);
+            comboBox.rowCount = Math.min(strings.length, 15);
+            var selectedValue:String;
+            if (_filterDefinition.filteredValues.length == 0 && strings.length > 0) {
+                _filterDefinition.filteredValues.addItem(strings[0]);
+            }
+            if (_filterDefinition.filteredValues.length > 0) {
+                var filterObj:Object = _filterDefinition.filteredValues.getItemAt(0);
+                if (filterObj is Value) {
+                    selectedValue = String(filterObj.getValue());
+                } else {
+                    selectedValue = filterObj as String;
+                }
+                var selectedIndex:int = strings.indexOf(selectedValue);
+                if (selectedIndex == -1) {
+                    selectedValue = strings[0] as String;
+                    var newFilteredValues:ArrayCollection = new ArrayCollection();
+                    newFilteredValues.addItem(selectedValue);
+                    _filterDefinition.filteredValues = newFilteredValues;
+                }
+                comboBox.selectedItem = selectedValue;
+
+            }
+
+            comboBox.enabled = _filterDefinition.enabled;
+            if (deleteButton != null) {
+                deleteButton.enabled = true;
+            }
+            valuesSet = false;
+            invalidateDisplayList();
+            //viewStack.selectedIndex = 1;
+            if (!_loadingFromReport) {
+                if (newFilter) {
+                    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+                    newFilter = false;
+                } else {
+                    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this));
+                }
             } else {
-                selectedValue = filterObj as String;
-            }
-            var selectedIndex:int = strings.indexOf(selectedValue);
-            if (selectedIndex == -1) {
-                selectedValue = strings[0] as String;
-                var newFilteredValues:ArrayCollection = new ArrayCollection();
-                newFilteredValues.addItem(selectedValue);
-                _filterDefinition.filteredValues = newFilteredValues;
-            }
-            comboBox.selectedItem = selectedValue;
 
-        }
-
-        comboBox.enabled = _filterDefinition.enabled;
-        if (deleteButton != null) {
-            deleteButton.enabled = true;
-        }
-        valuesSet = false;
-        invalidateDisplayList();
-        //viewStack.selectedIndex = 1;
-        if (!_loadingFromReport) {
-            if (newFilter) {
-                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+                loadingFromReport = false;
                 newFilter = false;
-            } else {
-                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this));
             }
-        } else {
-
-            loadingFromReport = false;
-            newFilter = false;
+        } catch (e:Error) {
+            Alert.show(e.message);
         }
     }
 
