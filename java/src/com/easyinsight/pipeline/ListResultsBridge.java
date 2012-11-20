@@ -5,6 +5,7 @@ import com.easyinsight.analysis.DataResults;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -13,7 +14,7 @@ import java.util.List;
  */
 public class ListResultsBridge implements ResultsBridge {
 
-    public DataResults toDataResults(DataSet dataSet, List<AnalysisItem> columns) {
-        return dataSet.toListDataResults(columns);
+    public DataResults toDataResults(DataSet dataSet, List<AnalysisItem> columns,  Map<AnalysisItem, AnalysisItem> aliases) {
+        return dataSet.toListDataResults(columns, aliases);
     }
 }

@@ -10,7 +10,7 @@ import com.easyinsight.dataset.DataSet;
  */
 public class ReportPreHandleComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        pipelineData.getReport().tweakReport(dataSet);
+        pipelineData.getReport().tweakReport(null);
         return dataSet;
     }
 

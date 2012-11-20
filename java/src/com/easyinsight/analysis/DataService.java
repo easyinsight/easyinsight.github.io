@@ -15,7 +15,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.StandardReportPipeline;
-import org.apache.jcs.JCS;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -414,7 +413,7 @@ public class DataService {
     private EmbeddedResults getEmbeddedResultsForReport(WSAnalysisDefinition analysisDefinition, List<FilterDefinition> customFilters,
                                                         InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters, EIConnection conn) throws Exception {
         ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
-        DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn);
+        DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
         EmbeddedResults embeddedResults = results.toEmbeddedResults();
         embeddedResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
         embeddedResults.setDefinition(analysisDefinition);
@@ -603,7 +602,7 @@ public class DataService {
                                    EIConnection conn) {
         try {
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-            DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn);
+            DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
             results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             return results;
         } catch (ReportException dae) {
@@ -1219,7 +1218,7 @@ public class DataService {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-            DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn);
+            DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
             List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
             suggestions.addAll(insightRequestMetadata.getSuggestions());
             if (analysisDefinition.isLogReport()) {
@@ -1253,6 +1252,7 @@ public class DataService {
         private StandardReportPipeline pipeline;
         private DataSourceInfo dataSourceInfo;
         private Feed feed;
+        private Map<AnalysisItem, AnalysisItem> aliases = new HashMap<AnalysisItem, AnalysisItem>();
 
         private ReportRetrieval(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn) throws SQLException {
             this.insightRequestMetadata = insightRequestMetadata;
@@ -1332,6 +1332,15 @@ public class DataService {
                     analysisDefinition.populateFromReportStructure(structure);
                 }
             }
+            analysisDefinition.tweakReport(aliases);
+
+            // acquirent report header on embed
+            // medecare zendesk
+            // balance freshbooks
+            // oeo report
+            // activity report on highrise
+            // acs stuff
+
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
             if (analysisDefinition.getAddedItems() != null) {
                 allFields.addAll(analysisDefinition.getAddedItems());

@@ -1,9 +1,8 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.DateValue;
-import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.dataset.LimitsResults;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +21,72 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     private Date xAxisMaximum = null;
 
     private int strokeWeight = 2;
+
+    /*public LimitsResults applyLimits(DataSet dataSet) {
+        LimitsResults limitsResults;
+        LimitsMetadata limitsMetadata = getLimitsMetadata();
+        if (limitsMetadata != null && limitsMetadata.isLimitEnabled()) {
+            if (!isMultiMeasure()) {
+                AnalysisItem xAxisItem = getXaxis();
+                AnalysisItem measureItem = getMeasure();
+                final Map<Value, Aggregation> aggregationMap = new HashMap<Value, Aggregation>();
+                AggregationFactory aggregationFactory = new AggregationFactory((AnalysisMeasure) measureItem, false);
+                for (IRow row : dataSet.getRows()) {
+                    Value xAxisValue = row.getValue(xAxisItem);
+                    Aggregation aggregation = aggregationMap.get(xAxisValue);
+                    if (aggregation == null) {
+                        aggregation = aggregationFactory.getAggregation();
+                        aggregationMap.put(xAxisValue, aggregation);
+                    }
+                    aggregation.addValue(row.getValue(measureItem));
+                }
+                List<Value> aggregationValues = new ArrayList<Value>(aggregationMap.keySet());
+                if (aggregationValues.size() > limitsMetadata.getNumber()) {
+                    Collections.sort(aggregationValues, new Comparator<Value>() {
+
+                        public int compare(Value value, Value value1) {
+                            return aggregationMap.get(value1).getValue().toDouble().compareTo(aggregationMap.get(value).toDouble());
+                        }
+                    });
+                    aggregationValues.subList(0, limitsMetadata.getNumber());
+                    IRow otherRow = dataSet.createRow();
+                    Iterator<IRow> iter = dataSet.getRows().iterator();
+                    while (iter.hasNext()) {
+                        IRow row = iter.next();
+                        if (row != otherRow) {
+                            Value value = row.getValue(xAxisItem);
+                            if (aggregationValues.contains(value)) {
+
+                            } else {
+                                row.addValue(xAxisItem.createAggregateKey(), new StringValue("Other"));
+                            }
+                        }
+                    }
+                } else {
+                    limitsResults = super.applyLimits(dataSet);
+                }
+            } else {
+                int count = dataSet.getRows().size();
+                limitsResults = new LimitsResults(count >= limitsMetadata.getNumber(), count, limitsMetadata.getNumber());
+                Map<String, AnalysisItem> structure = new HashMap<String, AnalysisItem>();
+                createReportStructure(structure);
+                AnalysisMeasure analysisMeasure = null;
+                for (AnalysisItem analysisItem : structure.values()) {
+                    if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                        analysisMeasure = (AnalysisMeasure) analysisItem;
+                        break;
+                    }
+                }
+                if (analysisMeasure != null) {
+                    dataSet.sort(analysisMeasure, limitsMetadata.isTop());
+                    dataSet.subset(limitsMetadata.getNumber());
+                }
+            //}
+        } else {
+            limitsResults = super.applyLimits(dataSet);
+        }
+        return limitsResults;
+    }*/
 
     public int getStrokeWeight() {
         return strokeWeight;
@@ -63,10 +128,16 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         return ChartDefinitionState.LINE_FAMILY;
     }
 
-    public void tweakReport(DataSet dataSet) {
+    public void tweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
         if (autoScale && getXaxis().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             int daysDuration = 0;
-            AnalysisDateDimension xAxis = (AnalysisDateDimension) this.getXaxis();
+        AnalysisDateDimension start;
+        try {
+            start = (AnalysisDateDimension) getXaxis().clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+        AnalysisDateDimension xAxis = (AnalysisDateDimension) this.getXaxis();
             if (getFilterDefinitions() != null) {
                 for (FilterDefinition filterDefinition : getFilterDefinitions()) {
                     if (filterDefinition instanceof RollingFilterDefinition) {
@@ -78,26 +149,6 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
                         daysDuration = (int)((filterDateRangeDefinition.getEndDate().getTime() - filterDateRangeDefinition.getStartDate().getTime()) / (1000 * 60 * 60 * 24));
                     }
                 }
-            }
-            if (daysDuration == 0) {
-                long startTime = 0;
-                long endTime = 0;
-                for (IRow row : dataSet.getRows()) {
-                    Value value = row.getValue(xAxis.createAggregateKey());
-                    if (value.type() == Value.DATE) {
-                        DateValue dateValue = (DateValue ) value;
-                        if (dateValue.getDate() != null) {
-                            long time = dateValue.getDate().getTime();
-                            if (startTime == 0 || time < startTime) {
-                                startTime = time;
-                            }
-                            if (endTime == 0 || time > endTime) {
-                                endTime = time;
-                            }
-                        }
-                    }
-                }
-                daysDuration = (int)((endTime - startTime) / (1000 * 60 * 60 * 24));
             }
             if (daysDuration > (365 * 6)) {
                 if (xAxis.getDateLevel() != AnalysisDateDimension.YEAR_LEVEL) {
@@ -125,6 +176,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
                 analysisStep.getStartDate().setDateLevel(analysisStep.getDateLevel());
                 analysisStep.getEndDate().setDateLevel(analysisStep.getDateLevel());
             }
+            aliasMap.put(xAxis, start);
         }
     }
 
@@ -132,12 +184,13 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         strokeWeight = (int) findNumberProperty(properties, "strokeWeight", 2);
+        autoScale = findBooleanProperty(properties, "autoScale", false);
     }
 
     @Override
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
-        properties.add(new ReportNumericProperty("strokeWeight", strokeWeight));
+        properties.add(new ReportBooleanProperty("autoScale", autoScale));
         return properties;
     }
 

@@ -5,6 +5,7 @@ import com.easyinsight.analysis.DataResults;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -12,5 +13,5 @@ import java.util.List;
  * Time: 9:32:05 AM
  */
 public interface ResultsBridge {
-    public DataResults toDataResults(DataSet dataSet, List<AnalysisItem> columns);
+    public DataResults toDataResults(DataSet dataSet, List<AnalysisItem> columns, Map<AnalysisItem, AnalysisItem> aliases);
 }
