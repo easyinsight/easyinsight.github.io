@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.freshbooks;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.Feed;
@@ -29,12 +30,16 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
     public static final String INVOICE_ID = "Invoice ID";
     public static final String INVOICE_NUMBER = "Invoice Number";
     public static final String INVOICE_CURRENCY = "Invoice Currency";
+    public static final String INVOICE_EDIT_URL = "Invoice Edit URL";
+    public static final String INVOICE_CLIENT_URL = "Invoice Client URL";
+    public static final String INVOICE_VIEW_URL = "Invoice View URL";
     public static final String CLIENT_ID = "Invoice Client ID";
     public static final String AMOUNT = "Invoice Amount";
     public static final String AMOUNT_OUTSTANDING = "Invoice Amount Outstanding";
     public static final String AMOUNT_PAID = "Invoice Amount Paid";
     public static final String STATUS = "Invoice Status";
     public static final String PO_NUMBER = "PO Number";
+    public static final String INVOICE_CREATED_BY = "Invoice Created By";
     public static final String INVOICE_DATE = "Invoice Date";
     public static final String DISCOUNT = "Discount";
     public static final String COUNT = "Invoice Count";
@@ -47,7 +52,8 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(INVOICE_ID, CLIENT_ID, AMOUNT, AMOUNT_OUTSTANDING, STATUS, PO_NUMBER, INVOICE_DATE,
-                DISCOUNT, COUNT, INVOICE_NUMBER, AMOUNT_PAID, INVOICE_CURRENCY);
+                DISCOUNT, COUNT, INVOICE_NUMBER, AMOUNT_PAID, INVOICE_CURRENCY, INVOICE_CREATED_BY, INVOICE_EDIT_URL,
+                INVOICE_CLIENT_URL, INVOICE_VIEW_URL);
     }
 
     @Override
@@ -68,6 +74,28 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
         items.add(new AnalysisMeasure(keys.get(FreshbooksInvoiceSource.AMOUNT), AMOUNT, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
         items.add(new AnalysisMeasure(keys.get(FreshbooksInvoiceSource.AMOUNT_OUTSTANDING), AMOUNT_OUTSTANDING, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
         items.add(new AnalysisMeasure(keys.get(FreshbooksInvoiceSource.AMOUNT_PAID), AMOUNT_PAID, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
+        Key invoiceCreatedByKey = keys.get(FreshbooksInvoiceSource.INVOICE_CREATED_BY);
+        if (invoiceCreatedByKey == null) {
+            invoiceCreatedByKey = new NamedKey(FreshbooksInvoiceSource.INVOICE_CREATED_BY);
+        }
+        items.add(new AnalysisDimension(invoiceCreatedByKey, true));
+        Key invoiceViewURLKey = keys.get(FreshbooksInvoiceSource.INVOICE_VIEW_URL);
+        if (invoiceViewURLKey == null) {
+            invoiceViewURLKey = new NamedKey(FreshbooksInvoiceSource.INVOICE_VIEW_URL);
+        }
+        items.add(new AnalysisDimension(invoiceViewURLKey, true));
+
+        Key invoiceEditURLKey = keys.get(FreshbooksInvoiceSource.INVOICE_EDIT_URL);
+        if (invoiceEditURLKey == null) {
+            invoiceEditURLKey = new NamedKey(FreshbooksInvoiceSource.INVOICE_EDIT_URL);
+        }
+        items.add(new AnalysisDimension(invoiceEditURLKey, true));
+
+        Key clientViewURLKey = keys.get(FreshbooksInvoiceSource.INVOICE_CLIENT_URL);
+        if (clientViewURLKey == null) {
+            clientViewURLKey = new NamedKey(FreshbooksInvoiceSource.INVOICE_CLIENT_URL);
+        }
+        items.add(new AnalysisDimension(clientViewURLKey, true));
         items.add(new AnalysisDateDimension(keys.get(FreshbooksInvoiceSource.INVOICE_DATE), true, AnalysisDateDimension.DAY_LEVEL));
         return items;
     }
@@ -102,6 +130,7 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
                         String invoiceNumber = queryField(invoice, "number/text()");
 
                         String clientID = queryField(invoice, "client_id/text()");
+                        String createdBy = queryField(invoice, "staff_id/text()");
                         String status = queryField(invoice, "status/text()");
                         String amountString = queryField(invoice, "amount/text()");
                         String amountOutstandingString = queryField(invoice, "amount_outstanding/text()");
@@ -109,12 +138,19 @@ public class FreshbooksInvoiceSource extends FreshbooksBaseSource {
                         String invoiceDateString = queryField(invoice, "date/text()");
                         String poNumber = queryField(invoice, "po_number/text()");
                         String invoiceCurrency = queryField(invoice, "currency_code/text()");
+                        String clientViewURL = queryField(invoice, "links/client_view/text()");
+                        String viewURL = queryField(invoice, "links/view/text()");
+                        String editURL = queryField(invoice, "links/edit/text()");
                         Date invoiceDate = df.parse(invoiceDateString);
                         IRow row = dataSet.createRow();
                         String discount = queryField(invoice, "discount/text()");
                         addValue(row, FreshbooksInvoiceSource.INVOICE_ID, invoiceID, keys);
                         addValue(row, FreshbooksInvoiceSource.INVOICE_NUMBER, invoiceNumber, keys);
+                        addValue(row, FreshbooksInvoiceSource.INVOICE_VIEW_URL, viewURL, keys);
+                        addValue(row, FreshbooksInvoiceSource.INVOICE_EDIT_URL, editURL, keys);
+                        addValue(row, FreshbooksInvoiceSource.INVOICE_CLIENT_URL, clientViewURL, keys);
                         addValue(row, FreshbooksInvoiceSource.INVOICE_CURRENCY, invoiceCurrency, keys);
+                        addValue(row, FreshbooksInvoiceSource.INVOICE_CREATED_BY, createdBy, keys);
                         addValue(row, FreshbooksInvoiceSource.CLIENT_ID, clientID, keys);
                         addValue(row, FreshbooksInvoiceSource.STATUS, status, keys);
                         addValue(row, FreshbooksInvoiceSource.PO_NUMBER, poNumber, keys);
