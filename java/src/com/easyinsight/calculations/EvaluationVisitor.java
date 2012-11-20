@@ -201,10 +201,27 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
             Value result2 = node2.getResult();
             if (result.type() == Value.STRING || result2.type() == Value.STRING) {
                 result = new StringValue(Function.minusQuotes(result).toString() + Function.minusQuotes(result2).toString());
-            } else if (node1.getResult().type() == Value.DATE && node2.getResult().type() == Value.NUMBER ||
-                    node1.getResult().type() == Value.NUMBER && node2.getResult().type() == Value.DATE ||
-                    node1.getResult().type() == Value.DATE && node2.getResult().type() == Value.DATE) {
-                result = new DateValue(new Date((long) (node1.getResult().toDouble() + node2.getResult().toDouble())));
+            } else if (result.type() == Value.DATE && result2.type() == Value.NUMBER) {
+                DateValue dateValue = (DateValue) result;
+                NumericValue result2Value = (NumericValue) result2;
+                if (result2Value.getCalendarType() > 0) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(result2Value.getCalendarType(), result2Value.getCalendarValue());
+                    result = new DateValue(cal.getTime());
+                } else {
+                    long time = dateValue.getDate().getTime();
+                    long delta = (long) (time + result2.toDouble());
+                    result = new NumericValue(delta);
+                }
+            } else if (result.type() == Value.DATE && result2.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) result;
+                DateValue dateValue2 = (DateValue) result2;
+                long delta = dateValue.getDate().getTime() + dateValue2.getDate().getTime();
+                result = new NumericValue(delta);
+            } else if (result.type() == Value.NUMBER && result2.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) result2;
+                long delta = (long) (result.toDouble() + dateValue.getDate().getTime());
+                result = new NumericValue(delta);
             } else if (!(node2.getResult() instanceof EmptyValue) && node1.getResult().toDouble() != null && node2.getResult().toDouble() != null) {
                 result = new NumericValue(result.toDouble() + node2.getResult().toDouble());
             } else {
