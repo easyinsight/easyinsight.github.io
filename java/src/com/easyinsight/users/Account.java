@@ -194,7 +194,7 @@ public class Account {
     private int daysOverSizeBoundary;
 
     @Column(name="max_days_over_size_boundary")
-    private int maxDaysOverSizeBoundary;
+    private int maxDaysOverSizeBoundary = 3;
 
     @Column(name="last_boundary_date")
     private Date lastBoundaryDate;
