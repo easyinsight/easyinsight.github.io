@@ -33,7 +33,7 @@
         var format = $('input:radio[name=emailGroup]:checked').val();
         var recipient = $('#input01').val();
         var subject = $('#input02').val();
-        var body = $('#input03').value;
+        var body = $('#textarea').val();
         $.getJSON('/app/emailReport?reportID=<%= request.getParameter("reportID")%>&format=' + format + "&recipient="+recipient + "&subject=" + subject + "&body=" + body, function(data) {
             alert('Email sent.');
         });

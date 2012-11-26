@@ -79,3 +79,7 @@ a.dp-choose-date {
     overflow:auto;
     padding:10px;
 }
+
+a.trendDrillthrough {
+    color:inherit;
+}

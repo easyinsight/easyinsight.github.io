@@ -32,19 +32,21 @@ Chart = {
                     extras(data);
                 }
 
-                if (data["drillthrough"]) {
+                if (data["drillthrough"] || params.drillthrough) {
                     var dtOptions = $.extend(true, {}, data["drillthrough"], params.drillthrough);
-                    var tt = $("#" + target);
-                    tt.bind("jqplotDataClick", function (event, seriesIndex, pointIndex, curData) {
-                        var drillthrough = data["drillthrough"];
-                        var s = 'reportID=' + dtOptions["reportID"] + '&drillthroughID=' + dtOptions["id"] + '&embedded=' + dtOptions["embedded"] + '&sourceField=' +
-                            dtOptions["source"] + '&f' + dtOptions["xaxis"] + "=" + encodeURI(data["ticks"][pointIndex]);
-                        if (drillthrough["stack"]) {
-                            s = s + "&f" + drillthrough["stack"] + "=" + encodeURI(data["series"][seriesIndex].label);
-                        }
-                        drillThrough(s);
+                    if (dtOptions["id"]) {
+                        var tt = $("#" + target);
+                        tt.bind("jqplotDataClick", function (event, seriesIndex, pointIndex, curData) {
+                            var drillthrough = data["drillthrough"];
+                            var s = 'reportID=' + dtOptions["reportID"] + '&drillthroughID=' + dtOptions["id"] + '&embedded=' + dtOptions["embedded"] + '&sourceField=' +
+                                dtOptions["source"] + '&f' + dtOptions["xaxis"] + "=" + encodeURI(data["ticks"][pointIndex]);
+                            if (drillthrough["stack"]) {
+                                s = s + "&f" + drillthrough["stack"] + "=" + encodeURI(data["series"][seriesIndex].label);
+                            }
+                            drillThrough(s);
 
-                    });
+                        });
+                    }
                 }
                 if (data["params"]) {
                     params.jqplotOptions = $.extend(true, {}, params.jqplotOptions, data["params"]);
@@ -55,6 +57,7 @@ Chart = {
         };
     },
     charts:{},
+    prevTooltip:{chart:null, text:""},
 
     cleanup:function (target) {
         if (Chart.charts[target]) {
@@ -79,7 +82,7 @@ Chart = {
             })
 
             var tt = $("#" + target);
-            tt.bind("jqplotDataHighlight", Chart.stackColumnToolTipHover(data["ticks"], data["series"], sums, 0));
+            tt.bind("jqplotDataMouseOver", Chart.stackColumnToolTipHover(data["ticks"], data["series"], sums, 0));
             tt.bind("jqplotDataUnhighlight", Chart.columnToolTipOut);
         })
     },
@@ -97,7 +100,7 @@ Chart = {
                     sums[v[0]] = sums[v[0]] + v[1];
                 })
             })
-            tt.bind("jqplotDataHighlight", Chart.stackColumnToolTipHover(data["ticks"], data["series"], sums, 1));
+            tt.bind("jqplotDataMouseOver", Chart.stackColumnToolTipHover(data["ticks"], data["series"], sums, 1));
             tt.bind("jqplotDataUnhighlight", Chart.columnToolTipOut);
         })
     },
@@ -105,7 +108,7 @@ Chart = {
     getColumnChartCallback:function (target, params, styleProps) {
         return Chart.getCallback(target, params, false, styleProps, function (data) {
             var tt = $("#" + target);
-            tt.bind("jqplotDataHighlight", Chart.columnToolTipHover(data["ticks"]));
+            tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"]));
             tt.bind("jqplotDataUnhighlight", Chart.columnToolTipOut);
         })
     },
@@ -132,6 +135,7 @@ Chart = {
             var mouseX = ev.pageX; //these are going to be how jquery knows where to put the div that will be our tooltip
             var mouseY = ev.pageY;
 
+
             $('#chartpseudotooltip').html("<b>" + stack[seriesIndex].label + "</b><br/>" + ticks[pointIndex] + '<br />' + data[index] + "(" + ((data[index] / sums[pointIndex + 1]) * 100).toFixed(2) + "%)<br />" + sums[pointIndex + 1] + " Total");
 
             var cssObj = {
@@ -147,23 +151,33 @@ Chart = {
     columnToolTipOut:function (ev) {
         $('#chartpseudotooltip').html('');
         $('#chartpseudotooltip').hide();
+        Chart.prevTooltip = {chart:null, text:""};
     },
 
     getPieChartCallback:function (target, params, styleProps) {
         return Chart.getCallback(target, params, false, styleProps, function (data) {
             var tt = $("#" + target);
-            tt.bind("jqplotDataHighlight", Chart.pieToolTipHover);
-            tt.bind("jqplotDataUnhighlight", Chart.pieToolTipOut);
+            tt.bind("jqplotDataMouseOver", Chart.pieToolTipHover);
+            tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
         });
     },
 
     pieToolTipHover:function (ev, seriesIndex, pointIndex, data) {
-        var $this = $(this);
-        $this.attr('title', data[0] + ": " + data[1]);
-    },
-    pieToolTipOut:function (ev) {
-        var $this = $(this);
-        $this.attr('title', "");
+
+        var mouseX = ev.pageX; //these are going to be how jquery knows where to put the div that will be our tooltip
+        var mouseY = ev.pageY;
+        var s = "<b>" + data[0] + "</b>: " + data[1];
+        if (!(ev.target == Chart.prevTooltip.chart && s == Chart.prevTooltip.text)) {
+            $("#chartpseudotooltip").html(s);
+            Chart.prevTooltip = { chart:ev.target, text:s }
+            var cssObj = {
+                'position':'absolute',
+                'left':mouseX + 'px',
+                'top':mouseY + 'px'
+            };
+            $("#chartpseudotooltip").css(cssObj);
+            $('#chartpseudotooltip').show();
+        }
     }
 
 };
@@ -174,6 +188,7 @@ Chart = {
     };
 
     function numberWithCommas(x) {
+
         return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
     }
 })(jQuery);

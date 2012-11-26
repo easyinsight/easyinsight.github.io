@@ -472,7 +472,7 @@ public class ExportService {
                     html = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, true, includeTitle);
                 } else {
                     ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, new ExportProperties());
+                    html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, new ExportProperties(false, true));
                 }
                 String htmlBody = body + html;
                 new SendGridEmail().sendNoAttachmentEmail(email, subject, htmlBody, true, "reports@easy-insight.com", "Easy Insight");
@@ -2456,7 +2456,7 @@ public class ExportService {
                                     sb.append(value.getLinks().get(defaultLink.getLabel()));
                                     sb.append("\">");
                                 }
-                            } else if (defaultLink instanceof DrillThrough) {
+                            } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
                                 StringBuilder paramBuilder = new StringBuilder();
                                 DrillThrough drillThrough = (DrillThrough) defaultLink;
                                 paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");

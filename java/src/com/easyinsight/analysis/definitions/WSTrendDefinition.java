@@ -7,6 +7,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.security.SecurityUtil;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -35,13 +36,23 @@ public class WSTrendDefinition extends WSKPIDefinition {
     @Override
     public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
         StringBuilder sb = new StringBuilder();
+
         try {
             ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
             TrendDataResults results = DataService.getTrendDataResults(this, insightRequestMetadata, conn);
             for (TrendOutcome outcome : results.getTrendOutcomes()) {
                 String fontColor = ExportService.getFontColor(outcome);
                 double v = ((outcome.getNow().toDouble() / outcome.getHistorical().toDouble()) - 1.0) * 100.0;
-
+                Link l = outcome.getMeasure().defaultLink();
+                String clickEvent = "";
+                if(l != null && l instanceof DrillThrough) {
+                    JSONObject j = new JSONObject();
+                    j.put("embedded", "false");
+                    j.put("id", l.getLinkID());
+                    j.put("reportID", getUrlKey());
+                    j.put("source", outcome.getMeasure().getAnalysisItemID());
+                    clickEvent = "drillThroughParameterized(" + j.toString() + ")";
+                }
                 sb.append("<div style='width: 250px;height:100px;'><div style='float: right;padding-top: 20px; padding-bottom: 20px; width: 80px;'> <div style='color:");
                 sb.append(fontColor);
                 sb.append(";'>");
@@ -58,7 +69,16 @@ public class WSTrendDefinition extends WSKPIDefinition {
                 sb.append("</div></div> <div style='font-size: 36px;font-weight: bold;padding-top: 34px;padding-bottom: 34px;color:");
                 sb.append(fontColor);
                 sb.append(";'> ");
+                if(!clickEvent.isEmpty()) {
+                    sb.append("<a href='#' class='trendDrillthrough' onclick='");
+                    sb.append(clickEvent);
+                    sb.append("'>");
+                }
                 sb.append(ExportService.createValue(0, outcome.getMeasure(), outcome.getNow(), md.cal, md.currencySymbol, false));
+
+                if(!clickEvent.isEmpty()) {
+                    sb.append("</a>");
+                }
 
                 sb.append("</div>");
 

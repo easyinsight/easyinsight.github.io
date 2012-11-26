@@ -43,7 +43,18 @@ public class BubbleChartServlet extends HtmlServlet {
         }
 
 
+        Link l = dimension.defaultLink();
+        if(l != null && l instanceof DrillThrough) {
+            JSONObject drillthrough = new JSONObject();
+            drillthrough.put("reportID", report.getUrlKey());
+            drillthrough.put("id", l.getLinkID());
+            drillthrough.put("source", dimension.getAnalysisItemID());
+            drillthrough.put("xaxis", dimension.getAnalysisItemID());
+            object.put("drillthrough", drillthrough);
+        }
+
         List<JSONArray> arrays = new ArrayList<JSONArray>();
+        JSONArray ticks = new JSONArray();
 
         for (IRow row : dataSet.getRows()) {
             JSONArray point = new JSONArray();
@@ -54,12 +65,15 @@ public class BubbleChartServlet extends HtmlServlet {
             } else {
                 point.put(row.getValue(zAxisMeasure).toDouble());
             }
-            point.put(row.getValue(dimension).toString());
+            String tick = row.getValue(dimension).toString();
+            point.put(tick);
+            ticks.put(tick);
+
             arrays.add(point);
         }
 
 
-        // object.put("ticks", ticks);
+        object.put("ticks", ticks);
         JSONArray a = new JSONArray();
         a.put(arrays);
         object.put("values", a);

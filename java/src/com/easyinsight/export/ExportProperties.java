@@ -7,6 +7,16 @@ package com.easyinsight.export;
  */
 public class ExportProperties {
     private boolean embedded;
+    private boolean emailed;
+
+    public ExportProperties() {
+
+    }
+
+    public ExportProperties(boolean emailed, boolean embedded) {
+        this.emailed = emailed;
+        this.embedded = embedded;
+    }
 
     public boolean isEmbedded() {
         return embedded;
@@ -14,5 +24,13 @@ public class ExportProperties {
 
     public void setEmbedded(boolean embedded) {
         this.embedded = embedded;
+    }
+
+    public boolean isEmailed() {
+        return emailed;
+    }
+
+    public void setEmailed(boolean emailed) {
+        this.emailed = emailed;
     }
 }

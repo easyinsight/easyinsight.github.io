@@ -1,0 +1,1 @@
+alter table account_credit_card_billing_info add successful tinyint(4);

@@ -26,6 +26,7 @@ public class HtmlExportServlet extends HtmlServlet {
             }
             ExportProperties exportProperties = new ExportProperties();
             exportProperties.setEmbedded(embedded);
+            exportProperties.setEmailed(false);
             html = DeliveryScheduledTask.createHTMLTable(conn, report, insightRequestMetadata, false, false, exportProperties);
         } catch (ReportException re) {
             html = re.getReportFault().toHTML();

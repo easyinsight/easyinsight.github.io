@@ -42,7 +42,8 @@ public class DrillthroughServlet extends HtmlServlet {
                 linkItem = analysisItem;
             }
             String value = request.getParameter("f" + analysisItem.getAnalysisItemID());
-            data.put(analysisItem.qualifiedName(), value);
+            if(data.get(analysisItem.qualifiedName()) == null)
+                data.put(analysisItem.qualifiedName(), value);
         }
         if (linkItem == null) {
             throw new RuntimeException();

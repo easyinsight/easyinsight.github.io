@@ -1,15 +1,16 @@
 <div class="modal hide fade" id="emailReportWindow">
     <div class="modal-header">
-        <button class="close" data-dismiss="modal">?</button>
+        <button class="close" data-dismiss="modal">X</button>
         <h3>Email Report</h3>
     </div>
     <div class="modal-body">
         <form class="form-horizontal">
             <div class="control-group">
-                <%--<label class="control-label" for="input01">Which format?</label>--%>
+                <label class="control-label">Which format?</label>
                 <div class="controls">
-                    <input type="radio" name="emailGroup" value="4">HTML
-                    <input type="radio" name="emailGroup" value="1">Excel
+
+                    <label class="radio" for="htmlRadio"><input type="radio" id="htmlRadio" name="emailGroup" value="4" /> HTML</label>
+                    <label class="radio" for="excelRadio"><input type="radio" id="excelRadio" name="emailGroup" value="1" /> Excel</label>
                 </div>
             </div>
             <div class="control-group">
