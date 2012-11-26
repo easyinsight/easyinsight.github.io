@@ -255,12 +255,12 @@ public class DashboardGrid extends DashboardElement {
         }
         sb.append("}\n");
         sb.append("</script>\n");
-        sb.append("<div class=\"container\">\n");
+        sb.append("<div class=\"container-fluid\">\n");
         for (int i = 0; i < rows; i++) {
             if (i < (rows - 1)) {
-                sb.append("<div class=\"row\" style=\"margin-bottom:20px\">\n");
+                sb.append("<div class=\"row-fluid\" style=\"margin-bottom:20px\">\n");
             } else {
-                sb.append("<div class=\"row\">\n");
+                sb.append("<div class=\"row-fluid\">\n");
             }
 
             //sb.append("<tr style=\"width:100%\">\r\n");
