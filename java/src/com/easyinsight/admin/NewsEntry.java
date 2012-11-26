@@ -12,6 +12,15 @@ public class NewsEntry {
     private String title;
     private Date date;
     private long id;
+    private String tags;
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
 
     public String getTitle() {
         return title;

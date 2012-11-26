@@ -47,17 +47,19 @@ public class AdminService {
         EIConnection conn = Database.instance().getConnection();
         try {
             if (newsEntry.getId() == 0) {
-                PreparedStatement insertNewStmt = conn.prepareStatement("INSERT INTO NEWS_ENTRY (NEWS_ENTRY_TEXT, ENTRY_TIME, NEWS_ENTRY_TITLE) VALUES (?, ?, ?)");
+                PreparedStatement insertNewStmt = conn.prepareStatement("INSERT INTO NEWS_ENTRY (NEWS_ENTRY_TEXT, ENTRY_TIME, NEWS_ENTRY_TITLE, TAGS) VALUES (?, ?, ?, ?)");
                 insertNewStmt.setString(1, newsEntry.getNews());
                 insertNewStmt.setTimestamp(2, new Timestamp(newsEntry.getDate().getTime()));
                 insertNewStmt.setString(3, newsEntry.getTitle());
+                insertNewStmt.setString(4, newsEntry.getTags());
                 insertNewStmt.execute();
             } else {
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE NEWS_ENTRY SET NEWS_ENTRY_TEXT = ?, ENTRY_TIME = ?, NEWS_ENTRY_TITLE = ? WHERE NEWS_ENTRY_ID = ?");
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE NEWS_ENTRY SET NEWS_ENTRY_TEXT = ?, ENTRY_TIME = ?, NEWS_ENTRY_TITLE = ?, TAGS = ? WHERE NEWS_ENTRY_ID = ?");
                 updateStmt.setString(1, newsEntry.getNews());
                 updateStmt.setTimestamp(2, new Timestamp(newsEntry.getDate().getTime()));
                 updateStmt.setString(3, newsEntry.getTitle());
-                updateStmt.setLong(4, newsEntry.getId());
+                updateStmt.setString(4, newsEntry.getTags());
+                updateStmt.setLong(5, newsEntry.getId());
                 updateStmt.executeUpdate();
             }
         } catch (Exception e) {
@@ -68,11 +70,25 @@ public class AdminService {
         }
     }
 
+    public List<String> getNewsTags() {
+        List<String> tags = new ArrayList<String>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("");
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return tags;
+    }
+
     public List<NewsEntry> getNews() {
         List<NewsEntry> entries = new ArrayList<NewsEntry>();
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT NEWS_ENTRY_TEXT, ENTRY_TIME, NEWS_ENTRY_ID, NEWS_ENTRY_TITLE FROM NEWS_ENTRY");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT NEWS_ENTRY_TEXT, ENTRY_TIME, NEWS_ENTRY_ID, NEWS_ENTRY_TITLE, TAGS FROM NEWS_ENTRY");
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 NewsEntry newsEntry = new NewsEntry();
@@ -80,6 +96,7 @@ public class AdminService {
                 newsEntry.setDate(new Date(rs.getTimestamp(2).getTime()));
                 newsEntry.setId(rs.getLong(3));
                 newsEntry.setTitle(rs.getString(4));
+                newsEntry.setTags(rs.getString(5));
                 entries.add(newsEntry);
             }
         } catch (Exception e) {
