@@ -15,6 +15,7 @@
 <%@ page import="com.easyinsight.audit.ActionDashboardLog" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
+<%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -45,7 +46,11 @@
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dataSourceID);
 
 %>
-<div class="navbar navbar-fixed-top">
+<jsp:include page="../header.jsp">
+    <jsp:param name="userName" value="<%= userName %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
+</jsp:include>
+<%--<div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container-fluid">
             <a data-target=".nav-collapse" data-toggle="collapse" class="btn btn-navbar">
@@ -66,7 +71,7 @@
                         <% } else { %>
                             <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
                         <% } %>
-                        <%--<li><a href="#">Profile</a></li>--%>
+                        &lt;%&ndash;<li><a href="#">Profile</a></li>&ndash;%&gt;
                         <li class="divider"></li>
                         <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
                     </ul>
@@ -81,6 +86,14 @@
                 <% } %>
             </div>
         </div>
+    </div>
+</div>--%>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <ul class="breadcrumb">
+            <li><a href="index.jsp">Data Sources</a> <span class="divider">/</span></li>
+            <li class="active"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></li>
+        </ul>
     </div>
 </div>
 <div class="container-fluid">

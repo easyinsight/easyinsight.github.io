@@ -10,6 +10,7 @@
 <%@ page import="com.easyinsight.audit.ActionReportLog" %>
 <%@ page import="com.easyinsight.audit.ActionDashboardLog" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -40,42 +41,10 @@
 
 
 %>
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a data-target=".nav-collapse" data-toggle="collapse" class="btn btn-navbar">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <div class="nav-collapse">
-                <div class="btn-group pull-right">
-                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                        <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-                        <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <% if (phone) { %>
-                        <li><a href="#">Data Sources</a></li>
-                        <% } else { %>
-                        <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
-                        <% } %>
-                        <%--<li><a href="#">Profile</a></li>--%>
-                        <li class="divider"></li>
-                        <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                    </ul>
-                </div>
-                <% if (!phone) { %>
-                <div class="nav-collapse">
-                    <ul class="nav">
-                        <li class="active"><a href="/app/html">Data Sources</a></li>
-                    </ul>
-                </div>
-                <% } %>
-            </div>
-        </div>
-    </div>
-</div>
+<jsp:include page="../header.jsp">
+    <jsp:param name="userName" value="<%= userName %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
+</jsp:include>
 <div class="container-fluid">
     <div class="row-fluid">
         <div class="span3">

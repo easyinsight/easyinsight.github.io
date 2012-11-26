@@ -7,11 +7,8 @@
 <%@ page import="java.util.List" %>
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <%@ page import="com.easyinsight.logging.LogClass" %>
-<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="com.easyinsight.html.DrillThroughData" %>
-<%@ page import="com.easyinsight.html.Utils" %>
-<%@ page import="com.easyinsight.html.UIData" %>
+<%@ page import="com.easyinsight.html.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -58,20 +55,21 @@
     <meta name="description" content="">
     <meta charset="utf-8">
     <meta name="author" content="">
-    <title>Easy Insight &mdash; <%= StringEscapeUtils.escapeHtml(report.getName()) %></title>
+    <title>Easy Insight &mdash; <%= StringEscapeUtils.escapeHtml(report.getName()) %>
+    </title>
     <jsp:include page="bootstrapHeader.jsp"/>
     <jsp:include page="reportDashboardHeader.jsp"/>
 
     <%
         List<String> jsIncludes = report.javaScriptIncludes();
         for (String jsInclude : jsIncludes) {
-            %><%= "<script type=\"text/javascript\" src=\"" + jsInclude + "\"></script>"%><%
-        }
-        List<String> cssIncludes = report.cssIncludes();
-        for (String cssInclude : cssIncludes) {
-            %><%= "<link rel=\"stylesheet\" type=\"text/css\" href=\""+cssInclude+"\" />"%><%
-        }
-    %>
+    %><%= "<script type=\"text/javascript\" src=\"" + jsInclude + "\"></script>"%><%
+    }
+    List<String> cssIncludes = report.cssIncludes();
+    for (String cssInclude : cssIncludes) {
+%><%= "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + cssInclude + "\" />"%><%
+    }
+%>
     <jsp:include page="methods.jsp">
         <jsp:param name="reportID" value="<%= report.getUrlKey() %>"/>
         <jsp:param name="dataSourceID" value="<%= report.getDataFeedID()%>"/>
@@ -84,8 +82,98 @@
 
 </head>
 <body>
-
-<div class="navbar navbar-fixed-top">
+<jsp:include page="../header.jsp">
+    <jsp:param name="userName" value="<%= userName %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
+</jsp:include>
+<div class="navbar">
+    <div class="navbar-inner reportNavBarInner">
+        <div class="container">
+            <div class="span4">
+                <ul class="breadcrumb reportBreadcrumb">
+                    <li><a href="/app/html/">Data Sources</a> <span class="divider">/</span></li>
+                    <li>
+                        <a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
+                        </a><span class="divider">/</span></li>
+                    <li class="active"><%= StringEscapeUtils.escapeHtml(report.getName()) %>
+                    </li>
+                </ul>
+            </div>
+            <div class="span8">
+                <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
+                    <div class="btn-group" style="padding-top: 0;margin-top: 0">
+                        <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                            Export the Report
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <button class="btn btn-inverse" type="button"
+                                        onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'"
+                                        style="padding:5px;margin:5px;width:150px">Export to Excel
+                                </button>
+                            </li>
+                            <li>
+                                <button class="btn btn-inverse" type="button"
+                                        onclick="$('#emailReportWindow').modal(true, true, true)"
+                                        style="padding:5px;margin:5px;width:150px">Email the Report
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="btn-group">
+                        <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                            Refresh Data
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <button class="btn btn-inverse" type="button" onclick="refreshReport()"
+                                        style="padding:5px;margin:5px;width:150px">Refresh the Report
+                                </button>
+                            </li>
+                            <%
+                                FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
+                                if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
+                            %>
+                            <li>
+                                <button class="btn btn-inverse" type="button" id="refreshDataSourceButton"
+                                        onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh
+                                    Data
+                                    Source
+                                </button>
+                            </li>
+                            <%
+                                }
+                            %>
+                        </ul>
+                    </div>
+                    <%
+                        boolean visibleFilter = false;
+                        for (FilterDefinition filter : report.getFilterDefinitions()) {
+                            if (filter.isShowOnReportView()) {
+                                visibleFilter = true;
+                                break;
+                            }
+                        }
+                        if (visibleFilter) {
+                    %>
+                    <div class="btn-group">
+                        <button class="btn btn-inverse" onclick="toggleFilters()">Toggle Filters</button>
+                    </div>
+                    <%
+                        }
+                    %>
+                    <div class="btn-group">
+                        <a href="<%= RedirectUtil.getURL(request, "/app/#analysisID=" + report.getUrlKey())%>"
+                           class="btn btn-inverse">Edit Report</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<%--<div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container-fluid">
             <a data-target=".nav-collapse" data-toggle="collapse" class="btn btn-navbar">
@@ -116,7 +204,7 @@
                         <% } else { %>
                             <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
                         <% } %>
-                        <%--<li><a href="#">Profile</a></li>--%>
+                        &lt;%&ndash;<li><a href="#">Profile</a></li>&ndash;%&gt;
                         <li class="divider"></li>
                         <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
                     </ul>
@@ -186,7 +274,7 @@
             <% } %>
         </div>
     </div>
-</div>
+</div>--%>
 <div class="container-fluid" id="reportHeader">
     <%= uiData.createHeader(report.getName()) %>
     <div class="row-fluid" id="filterRow">
@@ -194,9 +282,10 @@
             <%
                 for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
                     if (filterDefinition.isShowOnReportView()) {
-                        %>
-            <div class="filterDiv"><%=filterDefinition.toHTML(new FilterHTMLMetadata(report))%></div>
-                        <%
+            %>
+            <div class="filterDiv"><%=filterDefinition.toHTML(new FilterHTMLMetadata(report))%>
+            </div>
+            <%
                     }
                 }
             %>
@@ -212,13 +301,15 @@
 
     <div class="row">
         <div class="span12">
-            <div class="well" style="background-color: #ffffff">
+            <div class="well reportWell" style="background-color: #FFFFFF">
                 <div id="chartpseudotooltip" style="z-index:100;"></div>
                 <div id="reportTarget">
                     <div id="reportTargetReportArea" class="reportArea">
                         <%= report.rootHTML() %>
                     </div>
-                    <div class="noData">We didn't find any data for the fields and filters that you specified in the report.</div>
+                    <div class="noData">We didn't find any data for the fields and filters that you specified in the
+                        report.
+                    </div>
                 </div>
             </div>
         </div>
@@ -228,7 +319,7 @@
 <%
     } catch (ReportAccessException rae) {
         response.sendRedirect(RedirectUtil.getURL(request, "accessFault.jsp"));
-    } catch(ReportNotFoundException e) {
+    } catch (ReportNotFoundException e) {
         LogClass.error(e);
         response.sendError(404);
     } finally {

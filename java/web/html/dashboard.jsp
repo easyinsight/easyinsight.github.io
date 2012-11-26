@@ -7,12 +7,9 @@
 <%@ page import="com.easyinsight.dashboard.DashboardUIProperties" %>
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <%@ page import="com.easyinsight.logging.LogClass" %>
-<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page import="com.easyinsight.analysis.*" %>
 <%@ page import="java.util.*" %>
-<%@ page import="com.easyinsight.html.Utils" %>
-<%@ page import="com.easyinsight.html.UIData" %>
-<%@ page import="com.easyinsight.html.DrillThroughData" %>
+<%@ page import="com.easyinsight.html.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -102,7 +99,62 @@
     </script>
 </head>
 <body>
-<div class="navbar navbar-fixed-top">
+<jsp:include page="../header.jsp">
+    <jsp:param name="userName" value="<%= userName %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
+</jsp:include>
+<div class="navbar">
+    <div class="navbar-inner reportNavBarInner">
+        <div class="container">
+            <div class="span6">
+                <ul class="breadcrumb reportBreadcrumb">
+                    <li><a href="/app/html/">Data Sources</a> <span class="divider">/</span></li>
+                    <li>
+                        <a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
+                        </a><span class="divider">/</span></li>
+                    <li class="active"><%= StringEscapeUtils.escapeHtml(dashboard.getName()) %>
+                    </li>
+                </ul>
+            </div>
+            <div class="span6">
+                <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
+                    <div class="btn-group">
+                        <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                            Refresh Data
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <button class="btn btn-inverse" type="button" onclick="refreshReport()"
+                                        style="padding:5px;margin:5px;width:150px">Refresh the Report
+                                </button>
+                            </li>
+                            <%
+                                FeedMetadata feedMetadata = new DataService().getFeedMetadata(dashboard.getDataSourceID());
+                                if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
+                            %>
+                            <li>
+                                <button class="btn btn-inverse" type="button" id="refreshDataSourceButton"
+                                        onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh
+                                    Data
+                                    Source
+                                </button>
+                            </li>
+                            <%
+                                }
+                            %>
+                        </ul>
+                    </div>
+                    <div class="btn-group">
+                        <a href="<%= RedirectUtil.getURL(request, "/app/#dashboardID=" + dashboard.getUrlKey())%>"
+                           class="btn btn-inverse">Edit Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<%--<div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container-fluid">
             <a data-target=".nav-collapse" data-toggle="collapse" class="btn btn-navbar">
@@ -134,7 +186,7 @@
                             <a href="<%= RedirectUtil.getURL(request, "/app/#dashboardID=" + dashboard.getUrlKey())%>" class="btn btn-inverse">Edit Dashboard</a>
                         </div>
                         <% } %>
-                        <%--<li><a href="#">Profile</a></li>--%>
+                        &lt;%&ndash;<li><a href="#">Profile</a></li>&ndash;%&gt;
                         <li class="divider"></li>
                         <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
                     </ul>
@@ -155,7 +207,7 @@
             </div>
         </div>
     </div>
-</div>
+</div>--%>
 <div class="container-fluid">
     <%= uiData.createHeader(dashboard.getName()) %>
 </div>
@@ -180,7 +232,9 @@
     <jsp:include page="refreshingDataSource.jsp"/>
     <div class="row">
         <div class="span12">
-            <%= dashboard.getRootElement().toHTML(new FilterHTMLMetadata(dashboard, request, drillthroughArgh, false)) %>
+            <div class="well reportWell" style="background-color: #FFFFFF">
+                <%= dashboard.getRootElement().toHTML(new FilterHTMLMetadata(dashboard, request, drillthroughArgh, false)) %>
+            </div>
         </div>
     </div>
 </div>

@@ -24,8 +24,6 @@
         Transaction t = hibernateSession.beginTransaction();
 
         String domain = null;
-        String secretToken = null;
-        String token = null;
         String email = null;
         try {
             long accountId = (Long) session.getAttribute("accountID");

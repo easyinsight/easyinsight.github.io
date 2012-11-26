@@ -22,9 +22,16 @@
     accountTransferObject.setGoogleAppsDomain(domain);
     accountTransferObject.setAccountState(Account.TRIAL);
     String password = RandomTextGenerator.generateText(15);
-    new UserService().createAccount(admin, accountTransferObject, password);
-    UserServiceResponse userServiceResponse = new UserService().authenticate(email, password, false);
-    SecurityUtil.populateSession(session, userServiceResponse);
-//    response.sendRedirect(new TokenService().getHttpOAuthURL(FeedType.GOOGLE_PROVISIONING.getType(), true, TokenService.USER_SOURCE, session).getRequestToken());
-    response.sendRedirect("googleAppsUserList.jsp");
+    String exists = new com.easyinsight.users.UserService().doesUserExist(admin.getUserName(), admin.getEmail(), request.getParameter("companyName"));
+    if (exists == null) {
+        new UserService().createAccount(admin, accountTransferObject, password);
+        UserServiceResponse userServiceResponse = new UserService().authenticate(email, password, false);
+        SecurityUtil.populateSession(session, userServiceResponse);
+    //    response.sendRedirect(new TokenService().getHttpOAuthURL(FeedType.GOOGLE_PROVISIONING.getType(), true, TokenService.USER_SOURCE, session).getRequestToken());
+        request.getSession().removeAttribute("appsErrorString");
+        response.sendRedirect("googleAppsUserList.jsp");
+    } else {
+        request.getSession().setAttribute("appsErrorString", exists);
+        response.sendRedirect("googleAppsSettings.jsp");
+    }
 %>
