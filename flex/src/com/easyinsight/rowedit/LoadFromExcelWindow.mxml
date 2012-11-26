@@ -31,8 +31,8 @@
 
         private function doComplete(event:Event):void {
             fileData = file.data;
-            ProgressAlert.alert(this, "Importing data...", null, feedService.importData);
-            feedService.importData.send(fileData, dataSourceID);
+            ProgressAlert.alert(this, "Importing data...", null, analysisService.importData);
+            analysisService.importData.send(fileData, dataSourceID);
         }
 
         private function onCreation():void {
@@ -49,18 +49,18 @@
         public var dataSourceID:int;
 
         private function importedData():void {
-            PopUpManager.removePopUp(this);
-        }
-
-        private function generateTemplate():void {
-            feedService.generateTemplate.send(dataSourceID);
+            var result:String = analysisService.importData.lastResult as String;
+            if (result != null) {
+                Alert.show(result);
+            } else {
+                PopUpManager.removePopUp(this);
+            }
         }
 
         private var bytes:ByteArray;
         ]]></mx:Script>
-    <mx:RemoteObject destination="feeds" id="feedService">
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="importData" result="importedData()"/>
-        <mx:method name="generateTemplate"/>
     </mx:RemoteObject>
     <mx:FormItem label="Select an Excel spreadsheet to upload:" direction="horizontal">
         <mx:TextInput id="fileNameText" editable="false"/>
@@ -68,7 +68,6 @@
     </mx:FormItem>
     <mx:HBox>
         <util:SaveButton label="Import" enabled="{importEnabled}" click="importData()"/>
-        <util:SaveButton label="Generate Template" click="generateTemplate()"/>
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
     </mx:HBox>
 </util:EISlimWindow>

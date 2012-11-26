@@ -41,6 +41,10 @@ import nu.xom.Document;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Session;
 import org.apache.jcs.access.exception.CacheException;
 
@@ -310,10 +314,9 @@ public class AnalysisService {
         return analysisItem;
     }
 
-    public void importRows(byte[] bytes, long dataSourceID) {
+    public String importData(byte[] bytes, long dataSourceID) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         // have to translate provider name -> related provider
-        DataStorage dataStorage = null;
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -326,19 +329,66 @@ public class AnalysisService {
                 useSource = dataSource;
             }
 
-            AnalysisItemFormatMapper mapper = new AnalysisItemFormatMapper(useSource.getFields());
-            Key providerPseudoField = new NamedKey("Provider");
-            Key locationPseudoField = new NamedKey("Location");
-            mapper.assignPseudoKey("Provider", providerPseudoField);
-            mapper.assignPseudoKey("Location", locationPseudoField);
-            PersistableDataSetForm data = new ExcelUploadFormat().createDataSet(bytes, useSource.getFields(), mapper);
-            DataSet dataSet = data.toDataSet(null);
+            Map<String, Key> keyMap = new HashMap<String, Key>();
+
+            for (AnalysisItem analysisItem : useSource.getFields()) {
+                if (analysisItem.isConcrete()) {
+                    keyMap.put(analysisItem.toDisplay(), analysisItem.getKey());
+                }
+            }
+
+            //AnalysisItemFormatMapper mapper = new AnalysisItemFormatMapper(useSource.getFields());
+            Key providerPseudoField = new NamedKey("Provider Name");
+            Key locationPseudoField = new NamedKey("Location Name");
+            keyMap.put("Provider Name", providerPseudoField);
+            keyMap.put("Location Name", locationPseudoField);
+            /*mapper.assignPseudoKey("Provider", providerPseudoField);
+            mapper.assignPseudoKey("Location", locationPseudoField);*/
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            XSSFWorkbook wb = new XSSFWorkbook(bais);
+            XSSFSheet sheet = wb.getSheetAt(0);
+            Iterator<org.apache.poi.ss.usermodel.Row> rit = sheet.rowIterator();
+            DataSet dataSet = new DataSet();
+            Map<Integer, IRow> rowMap = new HashMap<Integer, IRow>();
+            for (; rit.hasNext(); ) {
+                org.apache.poi.ss.usermodel.Row excelRow = rit.next();
+                int i = 1;
+                Iterator<Cell> cit = excelRow.cellIterator();
+                Cell headerCell = cit.next();
+                String headerValue = headerCell.toString().trim();
+                Key key = keyMap.get(headerValue);
+                if (key == null) {
+                    return "We couldn't find a field by the name of " + headerValue + ".";
+                }
+                for (; cit.hasNext(); ) {
+                    IRow row = rowMap.get(i);
+                    if (row == null) {
+                        row = dataSet.createRow();
+                        rowMap.put(i, row);
+                    }
+                    Cell cell = cit.next();
+                    if (cell.getCellType() == XSSFCell.CELL_TYPE_NUMERIC) {
+                        if (DateUtil.isCellDateFormatted(cell)) {
+                            row.addValue(key, cell.getDateCellValue());
+                        } else {
+                            row.addValue(key, cell.getNumericCellValue());
+                        }
+                    } else {
+                        row.addValue(key, cell.toString());
+                    }
+
+                    i++;
+                }
+
+            }
+            /*PersistableDataSetForm data = new ExcelUploadFormat().createDataSet(bytes, useSource.getFields(), mapper);
+            DataSet dataSet = data.toDataSet(null);*/
             Map<List<String>, String> map = new HashMap<List<String>, String>();
 
             AnalysisItem relatedProviderField = null;
             AnalysisItem locationField = null;
             AnalysisItem providerField = null;
-            for (AnalysisItem field : useSource.getFields()) {
+            for (AnalysisItem field : dataSource.getFields()) {
                 if ("Related Provider".equals(field.toDisplay())) {
                     relatedProviderField = field;
                 } else if ("Provider Name".equals(field.toDisplay())) {
@@ -370,22 +420,40 @@ public class AnalysisService {
                 pair.add(provider.toString());
                 pair.add(location.toString());
                 String relatedProvider = map.get(pair);
-                if (relatedProvider == null) {
+                if (relatedProvider == null || "(Empty)".equals(relatedProvider)) {
+                    return "We couldn't find " + location.toString() + " - " + provider.toString() + ".";
                 } else {
                     row.addValue(relatedProviderField.getKey(), relatedProvider);
                 }
             }
-            dataStorage = DataStorage.writeConnection(dataSource, conn);
-            dataStorage.insertData(dataSet);
-            dataStorage.commit();
+
+            List<IDataTransform> transforms = new ArrayList<IDataTransform>();
+            if (useSource.getMarmotScript() != null && !"".equals(useSource.getMarmotScript())) {
+                StringTokenizer toker = new StringTokenizer(useSource.getMarmotScript(), "\r\n");
+                while (toker.hasMoreTokens()) {
+                    String line = toker.nextToken();
+                    transforms.addAll(new ReportCalculation(line).apply(useSource));
+                }
+            }
+            transforms.add(new CachedCalculationTransform(useSource));
+            DataStorage dataStorage = DataStorage.writeConnection(useSource, conn);
+            try {
+                for (IRow row : dataSet.getRows()) {
+                    dataStorage.addRow(row, useSource.getFields(), transforms);
+                }
+                dataStorage.commit();
+            } catch (Exception e) {
+                dataStorage.rollback();
+                throw e;
+            } finally {
+                dataStorage.closeConnection();
+            }
             conn.commit();
+            return null;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            if (dataStorage != null) {
-                dataStorage.closeConnection();
-            }
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }

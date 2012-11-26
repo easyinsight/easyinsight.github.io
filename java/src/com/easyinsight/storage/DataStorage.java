@@ -1562,6 +1562,41 @@ public class DataStorage implements IDataStorage {
         deleteStmt.close();
     }
 
+    public void addRow(IRow row, List<AnalysisItem> fields, List<IDataTransform> transforms) throws SQLException {
+        for (IDataTransform transform : transforms) {
+            transform.handle((EIConnection) coreDBConn, row);
+        }
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("INSERT INTO ");
+        sqlBuilder.append(getTableName());
+        StringBuilder paramBuilder = new StringBuilder();
+        StringBuilder fieldBuilder = new StringBuilder();
+        for (AnalysisItem field : fields) {
+            if (field.persistable()) {
+                KeyMetadata keyMetadata = keys.get(field.getKey());
+                fieldBuilder.append(keyMetadata.createInsertClause()).append(",");
+                paramBuilder.append(keyMetadata.createInsertQuestionMarks()).append(",");
+            }
+        }
+        fieldBuilder.deleteCharAt(fieldBuilder.length() - 1);
+        paramBuilder.deleteCharAt(paramBuilder.length() - 1);
+        sqlBuilder.append(" ( ");
+        sqlBuilder.append(fieldBuilder.toString());
+        sqlBuilder.append(" ) ");
+        sqlBuilder.append(" VALUES ( ");
+        sqlBuilder.append(paramBuilder.toString());
+        sqlBuilder.append(" ) ");
+        PreparedStatement insertStmt = storageConn.prepareStatement(sqlBuilder.toString());
+        int i = 1;
+        for (AnalysisItem field : fields) {
+            if (field.persistable()) {
+                KeyMetadata keyMetadata = keys.get(field.getKey());
+                i = setValue(insertStmt, i, keyMetadata, row.getValue(field.getKey()));
+            }
+        }
+        insertStmt.execute();
+    }
+
     public void addRow(ActualRow actualRow, List<AnalysisItem> fields, List<IDataTransform> transforms) throws SQLException {
         DataSet dataSet = new DataSet();
         IRow row = dataSet.createRow();
