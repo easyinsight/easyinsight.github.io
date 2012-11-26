@@ -834,6 +834,18 @@ public class AnalysisService {
                     if (drillThrough.isAddAllFilters()) {
                         filters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
                                 analysisItem));
+                        List<FilterDefinition> fieldFilters = analysisItem.getFilters();
+                        for (FilterDefinition filter : fieldFilters) {
+                            FilterDefinition clone;
+                            try {
+                                clone = filter.clone();
+                            } catch (CloneNotSupportedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            clone.setToggleEnabled(true);
+                            clone.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                            filters.add(clone);
+                        }
                     }
                     if (drillThrough.isFilterRowGroupings()) {
                         for (AnalysisItem grouping : report.getAllAnalysisItems()) {
