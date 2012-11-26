@@ -2,7 +2,6 @@ package com.easyinsight.users;
 
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.groups.Group;
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.preferences.UserDLS;
 import com.easyinsight.preferences.UserDLSFilter;
@@ -17,8 +16,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.groups.GroupStorage;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
 
 import java.sql.*;
 import java.util.*;
@@ -526,18 +523,7 @@ public class UserAccountAdminService {
         Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
-            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);            
-
-            if (toType == Account.PERSONAL) {
-                account.setAccountState(Account.ACTIVE);
-                account.setBillingDayOfMonth(null);
-                if (account.getGroupID() != null) {
-                    new GroupStorage().deleteGroup(account.getGroupID(), conn);
-                }
-            } else {
-                // is there anything we need to do here?
-                
-            }
+            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
 
             AccountLimits.configureAccount(account);
 
@@ -644,6 +630,12 @@ public class UserAccountAdminService {
         }
 
         return response;
+    }
+
+    public void deleteUsers(List<Integer> userIDs) {
+        for (Integer userID : userIDs) {
+            deleteUser(userID);
+        }
     }
 
     public void deleteUser(long userID) {
