@@ -12,10 +12,7 @@ import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedService;
-import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.kpi.KPI;
@@ -232,7 +229,7 @@ public class ExportService {
         List<DataSourceDescriptor> validSources = new ArrayList<DataSourceDescriptor>();
         List<DataSourceDescriptor> dataSources = new FeedService().searchForSubscribedFeeds();
         for (DataSourceDescriptor fd : dataSources) {
-            if (isRefreshable(fd.getDataSourceType())) {
+            if (fd.getDataSourceBehavior() == DataSourceInfo.COMPOSITE_PULL || fd.getDataSourceBehavior() == DataSourceInfo.STORED_PULL) {
                 validSources.add(fd);
             }
         }
@@ -267,13 +264,13 @@ public class ExportService {
         return validSources;
     }
 
-    private boolean isRefreshable(int feedType) {
+    /*private boolean isRefreshable(int feedType) {
         return (feedType == FeedType.BASECAMP_MASTER.getType() || feedType == FeedType.HIGHRISE_COMPOSITE.getType() ||
             feedType == FeedType.PIVOTAL_TRACKER.getType() || feedType == FeedType.WHOLE_FOODS.getType() ||
             feedType == FeedType.CONSTANT_CONTACT.getType() || feedType == FeedType.ZENDESK_COMPOSITE.getType() ||
             feedType == FeedType.HARVEST_COMPOSITE.getType() || feedType == FeedType.QUICKBASE_COMPOSITE.getType() ||
             feedType == FeedType.LINKEDIN.getType() || feedType == FeedType.BATCHBOOK_COMPOSITE.getType());
-    }
+    }*/
 
     public ReportDelivery getReportDelivery(long reportID, int utcOffset) {
         ReportDelivery reportDelivery = null;
@@ -335,14 +332,16 @@ public class ExportService {
 
 
 
-    public void deleteSchedule(long scheduledActivityID) {
+    public void deleteSchedules(List<Integer> activities) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM SCHEDULED_ACCOUNT_ACTIVITY WHERE " +
                     "scheduled_account_activity_id = ?");
-            deleteStmt.setLong(1, scheduledActivityID);
-            deleteStmt.executeUpdate();
+            for (Integer scheduledActivityID : activities) {
+                deleteStmt.setLong(1, scheduledActivityID);
+                deleteStmt.executeUpdate();
+            }
             deleteStmt.close();
             conn.commit();
         } catch (Exception e) {
@@ -354,6 +353,13 @@ public class ExportService {
             Database.closeConnection(conn);
         }
     }
+
+    // 1,969,225,728
+
+    // project completed on time, project completed late for last week and last month
+    // number of completed projects for last week, for last full month
+    // projects in the queue (projects not yet completed)
+    // new projects creation (line chart of creation over time)
 
     /*public long exportDataSourceToCSV(long dataSourceID) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);

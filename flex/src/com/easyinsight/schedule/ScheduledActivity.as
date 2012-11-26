@@ -7,6 +7,7 @@ public class ScheduledActivity {
     public var scheduledActivityID:int;
     public var problemLevel:int;
     public var problemMessage:String;
+    public var selected:Boolean;
 
     public function ScheduledActivity() {
     }

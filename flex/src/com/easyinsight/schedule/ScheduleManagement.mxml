@@ -7,9 +7,11 @@
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.RolloverLabelEvent;
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
+        import mx.core.UIComponent;
         import mx.events.CloseEvent;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
@@ -19,6 +21,22 @@
             addEventListener(ScheduleActivityEvent.DELETE_ACTIVITY, deleteActivity);
             addEventListener(ScheduleActivityEvent.EDIT_ACTIVITY, editActivity);
             addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, newActivity);
+            addEventListener(RolloverLabelEvent.ROLLOVER_LABEL, onEdit);
+        }
+
+        private function onEdit(event:RolloverLabelEvent):void {
+            var activity:ScheduledActivity = ScheduledActivity(event.data);
+            if (activity is DataSourceRefreshActivity) {
+                var dsWindow:DataSourceScheduleWindow = new DataSourceScheduleWindow();
+                dsWindow.activity = activity;
+                PopUpManager.addPopUp(dsWindow, this, true);
+                PopUpUtil.centerPopUp(dsWindow);
+            } else {
+                var window:ActivityWindow = new ActivityWindow();
+                window.activity = activity as ScheduledDelivery;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
         }
 
         private function editActivity(event:ScheduleActivityEvent):void {
@@ -124,6 +142,29 @@
             exportService.getRefreshableDataSources.send(null);
         }
 
+        private function deleteSelected():void {
+            var activityList:ArrayCollection = new ArrayCollection();
+            for each (var activity:ScheduledActivity in activities) {
+                if (activity.selected) {
+                    activityList.addItem(activity.scheduledActivityID);
+                }
+            }
+            if (activityList.length == 0) {
+                Alert.show("You must select at least one activity to delete.");
+            } else {
+                var str:String = "Are you sure you want to delete the selected scheduled activites?";
+                var thisObj:UIComponent = this;
+                Alert.show(str, "Alert", Alert.OK | Alert.CANCEL, this,
+                        function(closeEvent:CloseEvent):void {
+                            if (closeEvent.detail == Alert.OK) {
+                                ProgressAlert.alert(thisObj, "Deleting activities...", null, exportService.deleteSchedules);
+                                exportService.deleteSchedules.send(activityList);
+                            }
+                        });
+
+            }
+        }
+
         public function cleanup():void {
         }
 
@@ -135,19 +176,20 @@
         ]]></mx:Script>
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="getScheduledActivities" result="gotActivities()"/>
-        <mx:method name="deleteSchedule" result="deleted()"/>
+        <mx:method name="deleteSchedules" result="deleted()"/>
         <mx:method name="getRefreshableDataSources" result="gotDataSources()"/>
     </mx:RemoteObject>
     <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10" horizontalAlign="center" verticalGap="30" paddingBottom="10">
-        <mx:HBox width="100%">            
-            <mx:Button label="Add Report Delivery..." click="newReportDelivery()" styleName="grayButton" fontSize="12"/>
-            <mx:Button label="Add Scorecard Delivery..." click="newScorecard()" styleName="grayButton" fontSize="12"/>
-            <mx:Button label="Add Multi Report/Scorecard Delivery..." click="newGeneral()" styleName="grayButton" fontSize="12"/>
-            <!--<mx:Button label="Archive" click="archive()" styleName="grayButton" fontSize="12"/>-->
-        </mx:HBox>
         <mx:Canvas width="90%" maxHeight="200">
             <mx:VBox id="dataSourceWarnings"/>
         </mx:Canvas>
+        <mx:HBox width="100%">
+            <mx:Button label="Add Report Delivery..." click="newReportDelivery()" styleName="grayButton" fontSize="12"/>
+            <mx:Button label="Add Scorecard Delivery..." click="newScorecard()" styleName="grayButton" fontSize="12"/>
+            <mx:Button label="Add Multi Report/Scorecard Delivery..." click="newGeneral()" styleName="grayButton" fontSize="12"/>
+            <mx:Button label="Delete Selected" click="deleteSelected()" styleName="grayButton" fontSize="12"/>
+            <!--<mx:Button label="Archive" click="archive()" styleName="grayButton" fontSize="12"/>-->
+        </mx:HBox>
         <mx:ViewStack selectedIndex="{index}" creationPolicy="all" width="100%" height="100%">
             <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
                 <mx:ProgressBar label="Loading schedule configuration..." indeterminate="{index == 0}"/>
@@ -155,11 +197,13 @@
             <mx:Box width="100%" height="100%" horizontalAlign="center">
                 <mx:DataGrid dataProvider="{activities}" width="800" rowHeight="28" fontSize="16" id="activityGrid" selectable="false">
                     <mx:columns>
+                        <mx:DataGridColumn dataField="" headerText=""
+                                           itemRenderer="com.easyinsight.schedule.ScheduleCheckbox" width="30" sortable="false"/>
                         <util:EIDataGridColumn itemRenderer="com.easyinsight.schedule.ActivityStatusRenderer" width="50" sortable="false"/>
-                        <util:EIDataGridColumn dataField="activityDisplay" headerText="Activity"/>
-                        <util:EIDataGridColumn dataField="interval" headerText="When" width="250"/>
-                        <util:EIDataGridColumn headerText="" sortable="false"
-                                               itemRenderer="com.easyinsight.schedule.ActivityControls" width="100"/>
+                        <util:EIDataGridColumn dataField="activityDisplay" headerText="Activity"
+                                itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"/>
+                        <util:EIDataGridColumn dataField="interval" headerText="When" width="250"
+                                               itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"/>
                     </mx:columns>
                 </mx:DataGrid>
             </mx:Box>
