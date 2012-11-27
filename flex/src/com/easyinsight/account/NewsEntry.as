@@ -16,6 +16,7 @@ public class NewsEntry {
     public var title:String;
     public var date:Date;
     public var id:int;
+    public var tags:String;
 
     public function NewsEntry() {
     }
@@ -23,7 +24,7 @@ public class NewsEntry {
     public function get label():String {
         var df:DateFormatter  = new DateFormatter();
         df.format("yyyy-MM-dd");
-        return df.format(date);
+        return df.format(date) + " - " + title;
     }
 }
 }

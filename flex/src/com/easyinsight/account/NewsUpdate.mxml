@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="adminService.getNews.send()">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="adminService.getNews.send()" height="100%">
     <mx:Script><![CDATA[
         import com.easyinsight.account.NewsEntry;
         import com.easyinsight.util.PopUpUtil;
@@ -31,7 +31,7 @@
         ]]></mx:Script>
     <mx:Button label="Add News..." click="addNews()"/>
     <mx:Button label="Refresh" click="adminService.getNews.send()"/>
-    <mx:List dataProvider="{newsEntries}" itemClick="onItemClick(event)"/>
+    <mx:List dataProvider="{newsEntries}" itemClick="onItemClick(event)" width="700" height="100%"/>
     <mx:RemoteObject destination="admin" id="adminService">
         <mx:method name="getNews" result="gotNews()"/>
     </mx:RemoteObject>

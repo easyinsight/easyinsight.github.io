@@ -22,6 +22,7 @@
                 text = newsEntry.news;
                 date = newsEntry.date;
                 newsEntryTitle = newsEntry.title;
+                tags = newsEntry.tags;
             }
         }
 
@@ -32,6 +33,7 @@
             newsEntry.news = textArea.text;
             newsEntry.date = dateChooser.selectedDate;
             newsEntry.title = titleInput.text;
+            newsEntry.tags = tagsInput.text;
             ProgressAlert.alert(this, "Saving...", null, adminService.addNews);
             adminService.addNews.send(newsEntry);
         }
@@ -39,6 +41,9 @@
         private function saved():void {
             PopUpManager.removePopUp(this);
         }
+
+        [Bindable]
+        private var tags:String;
         ]]></mx:Script>
     <mx:RemoteObject destination="admin" id="adminService">
         <mx:method name="addNews" result="saved()"/>
@@ -46,6 +51,7 @@
     <mx:VBox backgroundColor="#FFFFFF">
         <mx:DateField id="dateChooser" selectedDate="{date}"/>
         <mx:TextInput text="{newsEntryTitle}" id="titleInput" width="700"/>
+        <mx:TextInput text="{tags}" id="tagsInput" width="700"/>
         <mx:TextArea width="700" height="400" text="{text}" id="textArea" editable="true" borderStyle="solid" borderThickness="1"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <util:SaveButton label="Save" click="save()"/>
