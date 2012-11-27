@@ -320,14 +320,15 @@ public class AnalysisService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-            // TODO: fix
+            FeedDefinition useSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(useSource.getParentSourceID(), conn);
+            /*// TODO: fix
             FeedDefinition useSource;
             if (dataSource.getFeedName().equals("Therapy Works")) {
                 useSource = resolveToName(dataSource, "Data Log");
             } else {
                 useSource = dataSource;
-            }
+            }*/
 
             Map<String, Key> keyMap = new HashMap<String, Key>();
 
