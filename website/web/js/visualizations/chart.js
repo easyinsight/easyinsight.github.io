@@ -83,7 +83,15 @@ Chart = {
 
             var tt = $("#" + target);
             tt.bind("jqplotDataMouseOver", Chart.stackColumnToolTipHover(data["ticks"], data["series"], sums, 0));
-            tt.bind("jqplotDataUnhighlight", Chart.columnToolTipOut);
+            tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
+        })
+    },
+
+    getBarChartCallback: function(target, params, styleProps) {
+        return Chart.getCallback(target, params, false, styleProps, function(data) {
+            var tt = $("#" + target);
+           tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"]));
+           tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
         })
     },
 
@@ -101,7 +109,7 @@ Chart = {
                 })
             })
             tt.bind("jqplotDataMouseOver", Chart.stackColumnToolTipHover(data["ticks"], data["series"], sums, 1));
-            tt.bind("jqplotDataUnhighlight", Chart.columnToolTipOut);
+            tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
         })
     },
 
@@ -109,7 +117,7 @@ Chart = {
         return Chart.getCallback(target, params, false, styleProps, function (data) {
             var tt = $("#" + target);
             tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"]));
-            tt.bind("jqplotDataUnhighlight", Chart.columnToolTipOut);
+            tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
         })
     },
 
@@ -117,17 +125,22 @@ Chart = {
         return function (ev, seriesIndex, pointIndex, data) {
             var mouseX = ev.pageX; //these are going to be how jquery knows where to put the div that will be our tooltip
             var mouseY = ev.pageY;
-            $('#chartpseudotooltip').html(ticks[pointIndex] + ', ' + data[1]);
 
-            var cssObj = {
-                'position':'absolute',
-                'font-weight':'bold',
-                'left':mouseX + 'px',
-                'top':mouseY + 'px'
-            };
+            var s = ticks[pointIndex] + ', ' + data[1];
+            if (!(ev.target == Chart.prevTooltip.chart && s == Chart.prevTooltip.text)) {
+                $('#chartpseudotooltip').html(s);
+                Chart.prevTooltip = { chart:ev.target, text:s };
 
-            $('#chartpseudotooltip').css(cssObj);
-            $('#chartpseudotooltip').show();
+                var cssObj = {
+                    'position':'absolute',
+                    'font-weight':'bold',
+                    'left':mouseX + 'px',
+                    'top':mouseY + 'px'
+                };
+
+                $('#chartpseudotooltip').css(cssObj);
+                $('#chartpseudotooltip').show();
+            }
         };
     },
     stackColumnToolTipHover:function (ticks, stack, sums, index) {
@@ -135,23 +148,38 @@ Chart = {
             var mouseX = ev.pageX; //these are going to be how jquery knows where to put the div that will be our tooltip
             var mouseY = ev.pageY;
 
+            var s = "<b>" + stack[seriesIndex].label + "</b><br/>" + ticks[pointIndex] + '<br />' + data[index] + "(" + ((data[index] / sums[pointIndex + 1]) * 100).toFixed(2) + "%)<br />" + sums[pointIndex + 1] + " Total";
+            if (!(ev.target == Chart.prevTooltip.chart && s == Chart.prevTooltip.text)) {
+                $('#chartpseudotooltip').html(s);
+                Chart.prevTooltip = { chart:ev.target, text:s };
+                var cssObj = {
+                    'position':'absolute',
+                    'left':mouseX + 'px',
+                    'top':mouseY + 'px'
+                };
 
-            $('#chartpseudotooltip').html("<b>" + stack[seriesIndex].label + "</b><br/>" + ticks[pointIndex] + '<br />' + data[index] + "(" + ((data[index] / sums[pointIndex + 1]) * 100).toFixed(2) + "%)<br />" + sums[pointIndex + 1] + " Total");
-
-            var cssObj = {
-                'position':'absolute',
-                'left':mouseX + 'px',
-                'top':mouseY + 'px'
-            };
-
-            $('#chartpseudotooltip').css(cssObj);
-            $('#chartpseudotooltip').show();
+                $('#chartpseudotooltip').css(cssObj);
+                $('#chartpseudotooltip').show();
+            }
         }
     },
     columnToolTipOut:function (ev) {
-        $('#chartpseudotooltip').html('');
-        $('#chartpseudotooltip').hide();
-        Chart.prevTooltip = {chart:null, text:""};
+
+        if (ev.relatedTarget == $("#chartpseudotooltip")[0])
+            $("#chartpseudotooltip").bind("mouseout", function f() {
+                e = event.toElement || event.relatedTarget;
+                if (e && (e.parentNode == this || e && (e.parentNode && e.parentNode.parentNode == this) ||
+                    e == this)) {
+                    return;
+                }
+                $("#chartpseudotooltip").unbind("mouseout", f);
+            });
+        else {
+            $('#chartpseudotooltip').html('');
+            $('#chartpseudotooltip').hide();
+            Chart.prevTooltip = {chart:null, text:""};
+        }
+
     },
 
     getPieChartCallback:function (target, params, styleProps) {
