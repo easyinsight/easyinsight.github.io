@@ -91,7 +91,7 @@
 <div class="container-fluid">
     <div class="row-fluid">
         <ul class="breadcrumb">
-            <li><a href="index.jsp">Data Sources</a> <span class="divider">/</span></li>
+            <li><a href="../index.jsp">Data Sources</a> <span class="divider">/</span></li>
             <li class="active"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></li>
         </ul>
     </div>
