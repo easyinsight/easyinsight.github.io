@@ -47,10 +47,11 @@ public class ReportCache {
         Map<CacheKey, EmbeddedResults> map = (Map<CacheKey, EmbeddedResults>) reportCache.get(dataSourceID);
         if (map == null) {
             map = new HashMap<CacheKey, EmbeddedResults>();
+
         }
         map.put(cacheKey, results);
         reportCache.remove(dataSourceID);
-        reportCache.put(cacheKey, results);
+        reportCache.put(dataSourceID, map);
     }
 
     public void flushResults(long dataSourceID) throws CacheException {

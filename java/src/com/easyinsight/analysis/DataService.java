@@ -531,6 +531,7 @@ public class DataService {
                 cacheKey = new CacheKey(reportID, filters);
                 EmbeddedResults embeddedResults = ReportCache.instance().getResults(dataSourceID, cacheKey);
                 if (embeddedResults != null) {
+                    System.out.println("*** Returning from cache");
                     return embeddedResults;
                 }
             }
