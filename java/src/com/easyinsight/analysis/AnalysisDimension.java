@@ -145,6 +145,7 @@ public class AnalysisDimension extends AnalysisItem {
             try {
                 Value newValue = new NumericValue(Integer.parseInt(stringValue.toString()));
                 newValue.setLinks(value.getLinks());
+                newValue.setValueExtension(value.getValueExtension());
                 value = newValue;
             } catch (NumberFormatException e) {
             }
