@@ -1,5 +1,7 @@
 package com.easyinsight.scheduler;
 
+import java.io.Serializable;
+
 /**
  * Created by IntelliJ IDEA.
  * User: abaldwin
@@ -7,7 +9,7 @@ package com.easyinsight.scheduler;
  * Time: 9:52:07 AM
  * To change this template use File | Settings | File Templates.
  */
-public class OutboundEvent {
+public class OutboundEvent implements Serializable {
     private long userId;
     private boolean broadcast = false;
 
