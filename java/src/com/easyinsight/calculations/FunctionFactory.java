@@ -225,6 +225,8 @@ public class FunctionFactory {
             return new Weeks();
         } else if (s.equals("dayofquarter")) {
             return new DayOfQuarter();
+        } else if (s.equals("hourofday")) {
+            return new HourOfDay();
         } else {
             return null;
         }

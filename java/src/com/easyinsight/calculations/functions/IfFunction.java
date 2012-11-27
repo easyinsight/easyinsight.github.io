@@ -13,13 +13,20 @@ import com.easyinsight.core.Value;
 public class IfFunction extends Function {
     public Value evaluate() {
 
-        if(params.get(0).toDouble() > 0)
-            return minusQuotes(params.get(1));
-        else
-            return minusQuotes(params.get(2));
+        if(getParameter(0).toDouble() > 0)
+            return minusQuotes(getParameter(1));
+        else {
+            return minusQuotes(getParameter(2));
+        }
+
     }
 
     public int getParameterCount() {
-        return 3;
+        return -1;
+    }
+
+    @Override
+    public boolean onDemand() {
+        return true;
     }
 }
