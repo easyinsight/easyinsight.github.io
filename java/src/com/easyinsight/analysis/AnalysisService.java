@@ -424,7 +424,7 @@ public class AnalysisService {
                 if (relatedProvider == null || "(Empty)".equals(relatedProvider)) {
                     return "We couldn't find " + location.toString() + " - " + provider.toString() + ".";
                 } else {
-                    row.addValue(relatedProviderField.getKey(), relatedProvider);
+                    row.addValue(new NamedKey("Related Provider"), relatedProvider);
                 }
             }
 
