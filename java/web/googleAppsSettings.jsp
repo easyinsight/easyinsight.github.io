@@ -44,6 +44,16 @@
                     Company Name
                 </label>
                 <input type="text" name="companyName" id="companyName" style="width:100%;font-size:14px;height:28px" autocapitalize="off" autocorrect="off" autoFocus/>
+                <%
+                    if (session.getAttribute("appsErrorString") != null) {
+                %>
+                }
+                <fieldset class="control-group error">
+                    <label class="formAreaP control-label" style="font-size: 12px;padding: 0;margin-bottom: 5px"><%= session.getAttribute("appsErrorString")%></label>
+                </fieldset>
+                <%
+                    }
+                %>
                 <div style="padding-top:15px">
                     By
                     clicking Create Account you agree to the <a href="/terms.html"
