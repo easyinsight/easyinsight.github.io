@@ -934,7 +934,17 @@ public class ExportService {
             }
             valueString = sdf.format(dateValue.getDate());
         } else {
-            valueString = value.toHTMLString();
+            if (value.type() == Value.NUMBER) {
+                int intValue = value.toDouble().intValue();
+                double doubleValue = value.toDouble().doubleValue();
+                if (intValue == doubleValue) {
+                    valueString = String.valueOf(intValue);
+                } else {
+                    valueString = value.toHTMLString();
+                }
+            } else {
+                valueString = value.toHTMLString();
+            }
             if (pdf && headerItem.hasType(AnalysisItemTypes.TEXT)) {
                 AnalysisText text = (AnalysisText) headerItem;
                 if (text.isHtml()) {
