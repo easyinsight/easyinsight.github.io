@@ -400,7 +400,7 @@ public class AnalysisService {
             }
 
             WSListDefinition list = new WSListDefinition();
-            list.setDataFeedID(dataSourceID);
+            list.setDataFeedID(dataSource.getDataFeedID());
             list.setFilterDefinitions(new ArrayList<FilterDefinition>());
             list.setColumns(Arrays.asList(locationField, providerField, relatedProviderField));
             DataSet dataSet1 = DataService.listDataSet(list, new InsightRequestMetadata(), conn);
