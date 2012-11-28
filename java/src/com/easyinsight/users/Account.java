@@ -699,7 +699,7 @@ public class Account {
             info.setAgainstCredit(true);
         } else {*/
 
-        BillingSystem billingSystem = new BrainTreeBillingSystem(ConfigLoader.instance().getBillingUsername(), ConfigLoader.instance().getBillingPassword());
+        BillingSystem billingSystem = new BrainTreeBlueBillingSystem();
         double amount = cost - credit;
         AccountCreditCardBillingInfo info = billingSystem.billAccount(getAccountID(), amount);
 

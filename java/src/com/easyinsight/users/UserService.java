@@ -1,6 +1,7 @@
 package com.easyinsight.users;
 
 import com.easyinsight.billing.BillingSystem;
+import com.easyinsight.billing.BrainTreeBlueBillingSystem;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -454,7 +455,7 @@ public class UserService {
     private void cancelAccount(Session session, Account a) {
         a.setAccountState(Account.CLOSING);
         a.setBillingInformationGiven(false);
-        BillingSystem billingSystem = new BrainTreeBillingSystem(ConfigLoader.instance().getBillingUsername(), ConfigLoader.instance().getBillingPassword());
+        BillingSystem billingSystem = new BrainTreeBlueBillingSystem();
         billingSystem.cancelPlan(a.getAccountID());
         session.save(a);
     }
