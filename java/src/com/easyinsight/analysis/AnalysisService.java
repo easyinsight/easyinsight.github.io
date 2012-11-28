@@ -13,7 +13,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.dataset.PersistableDataSetForm;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.security.*;
@@ -34,8 +33,6 @@ import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.storage.CachedCalculationTransform;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IDataTransform;
-import com.easyinsight.userupload.AnalysisItemFormatMapper;
-import com.easyinsight.userupload.ExcelUploadFormat;
 import nu.xom.Builder;
 import nu.xom.Document;
 import org.antlr.runtime.ANTLRStringStream;
@@ -424,7 +421,7 @@ public class AnalysisService {
                 if (relatedProvider == null || "(Empty)".equals(relatedProvider)) {
                     return "We couldn't find " + location.toString() + " - " + provider.toString() + ".";
                 } else {
-                    row.addValue(new NamedKey("Related Provider"), relatedProvider);
+                    row.addValue(new NamedKey("beutk2zd6.6"), relatedProvider);
                 }
             }
 
@@ -900,35 +897,36 @@ public class AnalysisService {
                         }
                         filters.add(filterValueDefinition);
                     }
-                    if (drillThrough.isAddAllFilters()) {
-                        filters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
-                                analysisItem));
-                        List<FilterDefinition> fieldFilters = analysisItem.getFilters();
-                        for (FilterDefinition filter : fieldFilters) {
-                            FilterDefinition clone;
-                            try {
-                                clone = filter.clone();
-                            } catch (CloneNotSupportedException e) {
-                                throw new RuntimeException(e);
-                            }
-                            clone.setToggleEnabled(true);
-                            clone.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                            filters.add(clone);
+
+                }
+                if (drillThrough.isAddAllFilters()) {
+                    filters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
+                            analysisItem));
+                }
+                if (drillThrough.isFilterRowGroupings()) {
+                    List<FilterDefinition> fieldFilters = analysisItem.getFilters();
+                    for (FilterDefinition filter : fieldFilters) {
+                        FilterDefinition clone;
+                        try {
+                            clone = filter.clone();
+                        } catch (CloneNotSupportedException e) {
+                            throw new RuntimeException(e);
                         }
+                        clone.setToggleEnabled(true);
+                        clone.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                        filters.add(clone);
                     }
-                    if (drillThrough.isFilterRowGroupings()) {
-                        for (AnalysisItem grouping : report.getAllAnalysisItems()) {
-                            if (grouping.hasType(AnalysisItemTypes.DIMENSION)) {
-                                FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-                                filterValueDefinition.setField(grouping);
-                                filterValueDefinition.setSingleValue(true);
-                                filterValueDefinition.setEnabled(true);
-                                filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                                filterValueDefinition.setToggleEnabled(true);
-                                filterValueDefinition.setInclusive(true);
-                                filterValueDefinition.setFilteredValues(Arrays.asList(data.get(grouping.qualifiedName())));
-                                filters.add(filterValueDefinition);
-                            }
+                    for (AnalysisItem grouping : report.getAllAnalysisItems()) {
+                        if (grouping.hasType(AnalysisItemTypes.DIMENSION)) {
+                            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+                            filterValueDefinition.setField(grouping);
+                            filterValueDefinition.setSingleValue(true);
+                            filterValueDefinition.setEnabled(true);
+                            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                            filterValueDefinition.setToggleEnabled(true);
+                            filterValueDefinition.setInclusive(true);
+                            filterValueDefinition.setFilteredValues(Arrays.asList(data.get(grouping.qualifiedName())));
+                            filters.add(filterValueDefinition);
                         }
                     }
                 }
