@@ -1,5 +1,6 @@
 package com.easyinsight.billing;
 
+import com.easyinsight.users.AccountCreditCardBillingInfo;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -22,7 +23,13 @@ import java.io.IOException;
  * Date: Jun 26, 2009
  * Time: 10:13:10 AM
  */
-public class BrainTreeBillingSystem {
+public class BrainTreeBillingSystem implements BillingSystem {
+
+    public BrainTreeBillingSystem(String username, String password) {
+        setUsername(username);
+        setPassword(password);
+    }
+
     public String getUsername() {
         return username;
     }
@@ -55,11 +62,11 @@ public class BrainTreeBillingSystem {
         }
     }
 
-    public Map<String, String> billAccount(long accountID, double amount) {
+    public AccountCreditCardBillingInfo billAccount(long accountID, double amount) {
         return billAccount(accountID, amount, false);
     }
 
-    public Map<String, String> billAccount(long accountID, double amount, boolean auth) {
+    public AccountCreditCardBillingInfo billAccount(long accountID, double amount, boolean auth) {
         HttpClient client = new HttpClient();
 
         AccountActivityStorage storage = new AccountActivityStorage();
@@ -84,7 +91,20 @@ public class BrainTreeBillingSystem {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        return params;
+        return createInfo(accountID, amount, params);
+    }
+
+    private AccountCreditCardBillingInfo createInfo(long accountID, double amount, Map<String, String> params) {
+        AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
+        info.setAmount(String.valueOf(amount));
+        info.setAccountId(accountID);
+        info.setResponse(params.get("response"));
+        info.setResponseCode(params.get("response_code"));
+        info.setResponseString(params.get("responsetext"));
+        info.setTransactionID(params.get("transactionid"));
+        info.setTransactionTime(new Date());
+        info.setSuccessful(info.getResponse().equals("1"));
+        return info;
     }
 
 }

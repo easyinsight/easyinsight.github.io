@@ -26,6 +26,10 @@ public class ConfigLoader {
     private String billingKeyID;
     private String billingKey;
 
+    private String merchantID;
+    private String billingPublicKey;
+    private String billingPrivateKey;
+
     private String googleUserName;
     private String googlePassword;
     private String outputLogPath;
@@ -155,6 +159,30 @@ public class ConfigLoader {
         this.localURL = localURL;
     }
 
+    public String getBillingPrivateKey() {
+        return billingPrivateKey;
+    }
+
+    public void setBillingPrivateKey(String billingPrivateKey) {
+        this.billingPrivateKey = billingPrivateKey;
+    }
+
+    public String getBillingPublicKey() {
+        return billingPublicKey;
+    }
+
+    public void setBillingPublicKey(String billingPublicKey) {
+        this.billingPublicKey = billingPublicKey;
+    }
+
+    public String getMerchantID() {
+        return merchantID;
+    }
+
+    public void setMerchantID(String merchantID) {
+        this.merchantID = merchantID;
+    }
+
     private ConfigLoader() {
         try {
             URL url = getClass().getClassLoader().getResource("eiconfig.properties");
@@ -175,6 +203,10 @@ public class ConfigLoader {
 
             googleUserName = (String) properties.get("google.username");
             googlePassword = (String) properties.get("google.password");
+
+            billingPublicKey = (String) properties.get("billing.blue.key");
+            billingPrivateKey = (String) properties.get("billing.blue.secretKey");
+            merchantID = (String) properties.get("billing.blue.merchantKey");
 
             taskRunner = Boolean.valueOf((String) properties.get("taskrunner"));
 

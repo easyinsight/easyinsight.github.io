@@ -1,6 +1,8 @@
 package com.easyinsight.users;
 
+import com.easyinsight.billing.BillingSystem;
 import com.easyinsight.billing.BrainTreeBillingSystem;
+import com.easyinsight.billing.BrainTreeBlueBillingSystem;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.logging.LogClass;
@@ -12,7 +14,6 @@ import javax.persistence.*;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Date;
 
 /**
@@ -651,21 +652,12 @@ public class Account {
     public AccountCreditCardBillingInfo upgradeBill(AccountTypeChange accountTypeChange, double charge, Session session) {
         LogClass.info("Starting billing for account ID:" + this.getAccountID());
         // the indirection here is to support invoice billingSystem later
-        BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
-        billingSystem.setUsername(ConfigLoader.instance().getBillingUsername());
-        billingSystem.setPassword(ConfigLoader.instance().getBillingPassword());
-        Map<String, String> params = billingSystem.billAccount(getAccountID(), charge);
+//        BillingSystem billingSystem = new BrainTreeBillingSystem(ConfigLoader.instance().getBillingUsername(), ConfigLoader.instance().getBillingPassword());
+        BillingSystem billingSystem = new BrainTreeBlueBillingSystem();
+        AccountCreditCardBillingInfo info = billingSystem.billAccount(getAccountID(), charge);
         boolean successful;
-        AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
-        info.setAmount(String.valueOf(charge));
-        info.setAccountId(this.getAccountID());
-        info.setResponse(params.get("response"));
-        info.setResponseCode(params.get("response_code"));
-        info.setResponseString(params.get("responsetext"));
-        info.setTransactionID(params.get("transactionid"));
-        info.setTransactionTime(new Date());
         info.setDays(accountTypeChange.isYearly() ? 365 : 28);
-        if(!params.get("response").equals("1")) {
+        if(!info.isSuccessful()) {
             successful = false;
         }
         else {
@@ -699,8 +691,6 @@ public class Account {
         double credit = 0;
         double cost = createTotalCost();
 
-        AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
-
         /*if (credit >= cost) {
             info.setAmount(String.valueOf(cost));
             info.setTransactionTime(new Date());
@@ -708,14 +698,13 @@ public class Account {
             info.setDays(getBillingDayOfMonth() != null ? 365 : 28);
             info.setAgainstCredit(true);
         } else {*/
-        BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
-        billingSystem.setUsername(ConfigLoader.instance().getBillingUsername());
-        billingSystem.setPassword(ConfigLoader.instance().getBillingPassword());
+
+        BillingSystem billingSystem = new BrainTreeBillingSystem(ConfigLoader.instance().getBillingUsername(), ConfigLoader.instance().getBillingPassword());
         double amount = cost - credit;
-        Map<String, String> params = billingSystem.billAccount(getAccountID(), amount);
+        AccountCreditCardBillingInfo info = billingSystem.billAccount(getAccountID(), amount);
 
         boolean successful;
-        if(!params.get("response").equals("1")) {
+        if(!info.isSuccessful()) {
             if (getBillingFailures() >= 7) {
                 setAccountState(Account.BILLING_FAILED);
             } else {
@@ -730,13 +719,6 @@ public class Account {
             successful = true;
         }
 
-        info.setAmount(String.valueOf(amount));
-        info.setAccountId(this.getAccountID());
-        info.setResponse(params.get("response"));
-        info.setResponseCode(params.get("response_code"));
-        info.setResponseString(params.get("responsetext"));
-        info.setTransactionID(params.get("transactionid"));
-        info.setTransactionTime(new Date());
         info.setDays(getBillingMonthOfYear() != null ? 365 : 28);
 
         if (successful) {
@@ -1022,7 +1004,7 @@ public class Account {
     public static double calculateCredit(Account account) {
         double totalCredit = 0;
         for (AccountCreditCardBillingInfo info : account.getBillingInfo()) {
-            if ("100".equals(info.getResponseCode())) {
+            if ("100".equals(info.getResponseCode()) || info.isSuccessful()) {
                 double amount = Double.parseDouble(info.getAmount());
                 DateTime lastTime = new DateTime(info.getTransactionTime());
                 DateTime now = new DateTime(System.currentTimeMillis());

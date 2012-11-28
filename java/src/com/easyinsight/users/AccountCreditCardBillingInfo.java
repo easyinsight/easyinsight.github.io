@@ -45,6 +45,9 @@ public class AccountCreditCardBillingInfo {
     @Column(name="amount")
     private String amount;
 
+    @Column(name="successful")
+    private boolean successful;
+
     @Column(name="response")
     private String response;
 
@@ -140,6 +143,14 @@ public class AccountCreditCardBillingInfo {
 
     public void setResponseString(String responseString) {
         this.responseString = responseString;
+    }
+
+    public boolean isSuccessful() {
+        return successful;
+    }
+
+    public void setSuccessful(boolean successful) {
+        this.successful = successful;
     }
 
     public String toInvoiceText(Account account) {
