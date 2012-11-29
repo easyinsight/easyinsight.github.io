@@ -115,3 +115,7 @@ a.dp-choose-date {
 a.trendDrillthrough {
     color:inherit;
 }
+
+.sortData {
+    display: none;
+}

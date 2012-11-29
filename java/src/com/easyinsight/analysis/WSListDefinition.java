@@ -220,7 +220,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         List<String> list = new ArrayList<String>();
         list.add("/js/visualizations/util.js");
         list.add("/js/visualizations/list.js");
-        list.add("/js/jquery.dataTables.min.js");
+        list.add("/js/jquery.dataTables.js");
         list.add("/js/color.js");
         return list;
     }
@@ -245,7 +245,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
 
             String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
 
-            return "$.get('/app/htmlExport?reportID=" + getUrlKey() +"&embedded="+htmlReportMetadata.isEmbedded()+ "&" + timezoneOffset + "&'+ strParams, List.getCallback('" + targetDiv + "', " + jsonProperties() + ", " + analysisItemMap.toString() +"));";
+            return "$.get('/app/htmlExport?reportID=" + getUrlKey() +"&embedded="+htmlReportMetadata.isEmbedded()+ "&" + timezoneOffset + "&'+ strParams, List.getCallback('" + targetDiv + "', " + jsonProperties() + ", " + analysisItemMap.toString() +", " + columns.size() + "));";
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

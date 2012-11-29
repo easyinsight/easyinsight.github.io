@@ -496,9 +496,9 @@ public class GoogleDataProvider {
             }
             String fieldType = field.getAttribute("field_type").getValue();
             Attribute attributeMode = field.getAttribute("mode");
-            if (attributeMode != null && "lookup".equals(attributeMode.getValue())) {
-                continue;
-            }
+//            if (attributeMode != null && "lookup".equals(attributeMode.getValue())) {
+//                continue;
+//            }
             Nodes uniqueNodes = field.query("unique/text()");
             boolean unique = false;
             if (uniqueNodes.size() > 0) {

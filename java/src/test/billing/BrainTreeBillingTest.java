@@ -1,6 +1,7 @@
 package test.billing;
 
 import com.easyinsight.billing.BillingSystem;
+import com.easyinsight.billing.BillingSystemFactory;
 import com.easyinsight.billing.BrainTreeBlueBillingSystem;
 import com.easyinsight.users.AccountCreditCardBillingInfo;
 import junit.framework.TestCase;
@@ -18,7 +19,7 @@ public class BrainTreeBillingTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 //        billingSystem = new BrainTreeBillingSystem("testapi", "password1");
-        billingSystem = new BrainTreeBlueBillingSystem();
+        billingSystem = BillingSystemFactory.getBillingSystem();
     }
 
     public void testBillTenDollars() {
@@ -30,7 +31,7 @@ public class BrainTreeBillingTest extends TestCase {
     }
 
     public void testDelete() {
-        billingSystem.cancelPlan(151);
+//        billingSystem.cancelPlan(151);
 
     }
 }

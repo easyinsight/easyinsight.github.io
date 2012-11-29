@@ -1,6 +1,7 @@
 package com.easyinsight.users;
 
 import com.easyinsight.billing.BillingSystem;
+import com.easyinsight.billing.BillingSystemFactory;
 import com.easyinsight.billing.BrainTreeBillingSystem;
 import com.easyinsight.billing.BrainTreeBlueBillingSystem;
 import com.easyinsight.config.ConfigLoader;
@@ -653,7 +654,7 @@ public class Account {
         LogClass.info("Starting billing for account ID:" + this.getAccountID());
         // the indirection here is to support invoice billingSystem later
 //        BillingSystem billingSystem = new BrainTreeBillingSystem(ConfigLoader.instance().getBillingUsername(), ConfigLoader.instance().getBillingPassword());
-        BillingSystem billingSystem = new BrainTreeBlueBillingSystem();
+        BillingSystem billingSystem = BillingSystemFactory.getBillingSystem();
         AccountCreditCardBillingInfo info = billingSystem.billAccount(getAccountID(), charge);
         boolean successful;
         info.setDays(accountTypeChange.isYearly() ? 365 : 28);
@@ -699,8 +700,8 @@ public class Account {
             info.setAgainstCredit(true);
         } else {*/
 
-        BillingSystem billingSystem = new BrainTreeBlueBillingSystem();
         double amount = cost - credit;
+        BillingSystem billingSystem = BillingSystemFactory.getBillingSystem();
         AccountCreditCardBillingInfo info = billingSystem.billAccount(getAccountID(), amount);
 
         boolean successful;

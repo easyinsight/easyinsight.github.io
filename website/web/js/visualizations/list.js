@@ -1,5 +1,28 @@
+$(function() {
+    console.log("starting...");
+    jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+        "sortValue-pre": function ( a ) {
+            var c = $("<td>" + a + "</td>").html();
+            var s = $(c, ".sortData").html();
+
+            if(isNaN(s))
+                return s;
+            else
+                return +s;
+        },
+
+        "sortValue-asc": function ( a, b ) {
+            return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+        },
+
+        "sortValue-desc": function ( a, b ) {
+            return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+        }
+    } );
+})
+
 List = {
-    getCallback:function (targetDiv, properties, sorting) {
+    getCallback:function (targetDiv, properties, sorting, numColumns) {
         return function (data) {
             Utils.noData(data, function () {
                 var i = 1;
@@ -9,9 +32,15 @@ List = {
                     i = i + 1;
                 }
 
+                var array = [];
+                var j;
+                for(j = 0;j < numColumns;j++) {
+                    array.push({"sType": "sortValue"})
+                }
+
                 List.createClasses(properties, targetDiv);
                 $('#' + targetDiv + ' .reportArea').html(data);
-                $('#' + targetDiv + ' .reportArea table').dataTable({bFilter:false, bPaginate:false, bInfo:false, aaSorting: a })
+                $('#' + targetDiv + ' .reportArea table').dataTable({bFilter:false, bPaginate:false, bInfo:false, aaSorting: a, aoColumns: array })
             }, null, targetDiv);
         }
     },

@@ -2456,6 +2456,16 @@ public class ExportService {
                         }
                         sb.append("<td style=\"").append(styleString.toString()).append("\">");
                         //sb.append("<td>");
+                        if(!exportProperties.isEmailed()) {
+                            sb.append("<span class='sortData'>");
+                            Value v = value;
+                            if(value.getSortValue() != null) {
+                                v = value.getSortValue();
+                            }
+                            sb.append(StringEscapeUtils.escapeHtml(v.toHTMLString()));
+                            sb.append("</span>");
+                        }
+
                         Link defaultLink = linkMap.get(analysisItem);
                         boolean showLink = false;
                         if (defaultLink != null) {

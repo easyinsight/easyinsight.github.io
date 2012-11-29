@@ -34,7 +34,11 @@ public class ConfigLoader {
     private String googlePassword;
     private String outputLogPath;
 
+    private int billingSystem;
+
     private boolean taskRunner;
+
+    private boolean billingEnabled;
 
     public String getOutputLogPath() {
         return outputLogPath;
@@ -213,10 +217,29 @@ public class ConfigLoader {
             localURL = (String) properties.get("localurl");
 
             production = Boolean.valueOf((String) properties.get("production"));
+            billingSystem = Integer.valueOf((String) properties.get("billing.system"));
+
+            billingEnabled = Boolean.valueOf((String) properties.get("billing.enabled"));
             
         } catch (IOException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    public int getBillingSystem() {
+        return billingSystem;
+    }
+
+    public void setBillingSystem(int billingSystem) {
+        this.billingSystem = billingSystem;
+    }
+
+    public boolean isBillingEnabled() {
+        return billingEnabled;
+    }
+
+    public void setBillingEnabled(boolean billingEnabled) {
+        this.billingEnabled = billingEnabled;
     }
 }

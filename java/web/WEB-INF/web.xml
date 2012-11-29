@@ -29,6 +29,11 @@
     </filter>
 
     <filter>
+        <filter-name>BillingEnabled</filter-name>
+        <filter-class>com.easyinsight.html.BillingEnabledFilter</filter-class>
+    </filter>
+
+    <filter>
         <filter-name>NoCache</filter-name>
         <filter-class>com.easyinsight.html.NoCacheFilter</filter-class>
     </filter>
@@ -78,6 +83,11 @@
         <url-pattern>/loginAction.jsp</url-pattern>
         <url-pattern>/forgotPasswordAction.jsp</url-pattern>
         <url-pattern>/newaccount/accountCreation.jsp</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>BillingEnabled</filter-name>
+        <url-pattern>/billing/*</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
