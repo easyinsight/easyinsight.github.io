@@ -1,23 +1,49 @@
 <?xml version="1.0"?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" verticalAlign="middle" paddingLeft="5" paddingRight="5"
-        verticalScrollPolicy="off" horizontalScrollPolicy="off" mouseChildren="false">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" verticalAlign="middle" paddingLeft="5" paddingRight="5"
+        verticalScrollPolicy="off" horizontalScrollPolicy="off" verticalGap="0">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.DrillThrough;
+        import com.easyinsight.analysis.DrillThroughEvent;
+        import com.easyinsight.analysis.DrillThroughExecutor;
+        import com.easyinsight.analysis.Link;
+        import com.easyinsight.analysis.ReportWindowEvent;
+        import com.easyinsight.analysis.TextValueExtension;
         import com.easyinsight.analysis.TrendOutcome;
+        import com.easyinsight.analysis.URLLink;
         import com.easyinsight.analysis.formatter.PercentageNumberFormatter;
         import com.easyinsight.analysis.list.ListDefinition;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.kpi.KPIOutcome;
         import com.easyinsight.listing.ReportEditorAnalyzeSource;
         import com.easyinsight.pseudocontext.StandardContextWindow;
+        import com.easyinsight.report.ReportNavigationEvent;
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.binding.utils.BindingUtils;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.controls.Image;
+        import mx.core.UIComponent;
 
         import mx.formatters.Formatter;
 
         private var _outcome:TrendOutcome;
 
-        [Bindable]
-        private var trendIcon:Class;
+
+        private var _trendIcon:Class;
+
+
+        [Bindable(event="trendIconChanged")]
+        public function get trendIcon():Class {
+            return _trendIcon;
+        }
+
+        public function set trendIcon(value:Class):void {
+            if (_trendIcon == value) return;
+            _trendIcon = value;
+            dispatchEvent(new Event("trendIconChanged"));
+        }
 
         [Bindable]
         private var currentValue:String;
@@ -33,6 +59,92 @@
 
         [Bindable]
         private var leftValueWidth:int;
+
+        private var _trendDefinition:TrendDefinition;
+
+        public function set trendDefinition(value:TrendDefinition):void {
+            _trendDefinition = value;
+        }
+
+        [Bindable]
+        private var majorFontSize:int;
+
+        [Bindable]
+        private var minorFontSize:int;
+
+        [Bindable]
+        private var topHeight:int;
+
+        private var defaultLink:Link;
+
+        private static function onRollOver(event:MouseEvent):void {
+            var target:UIComponent = event.currentTarget as UIComponent;
+            target.setStyle("textDecoration", "underline");
+        }
+
+        private static function onRollOut(event:MouseEvent):void {
+            var target:UIComponent = event.currentTarget as UIComponent;
+            target.setStyle("textDecoration", "none");
+        }
+
+        private function onClick(event:MouseEvent):void {
+            if (defaultLink is URLLink) {
+                var urlLink:URLLink = defaultLink as URLLink;
+                var url:String = data[urlLink.label + "_link"];
+                try {
+                    navigateToURL(new URLRequest(url), "_blank");
+                } catch (e:Error) {
+                    Alert.show(e.message);
+                }
+            } else if (defaultLink is DrillThrough) {
+                var drillThrough:DrillThrough = defaultLink as DrillThrough;
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, _outcome, _outcome.measure, _trendDefinition);
+                executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
+                executor.send();
+            }
+        }
+
+        private function onDrill(event:DrillThroughEvent):void {
+            if (event.drillThrough.miniWindow) {
+                dispatchEvent(new ReportWindowEvent(event.drillThroughResponse.descriptor.id, 0, 0, event.drillThroughResponse.filters, InsightDescriptor(event.drillThroughResponse.descriptor).dataFeedID,
+                        InsightDescriptor(event.drillThroughResponse.descriptor).reportType));
+            } else {
+                dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.drillThroughResponse.descriptor, event.drillThroughResponse.filters));
+            }
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            majorFontSize = _trendDefinition.majorFontSize;
+            minorFontSize = _trendDefinition.minorFontSize;
+            topHeight = majorFontSize + 10;
+            if (_outcome.measure.links != null && _outcome.measure.links.length > 0) {
+                startLabel.addEventListener(MouseEvent.ROLL_OVER, onRollOver);
+                startLabel.addEventListener(MouseEvent.ROLL_OUT, onRollOut);
+                startLabel.addEventListener(MouseEvent.CLICK, onClick);
+                labelArea.addEventListener(MouseEvent.ROLL_OVER, onRollOver);
+                labelArea.addEventListener(MouseEvent.ROLL_OUT, onRollOut);
+                labelArea.addEventListener(MouseEvent.CLICK, onClick);
+                percentChangeLabel.addEventListener(MouseEvent.ROLL_OVER, onRollOver);
+                percentChangeLabel.addEventListener(MouseEvent.ROLL_OUT, onRollOut);
+                percentChangeLabel.addEventListener(MouseEvent.CLICK, onClick);
+                defaultLink = _outcome.measure.links.getItemAt(0) as Link;
+            }
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (Math.max(majorFontSize, minorFontSize) > 20) {
+                var trendImage:Image = new Image();
+                BindingUtils.bindProperty(trendImage, "source", this, "trendIcon");
+                topBox.addChildAt(trendImage, 1);
+            }
+        }
+
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            labelArea.width = topBox.width;
+        }
 
         override public function set data(value:Object):void {
             _outcome = value as TrendOutcome;
@@ -69,32 +181,35 @@
             dispatchEvent(event);
         }
 
-        private function getColor(outcome:TrendOutcome):uint {
+        private static function getColor(outcome:TrendOutcome):uint {
             var color:uint;
-            switch (outcome.outcome) {
-                case KPIOutcome.EXCEEDING_GOAL:
-                case KPIOutcome.POSITIVE:
-                    color = 0x00BB00;
-                    break;
-                case KPIOutcome.NEGATIVE:
-                    color = 0xBB0000;
-                    break;
-                case KPIOutcome.NEUTRAL:
-                case KPIOutcome.NO_DATA:
-                default:
-                    trendColor = 0x000000;
-                    break;
+            if (outcome.now.valueExtension != null && outcome.now.valueExtension is TextValueExtension) {
+                var ext:TextValueExtension = outcome.now.valueExtension as TextValueExtension;
+                color = ext.color;
+            } else {
+                switch (outcome.outcome) {
+                    case KPIOutcome.EXCEEDING_GOAL:
+                    case KPIOutcome.POSITIVE:
+                        color = 0x00BB00;
+                        break;
+                    case KPIOutcome.NEGATIVE:
+                        color = 0xBB0000;
+                        break;
+                    case KPIOutcome.NEUTRAL:
+                    case KPIOutcome.NO_DATA:
+                    default:
+                        color = 0x000000;
+                        break;
+                }
             }
             return color;
         }
         ]]></mx:Script>
-    <mx:Label text="{currentValue}" fontSize="32" color="{trendColor}" width="{leftValueWidth}" textAlign="center"/>
-    <mx:VBox verticalScrollPolicy="off" horizontalScrollPolicy="off">
-        <mx:HBox verticalAlign="middle" verticalScrollPolicy="off" horizontalScrollPolicy="off">
-            <mx:Image source="{trendIcon}"/>
-            <mx:Label text="{percentChange}" fontSize="18" color="{trendColor}" width="80" textAlign="center"/>
-        </mx:HBox>
-        <util:AutoSizeTextArea text="{trendLabel}" fontSize="16" width="160" editable="false" selectable="false" focusEnabled="false"
-                verticalScrollPolicy="off" horizontalScrollPolicy="off" fontFamily="Cabin" backgroundAlpha="0"/>
-    </mx:VBox>
-</mx:HBox>
+    <mx:HBox verticalScrollPolicy="off" horizontalScrollPolicy="off" horizontalGap="0" verticalAlign="middle" height="{topHeight}" id="topBox">
+        <mx:Label text="{currentValue}" fontSize="{majorFontSize}" color="{trendColor}" width="{leftValueWidth}" textAlign="center" id="startLabel"/>
+        <!--<mx:Image source="{trendIcon}"/>-->
+        <mx:Label text="{percentChange}" fontSize="{minorFontSize}" color="{trendColor}" textAlign="center" id="percentChangeLabel"/>
+    </mx:HBox>
+    <util:AutoSizeTextArea text="{trendLabel}" fontSize="{minorFontSize}" editable="false" selectable="false" focusEnabled="false" width="132"
+            verticalScrollPolicy="off" horizontalScrollPolicy="off" backgroundAlpha="0" textAlign="center" id="labelArea" borderStyle="solid" borderThickness="0"/>
+</mx:VBox>

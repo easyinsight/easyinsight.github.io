@@ -12,6 +12,7 @@
             vbox.removeAllChildren();
             if (dataSet.length > 0) {
                 var trendDef:TrendDefinition = analysisDefinition as TrendDefinition;
+                vbox.direction = trendDef.direction;
                 var trends:ArrayCollection = new ArrayCollection();
                 var width:int = 0;
                 for (var i:int = 0; i < dataSet.length; i++) {
@@ -19,6 +20,7 @@
                     var mFormatter:Formatter = trendOutcome.measure.getFormatter();
                     var value:String = mFormatter.format(trendOutcome.now.getValue());
                     width = Math.max(width,  uiComp.measureText(value).width);
+                    width += trendDef.majorFontSize;
                     trendOutcome.dataSourceID = trendDef.dataFeedID;
                     trends.addItem(trendOutcome);
                 }
@@ -27,24 +29,24 @@
                     if (updateOutcome.measure.reportFieldExtension != null && updateOutcome.measure.reportFieldExtension is TrendReportFieldExtension &&
                             TrendReportFieldExtension(updateOutcome.measure.reportFieldExtension).date) {
                         var r:AltTrendRenderer = new AltTrendRenderer();
+                        r.trendDefinition = trendDef;
                         r.data = updateOutcome;
                         vbox.addChild(r);
                     } else {
                         var singleNumber:BigNumberTrendRenderer = new BigNumberTrendRenderer();
+                        singleNumber.trendDefinition = trendDef;
                         singleNumber.data = updateOutcome;
                         vbox.addChild(singleNumber);
                     }
 
                 }
-                /*list.rowCount = trends.length;
-                list.dataProvider = trends;*/
             }
         }
 
         ]]></mx:Script>
     <mx:Text id="uiComp" fontSize="32" visible="false"/>
-    <mx:VBox id="vbox">
+    <mx:Box id="vbox">
 
-    </mx:VBox>
+    </mx:Box>
     <!--<mx:List id="list" fontSize="14" selectable="false" itemRenderer="com.easyinsight.analysis.trend.AltTrendRenderer" variableRowHeight="true"/>-->
 </mx:Canvas>

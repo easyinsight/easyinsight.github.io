@@ -19,6 +19,9 @@ import mx.collections.ArrayCollection;
 public class TrendDefinition extends KPIDefinition {
 
     public var trendReportID:int;
+    public var majorFontSize:int = 32;
+    public var minorFontSize:int = 16;
+    public var direction:String = "horizontal";
 
     public function TrendDefinition() {
     }

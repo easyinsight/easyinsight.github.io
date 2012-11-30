@@ -19,6 +19,17 @@ import java.util.*;
 public class WSTrendDefinition extends WSKPIDefinition {
 
     private long trendReportID;
+    private int majorFontSize;
+    private int minorFontSize;
+    private String direction;
+
+    public String getDirection() {
+        return direction;
+    }
+
+    public void setDirection(String direction) {
+        this.direction = direction;
+    }
 
     public long getTrendReportID() {
         return trendReportID;
@@ -31,6 +42,38 @@ public class WSTrendDefinition extends WSKPIDefinition {
     @Override
     public String getDataFeedType() {
         return AnalysisTypes.TREND;
+    }
+
+    public int getMajorFontSize() {
+        return majorFontSize;
+    }
+
+    public void setMajorFontSize(int majorFontSize) {
+        this.majorFontSize = majorFontSize;
+    }
+
+    public int getMinorFontSize() {
+        return minorFontSize;
+    }
+
+    public void setMinorFontSize(int minorFontSize) {
+        this.minorFontSize = minorFontSize;
+    }
+
+    @Override
+    public void populateProperties(List<ReportProperty> properties) {
+        super.populateProperties(properties);
+        majorFontSize = (int) findNumberProperty(properties, "majorFontSize", 32);
+        minorFontSize = (int) findNumberProperty(properties, "minorFontSize", 16);
+        direction = findStringProperty(properties, "direction", "horizontal");
+    }
+
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportNumericProperty("majorFontSize", majorFontSize));
+        properties.add(new ReportNumericProperty("minorFontSize", minorFontSize));
+        properties.add(new ReportStringProperty("direction", direction));
+        return properties;
     }
 
     @Override

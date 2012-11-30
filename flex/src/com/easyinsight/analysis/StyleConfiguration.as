@@ -25,6 +25,7 @@ import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.analysis.summary.SummaryDefinition;
 import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
+import com.easyinsight.analysis.trend.TrendDefinition;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.analysis.ytd.CompareYearsDefinition;
@@ -290,6 +291,11 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Header Width", "headerWidth", CombinedVerticalListDefinition(report).headerWidth, report, 100, 400));
             items.addItem(new NumericReportFormItem("Column Width", "columnWidth", CombinedVerticalListDefinition(report).columnWidth, report, 100, 400));
             items.addItem(new CheckBoxReportFormItem("Hide Empty Rows", "removeEmptyRows", CombinedVerticalListDefinition(report).removeEmptyRows, report));
+        }
+        if (report is TrendDefinition) {
+            items.addItem(new NumericReportFormItem("Major Font Size", "majorFontSize", TrendDefinition(report).majorFontSize, report, 8, 48));
+            items.addItem(new NumericReportFormItem("Minor Font Size", "minorFontSize", TrendDefinition(report).minorFontSize, report, 8, 48));
+            items.addItem(new ComboBoxReportFormItem("Direction", "direction", TrendDefinition(report).direction, report, [ "horizontal", "vertical" ]));
         }
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
         items.addItem(new CheckBoxReportFormItem("Filter Optimization", "lookupTableOptimization", report.lookupTableOptimization, report));
