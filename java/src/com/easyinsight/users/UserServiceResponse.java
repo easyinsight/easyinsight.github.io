@@ -11,7 +11,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.List;
 
 /**
  * User: jboe
@@ -104,7 +103,7 @@ public class UserServiceResponse {
 
     private static UserServiceResponse createResponse(User user, ApplicationSkin applicationSkin, String personaName)  {
         Account account = user.getAccount();
-        System.out.println("Log in from " + user.getUserID() + " - " + user.getEmail());
+        LogClass.info("Log in from " + user.getUserID() + " - " + user.getEmail());
         byte[] bytes = null;
         Date newsDate = null;
         boolean accountOverSize = false;
@@ -118,9 +117,16 @@ public class UserServiceResponse {
             if (rs.next()) {
                 newsDate = new Date(rs.getTimestamp(1).getTime());
             }
-            /*List<DataSourceStats> statsList = UserAccountAdminService.sizeDataSources(conn, account.getAccountID());
-            long usedSize = UserAccountAdminService.usedSize(statsList);
-            accountOverSize = usedSize > account.getMaxSize();*/
+            PreparedStatement stmt = conn.prepareStatement("SELECT CURRENT_SIZE, MAX_DAYS_OVER_SIZE_BOUNDARY FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            stmt.setLong(1, user.getAccount().getAccountID());
+            ResultSet daysRS = stmt.executeQuery();
+            if (daysRS.next()) {
+                long currentSize = daysRS.getLong(1);
+                int maxDays = daysRS.getInt(2);
+                if (maxDays != -1) {
+                    accountOverSize = currentSize > account.getMaxSize();
+                }
+            }
         } catch (Exception e) {
             LogClass.error(e);
         } finally {

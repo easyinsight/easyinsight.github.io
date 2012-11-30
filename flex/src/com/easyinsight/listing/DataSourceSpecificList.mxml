@@ -41,6 +41,7 @@
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.events.CloseEvent;
         import mx.events.ListEvent;
+        import mx.formatters.DateFormatter;
         import mx.managers.PopUpManager;
         import mx.utils.ObjectUtil;
 
@@ -51,6 +52,23 @@
 
         private function onCreation():void {
             addEventListener("startedDragging", onStartedDragging);
+            switch (User.getInstance().dateFormat) {
+                case 0:
+                    formatter.formatString = "MM/DD/YYYY HH:NN";
+                    break;
+                case 1:
+                    formatter.formatString = "YYYY-MM-DD HH:NN";
+                    break;
+                case 2:
+                    formatter.formatString = "DD-MM-YYYY HH:NN";
+                    break;
+                case 3:
+                    formatter.formatString = "DD/MM/YYYY HH:NN";
+                    break;
+                case 4:
+                    formatter.formatString = "DD.MM.YYYY HH:NN";
+                    break;
+            }
         }
 
         private function onStartedDragging(event:Event):void {
@@ -263,6 +281,16 @@
 
         private var columnsInvalid:Boolean = false;
 
+        private var formatter:DateFormatter = new DateFormatter();
+
+        private function createDateLabelFunction(object:Object, column:AdvancedDataGridColumn):String {
+            if (object is EIDescriptor) {
+                return formatter.format(EIDescriptor(object).creationDate);
+            } else {
+                return "";
+            }
+        }
+
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
             super.updateDisplayList(unscaledWidth, unscaledHeight);
             if (dataChanged) {
@@ -285,7 +313,8 @@
                 creationDateColumn.width = 140;
                 creationDateColumn.headerText = "Creation Date";
                 creationDateColumn.sortCompareFunction = customCreationSort;
-                creationDateColumn.itemRenderer = new ClassFactory(MyDataCreationDateDataLabel);
+                creationDateColumn.labelFunction = createDateLabelFunction;
+                //creationDateColumn.itemRenderer = new ClassFactory(MyDataCreationDateDataLabel);
                 var accountVisibleColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                 accountVisibleColumn.dataField = "accountVisibleDisplay";
                 accountVisibleColumn.width = 130;
@@ -614,6 +643,11 @@
                     newsBar.addEventListener("dismissNews", onDismissed);
                     addChildAt(newsBar, 0);
                 }
+            }
+
+            if (User.getInstance().accountOverSize) {
+                var mb:AccountMessageBar = new AccountMessageBar();
+                addChildAt(mb, 0);
             }
         }
 

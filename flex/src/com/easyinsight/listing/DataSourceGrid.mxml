@@ -5,6 +5,7 @@
         import com.easyinsight.solutions.DataSourceDescriptor;
 
         import mx.collections.ArrayCollection;
+        import mx.formatters.DateFormatter;
         import mx.utils.ObjectUtil;
 
         private var _dataProvider:ArrayCollection;
@@ -62,6 +63,21 @@
                     }
                 }
             }
+            if (User.getInstance().accountOverSize) {
+                var mb:AccountMessageBar = new AccountMessageBar();
+                addChildAt(mb, 0);
+            }
+        }
+
+        private var formatter:DateFormatter = new DateFormatter();
+
+        private function createDateLabelFunction(value:Object, column:DataGridColumn):String {
+            var descriptor:DataSourceDescriptor = value as DataSourceDescriptor;
+            if (descriptor.lastDataTime == null) {
+                return "( No Data )";
+            } else {
+                return formatter.format(descriptor.lastDataTime);
+            }
         }
 
         private function onDismissed(event:Event):void {
@@ -77,7 +93,7 @@
                 dataProvider="{dataProvider}">
             <mx:columns>
                 <mx:DataGridColumn dataField="name" itemRenderer="com.easyinsight.listing.MyDataNameRenderer" headerText="Data Source" width="400"/>
-                <mx:DataGridColumn dataField="lastDataTime" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel" headerText="Last Data Time" width="140"
+                <mx:DataGridColumn dataField="lastDataTime" labelFunction="createDateLabelFunction" headerText="Last Data Time" width="140"
                         sortCompareFunction="customSort"/>
                 <mx:DataGridColumn dataField="author" headerText="Owner" width="140"/>
             </mx:columns>

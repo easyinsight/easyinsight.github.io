@@ -290,6 +290,11 @@ public class DataStorage implements IDataStorage {
                 throw new ReportException(new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + ". You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier.", statsList));
             }
 
+            /*
+            50,954,240
+            147783680
+             */
+
             Calendar now = Calendar.getInstance();
             Calendar cal = Calendar.getInstance();
             if (lastBoundaryDate != null) {
@@ -300,14 +305,21 @@ public class DataStorage implements IDataStorage {
             } else {
                 daysOver++;
             }
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET DAYS_OVER_SIZE_BOUNDARY = ?, LAST_BOUNDARY_DATE = ? WHERE ACCOUNT_ID = ?");
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET DAYS_OVER_SIZE_BOUNDARY = ?, LAST_BOUNDARY_DATE = ?, CURRENT_SIZE = ? WHERE ACCOUNT_ID = ?");
             updateStmt.setInt(1, daysOver);
             updateStmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-            updateStmt.setLong(3, accountID);
+            updateStmt.setLong(3, usedSize);
+            updateStmt.setLong(4, accountID);
             updateStmt.executeUpdate();
             updateStmt.close();
 
             warning = new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + ". You will need to either upgrade your account or reduce the size of data within " + (maxDaysOver - daysOver + 1) + " days to keep refreshing your data.", statsList);
+        } else {
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET CURRENT_SIZE = ? WHERE ACCOUNT_ID = ?");
+            updateStmt.setLong(1, usedSize);
+            updateStmt.setLong(2, accountID);
+            updateStmt.executeUpdate();
+            updateStmt.close();
         }
     }
 
@@ -1458,7 +1470,7 @@ public class DataStorage implements IDataStorage {
 
     private static void addOrUpdateMetadata(long dataFeedID, FeedPersistenceMetadata metadata, Connection conn, int dataSourceType) {
         try {
-            if (dataSourceType == FeedType.DATABASE_CONNECTION.getType() || dataSourceType == FeedType.SALESFORCE_SUB.getType()) {
+            //if (dataSourceType == FeedType.DATABASE_CONNECTION.getType() || dataSourceType == FeedType.SALESFORCE_SUB.getType()) {
                 //if (metadata.getMetadataID() > 0) {
                     PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_ID = ? AND " +
                             "VERSION = ?");
@@ -1467,14 +1479,14 @@ public class DataStorage implements IDataStorage {
                     deleteStmt.executeUpdate();
                     deleteStmt.close();
                 //}
-            } else {
+            /*} else {
                 if (metadata.getMetadataID() > 0) {
                     PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_PERSISTENCE_METADATA_ID = ?");
                     deleteStmt.setLong(1, metadata.getMetadataID());
                     deleteStmt.executeUpdate();
                     deleteStmt.close();
                 }
-            }
+            }*/
 
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO FEED_PERSISTENCE_METADATA (FEED_ID, " +
                     "VERSION, SIZE, DATABASE_NAME, LAST_DATA_TIME) VALUES (?, ?, ?, ?, ?)");

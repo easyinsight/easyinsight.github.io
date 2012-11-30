@@ -90,6 +90,9 @@ public class Account {
     @Column(name="upgraded")
     private boolean upgraded;
 
+    @Column(name="current_size")
+    private long usedSize;
+
     @Column(name="group_id")
     private Long groupID;
 
@@ -219,6 +222,14 @@ public class Account {
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public long getUsedSize() {
+        return usedSize;
+    }
+
+    public void setUsedSize(long usedSize) {
+        this.usedSize = usedSize;
+    }
 
     public Date getLastBoundaryDate() {
         return lastBoundaryDate;
