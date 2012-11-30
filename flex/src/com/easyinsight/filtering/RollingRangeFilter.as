@@ -142,6 +142,10 @@ public class RollingRangeFilter extends HBox implements IFilter
                 checkbox.enabled = false;
                 checkbox.toolTip = "This filter is an intrinsic part of the data source and cannot be disabled.";
             }*/
+
+        }
+
+        if (rollingFilter != null) {
             for each (var interval:CustomRollingInterval in rollingFilter.intervals) {
                 rangeOptions.addItem(new RangeOption(interval.filterLabel, interval.intervalNumber));
             }
