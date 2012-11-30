@@ -2,7 +2,6 @@ package com.easyinsight.analysis
 {
 
 
-import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.pseudocontext.StandardContextWindow;
 import com.easyinsight.report.ReportNavigationEvent;
 import com.easyinsight.solutions.InsightDescriptor;
@@ -26,24 +25,16 @@ public class SummaryCellRenderer extends UITextField implements IListItemRendere
     private var _analysisItem:AnalysisItem;
     private var _selectionEnabled:Boolean;
     private var _report:AnalysisDefinition;
-    private var _rolloverIcon:Class;
 
     private var hyperlinked:Boolean;
 
     public function SummaryCellRenderer() {
         super();
-        addEventListener(MouseEvent.ROLL_OVER, onRollOver);
-        addEventListener(MouseEvent.ROLL_OUT, onRollOut);
-        addEventListener(MouseEvent.CLICK, onClick);
         this.percentWidth = 100;
     }
 
     public function set report(value:AnalysisDefinition):void {
         _report = value;
-    }
-
-    public function set rolloverIcon(value:Class):void {
-        _rolloverIcon = value;
     }
 
     private function onClick(event:MouseEvent):void {
@@ -75,30 +66,21 @@ public class SummaryCellRenderer extends UITextField implements IListItemRendere
     }
 
     private function onRollOver(event:MouseEvent):void {
-        if (_rolloverIcon && !_selectionEnabled) {
-            CursorManager.setCursor(_rolloverIcon);
-        }
         if (hyperlinked) {
             if (utf != null) {
-                var tf:UITextFormat = new UITextFormat(this.systemManager, utf.font, utf.size, utf.color, null, null, true);
-                tf.align = utf.align;
-                setTextFormat(tf);
+                setTextFormat(hyperlinkedUTF);
                 invalidateProperties();
             }
         }
     }
 
+    private var hyperlinkedUTF:UITextFormat;
     private var utf:UITextFormat;
 
     private function onRollOut(event:MouseEvent):void {
-        if (_rolloverIcon && !_selectionEnabled) {
-            CursorManager.removeAllCursors();
-        }
         if (hyperlinked) {
             if (utf != null) {
-                var tf:UITextFormat = new UITextFormat(this.systemManager, utf.font, utf.size, utf.color, null, null, false);
-                tf.align = utf.align;
-                setTextFormat(tf);
+                setTextFormat(utf);
                 invalidateProperties();
             }
         }
@@ -145,6 +127,7 @@ public class SummaryCellRenderer extends UITextField implements IListItemRendere
         _data = value;
         var treeRow:TreeRow = value as TreeRow;
         var color:uint = 0;
+        var backgroundColor:uint = 0xFFFFFF;
         var text:String;
         if (value != null) {
             var field:String = analysisItem.qualifiedName();
@@ -156,18 +139,10 @@ public class SummaryCellRenderer extends UITextField implements IListItemRendere
                 } else {
                     text = formatter.format(objVal.getValue());
                 }
-                if (_report is ListDefinition) {
-                    var listDefinition:ListDefinition = _report as ListDefinition;
-                    if (objVal.summary) {
-                        color = listDefinition.summaryRowTextColor;
-                    } else {
-                        if (objVal.valueExtension != null) {
-                            var ext:TextValueExtension = objVal.valueExtension as TextValueExtension;
-                            color = ext.color;
-                        } else {
-                            color = listDefinition.textColor;
-                        }
-                    }
+                if (objVal.valueExtension != null) {
+                    var ext:TextValueExtension = objVal.valueExtension as TextValueExtension;
+                    color = ext.color;
+                    backgroundColor = ext.backgroundColor;
                 }
                 if (defaultLink != null && objVal != null && objVal.type() != Value.EMPTY) {
                     hyperlinked = true;
@@ -192,13 +167,35 @@ public class SummaryCellRenderer extends UITextField implements IListItemRendere
         if (rext != null && rext.align != null) {
             align = rext.align.toLowerCase();
         }
-        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color);
+        if (hyperlinked && !hasLinks) {
+            hasLinks = true;
+            addEventListener(MouseEvent.ROLL_OVER, onRollOver);
+            addEventListener(MouseEvent.ROLL_OUT, onRollOut);
+            addEventListener(MouseEvent.CLICK, onClick);
+        } else if (!hyperlinked && hasLinks) {
+            hasLinks = false;
+            removeEventListener(MouseEvent.ROLL_OVER, onRollOver);
+            removeEventListener(MouseEvent.ROLL_OUT, onRollOut);
+            removeEventListener(MouseEvent.CLICK, onClick);
+        }
+        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, null, null, false);
         utf.align = align;
+        if (hyperlinked) {
+            hyperlinkedUTF = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, null, null, true);
+            hyperlinkedUTF.align = align;
+        }
         setTextFormat(utf);
+        if (backgroundColor != 0xFFFFFF) {
+            this.backgroundColor = backgroundColor;
+            this.background = true;
+        }
         new StandardContextWindow(analysisItem, passThrough, this, value, _report);
         invalidateProperties();
-        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
+
+
+
+    private var hasLinks:Boolean;
 
     protected function setText(text:String):void {
         this.text = text;
