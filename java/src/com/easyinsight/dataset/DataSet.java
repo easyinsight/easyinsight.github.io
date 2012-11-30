@@ -4,6 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.core.*;
 import com.easyinsight.pipeline.AggregationComponent;
+import com.easyinsight.pipeline.PipelineData;
 import com.easyinsight.storage.IWhere;
 
 import java.util.*;
@@ -21,6 +22,7 @@ public class DataSet implements Serializable {
     private List<String> audits = new ArrayList<String>();
     private DataSetKeys dataSetKeys = new DataSetKeys();
     private String reportLog;
+    private transient PipelineData pipelineData;
 
     public DataSet() {
         rows = new ArrayList<IRow>();
@@ -32,6 +34,14 @@ public class DataSet implements Serializable {
 
     public DataSet(List<IRow> rows) {
         this.rows = rows;
+    }
+
+    public PipelineData getPipelineData() {
+        return pipelineData;
+    }
+
+    public void setPipelineData(PipelineData pipelineData) {
+        this.pipelineData = pipelineData;
     }
 
     public DataSetKeys getDataSetKeys() {
@@ -131,7 +141,7 @@ public class DataSet implements Serializable {
                         AnalysisItem dim = uniqueItems.get(id);
                         keyMapping.put(column, dim);
                     } else {
-                        if (tier == AggregationComponent.FINAL && fieldToUniques != null) {
+                        if (fieldToUniques != null) {
                             Long idObj = fieldToUniques.get(column.toDisplay());
                             if (idObj != null) {
                                 AnalysisItem dim = uniqueItems.get(idObj);
@@ -230,8 +240,17 @@ public class DataSet implements Serializable {
         Collections.sort(rows, new RowComparator(analysisItem, !descending));
     }
 
-    public void subset(int number) {
-        rows = rows.subList(0, Math.min(rows.size(), number));
+    public List<IRow> subset(int number) {
+        int index = Math.min(rows.size(), number - 1);
+        List<IRow> subsetRows = new ArrayList<IRow>(rows.subList(0, index));
+        List<IRow> remainder;
+        if (index < rows.size()) {
+            remainder = new ArrayList<IRow>(rows.subList(index + 1, rows.size()));
+            rows = subsetRows;
+        } else {
+            remainder = new ArrayList<IRow>();
+        }
+        return remainder;
     }
 
     public void mergeWheres(List<IWhere> wheres) {

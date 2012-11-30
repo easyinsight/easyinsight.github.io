@@ -39,7 +39,7 @@ public class DataService {
     }
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
-                                                              WSAnalysisDefinition report) {
+                                                              @Nullable WSAnalysisDefinition report) {
         EIConnection conn = Database.instance().getConnection();
         try {
             if (reportID > 0) {
@@ -188,7 +188,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeInsight(reportID);
-            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSKPIDefinition analysisDefinition = (WSKPIDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
             RollingFilterDefinition reportFilter = null;
             for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
@@ -209,7 +209,7 @@ public class DataService {
             Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
 
             for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-                if (analysisItem.getReportFieldExtension() != null) {
+                if (analysisItem.getReportFieldExtension() != null && reportFilter != null) {
                     TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
                     if (trendReportFieldExtension.getDate() != null) {
                         AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
@@ -320,7 +320,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeInsight(reportID);
-            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSCrosstabDefinition crosstabReport = (WSCrosstabDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
             ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, crosstabReport, conn, customFilters, drillthroughFilters);
             Crosstab crosstab = new Crosstab();
@@ -370,7 +370,7 @@ public class DataService {
     public EmbeddedVerticalResults getEmbeddedVerticalDataResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
         try {
             SecurityUtil.authorizeInsight(reportID);
-            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSCombinedVerticalListDefinition analysisDefinition = (WSCombinedVerticalListDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
             List<EmbeddedResults> list = new ArrayList<EmbeddedResults>();
@@ -506,8 +506,6 @@ public class DataService {
 
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters) {
-        // TODO: tweaking
-
         try {
             UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         } catch (InterruptedException e) {
@@ -516,7 +514,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeInsight(reportID);
-            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
 
             conn.setAutoCommit(false);
             WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
@@ -531,7 +529,7 @@ public class DataService {
                 cacheKey = new CacheKey(reportID, filters);
                 EmbeddedResults embeddedResults = ReportCache.instance().getResults(dataSourceID, cacheKey);
                 if (embeddedResults != null) {
-                    System.out.println("*** Returning from cache");
+                    LogClass.debug("*** Returning from cache");
                     return embeddedResults;
                 }
             }
@@ -582,6 +580,7 @@ public class DataService {
             if (analysisDefinition.isLogReport()) {
                 dataSet.setReportLog(reportRetrieval.getPipeline().toLogString());
             }
+            dataSet.setPipelineData(reportRetrieval.getPipeline().getPipelineData());
             return dataSet;
         } finally {
             UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
@@ -655,7 +654,7 @@ public class DataService {
         Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
 
         for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-            if (analysisItem.getReportFieldExtension() != null) {
+            if (analysisItem.getReportFieldExtension() != null && reportFilter != null) {
                 TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
                 if (trendReportFieldExtension.getDate() != null) {
                     AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
@@ -756,15 +755,15 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeInsight(reportID);
-            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + reportID);
-            WSSummaryDefinition report = (WSSummaryDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
+            WSTreeDefinition report = (WSTreeDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, report, conn, customFilters, drillthroughFilters);
             TreeData treeData = new TreeData(report, (AnalysisHierarchyItem) report.getHierarchy(), null);
             DataSet dataSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
             for (IRow row : dataSet.getRows()) {
                 treeData.addRow(row);
             }
-            List<TreeRow> rows = treeData.toTreeRows();
+            List<TreeRow> rows = treeData.toTreeRows(reportRetrievalNow.getPipeline().getPipelineData());
             EmbeddedTreeDataResults crossTabDataResults = new EmbeddedTreeDataResults();
             crossTabDataResults.setTreeRows(rows);
             crossTabDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
@@ -958,7 +957,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
-            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             RollingFilterDefinition reportFilter = null;
             for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
                 if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
@@ -978,7 +977,7 @@ public class DataService {
             Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
 
             for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-                if (analysisItem.getReportFieldExtension() != null) {
+                if (analysisItem.getReportFieldExtension() != null && reportFilter != null) {
                     TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
                     if (trendReportFieldExtension.getDate() != null) {
                         AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
@@ -1081,7 +1080,7 @@ public class DataService {
         }
     }
 
-    public TreeDataResults getTreeDataResults(WSSummaryDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+    public TreeDataResults getTreeDataResults(WSTreeDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         try {
             UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         } catch (InterruptedException e) {
@@ -1090,14 +1089,14 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
-            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             TreeData treeData = new TreeData(analysisDefinition, (AnalysisHierarchyItem) analysisDefinition.getHierarchy(), null);
             DataSet dataSet = listDataSet(analysisDefinition, insightRequestMetadata, conn);
             for (IRow row : dataSet.getRows()) {
                 treeData.addRow(row);
             }
-            List<TreeRow> rows = treeData.toTreeRows();
+            List<TreeRow> rows = treeData.toTreeRows(reportRetrieval.getPipeline().getPipelineData());
             TreeDataResults crossTabDataResults = new TreeDataResults();
             crossTabDataResults.setTreeRows(rows);
             crossTabDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
@@ -1127,7 +1126,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
-            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             Crosstab crosstab = new Crosstab();
 
@@ -1180,7 +1179,7 @@ public class DataService {
         }
         try {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
-            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
             List<DataResults> list = new ArrayList<DataResults>();
             for (WSAnalysisDefinition analysis : analysisDefinition.getReports()) {
@@ -1217,7 +1216,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
-            System.out.println(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
             List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
