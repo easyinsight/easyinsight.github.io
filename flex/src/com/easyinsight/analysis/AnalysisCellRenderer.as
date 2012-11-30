@@ -39,9 +39,6 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 
     public function AnalysisCellRenderer() {
         super();
-        addEventListener(MouseEvent.ROLL_OVER, onRollOver);
-        addEventListener(MouseEvent.ROLL_OUT, onRollOut);
-        addEventListener(MouseEvent.CLICK, onClick);
         this.percentWidth = 100;
     }
 
@@ -87,14 +84,13 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         }
         if (hyperlinked) {
             if (utf != null) {
-                var tf:UITextFormat = new UITextFormat(this.systemManager, utf.font, utf.size, utf.color, null, null, true);
-                tf.align = utf.align;
-                setTextFormat(tf);
+                setTextFormat(hyperlinkedUTF);
                 invalidateProperties();
             }
         }
     }
 
+    private var hyperlinkedUTF:UITextFormat;
     private var utf:UITextFormat;
 
     private function onRollOut(event:MouseEvent):void {
@@ -103,9 +99,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         }
         if (hyperlinked) {
             if (utf != null) {
-                var tf:UITextFormat = new UITextFormat(this.systemManager, utf.font, utf.size, utf.color, null, null, false);
-                tf.align = utf.align;
-                setTextFormat(tf);
+                setTextFormat(utf);
                 invalidateProperties();
             }
         }
@@ -205,19 +199,34 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
             align = rext.align.toLowerCase();
         }
 
-        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, bold);
+        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, bold, null, false);
         utf.align = align;
+        if (hyperlinked) {
+            hyperlinkedUTF = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, bold, null, true);
+            hyperlinkedUTF.align = align;
+        }
+        if (hyperlinked && !hasLinks) {
+            hasLinks = true;
+            addEventListener(MouseEvent.ROLL_OVER, onRollOver);
+            addEventListener(MouseEvent.ROLL_OUT, onRollOut);
+            addEventListener(MouseEvent.CLICK, onClick);
+        } else if (!hyperlinked && hasLinks) {
+            hasLinks = false;
+            removeEventListener(MouseEvent.ROLL_OVER, onRollOver);
+            removeEventListener(MouseEvent.ROLL_OUT, onRollOut);
+            removeEventListener(MouseEvent.CLICK, onClick);
+        }
         setTextFormat(utf);
         if (backgroundColor != 0xFFFFFF) {
             this.backgroundColor = backgroundColor;
             this.background = true;
         }
-        /*backgroundColor = 0x990000;
-        background = true;*/
         new StandardContextWindow(analysisItem, passThrough, this, value, _report);
         invalidateProperties();
-        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+        //dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
+
+    private var hasLinks:Boolean;
 
     protected function setText(text:String):void {
         this.text = text;
