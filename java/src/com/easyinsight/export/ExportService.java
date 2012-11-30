@@ -17,6 +17,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIOutcome;
+import com.easyinsight.pipeline.PipelineData;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.scorecard.ScorecardService;
 import com.easyinsight.scorecard.ScorecardStorage;
@@ -459,8 +460,7 @@ public class ExportService {
                     html = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
-                    DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.treeReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
+                    html = ExportService.treeReportToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
                     html = ExportService.compareYearsToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
@@ -1193,7 +1193,7 @@ public class ExportService {
         for (Map<String, Object> map : vListInfo.dColl) {
             sb.append("<tr>");
             AnalysisMeasure baseMeasure = (AnalysisMeasure) map.get("baseMeasure");
-            sb.append("<td>");
+            sb.append("<td style=\"white-space: nowrap;\">");
             sb.append(baseMeasure.toDisplay());
             sb.append("</td>");
             for (SortInfo sortInfo : vListInfo.columns) {
@@ -1202,7 +1202,7 @@ public class ExportService {
                 if (analysisMeasure != null) {
 
                 }
-                sb.append("<td>");
+                sb.append("<td style=\"").append(tdStyle).append("\">");
                 Value measureValue = (Value) map.get(columnName);
                 String text;
                 if (measureValue != null && measureValue.type() == Value.NUMBER) {
@@ -1379,7 +1379,7 @@ public class ExportService {
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<td></td>");
         for (int i = 0; i < ytdStuff.getHeaders().size(); i++) {
-            sb.append("<td>").append(ytdStuff.getHeaders().get(i)).append("</td>");            
+            sb.append("<td>").append(ytdStuff.getHeaders().get(i)).append("</td>");
         }
         sb.append("</tr>");
 
@@ -1390,14 +1390,14 @@ public class ExportService {
         for (CompareYearsRow ytdValue : ytdStuff.getRows()) {
             sb.append("<tr>");
             AnalysisItem baseMeasure = ytdValue.getMeasure();
-            sb.append("<td>").append(baseMeasure.toDisplay()).append("</td>");
+            sb.append("<td style=\"white-space: nowrap; ").append(tdStyle).append("\">").append(baseMeasure.toDisplay()).append("</td>");
             for (String header : ytdStuff.getHeaders()) {
                 CompareYearsResult compareYearsResult = ytdValue.getResults().get(header);
                 Value value = compareYearsResult.getValue();
                 if (compareYearsResult.isPercentChange()) {
-                    sb.append("<td>").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                    sb.append("<td style=\"").append(tdStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
                 } else {
-                    sb.append("<td>").append(createValue(exportMetadata.dateFormat, ytdValue.getMeasure(), value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                    sb.append("<td style=\"").append(tdStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getMeasure(), value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
                 }
             }
             sb.append("</tr>");
@@ -1447,7 +1447,6 @@ public class ExportService {
         for (YTDValue ytdValue : ytdStuff.getValues()) {
             sb.append("<tr>");
             AnalysisMeasure baseMeasure = ytdValue.getAnalysisMeasure();
-            // TODO: argh
             sb.append("<td style=\"white-space: nowrap; ").append(tdStyle).append("\">").append(baseMeasure.toDisplay()).append("</td>");
             if (ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
                 Map<Value, TimeIntervalValue> map = new HashMap<Value, TimeIntervalValue>();
@@ -1466,8 +1465,8 @@ public class ExportService {
                 sb.append("<td style=\"").append(tdStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
 
                 if (ytdValue.getBenchmarkMeasure() != null) {
-                    sb.append("<td>").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-                    sb.append("<td>").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                    sb.append("<td style=\"").append(tdStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                    sb.append("<td style=\"").append(tdStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
                 }
             }
             sb.append("</tr>");
@@ -2308,8 +2307,9 @@ public class ExportService {
     private static final String summaryTRStyle = "padding:0px;margin:0px;background-color:#F4F4F4";
     private static final String tdStyle = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
 
-    public static String treeReportToHTMLTable(WSAnalysisDefinition report, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
-
+    public static String treeReportToHTMLTable(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
+        DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
+        PipelineData pipelineData = dataSet.getPipelineData();
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
 
         StringBuilder sb = new StringBuilder();
@@ -2342,7 +2342,10 @@ public class ExportService {
         for (IRow row : dataSet.getRows()) {
             treeData.addRow(row);
         }
-        sb.append(treeData.toHTML());
+        List<TreeRow> rows = treeData.toTreeRows(pipelineData);
+        for (TreeRow row : rows) {
+            sb.append(row.toHTML(tree, exportMetadata));
+        }
 
         sb.append("</table>");
 

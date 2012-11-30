@@ -1,8 +1,13 @@
 package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.calculations.CalcGraph;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.StringValue;
+import com.easyinsight.dataset.DataSet;
+import com.easyinsight.pipeline.CalculationComponent;
+import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.pipeline.PipelineData;
 
 import java.util.*;
 
@@ -13,15 +18,15 @@ import java.util.*;
  */
 public class TreeData {
 
-    private static final String headerLabelStyle = "text-align:center;padding-top:15px;padding-bottom:15px;font-size:14px";
-    private static final String tableStyle = "font-size:12px;border-collapse:collapse;border-style:solid;border-width:1px;border-spacing:0;border-color:#000000;width:100%";
-    private static final String thStyle = "border-style:solid;padding:6px;border-width:1px;border-color:#000000";
-    private static final String headerTRStyle = "background-color:#EEEEEE";
-    private static final String trStyle = "padding:0px;margin:0px";
-    private static final String summaryTRStyle = "padding:0px;margin:0px;background-color:#F4F4F4";
-    private static final String tdStyle = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
-    private static final String tdStyle1 = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
-    private static final String tdStyle2 = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
+    public static final String headerLabelStyle = "text-align:center;padding-top:15px;padding-bottom:15px;font-size:14px";
+    public static final String tableStyle = "font-size:12px;border-collapse:collapse;border-style:solid;border-width:1px;border-spacing:0;border-color:#000000;width:100%";
+    public static final String thStyle = "border-style:solid;padding:6px;border-width:1px;border-color:#000000";
+    public static final String headerTRStyle = "background-color:#EEEEEE";
+    public static final String trStyle = "padding:0px;margin:0px";
+    public static final String summaryTRStyle = "padding:0px;margin:0px;background-color:#F4F4F4";
+    public static final String tdStyle = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
+    public static final String tdStyle1 = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
+    public static final String tdStyle2 = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
 
     private WSTreeDefinition treeDefinition;
     private AnalysisHierarchyItem hierarchy;
@@ -33,19 +38,11 @@ public class TreeData {
         this.exportMetadata = exportMetadata;
     }
 
-    public String toHTML() {
-        StringBuilder sb = new StringBuilder();
-        for (Argh argh : map.values()) {
-            sb.append(argh.toHTML());
-        }
-        return sb.toString();
-    }
-
-    public List<TreeRow> toTreeRows() {
+    public List<TreeRow> toTreeRows(PipelineData pipelineData) {
         List<TreeRow> rows = new ArrayList<TreeRow>();
 
         for (Argh argh : map.values()) {
-            TreeRow treeRow = argh.toTreeRow();
+            TreeRow treeRow = argh.toTreeRow(pipelineData);
             rows.add(treeRow);
 
         }
@@ -111,35 +108,96 @@ public class TreeData {
             argh.addRow(row);
         }
 
-        public TreeRow toTreeRow() {
+        public TreeRow toTreeRow(PipelineData pipelineData) {
             Map<AnalysisItem, Aggregation> sumMap = new HashMap<AnalysisItem, Aggregation>();
+
+            Set<AnalysisItem> reportItems = new HashSet<AnalysisItem>(treeDefinition.getItems());
+            List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, new AnalysisItemRetrievalStructure(null));
+
+            Iterator<IComponent> iter = components.iterator();
+            while (iter.hasNext()) {
+                IComponent component = iter.next();
+                if (!(component instanceof CalculationComponent)) {
+                    iter.remove();
+                    continue;
+                }
+                CalculationComponent calculationComponent = (CalculationComponent) component;
+                if (!calculationComponent.getAnalysisCalculation().isRecalculateSummary()) {
+                    iter.remove();
+                }
+            }
+
             for (AnalysisItem analysisItem : treeDefinition.getItems()) {
                 if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
-                    sumMap.put(analysisMeasure, new AggregationFactory(analysisMeasure, false).getAggregation());
-                }
-            }
-            TreeRow treeRow = new TreeRow();
-            treeRow.setGroupingField(level);
-            treeRow.setGroupingColumn(this.value);
-            for (Argh argh : map.values()) {
-                TreeRow childRow = argh.toTreeRow();
-                treeRow.getChildren().add(childRow);
-                for (AnalysisItem analysisItem : treeDefinition.getItems()) {
-                    if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                        Value value = (Value) childRow.getValues().get(analysisItem.qualifiedName());
-                        Aggregation aggregation = sumMap.get(analysisItem);
-                        aggregation.addValue(value);
+                    boolean recalculate = false;
+                    if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                        AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
+                        if (analysisCalculation.isRecalculateSummary()) {
+                            recalculate = true;
+                        }
+                    }
+                    if (!recalculate) {
+                        sumMap.put(analysisMeasure, new AggregationFactory(analysisMeasure, false).getAggregation());
                     }
                 }
             }
+            TreeRow treeRow = new TreeRow();
+            treeRow.setBackgroundColor(backgroundColor);
+            treeRow.setTextColor(textColor);
+            treeRow.setGroupingField(level);
+            treeRow.setGroupingColumn(this.value);
+
+            DataSet tempSet = new DataSet();
+            IRow tempRow = tempSet.createRow();
+
+            for (Argh argh : map.values()) {
+                TreeRow childRow = argh.toTreeRow(pipelineData);
+                treeRow.getChildren().add(childRow);
+                for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+                    if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                        boolean recalculate = false;
+                        if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                            AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
+                            if (analysisCalculation.isRecalculateSummary()) {
+                                recalculate = true;
+                            }
+                        }
+                        if (!recalculate) {
+                            Value value = (Value) childRow.getValues().get(analysisItem.qualifiedName());
+                            if (value != null) {
+                                Aggregation aggregation = sumMap.get(analysisItem);
+                                aggregation.addValue(value);
+                            }
+                        }
+                    }
+                }
+            }
+            for (Map.Entry<AnalysisItem, Aggregation> entry : sumMap.entrySet()) {
+                tempRow.addValue(entry.getKey().createAggregateKey(), entry.getValue().getValue());
+            }
+            for (IComponent component : components) {
+                component.apply(tempSet, pipelineData);
+            }
+
             TreeRow summaryRow = new TreeRow();
+
+            for (AnalysisItem reportItem : reportItems) {
+                if (reportItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                    summaryRow.getValues().put(reportItem.qualifiedName(), tempSet.getRow(0).getValue(reportItem));
+                }
+            }
+
+            summaryRow.setBackgroundColor("AAAAAA");
             summaryRow.setGroupingColumn(new StringValue(""));
             summaryRow.setSummaryColumn(true);
             for (Map.Entry<AnalysisItem, Aggregation> entry : sumMap.entrySet()) {
                 summaryRow.getValues().put(entry.getKey().qualifiedName(), entry.getValue().getValue());
             }
             treeRow.getChildren().add(summaryRow);
+            /*for (Map.Entry<AnalysisItem, Aggregation> entry : sumMap.entrySet()) {
+                treeRow.getValues().put(entry.getKey().qualifiedName(), entry.getValue().getValue());
+            }*/
 
             return treeRow;
         }
@@ -162,6 +220,7 @@ public class TreeData {
             for (Argh argh : map.values()) {
                 sb.append(argh.toHTML());
             }
+
             return sb.toString();
         }
     }
@@ -223,7 +282,7 @@ public class TreeData {
         }
 
         @Override
-        public TreeRow toTreeRow() {
+        public TreeRow toTreeRow(PipelineData pipelineData) {
             TreeRow treeRow = new TreeRow();
             treeRow.setGroupingField(analysisItem);
             for (AnalysisItem analysisItem : treeDefinition.getItems()) {
@@ -241,6 +300,6 @@ public class TreeData {
 
         public abstract String toHTML();
 
-        public abstract TreeRow toTreeRow();
+        public abstract TreeRow toTreeRow(PipelineData pipelineData);
     }
 }
