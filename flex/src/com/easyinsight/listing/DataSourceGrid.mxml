@@ -90,7 +90,7 @@
          backgroundColor="#FFFFFF" paddingTop="20" paddingBottom="20">
         <mx:DataGrid fontSize="12" horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
             verticalGridLines="true" id="dataSourceGrid" horizontalScrollPolicy="off" verticalScrollPolicy="off" selectable="false"
-                dataProvider="{dataProvider}">
+                dataProvider="{dataProvider}" rowHeight="24">
             <mx:columns>
                 <mx:DataGridColumn dataField="name" itemRenderer="com.easyinsight.listing.MyDataNameRenderer" headerText="Data Source" width="400"/>
                 <mx:DataGridColumn dataField="lastDataTime" labelFunction="createDateLabelFunction" headerText="Last Data Time" width="140"
