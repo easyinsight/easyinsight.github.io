@@ -233,6 +233,7 @@
     <div class="row">
         <div class="span12">
             <div class="well reportWell" style="background-color: #FFFFFF">
+                <div id="chartpseudotooltip" style="z-index:100;"></div>
                 <%= dashboard.getRootElement().toHTML(new FilterHTMLMetadata(dashboard, request, drillthroughArgh, false)) %>
             </div>
         </div>

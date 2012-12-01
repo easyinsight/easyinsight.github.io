@@ -87,11 +87,11 @@ Chart = {
         })
     },
 
-    getBarChartCallback: function(target, params, styleProps) {
-        return Chart.getCallback(target, params, false, styleProps, function(data) {
+    getBarChartCallback:function (target, params, styleProps) {
+        return Chart.getCallback(target, params, false, styleProps, function (data) {
             var tt = $("#" + target);
-           tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"]));
-           tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
+            tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"]));
+            tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
         })
     },
 
@@ -185,26 +185,52 @@ Chart = {
     getPieChartCallback:function (target, params, styleProps) {
         return Chart.getCallback(target, params, false, styleProps, function (data) {
             var tt = $("#" + target);
-            tt.bind("jqplotDataMouseOver", Chart.pieToolTipHover);
+            tt.bind("jqplotDataMouseOver", Chart.pieToolTipHover(target));
             tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
         });
     },
 
-    pieToolTipHover:function (ev, seriesIndex, pointIndex, data) {
+    pieToolTipHover:function (target) {
+        return function (ev, seriesIndex, pointIndex, data) {
+            var c = Chart.charts[target]["axes"]["xaxis"]["_series"][0]._center;
+            var r = Chart.charts[target]["axes"]["xaxis"]["_series"][0]._radius;
+            var o = $(Chart.charts[target]["axes"]["xaxis"]["_series"][0].canvas._ctx.canvas).offset();
+            var x = c[0] + o.left;
+            var y = c[1] + o.top;
 
-        var mouseX = ev.pageX; //these are going to be how jquery knows where to put the div that will be our tooltip
-        var mouseY = ev.pageY;
-        var s = "<b>" + data[0] + "</b>: " + data[1];
-        if (!(ev.target == Chart.prevTooltip.chart && s == Chart.prevTooltip.text)) {
-            $("#chartpseudotooltip").html(s);
-            Chart.prevTooltip = { chart:ev.target, text:s }
-            var cssObj = {
-                'position':'absolute',
-                'left':mouseX + 'px',
-                'top':mouseY + 'px'
-            };
-            $("#chartpseudotooltip").css(cssObj);
-            $('#chartpseudotooltip').show();
+            var mouseX = ev.pageX; //these are going to be how jquery knows where to put the div that will be our tooltip
+            var mouseY = ev.pageY;
+
+
+            var dx = x - mouseX;
+            var dy = y - mouseY;
+            var t = Math.atan2(dy, dx);
+            var finalX = -Math.cos(t) * r + x;
+            var finalY = -Math.sin(t) * r + y;
+            var topBottom = (finalY - y) > 0 ? "top" : "bottom";
+            var rightLeft = (finalX - x) > 0 ? "left" : "right";
+
+
+            var s = "<b>" + data[0] + "</b>: " + data[1];
+
+            if (!(ev.target == Chart.prevTooltip.chart && s == Chart.prevTooltip.text)) {
+                $("#chartpseudotooltip").html(s);
+                Chart.prevTooltip = { chart:ev.target, text:s }
+                if(topBottom == "bottom")
+                    finalY = finalY - $("#chartpseudotooltip").outerHeight();
+                if(rightLeft == "right")
+                    finalX = finalX - $("#chartpseudotooltip").outerWidth();
+                var cssObj = {
+                    'position':'absolute',
+                    'left': finalX + 'px',
+                    'top': finalY + 'px'
+                };
+
+
+
+                $("#chartpseudotooltip").css(cssObj);
+                $('#chartpseudotooltip').show();
+            }
         }
     }
 
