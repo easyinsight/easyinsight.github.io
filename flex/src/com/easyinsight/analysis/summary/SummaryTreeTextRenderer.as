@@ -88,25 +88,6 @@ public class SummaryTreeTextRenderer extends UITextField implements IListItemRen
         trace("depth = " + depth + ", color = " + color);
         var tf:UITextFormat = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color);
         setTextFormat(tf);
-        /*var treeRow:TreeRow = value as TreeRow;
-        var formatter:Formatter = analysisItem.getFormatter();
-        var field:String = analysisItem.qualifiedName();
-        var text:String = "";
-        if (treeRow.values[field] is Value) {
-            var objVal:Value = treeRow.values[field];
-            if (objVal == null) {
-                text = "";
-            } else {
-                text = formatter.format(objVal.getValue());
-            }
-        } else {
-            if (treeRow.values[field] != null) {
-                text = formatter.format(treeRow.values[field]);
-            } else {
-                text = "";
-            }
-
-        }*/
         this.text = text;
         new StandardContextWindow(analysisItem, passThrough, this, value, _report, false);
     }
