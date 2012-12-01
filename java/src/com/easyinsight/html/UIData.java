@@ -1,8 +1,10 @@
 package com.easyinsight.html;
 
+import com.easyinsight.dashboard.DashboardUIProperties;
 import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.ImageDescriptor;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: jamesboe
@@ -39,17 +41,28 @@ public class UIData {
     }
 
     public String createHeader(String name) {
+        return createHeader(name, null);
+    }
+
+    public String createHeader(String name, @Nullable DashboardUIProperties properties) {
 
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"row-fluid\">\n" +
                 "        <div class=\"span12\">\n");
         if (applicationSkin != null && applicationSkin.isReportHeader()) {
-            sb.append("            <div style=\""+headerStyle+"\">\n" +
-                    "                <div style=\"padding:10px;float:left\">\n" +
-                    "                    <div style=\"background-color: #FFFFFF;padding: 5px\">\n");
+            sb.append("            <div style=\"").append(headerStyle).append("\">\n").append("                <div style=\"padding:10px;float:left\">\n").append("                    <div style=\"background-color: #FFFFFF;padding: 5px\">\n");
             if (headerImageDescriptor != null) {
-                sb.append("                        <img src=\"/app/reportHeader?imageID="+headerImageDescriptor.getId()+"\" alt=\"Logo\"/>\n");
+                sb.append("                        <img src=\"/app/reportHeader?imageID=").append(headerImageDescriptor.getId()).append("\" alt=\"Logo\"/>\n");
             }
+            sb.append("                    </div>\n" +
+                    "                </div>\n");
+            sb.append("<div style=\"").append(headerTextStyle).append("\">");
+            sb.append(StringEscapeUtils.escapeHtml(name));
+            sb.append("</div>\n");
+            sb.append("</div>\n");
+        } else if (properties != null && properties.getHeader() != null) {
+            sb.append("            <div style=\"").append(headerStyle).append("\">\n").append("                <div style=\"padding:10px;float:left\">\n").append("                    <div style=\"background-color: #FFFFFF;padding: 5px\">\n");
+            sb.append("                        <img src=\"/app/reportHeader?imageID=").append(properties.getHeader().getId()).append("\" alt=\"Logo\"/>\n");
             sb.append("                    </div>\n" +
                     "                </div>\n");
             sb.append("<div style=\"").append(headerTextStyle).append("\">");
