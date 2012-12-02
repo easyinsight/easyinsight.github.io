@@ -267,7 +267,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     analysisDefinition.setName(deliveryInfo.getLabel());
                 }
                 updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
-                String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, true, true, new ExportProperties(false, true));
+                String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, true, true, new ExportProperties(true, true));
                 if (table != null) {
                     return new DeliveryResult(table);
                 }
@@ -459,7 +459,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         updateReportWithCustomFilters(analysisDefinition, customFilters);
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                         insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData, true, new ExportProperties(false, true));
+                        String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData, true, new ExportProperties(true, true));
                         if (table != null) {
                             sendNoAttachEmails(conn, table, activityID, subject, body, htmlEmail, ScheduledActivity.REPORT_DELIVERY);
                         }
