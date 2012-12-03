@@ -1,5 +1,4 @@
 $(function() {
-    console.log("starting...");
     jQuery.extend( jQuery.fn.dataTableExt.oSort, {
         "sortValue-pre": function ( a ) {
             var c = $("<td>" + a + "</td>").html();
