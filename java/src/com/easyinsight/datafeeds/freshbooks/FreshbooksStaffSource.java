@@ -82,25 +82,42 @@ public class FreshbooksStaffSource extends FreshbooksBaseSource {
             DataSet dataSet = new DataSet();
 
 
-            Document invoicesDoc = query("staff.list", "", freshbooksCompositeSource);
-            Nodes invoices = invoicesDoc.query("/response/staff_members/member");
-            for (int i = 0; i < invoices.size(); i++) {
-                Node invoice = invoices.get(i);
-                String firstName = queryField(invoice, "first_name/text()");
-                String lastName = queryField(invoice, "last_name/text()");
-                String name = firstName + " " + lastName;
-                String userName = queryField(invoice, "username/text()");
-                String email = queryField(invoice, "email/text()");
-                String staffID = queryField(invoice, "staff_id/text()");
+            int requestPage = 1;
+            int pages;
+            int currentPage;
+            do {
+                String string = "<page>" + requestPage + "</page>";
+                Document invoicesDoc = query("staff.list", string, freshbooksCompositeSource);
+                Nodes staffNodes = invoicesDoc.query("/response/staff_members");
+                if (staffNodes.size() == 0) {
+                    return dataSet;
+                }
+                Node invoicesSummaryNode = staffNodes.get(0);
+                String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
+                String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
+                pages = Integer.parseInt(pageString);
+                currentPage = Integer.parseInt(currentPageString);
+                Nodes invoices = invoicesDoc.query("/response/staff_members/member");
+                for (int i = 0; i < invoices.size(); i++) {
+                    Node invoice = invoices.get(i);
 
-                IRow row = dataSet.createRow();
-                addValue(row, FreshbooksStaffSource.FIRST_NAME, firstName, keys);
-                addValue(row, FreshbooksStaffSource.STAFF_ID, staffID, keys);
-                addValue(row, FreshbooksStaffSource.LAST_NAME, lastName, keys);
-                addValue(row, FreshbooksStaffSource.NAME, name, keys);
-                addValue(row, FreshbooksStaffSource.USERNAME, userName, keys);
-                addValue(row, FreshbooksStaffSource.EMAIL, email, keys);
-            }
+                    String firstName = queryField(invoice, "first_name/text()");
+                    String lastName = queryField(invoice, "last_name/text()");
+                    String name = firstName + " " + lastName;
+                    String userName = queryField(invoice, "username/text()");
+                    String email = queryField(invoice, "email/text()");
+                    String staffID = queryField(invoice, "staff_id/text()");
+
+                    IRow row = dataSet.createRow();
+                    addValue(row, FreshbooksStaffSource.FIRST_NAME, firstName, keys);
+                    addValue(row, FreshbooksStaffSource.STAFF_ID, staffID, keys);
+                    addValue(row, FreshbooksStaffSource.LAST_NAME, lastName, keys);
+                    addValue(row, FreshbooksStaffSource.NAME, name, keys);
+                    addValue(row, FreshbooksStaffSource.USERNAME, userName, keys);
+                    addValue(row, FreshbooksStaffSource.EMAIL, email, keys);
+                }
+                requestPage++;
+            } while (currentPage < pages);
 
             return dataSet;
         } catch (ReportException re) {
