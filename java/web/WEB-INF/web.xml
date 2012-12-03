@@ -554,7 +554,7 @@
         </init-param>
         <init-param>
             <param-name>realm</param-name>
-            <param-value>https://staging.easy-insight.com/</param-value>
+            <param-value>https://www.easy-insight.com/</param-value>
         </init-param>
     </servlet>
 
