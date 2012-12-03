@@ -195,6 +195,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         try {
             List results = session.createQuery("from Key where keyID = ?").setLong(0, targetJoinID).list();
             key = (Key) results.get(0);
+            key.afterLoad();
         } finally {
             session.close();
         }
