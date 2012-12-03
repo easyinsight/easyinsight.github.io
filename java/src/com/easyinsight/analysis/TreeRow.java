@@ -110,21 +110,25 @@ public class TreeRow {
                     styleString.append(align);
                 }
                 com.easyinsight.core.Value value =  (Value) values.get(analysisItem.qualifiedName());
-                if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
-                    TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
-                    if (textValueExtension.getColor() != 0) {
-                        String hexString = "#" + Integer.toHexString(textValueExtension.getColor());
-                        styleString.append(";color:").append(hexString);
+                if (value == null) {
+                    sb.append("<td></td>");
+                } else {
+                    if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
+                        TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
+                        if (textValueExtension.getColor() != 0) {
+                            String hexString = "#" + Integer.toHexString(textValueExtension.getColor());
+                            styleString.append(";color:").append(hexString);
+                        }
                     }
-                }
-                if (backgroundColor != null) {
-                    styleString.append(";background-color:#").append(backgroundColor);
-                }
-                sb.append("<td style=\"").append(styleString.toString()).append("\">");
+                    if (backgroundColor != null) {
+                        styleString.append(";background-color:#").append(backgroundColor);
+                    }
+                    sb.append("<td style=\"").append(styleString.toString()).append("\">");
 
-                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+                    sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
 
-                sb.append("</td>");
+                    sb.append("</td>");
+                }
             }
             sb.append("</tr>");
         } else {
