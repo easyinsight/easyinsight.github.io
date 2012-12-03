@@ -145,7 +145,7 @@
                         </ul>
                     </div>
                     <div class="btn-group">
-                        <a href="<%= RedirectUtil.getURL(request, "/app/#dashboardID=" + dashboard.getUrlKey())%>"
+                        <a href="<%= RedirectUtil.getURL(request, "/app/#dashboardAdminID=" + dashboard.getUrlKey())%>"
                            class="btn btn-inverse">Edit Dashboard</a>
                     </div>
                 </div>
