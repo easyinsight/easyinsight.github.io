@@ -88,7 +88,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         properties.add(new ReportNumericProperty("gradientColor", gradientColor));
         properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
         properties.add(new ReportStringProperty("columnSort", columnSort));
-        properties.add(new ReportStringProperty("axisType", columnSort));
+        properties.add(new ReportStringProperty("axisType", axisType));
         return properties;
     }
 
