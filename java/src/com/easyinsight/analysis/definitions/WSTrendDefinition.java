@@ -153,7 +153,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
                     sb.append(clickEvent);
                     sb.append("'>");
                 }
-                sb.append(outcome.getMeasure().getDisplayName());
+                sb.append(outcome.getMeasure().toDisplay());
                 if (!clickEvent.isEmpty()) {
                     sb.append("</a>");
                 }
