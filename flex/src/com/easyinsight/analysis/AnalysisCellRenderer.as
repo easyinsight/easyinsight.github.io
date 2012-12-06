@@ -220,6 +220,8 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         if (backgroundColor != 0xFFFFFF) {
             this.backgroundColor = backgroundColor;
             this.background = true;
+        } else {
+            this.background = false;
         }
         new StandardContextWindow(analysisItem, passThrough, this, value, _report);
         invalidateProperties();
