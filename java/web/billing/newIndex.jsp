@@ -4,18 +4,14 @@
 <%@ page import="com.easyinsight.users.Account" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="org.hibernate.Session" %>
-<%@ page import="com.easyinsight.billing.BillingUtil" %>
-<%@ page import="com.easyinsight.config.ConfigLoader" %>
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.users.AccountTypeChange" %>
 <%@ page import="java.text.NumberFormat" %>
-<%@ page import="com.braintreegateway.TransactionRequest" %>
-<%@ page import="com.braintreegateway.Transaction" %>
-<%@ page import="java.math.BigDecimal" %>
 <%@ page import="com.easyinsight.billing.BrainTreeBlueBillingSystem" %>
 <%@ page import="com.braintreegateway.CustomerRequest" %>
+<%@ page import="com.easyinsight.html.BillingResponse" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html lang="en">
 <head>
@@ -95,25 +91,25 @@
             hibernateSession.close();
         }
 
-        String keyID = BillingUtil.getKeyID();
-        String key = BillingUtil.getKey();
         boolean monthly = account.getBillingMonthOfYear() == null && (request.getParameter("billingType") == null || !request.getParameter("billingType").equals("yearly"));
-        String orderID = UUID.randomUUID().toString();
 
-        String amount = "1.00";
-        String type = "auth";
-
-        boolean chargeNow = false;
+        boolean chargeNow;
 
         if (accountTypeChange != null && (cost - credit) > 0) {
-            type = "sale";
-            double toCharge = cost - credit;
-            amount = String.valueOf(toCharge);
+
+            // it's an upgrade
+
             chargeNow = true;
-        }  else if(account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED || account.getAccountState() == Account.CLOSED) {
-            amount = String.valueOf(cost);
-            type = "sale";
+        }  else if (account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED || account.getAccountState() == Account.CLOSED) {
+
+            // it's restoring service to a locked account
+
             chargeNow = true;
+        } else {
+
+            // it's putting in new info or updating on a trial or active account
+
+            chargeNow = false;
         }
 
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -130,8 +126,6 @@
         String trData = new BrainTreeBlueBillingSystem().getRedirect(trParams);
 
         request.getSession().setAttribute("billingTime", time);
-        String hashString = orderID + "|" + amount + "|" + String.valueOf(account.getAccountID()) + "|" + time + "|" + key;
-        String hash = BillingUtil.MD5Hash(hashString);
         String accountInfoString;
         String charge;
         int accountType;
@@ -224,17 +218,21 @@
                 <% if(request.getParameter("error") != null) { %>
                 <p><label class="error"><%
                     String errorCode = request.getParameter("response_code");
-                    if ("200".equals(errorCode)) out.println("The transaction was declined by the credit card processor. If this error continues, contact support@easy-insight.com.");
-                    else if ("204".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
-                    else if ("220".equals(errorCode)) out.println("There was an error with your billing information. Please double check the payment information below. If this error continues, contact support@easy-insight.com.");
-                    else if ("221".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
-                    else if ("222".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
-                    else if ("223".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
-                    else if ("224".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
-                    else if ("300".equals(errorCode)) {
-                        out.println("There was an error with your billing information. Please input the correct information below.");
-                    } else {
-                        out.println("There was an error with your billing information. Please input the correct information below.");
+                    try {
+                        int code = Integer.parseInt(errorCode);
+                        if (code == BillingResponse.DECLINED) {
+                            %>The transaction was declined by the credit card processor. If this error continues, contact support@easy-insight.com.<%
+                        } else if (code == BillingResponse.BILLING_ERROR) {
+                            %>There was an error with your billing information. Please input the correct information below.<%
+                        } else if (code == BillingResponse.TRANSACTION_NOT_ALLOWED) {
+                            %>The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.<%
+                        } else if (code == BillingResponse.NOT_FOUND_IN_VAULT) {
+                            %>There was a server error with saving the information for your account. Please try again. If this error continues, contact support@easy-insight.com.<%
+                        } else {
+                            %>There was an error with your billing information. Please input the correct information below.<%
+                        }
+                    } catch (NumberFormatException nfe) {
+                            %>There was an error with your billing information. Please input the correct information below.<%
                     }
                 %></label></p>
                 <% } %>

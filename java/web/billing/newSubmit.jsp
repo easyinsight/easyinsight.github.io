@@ -1,25 +1,19 @@
 <!DOCTYPE html>
-<%@ page import="com.easyinsight.billing.BillingUtil" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="com.easyinsight.database.EIConnection" %>
-<%@ page import="com.easyinsight.logging.LogClass" %>
 <%@ page import="org.hibernate.Session" %>
-<%@ page import="java.text.DateFormat" %>
-<%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.Calendar" %>
 <%@ page import="java.util.Date" %>
-<%@ page import="java.util.TimeZone" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.users.*" %>
 <%@ page import="org.joda.time.Days" %>
 <%@ page import="org.joda.time.DateTime" %>
 <%@ page import="com.easyinsight.billing.BrainTreeBlueBillingSystem" %>
-<%@ page import="java.util.UUID" %>
-<%@ page import="java.math.BigDecimal" %>
 <%@ page import="com.easyinsight.billing.BillingSystem" %>
 <%@ page import="com.braintreegateway.exceptions.NotFoundException" %>
 <%@ page import="com.braintreegateway.*" %>
+<%@ page import="com.easyinsight.html.BillingResponse" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String postBillingMessage = "";
@@ -43,10 +37,10 @@
             }
 
 
-            double cost = 0;
+            double cost;
             double credit = 0;
-            boolean success = false;
-            Account account = null;
+            boolean success;
+            Account account;
             AccountTypeChange accountTypeChange = (AccountTypeChange) session.getAttribute("accountTypeChange");
 
 
@@ -54,6 +48,9 @@
             t = hibernateSession.beginTransaction();
 
             account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+
+            // clear out any existing credit card or address information
+
             Customer btCustomer = new BrainTreeBlueBillingSystem().getCustomer(account);
             if (btCustomer != null) {
                 for (CreditCard cc : btCustomer.getCreditCards()) {
@@ -66,29 +63,53 @@
 
             user = (User) hibernateSession.get(User.class, SecurityUtil.getUserID());
 
-            Result<Customer> result = null;
+            Result<Customer> result;
             try {
+
+                // verify that the information passed in the transparent redirect was valid
+
                 result = new BrainTreeBlueBillingSystem().confirmCustomer(request.getQueryString());
                 if (result.isSuccess()) {
                     account.setBillingInformationGiven(true);
                     hibernateSession.save(account);
                 } else {
                     t.rollback();
-                    response.sendRedirect("index.jsp?error=true&responseCode=" + result.getErrors().getAllDeepValidationErrors().get(0).getCode().code);
+                    String errorCode =  result.getErrors().getAllDeepValidationErrors().get(0).getCode().code;
+                    int responseCode;
+                    if ("200".equals(errorCode)) responseCode = BillingResponse.DECLINED;
+                    else if ("204".equals(errorCode)) responseCode = BillingResponse.TRANSACTION_NOT_ALLOWED;
+                    else if ("220".equals(errorCode)) responseCode = BillingResponse.BILLING_ERROR;
+                    else if ("221".equals(errorCode)) responseCode = BillingResponse.TRANSACTION_NOT_ALLOWED;
+                    else if ("222".equals(errorCode)) responseCode = BillingResponse.TRANSACTION_NOT_ALLOWED;
+                    else if ("223".equals(errorCode)) responseCode = BillingResponse.TRANSACTION_NOT_ALLOWED;
+                    else if ("224".equals(errorCode)) responseCode = BillingResponse.TRANSACTION_NOT_ALLOWED;
+                    else if ("300".equals(errorCode)) {
+                        responseCode = BillingResponse.BILLING_ERROR;
+                    } else {
+                        responseCode = BillingResponse.BILLING_ERROR;
+                    }
+                    response.sendRedirect("index.jsp?error=true&response_code=" + responseCode);
                     return;
                 }
             } catch (NotFoundException e) {
+
                 // customer has billingInformationGiven = true, but not found in vault somehow.
+
                 account.setBillingInformationGiven(false);
                 hibernateSession.save(account);
                 t.commit();
 
-                response.sendRedirect("index.jsp?error=true&responseCode=try_again");
+                response.sendRedirect("index.jsp?error=true&response_code=try_again");
                 return;
             }
 
 
+
+
             if (accountTypeChange != null) {
+
+                // if it's an upgrade charge, calculate how much the charge is for, and determine the prorated amount
+
                 cost = Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(),
                         accountTypeChange.getStorage(), accountTypeChange.isYearly());
                 credit = Account.calculateCredit(account);
@@ -99,32 +120,49 @@
                     accountTypeChange = null;
                 }
             } else {
+
+                // it's not an upgrade, just use the default total cost
+
                 cost = account.createTotalCost();
             }
 
 
             t.commit();
-            String amount = "1.00";
-            String type = "auth";
+            String amount;
 
             boolean chargeNow = false;
 
             if (accountTypeChange != null && (cost - credit) > 0) {
-                type = "sale";
+
+                // it's an immediate upgrade charge
+
                 double toCharge = cost - credit;
                 amount = String.valueOf(toCharge);
                 chargeNow = true;
             } else if (account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED || account.getAccountState() == Account.CLOSED) {
+
+                // it's an immediate charge
+
                 amount = String.valueOf(cost);
-                type = "sale";
                 chargeNow = true;
+            } else {
+
+                // it's just someone putting in their credit card, don't bill yet
+
+                amount = "1.00";
             }
 
-            AccountCreditCardBillingInfo info = null;
+            AccountCreditCardBillingInfo info;
             if (chargeNow) {
+
+                // if we actually have to charge now, make the actual bill call
+
                 t = hibernateSession.beginTransaction();
                 BillingSystem bs = new BrainTreeBlueBillingSystem();
-                info = bs.billAccount(account.getAccountID(), Double.valueOf(amount), "auth".equals(type));
+
+                // it's not an auth, it's a sale, if we're charging now
+
+                info = bs.billAccount(account.getAccountID(), Double.valueOf(amount), false);
                 if (info.isSuccessful()) {
                     boolean yearly;
                     if (accountTypeChange == null) {
@@ -172,15 +210,15 @@
                 success = true;
             }
 
-
-            // Can only let account admins use the billing
-            if ((account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE)
-                    && !user.isAccountAdmin())
-                response.sendRedirect("access.jsp");
-
             t = hibernateSession.beginTransaction();
             if (success) {
+
+                // at this point, the customer's credit card info is correctly stored in the vault
+
                 if (!chargeNow) {
+
+                    // they're upgrading their credit card on an existing good account if they're in this logic
+
                     boolean yearly;
                     if (accountTypeChange == null) {
                         yearly = account.getBillingMonthOfYear() != null;
@@ -221,9 +259,10 @@
                         }
                     }
 
-                    // If we've gotten this far, they're updating their billing information instead of submitting it. Allow upgrades to yearly, but if they're already yearly don't update
-                    // billing_month_of_year
                     if (yearly && account.getBillingMonthOfYear() == null) {
+
+                        // they're changing from monthly to annual
+
                         Calendar cal = Calendar.getInstance();
                         if (account.getBillingDayOfMonth() == null) {
                             account.setBillingDayOfMonth(cal.get(Calendar.DAY_OF_MONTH));
@@ -236,9 +275,15 @@
                             account.setBillingMonthOfYear((cal.get(Calendar.MONTH) + 1) % 12);
                         }
                     } else if (!yearly && account.getBillingMonthOfYear() != null) {
+
+                        // they're changing from annual to monthly
+
                         account.setBillingMonthOfYear(null);
                     }
                 }
+
+                // reset billing failures, set to active
+
                 account.setBillingFailures(0);
                 account.setAccountState(Account.ACTIVE);
                 hibernateSession.save(account);
