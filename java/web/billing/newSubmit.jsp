@@ -74,7 +74,7 @@
                     hibernateSession.save(account);
                 } else {
                     t.rollback();
-                    response.sendRedirect("newIndex.jsp?error=true&responseCode=" + result.getErrors().getAllDeepValidationErrors().get(0).getCode().code);
+                    response.sendRedirect("index.jsp?error=true&responseCode=" + result.getErrors().getAllDeepValidationErrors().get(0).getCode().code);
                     return;
                 }
             } catch (NotFoundException e) {
@@ -83,7 +83,7 @@
                 hibernateSession.save(account);
                 t.commit();
 
-                response.sendRedirect("newIndex.jsp?error=true&responseCode=try_again");
+                response.sendRedirect("index.jsp?error=true&responseCode=try_again");
                 return;
             }
 
