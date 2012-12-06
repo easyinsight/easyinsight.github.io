@@ -3,6 +3,7 @@ package com.easyinsight.billing;
 import com.braintreegateway.*;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.users.Account;
 import com.easyinsight.users.AccountActivityStorage;
 import com.easyinsight.users.AccountCreditCardBillingInfo;
 import org.apache.commons.httpclient.HttpClient;
@@ -73,5 +74,27 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
 
     public Result<Customer> confirmCustomer(String queryString) {
         return gateway.transparentRedirect().confirmCustomer(queryString);
+    }
+
+    public Customer getCustomer(Account account) {
+        CustomerSearchRequest r = new CustomerSearchRequest().id().is(String.valueOf(account.getAccountID()));
+        ResourceCollection<Customer> c = gateway.customer().search(r);
+        int i = 0;
+        for(Customer cc : c) {
+            i++;
+        }
+        if(i == 0)
+            return null;
+        else
+            return c.getFirst();
+    }
+
+    public void deleteCard(CreditCard cc) {
+
+        gateway.creditCard().delete(cc.getToken());
+    }
+
+    public void deleteAddress(Address aa) {
+        gateway.address().delete(aa.getCustomerId(), aa.getId());
     }
 }

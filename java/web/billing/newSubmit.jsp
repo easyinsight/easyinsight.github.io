@@ -14,15 +14,12 @@
 <%@ page import="com.easyinsight.users.*" %>
 <%@ page import="org.joda.time.Days" %>
 <%@ page import="org.joda.time.DateTime" %>
-<%@ page import="com.braintreegateway.Customer" %>
-<%@ page import="com.braintreegateway.Result" %>
 <%@ page import="com.easyinsight.billing.BrainTreeBlueBillingSystem" %>
 <%@ page import="java.util.UUID" %>
-<%@ page import="com.braintreegateway.TransactionRequest" %>
 <%@ page import="java.math.BigDecimal" %>
-<%@ page import="com.braintreegateway.Transaction" %>
 <%@ page import="com.easyinsight.billing.BillingSystem" %>
 <%@ page import="com.braintreegateway.exceptions.NotFoundException" %>
+<%@ page import="com.braintreegateway.*" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String postBillingMessage = "";
@@ -57,6 +54,16 @@
             t = hibernateSession.beginTransaction();
 
             account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+            Customer btCustomer = new BrainTreeBlueBillingSystem().getCustomer(account);
+            if (btCustomer != null) {
+                for (CreditCard cc : btCustomer.getCreditCards()) {
+                    new BrainTreeBlueBillingSystem().deleteCard(cc);
+                }
+                for(Address aa : btCustomer.getAddresses()) {
+                    new BrainTreeBlueBillingSystem().deleteAddress(aa);
+                }
+            }
+
             user = (User) hibernateSession.get(User.class, SecurityUtil.getUserID());
 
             Result<Customer> result = null;
