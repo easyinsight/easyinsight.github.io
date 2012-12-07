@@ -9,7 +9,10 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import nu.xom.*;
+import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.HttpParams;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -110,7 +113,11 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
 
             final CountDownLatch latch = new CountDownLatch(campaigns.size());
 
-            final org.apache.http.client.HttpClient client = new DefaultHttpClient();
+            DefaultHttpClient initClient = new DefaultHttpClient();
+
+            ClientConnectionManager mgr = initClient.getConnectionManager();
+            HttpParams params = initClient.getParams();
+            final DefaultHttpClient client = new DefaultHttpClient(new ThreadSafeClientConnManager(params, mgr.getSchemeRegistry()), params);
 
             for (final Campaign campaign : campaigns) {
                 tpe.execute(new Runnable() {
