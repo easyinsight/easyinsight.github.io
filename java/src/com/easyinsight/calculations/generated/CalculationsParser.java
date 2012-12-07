@@ -1,4 +1,4 @@
-// $ANTLR 3.4 /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g 2012-10-22 08:48:53
+// $ANTLR 3.4 /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g 2012-12-07 14:22:42
  package com.easyinsight.calculations.generated; 
 
 import org.antlr.runtime.*;
@@ -1417,7 +1417,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: expr, expr, Variable
+            // elements: expr, Variable, expr
             // token labels: 
             // rule labels: retval
             // token list labels: 

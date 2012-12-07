@@ -65,8 +65,7 @@ Decimal	:	((UInteger (Dot UInteger)?) | (Dot UInteger)) ('E' Integer)?;
 
 Variable:	BracketedVariable | NoBracketsVariable;
 
-String	:	'\"' (Character | Digit | VariableWhitespace | SpecialChars)* '\"';
-
+String	:	'\"' (Character | Digit | VariableWhitespace | SpecialChars | ']' | '[')* '\"';
 
 // Last rule to make sure whitespace incorporated in earlier rules is counted.
 

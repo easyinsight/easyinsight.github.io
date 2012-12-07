@@ -1,4 +1,4 @@
-// $ANTLR 3.4 /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g 2012-10-22 08:48:53
+// $ANTLR 3.4 /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g 2012-12-07 14:22:43
  package com.easyinsight.calculations.generated; 
 
 import org.antlr.runtime.*;
@@ -690,18 +690,18 @@ public class CalculationsLexer extends Lexer {
         try {
             int _type = String;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:68:8: ( '\\\"' ( Character | Digit | VariableWhitespace | SpecialChars )* '\\\"' )
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:68:10: '\\\"' ( Character | Digit | VariableWhitespace | SpecialChars )* '\\\"'
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:68:8: ( '\\\"' ( Character | Digit | VariableWhitespace | SpecialChars | ']' | '[' )* '\\\"' )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:68:10: '\\\"' ( Character | Digit | VariableWhitespace | SpecialChars | ']' | '[' )* '\\\"'
             {
             match('\"'); 
 
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:68:15: ( Character | Digit | VariableWhitespace | SpecialChars )*
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:68:15: ( Character | Digit | VariableWhitespace | SpecialChars | ']' | '[' )*
             loop5:
             do {
                 int alt5=2;
                 int LA5_0 = input.LA(1);
 
-                if ( (LA5_0=='\t'||(LA5_0 >= ' ' && LA5_0 <= '!')||(LA5_0 >= '#' && LA5_0 <= 'Z')||LA5_0=='\\'||(LA5_0 >= '^' && LA5_0 <= '~')||(LA5_0 >= '\u0100' && LA5_0 <= '\uFFFE')) ) {
+                if ( (LA5_0=='\t'||(LA5_0 >= ' ' && LA5_0 <= '!')||(LA5_0 >= '#' && LA5_0 <= '~')||(LA5_0 >= '\u0100' && LA5_0 <= '\uFFFE')) ) {
                     alt5=1;
                 }
 
@@ -710,7 +710,7 @@ public class CalculationsLexer extends Lexer {
             	case 1 :
             	    // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             	    {
-            	    if ( input.LA(1)=='\t'||(input.LA(1) >= ' ' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= 'Z')||input.LA(1)=='\\'||(input.LA(1) >= '^' && input.LA(1) <= '~')||(input.LA(1) >= '\u0100' && input.LA(1) <= '\uFFFE') ) {
+            	    if ( input.LA(1)=='\t'||(input.LA(1) >= ' ' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '~')||(input.LA(1) >= '\u0100' && input.LA(1) <= '\uFFFE') ) {
             	        input.consume();
             	    }
             	    else {
@@ -747,10 +747,10 @@ public class CalculationsLexer extends Lexer {
         try {
             int _type = HideWhiteSpace;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:74:2: ( ( Whitespace )+ )
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:74:4: ( Whitespace )+
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:73:2: ( ( Whitespace )+ )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:73:4: ( Whitespace )+
             {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:74:4: ( Whitespace )+
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:73:4: ( Whitespace )+
             int cnt6=0;
             loop6:
             do {
@@ -805,10 +805,10 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "Integer"
     public final void mInteger() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:76:18: ( ( Add | Subtract )? UInteger )
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:76:20: ( Add | Subtract )? UInteger
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:75:18: ( ( Add | Subtract )? UInteger )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:75:20: ( Add | Subtract )? UInteger
             {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:76:20: ( Add | Subtract )?
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:75:20: ( Add | Subtract )?
             int alt7=2;
             int LA7_0 = input.LA(1);
 
@@ -851,7 +851,7 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "Digit"
     public final void mDigit() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:79:2: ( '0' .. '9' )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:78:2: ( '0' .. '9' )
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
@@ -877,10 +877,10 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "UInteger"
     public final void mUInteger() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:81:2: ( ( Digit )+ )
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:81:4: ( Digit )+
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:80:2: ( ( Digit )+ )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:80:4: ( Digit )+
             {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:81:4: ( Digit )+
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:80:4: ( Digit )+
             int cnt8=0;
             loop8:
             do {
@@ -932,7 +932,7 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "VariableWhitespace"
     public final void mVariableWhitespace() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:84:2: ( ( '\\t' | ' ' ) )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:83:2: ( ( '\\t' | ' ' ) )
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             {
             if ( input.LA(1)=='\t'||input.LA(1)==' ' ) {
@@ -958,7 +958,7 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "Whitespace"
     public final void mWhitespace() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:87:2: ( ( VariableWhitespace | '\\r' | '\\n' | '\\u000C' ) )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:86:2: ( ( VariableWhitespace | '\\r' | '\\n' | '\\u000C' ) )
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             {
             if ( (input.LA(1) >= '\t' && input.LA(1) <= '\n')||(input.LA(1) >= '\f' && input.LA(1) <= '\r')||input.LA(1)==' ' ) {
@@ -984,7 +984,7 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "LowerCase"
     public final void mLowerCase() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:90:2: ( 'a' .. 'z' )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:89:2: ( 'a' .. 'z' )
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             {
             if ( (input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -1010,7 +1010,7 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "UpperCase"
     public final void mUpperCase() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:92:2: ( 'A' .. 'Z' )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:91:2: ( 'A' .. 'Z' )
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             {
             if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z') ) {
@@ -1036,7 +1036,7 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "InternationalCharacters"
     public final void mInternationalCharacters() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:95:2: ( '\\u0100' .. '\\uFFFE' )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:94:2: ( '\\u0100' .. '\\uFFFE' )
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             {
             if ( (input.LA(1) >= '\u0100' && input.LA(1) <= '\uFFFE') ) {
@@ -1062,7 +1062,7 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "Character"
     public final void mCharacter() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:98:2: ( LowerCase | UpperCase | InternationalCharacters )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:97:2: ( LowerCase | UpperCase | InternationalCharacters )
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             {
             if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u0100' && input.LA(1) <= '\uFFFE') ) {
@@ -1088,8 +1088,8 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "BracketedVariable"
     public final void mBracketedVariable() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:101:2: ( OpenBrace ( Character | Digit | VariableSpecialChars ) ( Character | Digit | VariableSpecialChars | VariableWhitespace )* CloseBrace )
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:101:4: OpenBrace ( Character | Digit | VariableSpecialChars ) ( Character | Digit | VariableSpecialChars | VariableWhitespace )* CloseBrace
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:100:2: ( OpenBrace ( Character | Digit | VariableSpecialChars ) ( Character | Digit | VariableSpecialChars | VariableWhitespace )* CloseBrace )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:100:4: OpenBrace ( Character | Digit | VariableSpecialChars ) ( Character | Digit | VariableSpecialChars | VariableWhitespace )* CloseBrace
             {
             mOpenBrace(); 
 
@@ -1104,7 +1104,7 @@ public class CalculationsLexer extends Lexer {
             }
 
 
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:101:57: ( Character | Digit | VariableSpecialChars | VariableWhitespace )*
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:100:57: ( Character | Digit | VariableSpecialChars | VariableWhitespace )*
             loop9:
             do {
                 int alt9=2;
@@ -1154,13 +1154,13 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "NoBracketsVariable"
     public final void mNoBracketsVariable() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:104:2: ( Character ( Character | Digit | VariableWhitespace )* )
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:104:4: Character ( Character | Digit | VariableWhitespace )*
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:103:2: ( Character ( Character | Digit | VariableWhitespace )* )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:103:4: Character ( Character | Digit | VariableWhitespace )*
             {
             mCharacter(); 
 
 
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:104:14: ( Character | Digit | VariableWhitespace )*
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:103:14: ( Character | Digit | VariableWhitespace )*
             loop10:
             do {
                 int alt10=2;
@@ -1207,8 +1207,8 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "NoBracketSpecialChars"
     public final void mNoBracketSpecialChars() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:108:2: ( '_' )
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:108:4: '_'
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:107:2: ( '_' )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:107:4: '_'
             {
             match('_'); 
 
@@ -1225,7 +1225,7 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "VariableSpecialChars"
     public final void mVariableSpecialChars() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:111:2: ( '\\\"' | SpecialChars )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:110:2: ( '\\\"' | SpecialChars )
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             {
             if ( (input.LA(1) >= '!' && input.LA(1) <= '/')||(input.LA(1) >= ':' && input.LA(1) <= '@')||input.LA(1)=='\\'||(input.LA(1) >= '^' && input.LA(1) <= '`')||(input.LA(1) >= '{' && input.LA(1) <= '~') ) {
@@ -1251,7 +1251,7 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "SpecialChars"
     public final void mSpecialChars() throws RecognitionException {
         try {
-            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:114:2: ( NoBracketSpecialChars | ':' | '<' | '>' | ',' | '.' | ';' | '/' | '?' | '\\'' | '-' | '=' | '+' | '(' | ')' | '!' | '@' | '#' | '$' | '%' | '^' | '&' | '*' | '~' | '`' | '|' | '\\\\' | '{' | '}' )
+            // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:113:2: ( NoBracketSpecialChars | ':' | '<' | '>' | ',' | '.' | ';' | '/' | '?' | '\\'' | '-' | '=' | '+' | '(' | ')' | '!' | '@' | '#' | '$' | '%' | '^' | '&' | '*' | '~' | '`' | '|' | '\\\\' | '{' | '}' )
             // /Users/Alan/Documents/EasyInsight/code/java/src/com/easyinsight/calculations/Calculations.g:
             {
             if ( input.LA(1)=='!'||(input.LA(1) >= '#' && input.LA(1) <= '/')||(input.LA(1) >= ':' && input.LA(1) <= '@')||input.LA(1)=='\\'||(input.LA(1) >= '^' && input.LA(1) <= '`')||(input.LA(1) >= '{' && input.LA(1) <= '~') ) {
@@ -1365,7 +1365,7 @@ public class CalculationsLexer extends Lexer {
         else if ( (LA11_0=='\"') ) {
             int LA11_17 = input.LA(2);
 
-            if ( (LA11_17=='\t'||(LA11_17 >= ' ' && LA11_17 <= 'Z')||LA11_17=='\\'||(LA11_17 >= '^' && LA11_17 <= '~')||(LA11_17 >= '\u0100' && LA11_17 <= '\uFFFE')) ) {
+            if ( (LA11_17=='\t'||(LA11_17 >= ' ' && LA11_17 <= '~')||(LA11_17 >= '\u0100' && LA11_17 <= '\uFFFE')) ) {
                 alt11=24;
             }
             else {
