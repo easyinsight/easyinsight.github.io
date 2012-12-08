@@ -53,19 +53,20 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
             info.setResponseString(result.getTarget().getProcessorResponseText());
             info.setTransactionID(result.getTarget().getId());
             info.setSuccessful(result.getTarget().getProcessorResponseCode().equals("1000"));
-        } else if(result.getErrors().size() > 0) {
+            info.setTransactionTime(result.getTarget().getCreatedAt().getTime());
+        } else if (result.getErrors().size() > 0) {
             info.setSuccessful(false);
             info.setResponseString(result.getMessage());
-
+            info.setTransactionTime(new Date());
         }
-        info.setTransactionTime(result.getTarget().getCreatedAt().getTime());
+
         info.setAmount(String.valueOf(amount));
 
         return info;
     }
 
     public String getRedirect(Request req) {
-        return gateway.transparentRedirect().trData(req, ConfigLoader.instance().getRedirectLocation() + "/app/billing/newSubmit.jsp");
+        return gateway.transparentRedirect().trData(req, ConfigLoader.instance().getRedirectLocation() + "/app/billing/newSubmitSubscription.jsp");
     }
 
     public String getTargetUrl() {
@@ -80,10 +81,10 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
         CustomerSearchRequest r = new CustomerSearchRequest().id().is(String.valueOf(account.getAccountID()));
         ResourceCollection<Customer> c = gateway.customer().search(r);
         int i = 0;
-        for(Customer cc : c) {
+        for (Customer cc : c) {
             i++;
         }
-        if(i == 0)
+        if (i == 0)
             return null;
         else
             return c.getFirst();
@@ -96,5 +97,43 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
 
     public void deleteAddress(Address aa) {
         gateway.address().delete(aa.getCustomerId(), aa.getId());
+    }
+
+    public void subscribe(Account account) {
+        Customer c = getCustomer(account);
+        SubscriptionRequest sr = new SubscriptionRequest();
+        CreditCard dc = null;
+        for (CreditCard cc : c.getCreditCards()) {
+            if (cc.isDefault())
+                dc = cc;
+        }
+        sr.planId("1").paymentMethodToken(dc.getToken());
+        Result<Subscription> r = gateway.subscription().create(sr);
+        r.getErrors();
+    }
+
+    public void setSubscribedStatus(Account account) {
+        Customer c = getCustomer(account);
+        if (c != null) {
+            CreditCard dc = null;
+            for (CreditCard cc : c.getCreditCards()) {
+                if (cc.isDefault())
+                    dc = cc;
+            }
+            if (dc != null) {
+                for (Subscription ss : dc.getSubscriptions()) {
+                    if (ss.getStatus() == Subscription.Status.ACTIVE) {
+                        account.setAccountState(Account.ACTIVE);
+                    } else if (ss.getStatus() == Subscription.Status.PAST_DUE) {
+                        account.setAccountState(Account.BILLING_FAILED);
+                    } else if (ss.getStatus() == Subscription.Status.EXPIRED) {
+                        account.setAccountState(Account.BILLING_FAILED);
+                    } else {
+                        account.setAccountState(Account.DELINQUENT);
+                    }
+                }
+            }
+        }
+
     }
 }
