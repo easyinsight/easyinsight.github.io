@@ -90,11 +90,11 @@ public class TreeData {
                 if (argh instanceof HigherLevel) {
                     HigherLevel higherLevel = (HigherLevel) argh;
                     HigherLevel higherLevel1 = (HigherLevel) argh1;
-                    return getComparison(higherLevel.level, higherLevel.value, higherLevel1.value);
+                    return getComparison(hierarchy.getHierarchyLevels().get(0).getAnalysisItem(), higherLevel.value, higherLevel1.value);
                 } else if (argh instanceof LowerLevel) {
                     LowerLevel lowerLevel = (LowerLevel) argh;
                     LowerLevel lowerLevel1 = (LowerLevel) argh1;
-                    return getComparison(lowerLevel.analysisItem, lowerLevel.row.getValue(lowerLevel.analysisItem), lowerLevel1.row.getValue(lowerLevel1.analysisItem));
+                    return getComparison(hierarchy.getHierarchyLevels().get(0).getAnalysisItem(), lowerLevel.row.getValue(lowerLevel.analysisItem), lowerLevel1.row.getValue(lowerLevel1.analysisItem));
                 }
                 return 0;
             }
