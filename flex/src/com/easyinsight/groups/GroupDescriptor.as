@@ -14,5 +14,9 @@ package com.easyinsight.groups
 		{
 		}
 
+
+        public function get displayName():String {
+            return name;
+        }
 	}
 }
