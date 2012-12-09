@@ -125,9 +125,15 @@
             columnSeries.yField = measure.qualifiedName();
             columnSeries.labelFunction = function (element:ChartItem, series:Series):String {
                 var columnSeriesItem:ColumnSeriesItem = element as ColumnSeriesItem;
-                return measure.getFormatter().format(columnSeriesItem.xNumber);
+                return measure.getFormatter().format(columnSeriesItem.yNumber);
             };
             columnSeries.dataProvider = dataSet;
+            if (ColumnChartDefinition(chartDef).labelPosition == "auto") {
+                var cf:ClassFactory = new ClassFactory(BetterBoxRenderer);
+                cf.properties = { labelFontSize: ColumnChartDefinition(chartDef).labelFontSize, labelFontWeight: ColumnChartDefinition(chartDef).labelFontWeight };
+                columnSeries.setStyle("itemRenderer", cf);
+            }
+
             columnSeries.dataFunction = function(series:Series, item:Object, fieldName:String):Object {
                 if (measure == null) {
                     return null;
@@ -139,6 +145,7 @@
                 else
                     return null;
             };
+            //columnSeries.setStyle("labelPosition",ColumnChartDefinition(chartDef).labelPosition);
             columnSeries.displayName = measure.display;
             columnSeries.setStyle("showDataEffect", interpolateIn);
             columnSeries.setStyle("hideDataEffect", interpolateIn);

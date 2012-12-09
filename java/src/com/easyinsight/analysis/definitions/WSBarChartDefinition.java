@@ -22,6 +22,51 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
     private boolean useChartColor;
     private String columnSort;
     private String axisType;
+    private String labelPosition = "none";
+    private int labelFontSize;
+    //private int labelFontColor;
+    /*private boolean useLabelFontColor;*/
+    private String labelFontWeight;
+
+    public int getLabelFontSize() {
+        return labelFontSize;
+    }
+
+    public void setLabelFontSize(int labelFontSize) {
+        this.labelFontSize = labelFontSize;
+    }
+
+    /*public int getLabelFontColor() {
+        return labelFontColor;
+    }
+
+    public void setLabelFontColor(int labelFontColor) {
+        this.labelFontColor = labelFontColor;
+    }*/
+
+    /*public boolean isUseLabelFontColor() {
+        return useLabelFontColor;
+    }
+
+    public void setUseLabelFontColor(boolean useLabelFontColor) {
+        this.useLabelFontColor = useLabelFontColor;
+    }*/
+
+    public String getLabelFontWeight() {
+        return labelFontWeight;
+    }
+
+    public void setLabelFontWeight(String labelFontWeight) {
+        this.labelFontWeight = labelFontWeight;
+    }
+
+    public String getLabelPosition() {
+        return labelPosition;
+    }
+
+    public void setLabelPosition(String labelPosition) {
+        this.labelPosition = labelPosition;
+    }
 
     public String getAxisType() {
         return axisType;
@@ -79,6 +124,9 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         useChartColor = findBooleanProperty(properties, "useChartColor", false);
         columnSort = findStringProperty(properties, "columnSort", "Unsorted");
         axisType = findStringProperty(properties, "axisType", "Linear");
+        labelPosition = findStringProperty(properties, "labelPosition", "none");
+        labelFontWeight = findStringProperty(properties, "labelFontWeight", "none");
+        labelFontSize = (int) findNumberProperty(properties, "labelFontSize", 12);
     }
 
     @Override
@@ -86,9 +134,12 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportNumericProperty("chartColor", chartColor));
         properties.add(new ReportNumericProperty("gradientColor", gradientColor));
+        properties.add(new ReportNumericProperty("labelFontSize", labelFontSize));
+        properties.add(new ReportStringProperty("labelFontWeight", labelFontWeight));
         properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
         properties.add(new ReportStringProperty("columnSort", columnSort));
         properties.add(new ReportStringProperty("axisType", axisType));
+        properties.add(new ReportStringProperty("labelPosition", labelPosition));
         return properties;
     }
 

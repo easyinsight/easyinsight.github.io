@@ -1,6 +1,9 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.*;
+import com.easyinsight.dataset.DataSet;
+import com.easyinsight.dataset.LimitsResults;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +22,33 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
     private boolean useChartColor;
     private String columnSort;
     private String axisType = "Linear";
+    private String labelPosition = "none";
+    private int labelFontSize;
+    private String labelFontWeight;
+
+    public int getLabelFontSize() {
+        return labelFontSize;
+    }
+
+    public void setLabelFontSize(int labelFontSize) {
+        this.labelFontSize = labelFontSize;
+    }
+
+    public String getLabelFontWeight() {
+        return labelFontWeight;
+    }
+
+    public void setLabelFontWeight(String labelFontWeight) {
+        this.labelFontWeight = labelFontWeight;
+    }
+
+    public String getLabelPosition() {
+        return labelPosition;
+    }
+
+    public void setLabelPosition(String labelPosition) {
+        this.labelPosition = labelPosition;
+    }
 
     public String getAxisType() {
         return axisType;
@@ -76,6 +106,9 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         useChartColor = findBooleanProperty(properties, "useChartColor", false);
         columnSort = findStringProperty(properties, "columnSort", "Unsorted");
         axisType = findStringProperty(properties, "axisType", "Linear");
+        labelPosition = findStringProperty(properties, "labelPosition", "none");
+        labelFontWeight = findStringProperty(properties, "labelFontWeight", "none");
+        labelFontSize = (int) findNumberProperty(properties, "labelFontSize", 12);
     }
 
     @Override
@@ -85,7 +118,9 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         properties.add(new ReportNumericProperty("gradientColor", gradientColor));
         properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
         properties.add(new ReportStringProperty("columnSort", columnSort));
-        properties.add(new ReportStringProperty("axisType", axisType));
+        properties.add(new ReportStringProperty("labelPosition", labelPosition));
+        properties.add(new ReportNumericProperty("labelFontSize", labelFontSize));
+        properties.add(new ReportStringProperty("labelFontWeight", labelFontWeight));
         return properties;
     }
 

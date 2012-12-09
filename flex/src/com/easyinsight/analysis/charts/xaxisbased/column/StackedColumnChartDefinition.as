@@ -22,6 +22,7 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
     public var useChartColor:Boolean;
     public var columnSort:String = ChartDefinition.SORT_UNSORTED;
     public var stackItem:AnalysisItem;
+    public var labelPosition:String = "none";
 
     public function StackedColumnChartDefinition() {
         super();

@@ -232,6 +232,7 @@
                     if (key == null || key == "") {
                         key = "[ No Value ]";
                     }
+                    uniqueLineSeries.setStyle("labelPosition",barChartDef.labelPosition);
                     uniqueLineSeries.xField = key;
                     uniqueLineSeries.displayName = key;
                     mySeries.push(uniqueLineSeries);

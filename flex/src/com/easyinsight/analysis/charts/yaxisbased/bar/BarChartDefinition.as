@@ -13,6 +13,11 @@ public class BarChartDefinition extends YAxisDefinition{
     public var useChartColor:Boolean;
     public var columnSort:String = ChartDefinition.SORT_UNSORTED;
     public var axisType:String = "Linear";
+    public var labelPosition:String = "none";
+    public var labelFontSize:int = 12;
+    public var labelFontWeight:String = "none";
+    //public var labelFontColor:uint = 0;
+    //public var useLabelFontColor:Boolean = false;
 
     public function BarChartDefinition() {
         super();

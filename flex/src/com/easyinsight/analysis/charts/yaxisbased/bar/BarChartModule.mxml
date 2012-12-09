@@ -11,6 +11,7 @@
         import com.easyinsight.analysis.ChartDefinition;
 
         import com.easyinsight.analysis.SortFunctionFactory;
+        import com.easyinsight.analysis.charts.xaxisbased.column.BetterBoxBarRenderer;
 
         import mx.charts.AxisRenderer;
 
@@ -30,6 +31,7 @@
         import mx.charts.series.items.BarSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
+        import mx.core.ClassFactory;
 
         override protected function getDimensionItem():AnalysisItem {
             return BarChartDefinition(chartDef).yaxis;
@@ -141,6 +143,14 @@
                 else
                     return null;
             };
+            //barSeries.setStyle("labelPosition",BarChartDefinition(chartDef).labelPosition);
+            if (BarChartDefinition(chartDef).labelPosition == "auto") {
+                var cf:ClassFactory = new ClassFactory(BetterBoxBarRenderer);
+                cf.properties = { labelFontSize: BarChartDefinition(chartDef).labelFontSize, labelFontWeight: BarChartDefinition(chartDef).labelFontWeight };
+                barSeries.setStyle("itemRenderer", cf);
+            }
+
+            barSeries.setStyle("fontSize", 18);
             barSeries.displayName = measure.display;
             barSeries.setStyle("showDataEffect", interpolateIn);
             barSeries.setStyle("hideDataEffect", interpolateIn);

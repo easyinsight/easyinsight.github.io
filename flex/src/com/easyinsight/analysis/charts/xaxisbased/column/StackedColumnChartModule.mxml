@@ -240,6 +240,12 @@
                     if (key == null || key == "") {
                         key = "[ No Value ]";
                     }
+                    uniqueLineSeries.setStyle("labelPosition",columnChartDef.labelPosition);
+                    uniqueLineSeries.labelFunction = function (element:ChartItem, series:Series):String {
+                        var columnSeriesItem:ColumnSeriesItem = element as ColumnSeriesItem;
+
+                        return AnalysisItem(columnChartDef.measures.getItemAt(0)).getFormatter().format(columnSeriesItem.yNumber - columnSeriesItem.minNumber);
+                    };
                     uniqueLineSeries.yField = key;
                     uniqueLineSeries.displayName = key;
                     mySeries.push(uniqueLineSeries);

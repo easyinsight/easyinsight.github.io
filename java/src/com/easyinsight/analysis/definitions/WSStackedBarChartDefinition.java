@@ -18,6 +18,15 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     private boolean useChartColor;
     private String columnSort;
     private AnalysisItem stackItem;
+    private String labelPosition = "none";
+
+    public String getLabelPosition() {
+        return labelPosition;
+    }
+
+    public void setLabelPosition(String labelPosition) {
+        this.labelPosition = labelPosition;
+    }
 
     public AnalysisItem getStackItem() {
         return stackItem;
@@ -65,6 +74,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         chartColor = (int) findNumberProperty(properties, "chartColor", 0);
         useChartColor = findBooleanProperty(properties, "useChartColor", false);
         columnSort = findStringProperty(properties, "columnSort", "Unsorted");
+        labelPosition = findStringProperty(properties, "labelPosition", "none");
     }
 
     @Override
@@ -73,6 +83,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         properties.add(new ReportNumericProperty("chartColor", chartColor));
         properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
         properties.add(new ReportStringProperty("columnSort", columnSort));
+        properties.add(new ReportStringProperty("labelPosition", labelPosition));
         return properties;
     }
 
@@ -99,6 +110,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
         includes.add("/js/visualizations/chart.js");
         includes.add("/js/visualizations/util.js");
         return includes;
@@ -118,7 +130,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
             JSONObject rendererOptions = new JSONObject();
             rendererOptions.put("barDirection", "'horizontal'");
             rendererOptions.put("varyBarColor", "true");
-            rendererOptions.put("barMargin", 45);
+            rendererOptions.put("barMargin", 30);
             seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = getGrid();

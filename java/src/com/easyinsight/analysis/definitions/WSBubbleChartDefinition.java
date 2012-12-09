@@ -1,9 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.HTMLReportMetadata;
-import com.easyinsight.analysis.WSChartDefinition;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.ChartDefinitionState;
+import com.easyinsight.analysis.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,6 +16,15 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
     private AnalysisItem xaxisMeasure;
     private AnalysisItem yaxisMeasure;
     private AnalysisItem zaxisMeasure;
+    private boolean showLabels = true;
+
+    public boolean isShowLabels() {
+        return showLabels;
+    }
+
+    public void setShowLabels(boolean showLabels) {
+        this.showLabels = showLabels;
+    }
 
     public AnalysisItem getXaxisMeasure() {
         return xaxisMeasure;
@@ -50,6 +56,19 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
 
     public void setDimension(AnalysisItem dimension) {
         this.dimension = dimension;
+    }
+
+    @Override
+    public void populateProperties(List<ReportProperty> properties) {
+        super.populateProperties(properties);
+        showLabels = findBooleanProperty(properties, "showLabels", true);
+    }
+
+    @Override
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportBooleanProperty("showLabels", showLabels));
+        return properties;
     }
 
     public void createReportStructure(Map<String, AnalysisItem> structure) {

@@ -7,6 +7,7 @@
  */
 package com.easyinsight.analysis {
 
+import com.easyinsight.analysis.charts.bubble.BubbleChartDefinition;
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
 import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartDefinition;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartDefinition;
@@ -208,39 +209,29 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", Pie3DChartDefinition(report).labelPosition,
                     report, ["callout", "insideWithCallout", "inside", "outside", "none"]));
         }
-        if (report is Bar3DChartDefinition) {
-            items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", Bar3DChartDefinition(report).colorScheme,
-                    report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
-            items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", Bar3DChartDefinition(report).useChartColor, report));
-            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", Bar3DChartDefinition(report).chartColor, report));
-            items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", Bar3DChartDefinition(report).columnSort, report,
-                [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
-                ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
-        }
         if (report is BarChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", BarChartDefinition(report).colorScheme,
                     report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
-            items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", BarChartDefinition(report).useChartColor, report));
-            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", BarChartDefinition(report).chartColor, report));
+            //items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", BarChartDefinition(report).useChartColor, report));
+            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", BarChartDefinition(report).chartColor, report, "useChartColor"));
             items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", BarChartDefinition(report).gradientColor, report));
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", BarChartDefinition(report).columnSort, report,
                 [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                 ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
             items.addItem(new ComboBoxReportFormItem("Chart Axis Type", "axisType", BarChartDefinition(report).axisType, report,
                     ["Linear", "Logarithmic"]));
-        }
-        if (report is Column3DChartDefinition) {
-            items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", Column3DChartDefinition(report).colorScheme,
-                    report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
-            items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", Column3DChartDefinition(report).useChartColor, report));
-            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", Column3DChartDefinition(report).chartColor, report));
-            items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", Column3DChartDefinition(report).columnSort, report,
-                    [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
-                    ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
+            items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", BarChartDefinition(report).labelPosition,
+                    report, ["none", "auto"]));
+            items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", BarChartDefinition(report).labelFontSize, report, 8, 48));
+            //items.addItem(new ColorReportFormItem("Label Font Color", "labelFontSize", BarChartDefinition(report).labelFontColor, report, "useLabelFontColor"));
+            items.addItem(new ComboBoxReportFormItem("Label Font Weight", "axisType", BarChartDefinition(report).labelFontWeight, report,
+                    ["none", "bold"]));
         }
         if (report is ColumnChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", ColumnChartDefinition(report).colorScheme,
                     report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
+            items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", ColumnChartDefinition(report).labelPosition,
+                    report, ["none", "auto"]));
             items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", ColumnChartDefinition(report).useChartColor, report));
             items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", ColumnChartDefinition(report).chartColor, report));
             items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", ColumnChartDefinition(report).gradientColor, report));
@@ -249,6 +240,10 @@ public class StyleConfiguration {
                     ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
             items.addItem(new ComboBoxReportFormItem("Chart Axis Type", "axisType", ColumnChartDefinition(report).axisType, report,
                     ["Linear", "Logarithmic"]));
+            items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", ColumnChartDefinition(report).labelFontSize, report, 8, 48));
+            //items.addItem(new ColorReportFormItem("Label Font Color", "labelFontSize", BarChartDefinition(report).labelFontColor, report, "useLabelFontColor"));
+            items.addItem(new ComboBoxReportFormItem("Label Font Weight", "axisType", ColumnChartDefinition(report).labelFontWeight, report,
+                    ["none", "bold"]));
         }
         if (report is StackedBarChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", StackedBarChartDefinition(report).colorScheme,
@@ -258,6 +253,9 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", StackedBarChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                     ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
+            items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", StackedBarChartDefinition(report).labelPosition,
+                    report, ["none", "inside"]));
+
         }
         if (report is StackedColumnChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", StackedColumnChartDefinition(report).colorScheme,
@@ -267,6 +265,8 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", StackedColumnChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                     ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
+            items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", StackedColumnChartDefinition(report).labelPosition,
+                    report, ["none", "inside"]));
         }
         if (report is FormReport) {
             items.addItem(new ComboBoxReportFormItem("Label Font Name", "labelFont", FormReport(report).labelFont, report, ["Arial", "Arial Black", "Comic Sans MS",
@@ -291,6 +291,9 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Header Width", "headerWidth", CombinedVerticalListDefinition(report).headerWidth, report, 100, 400));
             items.addItem(new NumericReportFormItem("Column Width", "columnWidth", CombinedVerticalListDefinition(report).columnWidth, report, 100, 400));
             items.addItem(new CheckBoxReportFormItem("Hide Empty Rows", "removeEmptyRows", CombinedVerticalListDefinition(report).removeEmptyRows, report));
+        }
+        if (report is BubbleChartDefinition) {
+            items.addItem(new CheckBoxReportFormItem("Show Labels", "showLabels", BubbleChartDefinition(report).showLabels, report));
         }
         if (report is TrendDefinition) {
             items.addItem(new NumericReportFormItem("Major Font Size", "majorFontSize", TrendDefinition(report).majorFontSize, report, 8, 48));

@@ -18,6 +18,15 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     private boolean useChartColor;
     private String columnSort;
     private AnalysisItem stackItem;
+    private String labelPosition = "none";
+
+    public String getLabelPosition() {
+        return labelPosition;
+    }
+
+    public void setLabelPosition(String labelPosition) {
+        this.labelPosition = labelPosition;
+    }
 
     public AnalysisItem getStackItem() {
         return stackItem;
@@ -65,6 +74,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         chartColor = (int) findNumberProperty(properties, "chartColor", 0);
         useChartColor = findBooleanProperty(properties, "useChartColor", false);
         columnSort = findStringProperty(properties, "columnSort", "Unsorted");
+        labelPosition = findStringProperty(properties, "labelPosition", "none");
     }
 
     @Override
@@ -73,6 +83,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         properties.add(new ReportNumericProperty("chartColor", chartColor));
         properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
         properties.add(new ReportStringProperty("columnSort", columnSort));
+        properties.add(new ReportStringProperty("labelPosition", labelPosition));
         return properties;
     }
 
