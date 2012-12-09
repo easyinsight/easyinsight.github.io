@@ -22,12 +22,16 @@ public class LookupTableCellRenderer extends TextInput {
 
     }
 
+    public function set report(report:AnalysisDefinition):void {
+
+    }
+
     private function onChange(event:Event):void {
         var srcString:String;
-        if (_data[_lookupTable.sourceField.qualifiedName()] is Value) {
-            srcString = String(Value(_data[_lookupTable.sourceField.qualifiedName()]).getValue());
+        if (TreeRow(_data).values[_lookupTable.sourceField.qualifiedName()] is Value) {
+            srcString = String(Value(TreeRow(_data).values[_lookupTable.sourceField.qualifiedName()]).getValue());
         } else {
-            srcString = String(_data[_lookupTable.sourceField.qualifiedName()]);
+            srcString = String(TreeRow(_data).values[_lookupTable.sourceField.qualifiedName()]);
         }
         var dstObj:Object;
         if (_lookupTable.targetField.hasType(AnalysisItemTypes.MEASURE)) {
@@ -38,7 +42,7 @@ public class LookupTableCellRenderer extends TextInput {
         } else {
             dstObj = this.text;
         }
-        _data[_analysisItem.qualifiedName()] = dstObj;
+        TreeRow(_data).values[_analysisItem.qualifiedName()] = dstObj;
         _pairMap[srcString] = dstObj;
         dispatchEvent(new LookupTableChangeEvent());
     }
@@ -61,20 +65,20 @@ public class LookupTableCellRenderer extends TextInput {
 
     override public function set data(value:Object):void {
         _data = value;
-        var text:String;
+        var treeRow:TreeRow = value as TreeRow;
         if (value != null) {
             var field:String = analysisItem.qualifiedName();
             var formatter:Formatter = analysisItem.getFormatter();
-            if (value[field] is Value) {
-                var objVal:Value = value[field];
+            if (treeRow.values[field] is Value) {
+                var objVal:Value = treeRow.values[field];
                 if (objVal == null) {
                     text = "";
                 } else {
                     text = formatter.format(objVal.getValue());
                 }
             } else {
-                if (value[field] != null) {
-                    text = formatter.format(value[field]);
+                if (treeRow.values[field] != null) {
+                    text = formatter.format(treeRow.values[field]);
                 } else {
                     text = "";
                 }
@@ -84,7 +88,6 @@ public class LookupTableCellRenderer extends TextInput {
             text = "";
         }
 
-        this.text = text;
         invalidateProperties();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
