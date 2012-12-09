@@ -197,6 +197,7 @@
                 } else {
                     measureAxis = new LogAxis();
                 }
+                measureAxis.baseAtZero = true;
                 measureAxis.title = "Blah";
                 measureAxis.labelFunction = renderAxis;
 
