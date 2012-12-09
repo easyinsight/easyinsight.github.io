@@ -1,9 +1,6 @@
 package com.easyinsight.pipeline;
 
-import com.easyinsight.analysis.AnalysisHierarchyItem;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.DataResults;
-import com.easyinsight.analysis.HierarchyLevel;
+import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.ArrayList;
@@ -41,12 +38,21 @@ public class HierarchyComponent implements INestedComponent {
             dataSet = component.apply(dataSet, pipelineData);
         }
 
+
+
         for (int i = hierarchyItem.getHierarchyLevels().size() - 1; i > 0; i--) {
             int position = hierarchyItem.getHierarchyLevels().size() - i - 1;
             DataSet childSet = sets.get(position);
             PipelineData pipelineData1 = pipelineDatas.get(position);
             pipelineData1.getAllRequestedItems().remove(hierarchyItem.getHierarchyLevels().get(i).getAnalysisItem());
             pipelineData1.getReportItems().remove(hierarchyItem.getHierarchyLevels().get(i).getAnalysisItem());
+            WSTreeDefinition tree = (WSTreeDefinition) pipelineData.getReport();
+            for (AnalysisItem analysisItem : tree.getItems()) {
+                if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                    pipelineData1.getAllRequestedItems().remove(analysisItem);
+                    pipelineData1.getReportItems().remove(analysisItem);
+                }
+            }
             for (IComponent component : components) {
                 childSet = component.apply(childSet, pipelineData1);
             }
