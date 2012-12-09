@@ -2338,7 +2338,7 @@ public class ExportService {
         }
         sb.append("</tr>");
 
-        TreeData treeData = new TreeData(tree, hierarchy, exportMetadata);
+        TreeData treeData = new TreeData(tree, hierarchy, exportMetadata, dataSet);
         for (IRow row : dataSet.getRows()) {
             treeData.addRow(row);
         }

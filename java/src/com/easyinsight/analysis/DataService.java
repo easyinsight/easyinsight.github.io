@@ -758,8 +758,9 @@ public class DataService {
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSTreeDefinition report = (WSTreeDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, report, conn, customFilters, drillthroughFilters);
-            TreeData treeData = new TreeData(report, (AnalysisHierarchyItem) report.getHierarchy(), null);
+
             DataSet dataSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+            TreeData treeData = new TreeData(report, (AnalysisHierarchyItem) report.getHierarchy(), null, dataSet);
             for (IRow row : dataSet.getRows()) {
                 treeData.addRow(row);
             }
@@ -1091,8 +1092,9 @@ public class DataService {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-            TreeData treeData = new TreeData(analysisDefinition, (AnalysisHierarchyItem) analysisDefinition.getHierarchy(), null);
+
             DataSet dataSet = listDataSet(analysisDefinition, insightRequestMetadata, conn);
+            TreeData treeData = new TreeData(analysisDefinition, (AnalysisHierarchyItem) analysisDefinition.getHierarchy(), null, dataSet);
             for (IRow row : dataSet.getRows()) {
                 treeData.addRow(row);
             }
