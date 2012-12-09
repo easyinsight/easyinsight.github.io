@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.analysis.ISelectableReportRenderer"
-        creationComplete="createRenderer()">
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:bubble="com.easyinsight.analysis.charts.bubble.*"
+           width="100%" height="100%" implements="com.easyinsight.analysis.ISelectableReportRenderer"
+           creationComplete="createRenderer()">
     <!--<mx:Style>
         .axisTitles {
             fontSize: 14;
@@ -41,7 +42,7 @@
         private var graphData:ArrayCollection = new ArrayCollection();
 
         private function createRenderer():void {
-            bubbleSeries.setStyle("itemRenderer", new ClassFactory(CircleItemRenderer));
+            //bubbleSeries.setStyle("itemRenderer", new ClassFactory(CircleItemRenderer));
             bubbleSeries.setStyle("fills", FillProvider.createRadialGradients2());
             //bubbleSeries.setStyle("stroke", borderStroke);
         }
@@ -73,6 +74,11 @@
 
         private var bubbleChart:BubbleChartDefinition;
 
+        private var showLabels:Boolean;
+
+        [Bindable]
+        private var chartRenderer:ClassFactory;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var plotChartDef:BubbleChartDefinition = analysisDefinition as BubbleChartDefinition;
             if (dataSet.length > 0) {
@@ -90,6 +96,19 @@
                 measure3Formatter = plotChartDef.zaxisMeasure.getFormatter();
                 dimension = plotChartDef.dimension.qualifiedName();
                 dimensionItem = plotChartDef.dimension;
+                if (chartRenderer == null) {
+                    showLabels = plotChartDef.showLabels;
+                    chartRenderer = plotChartDef.showLabels ? new ClassFactory(LabeledBubbleRenderer) : new ClassFactory(CircleItemRenderer);
+                } else {
+                    if (showLabels && !plotChartDef.showLabels) {
+                        showLabels = false;
+                        chartRenderer = new ClassFactory(CircleItemRenderer);
+                    } else if (!showLabels && plotChartDef.showLabels) {
+                        showLabels = true;
+                        chartRenderer = new ClassFactory(LabeledBubbleRenderer);
+                    }
+                }
+
             }
             graphData = dataSet;
         }
@@ -198,8 +217,9 @@
 			</mx:AxisRenderer>
 		</mx:verticalAxisRenderers>
 		<mx:series>
-			<mx:BubbleSeries xField="{measure1}" yField="{measure2}" radiusField="{measure3}" hideDataEffect="zoomOut" showDataEffect="zoomIn"
-                    id="bubbleSeries"/>
+			<bubble:LabeledBubbleSeries xField="{measure1}" yField="{measure2}" radiusField="{measure3}" hideDataEffect="zoomOut" showDataEffect="zoomIn"
+                    id="bubbleSeries" labelField="{dimension}" textAlign="center" itemRenderer="{chartRenderer}"
+                    textVAlign="middle"/>
 		</mx:series>
 	</mx:BubbleChart>
 </mx:Module>

@@ -12,6 +12,18 @@ public class BubbleChartDefinition extends ChartDefinition{
     public var xaxisMeasure:AnalysisItem;
     public var yaxisMeasure:AnalysisItem;
     public var zaxisMeasure:AnalysisItem;
+    public var showLabels:Boolean = true;
+    /*public var baseXAxisAtZero:Boolean;
+    public var baseYAxisAtZero:Boolean;
+    public var showGridLines:Boolean;
+    public var explicitXAxisMax:int;
+    public var explicitXAxisMin:int;
+    public var explicitYAxisMax:int;
+    public var explicitYAxisMin:int;
+    public var explicitXAxisInterval:int;
+    public var explicitYAxisInterval:int;
+    public var xAxisType:String;
+    public var yAxisType:String;*/
 
     public function BubbleChartDefinition() {
         super();
