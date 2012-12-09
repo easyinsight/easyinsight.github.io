@@ -25,7 +25,9 @@ public class Row implements IRow, Serializable, Cloneable {
         Row row = (Row) super.clone();
         Value[] copyMap = new Value[valueMap.length];
         for (int i = 0; i < valueMap.length; i++) {
-            copyMap[i] = valueMap[i].clone();
+            if (valueMap[i] != null) {
+                copyMap[i] = valueMap[i].clone();
+            }
         }
         row.valueMap = copyMap;
 
