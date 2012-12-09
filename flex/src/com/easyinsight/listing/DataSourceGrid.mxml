@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center" initialize="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
         import com.easyinsight.solutions.DataSourceDescriptor;
@@ -22,6 +22,27 @@
             dispatchEvent(new Event("dataProviderChanged"));
             if (dataSourceGrid != null) {
                 dataSourceGrid.invalidateSize();
+            }
+        }
+
+        private function onCreation():void {
+            formatter = new DateFormatter();
+            switch (User.getInstance().dateFormat) {
+                case 0:
+                    formatter.formatString = "MM/DD/YYYY HH:NN";
+                    break;
+                case 1:
+                    formatter.formatString = "YYYY-MM-DD HH:NN";
+                    break;
+                case 2:
+                    formatter.formatString = "DD-MM-YYYY HH:NN";
+                    break;
+                case 3:
+                    formatter.formatString = "DD/MM/YYYY HH:NN";
+                    break;
+                case 4:
+                    formatter.formatString = "DD.MM.YYYY HH:NN";
+                    break;
             }
         }
 
@@ -69,7 +90,7 @@
             }
         }
 
-        private var formatter:DateFormatter = new DateFormatter();
+        private var formatter:DateFormatter;
 
         private function createDateLabelFunction(value:Object, column:DataGridColumn):String {
             var descriptor:DataSourceDescriptor = value as DataSourceDescriptor;

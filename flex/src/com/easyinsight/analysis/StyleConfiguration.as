@@ -224,7 +224,7 @@ public class StyleConfiguration {
                     report, ["none", "auto"]));
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", BarChartDefinition(report).labelFontSize, report, 8, 48));
             //items.addItem(new ColorReportFormItem("Label Font Color", "labelFontSize", BarChartDefinition(report).labelFontColor, report, "useLabelFontColor"));
-            items.addItem(new ComboBoxReportFormItem("Label Font Weight", "axisType", BarChartDefinition(report).labelFontWeight, report,
+            items.addItem(new ComboBoxReportFormItem("Label Font Weight", "labelFontWeight", BarChartDefinition(report).labelFontWeight, report,
                     ["none", "bold"]));
         }
         if (report is ColumnChartDefinition) {
@@ -242,7 +242,7 @@ public class StyleConfiguration {
                     ["Linear", "Logarithmic"]));
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", ColumnChartDefinition(report).labelFontSize, report, 8, 48));
             //items.addItem(new ColorReportFormItem("Label Font Color", "labelFontSize", BarChartDefinition(report).labelFontColor, report, "useLabelFontColor"));
-            items.addItem(new ComboBoxReportFormItem("Label Font Weight", "axisType", ColumnChartDefinition(report).labelFontWeight, report,
+            items.addItem(new ComboBoxReportFormItem("Label Font Weight", "labelFontWeight", ColumnChartDefinition(report).labelFontWeight, report,
                     ["none", "bold"]));
         }
         if (report is StackedBarChartDefinition) {
