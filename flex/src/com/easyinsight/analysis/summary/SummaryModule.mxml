@@ -154,7 +154,7 @@
                     }
                     columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);
                     columnHeaderObject.headerText = myHeader.display;
-                    columnHeaderObject.dataField = myHeader.qualifiedName();
+                    columnHeaderObject.dataField = "groupingColumn";
                     var headerFactory:ClassFactory = new ClassFactory(ListViewHeaderRenderer);
                     headerFactory.properties = { eiColor:treeDefinition.headerTextColor };
                     columnHeaderObject.headerRenderer = headerFactory;
