@@ -1,5 +1,6 @@
 package com.easyinsight.schedule {
 import com.easyinsight.administration.sharing.UserStub;
+import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.events.MouseEvent;
@@ -43,6 +44,7 @@ public class RecipientControls extends UIComponent implements IListItemRenderer 
 
     private function deleteActivity(event:MouseEvent):void {
         if (obj is UserStub) dispatchEvent(new RecipientEvent(RecipientEvent.DELETE_RECIPIENT, UserStub(obj)));
+        else if (obj is GroupDescriptor) dispatchEvent(new RecipientEvent(RecipientEvent.DELETE_RECIPIENT, null, null, GroupDescriptor(obj)));
         else dispatchEvent(new RecipientEvent(RecipientEvent.DELETE_RECIPIENT, null, String(obj)));
     }
 

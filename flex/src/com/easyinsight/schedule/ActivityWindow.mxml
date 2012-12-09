@@ -3,6 +3,7 @@
                    xmlns:schedule="com.easyinsight.schedule.*">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
+        import com.easyinsight.groups.GroupDescriptor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
@@ -34,6 +35,9 @@
             }
             for each (var email:String in _activity.emails) {
                 recipients.addItem(email);
+            }
+            for each (var group:GroupDescriptor in _activity.groups) {
+                recipients.addItem(group);
             }
         }
 

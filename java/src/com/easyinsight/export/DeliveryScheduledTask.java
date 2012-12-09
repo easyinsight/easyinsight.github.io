@@ -192,6 +192,18 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 }
                 userStmt.close();
 
+                PreparedStatement groupStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, delivery_to_group, group_to_user_join WHERE " +
+                        "delivery_to_group.scheduled_account_activity_id = ? AND delivery_to_group.group_id = group_to_user_join.group_id and group_to_user_join.user_id = user.user_id");
+                groupStmt.setLong(1, activityID);
+                ResultSet groupRS = groupStmt.executeQuery();
+                while (groupRS.next()) {
+                    String email = groupRS.getString(1);
+                    String firstName = groupRS.getString(2);
+                    String lastName = groupRS.getString(3);
+                    userStubs.add(new UserInfo(email, firstName, lastName));
+                }
+                groupStmt.close();
+
                 String senderName = null;
                 String senderEmail = null;
                 PreparedStatement getSernderStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, REPORT_DELIVERY WHERE REPORT_DELIVERY.sender_user_id = user.user_id and " +
@@ -599,6 +611,18 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
         userStmt.close();
 
+        PreparedStatement groupStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, delivery_to_group, group_to_user_join WHERE " +
+                "delivery_to_group.scheduled_account_activity_id = ? AND delivery_to_group.group_id = group_to_user_join.group_id and group_to_user_join.user_id = user.user_id");
+        groupStmt.setLong(1, activityID);
+        ResultSet groupRS = groupStmt.executeQuery();
+        while (groupRS.next()) {
+            String email = groupRS.getString(1);
+            String firstName = groupRS.getString(2);
+            String lastName = groupRS.getString(3);
+            userStubs.add(new UserInfo(email, firstName, lastName));
+        }
+        groupStmt.close();
+
         String senderName = null;
         String senderEmail = null;
         PreparedStatement getSernderStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, REPORT_DELIVERY WHERE REPORT_DELIVERY.sender_user_id = user.user_id and " +
@@ -677,6 +701,18 @@ public class DeliveryScheduledTask extends ScheduledTask {
             userStubs.add(new UserInfo(email, firstName, lastName));
         }
         userStmt.close();
+
+        PreparedStatement groupStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, delivery_to_group, group_to_user_join WHERE " +
+                "delivery_to_group.scheduled_account_activity_id = ? AND delivery_to_group.group_id = group_to_user_join.group_id and group_to_user_join.user_id = user.user_id");
+        groupStmt.setLong(1, activityID);
+        ResultSet groupRS = groupStmt.executeQuery();
+        while (groupRS.next()) {
+            String email = groupRS.getString(1);
+            String firstName = groupRS.getString(2);
+            String lastName = groupRS.getString(3);
+            userStubs.add(new UserInfo(email, firstName, lastName));
+        }
+        groupStmt.close();
 
         String senderName = null;
         String senderEmail = null;

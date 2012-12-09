@@ -2,6 +2,7 @@ package com.easyinsight.export;
 
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.email.UserStub;
+import com.easyinsight.groups.GroupDescriptor;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,6 +18,7 @@ import java.util.List;
 public abstract class ScheduledDelivery extends ScheduledActivity {
 
     private List<UserStub> users = new ArrayList<UserStub>();
+    private List<GroupDescriptor> groups = new ArrayList<GroupDescriptor>();
     private List<String> emails = new ArrayList<String>();
 
     public List<UserStub> getUsers() {
@@ -35,6 +37,14 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
         this.emails = emails;
     }
 
+    public List<GroupDescriptor> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<GroupDescriptor> groups) {
+        this.groups = groups;
+    }
+
     protected void customSave(EIConnection conn, int utcOffset) throws SQLException {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM delivery_to_user WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         clearStmt.setLong(1, getScheduledActivityID());
@@ -47,6 +57,19 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
             insertStmt.execute();
         }
         insertStmt.close();
+
+        PreparedStatement clearGroupStmt = conn.prepareStatement("DELETE FROM delivery_to_group WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+        clearGroupStmt.setLong(1, getScheduledActivityID());
+        clearGroupStmt.executeUpdate();
+        clearGroupStmt.close();
+        PreparedStatement insertGroupStmt = conn.prepareStatement("INSERT INTO delivery_to_group (group_id, SCHEDULED_ACCOUNT_ACTIVITY_ID) VALUES (?, ?)");
+        for (GroupDescriptor group : groups) {
+            insertGroupStmt.setLong(1, group.getGroupID());
+            insertGroupStmt.setLong(2, getScheduledActivityID());
+            insertGroupStmt.execute();
+        }
+        insertGroupStmt.close();
+
         PreparedStatement clearEmailStmt = conn.prepareStatement("DELETE FROM delivery_to_email WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         clearEmailStmt.setLong(1, getScheduledActivityID());
         clearEmailStmt.executeUpdate();
@@ -73,6 +96,18 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
             users.add(userStub);
         }
         queryStmt.close();
+
+        PreparedStatement groupStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP_ID, NAME FROM COMMUNITY_GROUP, DELIVERY_TO_GROUP WHERE " +
+                "DELIVERY_TO_GROUP.GROUP_ID = COMMUNITY_GROUP.COMMUNITY_GROUP_ID AND DELIVERY_TO_GROUP.SCHEDULED_ACCOUNT_ACTIVITY_id = ?");
+        groupStmt.setLong(1, getScheduledActivityID());
+        ResultSet groupRS = groupStmt.executeQuery();
+        List<GroupDescriptor> groups = new ArrayList<GroupDescriptor>();
+        while (groupRS.next()) {
+            GroupDescriptor groupDescriptor = new GroupDescriptor(groupRS.getString(2), groupRS.getLong(1), 0, null);
+            groups.add(groupDescriptor);
+        }
+        groupStmt.close();
+
         PreparedStatement queryEmailStmt = conn.prepareStatement("SELECT EMAIL_ADDRESS FROM delivery_to_email where SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         queryEmailStmt.setLong(1, getScheduledActivityID());
         List<String> emails = new ArrayList<String>();
@@ -84,5 +119,6 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
         queryEmailStmt.close();
         setUsers(users);
         setEmails(emails);
+        setGroups(groups);
     }
 }

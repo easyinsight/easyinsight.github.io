@@ -7,6 +7,7 @@
         import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.framework.User;
+        import com.easyinsight.groups.GroupDescriptor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
@@ -49,6 +50,7 @@
 
         private function deleteRecipient(event:RecipientEvent):void {
             if (event.user != null) recipients.removeItemAt(recipients.getItemIndex(event.user));
+            else if (event.group != null) recipients.removeItemAt(recipients.getItemIndex(event.group));
             else recipients.removeItemAt(recipients.getItemIndex(event.email));
         }
 
@@ -74,6 +76,9 @@
                 }
                 for each (var email:String in _activity.emails) {
                     recipients.addItem(email);
+                }
+                for each (var group:GroupDescriptor in _activity.groups) {
+                    recipients.addItem(group);
                 }
                 deliveryLabel = _activity.deliveryLabel;
                 reportID = _activity.reportID;
@@ -108,14 +113,17 @@
             }
             var users:ArrayCollection = new ArrayCollection();
             var emails:ArrayCollection = new ArrayCollection();
+            var groups:ArrayCollection = new ArrayCollection();
             for each (var obj:Object in recipients) {
                 if (obj is UserStub) {
                     users.addItem(obj);
+                } else if (obj is GroupDescriptor) {
+                    groups.addItem(obj);
                 } else {
                     emails.addItem(obj);
                 }
             }
-            if (users.length == 0 && emails.length == 0) {
+            if (users.length == 0 && emails.length == 0 && groups.length == 0) {
                 var window:SavePromptWindow = new SavePromptWindow();
                 window.prompt = "You must define at least one recipient.";
                 window.defineOption("Add Recipient", PromptEvent.PROMPT_SAVE);
@@ -135,6 +143,7 @@
 
                 _activity.users = users;
                 _activity.emails = emails;
+                _activity.groups = groups;
                 deliveryConfiguration.save(_activity);
                 filterConfiguration.save(_activity);
 
@@ -200,6 +209,7 @@
 
         private function onAddUser(event:RecipientEvent):void {
             if (event.user != null) recipients.addItem(event.user);
+            else if (event.group != null) recipients.addItem(event.group);
             else recipients.addItem(event.email);
         }
 

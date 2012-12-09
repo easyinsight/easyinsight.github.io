@@ -1,5 +1,6 @@
 package com.easyinsight.schedule {
 import com.easyinsight.administration.sharing.UserStub;
+import com.easyinsight.groups.GroupDescriptor;
 
 import mx.controls.Label;
 
@@ -15,6 +16,8 @@ public class RecipientRenderer extends Label {
         obj = val;
         if (obj is UserStub) {
             text = UserStub(obj).displayName;
+        } else if (obj is GroupDescriptor) {
+            text = GroupDescriptor(obj).displayName;
         } else {
             text = String(obj);
         }

@@ -7,6 +7,7 @@ public class ScheduledDelivery extends ScheduledActivity {
 
     public var users:ArrayCollection = new ArrayCollection();
     public var emails:ArrayCollection = new ArrayCollection();
+    public var groups:ArrayCollection = new ArrayCollection();
 
     public function ScheduledDelivery() {
         super();
