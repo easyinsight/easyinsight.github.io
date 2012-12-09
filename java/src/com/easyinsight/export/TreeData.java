@@ -1,12 +1,10 @@
 package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.calculations.CalcGraph;
+import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.pipeline.CalculationComponent;
-import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.PipelineData;
 
 import java.util.*;
@@ -32,16 +30,77 @@ public class TreeData {
     private AnalysisHierarchyItem hierarchy;
     private ExportMetadata exportMetadata;
 
-    public TreeData(WSTreeDefinition treeDefinition, AnalysisHierarchyItem hierarchy, ExportMetadata exportMetadata) {
+    private Map<String, IRow> masterIndex = new HashMap<String, IRow>();
+
+    public TreeData(WSTreeDefinition treeDefinition, AnalysisHierarchyItem hierarchy, ExportMetadata exportMetadata, DataSet dataSet) {
         this.treeDefinition = treeDefinition;
         this.hierarchy = hierarchy;
         this.exportMetadata = exportMetadata;
+
+        for (int i = 0; i < dataSet.getAdditionalSets().size(); i++) {
+            DataSet childSet = dataSet.getAdditionalSets().get(i);
+            for (IRow row : childSet.getRows()) {
+                String key = "|";
+                for (int j = 0; j < hierarchy.getHierarchyLevels().size() - 1 - i; j++) {
+                    HierarchyLevel level = hierarchy.getHierarchyLevels().get(j);
+                    Value value = row.getValue(level.getAnalysisItem());
+                    key += value.toString() + "|";
+                }
+                masterIndex.put(key, row);
+            }
+
+        }
+    }
+
+    private int getComparison(AnalysisItem field, Value value1, Value value2) {
+        int comparison = 0;
+        int ascending = field.getSort() == 2 ? -1 : 1;
+
+
+        if (value1.type() == Value.NUMBER && value2.type() == Value.NUMBER) {
+            comparison = value1.toDouble().compareTo(value2.toDouble()) * ascending;
+        } else if (value1.type() == Value.DATE && value2.type() == Value.DATE) {
+            DateValue date1 = (DateValue) value1;
+            DateValue date2 = (DateValue) value2;
+            comparison = date1.getDate().compareTo(date2.getDate()) * ascending;
+        } else if (value1.type() == Value.DATE && value2.type() == Value.EMPTY) {
+            comparison = ascending;
+        } else if (value1.type() == Value.EMPTY && value2.type() == Value.DATE) {
+            comparison = -ascending;
+        } else if (value1.type() == Value.STRING && value2.type() == Value.STRING) {
+            StringValue stringValue1 = (StringValue) value1;
+            StringValue stringValue2 = (StringValue) value2;
+            comparison = stringValue1.getValue().compareTo(stringValue2.getValue()) * ascending;
+        } else if (value1.type() == Value.STRING && value2.type() == Value.EMPTY) {
+            comparison = -ascending;
+        } else if (value1.type() == Value.EMPTY && value2.type() == Value.STRING) {
+            comparison = ascending;
+        }
+        return comparison;
     }
 
     public List<TreeRow> toTreeRows(PipelineData pipelineData) {
         List<TreeRow> rows = new ArrayList<TreeRow>();
 
-        for (Argh argh : map.values()) {
+        List<Argh> children = new ArrayList<Argh>(map.values());
+
+        Collections.sort(children, new Comparator<Argh>() {
+
+            public int compare(Argh argh, Argh argh1) {
+                if (argh instanceof HigherLevel) {
+                    HigherLevel higherLevel = (HigherLevel) argh;
+                    HigherLevel higherLevel1 = (HigherLevel) argh1;
+                    return getComparison(higherLevel.level, higherLevel.value, higherLevel1.value);
+                } else if (argh instanceof LowerLevel) {
+                    LowerLevel lowerLevel = (LowerLevel) argh;
+                    LowerLevel lowerLevel1 = (LowerLevel) argh1;
+                    return getComparison(lowerLevel.analysisItem, lowerLevel.row.getValue(lowerLevel.analysisItem), lowerLevel1.row.getValue(lowerLevel1.analysisItem));
+                }
+                return 0;
+            }
+        });
+
+        for (Argh argh : children) {
             TreeRow treeRow = argh.toTreeRow(pipelineData);
             rows.add(treeRow);
 
@@ -57,7 +116,7 @@ public class TreeData {
         Value value = row.getValue(analysisItem);
         Argh argh = map.get(value);
         if (argh == null) {
-            argh = new HigherLevel(analysisItem, hierarchy, 0);
+            argh = new HigherLevel(analysisItem, hierarchy, 0, null);
             map.put(value, argh);
         }
         argh.addRow(row);
@@ -78,8 +137,10 @@ public class TreeData {
         private Value value;
         private String backgroundColor;
         private String textColor;
+        private IRow aggregateLevel;
+        private HigherLevel parent;
 
-        private HigherLevel(AnalysisItem level, AnalysisHierarchyItem hierarchy, int index) {
+        private HigherLevel(AnalysisItem level, AnalysisHierarchyItem hierarchy, int index, HigherLevel parent) {
             this.level = level;
             this.hierarchy = hierarchy;
             this.index = index;
@@ -90,6 +151,7 @@ public class TreeData {
             } else {
                 textColor = "#000000";
             }
+            this.parent = parent;
         }
 
         public void addRow(IRow row) {
@@ -101,100 +163,63 @@ public class TreeData {
                 if ((index + 1) == (hierarchy.getHierarchyLevels().size() - 1)) {
                     argh = new LowerLevel(nextItem);
                 } else {
-                    argh = new HigherLevel(nextItem, hierarchy, index + 1);
+                    argh = new HigherLevel(nextItem, hierarchy, index + 1, this);
                 }
                 map.put(value, argh);
             }
             argh.addRow(row);
+            String key = createKey();
+            aggregateLevel = masterIndex.get(key);
+        }
+
+        private String createKey() {
+            String key;
+            if (parent != null) {
+                key = parent.createKey();
+            } else {
+                key = "|";
+            }
+            key += value.toString() + "|";
+            return key;
         }
 
         public TreeRow toTreeRow(PipelineData pipelineData) {
-            Map<AnalysisItem, Aggregation> sumMap = new HashMap<AnalysisItem, Aggregation>();
 
-            Set<AnalysisItem> reportItems = new HashSet<AnalysisItem>(treeDefinition.getItems());
-            List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, new AnalysisItemRetrievalStructure(null));
-
-            Iterator<IComponent> iter = components.iterator();
-            while (iter.hasNext()) {
-                IComponent component = iter.next();
-                if (!(component instanceof CalculationComponent)) {
-                    iter.remove();
-                    continue;
-                }
-                CalculationComponent calculationComponent = (CalculationComponent) component;
-                if (!calculationComponent.getAnalysisCalculation().isRecalculateSummary()) {
-                    iter.remove();
-                }
-            }
-
-            for (AnalysisItem analysisItem : treeDefinition.getItems()) {
-                if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                    AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
-                    boolean recalculate = false;
-                    if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                        AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
-                        if (analysisCalculation.isRecalculateSummary()) {
-                            recalculate = true;
-                        }
-                    }
-                    if (!recalculate) {
-                        sumMap.put(analysisMeasure, new AggregationFactory(analysisMeasure, false).getAggregation());
-                    }
-                }
-            }
             TreeRow treeRow = new TreeRow();
             treeRow.setBackgroundColor(backgroundColor);
             treeRow.setTextColor(textColor);
             treeRow.setGroupingField(level);
             treeRow.setGroupingColumn(this.value);
 
-            DataSet tempSet = new DataSet();
-            IRow tempRow = tempSet.createRow();
-
             for (Argh argh : map.values()) {
                 TreeRow childRow = argh.toTreeRow(pipelineData);
                 treeRow.getChildren().add(childRow);
+            }
+
+            if (treeDefinition instanceof WSSummaryDefinition) {
+                TreeRow summaryRow = new TreeRow();
+
+                for (AnalysisItem reportItem : treeDefinition.getItems()) {
+                    if (reportItem.hasType(AnalysisItemTypes.MEASURE)) {
+                        summaryRow.getValues().put(reportItem.qualifiedName(), aggregateLevel.getValue(reportItem));
+                    }
+                }
+
+                summaryRow.setBackgroundColor("AAAAAA");
+                summaryRow.setGroupingColumn(new StringValue(""));
+                summaryRow.setSummaryColumn(true);
+                /*for (Map.Entry<AnalysisItem, Aggregation> entry : sumMap.entrySet()) {
+                    summaryRow.getValues().put(entry.getKey().qualifiedName(), entry.getValue().getValue());
+                }*/
+                treeRow.getChildren().add(summaryRow);
+            } else {
                 for (AnalysisItem analysisItem : treeDefinition.getItems()) {
                     if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                        boolean recalculate = false;
-                        if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                            AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
-                            if (analysisCalculation.isRecalculateSummary()) {
-                                recalculate = true;
-                            }
-                        }
-                        if (!recalculate) {
-                            Value value = (Value) childRow.getValues().get(analysisItem.qualifiedName());
-                            if (value != null) {
-                                Aggregation aggregation = sumMap.get(analysisItem);
-                                aggregation.addValue(value);
-                            }
-                        }
+                        treeRow.getValues().put(analysisItem.qualifiedName(), aggregateLevel.getValue(analysisItem.createAggregateKey()));
                     }
                 }
             }
-            for (Map.Entry<AnalysisItem, Aggregation> entry : sumMap.entrySet()) {
-                tempRow.addValue(entry.getKey().createAggregateKey(), entry.getValue().getValue());
-            }
-            for (IComponent component : components) {
-                component.apply(tempSet, pipelineData);
-            }
 
-            TreeRow summaryRow = new TreeRow();
-
-            for (AnalysisItem reportItem : reportItems) {
-                if (reportItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                    summaryRow.getValues().put(reportItem.qualifiedName(), tempSet.getRow(0).getValue(reportItem));
-                }
-            }
-
-            summaryRow.setBackgroundColor("AAAAAA");
-            summaryRow.setGroupingColumn(new StringValue(""));
-            summaryRow.setSummaryColumn(true);
-            for (Map.Entry<AnalysisItem, Aggregation> entry : sumMap.entrySet()) {
-                summaryRow.getValues().put(entry.getKey().qualifiedName(), entry.getValue().getValue());
-            }
-            treeRow.getChildren().add(summaryRow);
             /*for (Map.Entry<AnalysisItem, Aggregation> entry : sumMap.entrySet()) {
                 treeRow.getValues().put(entry.getKey().qualifiedName(), entry.getValue().getValue());
             }*/

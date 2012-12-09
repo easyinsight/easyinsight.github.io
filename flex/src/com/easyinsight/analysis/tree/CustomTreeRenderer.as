@@ -5,13 +5,6 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.HierarchyLevel;
 
 import flash.display.DisplayObject;
-import flash.utils.describeType;
-
-import mx.collections.GroupingCollection;
-
-import mx.controls.AdvancedDataGrid;
-
-import mx.controls.Alert;
 
 import mx.controls.advancedDataGridClasses.AdvancedDataGridGroupItemRenderer;
 import mx.controls.advancedDataGridClasses.AdvancedDataGridListData;
@@ -45,19 +38,10 @@ public class CustomTreeRenderer extends AdvancedDataGridGroupItemRenderer {
 
     protected override function commitProperties():void {
         super.commitProperties();
-        //Alert.show("depth = " + AdvancedDataGridListData(listData).depth);
-        trace("data field = " + AdvancedDataGridListData(listData).dataField);
         var levelItem:AnalysisItem = HierarchyLevel(AnalysisHierarchyItem(analysisItem).hierarchyLevels.getItemAt(AdvancedDataGridListData(listData).depth - 1)).analysisItem;
         levelItem.reportFieldExtension = analysisItem.reportFieldExtension;
         CustomTreeTextRenderer(label).analysisItem = levelItem;
         CustomTreeTextRenderer(label).report = report;
-
-        var grid:AdvancedDataGrid = AdvancedDataGrid(listData.owner);
-        /*var gColl:GroupingCollection = grid.dataProvider as GroupingCollection;
-        var data:Object = gColl.source.getItemAt(AdvancedDataGridListData(listData).rowIndex);
-        Alert.show(data[levelItem.qualifiedName()]);*/
-        /*var item:Object = AdvancedDataGridListData(listData).item;
-        Alert.show(item[levelItem.qualifiedName()].toString());*/
         CustomTreeTextRenderer(label).data = data;
     }
 

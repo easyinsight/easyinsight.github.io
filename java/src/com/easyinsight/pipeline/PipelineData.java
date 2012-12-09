@@ -11,7 +11,7 @@ import java.util.*;
  * Date: May 18, 2009
  * Time: 2:41:44 PM
  */
-public class PipelineData {
+public class PipelineData implements  Cloneable {
     private WSAnalysisDefinition report;
     private List<AnalysisItem> allItems;
     private Collection<AnalysisItem> reportItems;
@@ -30,6 +30,13 @@ public class PipelineData {
         this.dataSourceProperties = dataSourceProperties;
         this.allRequestedItems = allRequestedItems;
         this.uniqueItems = uniqueItems;
+    }
+
+    public PipelineData clone() throws CloneNotSupportedException {
+        PipelineData clone = (PipelineData) super.clone();
+        clone.setReportItems(new ArrayList<AnalysisItem>(reportItems));
+        clone.setAllRequestedItems(new HashSet<AnalysisItem>(allRequestedItems));
+        return clone;
     }
 
     public Map<Long, AnalysisItem> getUniqueItems() {

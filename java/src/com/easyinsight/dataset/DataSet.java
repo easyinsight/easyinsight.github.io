@@ -15,7 +15,7 @@ import java.io.Serializable;
 * Date: Dec 22, 2007
 * Time: 10:35:21 AM
 */
-public class DataSet implements Serializable {
+public class DataSet implements Serializable, Cloneable {
 
     private List<IRow> rows;
     private Date lastTime;
@@ -23,6 +23,8 @@ public class DataSet implements Serializable {
     private DataSetKeys dataSetKeys = new DataSetKeys();
     private String reportLog;
     private transient PipelineData pipelineData;
+
+    private List<DataSet> additionalSets = new ArrayList<DataSet>();
 
     public DataSet() {
         rows = new ArrayList<IRow>();
@@ -34,6 +36,28 @@ public class DataSet implements Serializable {
 
     public DataSet(List<IRow> rows) {
         this.rows = rows;
+    }
+
+    public void addSet(DataSet dataSet) {
+        additionalSets.add(dataSet);
+    }
+
+    public List<DataSet> getAdditionalSets() {
+        return additionalSets;
+    }
+
+    public DataSet clone() throws CloneNotSupportedException {
+        DataSet clone = (DataSet) super.clone();
+        DataSetKeys cloneKeys = dataSetKeys.clone();
+        clone.dataSetKeys = cloneKeys;
+        List<IRow> targetRows = new ArrayList<IRow>();
+        for (IRow row : rows) {
+            IRow cloneRow = row.clone();
+            cloneRow.setDataSetKeys(cloneKeys);
+            targetRows.add(cloneRow);
+        }
+        clone.rows = targetRows;
+        return clone;
     }
 
     public PipelineData getPipelineData() {

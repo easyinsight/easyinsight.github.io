@@ -8,9 +8,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
-import com.easyinsight.pipeline.IComponent;
-import com.easyinsight.pipeline.Pipeline;
-import com.easyinsight.pipeline.ResultsBridge;
+import com.easyinsight.pipeline.*;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -861,5 +859,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
         throw new UnsupportedOperationException();
+    }
+
+    public List<INestedComponent> endComponents() {
+        List<INestedComponent> components = new ArrayList<INestedComponent>();
+        components.add(new SimpleNestedComponent());
+        return components;
     }
 }

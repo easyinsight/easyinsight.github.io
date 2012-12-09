@@ -11,7 +11,7 @@ import java.io.Serializable;
  * Date: Dec 22, 2007
  * Time: 12:07:59 PM
  */
-public class Row implements IRow, Serializable {
+public class Row implements IRow, Serializable, Cloneable {
 
     private Value[] valueMap;
 
@@ -20,6 +20,21 @@ public class Row implements IRow, Serializable {
     private long rowID;
 
     private boolean marked;
+
+    public Row clone() throws CloneNotSupportedException {
+        Row row = (Row) super.clone();
+        Value[] copyMap = new Value[valueMap.length];
+        for (int i = 0; i < valueMap.length; i++) {
+            copyMap[i] = valueMap[i].clone();
+        }
+        row.valueMap = copyMap;
+
+        return row;
+    }
+
+    public void setDataSetKeys(DataSetKeys dataSetKeys) {
+        this.dataSetKeys = dataSetKeys;
+    }
 
     public boolean isMarked() {
         return marked;

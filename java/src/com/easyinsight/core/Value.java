@@ -1,7 +1,5 @@
 package com.easyinsight.core;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +9,7 @@ import java.util.Map;
  * Date: Jul 1, 2008
  * Time: 11:00:34 AM
  */
-public abstract class Value implements Serializable, Comparable<Value> {
+public abstract class Value implements Serializable, Comparable<Value>, Cloneable {
     public static final int STRING = 1;
     public static final int NUMBER = 2;
     public static final int DATE = 3;
@@ -29,6 +27,17 @@ public abstract class Value implements Serializable, Comparable<Value> {
 
     public Value(Value sortValue) {
         this.sortValue = sortValue;
+    }
+
+    public Value clone() throws CloneNotSupportedException {
+        Value value = (Value) super.clone();
+        if (originalValue != null) {
+            value.setOriginalValue(originalValue.clone());
+        }
+        if (sortValue != null) {
+            value.setSortValue(sortValue.clone());
+        }
+        return value;
     }
 
     private Map<String, String> links;

@@ -3,8 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.NewHierarchyIntention;
-import com.easyinsight.pipeline.IComponent;
-import com.easyinsight.pipeline.ListSummaryComponent;
+import com.easyinsight.pipeline.*;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -229,5 +228,11 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
             throw new RuntimeException("Unrecognized intention type");
         }
         return intentions;
+    }
+
+    public List<INestedComponent> endComponents() {
+        List<INestedComponent> components = new ArrayList<INestedComponent>();
+        components.add(new HierarchyComponent((AnalysisHierarchyItem) hierarchy));
+        return components;
     }
 }

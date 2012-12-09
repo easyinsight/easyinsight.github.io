@@ -14,9 +14,14 @@ import java.util.Date;
 * Time: 10:35:33 AM
 */
 public interface IRow {
+
+    public Row clone() throws CloneNotSupportedException;
+
     Value getValue(Key rowName);
 
     public DataSetKeys getDataSetKeys();
+
+    void setDataSetKeys(DataSetKeys dataSetKeys);
 
     Value getValue(AnalysisItem analysisItem);
 

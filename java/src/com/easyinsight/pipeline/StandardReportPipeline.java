@@ -28,6 +28,8 @@ public class StandardReportPipeline extends Pipeline {
 
         List<IComponent> components = new ArrayList<IComponent>();
 
+        //components.add(new ReportPreHandleComponent());
+
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
@@ -161,38 +163,43 @@ public class StandardReportPipeline extends Pipeline {
             components.add(new AggregationComponent(AggregationComponent.OTHER));*/
         }
 
-        components.add(new CleanupComponent(Pipeline.AFTER, measureFilter));
-
-        components.add(new NormalizationComponent());
-        components.add(new AggregationComponent(AggregationComponent.OTHER));
 
 
+        for (INestedComponent endComponent : report.endComponents()) {
 
-        List<IComponent> postAggCalculations = new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.AFTER, getStructure());
-        components.addAll(postAggCalculations);
+            components.add(endComponent);
 
-        // need another cleanup component here...
-        components.add(new CleanupComponent(Pipeline.LAST, false));
-        
-        for (AnalysisItem analysisItem : reportItems) {
-            if (analysisItem.getSortItem() != null) {
-                components.add(new SortDecorationComponent(analysisItem));
+            endComponent.add(new CleanupComponent(Pipeline.AFTER, measureFilter));
+
+            endComponent.add(new NormalizationComponent());
+            endComponent.add(new AggregationComponent(AggregationComponent.OTHER));
+
+            List<IComponent> postAggCalculations = new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.AFTER, getStructure());
+            endComponent.addAll(postAggCalculations);
+
+            // need another cleanup component here...
+            endComponent.add(new CleanupComponent(Pipeline.LAST, false));
+
+            for (AnalysisItem analysisItem : reportItems) {
+                if (analysisItem.getSortItem() != null) {
+                    endComponent.add(new SortDecorationComponent(analysisItem));
+                }
             }
-        }
 
-        components.add(new AggregationComponent(AggregationComponent.FINAL, AggregationTypes.RANK));
+            endComponent.add(new AggregationComponent(AggregationComponent.FINAL, AggregationTypes.RANK));
 
-        components.add(new LinkDecorationComponent());
-        if (report.getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(Pipeline.LAST_FILTERS, new DefaultFilterProcessor(), null, false));
+            endComponent.add(new LinkDecorationComponent());
+            if (report.getFilterDefinitions() != null) {
+                for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
+                    endComponent.addAll(filterDefinition.createComponents(Pipeline.LAST_FILTERS, new DefaultFilterProcessor(), null, false));
+                }
             }
+            endComponent.add(new LimitsComponent());
+            components.addAll(report.createComponents());
+            endComponent.add(new MarmotHerderComponent());
+            endComponent.add(new SortComponent());
+            endComponent.add(new DateHackComponent());
         }
-        components.add(new LimitsComponent());
-        components.addAll(report.createComponents());
-        components.add(new MarmotHerderComponent());
-        components.add(new SortComponent());
-        components.add(new DateHackComponent());
         return components;
     }
 

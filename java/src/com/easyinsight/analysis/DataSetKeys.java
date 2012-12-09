@@ -9,10 +9,17 @@ import java.util.*;
  * Date: 3/1/11
  * Time: 10:58 AM
  */
-public class DataSetKeys {
+public class DataSetKeys implements Cloneable {
     private Map<Key, Short> keyMap = new HashMap<Key, Short>();
     private short max;
     private List<Key> keys = new ArrayList<Key>();
+
+    public DataSetKeys clone() throws CloneNotSupportedException {
+        DataSetKeys clone = (DataSetKeys) super.clone();
+        clone.keyMap = new HashMap<Key, Short>(keyMap);
+        clone.keys = new ArrayList<Key>(keys);
+        return clone;
+    }
 
     public void replaceKey(Key source, Key target) {
         short position = keyMap.get(source);
