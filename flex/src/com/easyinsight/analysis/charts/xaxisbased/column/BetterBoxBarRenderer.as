@@ -195,7 +195,7 @@ public class BetterBoxBarRenderer extends UIComponent implements IDataRenderer {
         {
             // center the label vertically in the bar
             label.x = barWidth / 2 - labelWidth / 2;
-            labelColor = 0x222222; // label will appear on white background, so make it dark
+            //labelColor = 0x222222; // label will appear on white background, so make it dark
         }
 
         label.setStyle("color", labelColor);
