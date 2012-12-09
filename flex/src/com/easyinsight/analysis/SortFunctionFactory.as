@@ -1,5 +1,6 @@
 package com.easyinsight.analysis {
 
+import mx.controls.Alert;
 import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
 import mx.utils.ObjectUtil;
 
@@ -9,33 +10,72 @@ public class SortFunctionFactory {
     
     public static function createSortFunction(myHeader:AnalysisItem, sortDescending:Boolean, column:AdvancedDataGridColumn = null):Function {
             return function(obj1:Object, obj2:Object, fields:Array = null):int {
+
                 var value1:Value;
                 var value2:Value;
-                var valueObj1:Object = obj1[myHeader.qualifiedName()];
-                var valueObj2:Object = obj2[myHeader.qualifiedName()];
-                if (valueObj1 is Value) {
-                    value1 = valueObj1 as Value;
-                } else if (valueObj1 is Number) {
-                    value1 = new NumericValue();
-                    NumericValue(value1).value = valueObj1 as Number;
-                } else if (valueObj1 is String) {
-                    value1 = new StringValue();
-                    StringValue(value1).value = valueObj1 as String;
-                } else if (valueObj1 is Date) {
-                    value1 = new DateValue();
-                    DateValue(value1).cachedDate = valueObj1 as Date;
+                var valueObj1:Object;
+                var valueObj2:Object;
+                if (obj1 is TreeRow) {
+
+                    valueObj1 = TreeRow(obj1).values[myHeader.qualifiedName()];
+                    if (valueObj1 is Value) {
+                        value1 = valueObj1 as Value;
+                    } else if (valueObj1 is Number) {
+                        value1 = new NumericValue();
+                        NumericValue(value1).value = valueObj1 as Number;
+                    } else if (valueObj1 is String) {
+                        value1 = new StringValue();
+                        StringValue(value1).value = valueObj1 as String;
+                    } else if (valueObj1 is Date) {
+                        value1 = new DateValue();
+                        DateValue(value1).cachedDate = valueObj1 as Date;
+                    }
+                } else {
+
+                    valueObj1 = obj1[myHeader.qualifiedName()];
+
+                    if (valueObj1 is Value) {
+                        value1 = valueObj1 as Value;
+                    } else if (valueObj1 is Number) {
+                        value1 = new NumericValue();
+                        NumericValue(value1).value = valueObj1 as Number;
+                    } else if (valueObj1 is String) {
+                        value1 = new StringValue();
+                        StringValue(value1).value = valueObj1 as String;
+                    } else if (valueObj1 is Date) {
+                        value1 = new DateValue();
+                        DateValue(value1).cachedDate = valueObj1 as Date;
+                    }
                 }
-                if (valueObj2 is Value) {
-                    value2 = valueObj2 as Value;
-                } else if (valueObj2 is Number) {
-                    value2 = new NumericValue();
-                    NumericValue(value2).value = valueObj2 as Number;
-                } else if (valueObj2 is String) {
-                    value2 = new StringValue();
-                    StringValue(value2).value = valueObj2 as String;
-                } else if (valueObj2 is Date) {
-                    value2 = new DateValue();
-                    DateValue(value2).cachedDate = valueObj2 as Date;
+                if (obj2 is TreeRow) {
+                    valueObj2 = TreeRow(obj2).values[myHeader.qualifiedName()];
+                    if (valueObj2 is Value) {
+                        value2 = valueObj2 as Value;
+                    } else if (valueObj2 is Number) {
+                        value2 = new NumericValue();
+                        NumericValue(value2).value = valueObj2 as Number;
+                    } else if (valueObj2 is String) {
+                        value2 = new StringValue();
+                        StringValue(value2).value = valueObj2 as String;
+                    } else if (valueObj2 is Date) {
+                        value2 = new DateValue();
+                        DateValue(value2).cachedDate = valueObj2 as Date;
+                    }
+                } else {
+
+                    valueObj2 = obj2[myHeader.qualifiedName()];
+                    if (valueObj2 is Value) {
+                        value2 = valueObj2 as Value;
+                    } else if (valueObj2 is Number) {
+                        value2 = new NumericValue();
+                        NumericValue(value2).value = valueObj2 as Number;
+                    } else if (valueObj2 is String) {
+                        value2 = new StringValue();
+                        StringValue(value2).value = valueObj2 as String;
+                    } else if (valueObj2 is Date) {
+                        value2 = new DateValue();
+                        DateValue(value2).cachedDate = valueObj2 as Date;
+                    }
                 }
 
                 if (value1 == null) {
