@@ -14,6 +14,10 @@ PieChartDefinition extends XAxisDefinition{
         super();
     }
 
+    override public function supportsEmbeddedFonts():Boolean {
+        return true;
+    }
+
     override public function get type():int {
         return AnalysisDefinition.PIE;
     }
