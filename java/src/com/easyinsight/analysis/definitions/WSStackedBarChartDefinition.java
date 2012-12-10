@@ -19,6 +19,26 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     private String columnSort;
     private AnalysisItem stackItem;
     private String labelPosition = "none";
+    private int labelInsideFontColor;
+    private boolean useInsideLabelFontColor;
+    private int labelFontSize;
+    private String labelFontWeight;
+
+    public int getLabelFontSize() {
+        return labelFontSize;
+    }
+
+    public void setLabelFontSize(int labelFontSize) {
+        this.labelFontSize = labelFontSize;
+    }
+
+    public String getLabelFontWeight() {
+        return labelFontWeight;
+    }
+
+    public void setLabelFontWeight(String labelFontWeight) {
+        this.labelFontWeight = labelFontWeight;
+    }
 
     public String getLabelPosition() {
         return labelPosition;
@@ -68,13 +88,33 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         this.useChartColor = useChartColor;
     }
 
+    public int getLabelInsideFontColor() {
+        return labelInsideFontColor;
+    }
+
+    public void setLabelInsideFontColor(int labelInsideFontColor) {
+        this.labelInsideFontColor = labelInsideFontColor;
+    }
+
+    public boolean isUseInsideLabelFontColor() {
+        return useInsideLabelFontColor;
+    }
+
+    public void setUseInsideLabelFontColor(boolean useInsideLabelFontColor) {
+        this.useInsideLabelFontColor = useInsideLabelFontColor;
+    }
+
     @Override
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         chartColor = (int) findNumberProperty(properties, "chartColor", 0);
         useChartColor = findBooleanProperty(properties, "useChartColor", false);
         columnSort = findStringProperty(properties, "columnSort", "Unsorted");
+        labelFontWeight = findStringProperty(properties, "labelFontWeight", "none");
+        labelFontSize = (int) findNumberProperty(properties, "labelFontSize", 12);
         labelPosition = findStringProperty(properties, "labelPosition", "none");
+        labelInsideFontColor = (int) findNumberProperty(properties, "labelInsideFontColor", 0);
+        useInsideLabelFontColor = findBooleanProperty(properties, "useInsideLabelFontColor", false);
     }
 
     @Override
@@ -83,7 +123,11 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         properties.add(new ReportNumericProperty("chartColor", chartColor));
         properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
         properties.add(new ReportStringProperty("columnSort", columnSort));
+        properties.add(new ReportNumericProperty("labelFontSize", labelFontSize));
+        properties.add(new ReportStringProperty("labelFontWeight", labelFontWeight));
         properties.add(new ReportStringProperty("labelPosition", labelPosition));
+        properties.add(new ReportBooleanProperty("useInsideLabelFontColor", useInsideLabelFontColor));
+        properties.add(new ReportNumericProperty("labelInsideFontColor", labelInsideFontColor));
         return properties;
     }
 

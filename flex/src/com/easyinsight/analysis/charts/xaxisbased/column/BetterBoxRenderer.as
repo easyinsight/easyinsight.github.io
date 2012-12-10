@@ -17,6 +17,7 @@ import mx.charts.series.items.ColumnSeriesItem;
 import mx.controls.Label;
 import mx.core.IDataRenderer;
 import mx.core.UIComponent;
+import mx.formatters.Formatter;
 import mx.graphics.IFill;
 import mx.graphics.IStroke;
 import mx.graphics.SolidColor;
@@ -30,9 +31,23 @@ public class BetterBoxRenderer extends UIComponent implements IDataRenderer {
     private var _chartItem:ChartItem;
 
     private var _labelFontSize:int;
-    private var _labelFontColor:uint;
+    private var _labelInsideFontColor:uint;
+    private var _labelOutsideFontColor:uint;
     private var _labelFontWeight:String;
+    private var _formatter:Formatter;
 
+    public function set formatter(value:Formatter):void {
+        _formatter = value;
+    }
+
+
+    public function get chartItem():ChartItem {
+        return _chartItem;
+    }
+
+    public function get formatter():Formatter {
+        return _formatter;
+    }
 
     public function get labelFontSize():int {
         return _labelFontSize;
@@ -42,12 +57,20 @@ public class BetterBoxRenderer extends UIComponent implements IDataRenderer {
         _labelFontSize = value;
     }
 
-    public function get labelFontColor():uint {
-        return _labelFontColor;
+    public function get labelInsideFontColor():uint {
+        return _labelInsideFontColor;
     }
 
-    public function set labelFontColor(value:uint):void {
-        _labelFontColor = value;
+    public function set labelInsideFontColor(value:uint):void {
+        _labelInsideFontColor = value;
+    }
+
+    public function get labelOutsideFontColor():uint {
+        return _labelOutsideFontColor;
+    }
+
+    public function set labelOutsideFontColor(value:uint):void {
+        _labelOutsideFontColor = value;
     }
 
     public function get labelFontWeight():String {
@@ -74,7 +97,7 @@ public class BetterBoxRenderer extends UIComponent implements IDataRenderer {
         return _chartItem;
     }
 
-    private var label:Label;
+    protected var label:Label;
 
     override protected function createChildren():void
     {
@@ -165,11 +188,15 @@ public class BetterBoxRenderer extends UIComponent implements IDataRenderer {
         if (_chartItem == null) // _chartItem has no data
             return;
 
+        handle();
+    }
+
+    protected function handle():void {
         var cs:ColumnSeries = _chartItem.element as ColumnSeries;
         var csi:ColumnSeriesItem = _chartItem as ColumnSeriesItem;
 
         // set the label
-        label.text = csi.item[cs.yField].toString();
+        label.text = _formatter.format(csi.item[cs.yField].toString());
         label.width = label.maxWidth = unscaledWidth;
         label.height = label.textHeight;
         var labelHeight:int = label.textHeight + 3;
@@ -178,19 +205,18 @@ public class BetterBoxRenderer extends UIComponent implements IDataRenderer {
         var barYpos:Number = csi.y;
         var minYpos:Number = csi.min;
         var barHeight:Number = minYpos - barYpos;
-        var labelColor:uint = 0xFFFFFF; // white
+        var labelColor:uint = _labelInsideFontColor; // white
 
         if (barHeight < labelHeight) // if no room for label
         {
             // nudge label up the amount of pixels missing
             label.y = -1 * (labelHeight - barHeight);
-            labelColor = 0x222222; // label will appear on white background, so make it dark
+            labelColor = _labelOutsideFontColor; // label will appear on white background, so make it dark
         }
         else
         {
             // center the label vertically in the bar
             label.y = barHeight / 2 - labelHeight / 2;
-            //labelColor = 0x222222; // label will appear on white background, so make it dark
         }
 
         label.setStyle("color", labelColor);

@@ -21,7 +21,9 @@
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.EILegend;
+        import com.easyinsight.analysis.charts.xaxisbased.column.BetterBoxBarRenderer;
         import com.easyinsight.analysis.charts.xaxisbased.column.ContextMenuBoxItemRenderer;
+        import com.easyinsight.analysis.charts.xaxisbased.column.StackedBetterBoxBarRenderer;
 
 
         import com.easyinsight.filtering.FilterRawData;
@@ -168,15 +170,6 @@
             return dimensionFormatter.format(item);
         }
 
-        public function createFilterRawData():FilterRawData {
-            var filterRawData:FilterRawData = new FilterRawData();
-            for (var i:int = 0; i < barChart.selectedChartItems.length; i++) {
-                var obj:ChartItem = barChart.selectedChartItems[i];
-                filterRawData.addPair(xAxisItem, obj.item[xAxisItem.key.createString()]);
-            }
-            return filterRawData;
-        }
-
         private function legendDataChanged(event:Event):void {
             legend.dataProvider = barChart.legendData;
         }
@@ -217,7 +210,7 @@
 
                 var uniques:ArrayCollection = new ArrayCollection();
 
-
+                measureFormatter = barChartDef.measures.getItemAt(0).getFormatter();
                 var dataObjs:ArrayCollection = barChartDef.populateGroupings(dataSet, uniques);
                 var barSet:BarSet = new BarSet();
                 barSet.type = "stacked";
@@ -225,14 +218,18 @@
                     var key:String = uniques.getItemAt(i) as String;
 
                     var uniqueLineSeries:BarSeries = new BarSeries();
-                    var cFactory:ClassFactory = new ClassFactory(ContextMenuBoxItemRenderer);
-                    cFactory.properties = { stackItem: barChartDef.stackItem, seriesField: key, report: barChartDef};
-                    uniqueLineSeries.setStyle("itemRenderer", cFactory);
+                    if (barChartDef.labelPosition == "inside") {
+                        var cFactory:ClassFactory = new ClassFactory(StackedBetterBoxBarRenderer);
+                        cFactory.properties = { labelFontSize:barChartDef.labelFontSize, labelFontWeight:barChartDef.labelFontWeight, formatter: measureFormatter,
+                            labelInsideFontColor: barChartDef.useInsideLabelFontColor ? barChartDef.labelInsideFontColor : 0xFFFFFF};
+                        //cFactory.properties = { stackItem: barChartDef.stackItem, seriesField: key, report: barChartDef};
+                        uniqueLineSeries.setStyle("itemRenderer", cFactory);
+                    }
                     uniqueLineSeries.setStyle("fill", FillProvider.getColor(barChartDef.colorScheme, i, 90));
                     if (key == null || key == "") {
                         key = "[ No Value ]";
                     }
-                    uniqueLineSeries.setStyle("labelPosition",barChartDef.labelPosition);
+                    //uniqueLineSeries.setStyle("labelPosition",barChartDef.labelPosition);
                     uniqueLineSeries.xField = key;
                     uniqueLineSeries.displayName = key;
                     mySeries.push(uniqueLineSeries);
@@ -249,7 +246,7 @@
 
                 this.defaultLink = ChartUtil.setup(barChartDef.stackItem, barChart, onChartClick);
 
-                measureFormatter = barChartDef.measures.getItemAt(0).getFormatter();
+
                 dimensionFormatter = barChartDef.yaxis.getFormatter();
 
                 var newXAxisItem:AnalysisItem = barChartDef.measures.getItemAt(0) as AnalysisItem;

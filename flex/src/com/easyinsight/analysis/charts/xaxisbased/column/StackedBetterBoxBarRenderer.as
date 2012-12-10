@@ -14,29 +14,31 @@ import mx.charts.chartClasses.GraphicsUtilities;
 import mx.charts.chartClasses.LegendData;
 import mx.charts.series.BarSeries;
 import mx.charts.series.items.BarSeriesItem;
-import mx.controls.Alert;
 import mx.controls.Label;
 import mx.core.IDataRenderer;
 import mx.core.UIComponent;
+import mx.formatters.Formatter;
 import mx.graphics.IFill;
 import mx.graphics.IStroke;
 import mx.graphics.SolidColor;
 import mx.styles.StyleManager;
 import mx.utils.ColorUtil;
 
-public class BetterBoxBarRenderer extends BetterBoxRenderer {
-    public function BetterBoxBarRenderer() {
+public class StackedBetterBoxBarRenderer extends BetterBoxRenderer {
+    public function StackedBetterBoxBarRenderer() {
     }
 
 
-    override protected function handle():void {
+    override protected function handle():void
+    {
 
-        var cs:BarSeries = chartItem.element as BarSeries;
+
         var csi:BarSeriesItem = chartItem as BarSeriesItem;
 
         // set the label
-        label.text = formatter.format(csi.item[cs.xField].toString());
-        label.width = label.maxWidth = label.measureText(label.text).width + 5;
+        label.text = formatter.format(csi.xNumber);
+        //label.text = cs.xField;
+        label.width = label.measureText(label.text).width + 5;
 
         label.height = label.textHeight;
         var fontSize:int = label.getStyle("fontSize");
@@ -51,10 +53,7 @@ public class BetterBoxBarRenderer extends BetterBoxRenderer {
 
         if (barWidth < labelWidth) // if no room for label
         {
-            // nudge label up the amount of pixels missing
-            label.x = barWidth + 3;
-
-            labelColor = labelOutsideFontColor; // label will appear on white background, so make it dark
+            label.width = 0;
         }
         else
         {

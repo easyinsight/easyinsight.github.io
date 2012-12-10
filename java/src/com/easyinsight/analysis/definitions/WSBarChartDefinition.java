@@ -21,11 +21,13 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
     private int gradientColor;
     private boolean useChartColor;
     private String columnSort;
-    private String axisType;
+    private String axisType = "Linear";
     private String labelPosition = "none";
     private int labelFontSize;
-    //private int labelFontColor;
-    /*private boolean useLabelFontColor;*/
+    private int labelInsideFontColor;
+    private int labelOutsideFontColor;
+    private boolean useInsideLabelFontColor;
+    private boolean useOutsideLabelFontColor;
     private String labelFontWeight;
 
     public int getLabelFontSize() {
@@ -36,21 +38,37 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         this.labelFontSize = labelFontSize;
     }
 
-    /*public int getLabelFontColor() {
-        return labelFontColor;
+    public int getLabelInsideFontColor() {
+        return labelInsideFontColor;
     }
 
-    public void setLabelFontColor(int labelFontColor) {
-        this.labelFontColor = labelFontColor;
-    }*/
-
-    /*public boolean isUseLabelFontColor() {
-        return useLabelFontColor;
+    public void setLabelInsideFontColor(int labelInsideFontColor) {
+        this.labelInsideFontColor = labelInsideFontColor;
     }
 
-    public void setUseLabelFontColor(boolean useLabelFontColor) {
-        this.useLabelFontColor = useLabelFontColor;
-    }*/
+    public int getLabelOutsideFontColor() {
+        return labelOutsideFontColor;
+    }
+
+    public void setLabelOutsideFontColor(int labelOutsideFontColor) {
+        this.labelOutsideFontColor = labelOutsideFontColor;
+    }
+
+    public boolean isUseInsideLabelFontColor() {
+        return useInsideLabelFontColor;
+    }
+
+    public void setUseInsideLabelFontColor(boolean useInsideLabelFontColor) {
+        this.useInsideLabelFontColor = useInsideLabelFontColor;
+    }
+
+    public boolean isUseOutsideLabelFontColor() {
+        return useOutsideLabelFontColor;
+    }
+
+    public void setUseOutsideLabelFontColor(boolean useOutsideLabelFontColor) {
+        this.useOutsideLabelFontColor = useOutsideLabelFontColor;
+    }
 
     public String getLabelFontWeight() {
         return labelFontWeight;
@@ -127,6 +145,10 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         labelPosition = findStringProperty(properties, "labelPosition", "none");
         labelFontWeight = findStringProperty(properties, "labelFontWeight", "none");
         labelFontSize = (int) findNumberProperty(properties, "labelFontSize", 12);
+        labelInsideFontColor = (int) findNumberProperty(properties, "labelInsideFontColor", 0);
+        labelOutsideFontColor = (int) findNumberProperty(properties, "labelOutsideFontColor", 0);
+        useInsideLabelFontColor = findBooleanProperty(properties, "useInsideLabelFontColor", false);
+        useOutsideLabelFontColor = findBooleanProperty(properties, "useOutsideLabelFontColor", false);
     }
 
     @Override
@@ -140,6 +162,10 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         properties.add(new ReportStringProperty("columnSort", columnSort));
         properties.add(new ReportStringProperty("axisType", axisType));
         properties.add(new ReportStringProperty("labelPosition", labelPosition));
+        properties.add(new ReportBooleanProperty("useInsideLabelFontColor", useInsideLabelFontColor));
+        properties.add(new ReportBooleanProperty("useOutsideLabelFontColor", useOutsideLabelFontColor));
+        properties.add(new ReportNumericProperty("labelInsideFontColor", labelInsideFontColor));
+        properties.add(new ReportNumericProperty("labelOutsideFontColor", labelOutsideFontColor));
         return properties;
     }
 

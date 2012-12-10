@@ -130,7 +130,10 @@
             columnSeries.dataProvider = dataSet;
             if (ColumnChartDefinition(chartDef).labelPosition == "auto") {
                 var cf:ClassFactory = new ClassFactory(BetterBoxRenderer);
-                cf.properties = { labelFontSize: ColumnChartDefinition(chartDef).labelFontSize, labelFontWeight: ColumnChartDefinition(chartDef).labelFontWeight };
+                cf.properties = { labelFontSize: ColumnChartDefinition(chartDef).labelFontSize, labelFontWeight: ColumnChartDefinition(chartDef).labelFontWeight,
+                    formatter: measure.getFormatter(),
+                    labelInsideFontColor: ColumnChartDefinition(chartDef).useInsideLabelFontColor ? ColumnChartDefinition(chartDef).labelInsideFontColor : 0xFFFFFF,
+                    labelOutsideFontColor: ColumnChartDefinition(chartDef).useOutsideLabelFontColor ? ColumnChartDefinition(chartDef).labelOutsideFontColor : 0x222222};
                 columnSeries.setStyle("itemRenderer", cf);
             }
 

@@ -22,10 +22,6 @@
         import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.EILegend;
 
-
-        import com.easyinsight.filtering.FilterRawData;
-
-
         import mx.binding.utils.BindingUtils;
         import mx.charts.AxisRenderer;
 
@@ -178,15 +174,6 @@
             return dimensionFormatter.format(item);
         }
 
-        public function createFilterRawData():FilterRawData {
-            var filterRawData:FilterRawData = new FilterRawData();
-            for (var i:int = 0; i < columnChart.selectedChartItems.length; i++) {
-                var obj:ChartItem = columnChart.selectedChartItems[i];
-                filterRawData.addPair(xAxisItem, obj.item[xAxisItem.key.createString()]);
-            }
-            return filterRawData;
-        }
-
         private var columnChartDef:StackedColumnChartDefinition;
 
         private var stackItem:AnalysisItem;
@@ -227,20 +214,24 @@
 
                 var dataObjs:ArrayCollection = columnChartDef.populateGroupings(dataSet, uniques);
                 var columnSet:ColumnSet = new ColumnSet();
+                measureFormatter = columnChartDef.measures.getItemAt(0).getFormatter();
                 columnSet.type = "stacked";
                 for (var i:int = 0; i < uniques.length; i++) {
                     var key:String = uniques.getItemAt(i) as String;
 
                     var uniqueLineSeries:ColumnSeries = new ColumnSeries();
-                    var cFactory:ClassFactory = new ClassFactory(ContextMenuBoxItemRenderer);
-                    cFactory.properties = { stackItem: stackItem, seriesField: key, report: columnChartDef};
-                    uniqueLineSeries.setStyle("itemRenderer", cFactory);
+                    if (columnChartDef.labelPosition == "inside") {
+                        var cFactory:ClassFactory = new ClassFactory(StackedBetterBoxRenderer);
+                        cFactory.properties = { labelFontSize:columnChartDef.labelFontSize, labelFontWeight:columnChartDef.labelFontWeight, formatter: measureFormatter,
+                            labelInsideFontColor: columnChartDef.useInsideLabelFontColor ? columnChartDef.labelInsideFontColor : 0xFFFFFF};
+                        uniqueLineSeries.setStyle("itemRenderer", cFactory);
+                    }
                     uniqueLineSeries.setStyle("fill", FillProvider.getColor(columnChartDef.colorScheme, i));
                     //uniqueLineSeries.xField = columnChartDef.xaxis.qualifiedName();
                     if (key == null || key == "") {
                         key = "[ No Value ]";
                     }
-                    uniqueLineSeries.setStyle("labelPosition",columnChartDef.labelPosition);
+                    //uniqueLineSeries.setStyle("labelPosition",columnChartDef.labelPosition);
                     uniqueLineSeries.labelFunction = function (element:ChartItem, series:Series):String {
                         var columnSeriesItem:ColumnSeriesItem = element as ColumnSeriesItem;
 
@@ -265,7 +256,7 @@
 
                 this.defaultLink = ChartUtil.setup(columnChartDef.stackItem, columnChart, onChartClick);
 
-                measureFormatter = columnChartDef.measures.getItemAt(0).getFormatter();
+
                 dimensionFormatter = columnChartDef.xaxis.getFormatter();
 
                 var newXAxisItem:AnalysisItem = columnChartDef.xaxis;
@@ -281,7 +272,6 @@
                 }
 
                 xAxis.categoryField = newXAxisItem.qualifiedName();
-                var newXField:String = newXAxisItem.qualifiedName();
 
                 var newXAxisTitle:String = newXAxisItem.display;
                 if (newXAxisTitle != xAxisTitle) {

@@ -20,6 +20,10 @@ public class StackedBarChartDefinition extends YAxisDefinition{
     public var columnSort:String = ChartDefinition.SORT_UNSORTED;
     public var stackItem:AnalysisItem;
     public var labelPosition:String = "none";
+    public var labelInsideFontColor:int = 0x222222;
+    public var useInsideLabelFontColor:Boolean = true;
+    public var labelFontSize:int = 12;
+    public var labelFontWeight:String = "none";
 
     public function StackedBarChartDefinition() {
         super();

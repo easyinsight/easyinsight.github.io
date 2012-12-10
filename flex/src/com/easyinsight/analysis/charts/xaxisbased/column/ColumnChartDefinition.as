@@ -18,8 +18,10 @@ public class ColumnChartDefinition extends XAxisDefinition{
     public var labelPosition:String = "none";
     public var labelFontSize:int = 12;
     public var labelFontWeight:String = "none";
-    //public var labelFontColor:uint = 0;
-    //public var useLabelFontColor:Boolean = false;
+    public var labelInsideFontColor:int = 0x222222;
+    public var labelOutsideFontColor:int = 0;
+    public var useInsideLabelFontColor:Boolean = true;
+    public var useOutsideLabelFontColor:Boolean = true;
 
     public function ColumnChartDefinition() {
         super();

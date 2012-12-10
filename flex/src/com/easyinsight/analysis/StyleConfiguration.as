@@ -203,12 +203,6 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", PieChartDefinition(report).labelPosition,
                     report, ["callout", "insideWithCallout", "inside", "outside", "none"]));
         }
-        if (report is Pie3DChartDefinition) {
-            items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", Pie3DChartDefinition(report).colorScheme,
-                    report, [FillProvider.radialGradients, FillProvider.highContrast]));
-            items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", Pie3DChartDefinition(report).labelPosition,
-                    report, ["callout", "insideWithCallout", "inside", "outside", "none"]));
-        }
         if (report is BarChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", BarChartDefinition(report).colorScheme,
                     report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
@@ -223,17 +217,19 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", BarChartDefinition(report).labelPosition,
                     report, ["none", "auto"]));
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", BarChartDefinition(report).labelFontSize, report, 8, 48));
-            //items.addItem(new ColorReportFormItem("Label Font Color", "labelFontSize", BarChartDefinition(report).labelFontColor, report, "useLabelFontColor"));
+            items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", BarChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
+            items.addItem(new ColorReportFormItem("Label Outside Font Color", "labelOutsideFontColor", BarChartDefinition(report).labelOutsideFontColor, report, "useOutsideLabelFontColor"));
             items.addItem(new ComboBoxReportFormItem("Label Font Weight", "labelFontWeight", BarChartDefinition(report).labelFontWeight, report,
                     ["none", "bold"]));
         }
+
         if (report is ColumnChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", ColumnChartDefinition(report).colorScheme,
                     report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", ColumnChartDefinition(report).labelPosition,
                     report, ["none", "auto"]));
-            items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", ColumnChartDefinition(report).useChartColor, report));
-            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", ColumnChartDefinition(report).chartColor, report));
+            //items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", ColumnChartDefinition(report).useChartColor, report));
+            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", ColumnChartDefinition(report).chartColor, report, "useChartColor"));
             items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", ColumnChartDefinition(report).gradientColor, report));
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", ColumnChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
@@ -244,7 +240,10 @@ public class StyleConfiguration {
             //items.addItem(new ColorReportFormItem("Label Font Color", "labelFontSize", BarChartDefinition(report).labelFontColor, report, "useLabelFontColor"));
             items.addItem(new ComboBoxReportFormItem("Label Font Weight", "labelFontWeight", ColumnChartDefinition(report).labelFontWeight, report,
                     ["none", "bold"]));
+            items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", ColumnChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
+            items.addItem(new ColorReportFormItem("Label Outside Font Color", "labelOutsideFontColor", ColumnChartDefinition(report).labelOutsideFontColor, report, "useOutsideLabelFontColor"));
         }
+
         if (report is StackedBarChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", StackedBarChartDefinition(report).colorScheme,
                     report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
@@ -255,6 +254,10 @@ public class StyleConfiguration {
                     ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", StackedBarChartDefinition(report).labelPosition,
                     report, ["none", "inside"]));
+            items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", StackedBarChartDefinition(report).labelFontSize, report, 8, 48));
+            items.addItem(new ComboBoxReportFormItem("Label Font Weight", "labelFontWeight", StackedBarChartDefinition(report).labelFontWeight, report,
+                    ["none", "bold"]));
+            items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", StackedBarChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
 
         }
         if (report is StackedColumnChartDefinition) {
@@ -267,6 +270,10 @@ public class StyleConfiguration {
                     ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", StackedColumnChartDefinition(report).labelPosition,
                     report, ["none", "inside"]));
+            items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", StackedColumnChartDefinition(report).labelFontSize, report, 8, 48));
+            items.addItem(new ComboBoxReportFormItem("Label Font Weight", "labelFontWeight", StackedColumnChartDefinition(report).labelFontWeight, report,
+                    ["none", "bold"]));
+            items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", StackedColumnChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
         }
         if (report is FormReport) {
             items.addItem(new ComboBoxReportFormItem("Label Font Name", "labelFont", FormReport(report).labelFont, report, ["Arial", "Arial Black", "Comic Sans MS",

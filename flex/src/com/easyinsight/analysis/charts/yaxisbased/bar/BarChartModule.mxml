@@ -128,6 +128,7 @@
 
         override protected function createSeries(measure:AnalysisMeasure, dataSet:ArrayCollection, xField:String, measureNumber:int):Series {
             var barSeries:BarSeries = new BarSeries();
+            //noinspection JSSuspiciousNameCombination
             barSeries.yField = xField;
             barSeries.xField = measure.qualifiedName();
             barSeries.labelFunction = function (element:ChartItem, series:Series):String {
@@ -135,7 +136,7 @@
                 return measure.getFormatter().format(barSeriesItem.xNumber);
             };
             barSeries.dataProvider = dataSet;
-            barSeries.dataFunction = function(series:Series, item:Object, fieldName:String):Object {
+            barSeries.dataFunction = function (series:Series, item:Object, fieldName:String):Object {
                 if (fieldName == 'xValue')
                     return(item[measure.qualifiedName()].toNumber());
                 else if (fieldName == "yValue")
@@ -146,7 +147,10 @@
             //barSeries.setStyle("labelPosition",BarChartDefinition(chartDef).labelPosition);
             if (BarChartDefinition(chartDef).labelPosition == "auto") {
                 var cf:ClassFactory = new ClassFactory(BetterBoxBarRenderer);
-                cf.properties = { labelFontSize: BarChartDefinition(chartDef).labelFontSize, labelFontWeight: BarChartDefinition(chartDef).labelFontWeight };
+                cf.properties = { labelFontSize:BarChartDefinition(chartDef).labelFontSize, labelFontWeight:BarChartDefinition(chartDef).labelFontWeight,
+                    formatter:measure.getFormatter(),
+                    labelInsideFontColor: BarChartDefinition(chartDef).useInsideLabelFontColor ? BarChartDefinition(chartDef).labelInsideFontColor : 0xFFFFFF,
+                    labelOutsideFontColor: BarChartDefinition(chartDef).useOutsideLabelFontColor ? BarChartDefinition(chartDef).labelOutsideFontColor : 0x222222};
                 barSeries.setStyle("itemRenderer", cf);
             }
 
