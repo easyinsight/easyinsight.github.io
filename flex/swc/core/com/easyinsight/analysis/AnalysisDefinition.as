@@ -125,7 +125,8 @@ import mx.collections.ArrayCollection;
         }
 
         public function getFont():String {
-            if (fontName != null) {
+            return supportsEmbeddedFonts() ? "Lucida Grande" : "Tahoma";
+            /*if (fontName != null) {
                 var supportsEmbedded:Boolean = supportsEmbeddedFonts();
                 if (supportsEmbedded) {
                     if (fontName == "Tahoma") {
@@ -137,7 +138,7 @@ import mx.collections.ArrayCollection;
                     }
                 }
             }
-            return fontName;
+            return fontName;*/
         }
 
         public function populate(fields:ArrayCollection):void {

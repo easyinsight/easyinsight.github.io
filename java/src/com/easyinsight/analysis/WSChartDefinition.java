@@ -26,9 +26,28 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
     private String xAxisLabel;
     private String yAxisLabel;
 
+    private boolean xAxisBaseAtZero;
+    private boolean yAxisBaseAtZero;
+
     public abstract int getChartType();
 
     public abstract int getChartFamily();
+
+    public boolean isxAxisBaseAtZero() {
+        return xAxisBaseAtZero;
+    }
+
+    public void setxAxisBaseAtZero(boolean xAxisBaseAtZero) {
+        this.xAxisBaseAtZero = xAxisBaseAtZero;
+    }
+
+    public boolean isyAxisBaseAtZero() {
+        return yAxisBaseAtZero;
+    }
+
+    public void setyAxisBaseAtZero(boolean yAxisBaseAtZero) {
+        this.yAxisBaseAtZero = yAxisBaseAtZero;
+    }
 
     public String getxAxisLabel() {
         return xAxisLabel;
@@ -129,6 +148,8 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         showLegend = findBooleanProperty(properties, "showLegend", true);
         xAxisLabel = findStringProperty(properties, "xAxisLabel", "");
         yAxisLabel = findStringProperty(properties, "yAxisLabel", "");
+        xAxisBaseAtZero = findBooleanProperty(properties, "xAxisBaseAtZero", true);
+        yAxisBaseAtZero = findBooleanProperty(properties, "yAxisBaseAtZero", true);
     }
 
     @Override
@@ -137,6 +158,8 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         properties.add(new ReportBooleanProperty("showLegend", showLegend));
         properties.add(new ReportStringProperty("xAxisLabel", xAxisLabel));
         properties.add(new ReportStringProperty("yAxisLabel", yAxisLabel));
+        properties.add(new ReportBooleanProperty("xAxisBaseAtZero", xAxisBaseAtZero));
+        properties.add(new ReportBooleanProperty("yAxisBaseAtZero", yAxisBaseAtZero));
         return properties;
     }
 
@@ -182,6 +205,7 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         yAxis.put("label", "'"+analysisItem.toDisplay()+"'");
         yAxis.put("labelRenderer", "$.jqplot.CanvasAxisLabelRenderer");
         yAxis.put("min", 0);
+        yAxis.put("numberTicks", 8);
         JSONObject tickOptions = new JSONObject();
         if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.CURRENCY) {
             tickOptions.put("formatter", "$.jqplot.currencyTickNumberFormatter");
@@ -199,6 +223,7 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         xAxis.put("tickRenderer", "$.jqplot.CanvasAxisTickRenderer");
         xAxis.put("labelRenderer", "$.jqplot.CanvasAxisLabelRenderer");
         xAxis.put("label", "'"+analysisItem.toDisplay()+"'");
+
         JSONObject xAxisTicketOptions = new JSONObject();
         xAxisTicketOptions.put("angle", -15);
         xAxis.put("tickOptions", xAxisTicketOptions);

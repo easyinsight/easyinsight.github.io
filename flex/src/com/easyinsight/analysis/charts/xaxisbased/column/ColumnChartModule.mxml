@@ -117,6 +117,7 @@
         override protected function assignMeasureAxis(axis:NumericAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
             CartesianChart(chart).verticalAxis = axis;
             CartesianChart(chart).verticalAxisRenderer = axisRenderer;
+            axis.baseAtZero = chartDef.yAxisBaseAtZero;
         }
 
         override protected function createSeries(measure:AnalysisMeasure, dataSet:ArrayCollection, xField:String, measureNumber:int):Series {

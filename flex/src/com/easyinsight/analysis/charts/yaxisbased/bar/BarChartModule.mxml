@@ -101,7 +101,7 @@
             var xName:String = dataTransform.getAxis(CartesianTransform.VERTICAL_AXIS).displayName;
             if (xName != "")
                 dt += "<i>" + xName + ":</i> ";
-            dt += dimensionFormatter.format(BarSeriesItem(hd.chartItem).xValue) + "\n";
+            dt += dimensionFormatter.format(BarSeriesItem(hd.chartItem).yValue) + "\n";
 
             var yName:String = dataTransform.getAxis(CartesianTransform.HORIZONTAL_AXIS).displayName;
 
@@ -124,6 +124,7 @@
         override protected function assignMeasureAxis(axis:NumericAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
             CartesianChart(chart).horizontalAxisRenderers = [ axisRenderer ];
             CartesianChart(chart).horizontalAxis = axis;
+            axis.baseAtZero = chartDef.xAxisBaseAtZero;
         }
 
         override protected function createSeries(measure:AnalysisMeasure, dataSet:ArrayCollection, xField:String, measureNumber:int):Series {

@@ -29,6 +29,10 @@ public class BubbleChartDefinition extends ChartDefinition{
         super();
     }
 
+    override public function supportsEmbeddedFonts():Boolean {
+        return true;
+    }
+
     override public function populate(fields:ArrayCollection):void {
         var measures:ArrayCollection = findItems(fields, AnalysisItemTypes.MEASURE);
         if (measures.length > 0) {

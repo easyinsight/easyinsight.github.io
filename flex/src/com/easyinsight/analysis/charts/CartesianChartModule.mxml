@@ -41,6 +41,7 @@
 
         import mx.charts.events.ChartItemEvent;
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
 
         import mx.formatters.Formatter;
         import mx.graphics.GradientEntry;
@@ -197,7 +198,6 @@
                 } else {
                     measureAxis = new LogAxis();
                 }
-                measureAxis.baseAtZero = true;
                 measureAxis.title = "Blah";
                 measureAxis.labelFunction = renderAxis;
 
