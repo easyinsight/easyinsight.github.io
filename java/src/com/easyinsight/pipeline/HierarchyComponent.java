@@ -44,8 +44,11 @@ public class HierarchyComponent implements INestedComponent {
             int position = hierarchyItem.getHierarchyLevels().size() - i - 1;
             DataSet childSet = sets.get(position);
             PipelineData pipelineData1 = pipelineDatas.get(position);
-            pipelineData1.getAllRequestedItems().remove(hierarchyItem.getHierarchyLevels().get(i).getAnalysisItem());
-            pipelineData1.getReportItems().remove(hierarchyItem.getHierarchyLevels().get(i).getAnalysisItem());
+            for (int j = i; j < hierarchyItem.getHierarchyLevels().size(); j++) {
+                pipelineData1.getAllRequestedItems().remove(hierarchyItem.getHierarchyLevels().get(j).getAnalysisItem());
+                pipelineData1.getReportItems().remove(hierarchyItem.getHierarchyLevels().get(j).getAnalysisItem());
+            }
+
             WSTreeDefinition tree = (WSTreeDefinition) pipelineData.getReport();
             for (AnalysisItem analysisItem : tree.getItems()) {
                 if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
