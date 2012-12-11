@@ -4,13 +4,14 @@
 <%@ page import="com.easyinsight.users.Account" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="org.hibernate.Session" %>
-<%@ page import="com.easyinsight.billing.BillingUtil" %>
-<%@ page import="com.easyinsight.config.ConfigLoader" %>
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.users.AccountTypeChange" %>
 <%@ page import="java.text.NumberFormat" %>
+<%@ page import="com.easyinsight.billing.BrainTreeBlueBillingSystem" %>
+<%@ page import="com.braintreegateway.CustomerRequest" %>
+<%@ page import="com.easyinsight.html.BillingResponse" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html lang="en">
 <head>
@@ -25,7 +26,7 @@
 
     <script language="javascript" type="text/javascript">
         function setCCexp() {
-            document.getElementById("ccexp").value = document.getElementById("ccexpMonth").value + document.getElementById("ccexpYear").value;
+            document.getElementById("ccexp").value = document.getElementById("ccexpMonth").value + "/" + document.getElementById("ccexpYear").value;
         }
 
         function changeBilling() {
@@ -90,34 +91,42 @@
             hibernateSession.close();
         }
 
-        String keyID = BillingUtil.getKeyID();
-        String key = BillingUtil.getKey();
         boolean monthly = account.getBillingMonthOfYear() == null && (request.getParameter("billingType") == null || !request.getParameter("billingType").equals("yearly"));
-        String orderID = UUID.randomUUID().toString();
 
-        String amount = "1.00";
-        String type = "auth";
-
-        boolean chargeNow = false;
+        boolean chargeNow;
 
         if (accountTypeChange != null && (cost - credit) > 0) {
-            type = "sale";
-            double toCharge = cost - credit;
-            amount = String.valueOf(toCharge);
+
+            // it's an upgrade
+
             chargeNow = true;
-        }  else if(account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED || account.getAccountState() == Account.CLOSED) {
-            amount = String.valueOf(cost);
-            type = "sale";
+        }  else if (account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED || account.getAccountState() == Account.CLOSED) {
+
+            // it's restoring service to a locked account
+
             chargeNow = true;
+        } else {
+
+            // it's putting in new info or updating on a trial or active account
+
+            chargeNow = false;
         }
 
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date d = new Date();
         String time = df.format(d);
+
+        CustomerRequest trParams = new CustomerRequest();
+        if(account.isBillingInformationGiven() != null && account.isBillingInformationGiven())
+            trParams = trParams.customerId(String.valueOf(account.getAccountID()));
+        else
+            trParams = trParams.id(String.valueOf(account.getAccountID()));
+        trParams = trParams.creditCard().options().makeDefault(true).done().done();
+
+        String trData = new BrainTreeBlueBillingSystem().getRedirect(trParams);
+
         request.getSession().setAttribute("billingTime", time);
-        String hashString = orderID + "|" + amount + "|" + String.valueOf(account.getAccountID()) + "|" + time + "|" + key;
-        String hash = BillingUtil.MD5Hash(hashString);
         String accountInfoString;
         String charge;
         int accountType;
@@ -210,66 +219,62 @@
                 <% if(request.getParameter("error") != null) { %>
                 <p><label class="error"><%
                     String errorCode = request.getParameter("response_code");
-                    if ("200".equals(errorCode)) out.println("The transaction was declined by the credit card processor. If this error continues, contact support@easy-insight.com.");
-                    else if ("204".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
-                    else if ("220".equals(errorCode)) out.println("There was an error with your billing information. Please double check the payment information below. If this error continues, contact support@easy-insight.com.");
-                    else if ("221".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
-                    else if ("222".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
-                    else if ("223".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
-                    else if ("224".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
-                    else if ("300".equals(errorCode)) {
-                        out.println("There was an error with your billing information. Please input the correct information below.");
-                    } else {
-                        out.println("There was an error with your billing information. Please input the correct information below.");
+                    try {
+                        int code = Integer.parseInt(errorCode);
+                        if (code == BillingResponse.DECLINED) {
+                            %>The transaction was declined by the credit card processor. If this error continues, contact support@easy-insight.com.<%
+                        } else if (code == BillingResponse.BILLING_ERROR) {
+                            %>There was an error with your billing information. Please input the correct information below.<%
+                        } else if (code == BillingResponse.TRANSACTION_NOT_ALLOWED) {
+                            %>The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.<%
+                        } else if (code == BillingResponse.NOT_FOUND_IN_VAULT) {
+                            %>There was a server error with saving the information for your account. Please try again. If this error continues, contact support@easy-insight.com.<%
+                        } else {
+                            %>There was an error with your billing information. Please input the correct information below.<%
+                        }
+                    } catch (NumberFormatException nfe) {
+                            %>There was an error with your billing information. Please input the correct information below.<%
                     }
                 %></label></p>
                 <% } %>
-                <form method="post" action="https://secure.braintreepaymentgateway.com/api/transact.php" onsubmit="setCCexp()" class="well form-horizontal">
+                <form method="post" action="<%= new BrainTreeBlueBillingSystem().getTargetUrl() %>" onsubmit="setCCexp()" class="well form-horizontal">
                     <fieldset>
-                        <input id="ccexp" type="hidden" value="" name="ccexp"/>
+                        <input id="ccexp" type="hidden" value="" name="customer[credit_card][expiration_date]"/>
                         <input id="customer_vault_id" type="hidden" value="<%= account.getAccountID() %>" name="customer_vault_id" />
-                        <input id="customer_vault" type="hidden" value="<%= (account.isBillingInformationGiven() != null && account.isBillingInformationGiven()) ? "update_customer" : "add_customer" %>" name="customer_vault" />
-                        <input id="redirect" type="hidden" value="<%= ConfigLoader.instance().getRedirectLocation() %>/app/billing/submit.jsp" name="redirect"/>
-                        <input id="payment" type="hidden" value="creditcard" name="creditcard" />
-                        <input id="key_id" type="hidden" value="<%= keyID %>" name="key_id"/>
-                        <input id="orderid" type="hidden" value="<%= orderID %>" name="orderid"/>
-                        <input id="amount" type="hidden" value="<%= amount %>" name="amount"/>
-                        <input id="time" type="hidden" value="<%= time %>" name="time"/>
-                        <input id="hash" type="hidden" value="<%= hash %>" name="hash"/>
-                        <input id="type" type="hidden" value="<%= type %>" name="type" />
+                        <input id="tr_data" type="hidden" value="<%= trData %>" name="tr_data"/>
 
                         <div class="control-group">
                             <label class="control-label" for="firstname">First Name:</label>
                             <div class="controls">
-                                <input id="firstname" type="text" value="" name="firstname" class="span3"/>
+                                <input id="firstname" type="text" value="" name="customer[first_name]" class="span3"/>
                             </div>
 
                         </div>
                         <div class="control-group">
                             <label class="control-label" for="lastname">Last Name:</label>
                             <div class="controls">
-                                <input id="lastname" type="text" value="" name="lastname" class="span3"/>
+                                <input id="lastname" type="text" value="" name="customer[last_name]" class="span3"/>
                             </div>
                         </div>
 
                         <div class="control-group">
                             <label class="control-label" for="zip">Billing Zip/Postal Code:</label>
                             <div class="controls">
-                                <input id="zip" type="text" value="" name="zip" />
+                                <input id="zip" type="text" value="" name="customer[credit_card][billing_address][postal_code]" />
                             </div>
                         </div>
 
                         <div class="control-group">
                             <label class="control-label" for="ccnumber">Credit Card Number:</label>
                             <div class="controls">
-                                <input id="ccnumber" type="text" style="width:16.5em" name="ccnumber"/>
+                                <input id="ccnumber" type="text" style="width:16.5em" name="customer[credit_card][number]"/>
                             </div>
                         </div>
 
                         <div class="control-group">
                             <label class="control-label" for="cvv">CVV/CVC:</label>
                             <div class="controls">
-                                <input id="cvv" type="text" value="" name="cvv" style="width:3.5em" />
+                                <input id="cvv" type="text" value="" name="customer[credit_card][cvv]" style="width:3.5em" />
                             </div>
                         </div>
 
