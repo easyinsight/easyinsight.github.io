@@ -4,9 +4,12 @@
 
     <taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload"/>
     <taskdef name="StopInstances" classname="com.easyinsight.watchdog.updatetask.ShutdownAppInstanceTask"/>
+    <taskdef name="DownloadBackendInstances" classname="com.easyinsight.watchdog.updatetask.DownloadBackendTask"/>
     <taskdef name="UpdateInstances" classname="com.easyinsight.watchdog.updatetask.UpdateAppInstanceTask"/>
     <taskdef name="StartInstances" classname="com.easyinsight.watchdog.updatetask.StartAppInstanceTask"/>
+
     <taskdef name="UpdateDB" classname="com.easyinsight.database.ant.DatabaseUpdateTask"/>
+
     <taskdef name="StartStaging" classname="com.easyinsight.watchdog.updatetask.StartStagingTask" />
     <taskdef name="UpdateStaging" classname="com.easyinsight.watchdog.updatetask.UpdateStagingTask" />
     <taskdef name="DownloadStaging" classname="com.easyinsight.watchdog.updatetask.DownloadStagingTask" />
@@ -58,6 +61,10 @@
     </target>
 
     <target name="downloadStagingInstances">
+        <DownloadStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
+    </target>
+
+    <target name="downloadBackendInstances">
         <DownloadStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
 
