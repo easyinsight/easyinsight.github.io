@@ -65,7 +65,7 @@
     </target>
 
     <target name="downloadBackendInstances">
-        <DownloadStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
+        <DownloadBackendInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
 
     <target name="shutdownLargeInstances">
