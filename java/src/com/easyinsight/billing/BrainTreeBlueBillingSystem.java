@@ -66,7 +66,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
     }
 
     public String getRedirect(Request req) {
-        return gateway.transparentRedirect().trData(req, ConfigLoader.instance().getRedirectLocation() + "/app/billing/newSubmitSubscription.jsp");
+        return gateway.transparentRedirect().trData(req, ConfigLoader.instance().getRedirectLocation() + "/app/billing/newSubmit.jsp");
     }
 
     public String getTargetUrl() {
@@ -135,5 +135,9 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
             }
         }
 
+    }
+
+    public boolean placeholder(Account account, int addonDesigners, int addonConnections, int addonStorage) {
+        return true;
     }
 }
