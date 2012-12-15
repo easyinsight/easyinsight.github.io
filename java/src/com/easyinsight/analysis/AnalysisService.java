@@ -340,31 +340,27 @@ public class AnalysisService {
             Key locationPseudoField = new NamedKey("Location Name");
             keyMap.put("Provider Name", providerPseudoField);
             keyMap.put("Location Name", locationPseudoField);
-            /*mapper.assignPseudoKey("Provider", providerPseudoField);
-            mapper.assignPseudoKey("Location", locationPseudoField);*/
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             XSSFWorkbook wb = new XSSFWorkbook(bais);
             XSSFSheet sheet = wb.getSheetAt(0);
             Iterator<org.apache.poi.ss.usermodel.Row> rit = sheet.rowIterator();
             DataSet dataSet = new DataSet();
-            Map<Integer, IRow> rowMap = new HashMap<Integer, IRow>();
+            Map<Short, IRow> rowMap = new HashMap<Short, IRow>();
             for (; rit.hasNext(); ) {
                 org.apache.poi.ss.usermodel.Row excelRow = rit.next();
-                int i = 1;
-                Iterator<Cell> cit = excelRow.cellIterator();
-                Cell headerCell = cit.next();
+                Cell headerCell = excelRow.getCell(excelRow.getFirstCellNum());
                 String headerValue = headerCell.toString().trim();
                 Key key = keyMap.get(headerValue);
                 if (key == null) {
                     return "We couldn't find a field by the name of " + headerValue + ".";
                 }
-                for (; cit.hasNext(); ) {
+                for (short i = excelRow.getFirstCellNum(); i < excelRow.getLastCellNum(); i++) {
                     IRow row = rowMap.get(i);
                     if (row == null) {
                         row = dataSet.createRow();
                         rowMap.put(i, row);
                     }
-                    Cell cell = cit.next();
+                    Cell cell = excelRow.getCell(i);
                     if (cell.getCellType() == XSSFCell.CELL_TYPE_NUMERIC) {
                         if (DateUtil.isCellDateFormatted(cell)) {
                             row.addValue(key, cell.getDateCellValue());
@@ -374,8 +370,6 @@ public class AnalysisService {
                     } else {
                         row.addValue(key, cell.toString());
                     }
-
-                    i++;
                 }
 
             }
@@ -787,6 +781,8 @@ public class AnalysisService {
             } else if (dataObj instanceof TrendOutcome) {
                 TrendOutcome trendOutcome = (TrendOutcome) dataObj;
                 data = new HashMap<String, Object>(trendOutcome.getDimensions());
+            } else if (dataObj instanceof TreeRow) {
+                data = ((TreeRow) dataObj).getValues();
             } else {
                 throw new RuntimeException();
             }
@@ -876,26 +872,79 @@ public class AnalysisService {
                                 multiValue = true;
                             }
                         }
-                        FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-                        filterValueDefinition.setField(analysisItem);
-                        filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-
-                        filterValueDefinition.setEnabled(true);
-                        filterValueDefinition.setInclusive(true);
-                        filterValueDefinition.setToggleEnabled(true);
-                        if (multiValue) {
-                            filterValueDefinition.setSingleValue(false);
+                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                             Value value = (Value) target;
-                            List<Object> objs = new ArrayList<Object>();
-                            for (Value val : value.getOtherValues()) {
-                                objs.add(val);
+                            AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
+                            if (value instanceof DateValue) {
+                                DateValue dateValue = (DateValue) value;
+                                if (dateDimension.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
+                                    Calendar cal = Calendar.getInstance();
+                                    cal.setTime(dateValue.getDate());
+                                    FilterDateRangeDefinition range = new FilterDateRangeDefinition();
+                                    range.setStartDate(cal.getTime());
+                                    cal.add(Calendar.DAY_OF_YEAR, 1);
+                                    range.setEndDate(cal.getTime());
+                                    range.setField(analysisItem);
+                                    range.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                                    range.setEnabled(true);
+                                    filters.add(range);
+                                } else if (dateDimension.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL) {
+                                    Calendar cal = Calendar.getInstance();
+                                    cal.setTime(dateValue.getDate());
+                                    FilterDateRangeDefinition range = new FilterDateRangeDefinition();
+                                    range.setStartDate(cal.getTime());
+                                    cal.add(Calendar.WEEK_OF_YEAR, 1);
+                                    range.setEndDate(cal.getTime());
+                                    range.setField(analysisItem);
+                                    range.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                                    range.setEnabled(true);
+                                    filters.add(range);
+                                } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+                                    Calendar cal = Calendar.getInstance();
+                                    cal.setTime(dateValue.getDate());
+                                    FilterDateRangeDefinition range = new FilterDateRangeDefinition();
+                                    range.setStartDate(cal.getTime());
+                                    cal.add(Calendar.MONTH, 1);
+                                    range.setEndDate(cal.getTime());
+                                    range.setField(analysisItem);
+                                    range.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                                    range.setEnabled(true);
+                                    filters.add(range);
+                                } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+                                    Calendar cal = Calendar.getInstance();
+                                    cal.setTime(dateValue.getDate());
+                                    FilterDateRangeDefinition range = new FilterDateRangeDefinition();
+                                    range.setStartDate(cal.getTime());
+                                    cal.add(Calendar.MONTH, 1);
+                                    range.setEndDate(cal.getTime());
+                                    range.setField(analysisItem);
+                                    range.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                                    range.setEnabled(true);
+                                    filters.add(range);
+                                }
                             }
-                            filterValueDefinition.setFilteredValues(objs);
                         } else {
-                            filterValueDefinition.setSingleValue(true);
-                            filterValueDefinition.setFilteredValues(Arrays.asList(data.get(analysisItem.qualifiedName())));
+                            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+                            filterValueDefinition.setField(analysisItem);
+                            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+
+                            filterValueDefinition.setEnabled(true);
+                            filterValueDefinition.setInclusive(true);
+                            filterValueDefinition.setToggleEnabled(true);
+                            if (multiValue) {
+                                filterValueDefinition.setSingleValue(false);
+                                Value value = (Value) target;
+                                List<Object> objs = new ArrayList<Object>();
+                                for (Value val : value.getOtherValues()) {
+                                    objs.add(val);
+                                }
+                                filterValueDefinition.setFilteredValues(objs);
+                            } else {
+                                filterValueDefinition.setSingleValue(true);
+                                filterValueDefinition.setFilteredValues(Arrays.asList(data.get(analysisItem.qualifiedName())));
+                            }
+                            filters.add(filterValueDefinition);
                         }
-                        filters.add(filterValueDefinition);
                     }
 
                 }
