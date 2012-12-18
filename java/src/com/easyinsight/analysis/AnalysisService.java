@@ -354,21 +354,23 @@ public class AnalysisService {
                 if (key == null) {
                     return "We couldn't find a field by the name of " + headerValue + ".";
                 }
-                for (short i = excelRow.getFirstCellNum(); i < excelRow.getLastCellNum(); i++) {
+                for (short i = (short) (excelRow.getFirstCellNum() + 1); i < excelRow.getLastCellNum(); i++) {
                     IRow row = rowMap.get(i);
                     if (row == null) {
                         row = dataSet.createRow();
                         rowMap.put(i, row);
                     }
                     Cell cell = excelRow.getCell(i);
-                    if (cell.getCellType() == XSSFCell.CELL_TYPE_NUMERIC) {
-                        if (DateUtil.isCellDateFormatted(cell)) {
-                            row.addValue(key, cell.getDateCellValue());
+                    if (cell != null) {
+                        if (cell.getCellType() == XSSFCell.CELL_TYPE_NUMERIC) {
+                            if (DateUtil.isCellDateFormatted(cell)) {
+                                row.addValue(key, cell.getDateCellValue());
+                            } else {
+                                row.addValue(key, cell.getNumericCellValue());
+                            }
                         } else {
-                            row.addValue(key, cell.getNumericCellValue());
+                            row.addValue(key, cell.toString());
                         }
-                    } else {
-                        row.addValue(key, cell.toString());
                     }
                 }
 
