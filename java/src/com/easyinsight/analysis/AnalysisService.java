@@ -319,6 +319,7 @@ public class AnalysisService {
             conn.setAutoCommit(false);
             FeedDefinition useSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(useSource.getParentSourceID(), conn);
+
             /*// TODO: fix
             FeedDefinition useSource;
             if (dataSource.getFeedName().equals("Therapy Works")) {
@@ -421,11 +422,13 @@ public class AnalysisService {
                 }
             }
 
+            System.out.println("Determining calculations to apply...");
             List<IDataTransform> transforms = new ArrayList<IDataTransform>();
             if (useSource.getMarmotScript() != null && !"".equals(useSource.getMarmotScript())) {
                 StringTokenizer toker = new StringTokenizer(useSource.getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
+                    System.out.println("Adding " + line);
                     transforms.addAll(new ReportCalculation(line).apply(useSource));
                 }
             }
