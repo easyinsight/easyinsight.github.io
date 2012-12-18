@@ -60,7 +60,8 @@
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
-<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
+<div id="whiteDiv"></div>
+<div id="topMenuDiv"></div>
 <div id="trialDiv" style="margin-top: 108px"></div>
 <div style="width:1000px;margin:0 auto;">
     <div id="topBar">

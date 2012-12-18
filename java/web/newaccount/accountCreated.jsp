@@ -46,8 +46,9 @@
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
 </head>
-<body style="width:100%;text-align:center;margin:0px auto;">
-<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
+<body>
+<div id="whiteDiv"></div>
+<div id="topMenuDiv"></div>
 <div style="width:1000px;margin:0 auto;">
     <div id="topBar">
         <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
