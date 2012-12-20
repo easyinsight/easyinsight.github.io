@@ -51,6 +51,7 @@ public class DataSourceType {
     public static const DATABASE:int = 153;
     public static const YOUTRACK:int = 155;
     public static const INSIGHTLY:int = 160;
+    public static const MYSQL_SERVER:int = 167;
 
 
 
