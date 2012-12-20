@@ -42,6 +42,22 @@ public class AdminService {
 
     private static final String LOC_XML = "<url>\r\n\t<loc>{0}</loc>\r\n</url>\r\n";
 
+    public void requestEnterpriseAccess(final String email, final String phone, final boolean salesforce, final boolean quickbase) {
+        final long accountID = SecurityUtil.getAccountID();
+        new Thread(new Runnable() {
+
+            public void run() {
+                String body = "Account: " + accountID + "\nEmail: " + email + "\nPhone: " + phone +
+                        "\nSalesforce: " + salesforce + "\nQuickBase: " + quickbase;
+                try {
+                    new SendGridEmail().sendEmail("sales@easy-insight.com", "Request for Enterprise Connection", body, "donotreply@easy-insight.com", false, "Easy Insight");
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
+            }
+        }).start();
+    }
+
     public void addNews(NewsEntry newsEntry) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
