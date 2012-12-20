@@ -164,6 +164,8 @@
         <mapping class="com.easyinsight.audit.ActionDashboardLog" />
         <mapping class="com.easyinsight.audit.ActionDataSourceLog" />
         <mapping class="com.easyinsight.audit.ActionScorecardLog" />
+        <mapping class="com.easyinsight.billing.AccountSyncTaskGenerator" />
+        <mapping class="com.easyinsight.billing.AccountSyncScheduledTask" />
     </session-factory>
 
 </hibernate-configuration>
