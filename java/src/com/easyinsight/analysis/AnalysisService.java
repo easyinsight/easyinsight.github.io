@@ -374,7 +374,6 @@ public class AnalysisService {
                         }
                     }
                 }
-
             }
             /*PersistableDataSetForm data = new ExcelUploadFormat().createDataSet(bytes, useSource.getFields(), mapper);
             DataSet dataSet = data.toDataSet(null);*/
@@ -405,13 +404,18 @@ public class AnalysisService {
                 map.put(key, row.getValue(relatedProviderField.createAggregateKey()).toString());
             }
 
-            for (IRow row : dataSet.getRows()) {
+            Iterator<IRow> iter = dataSet.getRows().iterator();
+            while (iter.hasNext()) {
+                IRow row = iter.next();
                 // retrieve location
                 // retrieve provider
                 // look up the actual related provider
                 List<String> pair = new ArrayList<String>();
                 Value provider = row.getValue(providerPseudoField);
                 Value location = row.getValue(locationPseudoField);
+                if ("".equals(provider.toString().trim())) {
+                    iter.remove();
+                }
                 pair.add(provider.toString());
                 pair.add(location.toString());
                 String relatedProvider = map.get(pair);

@@ -128,7 +128,7 @@ public class CacheDataTransform implements IDataTransform {
         DataSet resultSet = pipeline.toDataSet(dataSet);
         IRow result = resultSet.getRow(0);
         Value targetValue = result.getValue(calculation);
-
+        System.out.println("storing " + endField.toDisplay() + " = " + targetValue);
         row.addValue(endField.getKey(), targetValue);
     }
 
