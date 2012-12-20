@@ -1,14 +1,11 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%" height="100%" creationComplete="onCreationComplete()"
-        styleName="basePageVBox" implements="com.easyinsight.listing.IPerspective">
+        implements="com.easyinsight.listing.IPerspective" paddingTop="20">
     <mx:states>
         <mx:State name="trialAccount">
             <mx:RemoveChild target="{invoicesButton}"/>
         </mx:State>
     </mx:states>
-    <mx:Box width="100%" styleName="bannerBackground">
-        <mx:Label text="Account Administration" styleName="bannerText"/>
-    </mx:Box>
     <mx:HBox horizontalGap="20" width="100%">
         <mx:VBox horizontalAlign="center" width="33%">
             <mx:Label text="Account Stats" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>

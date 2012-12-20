@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        creationComplete="setup()" width="100%" horizontalAlign="center" implements="com.easyinsight.listing.IPerspective">
+        creationComplete="setup()" width="100%" horizontalAlign="center" implements="com.easyinsight.listing.IPerspective"  verticalGap="10">
     <mx:Script><![CDATA[
         import com.easyinsight.account.AccountInfo;
         import com.easyinsight.util.PopUpUtil;
@@ -76,14 +76,17 @@
         <mx:method name="getPersonas" result="gotPersonas()"/>
         <mx:method name="deletePersonas" result="gotFocus()"/>
     </mx:RemoteObject>
-    <mx:Box width="100%" styleName="bannerBackground">
-        <mx:Label text="Persona Configuration" styleName="bannerText"/>
-    </mx:Box>
-    <mx:HBox>
-        <mx:Button label="Create Persona..." click="createPersona()" fontSize="12" styleName="grayButton"/>
-        <mx:Button label="Delete Selected" click="deleteSelected()" fontSize="12" styleName="grayButton"/>
+    <mx:HBox width="1000" paddingTop="20">
+        <mx:HBox height="100%" verticalAlign="bottom">
+            <mx:Button label="Create Persona..." click="createPersona()" styleName="grayButton"/>
+            <mx:Button label="Delete Selected" click="deleteSelected()" styleName="grayButton"/>
+        </mx:HBox>
+        <mx:Spacer width="100%"/>
+        <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="8" dropShadowEnabled="true" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" backgroundColor="#FFFFFF">
+            <mx:TextArea selectable="false" editable="false" width="375" height="50" text="Personas enable you to restrict data level access for different users. For example, a particular user might only be able to see one region within a data source."/>
+        </mx:Box>
     </mx:HBox>
-    <mx:DataGrid dataProvider="{personas}" width="500" id="grid" rowHeight="28">
+    <mx:DataGrid dataProvider="{personas}" width="1000" id="grid" rowHeight="28">
         <mx:columns>
             <util:EIDataGridColumn dataField="" headerText=""
                                itemRenderer="com.easyinsight.account.UserCheckbox" width="30" sortable="false"/>

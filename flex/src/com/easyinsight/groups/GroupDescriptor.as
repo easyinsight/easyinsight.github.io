@@ -9,6 +9,7 @@ package com.easyinsight.groups
 		public var groupID:int;
         public var description:String;
         public var groupMembers:int;
+        public var selected:Boolean;
 		
 		public function GroupDescriptor()
 		{

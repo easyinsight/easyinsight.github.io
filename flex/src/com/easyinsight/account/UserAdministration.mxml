@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%"
-           height="100%" creationComplete="gotFocus()" styleName="basePageVBox" implements="com.easyinsight.listing.IPerspective">
+           height="100%" creationComplete="gotFocus()" implements="com.easyinsight.listing.IPerspective" horizontalAlign="center" verticalGap="10">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.User;
@@ -233,7 +233,7 @@
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
         <mx:method name="getPersonas" result="gotPersonas()"/>
     </mx:RemoteObject>
-    <mx:HBox width="1000">
+    <mx:HBox width="1000" paddingTop="20">
         <mx:VBox verticalAlign="bottom" height="100%">
             <mx:HBox>
                 <mx:Label text="{usedAndAvailableMessage}" width="250"/>
@@ -251,7 +251,7 @@
             </mx:HBox>
         </mx:VBox>
         <mx:Spacer width="100%"/>
-        <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="8" dropShadowEnabled="true" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="8" dropShadowEnabled="true" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" backgroundColor="#FFFFFF">
             <mx:TextArea selectable="false" editable="false" width="375" height="{designerTextHeight}" text="{designerText}"/>
         </mx:Box>
     </mx:HBox>

@@ -65,13 +65,10 @@
         public function cleanup():void {
         }
         ]]></mx:Script>
-    <mx:Box width="100%" styleName="bannerBackground">
-        <mx:Label text="My Profile" styleName="bannerText"/>
-    </mx:Box>
-    <mx:VBox id="userProfileBox" horizontalAlign="center">
+    <mx:VBox id="userProfileBox" horizontalAlign="center" paddingTop="20">
         <mx:HBox>
-            <mx:Button label="Edit Profile..." click="editProfile()" fontSize="14" styleName="grayButton"/>
-            <mx:Button label="Change Password..." click="editPassword()" fontSize="14" styleName="grayButton"/>
+            <mx:Button label="Edit Profile..." click="editProfile()" styleName="grayButton"/>
+            <mx:Button label="Change Password..." click="editPassword()" styleName="grayButton"/>
         </mx:HBox>
         <mx:Form width="100%" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
             <mx:FormItem label="User Name:">
