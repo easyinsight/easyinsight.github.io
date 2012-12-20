@@ -132,7 +132,7 @@ public class OAuthServlet extends HttpServlet {
                     IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
 
                     dataSource.exchangeTokens(conn, req, verifier);
-                    feedDefinition.setVisible(true);
+                    //feedDefinition.setVisible(true);
                     new FeedStorage().updateDataFeedConfiguration(feedDefinition, conn);
                     FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
                     String redirectURL;
@@ -143,11 +143,7 @@ public class OAuthServlet extends HttpServlet {
                             redirectURL = "https://staging.easy-insight.com/app/#connectionConfig=" + feedDefinition.getApiKey();
                         }
                     } else {
-                        if (ConfigLoader.instance().isProduction()) {
-                            redirectURL = "https://www.easy-insight.com/app/";
-                        } else {
-                            redirectURL = "https://staging.easy-insight.com/app/";
-                        }
+                        redirectURL = "https://localhost:4443/app/";
                     }
                     conn.commit();
                     resp.sendRedirect(redirectURL);
