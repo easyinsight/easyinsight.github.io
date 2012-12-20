@@ -34,7 +34,7 @@
             return;
         }
 
-        if (numberDesigners > (stats.getUsedDesigners())) {
+        if ((numberDesigners + stats.getCoreDesigners()) < (stats.getUsedDesigners())) {
             request.getSession().setAttribute("errorString", "Your account currently has more Designers than the number you just specified.");
             response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
             return;
@@ -49,7 +49,7 @@
             return;
         }
 
-        if (numberConnections > stats.getCurrentSmallBizConnections()) {
+        if ((stats.getCoreSmallBizConnections() + numberConnections) < stats.getCurrentSmallBizConnections()) {
             request.getSession().setAttribute("errorString", "Your account currently has more small business connections than the number you just specified.");
             response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
             return;
