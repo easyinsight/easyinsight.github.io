@@ -12,6 +12,8 @@ import com.easyinsight.datafeeds.cleardb.ClearDBDataSource;
 import com.easyinsight.datafeeds.cloudwatch.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.datafeeds.constantcontact.*;
+import com.easyinsight.datafeeds.database.MySQLDatabaseConnection;
+import com.easyinsight.datafeeds.database.ServerDatabaseConnection;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.freshbooks.*;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
@@ -72,14 +74,55 @@ public class DataSourceTypeRegistry {
 
     private Map<FeedType, Class> dataSourceMap = new HashMap<FeedType, Class>();
     private Set<Integer> exchangeTypes = new HashSet<Integer>();
+    private Map<FeedType, Integer> connectionBillingInfoMap = new HashMap<FeedType, Integer>();
 
     public DataSourceTypeRegistry() {
         registerTypes();
         registerExchangeTypes();
+        registerConnectionBillingTypes();
     }
 
     public boolean isExchangeType(int type) {
         return exchangeTypes.contains(type);
+    }
+
+    private void registerConnectionBillingTypes() {
+        connectionBillingInfoMap.put(FeedType.SALESFORCE, ConnectionBillingType.SALESFORCE);
+        connectionBillingInfoMap.put(FeedType.QUICKBASE_COMPOSITE, ConnectionBillingType.QUICKBASE);
+
+        connectionBillingInfoMap.put(FeedType.BASECAMP_MASTER, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.BASECAMP_NEXT_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.HIGHRISE_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.ZENDESK_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.PIVOTAL_TRACKER, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.CONSTANT_CONTACT, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.GOOGLE_ANALYTICS, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.BATCHBOOK2_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.BATCHBOOK_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.FRESHBOOKS_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.INSIGHTLY_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.YOUTRACK_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.HARVEST_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.LINKEDIN, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.SENDGRID, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.WUFOO_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+
+        connectionBillingInfoMap.put(FeedType.SERVER_MYSQL, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.DEFAULT, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.STATIC, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.JSON, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.DATABASE_CONNECTION, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.TREASURE_DATA, ConnectionBillingType.CUSTOM_DATA);
+    }
+
+    public int billingInfoForType(FeedType feedType) {
+        Integer type = connectionBillingInfoMap.get(feedType);
+        if (type == null) {
+
+            // International Education Services, Highrise, 619-479-2626 x7013
+            return 0;
+        }
+        return type;
     }
 
     private void registerExchangeTypes() {
@@ -97,6 +140,9 @@ public class DataSourceTypeRegistry {
         exchangeTypes.add(FeedType.ZENDESK_COMPOSITE.getType());
         exchangeTypes.add(FeedType.HARVEST_COMPOSITE.getType());
         exchangeTypes.add(FeedType.BASECAMP_NEXT_COMPOSITE.getType());
+        exchangeTypes.add(FeedType.YOUTRACK_COMPOSITE.getType());
+        exchangeTypes.add(FeedType.INSIGHTLY_COMPOSITE.getType());
+        exchangeTypes.add(FeedType.BATCHBOOK2_COMPOSITE.getType());
     }
 
     public Set<Integer> getExchangeTypes() {
@@ -244,6 +290,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.INSIGHTLY_OPPORTUNITIES, InsightlyOpportunitySource.class);
         registerType(FeedType.INSIGHTLY_PROJECTS, InsightlyProjectSource.class);
         registerType(FeedType.INSIGHTLY_TASKS, InsightlyTaskSource.class);
+        registerType(FeedType.SERVER_MYSQL, MySQLDatabaseConnection.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
