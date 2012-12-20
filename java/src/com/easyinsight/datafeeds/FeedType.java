@@ -189,6 +189,7 @@ public class FeedType implements Serializable {
     public static final FeedType INSIGHTLY_PROJECTS = new FeedType(165);
 
     public static final FeedType GOOGLE_PROVISIONING = new FeedType(166);
+    public static final FeedType SERVER_MYSQL = new FeedType(167);
 
     public FeedType() {
     }
