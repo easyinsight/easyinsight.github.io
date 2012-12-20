@@ -60,17 +60,29 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
-        for (int i = 0; i < 1000; i++) {
-            IRow row = dataSet.createRow();
+        long startTime = System.currentTimeMillis();
+        try {
+            for (int i = 0; i < 20000; i++) {
+                IRow row = dataSet.createRow();
 
-            row.addValue(keys.get(CUSTOMER), customerNames[(int) (Math.random() * 8)]);
-            row.addValue(keys.get(PRODUCT), productNames[(int) (Math.random() * 5)]);
-            row.addValue(keys.get(QUANTITY), (int) (Math.random() * 3));
-            Calendar cal = Calendar.getInstance();
-            //cal.add(Calendar.YEAR, -1);
-            cal.add(Calendar.DAY_OF_YEAR, - (int) (Math.random() * 365));
-            row.addValue(keys.get(ORDER_DATE), cal.getTime());
+                row.addValue(keys.get(CUSTOMER), customerNames[(int) (Math.random() * 8)]);
+                row.addValue(keys.get(PRODUCT), productNames[(int) (Math.random() * 5)]);
+                row.addValue(keys.get(QUANTITY), (int) (Math.random() * 3));
+                Calendar cal = Calendar.getInstance();
+                //cal.add(Calendar.YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, - (int) (Math.random() * 365));
+                row.addValue(keys.get(ORDER_DATE), cal.getTime());
+                if (i % 1000 == 0) {
+                    IDataStorage.insertData(dataSet);
+                    dataSet = new DataSet();
+                }
+            }
+            IDataStorage.insertData(dataSet);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return dataSet;
+        long endTime = System.currentTimeMillis();
+        System.out.println("Elapsed time = " + (endTime - startTime));
+        return null;
     }
 }
