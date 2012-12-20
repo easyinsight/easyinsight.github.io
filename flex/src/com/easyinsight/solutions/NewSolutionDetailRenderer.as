@@ -112,26 +112,39 @@ public class NewSolutionDetailRenderer extends EventDispatcher {
     }
 
     private function checkedValidity(event:ResultEvent):void {
-        var existingConnectionID:int = solutionService.connectionInstalled.lastResult as int;
-        var renderer:NewSolutionDetailRenderer = this;
-        if (existingConnectionID > 0) {
-            var window:SavePromptWindow = new SavePromptWindow();
-            window.defineOption("Open the Existing Connection", PromptEvent.PROMPT_SAVE);
-            window.defineOption("Create New Connection", PromptEvent.PROMPT_DISCARD);
-            window.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
-            window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(existingConnectionID)));
-            }, false, 0, true);
-            window.addEventListener(PromptEvent.PROMPT_DISCARD, function(event:PromptEvent):void {
+        var installationValidation:InstallationValidation = solutionService.connectionInstalled.lastResult as InstallationValidation;
+        if (installationValidation.atSizeLimit) {
+            var atLimitWindow:SavePromptWindow = new SavePromptWindow();
+            atLimitWindow.defineOption("Upgrade Account", PromptEvent.PROMPT_SAVE);
+            atLimitWindow.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
+            atLimitWindow.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                navigateToURL(new URLRequest("/app/billing/accountType.jsp"), "_self");
+            });
+            atLimitWindow.prompt = "Your account is at its small business connection limit. You'll need to allocate more connections to install this connection.";
+            PopUpManager.addPopUp(atLimitWindow, UIComponent(Application.application), true);
+            PopUpUtil.centerPopUp(atLimitWindow);
+        } else {
+            var existingConnectionID:int = solutionService.connectionInstalled.lastResult as int;
+            var renderer:NewSolutionDetailRenderer = this;
+            if (existingConnectionID > 0) {
+                var window:SavePromptWindow = new SavePromptWindow();
+                window.defineOption("Open the Existing Connection", PromptEvent.PROMPT_SAVE);
+                window.defineOption("Create New Connection", PromptEvent.PROMPT_DISCARD);
+                window.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
+                window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(existingConnectionID)));
+                }, false, 0, true);
+                window.addEventListener(PromptEvent.PROMPT_DISCARD, function(event:PromptEvent):void {
+                    ProgressAlert.alert(UIComponent(Application.application), "Installing connection...", null, solutionService.installSolution);
+                    solutionService.installSolution.send(_solution.solutionID);
+                }, false, 0, true);
+                window.prompt = "It looks like you already have a data source for this connection under your My Data page. Are you sure you want to install a new data source?";
+                PopUpManager.addPopUp(window, UIComponent(Application.application), true);
+                PopUpUtil.centerPopUp(window);
+            } else {
                 ProgressAlert.alert(UIComponent(Application.application), "Installing connection...", null, solutionService.installSolution);
                 solutionService.installSolution.send(_solution.solutionID);
-            }, false, 0, true);
-            window.prompt = "It looks like you already have a data source for this connection under your My Data page. Are you sure you want to install a new data source?";
-            PopUpManager.addPopUp(window, UIComponent(Application.application), true);
-            PopUpUtil.centerPopUp(window);
-        } else {
-            ProgressAlert.alert(UIComponent(Application.application), "Installing connection...", null, solutionService.installSolution);
-            solutionService.installSolution.send(_solution.solutionID);
+            }
         }
     }
 

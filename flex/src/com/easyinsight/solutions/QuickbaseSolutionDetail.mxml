@@ -24,6 +24,17 @@
                 Alert.show("If you want to use Easy Insight with Quickbase, you'll need to upgrade to the Professional or higher account tier.", "Upgrade Required",
                         Alert.OK | Alert.CANCEL, this, upgradeListener, null, Alert.CANCEL);
             } else {
+                qbSolutionService.connectionInstalled.send(solution.solutionID);
+            }
+        }
+
+        private function isConnectionInstalled():void {
+            var installationValidation:InstallationValidation = qbSolutionService.connectionInstalled.lastResult as InstallationValidation;
+            if (installationValidation.enterpriseLimit) {
+                var eWindow:NewEnterpriseWindow = new NewEnterpriseWindow();
+                PopUpManager.addPopUp(eWindow, this, true);
+                PopUpUtil.centerPopUp(eWindow);
+            } else {
                 var window:QuickbaseWindow = new QuickbaseWindow();
                 window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, created);
                 PopUpManager.addPopUp(window, this, true);
@@ -39,6 +50,9 @@
             dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(event.feedID)));
         }
 ]]></mx:Script>
+    <mx:RemoteObject destination="solutionService" id="qbSolutionService">
+        <mx:method name="connectionInstalled" result="isConnectionInstalled()"/>
+    </mx:RemoteObject>
     <mx:HBox width="100%" height="100%" horizontalGap="0">
         <solutions:HeaderShadeArea width="50" height="100%" leftColor="#000000" rightColor="#FFFFFF"/>
         <mx:VBox width="100%" height="100%" styleName="connectionDetailCanvas" horizontalAlign="center">

@@ -10,7 +10,7 @@
                         <mx:Label text="This connection requires a higher account"/>
                         <mx:Label text="tier than what your current subscription."/>
                     </mx:VBox>
-                    <mx:Button label="Upgrade Account" styleName="blueButton" click="upgrade()"/>
+                    <mx:Button label="Upgrade Account" styleName="grayButton" fontSize="14" click="upgrade()"/>
                 </mx:VBox>
             </mx:AddChild>
         </mx:State>

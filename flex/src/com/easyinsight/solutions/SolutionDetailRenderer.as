@@ -29,6 +29,8 @@ import flash.net.navigateToURL;
 import flash.utils.ByteArray;
 
 import mx.controls.Alert;
+import mx.core.Application;
+import mx.core.UIComponent;
 import mx.events.CloseEvent;
 import mx.events.FlexEvent;
 import mx.managers.BrowserManager;
@@ -159,26 +161,42 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     }
 
     private function checkedValidity(event:ResultEvent):void {
-        var existingConnectionID:int = solutionService.connectionInstalled.lastResult as int;
-        var renderer:SolutionDetailRenderer = this;
-        if (existingConnectionID > 0) {
-            var window:SavePromptWindow = new SavePromptWindow();
-            window.defineOption("Open the Existing Connection", PromptEvent.PROMPT_SAVE);
-            window.defineOption("Create New Connection", PromptEvent.PROMPT_DISCARD);
-            window.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
-            window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(existingConnectionID)));
-            }, false, 0, true);
-            window.addEventListener(PromptEvent.PROMPT_DISCARD, function(event:PromptEvent):void {
-                ProgressAlert.alert(renderer, "Installing connection...", null, solutionService.installSolution);
-                solutionService.installSolution.send(_solution.solutionID);
-            }, false, 0, true);
-            window.prompt = "It looks like you already have a data source for this connection under your My Data page. Are you sure you want to install a new data source?";
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+        var installationValidation:InstallationValidation = solutionService.connectionInstalled.lastResult as InstallationValidation;
+        if (installationValidation.enterpriseLimit) {
+            var eWindow:NewEnterpriseWindow = new NewEnterpriseWindow();
+            PopUpManager.addPopUp(eWindow, this, true);
+            PopUpUtil.centerPopUp(eWindow);
+        } else if (installationValidation.atSizeLimit) {
+            var atLimitWindow:SavePromptWindow = new SavePromptWindow();
+            atLimitWindow.defineOption("Upgrade Account", PromptEvent.PROMPT_SAVE);
+            atLimitWindow.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
+            atLimitWindow.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                navigateToURL(new URLRequest("/app/billing/accountType.jsp"), "_self");
+            });
+            atLimitWindow.prompt = "Your account is at its small business connection limit. You'll need to allocate more connections to install this connection.";
+            PopUpManager.addPopUp(atLimitWindow, UIComponent(Application.application), true);
+            PopUpUtil.centerPopUp(atLimitWindow);
         } else {
-            ProgressAlert.alert(this, "Installing connection...", null, solutionService.installSolution);
-            solutionService.installSolution.send(_solution.solutionID);
+            var existingConnectionID:int = solutionService.connectionInstalled.lastResult as int;
+            if (existingConnectionID > 0) {
+                var window:SavePromptWindow = new SavePromptWindow();
+                window.defineOption("Open the Existing Connection", PromptEvent.PROMPT_SAVE);
+                window.defineOption("Create New Connection", PromptEvent.PROMPT_DISCARD);
+                window.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
+                window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(existingConnectionID)));
+                }, false, 0, true);
+                window.addEventListener(PromptEvent.PROMPT_DISCARD, function(event:PromptEvent):void {
+                    ProgressAlert.alert(UIComponent(Application.application), "Installing connection...", null, solutionService.installSolution);
+                    solutionService.installSolution.send(_solution.solutionID);
+                }, false, 0, true);
+                window.prompt = "It looks like you already have a data source for this connection under your My Data page. Are you sure you want to install a new data source?";
+                PopUpManager.addPopUp(window, UIComponent(Application.application), true);
+                PopUpUtil.centerPopUp(window);
+            } else {
+                ProgressAlert.alert(UIComponent(Application.application), "Installing connection...", null, solutionService.installSolution);
+                solutionService.installSolution.send(_solution.solutionID);
+            }
         }
     }
 

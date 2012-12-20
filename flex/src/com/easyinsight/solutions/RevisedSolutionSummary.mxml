@@ -1,14 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:solutions="com.easyinsight.solutions.*"
 
                       implements="com.easyinsight.listing.IPerspective"
                       doubleClickEnabled="true" creationComplete="initListeners()"
-                      xmlns:skin="com.easyinsight.skin.*">
+                      xmlns:skin="com.easyinsight.skin.*" verticalScrollPolicy="off">
+    <skin:states>
+        <mx:State name="oldPricingModel">
+            <mx:AddChild relativeTo="{headerHBox}">
+                <mx:VBox height="100%" horizontalAlign="center">
+                    <mx:Box height="100%" horizontalAlign="center" verticalAlign="middle">
+                        <mx:Label fontSize="24" text="Ready to connect to your own data?"/>
+                    </mx:Box>
+                    <mx:Label text="Click on any of the options below to get started."
+                              fontSize="18"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="newPricingModel">
+            <mx:AddChild relativeTo="{headerHBox}">
+                <solutions:ConnectionStatDisplay id="smallBizStats" current="{smallBizCurrent}" total="{smallBizTotal}" typeLabel="Small Biz Connections"/>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{headerHBox}">
+                <solutions:ConnectionStatDisplay id="storageUse" current="{storageCurrent}" total="{storageTotal}" typeLabel="Custom Storage"/>
+            </mx:AddChild>
+        </mx:State>
+    </skin:states>
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.account.AccountStats;
         import com.easyinsight.customupload.JSONWindow;
         import com.easyinsight.customupload.UserUpload;
         import com.easyinsight.datasources.DataSourceType;
+        import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.IPerspective;
         import com.easyinsight.listing.ListingChangeEvent;
@@ -42,15 +65,6 @@
         private var _learning:Boolean = false;
 
         private var _biz:Boolean = false;
-
-        [Embed(source="../../../../assets/background2.JPG")]
-        private var defaultReportBackground:Class;
-
-        protected override function commitProperties():void {
-            super.commitProperties();
-            solutionGrid.setStyle("backgroundImage", defaultReportBackground);
-            solutionGrid.setStyle("backgroundSize", "100%");
-        }
 
         [Bindable(event="saasChanged")]
         public function get saas():Boolean {
@@ -103,6 +117,7 @@
                     event.solution.dataSourceType == DataSourceType.YOUTRACK ||
                     event.solution.dataSourceType == DataSourceType.WUFOO ||
                     event.solution.dataSourceType == DataSourceType.INSIGHTLY ||
+                    event.solution.dataSourceType == DataSourceType.MYSQL_SERVER ||
                     event.solution.dataSourceType == DataSourceType.ZENDESK) {
                 var renderer:NewSolutionDetailRenderer = new NewSolutionDetailRenderer();
                 renderer.solution = event.solution;
@@ -128,11 +143,17 @@
         }
 
         public function gotFocus():void {
+            if (User.getInstance().pricingModel == 0) {
+                currentState = "oldPricingModel";
+            } else {
+                currentState = "newPricingModel";
+            }
             var fragmentObject:Object = new Object();
             fragmentObject.page = "connections";
             BrowserManager.getInstance().setTitle("Easy Insight - Connections");
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             BrowserManager.getInstance().setFragment(fragmentString);
+            accountService.getAccountStats.send();
         }
 
         private function gotAllSolutions():void {
@@ -179,36 +200,56 @@
             super.measure();
             if (availableSolutions != null) {
                 var availableColumns:int = (vbox.width - 50) / (240);
-                //Alert.show("unscaled width = " + (vbox.width - 40) + " available columns = " + availableColumns);
                 solutionGrid.width = availableColumns * 240 + 2;
-                var itemsPerRow:int = solutionGrid.width / solutionGrid.columnWidth;
+                var itemsPerRow:int = (solutionGrid.width) / solutionGrid.columnWidth;
                 var rows:int = Math.ceil(availableSolutions.length / itemsPerRow);
-                solutionGrid.height = solutionGrid.rowHeight * rows + 4;
+                solutionGrid.minHeight = solutionGrid.height = solutionGrid.rowHeight * rows + 4;
+                canvas.maxHeight = unscaledHeight - headerHBox.height - 30;
             }
+        }
+
+        private function gotStats():void {
+            var stats:AccountStats = accountService.getAccountStats.lastResult as AccountStats;
+            smallBizCurrent = String(stats.currentSmallBizConnections);
+            smallBizTotal = String(stats.addonSmallBizConnections + stats.coreSmallBizConnections);
+            storageCurrent = stats.usedSpaceString;
+            storageTotal = stats.maxSpaceString;
         }
 
         [Bindable]
         private var stackIndex:int;
+
+        [Bindable]
+        private var smallBizCurrent:String;
+
+        [Bindable]
+        private var smallBizTotal:String;
+
+        [Bindable]
+        private var storageCurrent:String;
+
+        [Bindable]
+        private var storageTotal:String;
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="solutionService" id="solutionService">
         <mx:method name="getSolutions" result="gotAllSolutions()"/>
     </mx:RemoteObject>
-    <mx:Canvas verticalScrollPolicy="auto" horizontalScrollPolicy="off">
-        <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10" id="vbox" horizontalAlign="center" width="100%"
-                 paddingBottom="10">
-            <mx:HBox width="100%" horizontalAlign="center">
-                <mx:VBox width="100%" height="100%" horizontalAlign="center">
-                    <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Label fontSize="24" text="Ready to connect to your own data?"/>
-                    </mx:Box>
-                    <mx:Label text="Click on any of the options below to quickly connect and get started."
-                              fontSize="18"/>
-                </mx:VBox>
-            </mx:HBox>
+    <mx:RemoteObject destination="accountAdmin" id="accountService">
+        <mx:method name="getAccountStats" result="gotStats()"/>
+    </mx:RemoteObject>
+
+    <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10" id="vbox" horizontalAlign="center" width="100%"
+             paddingBottom="10" verticalScrollPolicy="off">
+        <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" id="headerHBox">
+
+
+        </mx:HBox>
+        <mx:Canvas verticalScrollPolicy="on" id="canvas">
             <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView"
-                         dataProvider="{availableSolutions}" id="solutionGrid"
-                         columnWidth="240" rowHeight="160" verticalScrollPolicy="off"/>
-        </mx:VBox>
-    </mx:Canvas>
+                     dataProvider="{availableSolutions}" id="solutionGrid"
+                     columnWidth="240" rowHeight="160" verticalScrollPolicy="off"/>
+        </mx:Canvas>
+    </mx:VBox>
+
 </skin:BackgroundImage>

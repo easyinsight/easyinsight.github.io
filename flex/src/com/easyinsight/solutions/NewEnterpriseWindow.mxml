@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var defaultEmail:String;
+
+        private function requestAccess():void {
+            adminService.requestEnterpriseAccess.send(emailInput.text, phoneInput.text, salesforceCheckBox.selected, quickbaseCheckbox.selected);
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            defaultEmail = User.getInstance().getEmail();
+        }
+
+        [Bindable]
+        public var salesforce:Boolean;
+
+        [Bindable]
+        public var quickbase:Boolean;
+
+        private function requested():void {
+            Alert.show("Thanks for your interest! We'll be in touch with you soon to grant access.");
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="admin" id="adminService">
+        <mx:method name="requestEnterpriseAccess" result="requested()"/>
+    </mx:RemoteObject>
+    <mx:TextArea editable="false" selectable="false" width="600" height="50" fontSize="12" text="Your account doesn't have access to the Salesforce or QuickBase connections yet. If you'd like access, please contact us using this form and we'll be in touch with you as soon as possible."/>
+    <mx:Form>
+        <mx:FormItem label="Contact Email:">
+            <mx:TextInput id="emailInput" text="{defaultEmail}" width="400"/>
+        </mx:FormItem>
+        <mx:FormItem label="Contact Phone (if you want us to call you)">
+            <mx:TextInput id="phoneInput" width="400"/>
+        </mx:FormItem>
+        <mx:FormItem label="Salesforce Access">
+            <mx:CheckBox id="salesforceCheckBox" selected="{salesforce}"/>
+        </mx:FormItem>
+        <mx:FormItem label="QuickBase Access">
+            <mx:CheckBox id="quickbaseCheckbox" selected="{quickbase}"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox>
+        <util:SaveButton label="Request Access" click="requestAccess()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>
