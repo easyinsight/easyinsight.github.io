@@ -86,7 +86,9 @@ public class PreferencesService {
             queryStmt.setLong(2, accountID);
             queryStmt.setBoolean(3, true);
             ResultSet rs = queryStmt.executeQuery();
-            rs.next();
+            if (!rs.next()) {
+                return null;
+            }
             bytes = rs.getBytes(1);
             conn.commit();
             return bytes;
@@ -102,19 +104,15 @@ public class PreferencesService {
 
     public byte[] getImage(long imageID, EIConnection conn)  {
         byte[] bytes;
-        long accountID;
-        try {
-            accountID = SecurityUtil.getAccountID();
-        } catch (Exception e) {
-            accountID = 0;
-        }
 
         try {
 
             PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE WHERE USER_IMAGE_ID = ?");
             queryStmt.setLong(1, imageID);
             ResultSet rs = queryStmt.executeQuery();
-            rs.next();
+            if (!rs.next()) {
+                return null;
+            }
             bytes = rs.getBytes(1);
 
             return bytes;
@@ -122,6 +120,27 @@ public class PreferencesService {
             LogClass.error(e);
 
             throw new RuntimeException(e);
+        }
+    }
+
+    public void deletePersonas(List<Integer> personas) {
+        SecurityUtil.authorizeAccountAdmin();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM PERSONA WHERE PERSONA_ID = ? AND ACCOUNT_ID = ?");
+            for (Integer personaID : personas) {
+                deleteStmt.setLong(1, personaID);
+                deleteStmt.setLong(2, SecurityUtil.getAccountID());
+                deleteStmt.executeUpdate();
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 
@@ -330,6 +349,7 @@ public class PreferencesService {
                     dls.setFilters(filters);
                     dlsList.add(dls);
                 }
+                dlsStmt.close();
                 getFilterStmt.close();
                 persona.setDataSourceDLS(dlsList);
             }
