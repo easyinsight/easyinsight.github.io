@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%"
-           height="100%" creationComplete="gotFocus()" styleName="basePageVBox">
+           height="100%" creationComplete="gotFocus()" styleName="basePageVBox" implements="com.easyinsight.listing.IPerspective">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.User;
@@ -100,10 +100,13 @@
             }
         }
 
-        public function gotFocus():void {
+        private function onCreation():void {
             addEventListener(RolloverLabelEvent.ROLLOVER_LABEL, onEdit);
             addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
             addEventListener(DeleteUserEvent.DELETE_USER, deleteUser);
+        }
+
+        public function gotFocus():void {
             preferencesService.getPersonas.send();
             userService.getAccountStats.send();
             userService.getUsers.send();
@@ -112,7 +115,7 @@
         private function deleteUser(event:DeleteUserEvent):void {
             var obj:DisplayObject = this;
             Alert.show("Are you sure you want to delete " + event.userName + "?", "Alert", Alert.OK | Alert.CANCEL, this,
-                    function(closeEvent:CloseEvent):void {
+                    function (closeEvent:CloseEvent):void {
                         if (closeEvent.detail == Alert.OK) {
                             ProgressAlert.alert(obj, "Deleting user...", null, userService.deleteUser);
                             userService.deleteUser.send(event.userID);
@@ -160,7 +163,7 @@
 
         private var df:DateFormatter = new DateFormatter();
 
-        private function labelLastLogin(object:Object,  column:DataGridColumn):String {
+        private function labelLastLogin(object:Object, column:DataGridColumn):String {
             var u:UserTransferObject = object as UserTransferObject;
             if (u.lastLoginDate == null) {
                 return "";
@@ -208,7 +211,7 @@
                 var str:String = "Are you sure you want to delete the following users:\n\n" + strList;
                 var thisObj:UIComponent = this;
                 Alert.show(str, "Alert", Alert.OK | Alert.CANCEL, this,
-                        function(closeEvent:CloseEvent):void {
+                        function (closeEvent:CloseEvent):void {
                             if (closeEvent.detail == Alert.OK) {
                                 ProgressAlert.alert(thisObj, "Deleting users...", null, userService.deleteUsers);
                                 userService.deleteUsers.send(userList);
@@ -216,6 +219,9 @@
                         });
 
             }
+        }
+
+        public function cleanup():void {
         }
         ]]>
     </mx:Script>

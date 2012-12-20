@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="initProperties()"
-         width="100%" height="100%" styleName="basePageVBox">
+         width="100%" height="100%" styleName="basePageVBox" implements="com.easyinsight.listing.IPerspective">
     <mx:Script><![CDATA[
         import com.easyinsight.util.PopUpUtil;
 
@@ -24,9 +24,6 @@
         private var apiSecretKey:String;
         [Bindable]
         private var newsletterOptIn:Boolean;
-
-        [Bindable]
-        public var accountInfo:AccountInfo;
 
         private function initProperties():void {
             this.userName = User.getInstance().userName;
@@ -60,6 +57,12 @@
             var window:ChangePasswordWindow = new ChangePasswordWindow();
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+        }
+
+        public function gotFocus():void {
+        }
+
+        public function cleanup():void {
         }
         ]]></mx:Script>
     <mx:Box width="100%" styleName="bannerBackground">

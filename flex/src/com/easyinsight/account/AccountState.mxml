@@ -7,13 +7,15 @@
 
         protected override function commitProperties():void {
             super.commitProperties();
-            switch (accountInfo.accountState) {
-                case (Account.ACTIVE):
-                    accountState = "Active";
-                    break;
-                case (Account.TRIAL):
-                    accountState = "Trial";
-                    break;
+            if (accountInfo != null) {
+                switch (accountInfo.accountState) {
+                    case (Account.ACTIVE):
+                        accountState = "Active";
+                        break;
+                    case (Account.TRIAL):
+                        accountState = "Trial";
+                        break;
+                }
             }
         }]]></mx:Script>
     <mx:Label text="{accountState}" fontFamily="Lucida Grande" fontWeight="normal"/>

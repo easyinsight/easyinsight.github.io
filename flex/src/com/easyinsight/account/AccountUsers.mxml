@@ -10,9 +10,11 @@
 
         protected override function commitProperties():void {
             super.commitProperties();
-            var accountStats:AccountStats = accountInfo.accountStats;
-            usersUsed = String(accountStats.currentUsers);
-            usersAvailable = String(accountStats.availableUsers);
+            if (accountInfo != null) {
+                var accountStats:AccountStats = accountInfo.accountStats;
+                usersUsed = String(accountStats.currentUsers);
+                usersAvailable = String(accountStats.availableUsers);
+            }
         }]]>
     </mx:Script>
     <mx:Label text="{usersUsed}" fontFamily="Lucida Grande" fontWeight="normal"/>

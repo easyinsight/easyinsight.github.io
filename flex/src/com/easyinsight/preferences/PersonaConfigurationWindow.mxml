@@ -12,13 +12,9 @@
         import mx.collections.HierarchicalData;
         import mx.managers.PopUpManager;
 
-        private var uiConfig:UIConfiguration = new UIConfiguration();
 
         [Bindable]
         private var personaName:String;
-
-        [Bindable]
-        private var nodes:ArrayCollection;
 
         private var _persona:Persona;
 
@@ -30,21 +26,13 @@
             super.commitProperties();
             if (_persona != null) {
                 personaName = _persona.name;
-                uiConfig = UIConfiguration.fromUISettings(_persona.uiSettings);
                 dlsList = _persona.dataSourceDLS;
             }
         }
 
         private function setupNodes():void {
             addEventListener(DLSEvent.DLS_DELETE, removeDataSource);
-            var hierarchicalData:HierarchicalData = new HierarchicalData();
-            uiVisibility = uiConfig.getRoots();
-            hierarchicalData.source = uiVisibility;
-            grid.dataProvider = hierarchicalData;
         }
-
-        [Bindable]
-        private var uiVisibility:ArrayCollection;
 
         private function save():void {
             if (_persona == null) {
@@ -52,29 +40,8 @@
                 _persona.dataSourceDLS = dlsList;
                 newPersona = true;
             }
-            var map:Object = new Object();
-            recurseOptions(uiVisibility, map);
-            var options:ArrayCollection = new ArrayCollection();
-            for each (var setting:UIVisibilitySetting in map) {
-                options.addItem(setting);
-            }
             _persona.name = personaNameInput.text;
-            var settings:UISettings = new UISettings();
-            settings.visibilitySettings = options;
-            _persona.uiSettings = settings;
             preferencesService.savePersona.send(_persona);
-        }
-
-        private function recurseOptions(options:ArrayCollection, configMap:Object):void {
-            for each (var option:UIOption in options) {
-                if (option.key != null) {
-                    var visibilitySetting:UIVisibilitySetting = new UIVisibilitySetting();
-                    visibilitySetting.key = option.key;
-                    visibilitySetting.selected = option.selected;
-                    configMap[option.key] = visibilitySetting;
-                }
-                recurseOptions(option.children, configMap);
-            }
         }
 
         private var newPersona:Boolean = false;
@@ -132,36 +99,17 @@
                 <mx:TextInput id="personaNameInput" text="{personaName}"/>
             </mx:FormItem>
         </mx:Form>
-        <mx:TabNavigator id="tabNavigator" width="400" height="300">
-            <mx:Box borderThickness="1" borderStyle="solid" label="UI Config">
-                <mx:AdvancedDataGrid id="grid" width="100%" height="100%" selectable="false" headerHeight="0">
-                    <mx:columns>
-                        <mx:AdvancedDataGridColumn headerText="" dataField="label"/>
-                        <mx:AdvancedDataGridColumn headerText="" dataField="label" itemRenderer="com.easyinsight.preferences.PersonaConfigCheckbox"
-                                sortable="false" width="50"/>
-                    </mx:columns>
-                </mx:AdvancedDataGrid>
-            </mx:Box>
-            <mx:VBox borderThickness="1" borderStyle="solid" label="DLS">
-                <mx:Button label="Add Data Source..." click="addDataSource()"/>
-                <mx:DataGrid id="dataSourceGrid" width="100%" height="100%" selectable="false" headerHeight="0" dataProvider="{dlsList}"
-                        rowHeight="28">
-                    <mx:columns>
-                        <util:EIDataGridColumn headerText="" dataField="display"/>
-                        <util:EIDataGridColumn headerText="" itemRenderer="com.easyinsight.preferences.DLSControls" width="100" sortable="false"/>
-                    </mx:columns>
-                </mx:DataGrid>
-            </mx:VBox>
-            <!--<mx:VBox borderThickness="1" borderStyle="solid" label="DLS">
-                <mx:Button label="Add Data Source..." click="addDataSource()"/>
-                <mx:DataGrid id="dataSourceGrid" width="400" height="300" selectable="false" headerHeight="0" dataProvider="{dlsList}">
-                    <mx:columns>
-                        <util:EIDataGridColumn headerText="" dataField="display"/>
-                        <util:EIDataGridColumn headerText="" itemRenderer="com.easyinsight.preferences.DLSControls" width="100" sortable="false"/>
-                    </mx:columns>
-                </mx:DataGrid>
-            </mx:VBox> -->
-        </mx:TabNavigator>
+
+
+        <mx:Button label="Add Data Source..." click="addDataSource()"/>
+        <mx:DataGrid id="dataSourceGrid" width="100%" height="100%" selectable="false" headerHeight="0" dataProvider="{dlsList}"
+                rowHeight="28">
+            <mx:columns>
+                <util:EIDataGridColumn headerText="" dataField="display"/>
+                <util:EIDataGridColumn headerText="" itemRenderer="com.easyinsight.preferences.DLSControls" width="100" sortable="false"/>
+            </mx:columns>
+        </mx:DataGrid>
+
         <mx:HBox width="100%" horizontalAlign="center">
             <util:SaveButton label="Save" click="save()"/>
             <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

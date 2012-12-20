@@ -14,13 +14,15 @@
 
         protected override function commitProperties():void {
             super.commitProperties();
-            switch (accountInfo.accountState) {
-                case (Account.TRIAL):
-                    var dateFormatter:DateFormatter = new DateFormatter();
-                    dateFormatter.formatString = User.getInstance().getDateFormat();
-                    trialEndDate = dateFormatter.format(accountInfo.trialEndDate);
-                    trialDateVisible = true;
-                    break;
+            if (accountInfo != null) {
+                switch (accountInfo.accountState) {
+                    case (Account.TRIAL):
+                        var dateFormatter:DateFormatter = new DateFormatter();
+                        dateFormatter.formatString = User.getInstance().getDateFormat();
+                        trialEndDate = dateFormatter.format(accountInfo.trialEndDate);
+                        trialDateVisible = true;
+                        break;
+                }
             }
         }]]></mx:Script>
     <mx:Label text="{trialEndDate}" fontFamily="Lucida Grande" fontWeight="normal"/>

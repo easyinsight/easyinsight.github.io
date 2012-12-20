@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%" height="100%" creationComplete="onCreationComplete()"
-        styleName="basePageVBox">
+        styleName="basePageVBox" implements="com.easyinsight.listing.IPerspective">
     <mx:states>
         <mx:State name="trialAccount">
             <mx:RemoveChild target="{invoicesButton}"/>
@@ -46,7 +46,11 @@
         import mx.managers.PopUpManager;
 
         [Bindable]
-        public var accountInfo:AccountInfo;
+        private var accountInfo:AccountInfo;
+
+        private function gotAccountInfo():void {
+            accountInfo = userService.getAccountInfo.lastResult as AccountInfo;
+        }
 
         [Bindable]
         private var showSSO:Boolean;
@@ -124,6 +128,14 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        public function gotFocus():void {
+            userService.getAccountInfo.send();
+        }
 
+        public function cleanup():void {
+        }
         ]]></mx:Script>
+    <mx:RemoteObject destination="accountAdmin" id="userService">
+        <mx:method name="getAccountInfo" result="gotAccountInfo()"/>
+    </mx:RemoteObject>
 </mx:VBox>

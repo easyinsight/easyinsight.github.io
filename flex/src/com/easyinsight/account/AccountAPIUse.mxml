@@ -12,18 +12,20 @@
 
         protected override function commitProperties():void {
             super.commitProperties();
-            var accountStats:AccountStats = accountInfo.accountStats;
-            var numberFormatter:NumberFormatter = new NumberFormatter();
-            numberFormatter.precision = 2;
-            if (accountStats.apiMaxToday <= 1000000) {
-                spaceUsed = numberFormatter.format(accountStats.apiUsedToday / 1000) + " KB";
-                availableSpace = numberFormatter.format(accountStats.apiMaxToday / 1000) + " KB";
-            } else if (accountStats.maxSpace <= 1000000000) {
-                spaceUsed = numberFormatter.format(accountStats.apiUsedToday / 1000000) + " MB";
-                availableSpace = numberFormatter.format(accountStats.apiMaxToday / 1000000) + " MB";
-            } else {
-                spaceUsed = numberFormatter.format(accountStats.apiUsedToday / 1000000000) + " GB";
-                availableSpace = numberFormatter.format(accountStats.apiMaxToday / 1000000000) + " GB";
+            if (accountInfo != null) {
+                var accountStats:AccountStats = accountInfo.accountStats;
+                var numberFormatter:NumberFormatter = new NumberFormatter();
+                numberFormatter.precision = 2;
+                if (accountStats.apiMaxToday <= 1000000) {
+                    spaceUsed = numberFormatter.format(accountStats.apiUsedToday / 1000) + " KB";
+                    availableSpace = numberFormatter.format(accountStats.apiMaxToday / 1000) + " KB";
+                } else if (accountStats.maxSpace <= 1000000000) {
+                    spaceUsed = numberFormatter.format(accountStats.apiUsedToday / 1000000) + " MB";
+                    availableSpace = numberFormatter.format(accountStats.apiMaxToday / 1000000) + " MB";
+                } else {
+                    spaceUsed = numberFormatter.format(accountStats.apiUsedToday / 1000000000) + " GB";
+                    availableSpace = numberFormatter.format(accountStats.apiMaxToday / 1000000000) + " GB";
+                }
             }
         }]]>
     </mx:Script>

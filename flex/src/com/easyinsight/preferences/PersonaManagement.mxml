@@ -1,33 +1,34 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        creationComplete="setup()" width="100%" horizontalAlign="center">
+        creationComplete="setup()" width="100%" horizontalAlign="center" implements="com.easyinsight.listing.IPerspective">
     <mx:Script><![CDATA[
         import com.easyinsight.account.AccountInfo;
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.RolloverLabelEvent;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.core.UIComponent;
+        import mx.events.CloseEvent;
         import mx.managers.PopUpManager;
+
         [Bindable]
         private var personas:ArrayCollection;
 
-        [Bindable]
-        public var accountInfo:AccountInfo;
-
-        [Bindable]
-        private var stackIndex:int;
-
         private function setup():void {
-            addEventListener(PersonaEvent.DELETE_PERSONA, deletePersona);
-            preferencesService.getPersonas.send();
+            addEventListener(RolloverLabelEvent.ROLLOVER_LABEL, editPersona);
         }
 
-        private function deletePersona(event:PersonaEvent):void {
-
+        private function editPersona(event:RolloverLabelEvent):void {
+            var window:PersonaConfigurationWindow = new PersonaConfigurationWindow();
+            window.persona = Persona(event.data);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function gotPersonas():void {
             personas = preferencesService.getPersonas.lastResult as ArrayCollection;
-            stackIndex = 1;
         }
 
         private function createPersona():void {
@@ -37,30 +38,57 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        private function deleteSelected():void {
+            var activityList:ArrayCollection = new ArrayCollection();
+            for each (var persona:Persona in personas) {
+                if (persona.selected) {
+                    activityList.addItem(persona.personaID);
+                }
+            }
+            if (activityList.length == 0) {
+                Alert.show("You must select at least one persona to delete.");
+            } else {
+                var str:String = "Are you sure you want to delete the selected personas?";
+                var thisObj:UIComponent = this;
+                Alert.show(str, "Alert", Alert.OK | Alert.CANCEL, this,
+                        function (closeEvent:CloseEvent):void {
+                            if (closeEvent.detail == Alert.OK) {
+                                ProgressAlert.alert(thisObj, "Deleting activities...", null, preferencesService.deletePersonas);
+                                preferencesService.deletePersonas.send(activityList);
+                            }
+                        });
+
+            }
+        }
+
         private function newPersona(event:PersonaEvent):void {
             personas.addItem(event.persona);
+        }
+
+        public function gotFocus():void {
+            preferencesService.getPersonas.send();
+        }
+
+        public function cleanup():void {
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
         <mx:method name="getPersonas" result="gotPersonas()"/>
+        <mx:method name="deletePersonas" result="gotFocus()"/>
     </mx:RemoteObject>
     <mx:Box width="100%" styleName="bannerBackground">
         <mx:Label text="Persona Configuration" styleName="bannerText"/>
     </mx:Box>
-    <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true">
-        <mx:Box>
-            <mx:Button label="Create Persona..." click="createPersona()" fontSize="14" styleName="grayButton"/>
-        </mx:Box>
-        <mx:VBox verticalGap="10">
-            <mx:Button label="Create Persona..." click="createPersona()" fontSize="14" styleName="grayButton"/>
-            <mx:DataGrid dataProvider="{personas}" width="500" id="grid" rowHeight="28">
-                <mx:columns>
-                    <util:EIDataGridColumn dataField="name" headerText="Persona Name"/>
-                    <util:EIDataGridColumn dataField="name" headerText="" sortable="false" itemRenderer="com.easyinsight.preferences.PersonaControls"
-                            width="100"/>    
-                </mx:columns>
-            </mx:DataGrid>
-        </mx:VBox>
-
-    </mx:ViewStack>
+    <mx:HBox>
+        <mx:Button label="Create Persona..." click="createPersona()" fontSize="12" styleName="grayButton"/>
+        <mx:Button label="Delete Selected" click="deleteSelected()" fontSize="12" styleName="grayButton"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{personas}" width="500" id="grid" rowHeight="28">
+        <mx:columns>
+            <util:EIDataGridColumn dataField="" headerText=""
+                               itemRenderer="com.easyinsight.account.UserCheckbox" width="30" sortable="false"/>
+            <util:EIDataGridColumn dataField="name" headerText="Persona Name"
+                    itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"/>
+        </mx:columns>
+    </mx:DataGrid>
 </mx:VBox>

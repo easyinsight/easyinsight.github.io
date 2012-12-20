@@ -24,7 +24,6 @@
         private function initListeners():void {
             addEventListener(GroupSelectedEvent.GROUP_SELECTED, groupSelected);
             addEventListener(GroupSelectedEvent.GROUP_DELETE, groupDelete);
-            gotFocus();
         }
 
         private function groupDelete(event:GroupSelectedEvent):void {
@@ -47,11 +46,7 @@
         }
 
         public function gotFocus():void {
-            if (User.getInstance().getAccountType() == Account.PERSONAL) {
-                groupAddIndex = 1;
-            } else {
-                groupService.canCreateGroup.send();
-            }
+            groupService.canCreateGroup.send();
             stackIndex = 0;
             groupService.getAccountGroups.send();
             //groupService.getPublicGroups.send();
@@ -102,21 +97,10 @@
     <mx:Box width="100%" styleName="bannerBackground">
         <mx:Label text="Group Configuration" styleName="bannerText"/>
     </mx:Box>
-    <mx:ViewStack resizeToContent="true" selectedIndex="{groupAddIndex}">
-        <mx:Box/>
-        <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
-            <mx:Label text="You are only able to create groups with a Basic or higher account." fontSize="16"
-                      color="#000000"/>
-        </mx:Box>
-        <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
-            <mx:Label text="You are only allowed to have one group with a Basic account." fontSize="16"
-                      color="#000000"/>
-        </mx:Box>
-        <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
-            <mx:Button label="Create a New Group..."
-                       click="createNewGroup()" labelPlacement="bottom" styleName="grayButton" fontSize="14"/>
-        </mx:Box>
-    </mx:ViewStack>
+    <mx:Box width="100%" horizontalAlign="center">
+        <mx:Button label="Create a New Group..."
+                   click="createNewGroup()" labelPlacement="bottom" styleName="grayButton" fontSize="14"/>
+    </mx:Box>
     <mx:DataGrid dataProvider="{myGroups}" rowHeight="28">
         <mx:columns>
             <util:EIDataGridColumn dataField="name" headerText="Group Name" width="400"/>

@@ -7,28 +7,30 @@
 
         protected override function commitProperties():void {
             super.commitProperties();
-            switch (accountInfo.accountType) {
-                case Account.PERSONAL:
-                    accountType = "Personal";
-                    break;
-                case Account.BASIC:
-                    accountType = "Basic";
-                    break;
-                case Account.PLUS:
-                    accountType = "Plus";
-                    break;
-                case Account.PRO:
-                    accountType = "Professional";
-                    break;
-                case Account.PREMIUM:
-                    accountType = "Premium";
-                    break;
-                case Account.ENTERPRISE:
-                    accountType = "Enterprise";
-                    break;
-                case Account.ADMINISTRATOR:
-                    accountType = "Administrator";
-                    break;
+            if (accountInfo != null) {
+                switch (accountInfo.accountType) {
+                    case Account.PERSONAL:
+                        accountType = "Personal";
+                        break;
+                    case Account.BASIC:
+                        accountType = "Basic";
+                        break;
+                    case Account.PLUS:
+                        accountType = "Plus";
+                        break;
+                    case Account.PRO:
+                        accountType = "Professional";
+                        break;
+                    case Account.PREMIUM:
+                        accountType = "Premium";
+                        break;
+                    case Account.ENTERPRISE:
+                        accountType = "Enterprise";
+                        break;
+                    case Account.ADMINISTRATOR:
+                        accountType = "Administrator";
+                        break;
+                }
             }
         }]]></mx:Script>
     <mx:Label text="{accountType}" fontFamily="Lucida Grande" fontWeight="normal"/>
