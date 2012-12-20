@@ -11,10 +11,13 @@
     </mx:Box>
     <mx:HBox horizontalGap="20" width="100%">
         <mx:VBox horizontalAlign="center" width="33%">
+            <mx:Label text="Account Stats" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+            <account:AccountStatsForm accountInfo="{accountInfo}"/>
+        </mx:VBox>
+        <mx:VRule strokeColor="#333333"/>
+        <mx:VBox horizontalAlign="center" width="33%">
             <mx:Label text="Account Management" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
             <mx:Form width="100%" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-                <account:AccountType accountInfo="{accountInfo}"/>
-                <account:AccountUsers accountInfo="{accountInfo}"/>
                 <account:AccountState accountInfo="{accountInfo}"/>
                 <account:AccountTrialDate accountInfo="{accountInfo}"/>
             </mx:Form>
@@ -32,14 +35,8 @@
              <mx:Button label="SSO Configuration..." click="ssoConfig()" styleName="grayButton" fontSize="14" width="260" visible="{showSSO}"/>
              <mx:Button label="Edit Login Page..." click="loginPageConfig()" styleName="grayButton" fontSize="14" width="260" visible="{showLoginPageConfig}" />
         </mx:VBox>
-        <mx:VRule strokeColor="#333333"/>
-        <mx:VBox horizontalAlign="center" width="33%">
-            <mx:Label text="Account Stats" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-            <mx:Form width="100%" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-                <account:AccountStorage accountInfo="{accountInfo}"/>
-                <account:AccountAPIUse accountInfo="{accountInfo}"/>
-            </mx:Form>
-        </mx:VBox>
+
+
     </mx:HBox>
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;

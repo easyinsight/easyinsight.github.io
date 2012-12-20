@@ -132,7 +132,6 @@
                 user.name = fullNameInput.text;
                 user.firstName = firstNameInput.text;
                 user.fixedDashboardID = singleViewComboBox.selectedItem.id;
-                user.autoRefreshReports = refreshCheckbox.selected;
                 if (showPersonaOption) {
                     var persona:Object = personaComboBox.selectedItem;
                     if (persona != Persona.EMPTY_PERSONA) {
@@ -252,9 +251,6 @@
                 <mx:FormItem label="Fixed View:">
                     <util:SmartComboBox dataProvider="{availableViews}" labelField="name" id="singleViewComboBox" selectedProperty="id" selectedValue="{viewID}" enabled="{!accountAdmin}"
                             maxWidth="300"/>
-                </mx:FormItem>
-                <mx:FormItem label="Auto Refresh Reports and Dashboards:">
-                    <mx:CheckBox id="refreshCheckbox" selected="{autoRefresh}"/>
                 </mx:FormItem>
             </mx:Form>
         </mx:VBox>

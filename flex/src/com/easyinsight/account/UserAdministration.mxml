@@ -1,62 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%"
            height="100%" creationComplete="gotFocus()" styleName="basePageVBox">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.User;
+        import com.easyinsight.framework.UserTransferObject;
         import com.easyinsight.preferences.Persona;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.RolloverLabelEvent;
 
         import mx.controls.Alert;
+        import mx.core.UIComponent;
         import mx.events.CloseEvent;
+        import mx.formatters.DateFormatter;
 
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
 
-        [Bindable]
-        private var userButtonFactory:EditUserButtonFactory;
 
         [Bindable]
         private var users:ArrayCollection;
 
+        private var accountStats:AccountStats;
+
         [Bindable]
-        private var enableAdd:Boolean;
+        private var usedAndAvailableMessage:String;
+
+        [Bindable]
+        private var enableAddDesigner:Boolean;
+
+        [Bindable]
+        private var enableAddReportViewer:Boolean;
 
         [Bindable]
         private var usersAvailableString:String;
 
         [Bindable]
-        public var accountInfo:AccountInfo;
-
-        [Bindable]
         private var usersUsedString:String;
 
         [Bindable]
-        private var pricingModel:int;
+        private var basicAvailableString:String;
 
-        private var usersAvailable:int;
-        private var usersUsed:int;
+        [Bindable]
+        private var basicUsedString:String;
 
-        public function gotFocus():void {
-            addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
-            addEventListener(DeleteUserEvent.DELETE_USER, deleteUser);
-            addEventListener("userChange", userChange);
-            newPricingModel = User.getInstance().pricingModel > 0;
-            userButtonFactory = new EditUserButtonFactory(this);
-            enableAdd = accountInfo.accountStats.currentUsers < accountInfo.accountStats.availableUsers;
-            usersUsedString = String(accountInfo.accountStats.currentUsers);
-            usersAvailableString = String(accountInfo.accountStats.availableUsers);
-            usersUsed = accountInfo.accountStats.currentUsers;
-            usersAvailable = accountInfo.accountStats.availableUsers;
-            basicUsersShown = User.getInstance().getAccountType() >= Account.PLUS && newPricingModel;
-            preferencesService.getPersonas.send();
-            userIndex = 1;
-            userService.getUsers.send();
+        [Bindable]
+        private var showMoreDesigners:Boolean;
+
+        [Bindable]
+        private var personas:ArrayCollection;
+
+        [Bindable]
+        private var designerText:String;
+
+        private function onEdit(event:RolloverLabelEvent):void {
+            var user:UserTransferObject = event.data as UserTransferObject;
+            if (user.analyst) {
+                var userProfileEditor:NewUserDialog = new NewUserDialog();
+                userProfileEditor.user = user;
+                userProfileEditor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount, false, 0, true);
+                PopUpManager.addPopUp(userProfileEditor, this, true);
+                PopUpUtil.centerPopUp(userProfileEditor);
+            } else {
+                var basicEditor:NamedUserDialog = new NamedUserDialog();
+                basicEditor.user = user;
+                basicEditor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount, false, 0, true);
+                PopUpManager.addPopUp(basicEditor, this, true);
+                PopUpUtil.centerPopUp(basicEditor);
+            }
         }
 
-        private function userChange(event:Event):void {
-            changesIndex = 1;
+        private function gotStats():void {
+            accountStats = userService.getAccountStats.lastResult as AccountStats;
+        }
+
+        [Bindable]
+        private var designerTextHeight:int;
+
+        private function processStats():void {
+            if (User.getInstance().pricingModel == 1) {
+                usedAndAvailableMessage = "Designers Used and Available";
+                usersUsedString = String(accountStats.usedDesigners);
+                usersAvailableString = String(accountStats.addonDesigners + accountStats.coreDesigners);
+                showMoreDesigners = true;
+                enableAddDesigner = (accountStats.addonDesigners + accountStats.coreDesigners) > accountStats.usedDesigners;
+                enableAddReportViewer = true;
+                designerTextHeight = 50;
+                designerText = "Designers can create and customize reports and dashboards, while Viewers can only view existing reports and dashboards. Your account has a limited number of Designers, but unlimited Viewers.";
+            } else {
+                usedAndAvailableMessage = "Users Used and Available";
+                usersUsedString = String(accountStats.currentUsers);
+                usersAvailableString = String(accountStats.availableUsers);
+                showMoreDesigners = false;
+                enableAddDesigner = String(accountStats.availableUsers < accountStats.currentUsers);
+                enableAddReportViewer = String(accountStats.availableUsers < accountStats.currentUsers);
+                designerTextHeight = 35;
+                designerText = "Designers can create and customize reports and dashboards, while Viewers can only view existing reports and dashboards.";
+            }
+        }
+
+        public function gotFocus():void {
+            addEventListener(RolloverLabelEvent.ROLLOVER_LABEL, onEdit);
+            addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
+            addEventListener(DeleteUserEvent.DELETE_USER, deleteUser);
+            preferencesService.getPersonas.send();
+            userService.getAccountStats.send();
+            userService.getUsers.send();
         }
 
         private function deleteUser(event:DeleteUserEvent):void {
@@ -72,17 +122,13 @@
 
         private function refreshAccount(event:RefreshAccountEvent):void {
             if (event != null) event.stopPropagation();
-            usersAvailableString = String(accountInfo.accountStats.availableUsers);
-            usersAvailable = accountInfo.accountStats.availableUsers;
+            userService.getAccountStats.send();
             userService.getUsers.send();
         }
 
         private function gotUsers():void {
             users = userService.getUsers.lastResult as ArrayCollection;
-            usersUsed = users.length;
-            usersUsedString = String(users.length);
-            enableAdd = users.length < accountInfo.accountStats.availableUsers;
-            showMoreDesigners = newPricingModel && !enableAdd;
+            processStats();
         }
 
         private function addUser():void {
@@ -105,86 +151,122 @@
             refreshAccount(null);
         }
 
-        [Bindable]
-        private var userIndex:int;
-
-        [Bindable]
-        private var personas:ArrayCollection;
-
         private function gotPersonas():void {
             var personas:ArrayCollection = preferencesService.getPersonas.lastResult as ArrayCollection;
             personas.addItemAt(Persona.EMPTY_PERSONA, 0);
             this.personas = personas;
+            userService.getUsers.send();
         }
 
-        private function addMoreUsers():void {
+        private var df:DateFormatter = new DateFormatter();
+
+        private function labelLastLogin(object:Object,  column:DataGridColumn):String {
+            var u:UserTransferObject = object as UserTransferObject;
+            if (u.lastLoginDate == null) {
+                return "";
+            } else {
+                return df.format(u.lastLoginDate);
+            }
+        }
+
+        private function labelPersona(object:Object, column:DataGridColumn):String {
+            var u:UserTransferObject = object as UserTransferObject;
+            if (u.personaID > 0) {
+                for each (var p:Object in personas) {
+                    if (p is Persona) {
+                        if (p.personaID == u.personaID) {
+                            return p.name;
+                        }
+                    }
+                }
+            }
+            return "";
+        }
+
+        public var accountInfo:AccountInfo;
+
+        private static function addMoreUsers():void {
             navigateToURL(new URLRequest("/app/billing/accountType.jsp"), "_self");
         }
 
-        [Bindable]
-        private var newPricingModel:Boolean;
+        private function deleteSelected():void {
+            var userList:ArrayCollection = new ArrayCollection();
+            var strList:String = "";
+            for each (var user:UserTransferObject in users) {
+                if (User.getInstance().userID == user.userID) {
+                    Alert.show("You can't delete yourself.");
+                    return;
+                }
+                if (user.selected) {
+                    userList.addItem(user.userID);
+                    strList += user.email + "\n";
+                }
+            }
+            if (userList.length == 0) {
+                Alert.show("You must select at least one user to delete.");
+            } else {
+                var str:String = "Are you sure you want to delete the following users:\n\n" + strList;
+                var thisObj:UIComponent = this;
+                Alert.show(str, "Alert", Alert.OK | Alert.CANCEL, this,
+                        function(closeEvent:CloseEvent):void {
+                            if (closeEvent.detail == Alert.OK) {
+                                ProgressAlert.alert(thisObj, "Deleting users...", null, userService.deleteUsers);
+                                userService.deleteUsers.send(userList);
+                            }
+                        });
 
-        [Bindable]
-        private var basicUsersShown:Boolean;
-
-        private function updatedUsers():void {
-            changesIndex = 0;
+            }
         }
-
-        private function saveChanges():void {
-            userService.updateUsers.send(users);
-        }
-
-        [Bindable]
-        private var changesIndex:int;
-
-        [Bindable]
-        private var showMoreDesigners:Boolean;
         ]]>
     </mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
         <mx:method name="getUsers" result="gotUsers()"/>
-        <mx:method name="deleteUser" result="deletedUser()"/>
-        <mx:method name="updateUsers" result="updatedUsers()"/>
+        <mx:method name="deleteUsers" result="deletedUser()"/>
+        <mx:method name="getAccountStats" result="gotStats()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
         <mx:method name="getPersonas" result="gotPersonas()"/>
     </mx:RemoteObject>
-    <account:PersonaComboBoxFactory id="personaFactory" personas="{personas}"/>
-    <mx:ViewStack selectedIndex="{changesIndex}" resizeToContent="true">
-        <mx:Box/>
-        <mx:HBox width="100%" horizontalAlign="center">
-            <mx:HBox verticalAlign="middle" backgroundColor="#DDDDDD" cornerRadius="5" borderStyle="solid" borderColor="#DDDDDD" borderThickness="1"
-                    paddingLeft="10" paddingTop="5" paddingBottom="5" paddingRight="10">
-                <mx:Label text="You have unsaved changes:"/>
-                <mx:Button label="Save Changes" click="saveChanges()"/>
-            </mx:HBox>
-        </mx:HBox>
-    </mx:ViewStack>
-    <mx:VBox horizontalAlign="center" verticalAlign="middle" width="700">
-        <mx:HBox>
-            <mx:Label text="Designers Used and Available:"/>
-            <mx:Label text="{usersUsedString}" fontFamily="Lucida Grande" fontWeight="normal"/>
-            <mx:Label text=" / "/>
-            <mx:Label text="{usersAvailableString}" fontFamily="Lucida Grande" fontWeight="normal"/>
-            <mx:Button styleName="grayButton" label="Add More Designers..." click="addMoreUsers()" visible="{showMoreDesigners}"/>
-        </mx:HBox>
-        <mx:HBox horizontalAlign="right" width="100%">
-            <mx:Button label="Add Designer..." click="addUser()" enabled="{enableAdd}" fontSize="14" styleName="grayButton"/>
-            <mx:Button label="Add Viewer..." click="addBasicUser()" fontSize="14" styleName="grayButton" visible="{basicUsersShown}"/>
-        </mx:HBox>
-    </mx:VBox>
+    <mx:HBox width="1000">
+        <mx:VBox verticalAlign="bottom" height="100%">
+            <mx:HBox>
+                <mx:Label text="{usedAndAvailableMessage}" width="250"/>
+                <mx:Label text="{usersUsedString}" fontFamily="Lucida Grande" fontWeight="normal" width="25"/>
+                <mx:Label text=" / " width="25"/>
 
-    <mx:DataGrid dataProvider="{users}" rowHeight="28" height="100%">
+                <mx:Label text="{usersAvailableString}" fontFamily="Lucida Grande" fontWeight="normal" width="25"/>
+
+                <mx:Button styleName="grayButton" label="Add More Designers..." click="addMoreUsers()" visible="{showMoreDesigners}"/>
+            </mx:HBox>
+            <mx:HBox>
+                <mx:Button label="Add Designer..." click="addUser()" enabled="{enableAddDesigner}" styleName="grayButton"/>
+                <mx:Button label="Add Viewer..." click="addBasicUser()" styleName="grayButton" enabled="{enableAddReportViewer}"/>
+                <mx:Button label="Delete Selected" click="deleteSelected()" styleName="grayButton"/>
+            </mx:HBox>
+        </mx:VBox>
+        <mx:Spacer width="100%"/>
+        <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="8" dropShadowEnabled="true" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+            <mx:TextArea selectable="false" editable="false" width="375" height="{designerTextHeight}" text="{designerText}"/>
+        </mx:Box>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{users}" rowHeight="24" height="100%" width="1000" selectable="false">
         <mx:columns>
-            <mx:DataGridColumn dataField="userName" headerText="User Name"
-                               headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="200"/>
-            <mx:DataGridColumn dataField="firstName" headerText="First Name"
-                               headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="200"/>
-            <mx:DataGridColumn dataField="name" headerText="Last Name"
-                               headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="200"/>
-            <mx:DataGridColumn dataField="userName" width="100" headerText=""
-                               itemRenderer="{userButtonFactory}" sortable="false"/>
+            <mx:DataGridColumn dataField="" headerText=""
+                               itemRenderer="com.easyinsight.account.UserCheckbox" width="30" sortable="false"/>
+            <mx:DataGridColumn dataField="email" headerText="Email"
+                               headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="374"
+                    itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"/>
+            <mx:DataGridColumn dataField="fullName" headerText="Name"
+                               headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="354"
+                               itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"/>
+            <mx:DataGridColumn dataField="name" headerText="Persona"
+                               headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="120"
+                               itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"
+                    labelFunction="labelPersona"/>
+            <mx:DataGridColumn dataField="name" headerText="Last Login"
+                               headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="120"
+                               itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"
+                    labelFunction="labelLastLogin"/>
         </mx:columns>
     </mx:DataGrid>
 </mx:VBox>

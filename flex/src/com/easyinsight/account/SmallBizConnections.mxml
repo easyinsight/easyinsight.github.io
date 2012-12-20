@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<account:AccountFormItem xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
+        label="Small Biz Connections:" direction="horizontal">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var smallBizConnectionsUsed:String;
+
+        [Bindable]
+        private var smallBizConnectionsAvailable:String;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (accountInfo != null) {
+                var accountStats:AccountStats = accountInfo.accountStats;
+                smallBizConnectionsUsed = String(accountStats.currentSmallBizConnections);
+                smallBizConnectionsAvailable = String(accountStats.addonSmallBizConnections + accountStats.coreSmallBizConnections);
+            }
+        }]]>
+    </mx:Script>
+    <mx:Label text="{smallBizConnectionsUsed}" fontFamily="Lucida Grande" fontWeight="normal"/>
+    <mx:Label text=" / "/>
+    <mx:Label text="{smallBizConnectionsAvailable}" fontFamily="Lucida Grande" fontWeight="normal"/>
+</account:AccountFormItem>

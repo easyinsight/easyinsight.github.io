@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<mx:Form xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*">
+    <mx:states>
+        <mx:State name="TieredPricingModel">
+            <mx:AddChild>
+                <account:AccountType accountInfo="{accountInfo}"/>
+            </mx:AddChild>
+            <mx:AddChild>
+                <account:AccountUsers accountInfo="{accountInfo}"/>
+            </mx:AddChild>
+            <mx:AddChild>
+                <account:AccountStorage accountInfo="{accountInfo}"/>
+            </mx:AddChild>
+            <mx:AddChild>
+                <account:AccountAPIUse accountInfo="{accountInfo}"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="NewPricingModel">
+            <mx:AddChild>
+                <account:DesignersUsed accountInfo="{accountInfo}"/>
+            </mx:AddChild>
+            <mx:AddChild>
+                <account:SmallBizConnections accountInfo="{accountInfo}"/>
+            </mx:AddChild>
+            <mx:AddChild>
+                <account:CustomDataStorage accountInfo="{accountInfo}"/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+
+        [Bindable]
+        public var accountInfo:AccountInfo;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (User.getInstance().pricingModel == 0) {
+                currentState = "TieredPricingModel";
+            } else {
+                currentState = "NewPricingModel";
+            }
+        }
+        ]]></mx:Script>
+</mx:Form>

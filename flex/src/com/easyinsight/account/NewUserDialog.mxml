@@ -270,7 +270,7 @@
         <util:CancelButton label="Cancel" click="cancel()"/>
     </mx:HBox>
 	<mx:StringValidator source="{userNameInput}" property="text" id="userNameValidator" minLength="3" maxLength="60"/>
-	<mx:StringValidator source="{fullNameInput}" property="text" id="fullNameValidator" minLength="3" maxLength="60"/>
+	<mx:StringValidator source="{fullNameInput}" property="text" id="fullNameValidator" minLength="1" maxLength="60"/>
 	<mx:EmailValidator source="{emailInput}" property="text" id="emailValidator"/>
 	<mx:RemoteObject id="creationService" destination="accountAdmin">
 		<mx:method name="addUserToAccount" result="created()"/>		
