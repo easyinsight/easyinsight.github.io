@@ -218,7 +218,7 @@
                 var nameColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                 nameColumn.dataField = "name";
                 nameColumn.headerText = "Name";
-                //uploadGrid.groupItemRenderer = new ClassFactory(MyDataIndividualParentRenderer);
+                uploadGrid.groupItemRenderer = new ClassFactory(MyDataIndividualParentRenderer);
                 nameColumn.sortCompareFunction = nameSort;
 
                 columns.push(nameColumn);
