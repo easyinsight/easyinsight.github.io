@@ -193,11 +193,11 @@
             var userList:ArrayCollection = new ArrayCollection();
             var strList:String = "";
             for each (var user:UserTransferObject in users) {
-                if (User.getInstance().userID == user.userID) {
-                    Alert.show("You can't delete yourself.");
-                    return;
-                }
                 if (user.selected) {
+                    if (User.getInstance().userID == user.userID) {
+                        Alert.show("You can't delete yourself.");
+                        return;
+                    }
                     userList.addItem(user.userID);
                     strList += user.email + "\n";
                 }
