@@ -6,7 +6,9 @@
 <%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page import="com.easyinsight.users.NewModelAccountTypeChange" %>
 <%@ page import="java.sql.PreparedStatement" %>
-<%@ page import="java.sql.ResultSet" %><%
+<%@ page import="java.sql.ResultSet" %>
+<%@ page import="com.easyinsight.users.UserAccountAdminService" %>
+<%@ page import="com.easyinsight.users.AccountStats" %><%
     SecurityUtil.populateThreadLocalFromSession(request);
     EIConnection conn = Database.instance().getConnection();
     Session hibernateSession = Database.instance().createSession(conn);
@@ -16,17 +18,7 @@
 
         Account account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
 
-        PreparedStatement usersStmt = conn.prepareStatement("SELECT count(user_id), analyst from user where account_id = ? group by analyst");
-        usersStmt.setLong(1, account.getAccountID());
-        ResultSet usersRS = usersStmt.executeQuery();
-        int designers = 0;
-        if (usersRS.next()) {
-            int users = usersRS.getInt(1);
-            boolean analyst = usersRS.getBoolean(2);
-            if (analyst) {
-                designers = users;
-            }
-        }
+        AccountStats stats = new UserAccountAdminService().getAccountStats(conn);
 
         int numberDesigners;
         try {
@@ -42,7 +34,7 @@
             return;
         }
 
-        if (numberDesigners < (designers - account.getCoreDesigners())) {
+        if (numberDesigners < (stats.getUsedDesigners())) {
             request.getSession().setAttribute("errorString", "Your account currently has more Designers than the number you just specified.");
             response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
             return;
@@ -57,6 +49,12 @@
             return;
         }
 
+        if (numberConnections < stats.getCurrentSmallBizConnections()) {
+            request.getSession().setAttribute("errorString", "Your account currently has more small business connections than the number you just specified.");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
+            return;
+        }
+
         int numberStorageBlocks;
         try {
             numberStorageBlocks = Integer.parseInt(request.getParameter("numberStorageBlocks"));
@@ -66,13 +64,12 @@
             return;
         }
 
-
-        /*long usedStorage = new UserAccountAdminService().getAccountStorage();
-        if (usedStorage > storage) {
-            request.getSession().setAttribute("errorString", "You are currently using " + Account.humanReadableByteCount(usedStorage,  true) + " of storage, greater than the " + Account.humanReadableByteCount(storage, true) + " in the account change you just specified. You'll need to remove some data before making this change.");
+        long used = account.getCoreStorage() + (numberStorageBlocks * 250000000L);
+        if (used > stats.getUsedSpace()) {
+            request.getSession().setAttribute("errorString", "Your account currently has more custom data storage in use than the amount of storage you just specified.");
             response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
             return;
-        }*/
+        }
 
         String billingInterval = request.getParameter("billingInterval");
         boolean yearly = "2".equals(billingInterval);

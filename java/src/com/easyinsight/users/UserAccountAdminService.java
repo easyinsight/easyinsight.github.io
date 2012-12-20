@@ -915,7 +915,7 @@ public class UserAccountAdminService {
         return validDataSources;
     }
 
-    private AccountStats getAccountStats(EIConnection conn) throws SQLException {
+    public AccountStats getAccountStats(EIConnection conn) throws SQLException {
         long accountID = SecurityUtil.getAccountID();
         AccountStats accountStats = new AccountStats();
 
@@ -940,6 +940,8 @@ public class UserAccountAdminService {
         int addonQuickbaseConnections = statRS.getInt(10);
         boolean unlimitedQuickbaseConnections = statRS.getBoolean(11);
         int addonSalesforceConnections = statRS.getInt(12);
+
+        statsStmt.close();
 
         PreparedStatement dataSourceStmt = conn.prepareStatement("SELECT DATA_FEED_ID, FEED_TYPE FROM DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE " +
                 "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? AND " +
@@ -966,6 +968,7 @@ public class UserAccountAdminService {
                 }
             }
         }
+        dataSourceStmt.close();
 
 
         List<DataSourceStats> statsList = sizeDataSources(conn, accountID, pricingModel);
@@ -985,6 +988,7 @@ public class UserAccountAdminService {
                 viewers = users;
             }
         }
+        usersStmt.close();
         if (pricingModel == Account.TIERED) {
             accountStats.setCurrentUsers(designers + viewers);
             accountStats.setAvailableUsers(maxUsers);
@@ -1001,6 +1005,7 @@ public class UserAccountAdminService {
         if (apiRS.next()) {
             usedAPI = apiRS.getLong(1);
         }
+        apiTodayStmt.close();
 
         // new pricing model
 
