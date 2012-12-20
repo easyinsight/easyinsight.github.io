@@ -700,7 +700,7 @@ public class UserService {
     }
 */
 
-    public void updateUserLabels(String userName, String fullName, String email, String firstName, boolean optIn) {
+    public String updateUserLabels(String userName, String fullName, String email, String firstName, boolean optIn) {
         User user = retrieveUser().user;
         if (SecurityUtil.getAccountID() != user.getAccount().getAccountID()) {
             throw new SecurityException();
@@ -708,6 +708,7 @@ public class UserService {
         if (!SecurityUtil.isAccountAdmin() && (SecurityUtil.getUserID() != user.getUserID())) {
             throw new SecurityException();
         }
+
         user.setUserName(userName);
         user.setName(fullName);
         user.setEmail(email);
@@ -716,8 +717,23 @@ public class UserService {
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
+            List results = session.createQuery("from User where email = ?").setString(0, email).list();
+            if (results.size() == 1) {
+                User existing = (User) results.get(0);
+                if (existing.getUserID() != user.getUserID()) {
+                    return "This email address is already in use.";
+                }
+            }
+            results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+            if (results.size() == 1) {
+                User existing = (User) results.get(0);
+                if (existing.getUserID() != user.getUserID()) {
+                    return "This user name is already in use.";
+                }
+            }
             session.saveOrUpdate(user);
             session.getTransaction().commit();
+            return null;
         } catch (Exception e) {
             LogClass.error(e);
             session.getTransaction().rollback();

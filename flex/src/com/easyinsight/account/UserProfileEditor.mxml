@@ -7,6 +7,8 @@
 
         import com.easyinsight.util.ProgressAlert;
 
+        import mx.controls.Alert;
+
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
 
@@ -66,10 +68,15 @@
         }
 
         private function savedUser():void {
-            User.getInstance().updateLabels(userName.text, fullName.text, email.text, firstName.text);
-            User.getInstance().newsletterEnabled = newsletterCheckbox.selected;
-            dispatchEvent(new RefreshAccountEvent());
-            PopUpManager.removePopUp(this);
+            var result:String = creationService.updateUserLabels.lastResult as String;
+            if (result != null) {
+                Alert.show(result);
+            } else {
+                User.getInstance().updateLabels(userName.text, fullName.text, email.text, firstName.text);
+                User.getInstance().newsletterEnabled = newsletterCheckbox.selected;
+                dispatchEvent(new RefreshAccountEvent());
+                PopUpManager.removePopUp(this);
+            }
         }
         ]]>
 	</mx:Script>
