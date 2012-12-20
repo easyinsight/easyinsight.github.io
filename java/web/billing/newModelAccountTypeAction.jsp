@@ -65,7 +65,7 @@
         }
 
         long used = account.getCoreStorage() + (numberStorageBlocks * 250000000L);
-        if (used > stats.getUsedSpace()) {
+        if (used < stats.getUsedSpace()) {
             request.getSession().setAttribute("errorString", "Your account currently has more custom data storage in use than the amount of storage you just specified.");
             response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
             return;
