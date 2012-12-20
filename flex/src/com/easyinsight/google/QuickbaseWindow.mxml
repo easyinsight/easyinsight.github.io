@@ -124,15 +124,14 @@
         </mx:VBox>
         <mx:VBox horizontalAlign="center" creationComplete="PopUpUtil.centerPopUp(this)">
             <mx:RadioButtonGroup id="applicationGroup" enabled="true" />
-            <mx:Label text="Select an application from the list below."/>
+            <mx:Label text="Select an application from the list below." fontSize="16"/>
             <mx:List dataProvider="{apps}" itemRenderer="{buttonFactory}" height="300" width="100%"/>
-            <mx:TextArea width="100%" selectable="false" focusEnabled="false" editable="false" height="50" text="You'll also need to define an application token with access to all of your selected applications. You can define tokens inside of Quickbase under Customize -> Application -> Advanced Settings -> Manage Application Tokens."/>
             <mx:Form>
-                <mx:FormItem label="Application Token:">
+                <mx:FormItem label="Application Token (if required):">
                     <mx:TextInput id="appTokenInput" width="400"/>
                 </mx:FormItem>
-                <mx:FormItem label="Do you want to store these credentials with Easy Insight or use a session ticket?">
-                    <mx:CheckBox id="saveCredentialsCheckbox"/>
+                <mx:FormItem label="Do you want to store these credentials with Easy Insight?">
+                    <mx:CheckBox id="saveCredentialsCheckbox" selected="true"/>
                 </mx:FormItem>
                 <mx:FormItem label="Do you want to share this data source with other users in the account?">
                     <mx:CheckBox id="accountVisibleCheckbox" selected="true"/>
