@@ -7,6 +7,7 @@ import com.easyinsight.users.Account;
 import com.easyinsight.users.AccountActivityStorage;
 import com.easyinsight.logging.LogClass;
 
+import java.sql.ResultSet;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.List;
@@ -43,13 +44,48 @@ public class BillingScheduledTask extends ScheduledTask {
         // Where the account is not of the Free tier, the account is not Closing or Closed, and billing information is not given, and where
         // the trial end time is at or before today, set the account to Delinquent.
 
-        PreparedStatement stmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_TYPE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND (BILLING_INFORMATION_GIVEN IS NULL OR BILLING_INFORMATION_GIVEN = FALSE) AND ACCOUNT_ID IN (SELECT ACCOUNT_ID FROM ACCOUNT_TIMED_STATE WHERE date(state_change_time) < ?)");
-        stmt.setInt(1, Account.DELINQUENT);
-        stmt.setInt(2, Account.PERSONAL);
-        stmt.setInt(3, Account.CLOSING);
-        stmt.setInt(4, Account.CLOSED);
-        stmt.setDate(5, new java.sql.Date(System.currentTimeMillis()));
-        stmt.execute();
+        PreparedStatement selectStmt = conn.prepareStatement("SELECT ACCOUNT_ID, BILLING_INFORMATION_GIVEN, PRICING_MODEL FROM ACCOUNT WHERE  " +
+                "ACCOUNT_TYPE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND " +
+                "ACCOUNT_ID IN (SELECT ACCOUNT_ID FROM ACCOUNT_TIMED_STATE WHERE date(state_change_time) < ?)");
+        // todo: add indexes on pricing model and billing information given if not there already
+        PreparedStatement stmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_ID = ?");
+        selectStmt.setInt(1, Account.DELINQUENT);
+        selectStmt.setInt(2, Account.PERSONAL);
+        selectStmt.setInt(3, Account.CLOSING);
+        selectStmt.setInt(4, Account.CLOSED);
+        selectStmt.setDate(5, new java.sql.Date(System.currentTimeMillis()));
+        ResultSet rs = selectStmt.executeQuery();
+        while (rs.next()) {
+            long accountID = rs.getLong(1);
+            boolean billingInformationGiven = rs.getBoolean(2);
+            int pricingModel = rs.getInt(3);
+            if (pricingModel == Account.NEW) {
+                if (billingInformationGiven) {
+                    Session hibernateSession = Database.instance().createSession(conn);
+                    try {
+                        Account account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+                        if (account.getBillingMonthOfYear() == 1)
+                            new BrainTreeBlueBillingSystem().subscribeYearly(account, account.getAddonDesigners(),
+                                    account.getAddonStorageUnits(), account.getAddonSmallBizConnections());
+                        else
+                            new BrainTreeBlueBillingSystem().subscribeMonthly(account, account.getAddonDesigners(),
+                                    account.getAddonStorageUnits(), account.getAddonSmallBizConnections());
+                    } finally {
+                        hibernateSession.close();
+                    }
+
+                } else {
+                    stmt.setInt(1, Account.DELINQUENT);
+                    stmt.setLong(2, accountID);
+                    stmt.executeUpdate();
+                }
+            } else if (pricingModel == Account.TIERED) {
+                stmt.setInt(1, Account.DELINQUENT);
+                stmt.setLong(2, accountID);
+                stmt.executeUpdate();
+            }
+        }
+        selectStmt.close();
         stmt.close();
     }
 
