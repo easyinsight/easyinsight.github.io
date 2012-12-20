@@ -215,7 +215,9 @@ public class TreeData {
             } else {
                 for (AnalysisItem analysisItem : treeDefinition.getItems()) {
                     if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                        treeRow.getValues().put(analysisItem.qualifiedName(), aggregateLevel.getValue(analysisItem.createAggregateKey()));
+                        if (aggregateLevel != null) {
+                            treeRow.getValues().put(analysisItem.qualifiedName(), aggregateLevel.getValue(analysisItem.createAggregateKey()));
+                        }
                     }
                 }
             }
