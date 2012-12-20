@@ -49,6 +49,12 @@
             return;
         }
 
+        if (numberConnections < 0) {
+            request.getSession().setAttribute("errorString", "The number of connections must be a number greater than or equal to zero.");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
+            return;
+        }
+
         if (numberConnections < (stats.getCurrentSmallBizConnections() - stats.getCoreSmallBizConnections())) {
             request.getSession().setAttribute("errorString", "Your account currently has more small business connections than the number you just specified.");
             response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
@@ -60,6 +66,12 @@
             numberStorageBlocks = Integer.parseInt(request.getParameter("numberStorageBlocks"));
         } catch (NumberFormatException e) {
             request.getSession().setAttribute("errorString", "The number of storage blocks must be a number.");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
+            return;
+        }
+
+        if (numberStorageBlocks < 0) {
+            request.getSession().setAttribute("errorString", "The number of storage blocks must be a number greater than or equal to zero.");
             response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
             return;
         }

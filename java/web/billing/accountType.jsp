@@ -325,15 +325,15 @@
                             <div class="span4" style="background-color:#FFFFFF;padding: 10px;text-align: left">
 
                                 <label style="font-size: 14px">Additional Designers ($50/per)</label>
-                                <input type="number" style="width:290px" name="numberDesigners"
+                                <input type="number" min="0" style="width:290px" name="numberDesigners"
                                        value="<%= account.getAddonDesigners() %>" id="numberDesignersPro"
                                        onchange="updateAccountValue(this)">
                                 <label style="font-size: 14px">Additional Small Business Connections ($25/per)</label>
-                                <input type="number" style="width:290px" name="numberConnections"
+                                <input type="number" min="0" style="width:290px" name="numberConnections"
                                        value="<%= account.getAddonSmallBizConnections() %>" id="numberSmallConnections"
                                        onchange="updateSmallBizConnections(this)">
                                 <label style="font-size: 14px">Additional 250 MB Storage Blocks ($150/per)</label>
-                                <input type="number" style="width:290px" name="numberStorageBlocks"
+                                <input type="number" min="0" style="width:290px" name="numberStorageBlocks"
                                        value="<%= account.getAddonStorageUnits() %>" id="numberStorageBlocks"
                                        onchange="updateStorageCostPro(this)">
                                 <label style="font-size: 14px">Bill Me</label>
