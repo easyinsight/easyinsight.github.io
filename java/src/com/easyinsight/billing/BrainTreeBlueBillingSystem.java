@@ -65,8 +65,15 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
         return info;
     }
 
-    public String getRedirect(Request req) {
-        return gateway.transparentRedirect().trData(req, ConfigLoader.instance().getRedirectLocation() + "/app/billing/newSubmit.jsp");
+    public String getRedirect(Request req, int pricingModel) {
+        switch(pricingModel) {
+            case Account.TIERED:
+                return gateway.transparentRedirect().trData(req, ConfigLoader.instance().getRedirectLocation() + "/app/billing/newSubmit.jsp");
+            case Account.NEW:
+                return gateway.transparentRedirect().trData(req, ConfigLoader.instance().getRedirectLocation() + "/app/billing/newModelSubmit.jsp");
+            default:
+                throw new RuntimeException("There was a problem with the pricing model, please contact Easy Insight.");
+        }
     }
 
     public String getTargetUrl() {
@@ -99,7 +106,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
         gateway.address().delete(aa.getCustomerId(), aa.getId());
     }
 
-    public void subscribe(Account account) {
+    public Result<Subscription> subscribeMonthly(Account account, int numDesigners, int numStorage, int numConnections) {
         Customer c = getCustomer(account);
         SubscriptionRequest sr = new SubscriptionRequest();
         CreditCard dc = null;
@@ -107,14 +114,73 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
             if (cc.isDefault())
                 dc = cc;
         }
-        sr.planId("1").paymentMethodToken(dc.getToken());
+
+
+        sr.planId("1").paymentMethodToken(dc.getToken()).options().prorateCharges(true);
+        if (numDesigners > 0)
+            sr.addOns().add().inheritedFromId("11").quantity(numDesigners).done().done();
+        if (numStorage > 0)
+            sr.addOns().add().inheritedFromId("12").quantity(numStorage).done().done();
+        if (numConnections > 0)
+            sr.addOns().add().inheritedFromId("13").quantity(numConnections).done().done();
+
         Result<Subscription> r = gateway.subscription().create(sr);
-        r.getErrors();
+        return r;
+    }
+
+
+    public Result<Subscription> subscribeYearly(Account account, int numDesigners, int numStorage, int numConnections) {
+        Customer c = getCustomer(account);
+        SubscriptionRequest sr = new SubscriptionRequest();
+        CreditCard dc = null;
+        for (CreditCard cc : c.getCreditCards()) {
+            if (cc.isDefault())
+                dc = cc;
+        }
+        sr.planId("2").paymentMethodToken(dc.getToken());
+
+        if (numDesigners > 0)
+            sr.addOns().add().inheritedFromId("21").quantity(numDesigners).done().done();
+        if (numStorage > 0)
+            sr.addOns().add().inheritedFromId("22").quantity(numStorage).done().done();
+        if (numConnections > 0)
+            sr.addOns().add().inheritedFromId("23").quantity(numConnections).done().done();
+
+        Result<Subscription> r = gateway.subscription().create(sr);
+        return r;
+    }
+
+    public Result<Subscription> updateMonthly(Subscription s, int numDesigners, int numStorage, int numConnections) {
+        SubscriptionRequest sr = new SubscriptionRequest().id(s.getId());
+        sr.options().prorateCharges(true);
+        sr.options().replaceAllAddOnsAndDiscounts(true).done();
+        if (numDesigners > 0)
+            sr.addOns().add().inheritedFromId("11").quantity(numDesigners).done().done();
+        if (numStorage > 0)
+            sr.addOns().add().inheritedFromId("12").quantity(numStorage).done().done();
+        if (numConnections > 0)
+            sr.addOns().add().inheritedFromId("13").quantity(numConnections).done().done();
+        return gateway.subscription().update(s.getId(), sr);
+    }
+
+    public Result<Subscription> updateYearly(Subscription s, int numDesigners, int numStorage, int numConnections) {
+        SubscriptionRequest sr = new SubscriptionRequest().id(s.getId());
+        sr.options().prorateCharges(true);
+        sr.options().replaceAllAddOnsAndDiscounts(true).done();
+        if (numDesigners > 0)
+            sr.addOns().add().inheritedFromId("21").quantity(numDesigners).done().done();
+        if (numStorage > 0)
+            sr.addOns().add().inheritedFromId("22").quantity(numStorage).done().done();
+        if (numConnections > 0)
+            sr.addOns().add().inheritedFromId("23").quantity(numConnections).done().done();
+        return gateway.subscription().update(s.getId(), sr);
     }
 
     public void setSubscribedStatus(Account account) {
         Customer c = getCustomer(account);
+        System.out.println("Account ID: " + account.getAccountID());
         if (c != null) {
+            System.out.println("customer exists");
             CreditCard dc = null;
             for (CreditCard cc : c.getCreditCards()) {
                 if (cc.isDefault())
@@ -128,6 +194,8 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                         account.setAccountState(Account.BILLING_FAILED);
                     } else if (ss.getStatus() == Subscription.Status.EXPIRED) {
                         account.setAccountState(Account.BILLING_FAILED);
+                    } else if (ss.getStatus() == Subscription.Status.CANCELED) {
+                        account.setAccountState(Account.CLOSED);
                     } else {
                         account.setAccountState(Account.DELINQUENT);
                     }
@@ -137,7 +205,9 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
 
     }
 
-    public boolean placeholder(Account account, int addonDesigners, int addonConnections, int addonStorage) {
-        return true;
+
+    public void updateSubscriptionCard(CreditCard curCC, Subscription currentSubscription) {
+        SubscriptionRequest sr = new SubscriptionRequest().paymentMethodToken(curCC.getToken());
+        gateway.subscription().update(currentSubscription.getId(), sr);
     }
 }
