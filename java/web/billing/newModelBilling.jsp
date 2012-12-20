@@ -7,8 +7,8 @@
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
-<%@ page import="com.easyinsight.users.AccountTypeChange" %>
 <%@ page import="java.text.NumberFormat" %>
+<%@ page import="com.easyinsight.users.NewModelAccountTypeChange" %>
 <%@ page import="com.easyinsight.billing.BrainTreeBlueBillingSystem" %>
 <%@ page import="com.braintreegateway.CustomerRequest" %>
 <%@ page import="com.easyinsight.html.BillingResponse" %>
@@ -26,7 +26,7 @@
 
     <script language="javascript" type="text/javascript">
         function setCCexp() {
-            document.getElementById("ccexp").value = document.getElementById("ccexpMonth").value + "/" + document.getElementById("ccexpYear").value;
+            document.getElementById("ccexp").value = document.getElementById("ccexpMonth").value + document.getElementById("ccexpYear").value;
         }
 
         function changeBilling() {
@@ -62,30 +62,26 @@
             response.sendRedirect("access.jsp");
             return;
         }
-        if((SecurityUtil.getAccountTier() == Account.PREMIUM || SecurityUtil.getAccountTier() == Account.ENTERPRISE)) {
-            response.sendRedirect("access.jsp");
-            return;
-        }
 
         Session hibernateSession = Database.instance().createSession();
         double cost = 0;
-        double credit = 0;
         Account account = null;
-        AccountTypeChange accountTypeChange = (AccountTypeChange) session.getAttribute("accountTypeChange");
+
+
+        NewModelAccountTypeChange accountTypeChange;
+
         try {
             account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+            if (account.getPricingModel() == Account.TIERED) {
+                response.sendRedirect("index.jsp");
+                return;
+            }
+            accountTypeChange = (NewModelAccountTypeChange) session.getAttribute("accountTypeChange");
             if (accountTypeChange != null) {
-                cost = Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(),
-                        accountTypeChange.getStorage(), accountTypeChange.isYearly());
-                credit = Account.calculateCredit(account);
-                if (credit >= cost) {
-                    session.removeAttribute("accountTypeChange");
-                    // not supposed to get here...
-                    cost = account.createTotalCost();
-                    accountTypeChange = null;
-                }
+                cost = Account.createTotalCost(account.getPricingModel(), 0, accountTypeChange.getAddonDesigners(),
+                        accountTypeChange.getAddonConnections(), accountTypeChange.getAddonStorage(), accountTypeChange.isYearly()) + account.getEnterpriseAddonCost();
             } else {
-                cost = account.createTotalCost();
+                cost = account.createTotalCost() + account.getEnterpriseAddonCost();
             }
         } finally {
             hibernateSession.close();
@@ -93,29 +89,9 @@
 
         boolean monthly = account.getBillingMonthOfYear() == null && (request.getParameter("billingType") == null || !request.getParameter("billingType").equals("yearly"));
 
-        boolean chargeNow;
-
-        if (accountTypeChange != null && (cost - credit) > 0) {
-
-            // it's an upgrade
-
-            chargeNow = true;
-        }  else if (account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED || account.getAccountState() == Account.CLOSED) {
-
-            // it's restoring service to a locked account
-
-            chargeNow = true;
-        } else {
-
-            // it's putting in new info or updating on a trial or active account
-
-            chargeNow = false;
-        }
-
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date d = new Date();
-        String time = df.format(d);
 
         CustomerRequest trParams = new CustomerRequest();
         if(account.isBillingInformationGiven() != null && account.isBillingInformationGiven())
@@ -124,49 +100,20 @@
             trParams = trParams.id(String.valueOf(account.getAccountID()));
         trParams = trParams.creditCard().options().makeDefault(true).done().done();
 
-        String trData = new BrainTreeBlueBillingSystem().getRedirect(trParams);
-
-        request.getSession().setAttribute("billingTime", time);
-        String accountInfoString;
-        String charge;
-        int accountType;
-        if (accountTypeChange == null) {
-            accountType = account.getAccountType();
-        } else {
-            accountType = accountTypeChange.getAccountType();
-        }
-        switch(accountType) {
-            case Account.BASIC:
-                accountInfoString = "Basic";
-                break;
-            case Account.PLUS:
-                accountInfoString = "Plus";
-                break;
-            case Account.PROFESSIONAL:
-                accountInfoString = "Professional";
-                break;
-            default:
-                accountInfoString = "";
-        }
-        charge = NumberFormat.getCurrencyInstance().format(cost - credit);
+        String trData = new BrainTreeBlueBillingSystem().getRedirect(trParams, account.getPricingModel());
 
         String billingMessage;
         String billingHeader;
         String billingIntroParagraph;
+
         if (accountTypeChange == null) {
-            billingMessage = "You are signing up for the " + accountInfoString + " account tier, You will be charged " + NumberFormat.getCurrencyInstance().format(cost) + " USD " + (monthly ? "monthly" : "yearly") + " for your subscription.";
+            billingMessage = "You are signing up for an Easy Insight subscription. You will be charged " + NumberFormat.getCurrencyInstance().format(cost) + " USD " + (monthly ? "monthly" : "yearly") + " for your subscription.";
             billingHeader = account.billingHeader();
             billingIntroParagraph = account.billingIntroParagraph();
         } else {
-            billingMessage = "You are signing up for the " + accountInfoString + " account tier. You will be charged " + charge + " USD now, and " +
-                    NumberFormat.getCurrencyInstance().format(Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(), accountTypeChange.getStorage(),
-                            accountTypeChange.isYearly())) + (!accountTypeChange.isYearly() ? " monthly" : " yearly") + " for your subscription.";
+            billingMessage = "You are signing up for an Easy Insight subscription. You will be charged " + NumberFormat.getCurrencyInstance().format(cost) + " USD " + (monthly ? "monthly" : "yearly") + " for your subscription.";
             billingHeader = "";
             billingIntroParagraph = "";
-        }
-
-        if (chargeNow) {
-             billingMessage += " Your credit card will be charged upon submitting this form.";
         }
 %>
 <div class="navbar navbar-fixed-top">
@@ -222,22 +169,22 @@
                     try {
                         int code = Integer.parseInt(errorCode);
                         if (code == BillingResponse.DECLINED) {
-                            %>The transaction was declined by the credit card processor. If this error continues, contact support@easy-insight.com.<%
-                        } else if (code == BillingResponse.BILLING_ERROR) {
-                            %>There was an error with your billing information. Please input the correct information below.<%
-                        } else if (code == BillingResponse.TRANSACTION_NOT_ALLOWED) {
-                            %>The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.<%
-                        } else if (code == BillingResponse.NOT_FOUND_IN_VAULT) {
-                            %>There was a server error with saving the information for your account. Please try again. If this error continues, contact support@easy-insight.com.<%
-                        } else {
-                            %>There was an error with your billing information. Please input the correct information below.<%
-                        }
-                    } catch (NumberFormatException nfe) {
-                            %>There was an error with your billing information. Please input the correct information below.<%
+                %>The transaction was declined by the credit card processor. If this error continues, contact support@easy-insight.com.<%
+                } else if (code == BillingResponse.BILLING_ERROR) {
+                %>There was an error with your billing information. Please input the correct information below.<%
+                } else if (code == BillingResponse.TRANSACTION_NOT_ALLOWED) {
+                %>The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.<%
+                } else if (code == BillingResponse.NOT_FOUND_IN_VAULT) {
+                %>There was a server error with saving the information for your account. Please try again. If this error continues, contact support@easy-insight.com.<%
+                } else {
+                %>There was an error with your billing information. Please input the correct information below.<%
+                    }
+                } catch (NumberFormatException nfe) {
+                %>There was an error with your billing information. Please input the correct information below.<%
                     }
                 %></label></p>
                 <% } %>
-                <form method="post" action="<%= new BrainTreeBlueBillingSystem().getTargetUrl() %>" onsubmit="setCCexp()" class="well form-horizontal">
+                <form method="post" action="https://secure.braintreepaymentgateway.com/api/transact.php" onsubmit="setCCexp()" class="well form-horizontal">
                     <fieldset>
                         <input id="ccexp" type="hidden" value="" name="customer[credit_card][expiration_date]"/>
                         <input id="customer_vault_id" type="hidden" value="<%= account.getAccountID() %>" name="customer_vault_id" />
@@ -246,35 +193,35 @@
                         <div class="control-group">
                             <label class="control-label" for="firstname">First Name:</label>
                             <div class="controls">
-                                <input id="firstname" type="text" value="" name="customer[first_name]" class="span3"/>
+                                <input id="firstname" type="text" value="" name="firstname" class="span3"/>
                             </div>
 
                         </div>
                         <div class="control-group">
                             <label class="control-label" for="lastname">Last Name:</label>
                             <div class="controls">
-                                <input id="lastname" type="text" value="" name="customer[last_name]" class="span3"/>
+                                <input id="lastname" type="text" value="" name="lastname" class="span3"/>
                             </div>
                         </div>
 
                         <div class="control-group">
                             <label class="control-label" for="zip">Billing Zip/Postal Code:</label>
                             <div class="controls">
-                                <input id="zip" type="text" value="" name="customer[credit_card][billing_address][postal_code]" />
+                                <input id="zip" type="text" value="" name="zip" />
                             </div>
                         </div>
 
                         <div class="control-group">
                             <label class="control-label" for="ccnumber">Credit Card Number:</label>
                             <div class="controls">
-                                <input id="ccnumber" type="text" style="width:16.5em" name="customer[credit_card][number]"/>
+                                <input id="ccnumber" type="text" style="width:16.5em" name="ccnumber"/>
                             </div>
                         </div>
 
                         <div class="control-group">
                             <label class="control-label" for="cvv">CVV/CVC:</label>
                             <div class="controls">
-                                <input id="cvv" type="text" value="" name="customer[credit_card][cvv]" style="width:3.5em" />
+                                <input id="cvv" type="text" value="" name="cvv" style="width:3.5em" />
                             </div>
                         </div>
 
@@ -296,8 +243,6 @@
                                     <option value="12">12 - December</option>
                                 </select> /
                                 <select id="ccexpYear">
-                                    <option value="10">10</option>
-                                    <option value="11">11</option>
                                     <option value="12">12</option>
                                     <option value="13">13</option>
                                     <option value="14">14</option>
@@ -319,6 +264,28 @@
                 <div class="well" style="background-color: #d5d5d5">
                     <p><strong>Have questions?</strong></p>
                     <p>You can contact Easy Insight at 1-720-285-8652 or sales@easy-insight.com if you have any questions or concerns around your account billing.</p>
+                </div>
+            </div>
+            <div class="span3">
+                <div class="well" style="background-color: #d5d5d5">
+                    <p><strong>Your Account</strong></p>
+
+                        <p><%= account.getCoreDesigners() + account.getAddonDesigners() %> Designers
+                        </p>
+
+                        <p><%= account.getCoreSmallBizConnections() + account.getAddonSmallBizConnections() %> Small Business Connections
+                        </p>
+                        <p><%= Account.humanReadableByteCount(account.getCoreStorage() + (long) account.getAddonStorageUnits() * 250000000L, true) %> Custom Data Storage
+                        </p>
+                    <%
+                        if (account.getEnterpriseAddonCost() > 0) {
+                    %>
+                    <p><%= account.enterpriseCostString()%> Enterprise Addon Cost</p>
+                    <%
+                        }
+                    %>
+                        <p>Billed <%= account.billingInterval() %>
+                        </p>
                 </div>
             </div>
         </div>

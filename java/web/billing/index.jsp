@@ -67,16 +67,23 @@
             return;
         }
 
+
         Session hibernateSession = Database.instance().createSession();
         double cost = 0;
         double credit = 0;
         Account account = null;
-        AccountTypeChange accountTypeChange = (AccountTypeChange) session.getAttribute("accountTypeChange");
+        AccountTypeChange accountTypeChange;
+
         try {
             account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+            if (account.getPricingModel() == Account.NEW) {
+                response.sendRedirect("newModelBilling.jsp");
+                return;
+            }
+            accountTypeChange = (AccountTypeChange) session.getAttribute("accountTypeChange");
             if (accountTypeChange != null) {
                 cost = Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(),
-                        accountTypeChange.getStorage(), accountTypeChange.isYearly());
+                        accountTypeChange.getStorage(), 0, accountTypeChange.isYearly());
                 credit = Account.calculateCredit(account);
                 if (credit >= cost) {
                     session.removeAttribute("accountTypeChange");
@@ -124,7 +131,7 @@
             trParams = trParams.id(String.valueOf(account.getAccountID()));
         trParams = trParams.creditCard().options().makeDefault(true).done().done();
 
-        String trData = new BrainTreeBlueBillingSystem().getRedirect(trParams);
+        String trData = new BrainTreeBlueBillingSystem().getRedirect(trParams, account.getPricingModel());
 
         request.getSession().setAttribute("billingTime", time);
         String accountInfoString;
@@ -153,17 +160,19 @@
         String billingMessage;
         String billingHeader;
         String billingIntroParagraph;
+
         if (accountTypeChange == null) {
-            billingMessage = "You are signing up for the " + accountInfoString + " account tier, You will be charged " + NumberFormat.getCurrencyInstance().format(cost) + " USD " + (monthly ? "monthly" : "yearly") + " for your subscription.";
+            billingMessage = "You are signing up for the " + accountInfoString + " account tier. You will be charged " + NumberFormat.getCurrencyInstance().format(cost) + " USD " + (monthly ? "monthly" : "yearly") + " for your subscription.";
             billingHeader = account.billingHeader();
             billingIntroParagraph = account.billingIntroParagraph();
         } else {
             billingMessage = "You are signing up for the " + accountInfoString + " account tier. You will be charged " + charge + " USD now, and " +
-                    NumberFormat.getCurrencyInstance().format(Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(), accountTypeChange.getStorage(),
+                    NumberFormat.getCurrencyInstance().format(Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), 0, 0, 0,
                             accountTypeChange.isYearly())) + (!accountTypeChange.isYearly() ? " monthly" : " yearly") + " for your subscription.";
             billingHeader = "";
             billingIntroParagraph = "";
         }
+
 
         if (chargeNow) {
              billingMessage += " Your credit card will be charged upon submitting this form.";

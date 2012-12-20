@@ -1,11 +1,7 @@
 <!DOCTYPE html>
-<%@ page import="java.text.DateFormat" %>
-<%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="com.easyinsight.users.Account" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="org.hibernate.Session" %>
-<%@ page import="com.easyinsight.billing.BillingUtil" %>
-<%@ page import="com.easyinsight.config.ConfigLoader" %>
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
@@ -93,8 +89,7 @@
 
             // how many days until the next billing cycle?
 
-            cost = Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(),
-                    accountTypeChange.getStorage(), accountTypeChange.isYearly());
+            cost = Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), 0, 0, 0, accountTypeChange.isYearly());
             credit = Account.calculateCredit(account);
 
             proratedCost = cost * ((double) daysBetween / (double) ((accountTypeChange.isYearly() ? 365 : 31)));
@@ -145,9 +140,13 @@
         } else {
             message = "You'll be billed <b>" + currencyFormat.format(amountToBill) + "</b> for this change.";
         }
+        double calcCOst = Account.createBaseCost(account.getPricingModel(), accountTypeChange.getAccountType(),
+                                    0, 0, 0, accountTypeChange.isYearly());
+
 
 
         NumberFormat cf = NumberFormat.getCurrencyInstance();
+        String blah = cf.format(Account.createDiscount(cost, accountTypeChange.isYearly()));
 %>
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
@@ -219,14 +218,13 @@
                     <div style="width:300px; font-size: 16px">
                         <div style="float:right">
                             <strong><%= cf.format(Account.createBaseCost(account.getPricingModel(), accountTypeChange.getAccountType(),
-                                    accountTypeChange.getDesigners(), accountTypeChange.getStorage(), accountTypeChange.isYearly())) %></strong>
+                                    0, 0, 0, accountTypeChange.isYearly())) %></strong>
                         </div>
                         <span><strong>Base Price:</strong></span>
                     </div>
                     <div style="width:300px;font-size: 16px">
                         <div style="float:right">
-                            <strong><%= cf.format(Account.createDiscount(account.getPricingModel(), accountTypeChange.getAccountType(),
-                                    accountTypeChange.getDesigners(), accountTypeChange.getStorage(), accountTypeChange.isYearly())) %></strong>
+                            <strong><%= blah %></strong>
                         </div>
                         <span><strong>Discount:</strong></span>
                     </div>
@@ -234,7 +232,7 @@
                     <div style="width:300px; font-size: 16px">
                         <div style="float:right">
                             <strong><%= cf.format(Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(),
-                                    accountTypeChange.getDesigners(), accountTypeChange.getStorage(), accountTypeChange.isYearly())) %></strong>
+                                    0, 0, 0, accountTypeChange.isYearly())) %></strong>
                         </div>
                         <span><strong>Total:</strong></span>
                     </div>
@@ -254,7 +252,7 @@
                     <div style="width:300px;font-size: 16px">
                         <div style="float:right">
                             <strong><%= cf.format(Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(),
-                                    accountTypeChange.getDesigners(), accountTypeChange.getStorage(), accountTypeChange.isYearly())) %></strong>
+                                    0, 0, 0, accountTypeChange.isYearly())) %></strong>
                         </div>
                         <span><strong>Amount <%=accountTypeChange.isYearly() ? "Billed Yearly" : "Billed Monthly"%> </strong></span>
                     </div>

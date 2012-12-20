@@ -1,6 +1,8 @@
 package com.easyinsight.users;
 
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.datafeeds.ConnectionBillingType;
+import com.easyinsight.datafeeds.DataSourceTypeRegistry;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.preferences.UserDLS;
@@ -175,6 +177,18 @@ public class UserAccountAdminService {
         return accountInfo;
     }
 
+    public AccountStats getAccountStats() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            return getAccountStats(conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void updateUser(UserTransferObject userTransferObject, List<UserDLS> userDLSList) {
         long accountID = SecurityUtil.getAccountID();
         EIConnection conn = Database.instance().getConnection();
@@ -296,9 +310,11 @@ public class UserAccountAdminService {
         try {
             List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list();
             Account account = (Account) accountResults.get(0);
-            @SuppressWarnings({"unchecked"}) List<AccountCreditCardBillingInfo> results = session.createQuery("from AccountCreditCardBillingInfo where accountId = ? and responseCode = ? and amount > ?").setLong(0, SecurityUtil.getAccountID()).setString(1, "100").setDouble(2, 20.).list();
+            @SuppressWarnings({"unchecked"}) List<AccountCreditCardBillingInfo> results = session.createQuery("from AccountCreditCardBillingInfo where accountId = ? and amount > ?").setLong(0, SecurityUtil.getAccountID()).setDouble(1, 20.).list();
             for (AccountCreditCardBillingInfo info : results) {
-                invoices.add(new InvoiceInfo(info.getTransactionTime(), info.toInvoiceText(account)));
+                if ("100".equals(info.getResponseCode()) || info.isSuccessful()) {
+                    invoices.add(new InvoiceInfo(info.getTransactionTime(), info.toInvoiceText(account)));
+                }
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -820,7 +836,13 @@ public class UserAccountAdminService {
     public long getAccountStorage() throws SQLException {
         EIConnection conn = Database.instance().getConnection();
         try {
-            List<DataSourceStats> statsList = sizeDataSources(conn, SecurityUtil.getAccountID());
+            PreparedStatement stmt = conn.prepareStatement("SELECT PRICING_MODEL FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            stmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            int pricingModel = rs.getInt(1);
+            stmt.close();
+            List<DataSourceStats> statsList = sizeDataSources(conn, SecurityUtil.getAccountID(), pricingModel);
             return usedSize(statsList);
         } finally {
             Database.closeConnection(conn);
@@ -841,7 +863,7 @@ public class UserAccountAdminService {
         return usedSize;
     }
 
-    public static List<DataSourceStats> sizeDataSources(EIConnection conn, long accountID) throws SQLException {
+    public static List<DataSourceStats> sizeDataSources(EIConnection conn, long accountID, int pricingModel) throws SQLException {
         PreparedStatement queryStmt = conn.prepareStatement("select feed_persistence_metadata.size, feed_persistence_metadata.feed_id, data_feed.feed_type, data_feed.visible, " +
                 "data_feed.parent_source_id, data_feed.feed_name from feed_persistence_metadata, upload_policy_users, user, data_feed where " +
                 "data_feed.data_feed_id = upload_policy_users.feed_id and feed_persistence_metadata.feed_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id and " +
@@ -859,6 +881,10 @@ public class UserAccountAdminService {
             boolean visible = qRS.getBoolean(4);
             long parentSourceID = qRS.getLong(5);
             String feedName = qRS.getString(6);
+            int connectionBillingType = new DataSourceTypeRegistry().billingInfoForType(new FeedType(type));
+            if (pricingModel == Account.NEW && connectionBillingType == ConnectionBillingType.SMALL_BIZ) {
+                continue;
+            }
             DataSourceStats dataSourceStats = statsMap.get(dataSourceID);
             if (dataSourceStats == null) {
                 dataSourceStats = new DataSourceStats();
@@ -891,71 +917,82 @@ public class UserAccountAdminService {
 
     private AccountStats getAccountStats(EIConnection conn) throws SQLException {
         long accountID = SecurityUtil.getAccountID();
-        long maxSize;
-        int currentUsers = 0;
-        int maxUsers;
+        AccountStats accountStats = new AccountStats();
+
         long usedAPI = 0;
         long maxAPI = Account.getMaxCount(SecurityUtil.getAccountTier());
-        PreparedStatement queryStmt = conn.prepareStatement("select feed_persistence_metadata.size, feed_persistence_metadata.feed_id, data_feed.feed_type, data_feed.visible, " +
-                "data_feed.parent_source_id, data_feed.feed_name from feed_persistence_metadata, upload_policy_users, user, data_feed where " +
-                "data_feed.data_feed_id = upload_policy_users.feed_id and feed_persistence_metadata.feed_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id and " +
-                "user.account_id = ?");
-        queryStmt.setLong(1, accountID);
-        ResultSet qRS = queryStmt.executeQuery();
-        Map<Long, DataSourceStats> statsMap = new HashMap<Long, DataSourceStats>();
-        Map<Long, DataSourceStats> dupeMap = new HashMap<Long, DataSourceStats>();
-        while (qRS.next()) {
-            long size = qRS.getLong(1);
-            long dataSourceID = qRS.getLong(2);
-            if (dupeMap.containsKey(dataSourceID)) {
-                continue;
-            }
 
-            int type = qRS.getInt(3);
-            if (type == FeedType.COMPOSITE.getType()) {
-                continue;
-            }
-            boolean visible = qRS.getBoolean(4);
-            long parentSourceID = qRS.getLong(5);
-            String feedName = qRS.getString(6);
-            DataSourceStats dataSourceStats = statsMap.get(dataSourceID);
-            dupeMap.put(dataSourceID, dataSourceStats);
-            if (dataSourceStats == null) {
-                dataSourceStats = new DataSourceStats();
-            }
-            dataSourceStats.setSize(size);
-            dataSourceStats.setVisible(visible);
-            dataSourceStats.setDataSourceID(dataSourceID);
-            dataSourceStats.setName(feedName);
-            if (parentSourceID > 0) {
-                DataSourceStats parent = statsMap.get(parentSourceID);
-                if (parent == null) {
-                    parent = new DataSourceStats();
-                    statsMap.put(parentSourceID, parent);
-                }
-                parent.getChildStats().add(dataSourceStats);
-            } else {
-                statsMap.put(dataSourceID, dataSourceStats);
-            }
-        }
-        List<DataSourceStats> statsList = new ArrayList<DataSourceStats>();
-        long usedSize = 0;
-        for (DataSourceStats stats : statsMap.values()) {
-            if (stats.isVisible()) {
-                statsList.add(stats);
-                usedSize += stats.getSize();
-                for (DataSourceStats child : stats.getChildStats()) {
-                    usedSize += child.getSize();
-                    stats.setSize(stats.getSize() + child.getSize());
+        PreparedStatement statsStmt = conn.prepareStatement("SELECT max_users, max_size, core_small_biz_connections, addon_small_biz_connections," +
+                "core_designers, core_storage, addon_storage_units, pricing_model, addon_designers, addon_quickbase_connections," +
+                "unlimited_quickbase_connections, addon_salesforce_connections FROM account where account_id = ?");
+        statsStmt.setLong(1, accountID);
+        ResultSet statRS = statsStmt.executeQuery();
+        statRS.next();
+        int maxUsers = statRS.getInt(1);
+        long maxSize = statRS.getLong(2);
+        int coreSmallBizConnections = statRS.getInt(3);
+        int addonSmallBizConnections = statRS.getInt(4);
+        int coreDesigners = statRS.getInt(5);
+        long coreStorage = statRS.getInt(6);
+        int addonStorageUnits = statRS.getInt(7);
+        int pricingModel = statRS.getInt(8);
+        int addonDesigners = statRS.getInt(9);
+        int addonQuickbaseConnections = statRS.getInt(10);
+        boolean unlimitedQuickbaseConnections = statRS.getBoolean(11);
+        int addonSalesforceConnections = statRS.getInt(12);
+
+        PreparedStatement dataSourceStmt = conn.prepareStatement("SELECT DATA_FEED_ID, FEED_TYPE FROM DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE " +
+                "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? AND " +
+                "DATA_FEED.VISIBLE = ?");
+        dataSourceStmt.setLong(1, accountID);
+        dataSourceStmt.setBoolean(2, true);
+        ResultSet dsRS = dataSourceStmt.executeQuery();
+        Set<Long> ids = new HashSet<Long>();
+        int smallBizConnections = 0;
+        int quickbaseConnections = 0;
+        int salesforceConnections = 0;
+        while (dsRS.next()) {
+            long id = dsRS.getLong(1);
+            int feedType = dsRS.getInt(2);
+            int billingType = new DataSourceTypeRegistry().billingInfoForType(new FeedType(feedType));
+            if (!ids.contains(id)) {
+                ids.add(id);
+                if (billingType == ConnectionBillingType.SMALL_BIZ) {
+                    smallBizConnections++;
+                } else if (billingType == ConnectionBillingType.QUICKBASE) {
+                    quickbaseConnections++;
+                } else if (billingType == ConnectionBillingType.SALESFORCE) {
+                    salesforceConnections++;
                 }
             }
         }
 
-        PreparedStatement usersStmt = conn.prepareStatement("SELECT count(user_id) from user where account_id = ?");
+
+        List<DataSourceStats> statsList = sizeDataSources(conn, accountID, pricingModel);
+        long usedSize = usedSize(statsList);
+
+        PreparedStatement usersStmt = conn.prepareStatement("SELECT count(user_id), analyst from user where account_id = ? group by analyst");
         usersStmt.setLong(1, accountID);
         ResultSet usersRS = usersStmt.executeQuery();
+        int designers = 0;
+        int viewers = 0;
         if (usersRS.next()) {
-            currentUsers = usersRS.getInt(1);
+            int users = usersRS.getInt(1);
+            boolean analyst = usersRS.getBoolean(2);
+            if (analyst) {
+                designers = users;
+            } else {
+                viewers = users;
+            }
+        }
+        if (pricingModel == Account.TIERED) {
+            accountStats.setCurrentUsers(designers + viewers);
+            accountStats.setAvailableUsers(maxUsers);
+        } else {
+            accountStats.setCoreDesigners(coreDesigners);
+            accountStats.setAddonDesigners(addonDesigners);
+            accountStats.setUsedDesigners(designers);
+            accountStats.setReportViewers(viewers);
         }
         PreparedStatement apiTodayStmt = conn.prepareStatement("SELECT used_bandwidth from bandwidth_usage where account_id = ? AND bandwidth_date = ?");
         apiTodayStmt.setLong(1, accountID);
@@ -964,20 +1001,34 @@ public class UserAccountAdminService {
         if (apiRS.next()) {
             usedAPI = apiRS.getLong(1);
         }
-        PreparedStatement statsStmt = conn.prepareStatement("SELECT max_users, max_size FROM account where account_id = ?");
-        statsStmt.setLong(1, accountID);
-        ResultSet statRS = statsStmt.executeQuery();
-        statRS.next();
-        maxUsers = statRS.getInt(1);
-        maxSize = statRS.getLong(2);
-        AccountStats accountStats = new AccountStats();
-        accountStats.setMaxSpace(maxSize);
+
+        // new pricing model
+
+        accountStats.setCoreSmallBizConnections(coreSmallBizConnections);
+        accountStats.setAddonSmallBizConnections(addonSmallBizConnections);
+        accountStats.setCurrentSmallBizConnections(smallBizConnections);
+
+        accountStats.setAddonQuickbaseConnections(addonQuickbaseConnections);
+        accountStats.setUnlimitedQuickbaseConnections(unlimitedQuickbaseConnections);
+        accountStats.setAddonSalesforceConnections(addonSalesforceConnections);
+
+        accountStats.setUsedQuickbaseConnections(quickbaseConnections);
+        accountStats.setUsedSalesforceConnections(salesforceConnections);
+
+        accountStats.setCoreSpace(coreStorage);
+        accountStats.setAddonStorageUnits(addonStorageUnits);
+
         accountStats.setUsedSpace(usedSize);
-        accountStats.setCurrentUsers(currentUsers);
+        accountStats.setUsedSpaceString(Account.humanReadableByteCount(usedSize, true));
+
+        accountStats.setMaxSpace(maxSize);
+        accountStats.setMaxSpaceString(Account.humanReadableByteCount(maxSize, true));
+
         accountStats.setStatsList(statsList);
-        accountStats.setAvailableUsers(maxUsers);
+
         accountStats.setApiUsedToday(usedAPI);
         accountStats.setApiMaxToday(maxAPI);
+
         return accountStats;
     }
 

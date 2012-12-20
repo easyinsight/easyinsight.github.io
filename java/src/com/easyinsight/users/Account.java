@@ -2,9 +2,7 @@ package com.easyinsight.users;
 
 import com.easyinsight.billing.BillingSystem;
 import com.easyinsight.billing.BillingSystemFactory;
-import com.easyinsight.billing.BrainTreeBillingSystem;
 import com.easyinsight.billing.BrainTreeBlueBillingSystem;
-import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.logging.LogClass;
 import org.hibernate.Session;
@@ -66,10 +64,41 @@ public class Account {
     public static final long ENTERPRISE_MAX = 1000000000;
     public static final long ADMINISTRATOR_MAX = Long.MAX_VALUE;
 
+    public static final int TIERED = 0;
+    public static final int NEW = 1;
+
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="account_id")
     private long accountID;
+
+    @Column(name="core_small_biz_connections")
+    private int coreSmallBizConnections;
+
+    @Column(name="addon_small_biz_connections")
+    private int addonSmallBizConnections;
+
+    @Column(name="addon_designers")
+    private int addonDesigners;
+
+    @Column(name="core_designers")
+    private int coreDesigners;
+
+    @Column(name="core_storage")
+    private long coreStorage;
+
+    @Column(name="addon_storage_units")
+    private int addonStorageUnits;
+
+    @Column(name="unlimited_quickbase_connections")
+    private boolean unlimitedQuickbaseConnections;
+    @Column(name="addon_quickbase_connections")
+    private int addonQuickbaseConnections;
+    @Column(name="addon_salesforce_connections")
+    private int addonSalesforceConnections;
+
+    @Column(name="enterprise_addon_cost")
+    private int enterpriseAddonCost;
 
     @Column(name="google_domain_name")
     private String googleDomainName;
@@ -222,6 +251,86 @@ public class Account {
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public int getEnterpriseAddonCost() {
+        return enterpriseAddonCost;
+    }
+
+    public void setEnterpriseAddonCost(int enterpriseAddonCost) {
+        this.enterpriseAddonCost = enterpriseAddonCost;
+    }
+
+    public boolean isUnlimitedQuickbaseConnections() {
+        return unlimitedQuickbaseConnections;
+    }
+
+    public void setUnlimitedQuickbaseConnections(boolean unlimitedQuickbaseConnections) {
+        this.unlimitedQuickbaseConnections = unlimitedQuickbaseConnections;
+    }
+
+    public int getAddonQuickbaseConnections() {
+        return addonQuickbaseConnections;
+    }
+
+    public void setAddonQuickbaseConnections(int addonQuickbaseConnections) {
+        this.addonQuickbaseConnections = addonQuickbaseConnections;
+    }
+
+    public int getAddonSalesforceConnections() {
+        return addonSalesforceConnections;
+    }
+
+    public void setAddonSalesforceConnections(int addonSalesforceConnections) {
+        this.addonSalesforceConnections = addonSalesforceConnections;
+    }
+
+    public int getAddonDesigners() {
+        return addonDesigners;
+    }
+
+    public void setAddonDesigners(int addonDesigners) {
+        this.addonDesigners = addonDesigners;
+    }
+
+    public int getCoreSmallBizConnections() {
+        return coreSmallBizConnections;
+    }
+
+    public void setCoreSmallBizConnections(int coreSmallBizConnections) {
+        this.coreSmallBizConnections = coreSmallBizConnections;
+    }
+
+    public int getAddonSmallBizConnections() {
+        return addonSmallBizConnections;
+    }
+
+    public void setAddonSmallBizConnections(int addonSmallBizConnections) {
+        this.addonSmallBizConnections = addonSmallBizConnections;
+    }
+
+    public int getCoreDesigners() {
+        return coreDesigners;
+    }
+
+    public void setCoreDesigners(int coreDesigners) {
+        this.coreDesigners = coreDesigners;
+    }
+
+    public long getCoreStorage() {
+        return coreStorage;
+    }
+
+    public void setCoreStorage(long coreStorage) {
+        this.coreStorage = coreStorage;
+    }
+
+    public int getAddonStorageUnits() {
+        return addonStorageUnits;
+    }
+
+    public void setAddonStorageUnits(int addonStorageUnits) {
+        this.addonStorageUnits = addonStorageUnits;
+    }
 
     public long getUsedSize() {
         return usedSize;
@@ -775,6 +884,10 @@ public class Account {
         return info;
     }
 
+    public void syncState() {
+        new BrainTreeBlueBillingSystem().setSubscribedStatus(this);
+    }
+
     public Integer getBillingMonthOfYear() {
         return billingMonthOfYear;
     }
@@ -885,66 +998,36 @@ public class Account {
         return nf.format(createCost());
     }
 
+    public String enterpriseCostString() {
+        NumberFormat nf = NumberFormat.getCurrencyInstance();
+        nf.setMaximumFractionDigits(2);
+        nf.setMinimumFractionDigits(2);
+        return nf.format(enterpriseAddonCost);
+    }
+
+    public String addonCostString() {
+        NumberFormat nf = NumberFormat.getCurrencyInstance();
+        nf.setMaximumFractionDigits(2);
+        nf.setMinimumFractionDigits(2);
+        return nf.format(createCost() - 50);
+    }
+
     public double createCost() {
-        int storageType = 1;
-        if (accountType == PROFESSIONAL) {
-            if (maxSize == Account.PROFESSIONAL_MAX_2) {
-                storageType = 2;
-            } else if (maxSize == Account.PROFESSIONAL_MAX_3) {
-                storageType = 3;
-            } else if (maxSize == Account.PROFESSIONAL_MAX_4) {
-                storageType = 4;
-            }
-        } else if (accountType == PLUS) {
-            if (maxSize == Account.PLUS_MAX2) {
-                storageType = 2;
-            } else if (maxSize == Account.PLUS_MAX3) {
-                storageType = 3;
-            }
-        } else if (accountType == BASIC) {
-            if (maxSize == Account.BASIC_MAX2) {
-                storageType = 2;
-            } else if (maxSize == Account.BASIC_MAX3) {
-                storageType = 3;
-            }
-        }
-        return createBaseCost(pricingModel, accountType, maxUsers, storageType, getBillingMonthOfYear() != null);
+        return createBaseCost(pricingModel, accountType, addonDesigners, addonSmallBizConnections, addonStorageUnits, getBillingMonthOfYear() != null);
     }
 
     public String createTotalCostString() {
         NumberFormat nf = NumberFormat.getCurrencyInstance();
         nf.setMaximumFractionDigits(2);
         nf.setMinimumFractionDigits(2);
-        return nf.format(createTotalCost());
+        return nf.format(createTotalCost() + enterpriseAddonCost);
     }
 
     public double createTotalCost() {
-        int storageType = 1;
-        if (accountType == PROFESSIONAL) {
-            if (maxSize == Account.PROFESSIONAL_MAX_2) {
-                storageType = 2;
-            } else if (maxSize == Account.PROFESSIONAL_MAX_3) {
-                storageType = 3;
-            } else if (maxSize == Account.PROFESSIONAL_MAX_4) {
-                storageType = 4;
-            }
-        } else if (accountType == PLUS) {
-            if (maxSize == Account.PLUS_MAX2) {
-                storageType = 2;
-            } else if (maxSize == Account.PLUS_MAX3) {
-                storageType = 3;
-            }
-        } else if (accountType == BASIC) {
-            if (maxSize == Account.BASIC_MAX2) {
-                storageType = 2;
-            } else if (maxSize == Account.BASIC_MAX3) {
-                storageType = 3;
-            }
-        }
-        return createTotalCost(pricingModel, accountType, maxUsers, storageType, getBillingMonthOfYear() != null);
+        return createTotalCost(pricingModel, accountType, addonDesigners, addonSmallBizConnections, addonStorageUnits, getBillingMonthOfYear() != null);
     }
 
-    public static double createBaseCost(int pricingModel, int tier, int maxUsers, int maxSize, boolean yearly) {
+    public static double createBaseCost(int pricingModel, int tier, int designers, int smallBizConnections, int storageAddons, boolean yearly) {
         double cost;
         if (pricingModel == 0) {
             if (tier == Account.BASIC) {
@@ -957,58 +1040,21 @@ public class Account {
                 throw new RuntimeException();
             }
         } else {
-            if (tier == Account.BASIC) {
-                cost = (25 * (yearly ? 12 : 1)) + (maxUsers - 1) * 10 * (yearly ? 12 : 1);
-                if (maxSize == 2) {
-                    cost += 15 * (yearly ? 12 : 1);
-                } else if (maxSize == 3) {
-                    cost += 30 * (yearly ? 12 : 1);
-                }
-            } else if (tier == Account.PLUS) {
-                cost = (75 * (yearly ? 12 : 1)) + (maxUsers - 1) * 25 * (yearly ? 12 : 1);
-                if (maxSize == 2) {
-                    cost += 30 * (yearly ? 12 : 1);
-                } else if (maxSize == 3) {
-                    cost += 60 * (yearly ? 12 : 1);
-                }
-            } else if (tier == Account.PROFESSIONAL) {
-                cost = (200 * (yearly ? 12 : 1)) + (maxUsers - 1) * 50 * (yearly ? 12 : 1);
-                if (maxSize == 2) {
-                    cost += 150 * (yearly ? 12 : 1);
-                } else if (maxSize == 3) {
-                    cost += 300 * (yearly ? 12 : 1);
-                } else if (maxSize == 4) {
-                    cost += 450 * (yearly ? 12 : 1);
-                }
-            } else {
-                throw new RuntimeException();
-            }
+            cost = 50 + (designers * 50) + (smallBizConnections * 25) + (storageAddons * 150);
         }
         return cost;
     }
 
-    public static double createTotalCost(int pricingModel, int tier, int maxUsers, int maxSize, boolean yearly) {
-        double cost = createBaseCost(pricingModel, tier, maxUsers, maxSize, yearly);
-        cost = cost - (createDiscount(pricingModel, tier, maxUsers, maxSize, yearly));
+    public static double createTotalCost(int pricingModel, int tier, int designers, int smallBizConnections, int storageAddons, boolean yearly) {
+        double cost = createBaseCost(pricingModel, tier, designers, smallBizConnections, storageAddons, yearly);
+        cost = cost - (createDiscount(cost, yearly));
         return cost;
     }
 
-    public static double createDiscount(int pricingModel, int tier, int maxUsers, int maxSize, boolean yearly) {
+    public static double createDiscount(double baseCost, boolean yearly) {
         double discount = 0;
         if (yearly) {
-            if (pricingModel == 0) {
-                if (tier == Account.BASIC) {
-                    discount = 25;
-                } else if (tier == Account.PLUS) {
-                    discount = 75;
-                } else if (tier == Account.PROFESSIONAL) {
-                    discount = 200;
-                } else {
-                    throw new RuntimeException();
-                }
-            } else {
-                discount = createBaseCost(pricingModel, tier, maxUsers, maxSize, yearly) / 12;
-            }
+            discount = baseCost / 12;
         }
         return discount;
     }

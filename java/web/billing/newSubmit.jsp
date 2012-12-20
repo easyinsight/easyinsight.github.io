@@ -74,7 +74,7 @@
                     hibernateSession.save(account);
                 } else {
                     t.rollback();
-                    String errorCode =  result.getErrors().getAllDeepValidationErrors().get(0).getCode().code;
+                    String errorCode = result.getErrors().getAllDeepValidationErrors().get(0).getCode().code;
                     int responseCode;
                     if ("200".equals(errorCode)) responseCode = BillingResponse.DECLINED;
                     else if ("204".equals(errorCode)) responseCode = BillingResponse.TRANSACTION_NOT_ALLOWED;
@@ -104,13 +104,11 @@
             }
 
 
-
-
             if (accountTypeChange != null) {
 
                 // if it's an upgrade charge, calculate how much the charge is for, and determine the prorated amount
 
-                cost = Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(),
+                cost = Account.createTotalCost(account.getPricingModel(), account.getAccountType(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(),
                         accountTypeChange.getStorage(), accountTypeChange.isYearly());
                 credit = Account.calculateCredit(account);
                 if (credit >= cost) {

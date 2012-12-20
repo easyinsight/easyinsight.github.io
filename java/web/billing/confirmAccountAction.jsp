@@ -4,7 +4,6 @@
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="com.easyinsight.users.AccountTypeChange" %>
 <%@ page import="com.easyinsight.users.AccountCreditCardBillingInfo" %>
-<%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page import="java.util.Calendar" %>
@@ -47,36 +46,12 @@
 
         // how many days until the next billing cycle?
 
-        cost = Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(),
-                accountTypeChange.getStorage(), accountTypeChange.isYearly());
+        cost = Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), 0, 0, 0, accountTypeChange.isYearly());
         credit = Account.calculateCredit(account);
 
         double proratedCost = cost * ((double) daysBetween / (double) ((accountTypeChange.isYearly() ? 365 : 31)));
 
-        int storageType = 1;
-        if (account.getAccountType() == Account.PROFESSIONAL) {
-            if (account.getMaxSize() == Account.PROFESSIONAL_MAX_2) {
-                storageType = 2;
-            } else if (account.getMaxSize() == Account.PROFESSIONAL_MAX_3) {
-                storageType = 3;
-            } else if (account.getMaxSize() == Account.PROFESSIONAL_MAX_4) {
-                storageType = 4;
-            }
-        } else if (account.getAccountType() == Account.PLUS) {
-            if (account.getMaxSize() == Account.PLUS_MAX2) {
-                storageType = 2;
-            } else if (account.getMaxSize() == Account.PLUS_MAX3) {
-                storageType = 3;
-            }
-        } else if (account.getAccountType() == Account.BASIC) {
-            if (account.getMaxSize() == Account.BASIC_MAX2) {
-                storageType = 2;
-            } else if (account.getMaxSize() == Account.BASIC_MAX3) {
-                storageType = 3;
-            }
-        }
-        double priorCost = Account.createTotalCost(account.getPricingModel(), account.getAccountType(), account.getMaxUsers(),
-                storageType, accountTypeChange.isYearly());
+        double priorCost = Account.createTotalCost(account.getPricingModel(), account.getAccountType(), 0, 0, 0, accountTypeChange.isYearly());
 
 
         String target;

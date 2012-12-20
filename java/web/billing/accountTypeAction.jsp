@@ -22,39 +22,17 @@
             return;
         }
         int numberDesigners;
-        if (account.getPricingModel() == 0) {
-            if (targetType == Account.BASIC) {
-                numberDesigners = 5;
-            } else if (targetType == Account.PLUS) {
-                numberDesigners = 500;
-            } else if (targetType == Account.PROFESSIONAL) {
-                numberDesigners = 500;
-            } else {
-                throw new RuntimeException("Unknown target type " + targetType);
-            }
+
+        if (targetType == Account.BASIC) {
+            numberDesigners = 5;
+        } else if (targetType == Account.PLUS) {
+            numberDesigners = 500;
+        } else if (targetType == Account.PROFESSIONAL) {
+            numberDesigners = 500;
         } else {
-            try {
-                numberDesigners = Integer.parseInt(request.getParameter("numberDesigners"));
-            } catch (NumberFormatException e) {
-                request.getSession().setAttribute("errorString", "The number of designers must be a number.");
-                response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
-                return;
-            }
-            if (numberDesigners <= 0) {
-                request.getSession().setAttribute("errorString", "The number of designers must be a number greater than zero.");
-                response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
-                return;
-            }
-            if (targetType == Account.BASIC && numberDesigners > 3) {
-                request.getSession().setAttribute("errorString", "The Basic account is limited to three designers.");
-                response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
-                return;
-            } else if (targetType == Account.PLUS && numberDesigners > 10) {
-                request.getSession().setAttribute("errorString", "The Plus account is limited to ten designers.");
-                response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
-                return;
-            }
+            throw new RuntimeException("Unknown target type " + targetType);
         }
+
 
         if (numberDesigners < account.getUsers().size()) {
             request.getSession().setAttribute("errorString", "Your account currently has more Designers than the number you just specified.");
@@ -64,50 +42,16 @@
 
         int storageSelection = 0;
         long storage = 0;
-        if (account.getPricingModel() == 0) {
-            if (targetType == Account.BASIC) {
-                storage = Account.BASIC_MAX;
-            } else if (targetType == Account.PLUS) {
-                storage = Account.PLUS_MAX;
-            } else if (targetType == Account.PROFESSIONAL) {
-                storage = Account.PROFESSIONAL_MAX;
-                storageSelection = 1;
-            }
-        } else {
-            String storageSelectionString = request.getParameter("storageSelection");
-            storageSelection = Integer.parseInt(storageSelectionString);
-            if (targetType == Account.PROFESSIONAL) {
-                if (storageSelection == 0 || storageSelection == 1) {
-                    storage = Account.PROFESSIONAL_MAX;
-                } else if (storageSelection == 2) {
-                    storage = Account.PROFESSIONAL_MAX_2;
-                } else if (storageSelection == 3) {
-                    storage = Account.PROFESSIONAL_MAX_3;
-                } else if (storageSelection == 4) {
-                    storage = Account.PROFESSIONAL_MAX_4;
-                } else {
-                    request.getSession().setAttribute("errorString", "Illegal storage selection parameter.");
-                    response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
-                    return;
-                }
-            } else if (targetType == Account.PLUS) {
-                if (storageSelection == 0 || storageSelection == 1) {
-                    storage = Account.PLUS_MAX;
-                } else if (storageSelection == 2) {
-                    storage = Account.PLUS_MAX2;
-                } else if (storageSelection == 3) {
-                    storage = Account.PLUS_MAX3;
-                }
-            } else if (targetType == Account.BASIC) {
-                if (storageSelection == 0 || storageSelection == 1) {
-                    storage = Account.BASIC_MAX;
-                } else if (storageSelection == 2) {
-                    storage = Account.BASIC_MAX2;
-                } else if (storageSelection == 3) {
-                    storage = Account.BASIC_MAX3;
-                }
-            }
+
+        if (targetType == Account.BASIC) {
+            storage = Account.BASIC_MAX;
+        } else if (targetType == Account.PLUS) {
+            storage = Account.PLUS_MAX;
+        } else if (targetType == Account.PROFESSIONAL) {
+            storage = Account.PROFESSIONAL_MAX;
+            storageSelection = 1;
         }
+
 
         long usedStorage = new UserAccountAdminService().getAccountStorage();
         if (usedStorage > storage) {

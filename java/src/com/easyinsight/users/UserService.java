@@ -455,9 +455,11 @@ public class UserService {
 
     private void cancelAccount(Session session, Account a) {
         a.setAccountState(Account.CLOSING);
+        if (a.isBillingInformationGiven()) {
+            BillingSystem billingSystem = BillingSystemFactory.getBillingSystem();
+            billingSystem.cancelPlan(a.getAccountID());
+        }
         a.setBillingInformationGiven(false);
-        BillingSystem billingSystem = BillingSystemFactory.getBillingSystem();
-        billingSystem.cancelPlan(a.getAccountID());
         session.save(a);
     }
 
