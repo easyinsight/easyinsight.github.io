@@ -3,14 +3,12 @@ package com.easyinsight.storage;
 import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedPersistenceMetadata;
 import com.easyinsight.core.*;
 import com.easyinsight.cache.Cache;
 import com.easyinsight.users.Account;
@@ -53,6 +51,7 @@ public class DataStorage implements IDataStorage {
     private static DateDimCache dateDimCache = new DateDimCache();
     private List<IDataTransform> transforms = new ArrayList<IDataTransform>();
     private ReportFault warning;
+    private int connectionBillingType;
 
     private JCS reportCache = Cache.getCache(Cache.EMBEDDED_REPORTS);
 
@@ -186,20 +185,12 @@ public class DataStorage implements IDataStorage {
         return new TempStorage(feedDefinition.getDataFeedID(), keyMetadatas, database, cachedCalculations, transforms, conn);
     }
 
-    private List<AnalysisCalculation> cachedCalculations = new ArrayList<AnalysisCalculation>();
-
     public static DataStorage writeConnection(FeedDefinition feedDefinition, Connection conn, long accountID, boolean systemUpdate) throws SQLException {
         DataStorage dataStorage = new DataStorage();
         dataStorage.accountID = accountID;
         dataStorage.systemUpdate = systemUpdate;
         Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
         for (AnalysisItem analysisItem : feedDefinition.getFields()) {
-            if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
-                if (analysisCalculation.isCachedCalculation()) {
-                    dataStorage.cachedCalculations.add(analysisCalculation);
-                }
-            }
             if (!analysisItem.persistable()) {
                 continue;
             }
@@ -231,13 +222,13 @@ public class DataStorage implements IDataStorage {
         }
         dataStorage.database = DatabaseManager.instance().getDatabase(dataStorage.metadata.getDatabase());
         if (dataStorage.database == null) {
-            System.out.println("Rebuilding metadata...");
             dataStorage.metadata = createDefaultMetadata(conn);
             dataStorage.database = DatabaseManager.instance().getDatabase(dataStorage.metadata.getDatabase());
             if (dataStorage.database == null) {
                 throw new DatabaseShardException();
             }
         }
+        dataStorage.connectionBillingType = new DataSourceTypeRegistry().billingInfoForType(feedDefinition.getFeedType());
         dataStorage.keys = keyMetadatas;
         dataStorage.dataSourceType = feedDefinition.getFeedType().getType();
         dataStorage.feedID = feedDefinition.getDataFeedID();
@@ -262,38 +253,47 @@ public class DataStorage implements IDataStorage {
     private void validateSpace(Connection conn) throws SQLException, StorageLimitException {
         if (systemUpdate) return;
 
-        PreparedStatement spaceAllowed = conn.prepareStatement("SELECT ACCOUNT_TYPE, MAX_SIZE, max_days_over_size_boundary, days_over_size_boundary, last_boundary_date FROM ACCOUNT WHERE account_id = ?");
+        PreparedStatement spaceAllowed = conn.prepareStatement("SELECT ACCOUNT_TYPE, MAX_SIZE, max_days_over_size_boundary, days_over_size_boundary, last_boundary_date, pricing_model, core_storage, addon_storage_units FROM ACCOUNT WHERE account_id = ?");
         spaceAllowed.setLong(1, accountID);
         ResultSet spaceRS = spaceAllowed.executeQuery();
         spaceRS.next();
-        int accountType = spaceRS.getInt(1);
-        long maxSize = spaceRS.getLong(2);
+        long fixedSize = spaceRS.getLong(2);
         int maxDaysOver = spaceRS.getInt(3);
         int daysOver = spaceRS.getInt(4);
         Date lastBoundaryDate = spaceRS.getTimestamp(5);
+        int pricingModel = spaceRS.getInt(6);
+        long coreStorage = spaceRS.getLong(7);
+        int addonStorageUnits = spaceRS.getInt(8);
         spaceAllowed.close();
+
+        // if it's a small biz connection and they're on the new pricing model, don't validate storage
+        if (pricingModel == 1 && connectionBillingType == ConnectionBillingType.SMALL_BIZ) return;
 
         if (maxDaysOver == -1) {
             // if max days over = -1, they're an account we're not monitoring at all for size yet
             return;
         }
-        List<DataSourceStats> statsList = UserAccountAdminService.sizeDataSources((EIConnection) conn, accountID);
+
+        List<DataSourceStats> statsList = UserAccountAdminService.sizeDataSources((EIConnection) conn, accountID, pricingModel);
         long usedSize = UserAccountAdminService.usedSize(statsList);
+
+        long maxSize;
+
+        if (pricingModel == 0) {
+            maxSize = fixedSize;
+        } else {
+            maxSize = coreStorage + (long) addonStorageUnits * 250000000L;
+        }
 
         if (usedSize > maxSize) {
             String mb = Account.humanReadableByteCount(maxSize, true);
-            // first, if the account is using more than absolute limit, just throw an exception
+            // first, if the account is using more than absolute limit of 2x storage, just throw an exception
             if (usedSize > (maxSize * 2)) {
                 throw new ReportException(new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + ". You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier.", statsList));
             }
             if (daysOver > maxDaysOver) {
                 throw new ReportException(new StorageLimitFault("Retrieval of data for this data source has exceeded your account's storage limit of " + mb + ". You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier.", statsList));
             }
-
-            /*
-            50,954,240
-            147783680
-             */
 
             Calendar now = Calendar.getInstance();
             Calendar cal = Calendar.getInstance();
