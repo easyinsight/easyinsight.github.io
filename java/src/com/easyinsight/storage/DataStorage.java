@@ -267,7 +267,9 @@ public class DataStorage implements IDataStorage {
         spaceAllowed.close();
 
         // if it's a small biz connection and they're on the new pricing model, don't validate storage
-        if (pricingModel == 1 && connectionBillingType == ConnectionBillingType.SMALL_BIZ) return;
+        boolean validate = connectionBillingType == ConnectionBillingType.CUSTOM_DATA ||
+                connectionBillingType == ConnectionBillingType.QUICKBASE;
+        if (pricingModel == 1 && !validate) return;
 
         if (maxDaysOver == -1) {
             // if max days over = -1, they're an account we're not monitoring at all for size yet

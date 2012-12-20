@@ -1021,8 +1021,13 @@ public class UserAccountAdminService {
         accountStats.setUsedSpace(usedSize);
         accountStats.setUsedSpaceString(Account.humanReadableByteCount(usedSize, true));
 
-        accountStats.setMaxSpace(maxSize);
-        accountStats.setMaxSpaceString(Account.humanReadableByteCount(maxSize, true));
+        if (pricingModel == Account.TIERED) {
+            accountStats.setMaxSpace(maxSize);
+            accountStats.setMaxSpaceString(Account.humanReadableByteCount(maxSize, true));
+        } else {
+            accountStats.setMaxSpace(coreStorage + addonStorageUnits * 250000000L);
+            accountStats.setMaxSpaceString(Account.humanReadableByteCount(coreStorage + addonStorageUnits * 250000000L, true));
+        }
 
         accountStats.setStatsList(statsList);
 

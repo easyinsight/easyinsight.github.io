@@ -529,23 +529,6 @@ public class PreferencesService {
             updateStmt.setLong(3, SecurityUtil.getAccountID());
             updateStmt.executeUpdate();
         }
-        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM UI_VISIBILITY_SETTING WHERE PERSONA_ID = ?");
-        clearStmt.setLong(1, persona.getPersonaID());
-        clearStmt.executeUpdate();
-        PreparedStatement insertSettingStmt = conn.prepareStatement("INSERT INTO UI_VISIBILITY_SETTING (CONFIG_ELEMENT, VISIBLE, PERSONA_ID) " +
-                "VALUES (?, ?, ?)");
-        for (UIVisibilitySetting setting : persona.getUiSettings().getVisibilitySettings()) {
-            insertSettingStmt.setString(1, setting.getKey());
-            insertSettingStmt.setBoolean(2, setting.isSelected());
-            insertSettingStmt.setLong(3, persona.getPersonaID());
-            insertSettingStmt.execute();
-        }
-        if (SecurityUtil.getAccountTier() == Account.PERSONAL) {
-            PreparedStatement updateUserStmt = conn.prepareStatement("UPDATE USER SET PERSONA_ID = ? WHERE USER_ID = ?");
-            updateUserStmt.setLong(1, persona.getPersonaID());
-            updateUserStmt.setLong(2, SecurityUtil.getUserID());
-            updateUserStmt.executeUpdate();
-        }
         /*PreparedStatement dlsClearStmt = conn.prepareStatement("DELETE FROM DLS WHERE PERSONA_ID = ?");
         dlsClearStmt.setLong(1, persona.getPersonaID());
         dlsClearStmt.executeUpdate();*/
