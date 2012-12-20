@@ -976,7 +976,7 @@ public class UserAccountAdminService {
         ResultSet usersRS = usersStmt.executeQuery();
         int designers = 0;
         int viewers = 0;
-        if (usersRS.next()) {
+        while (usersRS.next()) {
             int users = usersRS.getInt(1);
             boolean analyst = usersRS.getBoolean(2);
             if (analyst) {
