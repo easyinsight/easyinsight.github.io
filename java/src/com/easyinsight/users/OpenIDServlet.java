@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -121,6 +120,10 @@ public class OpenIDServlet extends HttpServlet {
             throw new ServletException("Error processing OpenID response", e);
         }
     }
+
+    /*
+    https://accounts.google.com/o/openid2/auth?be=o8&openid.ns=http://specs.openid.net/auth/2.0&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select&openid.identity=http://specs.openid.net/auth/2.0/identifier_select&openid.return_to=https://www.easy-insight.com/app/openid&openid.assoc_handle=AMlYA9VSheeFfwKbiRoliHfZm51BKHNzwHujmHYgZUY2Cgb8GGfMIuSmxetNYO62Grz305AY&openid.mode=checkid_setup&openid.ns.ext1=http://openid.net/srv/ax/1.0&openid.ext1.mode=fetch_request&openid.ext1.type.email=http://axschema.org/contact/email&openid.ext1.type.firstName=http://axschema.org/namePerson/first&openid.ext1.type.lastName=http://axschema.org/namePerson/last&openid.ext1.required=email,firstName,lastName&openid.realm=https://staging.easy-insight.com/&openid.ns.ext2=http://specs.openid.net/extensions/ui/1.0&openid.ext2.icon=true&hd=easy-insight.com
+     */
 
     /**
      * Builds an auth request for a given OpenID provider.

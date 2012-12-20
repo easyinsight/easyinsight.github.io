@@ -6,6 +6,7 @@ import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextAccount;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
+import com.easyinsight.datafeeds.database.DatabaseListener;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
@@ -34,6 +35,9 @@ import java.util.Date;
 import java.sql.*;
 
 import com.easyinsight.util.ServiceUtil;
+import com.xerox.amazonws.sqs2.Message;
+import com.xerox.amazonws.sqs2.MessageQueue;
+import com.xerox.amazonws.sqs2.SQSUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
@@ -854,14 +858,7 @@ public class UserUploadService {
                                         DataSourceRefreshEvent info = new DataSourceRefreshEvent();
                                         info.setDataSourceName("Synchronizing with " + refreshable.getFeedName());
                                         ServiceUtil.instance().updateStatus(callID, ServiceUtil.RUNNING, info);
-                                        boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings);
-                                        sourceToRefresh.setVisible(true);
-                                        sourceToRefresh.setLastRefreshStart(now);
-                                        if (changed) {
-                                            new DataSourceInternalService().updateFeedDefinition(sourceToRefresh, conn, true, true);
-                                        } else {
-                                            feedStorage.updateDataFeedConfiguration(sourceToRefresh, conn);
-                                        }
+                                        new DataSourceFactory().createSource(conn, warnings, now, sourceToRefresh, refreshable, callID).invoke();
                                         PreparedStatement stmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_REFRESH_LOG (REFRESH_TIME, DATA_SOURCE_ID) VALUES (?, ?)");
                                         stmt.setTimestamp(1, new Timestamp(now.getTime()));
                                         stmt.setLong(2, sourceToRefresh.getDataFeedID());
@@ -1130,14 +1127,7 @@ public class UserUploadService {
                         try {
                             conn.setAutoCommit(false);
                             Date now = new Date();
-                            boolean changed = serverDataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, dataSource.getLastRefreshStart(), false, new ArrayList<ReportFault>());
-                            dataSource.setVisible(true);
-                            dataSource.setLastRefreshStart(now);
-                            if (changed) {
-                                new DataSourceInternalService().updateFeedDefinition(dataSource, conn, true, true);
-                            } else {
-                                feedStorage.updateDataFeedConfiguration(dataSource, conn);
-                            }
+                            new DataSourceFactory().createSource(conn, new ArrayList<ReportFault>(), now, dataSource, serverDataSourceDefinition, callID).invoke();
                             conn.commit();
                             DataSourceRefreshResult result = new DataSourceRefreshResult();
                             result.setDate(now);
@@ -1196,6 +1186,83 @@ public class UserUploadService {
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
+        }
+    }
+
+    public static class DataSourceFactory {
+        public IUploadDataSource createSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID) {
+            if (sourceToRefresh.getFeedType().getType() == FeedType.SERVER_MYSQL.getType()) {
+                return new SQSUploadDataSource(sourceToRefresh.getDataFeedID());
+            } else {
+                return new UploadDataSource(conn, warnings, now, sourceToRefresh, refreshable, callID);
+            }
+        }
+    }
+
+    public static interface IUploadDataSource {
+        public void invoke() throws Exception;
+    }
+
+    public static class SQSUploadDataSource implements IUploadDataSource {
+
+        private long dataSourceID;
+
+        private SQSUploadDataSource(long dataSourceID) {
+            this.dataSourceID = dataSourceID;
+        }
+
+        public void invoke() throws Exception {
+            MessageQueue msgQueue = SQSUtils.connectToQueue(DatabaseListener.DB_REQUEST, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            MessageQueue responseQueue = SQSUtils.connectToQueue(DatabaseListener.DB_RESPONSE, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            msgQueue.sendMessage(String.valueOf(dataSourceID));
+            boolean responded = false;
+            int i = 0;
+            while (!responded && i < 60) {
+                i++;
+                Message message = responseQueue.receiveMessage();
+                if (message == null) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        // ignore
+                    }
+                } else {
+                    long sourceID = Long.parseLong(message.getMessageBody());
+                    responseQueue.deleteMessage(message);
+                    if (sourceID == dataSourceID) {
+                        responded = true;
+                    }
+                }
+            }
+        }
+    }
+
+    public static class UploadDataSource implements IUploadDataSource {
+        private EIConnection conn;
+        private List<ReportFault> warnings;
+        private Date now;
+        private FeedDefinition sourceToRefresh;
+        private IServerDataSourceDefinition refreshable;
+        private String callID;
+
+        public UploadDataSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID) {
+            this.conn = conn;
+            this.warnings = warnings;
+            this.now = now;
+            this.sourceToRefresh = sourceToRefresh;
+            this.refreshable = refreshable;
+            this.callID = callID;
+        }
+
+        public void invoke() throws Exception {
+            boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings);
+            sourceToRefresh.setVisible(true);
+            sourceToRefresh.setLastRefreshStart(now);
+            if (changed) {
+                new DataSourceInternalService().updateFeedDefinition(sourceToRefresh, conn, true, true);
+            } else {
+                feedStorage.updateDataFeedConfiguration(sourceToRefresh, conn);
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.migration.Migrations;
 import com.easyinsight.datafeeds.DataSourceTypeRegistry;
 import com.easyinsight.datafeeds.FeedRegistry;
+import com.easyinsight.datafeeds.database.DatabaseListener;
 import com.easyinsight.datafeeds.migration.MigrationManager;
 import com.easyinsight.export.HtmlResultCache;
 import com.easyinsight.security.SecurityUtil;
@@ -47,6 +48,7 @@ public class DMSServlet extends HttpServlet {
                 Database.initialize();
                 ServiceUtil.initialize();
                 CurrencyRetrieval.initialize();
+                DatabaseListener.initialize();
                 new Migrations().migrate();
                 // create schedulers...
                 
@@ -99,6 +101,7 @@ public class DMSServlet extends HttpServlet {
         DatabaseManager.instance().shutdown();
         EventDispatcher.instance().setRunning(false);
         EventDispatcher.instance().interrupt();
+        DatabaseListener.instance().stop();
         if (scheduler != null) {
             scheduler.stop();
         }
