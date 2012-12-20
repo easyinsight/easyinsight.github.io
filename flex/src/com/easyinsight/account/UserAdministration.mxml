@@ -240,7 +240,7 @@
                 <mx:Label text="{usersUsedString}" fontFamily="Lucida Grande" fontWeight="normal" width="25"/>
                 <mx:Label text=" / " width="25"/>
 
-                <mx:Label text="{usersAvailableString}" fontFamily="Lucida Grande" fontWeight="normal" width="25"/>
+                <mx:Label text="{usersAvailableString}" fontFamily="Lucida Grande" fontWeight="normal" width="35"/>
 
                 <mx:Button styleName="grayButton" label="Add More Designers..." click="addMoreUsers()" visible="{showMoreDesigners}"/>
             </mx:HBox>
