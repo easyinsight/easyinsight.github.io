@@ -843,6 +843,7 @@ public class UserService {
             Account account = accountTransferObject.toAccount();
             account.setCreationDate(new Date());
             account.setAccountSource(accountSource);
+            account.setPricingModel(1);
             configureNewAccount(account);
             User user = createInitialUser(userTransferObject, password, account, salt);
             account.addUser(user);

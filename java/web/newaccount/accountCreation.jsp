@@ -40,15 +40,8 @@
             user.setAnalyst(true);
             com.easyinsight.users.AccountTransferObject account = new com.easyinsight.users.AccountTransferObject();
             account.setName(company);
-            String tierString = request.getParameter("tier");
-            int tier;
-            if (tierString == null || "".equals(tierString) || "null".equals(tierString)) {
-                tier = Account.BASIC;
-            } else {
-                int val = Integer.parseInt(tierString);
-                tier = Math.max(Math.min(val, Account.PROFESSIONAL), Account.BASIC);
-            }
-            account.setAccountType(tier);
+            account.setAccountType(Account.PROFESSIONAL);
+
             String exists = new com.easyinsight.users.UserService().doesUserExist(user.getUserName(), user.getEmail(), account.getName());
             if (exists == null) {
                 String url = "https://www.easy-insight.com/app";
