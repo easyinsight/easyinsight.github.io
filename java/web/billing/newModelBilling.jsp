@@ -26,7 +26,7 @@
 
     <script language="javascript" type="text/javascript">
         function setCCexp() {
-            document.getElementById("ccexp").value = document.getElementById("ccexpMonth").value + document.getElementById("ccexpYear").value;
+            document.getElementById("ccexp").value = document.getElementById("ccexpMonth").value + "/" + document.getElementById("ccexpYear").value;
         }
 
         function changeBilling() {
@@ -184,7 +184,7 @@
                     }
                 %></label></p>
                 <% } %>
-                <form method="post" action="https://secure.braintreepaymentgateway.com/api/transact.php" onsubmit="setCCexp()" class="well form-horizontal">
+                <form method="post" action="<%= new BrainTreeBlueBillingSystem().getTargetUrl() %>" onsubmit="setCCexp()" class="well form-horizontal">
                     <fieldset>
                         <input id="ccexp" type="hidden" value="" name="customer[credit_card][expiration_date]"/>
                         <input id="customer_vault_id" type="hidden" value="<%= account.getAccountID() %>" name="customer_vault_id" />
