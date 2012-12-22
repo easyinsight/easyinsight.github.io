@@ -193,35 +193,35 @@
                         <div class="control-group">
                             <label class="control-label" for="firstname">First Name:</label>
                             <div class="controls">
-                                <input id="firstname" type="text" value="" name="firstname" class="span3"/>
+                                <input id="firstname" type="text" value="" name="customer[first_name]" class="span3"/>
                             </div>
 
                         </div>
                         <div class="control-group">
                             <label class="control-label" for="lastname">Last Name:</label>
                             <div class="controls">
-                                <input id="lastname" type="text" value="" name="lastname" class="span3"/>
+                                <input id="lastname" type="text" value="" name="customer[last_name]" class="span3"/>
                             </div>
                         </div>
 
                         <div class="control-group">
                             <label class="control-label" for="zip">Billing Zip/Postal Code:</label>
                             <div class="controls">
-                                <input id="zip" type="text" value="" name="zip" />
+                                <input id="zip" type="text" value="" name="customer[credit_card][billing_address][postal_code]" />
                             </div>
                         </div>
 
                         <div class="control-group">
                             <label class="control-label" for="ccnumber">Credit Card Number:</label>
                             <div class="controls">
-                                <input id="ccnumber" type="text" style="width:16.5em" name="ccnumber"/>
+                                <input id="ccnumber" type="text" style="width:16.5em" name="customer[credit_card][number]"/>
                             </div>
                         </div>
 
                         <div class="control-group">
                             <label class="control-label" for="cvv">CVV/CVC:</label>
                             <div class="controls">
-                                <input id="cvv" type="text" value="" name="cvv" style="width:3.5em" />
+                                <input id="cvv" type="text" value="" name="customer[credit_card][cvv]" style="width:3.5em" />
                             </div>
                         </div>
 
