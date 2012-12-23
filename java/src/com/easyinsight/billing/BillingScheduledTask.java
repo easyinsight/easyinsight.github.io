@@ -80,9 +80,11 @@ public class BillingScheduledTask extends ScheduledTask {
                     stmt.executeUpdate();
                 }
             } else if (pricingModel == Account.TIERED) {
-                stmt.setInt(1, Account.DELINQUENT);
-                stmt.setLong(2, accountID);
-                stmt.executeUpdate();
+                if (!billingInformationGiven) {
+                    stmt.setInt(1, Account.DELINQUENT);
+                    stmt.setLong(2, accountID);
+                    stmt.executeUpdate();
+                }
             }
         }
         selectStmt.close();
