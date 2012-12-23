@@ -45,12 +45,12 @@ public class BillingScheduledTask extends ScheduledTask {
         // the trial end time is at or before today, set the account to Delinquent.
 
         PreparedStatement selectStmt = conn.prepareStatement("SELECT ACCOUNT_ID, BILLING_INFORMATION_GIVEN, PRICING_MODEL FROM ACCOUNT WHERE  " +
-                "ACCOUNT_TYPE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND " +
+                "ACCOUNT_TYPE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND " +
                 "ACCOUNT_ID IN (SELECT ACCOUNT_ID FROM ACCOUNT_TIMED_STATE WHERE date(state_change_time) < ?)");
-        // todo: add indexes on pricing model and billing information given if not there already
+
         PreparedStatement stmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_ID = ?");
-        selectStmt.setInt(1, Account.DELINQUENT);
-        selectStmt.setInt(2, Account.PERSONAL);
+        selectStmt.setInt(1, Account.PERSONAL);
+        selectStmt.setInt(2, Account.DELINQUENT);
         selectStmt.setInt(3, Account.CLOSING);
         selectStmt.setInt(4, Account.CLOSED);
         selectStmt.setDate(5, new java.sql.Date(System.currentTimeMillis()));
