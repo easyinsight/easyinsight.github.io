@@ -14,6 +14,7 @@ import com.easyinsight.users.Account;
 import com.easyinsight.users.QuickbaseExternalLogin;
 import com.easyinsight.users.User;
 import nu.xom.*;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
@@ -177,6 +178,7 @@ public class QuickbaseFeed extends Feed {
         if (queryBuilder.length() > 0) {
             query = queryBuilder.toString();
             query = query.substring(0, query.length() - 5);
+            query = StringEscapeUtils.escapeXml(query);
         }
         columnBuilder.deleteCharAt(columnBuilder.length() - 1);
         int masterCount = 0;
