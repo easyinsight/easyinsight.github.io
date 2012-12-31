@@ -26,6 +26,10 @@ public class TrendDefinition extends KPIDefinition {
     public function TrendDefinition() {
     }
 
+    override public function supportsEmbeddedFonts():Boolean {
+        return true;
+    }
+
     override public function fromSave(savedDef:AnalysisDefinition):void {
         super.fromSave(savedDef);
         this.trendReportID = TrendDefinition(savedDef).trendReportID;

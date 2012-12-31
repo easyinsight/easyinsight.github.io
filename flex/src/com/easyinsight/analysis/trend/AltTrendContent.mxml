@@ -45,7 +45,7 @@
 
         ]]></mx:Script>
     <mx:Text id="uiComp" fontSize="32" visible="false"/>
-    <mx:Box id="vbox">
+    <mx:Box id="vbox" width="100%" horizontalAlign="center">
 
     </mx:Box>
     <!--<mx:List id="list" fontSize="14" selectable="false" itemRenderer="com.easyinsight.analysis.trend.AltTrendRenderer" variableRowHeight="true"/>-->
