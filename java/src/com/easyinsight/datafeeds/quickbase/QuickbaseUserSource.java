@@ -4,11 +4,9 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
-import com.easyinsight.datafeeds.google.GoogleDataProvider;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DataStorage;
@@ -16,6 +14,7 @@ import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
 import nu.xom.*;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.BasicHttpEntity;
@@ -25,8 +24,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.*;
@@ -121,11 +118,10 @@ public class QuickbaseUserSource extends ServerDataSourceDefinition {
         httpRequest.setHeader("Content-Type", "application/xml");
         httpRequest.setHeader("QUICKBASE-ACTION", "API_UserRoles");
         BasicHttpEntity entity = new BasicHttpEntity();
-        StringBuilder columnBuilder = new StringBuilder();
         DataSet dataSet = new DataSet();
         try {
             String requestBody;
-            requestBody = MessageFormat.format(REQUEST, sessionTicket, applicationToken, columnBuilder.toString());
+            requestBody = MessageFormat.format(REQUEST, sessionTicket, applicationToken, "");
             byte[] contentBytes = requestBody.getBytes();
             entity.setContent(new ByteArrayInputStream(contentBytes));
             entity.setContentLength(contentBytes.length);
@@ -133,7 +129,13 @@ public class QuickbaseUserSource extends ServerDataSourceDefinition {
             HttpClient client = new DefaultHttpClient();
             ResponseHandler<String> responseHandler = new BasicResponseHandler();
 
-            String string = client.execute(httpRequest, responseHandler);
+            String string;
+            try {
+                string = client.execute(httpRequest, responseHandler);
+            } catch (HttpResponseException hre) {
+                // let's just ignore this for now
+                return dataSet;
+            }
             Document doc = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
 
             Nodes errors = doc.query("/qdbapi/errcode/text()");
