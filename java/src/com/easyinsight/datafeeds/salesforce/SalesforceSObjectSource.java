@@ -148,7 +148,7 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
             }
             return items;
         } catch (Exception e) {
-            LogClass.error(e.getMessage() + " on trying to load fields for " + getFeedName(), e);
+            LogClass.debug(e.getMessage() + " on trying to load fields for " + getFeedName());
             return new ArrayList<AnalysisItem>();
         }
     }
