@@ -101,7 +101,7 @@
         private var parameterFilter:Boolean;
 
         [Bindable]
-        private var filterField = "";
+        private var filterField:String = "";
 
         public function set fieldEditable(value:Boolean):void {
             _fieldEditable = value;
