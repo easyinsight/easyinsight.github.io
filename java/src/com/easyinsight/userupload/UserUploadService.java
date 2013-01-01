@@ -1191,6 +1191,7 @@ public class UserUploadService {
 
     public static class DataSourceFactory {
         public IUploadDataSource createSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID) {
+            System.out.println("refreshable type = " + sourceToRefresh.getFeedType().getType());
             if (sourceToRefresh.getFeedType().getType() == FeedType.SERVER_MYSQL.getType()) {
                 return new SQSUploadDataSource(sourceToRefresh.getDataFeedID());
             } else {
@@ -1217,6 +1218,7 @@ public class UserUploadService {
             msgQueue.sendMessage(dataSourceID + "|" + System.currentTimeMillis());
             boolean responded = false;
             int i = 0;
+            System.out.println("at least invoking from this side?");
             while (!responded && i < 60) {
                 Message message = responseQueue.receiveMessage();
                 if (message == null) {
