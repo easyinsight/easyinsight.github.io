@@ -424,7 +424,7 @@ public class AnalysisService {
                     locationField = field;
                 } else if ("Date".equals(field.toDisplay())) {
                     date = field;
-                } else if ("Data Log - Record ID".equals(field.toDisplay())) {
+                } else if ("Data Log - Record ID#".equals(field.toDisplay())) {
                     recordID = field;
                     recordID = recordID.clone();
                     recordID.setKeyColumn(true);
