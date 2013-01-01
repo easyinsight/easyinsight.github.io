@@ -241,7 +241,7 @@
 
     <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10" id="vbox" horizontalAlign="center" width="100%"
              paddingBottom="10" verticalScrollPolicy="off">
-        <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" id="headerHBox">
+        <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" id="headerHBox" horizontalGap="50">
 
 
         </mx:HBox>
