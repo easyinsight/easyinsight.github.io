@@ -85,7 +85,7 @@ public class TransformContainer extends HBox
         filterTile.removeAllChildren();
     }
 
-    protected function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
+    protected static function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
     {
         // resize the FlowBox manually, as the internal calculation doesn't work
 
@@ -464,17 +464,19 @@ public class TransformContainer extends HBox
             var newFilter:IFilter = createFilter(event.filterDefinition);
             initializeFilter(newFilter, false);
         } else {
-            var existingFilter:IFilter = null;
-            for each (var filter:IFilter in filterTile.getChildren()) {
-                if (filter.filterDefinition == event.filterDefinition) {
-                    existingFilter = filter;
+            var existingFilter1:IFilter = null;
+            for each (var testFilter:IFilter in filterTile.getChildren()) {
+                if (testFilter.filterDefinition == event.filterDefinition) {
+                    existingFilter1 = testFilter;
                 }
             }
-            register(existingFilter);
+            register(existingFilter1);
             var coll:Object = triggerMap[event.filter.filterDefinition.filterName];
             if (coll != null) {
                 for each (var child:IFilter in coll) {
-                    ComboBoxFilter(child).regenerate();
+                    if (child is ComboBoxFilter) {
+                        ComboBoxFilter(child).regenerate();
+                    }
                 }
             }
             dispatchEvent(new TransformsUpdatedEvent(filterDefinitions));
