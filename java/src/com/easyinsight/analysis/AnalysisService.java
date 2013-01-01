@@ -436,23 +436,17 @@ public class AnalysisService {
             list.setFilterDefinitions(new ArrayList<FilterDefinition>());
             list.setColumns(Arrays.asList(locationField, providerField, relatedProviderField));
             DataSet dataSet1 = DataService.listDataSet(list, new InsightRequestMetadata(), conn);
-            Collection<Object> relatedProviders = new HashSet<Object>();
+            //Collection<Object> relatedProviders = new HashSet<Object>();
             for (IRow row : dataSet1.getRows()) {
                 List<String> key = new ArrayList<String>();
                 key.add(row.getValue(providerField.createAggregateKey()).toString());
                 key.add(row.getValue(locationField.createAggregateKey()).toString());
                 String relatedProviderString = row.getValue(relatedProviderField.createAggregateKey()).toString();
                 map.put(key, relatedProviderString);
-                relatedProviders.add(relatedProviderString);
+              //  relatedProviders.add(relatedProviderString);
             }
 
-            WSListDefinition existingReport = new WSListDefinition();
-            existingReport.setDataFeedID(useSource.getDataFeedID());
 
-            existingReport.setColumns(Arrays.asList(relatedProviderField));
-            FilterDefinition filterDefinition = new FilterValueDefinition(relatedProviderField, true, new ArrayList<Object>(relatedProviders));
-            existingReport.setFilterDefinitions(Arrays.asList(filterDefinition));
-            DataSet existing = DataService.listDataSet(existingReport, new InsightRequestMetadata(), conn);
 
             List<Object> filteredValues = new ArrayList<Object>();
             Iterator<IRow> iter = dataSet.getRows().iterator();
@@ -476,11 +470,20 @@ public class AnalysisService {
                 filteredValues.add(providerID);
             }
 
+            WSListDefinition existingReport = new WSListDefinition();
+            existingReport.setDataFeedID(dataSource.getDataFeedID());
+
+            existingReport.setColumns(Arrays.asList(relatedProviderField));
+            FilterDefinition filterDefinition = new FilterValueDefinition(relatedProviderField, true, filteredValues);
+            existingReport.setFilterDefinitions(Arrays.asList(filterDefinition));
+            DataSet existing = DataService.listDataSet(existingReport, new InsightRequestMetadata(), conn);
+
             List<FilterDefinition> recordIDFilters = new ArrayList<FilterDefinition>();
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
             filterValueDefinition.setField(recordID);
             filterValueDefinition.setInclusive(true);
             filterValueDefinition.setEnabled(true);
+            filterValueDefinition.setApplyBeforeAggregation(true);
             recordIDFilters.add(filterValueDefinition);
 
             for (IRow row : existing.getRows()) {
