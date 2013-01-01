@@ -160,6 +160,7 @@
             }
             if (dashboard.borderThickness == 0 && exchangeItem == null) {
                 headerArea.includeInLayout = false;
+                headerArea.visible = false;
                 descriptionBox.includeInLayout = false;
             }
             if (dashboard.backgroundColor == 0xFFFFFF) {
