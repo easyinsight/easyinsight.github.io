@@ -37,11 +37,20 @@ import flash.events.EventDispatcher;
     public var marmotScript:String;
     public var trendFilter:Boolean;
     public var notCondition:Boolean;
+    public var parentFilters:String;
 		
 		public function FilterDefinition()
 			{
 			super();
 		}
+
+    public function retrieveParentFilters():Array {
+        if (parentFilters == null || parentFilters == "") {
+            return [];
+        }
+        return parentFilters.split(",");
+        //return [ parentFilters ];
+    }
 
     public function matches(filterDefinition:FilterDefinition):Boolean {
         return field != null && filterDefinition.field != null && field.matches(filterDefinition.field) && getType() == filterDefinition.getType();
