@@ -449,22 +449,46 @@ public class AnalysisService {
             WSListDefinition existingReport = new WSListDefinition();
             existingReport.setDataFeedID(useSource.getDataFeedID());
 
-            existingReport.setColumns(Arrays.asList(recordID, relatedProviderField, date));
+            existingReport.setColumns(Arrays.asList(relatedProviderField));
             FilterDefinition filterDefinition = new FilterValueDefinition(relatedProviderField, true, new ArrayList<Object>(relatedProviders));
             existingReport.setFilterDefinitions(Arrays.asList(filterDefinition));
             DataSet existing = DataService.listDataSet(existingReport, new InsightRequestMetadata(), conn);
+
+            List<Object> filteredValues = new ArrayList<Object>();
+            Iterator<IRow> iter = dataSet.getRows().iterator();
+            while (iter.hasNext()) {
+                IRow row = iter.next();
+                List<String> pair = new ArrayList<String>();
+                Value provider = row.getValue(providerPseudoField);
+                Value location = row.getValue(locationPseudoField);
+                if ("".equals(provider.toString().trim())) {
+                    iter.remove();
+                }
+                pair.add(provider.toString());
+                pair.add(location.toString());
+                String relatedProvider = map.get(pair);
+                if (relatedProvider == null || "(Empty)".equals(relatedProvider)) {
+                    return "We couldn't find " + location.toString() + " - " + provider.toString() + ".";
+                } else {
+                    row.addValue(new NamedKey("beutk2zd6.6"), relatedProvider);
+                }
+                Value providerID = row.getValue(relatedProviderField);
+                filteredValues.add(providerID);
+            }
+
             List<FilterDefinition> recordIDFilters = new ArrayList<FilterDefinition>();
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
             filterValueDefinition.setField(recordID);
             filterValueDefinition.setInclusive(true);
             filterValueDefinition.setEnabled(true);
             recordIDFilters.add(filterValueDefinition);
-            List<Object> filteredValues = new ArrayList<Object>();
+
             for (IRow row : existing.getRows()) {
                 filteredValues.add(row.getValue(recordID));
             }
+            System.out.println("retrieving record IDs of " + filteredValues);
             filterValueDefinition.setFilteredValues(filteredValues);
-            DataStorage readStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID());
+            /*DataStorage readStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID());
             ActualRowSet rowSet = readStorage.allData(recordIDFilters, useSource.getFields(), null, new InsightRequestMetadata());
             readStorage.closeConnection();
 
@@ -486,23 +510,10 @@ public class AnalysisService {
 
             List<IRow> endTargets = new ArrayList<IRow>();
             List<ActualRow> actualTargets = new ArrayList<ActualRow>();
-            Iterator<IRow> iter = dataSet.getRows().iterator();
+            iter = dataSet.getRows().iterator();
             while (iter.hasNext()) {
                 IRow row = iter.next();
-                List<String> pair = new ArrayList<String>();
                 Value provider = row.getValue(providerPseudoField);
-                Value location = row.getValue(locationPseudoField);
-                if ("".equals(provider.toString().trim())) {
-                    iter.remove();
-                }
-                pair.add(provider.toString());
-                pair.add(location.toString());
-                String relatedProvider = map.get(pair);
-                if (relatedProvider == null || "(Empty)".equals(relatedProvider)) {
-                    return "We couldn't find " + location.toString() + " - " + provider.toString() + ".";
-                } else {
-                    row.addValue(new NamedKey("beutk2zd6.6"), relatedProvider);
-                }
                 Value providerID = row.getValue(relatedProviderField);
                 DateValue dateValue = (DateValue) row.getValue(date);
 
@@ -537,7 +548,7 @@ public class AnalysisService {
                     transforms.addAll(new ReportCalculation(line).apply(useSource));
                 }
             }
-            transforms.add(new CachedCalculationTransform(useSource));
+            transforms.add(new CachedCalculationTransform(useSource));*/
             /*DataStorage dataStorage = DataStorage.writeConnection(useSource, conn);
             try {
                 for (IRow row : endTargets) {
