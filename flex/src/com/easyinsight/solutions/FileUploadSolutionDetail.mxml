@@ -11,7 +11,7 @@
 
         private function install():void {
             var userUpload:UserUpload = UserUpload(PopUpManager.createPopUp(this, UserUpload, true));
-            userUpload.addEventListener(AnalyzeEvent.ANALYZE, uploadConfigComplete);
+            userUpload.addEventListener(AnalyzeEvent.ANALYZE, uploadConfigComplete, false, 0, true);
             PopUpUtil.centerPopUp(userUpload);
         }
 
