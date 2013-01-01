@@ -311,6 +311,36 @@ public class AnalysisService {
         return analysisItem;
     }
 
+    public static final class ImportKey {
+        private String providerID;
+        private Date date;
+
+        public ImportKey(String providerID, Date date) {
+            this.providerID = providerID;
+            this.date = date;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ImportKey importKey = (ImportKey) o;
+
+            if (!date.equals(importKey.date)) return false;
+            if (!providerID.equals(importKey.providerID)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = providerID.hashCode();
+            result = 31 * result + date.hashCode();
+            return result;
+        }
+    }
+
     public String importData(byte[] bytes, long dataSourceID) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         // have to translate provider name -> related provider
@@ -346,6 +376,9 @@ public class AnalysisService {
             XSSFSheet sheet = wb.getSheetAt(0);
             Iterator<org.apache.poi.ss.usermodel.Row> rit = sheet.rowIterator();
             DataSet dataSet = new DataSet();
+
+            // identify which rows we're adding data onto
+
             Map<Short, IRow> rowMap = new HashMap<Short, IRow>();
             for (; rit.hasNext(); ) {
                 org.apache.poi.ss.usermodel.Row excelRow = rit.next();
@@ -375,13 +408,13 @@ public class AnalysisService {
                     }
                 }
             }
-            /*PersistableDataSetForm data = new ExcelUploadFormat().createDataSet(bytes, useSource.getFields(), mapper);
-            DataSet dataSet = data.toDataSet(null);*/
             Map<List<String>, String> map = new HashMap<List<String>, String>();
 
             AnalysisItem relatedProviderField = null;
             AnalysisItem locationField = null;
             AnalysisItem providerField = null;
+            AnalysisItem recordID = null;
+            AnalysisItem date = null;
             for (AnalysisItem field : dataSource.getFields()) {
                 if ("Related Provider".equals(field.toDisplay())) {
                     relatedProviderField = field;
@@ -389,6 +422,10 @@ public class AnalysisService {
                     providerField = field;
                 } else if ("Location Name".equals(field.toDisplay())) {
                     locationField = field;
+                } else if ("Date".equals(field.toDisplay())) {
+                    date = field;
+                } else if ("Record ID".equals(field.toDisplay())) {
+                    recordID = field;
                 }
             }
 
@@ -397,19 +434,59 @@ public class AnalysisService {
             list.setFilterDefinitions(new ArrayList<FilterDefinition>());
             list.setColumns(Arrays.asList(locationField, providerField, relatedProviderField));
             DataSet dataSet1 = DataService.listDataSet(list, new InsightRequestMetadata(), conn);
+            Collection<Object> relatedProviders = new HashSet<Object>();
             for (IRow row : dataSet1.getRows()) {
                 List<String> key = new ArrayList<String>();
                 key.add(row.getValue(providerField.createAggregateKey()).toString());
                 key.add(row.getValue(locationField.createAggregateKey()).toString());
-                map.put(key, row.getValue(relatedProviderField.createAggregateKey()).toString());
+                String relatedProviderString = row.getValue(relatedProviderField.createAggregateKey()).toString();
+                map.put(key, relatedProviderString);
+                relatedProviders.add(relatedProviderString);
             }
 
+            WSListDefinition existingReport = new WSListDefinition();
+            existingReport.setDataFeedID(useSource.getDataFeedID());
+
+            existingReport.setColumns(Arrays.asList(recordID, relatedProviderField, date));
+            FilterDefinition filterDefinition = new FilterValueDefinition(relatedProviderField, true, new ArrayList<Object>(relatedProviders));
+            existingReport.setFilterDefinitions(Arrays.asList(filterDefinition));
+            DataSet existing = DataService.listDataSet(existingReport, new InsightRequestMetadata(), conn);
+            List<FilterDefinition> recordIDFilters = new ArrayList<FilterDefinition>();
+            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+            filterValueDefinition.setField(recordID);
+            filterValueDefinition.setInclusive(true);
+            filterValueDefinition.setEnabled(true);
+            recordIDFilters.add(filterValueDefinition);
+            List<Object> filteredValues = new ArrayList<Object>();
+            for (IRow row : existing.getRows()) {
+                filteredValues.add(row.getValue(recordID));
+            }
+            filterValueDefinition.setFilteredValues(filteredValues);
+            DataStorage readStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID());
+            ActualRowSet rowSet = readStorage.allData(recordIDFilters, useSource.getFields(), null, new InsightRequestMetadata());
+            readStorage.closeConnection();
+
+            System.out.println("retrieved " + rowSet.getRows().size() + " rows matching this existing data");
+
+            Map<ImportKey, ActualRow> existingMap = new HashMap<ImportKey, ActualRow>();
+            for (ActualRow actualRow : rowSet.getRows()) {
+                //String recordIDValue = actualRow.getValues().get(recordID.qualifiedName()).toString();
+                String provider = actualRow.getValues().get(providerField.qualifiedName()).toString();
+                Value dVal = actualRow.getValues().get(date.qualifiedName());
+                if (dVal.type() == Value.DATE) {
+                    DateValue dVal1 = (DateValue) dVal;
+                    existingMap.put(new ImportKey(provider, dVal1.getDate()), actualRow);
+                }
+
+            }
+
+
+
+            List<IRow> endTargets = new ArrayList<IRow>();
+            List<ActualRow> actualTargets = new ArrayList<ActualRow>();
             Iterator<IRow> iter = dataSet.getRows().iterator();
             while (iter.hasNext()) {
                 IRow row = iter.next();
-                // retrieve location
-                // retrieve provider
-                // look up the actual related provider
                 List<String> pair = new ArrayList<String>();
                 Value provider = row.getValue(providerPseudoField);
                 Value location = row.getValue(locationPseudoField);
@@ -424,6 +501,28 @@ public class AnalysisService {
                 } else {
                     row.addValue(new NamedKey("beutk2zd6.6"), relatedProvider);
                 }
+                Value providerID = row.getValue(relatedProviderField);
+                DateValue dateValue = (DateValue) row.getValue(date);
+
+                ImportKey importKey = new ImportKey(providerID.toString(), dateValue.getDate());
+                ActualRow actualRow = existingMap.get(importKey);
+                if (actualRow == null) {
+                    System.out.println("no row found for " + provider.toString() + " - " + dateValue.toString());
+                    endTargets.add(row);
+                } else {
+                    // update actualRow with the value from row
+                    System.out.println("found existing row for " + provider.toString() + " - " + dateValue.toString());
+                    for (AnalysisItem analysisItem : useSource.getFields()) {
+                        Value value = row.getValue(analysisItem);
+                        if (value.type() != Value.EMPTY) {
+                            System.out.println("\tmerging in value from " + analysisItem.qualifiedName());
+                            actualRow.getValues().put(analysisItem.qualifiedName(), value);
+                        }
+                    }
+
+                    actualTargets.add(actualRow);
+                }
+
             }
 
             System.out.println("Determining calculations to apply...");
@@ -437,10 +536,13 @@ public class AnalysisService {
                 }
             }
             transforms.add(new CachedCalculationTransform(useSource));
-            DataStorage dataStorage = DataStorage.writeConnection(useSource, conn);
+            /*DataStorage dataStorage = DataStorage.writeConnection(useSource, conn);
             try {
-                for (IRow row : dataSet.getRows()) {
+                for (IRow row : endTargets) {
                     dataStorage.addRow(row, useSource.getFields(), transforms);
+                }
+                for (ActualRow row : actualTargets) {
+                    dataStorage.updateRow(row, useSource.getFields(), transforms);
                 }
                 dataStorage.commit();
             } catch (Exception e) {
@@ -448,7 +550,7 @@ public class AnalysisService {
                 throw e;
             } finally {
                 dataStorage.closeConnection();
-            }
+            }*/
             conn.commit();
             return null;
         } catch (Exception e) {
