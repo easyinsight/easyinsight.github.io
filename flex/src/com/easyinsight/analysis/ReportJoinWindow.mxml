@@ -164,7 +164,7 @@
             }
             dataSources = dataSourceMap[String(dataSource.id)] as ArrayCollection;
             connections = new ArrayCollection();
-            if (startJoins == null) {
+            if (startJoins == null || startJoins.length == 0) {
                 var joins:ArrayCollection = joinMap[String(dataSource.id)];
                 for each (var join:JoinOverride in joins) {
                     connections.addItem(join.toConnection());
