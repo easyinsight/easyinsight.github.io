@@ -1214,13 +1214,13 @@ public class UserUploadService {
         public void invoke() throws Exception {
             MessageQueue msgQueue = SQSUtils.connectToQueue(DatabaseListener.DB_REQUEST, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             MessageQueue responseQueue = SQSUtils.connectToQueue(DatabaseListener.DB_RESPONSE, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-            msgQueue.sendMessage(String.valueOf(dataSourceID));
+            msgQueue.sendMessage(dataSourceID + "|" + System.currentTimeMillis());
             boolean responded = false;
             int i = 0;
             while (!responded && i < 60) {
-                i++;
                 Message message = responseQueue.receiveMessage();
                 if (message == null) {
+                    i++;
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
@@ -1228,8 +1228,10 @@ public class UserUploadService {
                     }
                 } else {
                     long sourceID = Long.parseLong(message.getMessageBody());
+                    System.out.println("got response with id = " + sourceID);
                     responseQueue.deleteMessage(message);
                     if (sourceID == dataSourceID) {
+                        System.out.println("matched!");
                         responded = true;
                     }
                 }

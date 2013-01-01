@@ -29,8 +29,8 @@ import java.util.List;
  */
 public class DatabaseListener implements Runnable {
 
-    public static final String DB_REQUEST = "EIDBRequest";
-    public static final String DB_RESPONSE = "EIDBResponse";
+    public static final String DB_REQUEST = "EIDBRequestProduction";
+    public static final String DB_RESPONSE = "EIDBResponseProduction";
 
     private boolean running;
 
@@ -63,8 +63,16 @@ public class DatabaseListener implements Runnable {
                         // ignore
                     }
                 } else {
-                    long sourceID = Long.parseLong(message.getMessageBody());
+                    String body = message.getMessageBody();
                     messageQueue.deleteMessage(message);
+                    String[] tokens = body.split("\\|");
+                    long sourceID = Long.parseLong(tokens[0]);
+                    long time = Long.parseLong(tokens[1]);
+                    if (time < (System.currentTimeMillis() - (1000 * 60 * 60))) {
+                        System.out.println("Dropping old message from " + new Date(time));
+                        continue;
+                    }
+                    System.out.println("firing up a refresh on " + sourceID);
                     EIConnection conn = Database.instance().getConnection();
                     try {
                         conn.setAutoCommit(false);
