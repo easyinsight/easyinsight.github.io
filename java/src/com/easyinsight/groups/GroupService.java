@@ -48,6 +48,23 @@ public class GroupService {
         return false;
     }
 
+    public void deleteGroups(List<Integer> groupIDs) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM COMMUNITY_GROUP WHERE COMMUNITY_GROUP_ID = ?");
+            for (Integer groupID : groupIDs) {
+                SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+                deleteStmt.setLong(1, groupID);
+                deleteStmt.executeUpdate();
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void deleteGroup(long groupID) {
         SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
         EIConnection conn = Database.instance().getConnection();

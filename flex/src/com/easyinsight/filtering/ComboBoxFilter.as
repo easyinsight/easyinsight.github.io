@@ -26,6 +26,7 @@ import mx.core.UIComponent;
 import mx.events.DropdownEvent;
 import mx.managers.PopUpManager;
 import mx.managers.PopUpManager;
+import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
@@ -45,6 +46,12 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
     private var _reportID:int;
 
     private var _dashboardID:int;
+
+    private var _otherFilters:ArrayCollection;
+
+    public function set otherFilters(value:ArrayCollection):void {
+        _otherFilters = value;
+    }
 
     public function set reportID(value:int):void {
         _reportID = value;
@@ -67,11 +74,12 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
 
     private var _report:AnalysisDefinition;
 
-    public function ComboBoxFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition) {
+    public function ComboBoxFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition, otherFilters:ArrayCollection) {
         super();
         this._report = report;
         this._feedID = feedID;
         this._analysisItem = analysisItem;
+        _otherFilters = otherFilters;
         this.reportID = reportID;
         this.dashboardID = dashboardID;
         this.height = 23;
@@ -108,8 +116,17 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report);
+            dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report, _otherFilters, _filterDefinition);
         }
+    }
+
+    public function regenerate():void {
+        _loadingFromReport = true;
+        _filterDefinition.filteredValues = new ArrayCollection(["All"]);
+        dataService = new RemoteObject();
+        dataService.destination = "data";
+        dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
+        dataService.getAnalysisItemMetadata.send(_feedID, filterDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report, _otherFilters, _filterDefinition);
     }
 
     private function onChange(event:Event):void {
@@ -212,10 +229,15 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report);
+            dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
+            dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report, _otherFilters, _filterDefinition);
         } else {
             processMetadata(_filterDefinition.cachedValues as AnalysisDimensionResultMetadata);
         }
+    }
+
+    private function onFault(event:FaultEvent):void {
+        Alert.show(event.fault.faultString);
     }
     
     private var loadingBar:ProgressBar;

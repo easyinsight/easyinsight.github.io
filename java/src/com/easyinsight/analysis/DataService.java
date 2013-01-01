@@ -40,6 +40,11 @@ public class DataService {
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
                                                               @Nullable WSAnalysisDefinition report) {
+        return getAnalysisItemMetadata(feedID, analysisItem, utfOffset, reportID, dashboardID, report, null, null);
+    }
+
+    public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
+                                                              @Nullable WSAnalysisDefinition report, List<FilterDefinition> additionalFilters, FilterDefinition requester) {
         EIConnection conn = Database.instance().getConnection();
         try {
             if (reportID > 0) {
@@ -61,7 +66,7 @@ public class DataService {
                 insightRequestMetadata.setTraverseAllJoins(report.isFullJoins());
             }
             timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed);
-            return feed.getMetadata(analysisItem, insightRequestMetadata, conn, report);
+            return feed.getMetadata(analysisItem, insightRequestMetadata, conn, report, additionalFilters, requester);
         } catch (ReportException re) {
             AnalysisItemResultMetadata metadata = new AnalysisItemResultMetadata();
             metadata.setReportFault(re.getReportFault());
@@ -778,7 +783,7 @@ public class DataService {
             EmbeddedTreeDataResults embeddedDataResults = new EmbeddedTreeDataResults();
             embeddedDataResults.setReportFault(dae.getReportFault());
             return embeddedDataResults;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {

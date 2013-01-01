@@ -69,6 +69,9 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name="minimum_role")
     private int minimumRole = 4;
 
+    @Column(name="parent_filters")
+    private String parentFilters;
+
     @Column(name="not_condition")
     private boolean notCondition;
 
@@ -114,6 +117,14 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     public int type() {
         return 0;
+    }
+
+    public String getParentFilters() {
+        return parentFilters;
+    }
+
+    public void setParentFilters(String parentFilters) {
+        this.parentFilters = parentFilters;
     }
 
     public boolean isTrendFilter() {
@@ -398,7 +409,7 @@ public class FilterDefinition implements Serializable, Cloneable {
                 boolean dateTime = !dateDim.isDateOnlyField() && dataSource.getDataSource().checkDateTime(getField().toOriginalDisplayName(), getField().getKey());
                 dateDim.setTimeshift(dateTime);
             }
-        }
+        }               // https://www.pivotaltracker.com/story/show/37900405
     }
 
     public void calculationItems(Map<String, List<AnalysisItem>> map) {

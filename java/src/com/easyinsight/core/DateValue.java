@@ -3,6 +3,7 @@ package com.easyinsight.core;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -76,12 +77,17 @@ public class DateValue extends Value implements Serializable {
         if (date == null) {
             return "";
         }
-        if (format == null) {
-            return new SimpleDateFormat("yyyy-MM-dd").format(date);
-        } else {
-            return new SimpleDateFormat(format).format(date);
+        if (cachedFormat == null) {
+            if (format == null) {
+                cachedFormat = new SimpleDateFormat("yyyy-MM-dd");
+            } else {
+                cachedFormat = new SimpleDateFormat(format);
+            }
         }
+        return cachedFormat.format(date);
     }
+
+    private transient DateFormat cachedFormat;
 
     public DateValue(Date date) {
         this.date = date;

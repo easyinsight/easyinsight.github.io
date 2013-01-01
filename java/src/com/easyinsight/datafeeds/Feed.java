@@ -173,7 +173,7 @@ public abstract class Feed implements Serializable {
         return ids;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, List<FilterDefinition> otherFilters, FilterDefinition requester) {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         WSListDefinition tempList = new WSListDefinition();
         if (report != null) {
@@ -184,9 +184,22 @@ public abstract class Feed implements Serializable {
             tempList.setAddedItems(report.getAddedItems());
         }
         List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
+        // Kerry Skitch, 562-968
         columns.add(analysisItem);
         tempList.setDataFeedID(getFeedID());
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+
+        if (requester != null && otherFilters != null && requester.getParentFilters() != null) {
+            String[] targetNames = requester.getParentFilters().split(",");
+            for (String targetName : targetNames) {
+                for (FilterDefinition filterDefinition : otherFilters) {
+                    if (targetName.equals(filterDefinition.getFilterName())) {
+                        filters.add(filterDefinition);
+                        columns.add(filterDefinition.getField());
+                    }
+                }
+            }
+        }
 
         try {
             PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
@@ -216,6 +229,28 @@ public abstract class Feed implements Serializable {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
+        Iterator<FilterDefinition> iter = filters.iterator();
+        while (iter.hasNext()) {
+            FilterDefinition filter = iter.next();
+            if (!filter.isEnabled()) {
+                iter.remove();
+            } else {
+                if (filter instanceof FilterValueDefinition) {
+                    FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
+                    if (filterValueDefinition.isAllOption() && filterValueDefinition.getFilteredValues().size() == 1 &&
+                            "All".equals(filterValueDefinition.getFilteredValues().get(0).toString())) {
+                        iter.remove();
+                    }
+                } else if (filter instanceof RollingFilterDefinition) {
+                    RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;
+                    if (rollingFilterDefinition.getInterval() == MaterializedRollingFilterDefinition.ALL) {
+                        iter.remove();
+                    }
+                }
+            }
+        }
+
         tempList.setColumns(columns);
         tempList.setJoinOverrides(insightRequestMetadata.getJoinOverrides());
         tempList.setFullJoins(insightRequestMetadata.isTraverseAllJoins());
@@ -232,7 +267,7 @@ public abstract class Feed implements Serializable {
             }
         }
         for (IRow row : dataSet.getRows()) {
-            metadata.addValue(analysisItem, row.getValue(analysisItem.createAggregateKey()), insightRequestMetadata);
+            metadata.addValue(analysisItem, analysisItem.polishValue(row.getValue(analysisItem.createAggregateKey())), insightRequestMetadata);
         }
         return metadata;
     }

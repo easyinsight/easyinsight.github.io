@@ -20,6 +20,8 @@ import flash.utils.Dictionary;
 import flexlib.containers.FlowBox;
 
 import mx.collections.ArrayCollection;
+
+import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 
 import mx.controls.AdvancedDataGrid;
@@ -225,7 +227,7 @@ public class TransformContainer extends HBox
                 if (filterValueDefinition.autoComplete) {
                     filter = new AutoCompleteFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
                 } else {
-                    filter = new ComboBoxFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report);
+                    filter = new ComboBoxFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report, filterDefinitions);
                 }
             } else {
                 filter = new MultiValueFilter(_feedID, filterDefinition.field, _reportID,  _dashboardID);
@@ -462,6 +464,19 @@ public class TransformContainer extends HBox
             var newFilter:IFilter = createFilter(event.filterDefinition);
             initializeFilter(newFilter, false);
         } else {
+            var existingFilter:IFilter = null;
+            for each (var filter:IFilter in filterTile.getChildren()) {
+                if (filter.filterDefinition == event.filterDefinition) {
+                    existingFilter = filter;
+                }
+            }
+            register(existingFilter);
+            var coll:Object = triggerMap[event.filter.filterDefinition.filterName];
+            if (coll != null) {
+                for each (var child:IFilter in coll) {
+                    ComboBoxFilter(child).regenerate();
+                }
+            }
             dispatchEvent(new TransformsUpdatedEvent(filterDefinitions));
         }
     }
@@ -482,10 +497,13 @@ public class TransformContainer extends HBox
         if (_loadingFromReport) {
             addFilter(filter);
         }
+
         if (filter.filterDefinition != null && filter.filterDefinition.filterID == 0) {
             dispatchEvent(new AnalysisChangedEvent());
         }
     }
+
+    private var triggerMap:Object = new Object();
 
     private var _role:int;
 
@@ -504,14 +522,31 @@ public class TransformContainer extends HBox
                 MultiValueFilter(filter).edit(null);
             }
         }
+        if (filter is ComboBoxFilter) {
+            ComboBoxFilter(filter).otherFilters = filterDefinitions;
+        }
     }
 
     private function initializeFilter(filter:IFilter, launchWindow:Boolean):void {
         dispatchEvent(new CommandEvent(new FilterAddCommand(this, filter, launchWindow)));
     }
 
+    private function register(filter:IFilter):void {
+        var filters:Array = filter.filterDefinition.retrieveParentFilters();
+        for each (var filterName:String in filters) {
+            var coll:Object = triggerMap[filterName];
+            if (coll == null) {
+                coll = new Object();
+                triggerMap[filterName] = coll;
+            }
+            coll[filter.filterDefinition.filterName] = filter;
+        }
+    }
+
     protected function addFilter(filter:IFilter):void {
         //filterMap[filter.filterDefinition.field.qualifiedName()] = filter;
+        register(filter);
+
         filterDefinitions.addItem(filter.filterDefinition);
         filter.analysisItems = _analysisItems;
     }
@@ -580,7 +615,7 @@ public class TransformContainer extends HBox
                     filterValueDefinition.inclusive = includeFilter;
                     filterDefinition = filterValueDefinition;
                     if (values.length == 1 && includeFilter) {
-                        filter = new ComboBoxFilter(_feedID, key, _reportID, _dashboardID, _report);
+                        filter = new ComboBoxFilter(_feedID, key, _reportID, _dashboardID, _report, filterDefinitions);
                     } else {
                         filter = new MultiValueFilter(_feedID, key, _reportID, _dashboardID);
                     }

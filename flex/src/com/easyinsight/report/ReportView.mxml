@@ -245,6 +245,7 @@
             viewFactory.refresh();
         }
 
+        [Bindable]
         private var report:AnalysisDefinition;
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
@@ -782,7 +783,7 @@
             <filtering:TransformContainer id="transformContainer" filterEditable="false"
                                           existingFilters="{filterDefinitions}"
                                           width="100%" feedID="{dataSourceID}"
-                                          reportView="true" reportID="{_reportID}"/>
+                                          reportView="true" reportID="{_reportID}" report="{report}"/>
         </mx:VBox>
     </mx:ViewStack>
     <mx:Canvas id="screenTarget" width="100%" height="100%"/>

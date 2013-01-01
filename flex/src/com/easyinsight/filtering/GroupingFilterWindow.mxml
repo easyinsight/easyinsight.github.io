@@ -20,7 +20,7 @@
         }
 
         private function addComboBox():void {
-            var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, _item, 0, 0, _report);
+            var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, _item, 0, 0, _report, null);
             dispatchEvent(new FilterCreationEvent(comboBoxFilter));
             PopUpManager.removePopUp(this);
         }

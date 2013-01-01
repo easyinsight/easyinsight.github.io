@@ -1,0 +1,91 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.BaseCampDataSource;
+        import com.easyinsight.datasources.MySQLDatabaseConnection;
+
+        import mx.controls.Button;
+
+        [Bindable]
+        private var host:String;
+        [Bindable]
+        private var port:String;
+        [Bindable]
+        private var databaseName:String;
+        [Bindable]
+        private var userName:String;
+        [Bindable]
+        private var query:String;
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var obj:MySQLDatabaseConnection = new MySQLDatabaseConnection();
+            obj.host = hostInput.text;
+            obj.port = int(portInput.text);
+            obj.databaseName = databaseNameInput.text;
+            obj.dbUserName = databaseUserNameInput.text;
+            obj.dbPassword = databasePasswordInput.text;
+            obj.query = queryArea.text;
+            obj.feedName = nameInput.text;
+            obj.rebuildFields = true;
+            return obj;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:MySQLDatabaseConnection = feedDefinition as MySQLDatabaseConnection;
+            host = ds.host;
+            port = String(ds.port);
+            databaseName = ds.databaseName;
+            userName = ds.dbUserName;
+            query = ds.query;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var obj:MySQLDatabaseConnection = feedDefinition as MySQLDatabaseConnection;
+            obj.host = hostInput.text;
+            obj.port = int(portInput.text);
+            obj.databaseName = databaseNameInput.text;
+            obj.dbUserName = databaseUserNameInput.text;
+            obj.dbPassword = databasePasswordInput.text;
+            obj.query = queryArea.text;
+            obj.feedName = nameInput.text;
+            obj.rebuildFields = true;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Data Source Name:">
+            <mx:TextInput id="nameInput" fontWeight="normal" fontFamily="Lucida Grande"  width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Database Host:">
+            <mx:TextInput id="hostInput" fontWeight="normal" fontFamily="Lucida Grande" text="{host}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Database Port:">
+            <mx:TextInput id="portInput" fontWeight="normal" fontFamily="Lucida Grande" text="{port}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Database Name:">
+            <mx:TextInput id="databaseNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{databaseName}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Database User Name:">
+            <mx:TextInput id="databaseUserNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{userName}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Database Password:">
+            <mx:TextInput id="databasePasswordInput" fontWeight="normal" fontFamily="Lucida Grande" width="350" displayAsPassword="true"/>
+        </mx:FormItem>
+        <mx:FormItem label="Query:">
+            <mx:TextArea id="queryArea" fontWeight="normal" fontFamily="Lucida Grande" width="350" text="{query}" height="100"
+                    borderStyle="solid" borderThickness="1"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:VBox>

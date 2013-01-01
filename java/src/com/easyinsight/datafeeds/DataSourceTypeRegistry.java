@@ -118,8 +118,6 @@ public class DataSourceTypeRegistry {
     public int billingInfoForType(FeedType feedType) {
         Integer type = connectionBillingInfoMap.get(feedType);
         if (type == null) {
-
-            // International Education Services, Highrise, 619-479-2626 x7013
             return 0;
         }
         return type;

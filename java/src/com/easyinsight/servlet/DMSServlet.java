@@ -48,7 +48,9 @@ public class DMSServlet extends HttpServlet {
                 Database.initialize();
                 ServiceUtil.initialize();
                 CurrencyRetrieval.initialize();
-                DatabaseListener.initialize();
+                if (ConfigLoader.instance().isDatabaseListener()) {
+                    DatabaseListener.initialize();
+                }
                 new Migrations().migrate();
                 // create schedulers...
                 

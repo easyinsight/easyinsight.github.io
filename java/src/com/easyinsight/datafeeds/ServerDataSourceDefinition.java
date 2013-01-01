@@ -152,6 +152,10 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     public void validateTableSetup(EIConnection conn) throws SQLException {
     }
 
+    protected boolean otherwiseChanged() {
+        return false;
+    }
+
     public MigrationResult migrations(EIConnection conn, FeedDefinition parentDefinition) throws Exception {
         boolean changed = false;
         Map<String, Key> keys = newDataSourceFields(parentDefinition);
@@ -173,7 +177,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
                 existingField.setDisplayName(field.getDisplayName());
             }*/
         }
-        if (newFields.size() > 0) {
+        if (newFields.size() > 0 || otherwiseChanged()) {
             changed = true;
             System.out.println("Discovered new fields = " + newFields);
             for (AnalysisItem newField : newFields) {

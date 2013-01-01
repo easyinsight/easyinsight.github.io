@@ -52,6 +52,7 @@
             beforeAgg = _filterDefinition.applyBeforeAggregation;
             showOnReportView = _filterDefinition.showOnReportView;
             filterName = _filterDefinition.filterName;
+            parentNames = _filterDefinition.parentFilters;
             inverse = _filterDefinition.notCondition;
             parameterFilter = _filterDefinition.templateFilter;
             toggle = _filterDefinition.toggleEnabled;
@@ -115,6 +116,7 @@
                 _filterDefinition.field = editor.save(_feedID);
             }*/
             _filterDefinition.applyBeforeAggregation = aggregationCheckbox.selected;
+            _filterDefinition.parentFilters = parentNamesInput.text;
             _filterDefinition.notCondition = inverseCheckbox.selected;
             _filterDefinition.showOnReportView = reportViewCheckbox.selected;
             _filterDefinition.filterName = filterNameInput.text;
@@ -134,6 +136,9 @@
 
         [Bindable]
         private var role:int;
+
+        [Bindable]
+        private var parentNames:String;
 		]]>
 	</mx:Script>
 	<mx:VBox id="coreBox">
@@ -150,6 +155,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="Filter Name:">
                     <mx:TextInput id="filterNameInput" text="{filterName}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Parent Filter Names:">
+                    <mx:TextInput id="parentNamesInput" text="{parentNames}"/>
                 </mx:FormItem>
             </mx:Form>
             <mx:Form>

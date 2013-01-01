@@ -179,6 +179,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
             var parentFilters:ArrayCollection = createAdditionalFilters(filterMap);
             transformContainer = new TransformContainer();
+            transformContainer.report = event.reportInfo.report;
 
             transformContainer.filterEditable = false;
             var myFilterColl:ArrayCollection = new ArrayCollection();

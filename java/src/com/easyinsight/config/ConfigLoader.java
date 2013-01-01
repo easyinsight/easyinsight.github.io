@@ -40,6 +40,16 @@ public class ConfigLoader {
 
     private boolean billingEnabled;
 
+    private boolean databaseListener;
+
+    public boolean isDatabaseListener() {
+        return databaseListener;
+    }
+
+    public void setDatabaseListener(boolean databaseListener) {
+        this.databaseListener = databaseListener;
+    }
+
     public String getOutputLogPath() {
         return outputLogPath;
     }
@@ -220,6 +230,8 @@ public class ConfigLoader {
             billingSystem = Integer.valueOf((String) properties.get("billing.system"));
 
             billingEnabled = Boolean.valueOf((String) properties.get("billing.enabled"));
+
+            databaseListener = Boolean.valueOf((String) properties.get("database.listener"));
             
         } catch (IOException e) {
             LogClass.error(e);
