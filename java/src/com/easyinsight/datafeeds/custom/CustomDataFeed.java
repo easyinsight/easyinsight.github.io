@@ -53,7 +53,7 @@ public class CustomDataFeed extends Feed {
     }
 
     @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, List<FilterDefinition> otherFilters, FilterDefinition requester) throws ReportException {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             List<DateValue> dateValues = getPort().getPossibleDateValues(analysisItem.getKey().toKeyString(), new ArrayList<Property>());

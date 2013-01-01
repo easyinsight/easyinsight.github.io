@@ -50,7 +50,7 @@ public class SendGridFeed extends Feed {
     }
 
     @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, List<FilterDefinition> otherFilters, FilterDefinition requester) throws ReportException {
         try {
             AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
             if (SendGridDataSource.CATEGORY.equals(analysisItem.getKey().toKeyString())) {
