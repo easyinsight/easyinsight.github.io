@@ -473,7 +473,7 @@ public class AnalysisService {
             WSListDefinition existingReport = new WSListDefinition();
             existingReport.setDataFeedID(dataSource.getDataFeedID());
 
-            existingReport.setColumns(Arrays.asList(relatedProviderField));
+            existingReport.setColumns(Arrays.asList(recordID));
             FilterDefinition filterDefinition = new FilterValueDefinition(relatedProviderField, true, filteredValues);
             existingReport.setFilterDefinitions(Arrays.asList(filterDefinition));
             DataSet existing = DataService.listDataSet(existingReport, new InsightRequestMetadata(), conn);
