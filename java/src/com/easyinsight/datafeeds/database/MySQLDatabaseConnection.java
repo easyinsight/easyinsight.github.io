@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.database;
 
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
 
@@ -134,5 +135,10 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
             setRebuildFields(rs.getBoolean(7));
         }
         loadStmt.close();
+    }
+
+    @Override
+    public int getDataSourceType() {
+        return DataSourceInfo.STORED_PULL;
     }
 }
