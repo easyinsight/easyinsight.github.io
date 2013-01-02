@@ -43,7 +43,7 @@ public class GoogleAnalyticsFeed extends Feed {
         this.oauthTokenSecret = oauthTokenSecret;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, List<FilterDefinition> otherFilters, FilterDefinition requester) throws ReportException {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         try {
             AnalysisItem queryItem;
