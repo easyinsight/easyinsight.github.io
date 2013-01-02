@@ -143,7 +143,7 @@ public class OAuthServlet extends HttpServlet {
                             redirectURL = "https://staging.easy-insight.com/app/#connectionConfig=" + feedDefinition.getApiKey();
                         }
                     } else {
-                        redirectURL = "https://localhost:4443/app/";
+                        redirectURL = "https://www.easy-insight.com/app/";
                     }
                     conn.commit();
                     resp.sendRedirect(redirectURL);
