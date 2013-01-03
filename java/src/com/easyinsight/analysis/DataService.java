@@ -1459,6 +1459,11 @@ public class DataService {
                 //if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
                     validQueryItems.add(analysisItem);
                 //}
+                if (analysisItem.getFilters() != null) {
+                    for (FilterDefinition filterDefinition : analysisItem.getFilters()) {
+                        filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                    }
+                }
             }
 
             for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
