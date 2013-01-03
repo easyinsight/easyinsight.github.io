@@ -422,7 +422,7 @@ public class AnalysisService {
                     providerField = field;
                 } else if ("Location Name".equals(field.toDisplay())) {
                     locationField = field;
-                } else if ("Record ID#".equals(field.toDisplay())) {
+                } else if ("Data Log - Record ID#".equals(field.toDisplay())) {
                     recordID = field;
                     recordID = recordID.clone();
                     recordID.setKeyColumn(true);
