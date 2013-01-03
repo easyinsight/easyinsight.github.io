@@ -414,7 +414,7 @@ public class AnalysisService {
             AnalysisItem locationField = null;
             AnalysisItem providerField = null;
             AnalysisItem recordID = null;
-            AnalysisItem date = null;
+
             for (AnalysisItem field : dataSource.getFields()) {
                 if ("Related Provider".equals(field.toDisplay())) {
                     relatedProviderField = field;
@@ -422,12 +422,19 @@ public class AnalysisService {
                     providerField = field;
                 } else if ("Location Name".equals(field.toDisplay())) {
                     locationField = field;
-                } else if ("Date".equals(field.toDisplay())) {
-                    date = field;
-                } else if ("Data Log - Record ID#".equals(field.toDisplay())) {
+                } else if ("Record ID#".equals(field.toDisplay())) {
                     recordID = field;
                     recordID = recordID.clone();
                     recordID.setKeyColumn(true);
+                }
+            }
+            AnalysisItem useSourceRelatedProviderField = null;
+            AnalysisItem date = null;
+            for (AnalysisItem field : useSource.getFields()) {
+                if ("Date".equals(field.toDisplay())) {
+                    date = field;
+                } else if ("Related Provider".equals(field.toDisplay())) {
+                    useSourceRelatedProviderField = field;
                 }
             }
 
@@ -436,6 +443,7 @@ public class AnalysisService {
             list.setFilterDefinitions(new ArrayList<FilterDefinition>());
             list.setColumns(Arrays.asList(locationField, providerField, relatedProviderField));
             DataSet dataSet1 = DataService.listDataSet(list, new InsightRequestMetadata(), conn);
+
             //Collection<Object> relatedProviders = new HashSet<Object>();
             for (IRow row : dataSet1.getRows()) {
                 List<String> key = new ArrayList<String>();
@@ -443,6 +451,7 @@ public class AnalysisService {
                 key.add(row.getValue(locationField.createAggregateKey()).toString());
                 String relatedProviderString = row.getValue(relatedProviderField.createAggregateKey()).toString();
                 map.put(key, relatedProviderString);
+
               //  relatedProviders.add(relatedProviderString);
             }
 
@@ -465,10 +474,14 @@ public class AnalysisService {
                     return "We couldn't find " + location.toString() + " - " + provider.toString() + ".";
                 } else {
                     row.addValue(new NamedKey("beutk2zd6.6"), relatedProvider);
+                    row.addValue(useSourceRelatedProviderField.getKey(), relatedProvider);
+                    filteredValues.add(relatedProvider);
                 }
-                Value providerID = row.getValue(relatedProviderField);
-                filteredValues.add(providerID);
+                //Value providerID = row.getValue(relatedProviderField);
+
             }
+
+            System.out.println("filtered values = " + filteredValues);
 
             WSListDefinition existingReport = new WSListDefinition();
             existingReport.setDataFeedID(dataSource.getDataFeedID());
@@ -486,12 +499,13 @@ public class AnalysisService {
             filterValueDefinition.setApplyBeforeAggregation(true);
             recordIDFilters.add(filterValueDefinition);
 
+            List<Object> recordIDValues = new ArrayList<Object>();
             for (IRow row : existing.getRows()) {
-                filteredValues.add(row.getValue(recordID));
+                recordIDValues.add(row.getValue(recordID));
             }
-            System.out.println("retrieving record IDs of " + filteredValues);
-            filterValueDefinition.setFilteredValues(filteredValues);
-            /*DataStorage readStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID());
+            System.out.println("retrieving record IDs of " + recordIDValues);
+            filterValueDefinition.setFilteredValues(recordIDValues);
+            DataStorage readStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID());
             ActualRowSet rowSet = readStorage.allData(recordIDFilters, useSource.getFields(), null, new InsightRequestMetadata());
             readStorage.closeConnection();
 
@@ -500,7 +514,7 @@ public class AnalysisService {
             Map<ImportKey, ActualRow> existingMap = new HashMap<ImportKey, ActualRow>();
             for (ActualRow actualRow : rowSet.getRows()) {
                 //String recordIDValue = actualRow.getValues().get(recordID.qualifiedName()).toString();
-                String provider = actualRow.getValues().get(providerField.qualifiedName()).toString();
+                String provider = actualRow.getValues().get(useSourceRelatedProviderField.qualifiedName()).toString();
                 Value dVal = actualRow.getValues().get(date.qualifiedName());
                 if (dVal.type() == Value.DATE) {
                     DateValue dVal1 = (DateValue) dVal;
@@ -517,7 +531,7 @@ public class AnalysisService {
             while (iter.hasNext()) {
                 IRow row = iter.next();
                 Value provider = row.getValue(providerPseudoField);
-                Value providerID = row.getValue(relatedProviderField);
+                Value providerID = row.getValue(new NamedKey("beutk2zd6.6"));
                 DateValue dateValue = (DateValue) row.getValue(date);
 
                 ImportKey importKey = new ImportKey(providerID.toString(), dateValue.getDate());
@@ -551,7 +565,7 @@ public class AnalysisService {
                     transforms.addAll(new ReportCalculation(line).apply(useSource));
                 }
             }
-            transforms.add(new CachedCalculationTransform(useSource));*/
+            transforms.add(new CachedCalculationTransform(useSource));
             /*DataStorage dataStorage = DataStorage.writeConnection(useSource, conn);
             try {
                 for (IRow row : endTargets) {
