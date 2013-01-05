@@ -189,7 +189,7 @@ public abstract class Feed implements Serializable {
         tempList.setDataFeedID(getFeedID());
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
 
-        if (requester != null && otherFilters != null && requester.getParentFilters() != null) {
+        if (requester != null && otherFilters != null && requester.getParentFilters() != null && !"".equals(requester.getParentFilters().trim())) {
             String[] targetNames = requester.getParentFilters().split(",");
             for (String targetName : targetNames) {
                 for (FilterDefinition filterDefinition : otherFilters) {
