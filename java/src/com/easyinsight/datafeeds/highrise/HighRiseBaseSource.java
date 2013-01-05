@@ -126,6 +126,9 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                         } catch (InterruptedException e1) {
                         }
                     }
+                } else if (statusLine.indexOf("502") != -1) {
+                    // keep trying...
+                    System.out.println("highrise 502 fix");
                 } else {
                     if (badCredentialsOnError) {
                         System.out.println("Failure = " + statusLine);
