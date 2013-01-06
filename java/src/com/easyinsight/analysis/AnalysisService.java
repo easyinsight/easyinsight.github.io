@@ -414,10 +414,13 @@ public class AnalysisService {
             AnalysisItem locationField = null;
             AnalysisItem providerField = null;
             AnalysisItem recordID = null;
+            AnalysisItem providerRecordID = null;
 
             for (AnalysisItem field : dataSource.getFields()) {
                 if ("Related Provider".equals(field.toDisplay())) {
                     relatedProviderField = field;
+                } else if ("Providers - Record ID#".equals(field.toDisplay())) {
+                    providerRecordID = field;
                 } else if ("Provider Name".equals(field.toDisplay())) {
                     providerField = field;
                 } else if ("Location Name".equals(field.toDisplay())) {
@@ -441,7 +444,7 @@ public class AnalysisService {
             WSListDefinition list = new WSListDefinition();
             list.setDataFeedID(dataSource.getDataFeedID());
             list.setFilterDefinitions(new ArrayList<FilterDefinition>());
-            list.setColumns(Arrays.asList(locationField, providerField, relatedProviderField));
+            list.setColumns(Arrays.asList(locationField, providerField, providerRecordID));
             DataSet dataSet1 = DataService.listDataSet(list, new InsightRequestMetadata(), conn);
 
             //Collection<Object> relatedProviders = new HashSet<Object>();
@@ -449,7 +452,7 @@ public class AnalysisService {
                 List<String> key = new ArrayList<String>();
                 key.add(row.getValue(providerField.createAggregateKey()).toString());
                 key.add(row.getValue(locationField.createAggregateKey()).toString());
-                String relatedProviderString = row.getValue(relatedProviderField.createAggregateKey()).toString();
+                String relatedProviderString = row.getValue(providerRecordID.createAggregateKey()).toString();
                 map.put(key, relatedProviderString);
 
               //  relatedProviders.add(relatedProviderString);
