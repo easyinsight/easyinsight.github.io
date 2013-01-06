@@ -214,7 +214,7 @@ public class DataService {
             Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
 
             for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-                if (analysisItem.getReportFieldExtension() != null && reportFilter != null) {
+                if (analysisItem.getReportFieldExtension() != null && reportFilter != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
                     TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
                     if (trendReportFieldExtension.getDate() != null) {
                         AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
@@ -659,7 +659,7 @@ public class DataService {
         Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
 
         for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-            if (analysisItem.getReportFieldExtension() != null && reportFilter != null) {
+            if (analysisItem.getReportFieldExtension() != null && reportFilter != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
                 TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
                 if (trendReportFieldExtension.getDate() != null) {
                     AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
@@ -983,7 +983,7 @@ public class DataService {
             Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
 
             for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-                if (analysisItem.getReportFieldExtension() != null && reportFilter != null) {
+                if (analysisItem.getReportFieldExtension() != null && reportFilter != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
                     TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
                     if (trendReportFieldExtension.getDate() != null) {
                         AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
