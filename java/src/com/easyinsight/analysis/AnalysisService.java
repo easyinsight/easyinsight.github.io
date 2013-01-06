@@ -566,7 +566,7 @@ public class AnalysisService {
                 }
             }
             transforms.add(new CachedCalculationTransform(useSource));
-            /*DataStorage dataStorage = DataStorage.writeConnection(useSource, conn);
+            DataStorage dataStorage = DataStorage.writeConnection(useSource, conn);
             try {
                 for (IRow row : endTargets) {
                     dataStorage.addRow(row, useSource.getFields(), transforms);
@@ -580,7 +580,7 @@ public class AnalysisService {
                 throw e;
             } finally {
                 dataStorage.closeConnection();
-            }*/
+            }
             conn.commit();
             return null;
         } catch (Exception e) {
