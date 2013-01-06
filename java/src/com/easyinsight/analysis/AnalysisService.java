@@ -469,6 +469,7 @@ public class AnalysisService {
                 Value location = row.getValue(locationPseudoField);
                 if ("".equals(provider.toString().trim())) {
                     iter.remove();
+                    continue;
                 }
                 pair.add(provider.toString());
                 pair.add(location.toString());
