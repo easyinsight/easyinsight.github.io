@@ -21,6 +21,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     private Date xAxisMaximum = null;
 
     private int strokeWeight = 2;
+    private boolean alignLabelsToUnits = true;
 
     /*public LimitsResults applyLimits(DataSet dataSet) {
         LimitsResults limitsResults;
@@ -112,6 +113,14 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         this.autoScaled = autoScaled;
     }
 
+    public boolean isAlignLabelsToUnits() {
+        return alignLabelsToUnits;
+    }
+
+    public void setAlignLabelsToUnits(boolean alignLabelsToUnits) {
+        this.alignLabelsToUnits = alignLabelsToUnits;
+    }
+
     public boolean isAutoScale() {
         return autoScale;
     }
@@ -129,7 +138,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     }
 
     public void tweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
-        if (autoScale && getXaxis().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+        if (autoScale && getXaxis() != null && getXaxis().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             int daysDuration = 0;
         AnalysisDateDimension start;
         try {
@@ -185,12 +194,15 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         super.populateProperties(properties);
         strokeWeight = (int) findNumberProperty(properties, "strokeWeight", 2);
         autoScale = findBooleanProperty(properties, "autoScale", false);
+        alignLabelsToUnits = findBooleanProperty(properties, "alignLabelsToUnits", true);
     }
 
     @Override
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportNumericProperty("strokeWeight", strokeWeight));
         properties.add(new ReportBooleanProperty("autoScale", autoScale));
+        properties.add(new ReportBooleanProperty("alignLabelsToUnits", alignLabelsToUnits));
         return properties;
     }
 

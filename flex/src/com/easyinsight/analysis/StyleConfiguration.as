@@ -52,6 +52,7 @@ public class StyleConfiguration {
         items.addItem(new NumericReportFormItem("Border Thickness", "borderThickness", dashboard.borderThickness, dashboard, 0, 100));
         items.addItem(new ColorReportFormItem("Border Color", "borderColor",  dashboard.borderColor, dashboard));
         items.addItem(new ColorReportFormItem("Background Color", "backgroundColor",  dashboard.backgroundColor, dashboard));
+        items.addItem(new CheckBoxReportFormItem("Absolute Height", "absoluteSizing",  dashboard.absoluteSizing, dashboard));
         return items;
     }
 
@@ -188,6 +189,7 @@ public class StyleConfiguration {
                     report, ["true", "false"]));
             items.addItem(new NumericReportFormItem("Stroke Weight", "strokeWeight", LineChartDefinition(report).strokeWeight, report, 1, 10));
             items.addItem(new CheckBoxReportFormItem("Auto Scale", "autoScale", LineChartDefinition(report).autoScale, report));
+            items.addItem(new CheckBoxReportFormItem("Align Labels To Units", "alignLabelsToUnits", LineChartDefinition(report).alignLabelsToUnits, report));
         }
         if (report is AreaChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Form", "form", TwoAxisDefinition(report).form,

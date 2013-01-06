@@ -12,7 +12,7 @@ public class LineChartDefinition extends TwoAxisDefinition{
     public var xAxisMaximum:Date = null;
 
     public var strokeWeight:int = 2;
-
+    public var alignLabelsToUnits:Boolean = true;
 
 
     public function LineChartDefinition() {

@@ -196,6 +196,7 @@
                 if (xAxisDimension.hasType(AnalysisItemTypes.DATE)) {
                     var dateDimension:AnalysisDateDimension = xAxisDimension as AnalysisDateDimension;
                     var dateAxis:DateTimeAxis = new DateTimeAxis();
+                    dateAxis.alignLabelsToUnits = lineChartDef.alignLabelsToUnits;
                     switch (dateDimension.dateLevel) {
                         case AnalysisItemTypes.YEAR_LEVEL:
                             dateAxis.dataUnits = "years";
