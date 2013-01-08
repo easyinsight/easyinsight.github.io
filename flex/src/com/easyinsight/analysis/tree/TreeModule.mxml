@@ -35,6 +35,7 @@
         import com.easyinsight.analysis.TextCellRenderer;
         import com.easyinsight.analysis.TextReportFieldExtension;
         import com.easyinsight.analysis.TreeRow;
+        import com.easyinsight.analysis.TreeTextCellRenderer;
         import com.easyinsight.analysis.Value;
         import com.easyinsight.analysis.list.EnableLookupEditingEvent;
         import com.easyinsight.analysis.list.LookupTableChangeEvent;
@@ -367,15 +368,15 @@
                 }
             }
             if (item.hasType(AnalysisItemTypes.TEXT)) {
-                return TextCellRenderer;
+                return TreeTextCellRenderer;
             } else {
                 if (item.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
                     var d:DerivedAnalysisDimension = item as DerivedAnalysisDimension;
-                    return d.wordWrap ? TextCellRenderer : SummaryCellRenderer;
+                    return d.wordWrap ? TreeTextCellRenderer : SummaryCellRenderer;
                 }
                 var ext:TextReportFieldExtension = item.reportFieldExtension as TextReportFieldExtension;
                 if (ext != null && ext.wordWrap) {
-                    return TextCellRenderer;
+                    return TreeTextCellRenderer;
                 }
                 return SummaryCellRenderer;
             }
