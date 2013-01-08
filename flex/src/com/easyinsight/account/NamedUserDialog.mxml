@@ -3,7 +3,7 @@
     <util:states>
         <mx:State name="initialCreate">
             <mx:AddChild relativeTo="{baseInfoForm}">
-                <mx:FormItem label="Require Password Change:">
+                <mx:FormItem label="Require Password Change:" labelWidth="180">
                     <mx:CheckBox id="requirePasswordChangeCheckbox" selected="true"/>
                 </mx:FormItem>
             </mx:AddChild>
@@ -243,19 +243,19 @@
             <mx:Text text="This user is a Viewer. He or she can view reports and dashboards, but can't create or modify them." width="540"
                     selectable="false"/>
             <mx:Form  id="baseInfoForm">
-                <mx:FormItem label="User ID:" direction="horizontal" labelWidth="150">
+                <mx:FormItem label="User ID:" direction="horizontal" labelWidth="180">
                     <mx:TextInput id="userNameInput" text="{userName}" width="400"/>
                 </mx:FormItem>
-                <mx:FormItem label="First Name:" direction="horizontal" labelWidth="150">
+                <mx:FormItem label="First Name:" direction="horizontal" labelWidth="180">
                     <mx:TextInput id="firstNameInput" text="{firstName}" width="400"/>
                 </mx:FormItem>
-                <mx:FormItem label="Last Name:" direction="horizontal">
+                <mx:FormItem label="Last Name:" direction="horizontal" labelWidth="180">
                     <mx:TextInput id="fullNameInput" text="{fullName}" width="400"/>
                 </mx:FormItem>
-                <mx:FormItem label="Email Address:" direction="horizontal">
+                <mx:FormItem label="Email Address:" direction="horizontal" labelWidth="180">
                     <mx:TextInput id="emailInput" text="{email}" width="400"/>
                 </mx:FormItem>
-                <mx:FormItem label="Send Newsletter to User:">
+                <mx:FormItem label="Send Newsletter to User:" labelWidth="180">
                     <mx:CheckBox id="newsletterCheckbox" selected="{newsletterSelected}"/>
                 </mx:FormItem>
             </mx:Form>
@@ -263,7 +263,7 @@
             <mx:Text text="Personas allow you to restrict users to only see certain subsets of data. You can configure Personas through the Persona section of the Account page."
                      width="540" selectable="false"/>
             <mx:Form>
-                <mx:FormItem label="Persona:" visible="{showPersonaOption}" labelWidth="150">
+                <mx:FormItem label="Persona:" visible="{showPersonaOption}" labelWidth="180">
                     <util:PersonaItemComboBox dataProvider="{personas}" labelField="name" id="personaComboBox" selectedProperty="personaID"
                                               selectedValue="{personaID}" change="onPersonaChange(event)"/>
                 </mx:FormItem>
@@ -272,7 +272,7 @@
             <mx:Text text="By setting a fixed dashboard view, the user will only see the specified dashboard when he or she logs into Easy Insight."
                     width="540" selectable="false"/>
             <mx:Form>
-                <mx:FormItem label="Fixed Dashboard View:">
+                <mx:FormItem label="Fixed Dashboard View:" labelWidth="180">
                     <util:SmartComboBox dataProvider="{availableViews}" labelField="name" id="singleViewComboBox" selectedProperty="id" selectedValue="{viewID}" enabled="{!accountAdmin}"
                             maxWidth="300"/>
                 </mx:FormItem>

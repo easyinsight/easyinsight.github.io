@@ -3,7 +3,7 @@
     <util:states>
         <mx:State name="initialCreate">
             <mx:AddChild relativeTo="{baseInfoForm}">
-                <mx:FormItem label="Require Password Change:">
+                <mx:FormItem label="Require Password Change:" labelWidth="180">
                     <mx:CheckBox id="requirePasswordChangeCheckbox" selected="true"/>
                 </mx:FormItem>
             </mx:AddChild>
@@ -242,29 +242,29 @@
         <mx:method name="getUserDLS" result="gotUserDLS()"/>
     </mx:RemoteObject>
     <mx:TabNavigator id="tabNavigator" resizeToContent="true">
-        <mx:VBox label="Base Info" horizontalAlign="center" paddingLeft="5">
+        <mx:VBox label="Base Info" paddingLeft="5">
             <mx:Text text="This user is a Designer. He or she can create and modify reports and dashboards." width="540"
                      selectable="false"/>
             <mx:Form  id="baseInfoForm">
-                <mx:FormItem label="User ID:" direction="horizontal">
+                <mx:FormItem label="User ID:" direction="horizontal" labelWidth="180">
                     <mx:TextInput id="userNameInput" text="{userName}" width="400"/>
                 </mx:FormItem>
-                <mx:FormItem label="First Name:" direction="horizontal">
+                <mx:FormItem label="First Name:" direction="horizontal" labelWidth="180">
                     <mx:TextInput id="firstNameInput" text="{firstName}" width="400"/>
                 </mx:FormItem>
-                <mx:FormItem label="Last Name:" direction="horizontal">
+                <mx:FormItem label="Last Name:" direction="horizontal" labelWidth="180">
                     <mx:TextInput id="fullNameInput" text="{fullName}" width="400"/>
                 </mx:FormItem>
-                <mx:FormItem label="Email Address:" direction="horizontal">
+                <mx:FormItem label="Email Address:" direction="horizontal" labelWidth="180">
                     <mx:TextInput id="emailInput" text="{email}" width="400"/>
                 </mx:FormItem>
-                <mx:FormItem label="Account Administrator:">
+                <mx:FormItem label="Account Administrator:" labelWidth="180">
                     <mx:CheckBox id="accountAdminCheckbox" selected="{accountAdmin}"/>
                 </mx:FormItem>
-                <mx:FormItem label="Invoice Recipient:">
+                <mx:FormItem label="Invoice Recipient:" labelWidth="180">
                     <mx:CheckBox id="invoiceCheckbox" selected="{invoiceRecipient}"/>
                 </mx:FormItem>
-                <mx:FormItem label="Send Newsletter to User:">
+                <mx:FormItem label="Send Newsletter to User:" labelWidth="180">
                     <mx:CheckBox id="newsletterCheckbox" selected="{newsletterSelected}"/>
                 </mx:FormItem>
             </mx:Form>
@@ -272,7 +272,7 @@
             <mx:Text text="Personas allow you to restrict users to only see certain subsets of data. You can configure Personas through the Persona section of the Account page."
                      width="540" selectable="false"/>
             <mx:Form>
-                <mx:FormItem label="Persona:" visible="{showPersonaOption}" labelWidth="150">
+                <mx:FormItem label="Persona:" visible="{showPersonaOption}" labelWidth="180">
                     <util:PersonaItemComboBox dataProvider="{personas}" labelField="name" id="personaComboBox" selectedProperty="personaID"
                                               selectedValue="{personaID}" change="onPersonaChange(event)"/>
                 </mx:FormItem>
