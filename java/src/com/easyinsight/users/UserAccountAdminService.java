@@ -30,6 +30,32 @@ import java.util.Date;
  */
 public class UserAccountAdminService {
 
+    public String convertUser(long userID, boolean designer) {
+        SecurityUtil.authorizeAccountAdmin();
+        AccountStats stats = getAccountStats();
+        if (designer && (stats.getCoreDesigners() + stats.getAddonDesigners()) <= stats.getUsedDesigners()) {
+            return "You're currently at your limit of " + (stats.getCoreDesigners() + stats.getAddonDesigners()) + " designers. You'll need to upgrade your account before you can convert this user to a designer.";
+        }
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+            if (user.getAccount().getAccountID() != SecurityUtil.getAccountID()) {
+                throw new RuntimeException("Illegal attempt made to change user " + user.getUserID() + " by " + SecurityUtil.getUserID());
+            }
+            user.setAnalyst(designer);
+            session.update(user);
+            session.flush();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return null;
+    }
+
     public String regenerateAccountSecretKey() {
         try {
             return RandomTextGenerator.generateText(16);

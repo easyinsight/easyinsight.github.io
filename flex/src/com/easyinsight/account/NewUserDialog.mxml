@@ -7,6 +7,7 @@
                     <mx:CheckBox id="requirePasswordChangeCheckbox" selected="true"/>
                 </mx:FormItem>
             </mx:AddChild>
+            <mx:RemoveChild target="{convertButton}"/>
         </mx:State>
     </util:states>
 	<mx:Metadata>
@@ -133,7 +134,6 @@
                 user.userName = userNameInput.text;
                 user.name = fullNameInput.text;
                 user.firstName = firstNameInput.text;
-                user.fixedDashboardID = singleViewComboBox.selectedItem.id;
                 user.invoiceRecipient = invoiceCheckbox.selected;
                 if (showPersonaOption) {
                     var persona:Object = personaComboBox.selectedItem;
@@ -218,6 +218,20 @@
 
         [Bindable]
         private var personaID:int;
+
+        private function convertToViewer():void {
+            creationService.convertUser.send(userID, false);
+        }
+
+        private function converted():void {
+            var result:String = creationService.convertUser.lastResult as String;
+            if (result == null) {
+                dispatchEvent(new RefreshAccountEvent());
+                PopUpManager.removePopUp(this);
+            } else {
+                Alert.show(result);
+            }
+        }
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
@@ -229,6 +243,8 @@
     </mx:RemoteObject>
     <mx:TabNavigator id="tabNavigator" resizeToContent="true">
         <mx:VBox label="Base Info" horizontalAlign="center" paddingLeft="5">
+            <mx:Text text="This user is a Designer. He or she can create and modify reports and dashboards." width="540"
+                     selectable="false"/>
             <mx:Form  id="baseInfoForm">
                 <mx:FormItem label="User ID:" direction="horizontal">
                     <mx:TextInput id="userNameInput" text="{userName}" width="400"/>
@@ -251,22 +267,21 @@
                 <mx:FormItem label="Send Newsletter to User:">
                     <mx:CheckBox id="newsletterCheckbox" selected="{newsletterSelected}"/>
                 </mx:FormItem>
-                <mx:FormItem label="Persona:" visible="{showPersonaOption}">
-                    <util:PersonaItemComboBox dataProvider="{personas}" labelField="name" id="personaComboBox" selectedProperty="personaID"
-                            selectedValue="{personaID}" change="onPersonaChange(event)"/>
-                </mx:FormItem>
             </mx:Form>
             <mx:HRule width="100%"/>
+            <mx:Text text="Personas allow you to restrict users to only see certain subsets of data. You can configure Personas through the Persona section of the Account page."
+                     width="540" selectable="false"/>
             <mx:Form>
-                <mx:FormItem label="Fixed View:">
-                    <util:SmartComboBox dataProvider="{availableViews}" labelField="name" id="singleViewComboBox" selectedProperty="id" selectedValue="{viewID}" enabled="{!accountAdmin}"
-                            maxWidth="300"/>
+                <mx:FormItem label="Persona:" visible="{showPersonaOption}" labelWidth="150">
+                    <util:PersonaItemComboBox dataProvider="{personas}" labelField="name" id="personaComboBox" selectedProperty="personaID"
+                                              selectedValue="{personaID}" change="onPersonaChange(event)"/>
                 </mx:FormItem>
             </mx:Form>
         </mx:VBox>
     </mx:TabNavigator>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="{createLabel}" click="save()"/>
+        <util:SaveButton label="Convert to Viewer" click="convertToViewer()" id="convertButton"/>
         <util:CancelButton label="Cancel" click="cancel()"/>
     </mx:HBox>
 	<mx:StringValidator source="{userNameInput}" property="text" id="userNameValidator" minLength="3" maxLength="60"/>
@@ -275,5 +290,6 @@
 	<mx:RemoteObject id="creationService" destination="accountAdmin">
 		<mx:method name="addUserToAccount" result="created()"/>		
 		<mx:method name="updateUser" result="updated()"/>
+        <mx:method name="convertUser" result="converted()"/>
 	</mx:RemoteObject>
 </util:EISlimWindow>
