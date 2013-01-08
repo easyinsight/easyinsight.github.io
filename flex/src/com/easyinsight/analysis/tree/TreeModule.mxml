@@ -229,7 +229,7 @@
                     }
 
                     var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-                    var existingIndex:int = findColumnIndex(myHeader.qualifiedName());
+                    var existingIndex:int = findColumnIndex(myHeader.display);
                     if (!fieldsChanged && existingIndex != -1) {
                         var existingColumn:AdvancedDataGridColumn = coreGrid.columns[existingIndex];
                         columnHeaderObject.width = existingColumn.width;
@@ -371,7 +371,7 @@
             } else {
                 if (item.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
                     var d:DerivedAnalysisDimension = item as DerivedAnalysisDimension;
-                    return d.wordWrap ? TextCellRenderer : AnalysisCellRenderer;
+                    return d.wordWrap ? TextCellRenderer : SummaryCellRenderer;
                 }
                 var ext:TextReportFieldExtension = item.reportFieldExtension as TextReportFieldExtension;
                 if (ext != null && ext.wordWrap) {
@@ -387,7 +387,7 @@
             updateItem(hierarchy, hierarchyIndex);
             for (var i:int = 0; i < treeDef.items.length; i++) {
                 var item:AnalysisItem = treeDef.items.getItemAt(i) as AnalysisItem;
-                var columnIndex:int = findColumnIndex(item.qualifiedName());
+                var columnIndex:int = findColumnIndex(item.display);
                 updateItem(item, columnIndex);
             }
         }
@@ -398,7 +398,7 @@
             updateItem(hierarchy, hierarchyIndex);
             for (var i:int = 0; i < treeDef.items.length; i++) {
                 var item:AnalysisItem = treeDef.items.getItemAt(i) as AnalysisItem;
-                var columnIndex:int = findColumnIndex(item.qualifiedName());
+                var columnIndex:int = findColumnIndex(item.display);
                 updateItem(item, columnIndex);
             }
         }
@@ -416,7 +416,7 @@
         private function findColumnIndex(qualifiedName:String):int {
             for (var i:int = 0; i < coreGrid.columns.length; i++) {
                 var column:AdvancedDataGridColumn = coreGrid.columns[i];
-                if (column.dataField == qualifiedName) {
+                if (column.headerText == qualifiedName) {
                     return i;
                 }
             }
