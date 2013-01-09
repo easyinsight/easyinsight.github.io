@@ -60,10 +60,12 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         }
         if (!sizeInfo.autoCalcHeight && sizeInfo.preferredHeight > 0) {
             height = dashboardReport.preferredHeight;
-        } else if (dashboardEditorMetadata.dashboard.absoluteSizing) {
+        } else if (!sizeInfo.autoCalcHeight && dashboardEditorMetadata.dashboard.absoluteSizing) {
             height = 400;
-        } else {
+        } else if (!sizeInfo.autoCalcHeight) {
             percentHeight = 100;
+        } else {
+            percentHeight = NaN;
         }
     }
 
@@ -83,8 +85,10 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             height = dashboardReport.preferredHeight;
         } else if (dashboardEditorMetadata.dashboard.absoluteSizing) {
             height = 400;
-        } else {
+        } else if (!sizeInfo.autoCalcHeight) {
             percentHeight = 100;
+        } else {
+            percentHeight = NaN;
         }
         /*if (dashboardEditorMetadata.borderThickness > 0) {
             setStyle("borderStyle", "inset");
@@ -138,6 +142,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             var h:int = event.height + (this.transformContainer ? this.transformContainer.height : 0) + 10 + (dashboardReport.showLabel ? 30 : 0);
             this.height = h;
             alteredHeight = h;
+            //Alert.show("setting to " + h);
             dispatchEvent(new SizeOverrideEvent(-1, h));
         }
     }
