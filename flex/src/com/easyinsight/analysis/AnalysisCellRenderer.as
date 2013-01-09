@@ -19,15 +19,18 @@ import mx.collections.ArrayCollection;
 import mx.controls.Alert;
 
 import mx.controls.listClasses.IListItemRenderer;
+import mx.core.UIComponentGlobals;
 import mx.core.UITextField;
 import mx.core.UITextFormat;
+import mx.core.mx_internal;
 import mx.events.FlexEvent;
 import mx.formatters.Formatter;
 import mx.managers.CursorManager;
+import mx.managers.ILayoutManagerClient;
 import mx.managers.PopUpManager;
+use namespace mx_internal;
 
-
-public class AnalysisCellRenderer extends UITextField implements IListItemRenderer
+public class AnalysisCellRenderer extends UITextField implements IListItemRenderer, ILayoutManagerClient
 {
     private var _data:Object;
     private var _analysisItem:AnalysisItem;
@@ -224,6 +227,8 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
             this.background = false;
         }
         new StandardContextWindow(analysisItem, passThrough, this, value, _report);
+        //UIComponentGlobals.layoutManager.invalidateSize(this);
+        invalidateSize();
         invalidateProperties();
         //dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }

@@ -5,8 +5,16 @@ import flash.events.MouseEvent;
 import flash.utils.Dictionary;
 
 import mx.collections.ArrayCollection;
+import mx.collections.CursorBookmark;
+import mx.collections.errors.ItemPendingError;
 import mx.controls.AdvancedDataGrid;
+import mx.controls.Alert;
+import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
+import mx.controls.listClasses.IListItemRenderer;
 import mx.controls.listClasses.ListRowInfo;
+import mx.core.mx_internal;
+
+use namespace mx_internal;
 
 public class ListViewGrid extends AdvancedDataGrid {
 
@@ -130,5 +138,139 @@ public class ListViewGrid extends AdvancedDataGrid {
         super.drawRowBackground(s, rowIndex, y, height, color, dataIndex);
     }
 
+
+    mx_internal override function measureHeightOfItemsUptoMaxHeight(index:int = -1, count:int = 0, maxHeight:Number = -1):Number
+    {
+        if (!columns.length)
+            return rowHeight * count;
+
+        var h:Number = 0;
+
+        var item:IListItemRenderer;
+        var c:AdvancedDataGridColumn;
+        var ch:Number = 0;
+        var n:int;
+        var j:int;
+
+        var paddingTop:Number = getStyle("paddingTop");
+        var paddingBottom:Number = getStyle("paddingBottom");
+
+        if (!measuringObjects)
+            measuringObjects = new Dictionary(false);
+
+        var lockedCount:int = lockedRowCount;
+
+        if (headerVisible && count > 0 && index == -1)
+        {
+            h = calculateHeaderHeight();
+
+            if (maxHeight != -1 && h > maxHeight)
+            {
+                setRowCount(0);
+                return 0;
+            }
+
+            // trace(this + " header preferredHeight = " + h);
+        }
+
+        var bookmark:CursorBookmark = (iterator) ? iterator.bookmark : null;
+
+        var bMore:Boolean = iterator != null;
+        if (index != -1 && iterator)
+        {
+            try
+            {
+                iterator.seek(CursorBookmark.FIRST, index);
+            }
+            catch (e:ItemPendingError)
+            {
+                bMore = false;
+            }
+        }
+
+        if (lockedCount > 0 && collectionIterator)
+        {
+            try
+            {
+                collectionIterator.seek(CursorBookmark.FIRST,0);
+            }
+            catch (e:ItemPendingError)
+            {
+                bMore = false;
+            }
+        }
+
+        for (var i:int = 0; i < count; i++)
+        {
+            var data:Object;
+            if (bMore)
+            {
+                data = (lockedCount > 0) ? collectionIterator.current : iterator.current;
+                ch = 0;
+                n = columns.length;
+                for (j = 0; j < n; j++)
+                {
+                    c = columns[j];
+
+                    if (!c.visible)
+                        continue;
+
+                    item = getMeasuringRenderer(c, false,data);
+                    setupRendererFromData(c, item, data);
+                    ch = Math.max(ch, variableRowHeight ? Math.ceil(item.getExplicitOrMeasuredHeight()) + paddingBottom + paddingTop : rowHeight);
+                }
+            }
+
+            if (maxHeight != -1 && (h + ch > maxHeight || !bMore))
+            {
+                try
+                {
+                    if (iterator)
+                        iterator.seek(bookmark, 0);
+                }
+                catch (e:ItemPendingError)
+                {
+                    // we don't recover here since we'd only get here if the first seek failed.
+                }
+                count = i;
+                setRowCount(count);
+                return h;
+            }
+
+            h += ch;
+            if (iterator)
+            {
+                try
+                {
+                    bMore = iterator.moveNext();
+                    if (lockedCount > 0)
+                    {
+                        collectionIterator.moveNext();
+                        lockedCount--;
+                    }
+                }
+                catch (e:ItemPendingError)
+                {
+                    // if we run out of data, assume all remaining rows are the size of the previous row
+                    bMore = false;
+                }
+            }
+        }
+
+        if (iterator)
+        {
+            try
+            {
+                iterator.seek(bookmark, 0);
+            }
+            catch (e:ItemPendingError)
+            {
+                // we don't recover here since we'd only get here if the first seek failed.
+            }
+        }
+
+        // trace("calcheight = " + h);
+        return h;
+    }
 }
 }
