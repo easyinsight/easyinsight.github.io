@@ -25,12 +25,16 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 
 import mx.controls.Button;
+import mx.controls.LinkButton;
 import mx.managers.PopUpManager;
 
-public class SearchButton extends Button {
+public class SearchButton extends LinkButton {
 
     public function SearchButton() {
-        styleName = "altGrayButton";
+        // color="#FFFFFF" themeColor="#FFFFFF" fontSize="14"
+        setStyle("color", 0xFFFFFF);
+        setStyle("themeColor", 0xFFFFFF);
+        setStyle("fontSize", 14);
         label = "Search";
         addEventListener(MouseEvent.CLICK, onClick);
     }
