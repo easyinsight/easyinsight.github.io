@@ -52,8 +52,10 @@ public class TreeDefinition extends AnalysisDefinition{
             hierarchy = hierarchies.getItemAt(0) as AnalysisHierarchyItem;
         }
         for each (var item:AnalysisItem in fields) {
-            if (!item.hasType(AnalysisItemTypes.HIERARCHY)) {
-                items.addItem(item);
+            if (item != null) {
+                if (!item.hasType(AnalysisItemTypes.HIERARCHY)) {
+                    items.addItem(item);
+                }
             }
         }
     }
