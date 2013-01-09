@@ -219,8 +219,10 @@
                 state.name = "override";
                 this.states = [ state ];
                 this.currentState = "override";
+                var currentlyShowing:Boolean = showScorecard;
                 showScorecard = realDataSource && ApplicationSkin.instance().myDataNewScorecard;
-                if (showScorecard) {
+                if (!currentlyShowing && showScorecard) {
+                    currentlyShowing = true;
                     createOptions.addItemAt({label: "New Scorecard", data: "newScorecard"}, 2);
                 }
                 var dataSourceChildren:ArrayCollection = _dataSourceDescriptor.children;
