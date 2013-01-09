@@ -22,7 +22,6 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.quicksearch.EIDescriptor;
-        import com.easyinsight.report.AddToDataSourceWindow;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.scorecard.ScorecardDescriptor;
         import com.easyinsight.skin.ApplicationSkin;
