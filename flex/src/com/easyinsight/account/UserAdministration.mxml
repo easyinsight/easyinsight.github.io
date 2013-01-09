@@ -93,8 +93,8 @@
                 usersUsedString = String(accountStats.currentUsers);
                 usersAvailableString = String(accountStats.availableUsers);
                 showMoreDesigners = false;
-                enableAddDesigner = accountStats.availableUsers < accountStats.currentUsers;
-                enableAddReportViewer = accountStats.availableUsers < accountStats.currentUsers;
+                enableAddDesigner = accountStats.currentUsers < accountStats.availableUsers;
+                enableAddReportViewer = accountStats.currentUsers < accountStats.availableUsers;
                 designerTextHeight = 35;
                 designerText = "Designers can create and customize reports and dashboards, while Viewers can only view existing reports and dashboards.";
             }
