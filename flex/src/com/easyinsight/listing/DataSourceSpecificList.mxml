@@ -782,7 +782,7 @@
 
         [Bindable]
         private var customizeOptions:ArrayCollection = new ArrayCollection([ {label: "Organize Folders", data: "organizeFolders"},
-            {label: "Table Columns", data: "tableColumns"}
+            {label: "Page Settings", data: "tableColumns"}
         ]);
         ]]></mx:Script>
     <mx:Style>
