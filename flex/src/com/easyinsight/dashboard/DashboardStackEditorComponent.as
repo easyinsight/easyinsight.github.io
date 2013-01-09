@@ -114,9 +114,14 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         dashboardStack.count--;
         var index:int = button["data"];
         dashboardStack.gridItems.removeItemAt(index);
-        getButtonsBox().removeChildAt(getButtonsBox().getChildIndex(button));
+        var btnIndex:int = getButtonsBox().getChildIndex(button);
+        getButtonsBox().removeChildAt(btnIndex);
         viewStack.removeChildAt(index);
         viewChildren.removeItemAt(index);
+        for (var i:int = 0; i < getButtonsBox().getChildren().length; i++) {
+            var btn:DashboardEditButton = getButtonsBox().getChildAt(i) as DashboardEditButton;
+            btn.data = i;
+        }
     }
 
     override protected function createStackButton(index:int, label:String):UIComponent {
