@@ -30,6 +30,16 @@ public class EIDescriptor {
     public function EIDescriptor() {
     }
 
+    private var _selected:Boolean;
+
+    public function get selected():Boolean {
+        return _selected;
+    }
+
+    public function set selected(value:Boolean):void {
+        _selected = value;
+    }
+
     public function get qualifiedName():String {
         return getType() + "-" + id;
     }
