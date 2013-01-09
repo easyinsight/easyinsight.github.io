@@ -90,7 +90,7 @@
                             top="0" bottom="0" id="toggleBar">
         </mx:ToggleButtonBar>
         <mx:Spacer width="100%"/>
-        <!--<listing:SearchButton/>-->
-        <easyinsight:NewLoggedOnStatus/>
+        <listing:SearchButton/>
+        <easyinsight:AltLoggedOnStatus/>
     </mx:HBox>
 </mx:HBox>
