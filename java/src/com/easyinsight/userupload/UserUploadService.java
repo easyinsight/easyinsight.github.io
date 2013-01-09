@@ -3,6 +3,7 @@ package com.easyinsight.userupload;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextAccount;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
@@ -13,6 +14,7 @@ import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.scorecard.DataSourceRefreshEvent;
 import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.scorecard.ScorecardInternalService;
+import com.easyinsight.scorecard.ScorecardService;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.StorageLimitException;
 import com.easyinsight.database.Database;
@@ -54,6 +56,26 @@ public class UserUploadService {
     private static final long TEN_MEGABYTES = 10485760;
 
     public UserUploadService() {
+    }
+
+    public void deleteReports(List<EIDescriptor> descriptors) {
+
+        try {
+            for (EIDescriptor descriptor : descriptors) {
+                if (descriptor.getType() == EIDescriptor.REPORT) {
+                    new AnalysisService().deleteAnalysisDefinition(descriptor.getId());
+                } else if (descriptor.getType() == EIDescriptor.SCORECARD) {
+                    new ScorecardService().deleteScorecard(descriptor.getId());
+                } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                    new DashboardService().deleteDashboard(descriptor.getId());
+                } else if (descriptor.getType() == EIDescriptor.LOOKUP_TABLE) {
+                    new FeedService().deleteLookupTable(descriptor.getId());
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     public long newFolder(String name, long dataSourceID) {
@@ -158,7 +180,7 @@ public class UserUploadService {
             List<EIDescriptor> results = new ArrayList<EIDescriptor>();
 
             AnalysisStorage analysisStorage = new AnalysisStorage();
-            
+
             objects.addAll(new DashboardStorage().getDashboardsForDataSource(userID, accountID, conn, dataSourceDescriptor.getId()).values());
             objects.addAll(analysisStorage.getInsightDescriptorsForDataSource(userID, accountID, dataSourceDescriptor.getId(), conn));
             objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn).values());
@@ -473,7 +495,7 @@ public class UserUploadService {
             conn.setAutoCommit(false);
             Database.closeConnection(conn);
         }
-    }    
+    }
 
     public FeedDefinition getDataFeedConfiguration(long dataFeedID) {
         SecurityUtil.authorizeFeed(dataFeedID, Roles.SUBSCRIBER);
@@ -593,7 +615,7 @@ public class UserUploadService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            
+
             String validation = uploadContext.validateUpload(conn);
 
             if (validation != null) {
@@ -662,7 +684,7 @@ public class UserUploadService {
         }
         return result;
     }
-    
+
     public static RawUploadData retrieveRawData(long uploadID, Connection conn) throws SQLException {
         RawUploadData rawUploadData = rawDataMap.get(uploadID);
         if (rawUploadData == null) {
@@ -721,40 +743,36 @@ public class UserUploadService {
     }
 
     public void deleteUserUpload(long dataFeedID) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            int role = SecurityUtil.getUserRoleToFeed(dataFeedID);
-            if (role <= Roles.SHARER) {
-                FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataFeedID, conn);
-                try {
-                    feedDefinition.delete(conn);
-                } catch (HibernateException e) {
-                    LogClass.error(e);
-                    PreparedStatement manualDeleteStmt = conn.prepareStatement("DELETE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
-                    manualDeleteStmt.setLong(1, dataFeedID);
-                    manualDeleteStmt.executeUpdate();
-                }
-            } else if (role == Roles.SUBSCRIBER) {
-            } else {
-                throw new SecurityException();
-            }
+            deleteUserUpload(dataFeedID, conn);
             conn.commit();
         } catch (Throwable e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
+        }
+    }
+
+    private void deleteUserUpload(long dataFeedID, EIConnection conn) throws SQLException {
+        int role = SecurityUtil.getUserRoleToFeed(dataFeedID);
+        if (role <= Roles.SHARER) {
+            FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataFeedID, conn);
+            try {
+                feedDefinition.delete(conn);
+            } catch (HibernateException e) {
+                LogClass.error(e);
+                PreparedStatement manualDeleteStmt = conn.prepareStatement("DELETE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                manualDeleteStmt.setLong(1, dataFeedID);
+                manualDeleteStmt.executeUpdate();
+            }
+        } else if (role == Roles.SUBSCRIBER) {
+        } else {
+            throw new SecurityException();
         }
     }
 
@@ -974,7 +992,7 @@ public class UserUploadService {
         try {
             Long userID = SecurityUtil.getUserID(false);
             if (userID == 0) {
-                userID = null;    
+                userID = null;
             }
             return new PNGExportOperation().write(bytes, userID);
         } catch (Throwable e) {
@@ -1014,7 +1032,7 @@ public class UserUploadService {
             conn.commit();
             return id;
         } catch (Throwable e) {
-            LogClass.error(e);            
+            LogClass.error(e);
             conn.rollback();
             throw new RuntimeException(e);
         } finally {
@@ -1043,7 +1061,7 @@ public class UserUploadService {
                 session.close();
             }
             if (results.size() > 0) {
-                user = (User) results.get(0);                
+                user = (User) results.get(0);
             }
             return user;
         } catch (Throwable e) {
@@ -1191,7 +1209,6 @@ public class UserUploadService {
 
     public static class DataSourceFactory {
         public IUploadDataSource createSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID) {
-            System.out.println("refreshable type = " + sourceToRefresh.getFeedType().getType());
             if (sourceToRefresh.getFeedType().getType() == FeedType.SERVER_MYSQL.getType()) {
                 return new SQSUploadDataSource(sourceToRefresh.getDataFeedID());
             } else {
@@ -1218,7 +1235,6 @@ public class UserUploadService {
             msgQueue.sendMessage(dataSourceID + "|" + System.currentTimeMillis());
             boolean responded = false;
             int i = 0;
-            System.out.println("at least invoking from this side?");
             while (!responded && i < 60) {
                 Message message = responseQueue.receiveMessage();
                 if (message == null) {
