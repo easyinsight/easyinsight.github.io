@@ -21,7 +21,7 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
     private function dashboardPopulate(event:DashboardPopulateEvent):void {
         var box:DashboardBox = event.dashboardBox;
         var index:int = viewChildren.getItemIndex(box);
-        var pos:int = index * 2 + 1;
+        var pos:int = index;
         if (box.element == null) {
             (getButtonsBox().getChildAt(pos))["label"] = "Stack Item " + index;
         } else if (box.element is DashboardReport) {

@@ -36,14 +36,14 @@ public class Dashboard {
     public var marmotScript:String;
     public var folder:int = EIDescriptor.MAIN_VIEWS_FOLDER;
 
-    public var absoluteSizing:Boolean;
+    public var absoluteSizing:Boolean = true;
     public var reportAccessProblem:Boolean;
 
-    public var fillStackHeaders:Boolean;
-    public var stackFill1Start:int;
-    public var stackFill1SEnd:int;
-    public var stackFill2Start:int;
-    public var stackFill2End:int;
+    public var fillStackHeaders:Boolean = true;
+    public var stackFill1Start:int = 0x848080;
+    public var stackFill1SEnd:int = 0x545050;
+    public var stackFill2Start:int = 0x494444;
+    public var stackFill2End:int = 0x343030;
 
     public function Dashboard() {
     }

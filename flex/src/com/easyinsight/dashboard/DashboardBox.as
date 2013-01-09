@@ -135,7 +135,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         dropBox.setStyle("horizontalAlign", "center");
         addChild(dropBox);
         if (element != null) {
-            if (element instanceof DashboardStack) {
+            if (element is DashboardStack) {
                 addButton = new LinkButton();
                 addButton.label = "Add";
                 addButton.addEventListener(MouseEvent.CLICK, stackAdd);
@@ -214,6 +214,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
             dropTextArea.setStyle("fontSize", 12);
             dropTextArea.text = "Drag a control or report from the left side options to here.";
             dropTextArea.width = 200;
+            dropTextArea.height = 35;
             dropBox.addChild(dropTextArea);
             dispatchEvent(new DashboardPopulateEvent(DashboardPopulateEvent.DASHBOARD_POPULATE, this));
             dispatchEvent(new DashboardChangedEvent());
@@ -282,7 +283,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         clearValidation();
         errorString = null;
         editorComp = IDashboardEditorComponent(DashboardElementFactory.createEditorUIComponent(element, dashboardEditorMetadata));
-        if (element instanceof DashboardStack) {
+        if (element is DashboardStack) {
             addButton = new LinkButton();
             addButton.label = "Add";
             addButton.addEventListener(MouseEvent.CLICK, stackAdd);

@@ -3,7 +3,7 @@
          xmlns:filtering="com.easyinsight.filtering.*" xmlns:easyinsight="com.easyinsight.*"
          xmlns:analysis="com.easyinsight.analysis.*"
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%" creationComplete="populateData()"
-         styleName="screenBackground">
+         verticalScrollPolicy="off" horizontalScrollPolicy="off">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
@@ -34,6 +34,7 @@
         import mx.collections.Sort;
         import mx.collections.SortField;
         import mx.controls.Alert;
+        import mx.core.Application;
         import mx.core.UIComponent;
         import mx.events.CloseEvent;
         import mx.events.FlexEvent;
@@ -46,7 +47,7 @@
         private function populateData():void {
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
-            addEventListener(DashboardChangedEvent.DASHBOARD_CHANGED, function(event:DashboardChangedEvent):void {
+            addEventListener(DashboardChangedEvent.DASHBOARD_CHANGED, function (event:DashboardChangedEvent):void {
                 dashboardChanged = true;
             });
             var controls:ArrayCollection = new ArrayCollection();
@@ -56,7 +57,7 @@
             controls.addItem(new DashboardControl("Text", DashboardTextElement));
             this.availableControls = controls;
             if (_dashboardID == 0) {
-                ProgressAlert.alert(this, "Retrieving reports...", null, feedService.searchForSubscribedFeeds, scorecardService.getScorecardDescriptorsForDataSource);
+                ProgressAlert.alert(this, "Retrieving reports...", null, feedService.searchForSubscribedFeeds);
                 feedService.searchForSubscribedFeeds.send();
             } else {
                 dashboardViewable = true;
@@ -109,24 +110,13 @@
             availableReports.refresh();
         }
 
-        private function gotScorecards():void {
-            var scorecardList:ArrayCollection = scorecardService.getScorecardDescriptorsForDataSource.lastResult as ArrayCollection;
-            for each (var scorecard:ScorecardDescriptor in scorecardList) {
-                availableScorecards.addItem(scorecard);
-            }
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("name", true) ];
-            availableScorecards.sort = sort;
-            availableScorecards.refresh();
-        }
-
         private function gotDataSources():void {
             /*var window:DashboardSetupWindow = new DashboardSetupWindow();
-            window.startDataSourceID = _startDataSourceID;
-            window.dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
-            window.addEventListener(DashboardSetupEvent.DASHBOARD_SETUP, onDimensions, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);*/
+             window.startDataSourceID = _startDataSourceID;
+             window.dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+             window.addEventListener(DashboardSetupEvent.DASHBOARD_SETUP, onDimensions, false, 0, true);
+             PopUpManager.addPopUp(window, this, true);
+             PopUpUtil.centerPopUp(window);*/
             onDimensions(null);
         }
 
@@ -146,17 +136,16 @@
             box.dashboardEditorMetadata = metadata;
             box.element = _dashboard.rootElement;
             box.allowDelete = false;
-            UIComponent(box).addEventListener(FlexEvent.CREATION_COMPLETE, function(event:FlexEvent):void {
+            UIComponent(box).addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent):void {
                 var filterMap:Object = new Object();
                 filterMap["master"] = _dashboard.filters;
                 box.updateAdditionalFilters(filterMap);
                 box.initialRetrieve();
             });
             dashboardCanvas.addChild(box);
-            ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource, scorecardService.getScorecardDescriptorsForDataSource,
+            ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource,
                     dataService.getFeedMetadata);
             analysisService.getInsightDescriptorsForDataSource.send(_dashboard.dataSourceID);
-            scorecardService.getScorecardDescriptorsForDataSource.send(_dashboard.dataSourceID);
             dataService.getFeedMetadata.send(_dashboard.dataSourceID);
             dashboardFilters = _dashboard.filters;
             UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.EDIT, _dashboardID));
@@ -173,7 +162,6 @@
             dataSourceID = _startDataSourceID;
             ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource);
             analysisService.getInsightDescriptorsForDataSource.send(dataSourceID);
-            scorecardService.getScorecardDescriptorsForDataSource.send(dataSourceID);
             dataService.getFeedMetadata.send(dataSourceID);
             //_dashboard.rootElement = grid;
         }
@@ -236,21 +224,25 @@
                 Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
                         Alert.OK | Alert.CANCEL, null, viewListener, null, Alert.CANCEL);
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
             }
         }
 
         private function viewListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
             }
         }
 
         private function configureDashboard():void {
             var window:DashboardWindow = new DashboardWindow();
             window.dashboard = _dashboard;
+            window.addEventListener(Event.CHANGE, onDashboardChange, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+        }
+
+        private function onDashboardChange(event:Event):void {
         }
 
         [Bindable]
@@ -335,10 +327,10 @@
         private function newDashboard():void {
             if (dashboardChanged) {
                 createPromptWindow("You have unsaved changes to this dashboard.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID})));
             }
         }
 
@@ -373,27 +365,52 @@
 
         private function goReport():void {
             if (_dashboard.id == 0) {
-                createRequiredPromptWindow("You need to save this dashboard first.", function():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+                createRequiredPromptWindow("You need to save this dashboard first.", function ():void {
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
                 });
             } else if (dashboardChanged) {
-                createRequiredPromptWindow("You have unsaved changes to this dashboard.", function():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+                createRequiredPromptWindow("You have unsaved changes to this dashboard.", function ():void {
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
             }
         }
 
         private function goAdmin():void {
             if (dashboardChanged) {
-                createPromptWindow("You have unsaved changes to this dashboard.", function():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
+                createPromptWindow("You have unsaved changes to this dashboard.", function ():void {
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID})));
             }
         }
+
+        override protected function measure():void {
+            super.measure();
+            vbox.width =  Application(Application.application).width - controls.width - 50;
+            vbox.maxHeight = Application(Application.application).height - headers.height - filtersBox.height - 20;
+            lastFiltersHeight = filtersBox.height;
+        }
+
+        private var lastFiltersHeight:int;
+
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            if (filtersBox.height != lastFiltersHeight) {
+                lastFiltersHeight = filtersBox.height;
+                vbox.maxHeight = Application(Application.application).height - headers.height - filtersBox.height - 20;
+            }
+            //vbox.width = this.width - controls.width;
+            //vbox.maxHeight = this.height - headers.height - filtersBox.height;
+
+            //Alert.show("width set to " + (this.width - controls.width));
+            //Alert.show("max height set to " + (this.height - headers.height - filtersBox.height) + " where this height = " + this.height);
+        }
+
+        // >=
+        //
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptorsForDataSource" result="gotReports()"/>
@@ -407,10 +424,7 @@
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
     </mx:RemoteObject>
-    <mx:RemoteObject id="scorecardService" destination="scorecardService">
-        <mx:method name="getScorecardDescriptorsForDataSource" result="gotScorecards()"/>
-    </mx:RemoteObject>
-    <mx:HBox width="100%" styleName="topButtonBar">
+    <mx:HBox width="100%" styleName="topButtonBar" id="headers">
         <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="closeEditor()"
                    toolTip="Close" labelPlacement="right" label="Close Editor" styleName="grayButton"/>
         <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
@@ -425,8 +439,8 @@
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
     </mx:HBox>
-    <mx:HBox width="100%" height="100%" paddingLeft="10" paddingRight="10">
-        <mx:VBox height="100%" horizontalAlign="center" width="200" paddingTop="20" paddingBottom="20">
+    <mx:HBox width="100%" height="100%" paddingLeft="10" paddingRight="10" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+        <mx:VBox height="100%" horizontalAlign="center" width="200" paddingTop="20" paddingBottom="20" id="controls">
             <mx:Label text="Controls" fontSize="14"/>
             <mx:List id="controlsList" dataProvider="{availableControls}" labelField="name" dragEnabled="true"
                      width="100%" rowCount="4"/>
@@ -434,8 +448,8 @@
             <mx:List id="reportsList" dataProvider="{availableReports}" labelField="name" dragEnabled="true"
                      width="100%" height="100%"/>
         </mx:VBox>
-        <mx:VBox width="100%" height="100%" horizontalAlign="center">
-            <mx:HBox width="100%">
+        <mx:VBox width="100%" height="100%" horizontalAlign="center" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+            <mx:HBox width="100%" id="filtersBox">
                 <mx:Button icon="@Embed(source='../../../../assets/funnel.png')"
                        toolTip="Create New Filter..." click="transformContainer.addNewFilter()" label="New Filter"/>
                 <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
@@ -445,7 +459,11 @@
                                               analysisItems="{allFields}"
                                               updatedTransforms="transformsUpdated(event)"/>
             </mx:HBox>
-            <mx:Canvas width="100%" height="100%" id="dashboardCanvas"/>
+            <mx:Canvas width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+                <mx:VBox id="vbox" verticalScrollPolicy="on" verticalGap="0">
+                    <mx:Canvas width="100%" id="dashboardCanvas" backgroundColor="#CC0000"/>
+                </mx:VBox>
+            </mx:Canvas>
         </mx:VBox>
     </mx:HBox>
 </mx:VBox>

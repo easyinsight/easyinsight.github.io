@@ -397,7 +397,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     }
 
     private function createStackChildren(headerbar:Container):void {
-        if (dashboardStack.selectionType == 'Buttons' && dashboardStack.count > 1) {
+        if (dashboardStack.selectionType == 'Buttons' && dashboardStack.count > 1 && !editMode()) {
             var s1:Spacer = new Spacer();
             s1.percentWidth = 100;
             headerbar.addChild(s1);
@@ -426,9 +426,11 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
                 if (editMode() || dashboardStack.count > 1) {
                     headerbar.addChild(topButton);
-                    var s2:Spacer = new Spacer();
-                    s2.percentWidth = 100;
-                    headerbar.addChild(s2);
+                    if (!editMode()) {
+                        var s2:Spacer = new Spacer();
+                        s2.percentWidth = 100;
+                        headerbar.addChild(s2);
+                    }
                 }
             }
             var comp:UIComponent = createComp(report, i);

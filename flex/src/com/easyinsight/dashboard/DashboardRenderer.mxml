@@ -40,6 +40,18 @@
             rootView.refresh();
         }
 
+        public function styleUpdated():void {
+            if (!dashboard.absoluteSizing) {
+                percentHeight = 100;
+                dashboardCanvas.percentHeight = 100;
+                dashboardStyleArea.percentHeight = 100;
+            } else {
+                percentHeight = NaN;
+                dashboardCanvas.percentHeight = NaN;
+                dashboardStyleArea.percentHeight = NaN;
+            }
+        }
+
         public function createDashboard(width:int = 0, height:int = 0):IDashboardViewComponent {
             /*var primary:VBox = new VBox();
             primary.percentHeight = 100;
@@ -83,10 +95,6 @@
             var toUse:ArrayCollection = new ArrayCollection();
             var fToAdd:Object = new Object();
             if (_initialFilters != null) {
-                // Christina Devormer
-                // Christina Devormer
-
-                //
                 for each (var eFilter:FilterDefinition in _initialFilters) {
                     if (eFilter.getType() == FilterDefinition.ANALYSIS_ITEM) {
                         paramObj[eFilter.filterName] = eFilter;
